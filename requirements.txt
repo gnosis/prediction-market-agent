@@ -1,0 +1,5 @@
+python-dotenv
+langchain
+langchain-experimental
+google-search-results
+numexpr
