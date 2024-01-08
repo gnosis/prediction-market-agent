@@ -3,3 +3,4 @@ langchain
 langchain-experimental
 google-search-results
 numexpr
+pyautogen
