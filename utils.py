@@ -54,3 +54,7 @@ def get_market_prompt(question: str) -> str:
 
 def parse_result_to_boolean(result: str) -> bool:
     return True if result == "Yes" else False
+
+
+def parse_result_to_str(result: bool) -> str:
+    return "Yes" if result else "No"

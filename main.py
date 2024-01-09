@@ -45,15 +45,14 @@ if __name__ == "__main__":
 
     # Create the agent and run it
     agent = agent_mapping[agent_type]()
-    result = agent.run(utils.get_market_prompt(market.question))
+    result = agent.run(market.question)
 
     # Place a bet based on the result
-
     if args.auto_bet:
         do_bet = True
     else:
         prompt = (
-            f"Do you want to take the position:\n\n{result.upper()}\n\n"
+            f"Do you want to take the position:\n\n{utils.parse_result_to_str(result)}\n\n"
             f"on the market:\n\n{market.question}\n\n"
             f"(y/n, press Enter for default 'y'): "
         )
@@ -61,10 +60,12 @@ if __name__ == "__main__":
         do_bet = user_input.lower().strip() == "y" if user_input else True
 
     if do_bet:
-        print(f"Placing bet with position {result} on market '{market.question}'")
+        print(
+            f"Placing bet with position {utils.parse_result_to_str(result)} on market '{market.question}'"
+        )
         manifold.place_bet(
             amount=5,
             market_id=market.id,
-            outcome=utils.parse_result_to_boolean(result),
+            outcome=result,
             api_key=keys.manifold,
         )

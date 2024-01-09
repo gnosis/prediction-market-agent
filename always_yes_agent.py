@@ -9,5 +9,5 @@ class AlwaysYesAgent(AbstractAgent):
     def __init__(self):
         pass
 
-    def run(self, objective: str) -> str:
-        return "yes"
+    def run(self, objective: str) -> bool:
+        return True

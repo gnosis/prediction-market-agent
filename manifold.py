@@ -26,20 +26,15 @@ def pick_binary_market() -> Market:
     params = {
         "term": "",
         "sort": "liquidity",
-        "filter": "closing-this-month",
         "contractType": "BINARY",
         "limit": 1,
+        "topicSlug": "forecaster-bot-war",
     }
     response = requests.get(url, params=params)
 
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        data = response.json()
-        return Market(data[0])
-    else:
-        raise Exception(
-            f"Picking market failed: {response.status_code} {response.reason} {response.text}"
-        )
+    response.raise_for_status()
+    data = response.json()
+    return Market(data[0])
 
 
 def place_bet(amount: int, market_id: str, outcome: bool, api_key):
@@ -69,5 +64,6 @@ def place_bet(amount: int, market_id: str, outcome: bool, api_key):
 if __name__ == "__main__":
     # A test run
     market = pick_binary_market()
+    print(market.question)
     print("Placing bet on market:", market.question)
     place_bet(2, market.id, True, get_manifold_api_key())

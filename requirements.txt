@@ -4,3 +4,6 @@ langchain-experimental
 google-search-results
 numexpr
 pyautogen
+beautifulsoup4
+serpapi
+google-search-results
