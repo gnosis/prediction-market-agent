@@ -1,6 +1,6 @@
 # Prediction Market Betting Agent
 
-A library for building an autonomous agent that researches markets from [Manifold](https://manifold.markets/), and uses its findings to place bets.
+A library for exploring the landscape of AI Agent frameworks, using the example application of a prediction market betting agent. The agent researches markets from [Manifold](https://manifold.markets/), and uses its findings to place bets.
 
 ## Setup
 
