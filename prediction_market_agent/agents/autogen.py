@@ -112,12 +112,3 @@ Therefore, considering the nuances presented in the sources, the answer to wheth
 TERMINATE
 
 """
-
-if __name__ == "__main__":
-    # Test util functions of agent
-    objective = "In 2024, will Israel conduct a military strike against Iran?"
-    keys = utils.get_keys()
-    search = GoogleSearchTool().fn(query=objective, api_key=keys.serp)
-    scraping = _web_scraping(objective, search[0])
-    summary = _summary(objective, scraping)
-    print(scraping)

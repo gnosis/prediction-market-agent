@@ -33,11 +33,21 @@ optional arguments:
   --auto-bet AUTO_BET   If true, does not require user input to place the bet.
 ```
 
+## Testing
+
+Run the tets:
+
+```bash
+pytest tests
+```
+
+Note: these make actual API calls!
+
 ## Frameworks implemented
 
 | Framework | Implemented Yet? |
 | --------- | ---------------- |
-| LangChain |	Yes |
+| LangChain | Yes |
 | LlamaIndex | No |
 | MetaGPT | No |
 | AutoGen | Yes |

@@ -7,3 +7,4 @@ pyautogen
 beautifulsoup4
 serpapi
 google-search-results
+pytest
