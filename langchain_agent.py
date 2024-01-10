@@ -6,14 +6,14 @@ from langchain.llms import OpenAI
 import utils
 from abstract_agent import AbstractAgent
 
-# Note: there is an experimental autogpt API
-# from langchain_experimental.autonomous_agents.autogpt.agent import AutoGPT
-
 
 class LangChainAgent(AbstractAgent):
     def __init__(self):
         keys = utils.get_keys()
         llm = OpenAI(openai_api_key=keys.openai)
+        # Can use pre-defined search tool
+        # TODO: Tavily tool could give better results
+        # https://docs.tavily.com/docs/tavily-api/langchain
         tools = load_tools(["serpapi", "llm-math"], llm=llm, serpapi_api_key=keys.serp)
         self._agent = initialize_agent(
             tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
