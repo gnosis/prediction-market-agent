@@ -1,62 +1,17 @@
 import autogen
-import bs4
 import re
-import requests
-import serpapi
-import typing as t
 
-from langchain.chains.summarize import load_summarize_chain
-from langchain.chat_models import ChatOpenAI
-from langchain import PromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
-
-
-def _google_search(query: str) -> t.List[str]:
-    params = {"q": query, "api_key": utils.get_keys().serp, "num": 3}
-    search = serpapi.GoogleSearch(params)
-    urls = [result["link"] for result in search.get_dict()["organic_results"]]
-    return urls
-
-
-def _summary(objective, content):
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
-    text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n"], chunk_size=10000, chunk_overlap=500
-    )
-    docs = text_splitter.create_documents([content])
-    map_prompt = (
-        "Write a summary of the following text for {objective}:\n"
-        '"{text}\n'
-        "SUMMARY:"
-    )
-    t = PromptTemplate(template=map_prompt, input_variables=["text", "objective"])
-    summary_chain = load_summarize_chain(
-        llm=llm,
-        chain_type="map_reduce",
-        map_prompt=t,
-        combine_prompt=t,
-        verbose=False,
-    )
-    return summary_chain.run(input_documents=docs, objective=objective)
-
-
-def _web_scraping(objective: str, url: str):
-    response = requests.get(url)
-    response.raise_for_status()
-    soup = bs4.BeautifulSoup(response.content, "html.parser")
-    text = soup.get_text()
-    if len(text) > 10000:
-        text = _summary(objective, text)
-    return text
+from prediction_market_agent.tools.google_search import GoogleSearchTool
+from prediction_market_agent.tools.web_scrape import WebScrapingTool
 
 
 class AutoGenAgent(AbstractAgent):
     def get_base_llm_config(self):
-        keys = get_keys()
+        keys = utils.get_keys()
         return {
             "config_list": [
                 {
@@ -68,54 +23,10 @@ class AutoGenAgent(AbstractAgent):
         }
 
     def __init__(self):
-        def google_search(query) -> t.List[str]:
-            return _google_search(query)
-
-        google_search_schema = {
-            "type": "function",
-            "function": {
-                "name": "google_search",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The google search query.",
-                        }
-                    },
-                    "required": ["query"],
-                },
-                "description": "Google search to return search results from a query.",
-            },
-        }
-
-        def web_scraping(objective, url) -> str:
-            return _web_scraping(objective, url)
-
-        web_scraping_schema = {
-            "type": "function",
-            "function": {
-                "name": "web_scraping",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "objective": {
-                            "type": "string",
-                            "description": "The objective that defines the content to be scraped from the website.",
-                        },
-                        "url": {
-                            "type": "string",
-                            "description": "The URL of the website to be scraped.",
-                        },
-                    },
-                    "required": ["query"],
-                },
-                "description": "Google search to return search results from a query.",
-            },
-        }
-
+        google_search_tool = GoogleSearchTool()
+        web_scaping_tool = WebScrapingTool()
         llm_config = self.get_base_llm_config()
-        llm_config["tools"] = [google_search_schema, web_scraping_schema]
+        llm_config["tools"] = [google_search_tool.schema, web_scaping_tool.schema]
         self.assistant = GPTAssistantAgent(
             name="assistant",
             instructions="You are a researcher with tools to search and web scrape, in order to produce high quality, fact-based results for the research objective you've been given. Make sure you search for a variety of high quality sources, and that the results you produce are relevant to the objective you've been given.",
@@ -123,8 +34,8 @@ class AutoGenAgent(AbstractAgent):
         )
         self.assistant.register_function(
             function_map={
-                "web_scraping": web_scraping,
-                "google_search": google_search,
+                "web_scraping": web_scaping_tool.fn,
+                "google_search": google_search_tool.fn,
             }
         )
 
@@ -145,7 +56,7 @@ class AutoGenAgent(AbstractAgent):
         match = re.search(pattern, message)
 
         if match:
-            return bool(match.group(1))
+            return eval(match.group(1))
         else:
             raise ValueError("Result found in Termination message")
 
@@ -205,8 +116,8 @@ TERMINATE
 if __name__ == "__main__":
     # Test util functions of agent
     objective = "In 2024, will Israel conduct a military strike against Iran?"
-    keys = get_keys()
-    search = _google_search(query=objective, api_key=keys.serp)
+    keys = utils.get_keys()
+    search = GoogleSearchTool().fn(query=objective, api_key=keys.serp)
     scraping = _web_scraping(objective, search[0])
     summary = _summary(objective, scraping)
     print(scraping)
