@@ -11,12 +11,12 @@ from langchain import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
 
-from utils import get_keys
-from abstract_agent import AbstractAgent
+from prediction_market_agent import utils
+from prediction_market_agent.agents.abstract import AbstractAgent
 
 
 def _google_search(query: str) -> t.List[str]:
-    params = {"q": query, "api_key": get_keys().serp, "num": 3}
+    params = {"q": query, "api_key": utils.get_keys().serp, "num": 3}
     search = serpapi.GoogleSearch(params)
     urls = [result["link"] for result in search.get_dict()["organic_results"]]
     return urls

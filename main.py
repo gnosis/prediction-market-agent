@@ -1,12 +1,11 @@
 from enum import Enum
 import argparse
 
-import utils
-import manifold
-
-from langchain_agent import LangChainAgent
-from autogen_agent import AutoGenAgent
-from always_yes_agent import AlwaysYesAgent
+from prediction_market_agent.agents.langchain import LangChainAgent
+from prediction_market_agent.agents.autogen import AutoGenAgent
+from prediction_market_agent.agents.always_yes import AlwaysYesAgent
+from prediction_market_agent import utils
+from prediction_market_agent import manifold
 
 
 class AgentType(Enum):

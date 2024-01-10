@@ -45,6 +45,7 @@ optional arguments:
 | BabyAGI | No |
 | RoboGPT | No |
 | OpenAI assistants API | No |
+| Tavily GPT Researcher | No |
 
 ## Other TODOs
 

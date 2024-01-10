@@ -1,6 +1,6 @@
 import requests
 
-from utils import get_manifold_api_key
+from prediction_market_agent import utils
 
 """
 Python API for Manifold Markets
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     market = pick_binary_market()
     print(market.question)
     print("Placing bet on market:", market.question)
-    place_bet(2, market.id, True, get_manifold_api_key())
+    place_bet(2, market.id, True, utils.get_manifold_api_key())

@@ -2,3 +2,4 @@
 .env
 .agents_workspace
 .cache
+*.egg-info

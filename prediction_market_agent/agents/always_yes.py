@@ -1,4 +1,4 @@
-from abstract_agent import AbstractAgent
+from prediction_market_agent.agents.abstract import AbstractAgent
 
 
 class AlwaysYesAgent(AbstractAgent):

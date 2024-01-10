@@ -3,8 +3,8 @@ from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 from langchain.llms import OpenAI
 
-import utils
-from abstract_agent import AbstractAgent
+from prediction_market_agent import utils
+from prediction_market_agent.agents.abstract import AbstractAgent
 
 
 class LangChainAgent(AbstractAgent):
