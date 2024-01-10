@@ -4,6 +4,7 @@ import argparse
 from prediction_market_agent.agents.langchain import LangChainAgent
 from prediction_market_agent.agents.autogen import AutoGenAgent
 from prediction_market_agent.agents.always_yes import AlwaysYesAgent
+from prediction_market_agent.agents.llamaindex import LlamaIndexAgent
 from prediction_market_agent import utils
 from prediction_market_agent import manifold
 
@@ -12,12 +13,14 @@ class AgentType(Enum):
     LANGCHAIN = 1
     AUTOGEN = 2
     ALWAYS_YES = 3
+    LLAMAINDEX = 4
 
 
 agent_mapping = {
     AgentType.LANGCHAIN: LangChainAgent,
     AgentType.AUTOGEN: AutoGenAgent,
     AgentType.ALWAYS_YES: AlwaysYesAgent,
+    AgentType.LLAMAINDEX: LlamaIndexAgent,
 }
 
 if __name__ == "__main__":

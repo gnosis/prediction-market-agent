@@ -8,3 +8,4 @@ beautifulsoup4
 serpapi
 google-search-results
 pytest
+llama-index

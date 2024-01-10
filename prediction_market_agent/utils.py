@@ -47,7 +47,7 @@ def get_market_prompt(question: str) -> str:
     prompt = (
         f"Research and report on the following question:\n\n"
         f"{question}\n\n"
-        f"Return a single world answer: 'Yes' or 'No'. If you are unsure, make your best guess.\n"
+        f"Return ONLY a single world answer: 'Yes' or 'No', even if you are unsure. If you are unsure, make your best guess.\n"
     )
     return prompt
 

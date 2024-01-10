@@ -8,7 +8,7 @@ Install requirements in a virtual environment
 
 ```bash
 python3 -m venv .venv
-pip install -r requirements.txt
+pip install -e .
 ```
 
 Create a `.env` file in the base directory that contains the following environmnent variables:
@@ -57,6 +57,8 @@ Note: these make actual API calls!
 | OpenAI assistants API | No |
 | Tavily GPT Researcher | No |
 
+**Note** [gpt-researcher package](https://docs.tavily.com/docs/gpt-researcher/pip-package) dependencies break langchain agent
+
 ## Other TODOs
 
 - Extend the agent with tools to pick and bet on the market.
@@ -64,3 +66,4 @@ Note: these make actual API calls!
 - Split agent functionality into:
   1. Researcher: generates report from a market question
   2. Predictor: Generates a `p_yes`, `p_no` for the market, from which it places a bet.
+- Seeing some reponses like `Error: 401 Client Error: HTTP Forbidden for url` from web scraping tool (e.g. for Reuters). Look to improve.
