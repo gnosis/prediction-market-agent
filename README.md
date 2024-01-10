@@ -48,7 +48,7 @@ Note: these make actual API calls!
 | Framework | Implemented Yet? |
 | --------- | ---------------- |
 | LangChain | Yes |
-| LlamaIndex | No |
+| LlamaIndex | Yes |
 | MetaGPT | No |
 | AutoGen | Yes |
 | crewAI | No |
