@@ -8,6 +8,7 @@ Install requirements in a virtual environment
 
 ```bash
 python3 -m venv .venv
+source .venv/bin/activate
 pip install -e .
 ```
 
@@ -51,7 +52,7 @@ Note: these make actual API calls!
 | [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Yes |
 | [MetaGPT](https://github.com/geekan/MetaGPT) | Yes |
 | [AutoGen](https://github.com/microsoft/autogen) | Yes |
-| [crewAI](https://github.com/joaomdmoura/crewAI) | No |
+| [crewAI](https://github.com/joaomdmoura/crewAI) | Yes |
 | [OpenAI assistants API](https://platform.openai.com/docs/assistants) | No |
 
 ### Stale projects

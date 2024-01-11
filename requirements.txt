@@ -10,3 +10,5 @@ google-search-results
 pytest
 llama-index
 metagpt
+duckduckgo-search
+crewai

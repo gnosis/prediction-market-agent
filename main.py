@@ -10,6 +10,7 @@ class AgentType(Enum):
     ALWAYS_YES = 3
     LLAMAINDEX = 4
     METAGPT = 5
+    CREWAI = 6
 
 
 agent_mapping = {
@@ -18,6 +19,7 @@ agent_mapping = {
     AgentType.ALWAYS_YES: pma.agents.always_yes.AlwaysYesAgent,
     AgentType.LLAMAINDEX: pma.agents.llamaindex.LlamaIndexAgent,
     AgentType.METAGPT: pma.agents.metagpt.MetaGPTAgent,
+    AgentType.CREWAI: pma.agents.crewai.CrewAIAgent,
 }
 
 if __name__ == "__main__":

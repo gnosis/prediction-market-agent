@@ -3,16 +3,16 @@ import dotenv
 import json
 import os
 
-dotenv.load_dotenv()
-os.environ["OPENAI_API_MODEL"] = "gpt-4-1106-preview"
-os.environ["SERPAPI_API_KEY"] = os.getenv("SERP_API_KEY")
-from metagpt.roles import Searcher
-
 from prediction_market_agent.agents.abstract import AbstractAgent
 
 
 class MetaGPTAgent(AbstractAgent):
     def __init__(self):
+        dotenv.load_dotenv()
+        os.environ["OPENAI_API_MODEL"] = "gpt-4-1106-preview"
+        os.environ["SERPAPI_API_KEY"] = os.getenv("SERP_API_KEY")
+        from metagpt.roles import Searcher
+
         self._agent = Searcher()
 
     def run(self, market: str) -> bool:
