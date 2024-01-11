@@ -9,3 +9,4 @@ serpapi
 google-search-results
 pytest
 llama-index
+metagpt

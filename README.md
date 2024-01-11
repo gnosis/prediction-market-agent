@@ -47,20 +47,32 @@ Note: these make actual API calls!
 
 | Framework | Implemented Yet? |
 | --------- | ---------------- |
-| LangChain | Yes |
-| LlamaIndex | Yes |
-| MetaGPT | No |
-| AutoGen | Yes |
-| crewAI | No |
-| BabyAGI | No |
-| RoboGPT | No |
-| OpenAI assistants API | No |
-| Tavily GPT Researcher | No |
+| [LangChain](https://python.langchain.com/docs/modules/agents/) | Yes |
+| [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Yes |
+| [MetaGPT](https://github.com/geekan/MetaGPT) | No |
+| [AutoGen](https://github.com/microsoft/autogen) | Yes |
+| [crewAI](https://github.com/joaomdmoura/crewAI) | No |
+| [OpenAI assistants API](https://platform.openai.com/docs/assistants) | No |
 
-**Note** [gpt-researcher package](https://docs.tavily.com/docs/gpt-researcher/pip-package) dependencies break langchain agent
+### Stale projects
 
-## Other TODOs
+A list of framework projects that had traction but are no longer under development.
 
+- [RoboGPT](https://github.com/rokstrnisa/RoboGPT)
+  - Note: doesn't specify an `openai` version in its dependencies, and is incompatible with the latest version.
+- [BabyAGI](https://github.com/yoheinakajima/babyagi)
+
+### Other frameworks to try
+
+- [Semantic Kernel](https://github.com/microsoft/semantic-kernel/)
+- [LangGraph](https://github.com/langchain-ai/langgraph)
+- [Tavily GPT Researcher](https://github.com/assafelovic/gpt-researcher)
+  - Note: Pip installing this [package](https://docs.tavily.com/docs/gpt-researcher/pip-package) breaks langchain agent atm due to incompatible dependencies.
+
+## TODOs
+
+- Add `omen.py` that contains abstractions for getting markets and placing bets with the [Omen prediction market](https://omen.eth.limo/).
+- Implement agents for frameworks in `Other frameworks to try`
 - Extend the agent with tools to pick and bet on the market.
 - Bet more intelligently, based on prediction probability, market odds, market liquidity etc.
 - Split agent functionality into:

@@ -3,3 +3,4 @@
 .agents_workspace
 .cache
 *.egg-info
+logs

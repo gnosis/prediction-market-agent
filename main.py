@@ -1,12 +1,7 @@
 from enum import Enum
 import argparse
 
-from prediction_market_agent.agents.langchain import LangChainAgent
-from prediction_market_agent.agents.autogen import AutoGenAgent
-from prediction_market_agent.agents.always_yes import AlwaysYesAgent
-from prediction_market_agent.agents.llamaindex import LlamaIndexAgent
-from prediction_market_agent import utils
-from prediction_market_agent import manifold
+import prediction_market_agent as pma
 
 
 class AgentType(Enum):
@@ -14,13 +9,15 @@ class AgentType(Enum):
     AUTOGEN = 2
     ALWAYS_YES = 3
     LLAMAINDEX = 4
+    METAGPT = 5
 
 
 agent_mapping = {
-    AgentType.LANGCHAIN: LangChainAgent,
-    AgentType.AUTOGEN: AutoGenAgent,
-    AgentType.ALWAYS_YES: AlwaysYesAgent,
-    AgentType.LLAMAINDEX: LlamaIndexAgent,
+    AgentType.LANGCHAIN: pma.agents.langchain.LangChainAgent,
+    AgentType.AUTOGEN: pma.agents.autogen.AutoGenAgent,
+    AgentType.ALWAYS_YES: pma.agents.always_yes.AlwaysYesAgent,
+    AgentType.LLAMAINDEX: pma.agents.llamaindex.LlamaIndexAgent,
+    AgentType.METAGPT: pma.agents.metagpt.MetaGPTAgent,
 }
 
 if __name__ == "__main__":
@@ -40,10 +37,10 @@ if __name__ == "__main__":
 
     args = args.parse_args()
     agent_type = AgentType[args.agent_type.upper()]
-    keys = utils.get_keys()
+    keys = pma.utils.get_keys()
 
     # Pick a market
-    market = manifold.pick_binary_market()
+    market = pma.manifold.pick_binary_market()
 
     # Create the agent and run it
     agent = agent_mapping[agent_type]()
@@ -54,7 +51,7 @@ if __name__ == "__main__":
         do_bet = True
     else:
         prompt = (
-            f"Do you want to take the position:\n\n{utils.parse_result_to_str(result)}\n\n"
+            f"Do you want to take the position:\n\n{pma.utils.parse_result_to_str(result)}\n\n"
             f"on the market:\n\n{market.question}\n\n"
             f"(y/n, press Enter for default 'y'): "
         )
@@ -63,9 +60,9 @@ if __name__ == "__main__":
 
     if do_bet:
         print(
-            f"Placing bet with position {utils.parse_result_to_str(result)} on market '{market.question}'"
+            f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
-        manifold.place_bet(
+        pma.manifold.place_bet(
             amount=5,
             market_id=market.id,
             outcome=result,
