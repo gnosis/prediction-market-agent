@@ -49,7 +49,7 @@ Note: these make actual API calls!
 | --------- | ---------------- |
 | [LangChain](https://python.langchain.com/docs/modules/agents/) | Yes |
 | [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Yes |
-| [MetaGPT](https://github.com/geekan/MetaGPT) | No |
+| [MetaGPT](https://github.com/geekan/MetaGPT) | Yes |
 | [AutoGen](https://github.com/microsoft/autogen) | Yes |
 | [crewAI](https://github.com/joaomdmoura/crewAI) | No |
 | [OpenAI assistants API](https://platform.openai.com/docs/assistants) | No |
