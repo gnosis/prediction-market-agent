@@ -51,8 +51,8 @@ Note: these make actual API calls!
 | [LangChain](https://python.langchain.com/docs/modules/agents/) | Wraps OpenAI function calling API. Equips single agent with tools, makes calls in while loop. Has library of built-in tools, or can make own. Can extend using [Python Repl](https://python.langchain.com/docs/integrations/tools/python) tool to execute ad-hoc generated code. |
 | [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Similar to LangChain. Tool library from `llama_hub`. No tool to execute ad-hoc generated code. |
 | [MetaGPT](https://github.com/geekan/MetaGPT) | Advertised as a framework for building an agent-based software dev team, but can be general purpose. Can do single-agent or multi-agent (as a [Team](https://docs.deepwisdom.ai/main/en/guide/tutorials/multi_agent_101.html)) execution. Has many predefined agent `Role`s, pre-equipped with relevant tools. |
-| [AutoGen](https://github.com/microsoft/autogen) | Multi-agent. Can use local model. Easy to explicitly control the execution pattern of the agents. |
-| [crewAI](https://github.com/joaomdmoura/crewAI) | Similar to AutoGen, except agents<->task mapping is only 1-1 currently. Agents tackly distinct tasks in series. Can use local model (Ollama integration). |
+| [AutoGen](https://github.com/microsoft/autogen) | Multi-agent. Can use local model. Easy to explicitly control the execution pattern of the agents. `GPTAssistantAgent` class wraps the OpenAI Assistant API. |
+| [crewAI](https://github.com/joaomdmoura/crewAI) | Similar to AutoGen, except agents<->task mapping is only 1-1 currently. Agents tackly distinct tasks in series. Can use local model (Ollama integration). Agent tool integration with LangChain, so can use its existing tool library. |
 
 ### Stale projects
 
