@@ -46,14 +46,13 @@ Note: these make actual API calls!
 
 ## Frameworks implemented
 
-| Framework | Implemented Yet? |
+| Framework | Notes |
 | --------- | ---------------- |
-| [LangChain](https://python.langchain.com/docs/modules/agents/) | Yes |
-| [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Yes |
-| [MetaGPT](https://github.com/geekan/MetaGPT) | Yes |
-| [AutoGen](https://github.com/microsoft/autogen) | Yes |
-| [crewAI](https://github.com/joaomdmoura/crewAI) | Yes |
-| [OpenAI assistants API](https://platform.openai.com/docs/assistants) | No |
+| [LangChain](https://python.langchain.com/docs/modules/agents/) | Wraps OpenAI function calling API. Equips single agent with tools, makes calls in while loop. Has library of built-in tools, or can make own. Can extend using [Python Repl](https://python.langchain.com/docs/integrations/tools/python) tool to execute ad-hoc generated code. |
+| [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Similar to LangChain. Tool library from `llama_hub`. No tool to execute ad-hoc generated code. |
+| [MetaGPT](https://github.com/geekan/MetaGPT) | Advertised as a framework for building an agent-based software dev team, but can be general purpose. Can do single-agent or multi-agent (as a [Team](https://docs.deepwisdom.ai/main/en/guide/tutorials/multi_agent_101.html)) execution. |
+| [AutoGen](https://github.com/microsoft/autogen) | Multi-agent. Can use local model. Easy to explicitly control the execution pattern of the agents. |
+| [crewAI](https://github.com/joaomdmoura/crewAI) | Similar to AutoGen, except agents<->task mapping is only 1-1 currently. Agents tackly distinct tasks in series. Can use local model (Ollama integration). |
 
 ### Stale projects
 
@@ -69,13 +68,15 @@ A list of framework projects that had traction but are no longer under developme
 - [LangGraph](https://github.com/langchain-ai/langgraph)
 - [Tavily GPT Researcher](https://github.com/assafelovic/gpt-researcher)
   - Note: Pip installing this [package](https://docs.tavily.com/docs/gpt-researcher/pip-package) breaks langchain agent atm due to incompatible dependencies.
+- [OpenAI assistants API](https://platform.openai.com/docs/assistants)
 
 ## TODOs
 
 - Add `omen.py` that contains abstractions for getting markets and placing bets with the [Omen prediction market](https://omen.eth.limo/).
 - Implement agents for frameworks in `Other frameworks to try`
-- Extend the agent with tools to pick and bet on the market.
+- Add option to main.py to use a locally running llm (e.g. Ollama+litellm).
 - Bet more intelligently, based on prediction probability, market odds, market liquidity etc.
+- Extend the agent with tools to pick the market.
 - Split agent functionality into:
   1. Researcher: generates report from a market question
   2. Predictor: Generates a `p_yes`, `p_no` for the market, from which it places a bet.
