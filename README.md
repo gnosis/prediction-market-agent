@@ -4,12 +4,22 @@ A library for exploring the landscape of AI Agent frameworks, using the example 
 
 ## Setup
 
-Install requirements in a virtual environment
+Use Poetry to manage environment:
+
+```
+pip install poetry
+poetry install
+```
+
+And either execute into the environment with `poetry shell` or use commands as `poetry run python main.py ...`.
+
+Optionally, one can use standard virtual environment without Poetry:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+poetry export -f requirements.txt --output requirements.txt
+pip install -f requirements.txt
 ```
 
 Create a `.env` file in the base directory that contains the following environmnent variables:
