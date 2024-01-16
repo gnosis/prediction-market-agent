@@ -56,27 +56,3 @@ def pick_binary_market() -> Market:
         question=market["title"],
         liquidity=float(market["scaledLiquidityParameter"]),
     )
-
-
-def place_bet(amount: int, market_id: str, outcome: bool, api_key: str):
-    outcome_str = "YES" if outcome else "NO"
-    url = "https://api.manifold.markets/v0/bet"
-    params = {
-        "amount": amount,
-        "contractId": market_id,
-        "outcome": outcome_str,
-    }
-
-    headers = {
-        "Authorization": f"Key {api_key}",
-        "Content-Type": "application/json",
-    }
-    response = requests.post(url, json=params, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-        assert data["isFilled"]
-    else:
-        raise Exception(
-            f"Placing bet failed: {response.status_code} {response.reason} {response.text}"
-        )
