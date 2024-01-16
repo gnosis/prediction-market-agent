@@ -1,6 +1,7 @@
 import requests
 
 from prediction_market_agent import utils
+from prediction_market_agent.models import Market
 
 """
 Python API for Manifold Markets
@@ -9,16 +10,6 @@ https://docs.manifold.markets/api#get-v0search-markets
 
 Note: There is an existing wrapper here: https://github.com/vluzko/manifoldpy. Consider using that instead.
 """
-
-
-class Market:
-    def __init__(self, market_json: dict):
-        self.question = market_json["question"]
-        self.id = market_json["id"]
-        self.liquidity = market_json["totalLiquidity"]
-
-    def __repr__(self):
-        return f"Market: {self.question}"
 
 
 def pick_binary_market() -> Market:
@@ -34,7 +25,11 @@ def pick_binary_market() -> Market:
 
     response.raise_for_status()
     data = response.json()
-    return Market(data[0])
+    return Market(
+        id=data[0]["id"],
+        question=data[0]["question"],
+        liquidity=float(data[0]["totalLiquidity"]),
+    )
 
 
 def place_bet(amount: int, market_id: str, outcome: bool, api_key):

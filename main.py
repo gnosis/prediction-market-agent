@@ -13,6 +13,11 @@ class AgentType(Enum):
     CREWAI = 6
 
 
+class Market(Enum):
+    MANIFOLD = 1
+    OMEN = 2
+
+
 agent_mapping = {
     AgentType.LANGCHAIN: pma.agents.langchain.LangChainAgent,
     AgentType.AUTOGEN: pma.agents.autogen.AutoGenAgent,
@@ -20,6 +25,11 @@ agent_mapping = {
     AgentType.LLAMAINDEX: pma.agents.llamaindex.LlamaIndexAgent,
     AgentType.METAGPT: pma.agents.metagpt.MetaGPTAgent,
     AgentType.CREWAI: pma.agents.crewai.CrewAIAgent,
+}
+
+pick_binary_market_mapping = {
+    Market.MANIFOLD: pma.manifold.pick_binary_market,
+    Market.OMEN: pma.omen.pick_binary_market,
 }
 
 if __name__ == "__main__":
@@ -31,25 +41,32 @@ if __name__ == "__main__":
         default="always_yes",
     )
     args.add_argument(
+        "--market",
+        type=str,
+        choices=[t.name.lower() for t in list(Market)],
+        default=Market.MANIFOLD.name.lower(),
+    )
+    args.add_argument(
         "--auto-bet",
         type=bool,
         default=False,
         help="If true, does not require user input to place the bet.",
     )
 
-    args = args.parse_args()
-    agent_type = AgentType[args.agent_type.upper()]
+    parsed_args = args.parse_args()
+    selected_market = Market[parsed_args.market.upper()]
+    agent_type = AgentType[parsed_args.agent_type.upper()]
     keys = pma.utils.get_keys()
 
     # Pick a market
-    market = pma.manifold.pick_binary_market()
+    market = pick_binary_market_mapping[selected_market]()
 
     # Create the agent and run it
     agent = agent_mapping[agent_type]()
     result = agent.run(market.question)
 
     # Place a bet based on the result
-    if args.auto_bet:
+    if parsed_args.auto_bet:
         do_bet = True
     else:
         prompt = (
@@ -59,6 +76,11 @@ if __name__ == "__main__":
         )
         user_input = input(prompt)
         do_bet = user_input.lower().strip() == "y" if user_input else True
+
+    if market != Market.MANIFOLD:
+        raise NotImplementedError(
+            "Only Manifold is supported for betting at the moment."
+        )
 
     if do_bet:
         print(
