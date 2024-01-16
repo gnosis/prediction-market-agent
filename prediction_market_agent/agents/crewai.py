@@ -1,4 +1,3 @@
-from crewai import Agent, Task, Crew
 import json
 from prediction_market_agent.agents.abstract import AbstractAgent
 
@@ -10,6 +9,10 @@ from langchain.tools import DuckDuckGoSearchRun
 
 class CrewAIAgent(AbstractAgent):
     def __init__(self):
+        try:
+            from crewai import Agent
+        except ImportError:
+            raise RuntimeError("You need to install the `crewai` package manually.")
         search_tool = DuckDuckGoSearchRun()
         self._researcher = Agent(
             role="Research Analyst",
@@ -28,6 +31,8 @@ class CrewAIAgent(AbstractAgent):
         )
 
     def run(self, market: str) -> bool:
+        from crewai import Task, Crew
+
         task1 = Task(
             description=(
                 f"Research and report on the following question:\n\n"

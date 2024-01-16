@@ -11,8 +11,13 @@ class MetaGPTAgent(AbstractAgent):
         dotenv.load_dotenv()
         os.environ["OPENAI_API_MODEL"] = "gpt-4-1106-preview"
         os.environ["SERPAPI_API_KEY"] = os.getenv("SERP_API_KEY")
-        from metagpt.roles import Searcher
-        from metagpt.roles.researcher import Researcher
+        try:
+            from metagpt.roles import Searcher
+            from metagpt.roles.researcher import Researcher
+        except ImportError:
+            raise RuntimeError(
+                "You need to install the `metagpt` package manually."
+            )
 
         if cheap:
             self._agent = Searcher()

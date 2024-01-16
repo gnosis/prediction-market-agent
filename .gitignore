@@ -1,6 +1,8 @@
+requirements.txt
 .venv
 .env
 .agents_workspace
 .cache
+__pycache__
 *.egg-info
 logs
