@@ -11,7 +11,7 @@ class CrewAIAgent(AbstractAgent):
         try:
             from crewai import Agent
         except ImportError:
-            raise ImportError("You need to install the `crewai` package manually.")
+            raise RuntimeError("You need to install the `crewai` package manually.")
         search_tool = DuckDuckGoSearchRun()
         self._researcher = Agent(
             role="Research Analyst",
