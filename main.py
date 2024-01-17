@@ -11,6 +11,7 @@ class AgentType(Enum):
     LLAMAINDEX = 4
     METAGPT = 5
     CREWAI = 6
+    CUSTOM = 7
 
 
 class Market(Enum):
@@ -19,12 +20,13 @@ class Market(Enum):
 
 
 agent_mapping = {
-    AgentType.LANGCHAIN: pma.agents.langchain.LangChainAgent,
-    AgentType.AUTOGEN: pma.agents.autogen.AutoGenAgent,
+    AgentType.LANGCHAIN: pma.agents.langchain_agent.LangChainAgent,
+    AgentType.AUTOGEN: pma.agents.autogen_agent.AutoGenAgent,
     AgentType.ALWAYS_YES: pma.agents.always_yes.AlwaysYesAgent,
-    AgentType.LLAMAINDEX: pma.agents.llamaindex.LlamaIndexAgent,
-    AgentType.METAGPT: pma.agents.metagpt.MetaGPTAgent,
-    AgentType.CREWAI: pma.agents.crewai.CrewAIAgent,
+    AgentType.LLAMAINDEX: pma.agents.llamaindex_agent.LlamaIndexAgent,
+    AgentType.METAGPT: pma.agents.metagpt_agent.MetaGPTAgent,
+    AgentType.CREWAI: pma.agents.crewai_agent.CrewAIAgent,
+    AgentType.CUSTOM: pma.agents.custom_agent.CustomAgent,
 }
 
 pick_binary_market_mapping = {
@@ -38,7 +40,7 @@ if __name__ == "__main__":
         "--agent-type",
         type=str,
         choices=[t.name.lower() for t in list(AgentType)],
-        default="always_yes",
+        default=AgentType.ALWAYS_YES.name.lower(),
     )
     args.add_argument(
         "--market",

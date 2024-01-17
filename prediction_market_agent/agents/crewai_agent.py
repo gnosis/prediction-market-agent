@@ -1,7 +1,7 @@
 import json
 from prediction_market_agent.agents.abstract import AbstractAgent
 
-from langchain.tools import DuckDuckGoSearchRun
+from langchain_community.tools import DuckDuckGoSearchRun
 
 # TODO can use langchain's @tool decorator on our own tool methods to create a
 # tool useable by a crew agent

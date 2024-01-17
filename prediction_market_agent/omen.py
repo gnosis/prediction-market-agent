@@ -6,7 +6,7 @@ but to not use our own credits, seems we can use their api deployment directly: 
 """
 import requests
 
-from prediction_market_agent.models import Market
+from prediction_market_agent.data_models.market_data_models import Market
 
 THEGRAPH_QUERY_URL = "https://api.thegraph.com/subgraphs/name/protofire/omen-xdai"
 
