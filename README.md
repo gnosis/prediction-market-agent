@@ -79,6 +79,7 @@ A list of framework projects that had traction but are no longer under developme
 - [Tavily GPT Researcher](https://github.com/assafelovic/gpt-researcher)
   - Note: Pip installing this [package](https://docs.tavily.com/docs/gpt-researcher/pip-package) breaks langchain agent atm due to incompatible dependencies.
 - [OpenAI assistants API](https://platform.openai.com/docs/assistants)
+- [SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
 
 ## TODOs
 
