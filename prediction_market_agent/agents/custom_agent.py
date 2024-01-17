@@ -69,13 +69,18 @@ If you want to answer, return a completion in form of a dictionary with a single
 
         while True:
             cycle_count += 1
-            # If we reached the maximum number of cycles, ask to provide an answer based on available information.
             if cycle_count == self.max_cycles - 1:
+                # If we reached the maximum number of cycles, ask to provide an answer based on available information.
                 self.verbose_print(
                     f"Agent: Reached {cycle_count} cycles, asking to provide answer now."
                 )
                 messages.append(
                     "You have reached maximal message count, please provide answer now as best as you can."
+                )
+            elif cycle_count >= self.max_cycles:
+                # If model didn't follow the final answer prompt, raise an error.
+                raise ValueError(
+                    f"Reached {cycle_count} cycles, but no answer was given."
                 )
 
             # Because of the system prompt, completions are expected to be JSON-parseable.
