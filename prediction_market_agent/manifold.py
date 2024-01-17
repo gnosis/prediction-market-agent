@@ -1,7 +1,7 @@
 import requests
 
 from prediction_market_agent import utils
-from prediction_market_agent.models import Market
+from prediction_market_agent.data_models.market_data_models import Market
 
 """
 Python API for Manifold Markets

@@ -1,7 +1,7 @@
 from langchain.agents import load_tools
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
-from langchain.llms import OpenAI
+from langchain_community.llms import OpenAI
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent

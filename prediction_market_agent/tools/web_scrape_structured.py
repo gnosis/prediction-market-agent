@@ -1,5 +1,14 @@
 import requests
 from bs4 import BeautifulSoup, Comment, Tag
+from prediction_market_agent.tools.web_scrape import _summary
+
+
+def web_scrape_structured_and_summarized(
+    objective: str, url: str, remove_a_links: bool = True
+) -> str:
+    content = web_scrape_structured(url, remove_a_links=remove_a_links)
+    summary = _summary(objective, content)
+    return summary
 
 
 def web_scrape_structured(url: str, remove_a_links: bool = True) -> str:
@@ -26,9 +35,13 @@ def web_scrape_structured(url: str, remove_a_links: bool = True) -> str:
     """
     if not url.startswith("http"):
         url = f"https://{url}"
-    response = requests.get(url)
+    response = requests.get(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
+        },
+    )
     response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
     page_content_html = response.text
     page_content_body_text_clean = pretty_html_from_page_content(
         page_content_html, remove_a_links=remove_a_links

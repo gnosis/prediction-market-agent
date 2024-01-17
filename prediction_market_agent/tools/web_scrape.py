@@ -2,7 +2,7 @@ import bs4
 import requests
 
 from langchain.chains.summarize import load_summarize_chain
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
