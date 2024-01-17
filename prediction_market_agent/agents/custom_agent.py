@@ -28,7 +28,7 @@ class CustomAgent(AbstractAgent):
             "GoogleSearchTool": google_search,
             "WebScrapingTool": tool_exception_handler(
                 map_exception_to_output={
-                    requests.exceptions.HTTPError: "Couldn't reach the URL. Don't scrap the same domain again."
+                    requests.exceptions.HTTPError: "Couldn't reach the URL. Don't scrape the same domain again."
                 }
             )(web_scrape_structured_and_summarized),
         }
