@@ -1,16 +1,24 @@
-from prediction_market_agent.ai_models.abstract_ai_models import AbstractAiChatModel
+from prediction_market_agent.ai_models.abstract_ai_models import (
+    AbstractAiChatModel,
+    Message,
+)
+from enum import Enum
 from openai import OpenAI
 from typing import Optional, Literal
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 
+ROLE_KEY = "role"
+CONTENT_KEY = "content"
+
+
+class OpenAiRole(str, Enum):
+    user = "user"
+    assistant = "assistant"
+    system = "system"
+
 
 class ChatOpenAIModel(AbstractAiChatModel):
-    ROLE_KEY = "role"
-    CONTENT_KEY = "content"
-    USER_ROLE_NAME = "user"
-    SYSTEM_ROLE_NAME = "system"
-
     def __init__(
         self,
         model: Literal[
@@ -46,19 +54,19 @@ class ChatOpenAIModel(AbstractAiChatModel):
         self.frequency_penalty = frequency_penalty
         self.client = OpenAI(api_key=api_key)
 
-    def complete(self, messages: list[str]) -> Optional[str]:
+    def complete(self, messages: list[Message]) -> Optional[str]:
         # TODO: Check `ChatCompletionMessageParam` to support all roles, not just hardcoded system and user.
         messages_formatted: list[dict[str, str]] = []
         if self.system_prompt is not None:
             messages_formatted.append(
                 {
-                    self.ROLE_KEY: self.SYSTEM_ROLE_NAME,
-                    self.CONTENT_KEY: self.system_prompt,
+                    ROLE_KEY: OpenAiRole.system.value,
+                    CONTENT_KEY: self.system_prompt,
                 }
             )
         for message in messages:
             messages_formatted.append(
-                {self.ROLE_KEY: self.USER_ROLE_NAME, self.CONTENT_KEY: message}
+                {ROLE_KEY: message.role, CONTENT_KEY: message.content}
             )
         response: ChatCompletion = self.client.chat.completions.create(
             model=self.model,
@@ -76,6 +84,6 @@ class ChatOpenAIModel(AbstractAiChatModel):
 
 if __name__ == "__main__":
     model = ChatOpenAIModel()
-    messages = ["Hello, how are you?"]
+    messages = [Message(role="user", content="Hello, how are you?")]
     completion = model.complete(messages)
     print(completion)
