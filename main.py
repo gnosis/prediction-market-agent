@@ -11,7 +11,8 @@ class AgentType(Enum):
     LLAMAINDEX = 4
     METAGPT = 5
     CREWAI = 6
-    CUSTOM = 7
+    CUSTOM_OPENAI = 7
+    CUSTOM_LLAMA = 8
 
 
 class Market(Enum):
@@ -26,7 +27,8 @@ agent_mapping = {
     AgentType.LLAMAINDEX: pma.agents.llamaindex_agent.LlamaIndexAgent,
     AgentType.METAGPT: pma.agents.metagpt_agent.MetaGPTAgent,
     AgentType.CREWAI: pma.agents.crewai_agent.CrewAIAgent,
-    AgentType.CUSTOM: pma.agents.custom_agent.CustomAgent,
+    AgentType.CUSTOM_OPENAI: pma.agents.custom_agent.CustomAgent.init_with_openai,
+    AgentType.CUSTOM_LLAMA: pma.agents.custom_agent.CustomAgent.init_with_llama,
 }
 
 pick_binary_market_mapping = {
