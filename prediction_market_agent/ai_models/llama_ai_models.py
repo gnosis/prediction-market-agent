@@ -49,6 +49,9 @@ class ChatReplicateLLamaModel(AbstractAiChatModel):
 
 
 def construct_llama_prompt(messages: list[Message]) -> str:
+    """
+    Based on https://replicate.com/blog/how-to-prompt-llama.
+    """
     return "\n".join(
         (
             message.content
