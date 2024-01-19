@@ -54,7 +54,7 @@ def call_function_on_contract(
     return output
 
 
-def call_function_on_contract_with_tx(
+def call_function_on_contract_tx(
     web3: Web3,
     *,
     contract_address: ChecksumAddress,

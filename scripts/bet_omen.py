@@ -1,5 +1,5 @@
 import typer
-from prediction_market_agent.omen import omen_buy_outcome, get_market
+from prediction_market_agent.omen import omen_buy_outcome_tx, get_market
 from prediction_market_agent.tools.types import xDai, HexAddress, PrivateKey
 
 
@@ -25,7 +25,7 @@ def main(
     Market ID can be found easily in the URL: https://aiomen.eth.limo/#/0x86376012a5185f484ec33429cadfa00a8052d9d4
     """
     market = get_market(market_id)
-    omen_buy_outcome(
+    omen_buy_outcome_tx(
         amount=xDai(amount),
         from_address=HexAddress(from_address),
         from_private_key=PrivateKey(from_private_key),

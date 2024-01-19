@@ -13,7 +13,7 @@ from pprint import pprint
 from prediction_market_agent.data_models.market_data_models import Market
 from prediction_market_agent.tools.web3_utils import (
     call_function_on_contract,
-    call_function_on_contract_with_tx,
+    call_function_on_contract_tx,
     WXDAI_ABI,
     xdai_to_wei,
     remove_fraction_wei,
@@ -105,7 +105,7 @@ def get_market(market_id: str) -> Market:
     return Market.model_validate(market)
 
 
-def omen_approve_market_maker_to_spend_collateral_token(
+def omen_approve_market_maker_to_spend_collateral_token_tx(
     web3: Web3,
     market: Market,
     amount_wei: Wei,
@@ -113,7 +113,7 @@ def omen_approve_market_maker_to_spend_collateral_token(
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
-    return call_function_on_contract_with_tx(
+    return call_function_on_contract_tx(
         web3=web3,
         contract_address=market.collateral_token_contract_address_checksummed,
         contract_abi=WXDAI_ABI,
@@ -128,7 +128,7 @@ def omen_approve_market_maker_to_spend_collateral_token(
     )
 
 
-def omen_deposit_collateral_token(
+def omen_deposit_collateral_token_tx(
     web3: Web3,
     market: Market,
     amount_wei: Wei,
@@ -136,7 +136,7 @@ def omen_deposit_collateral_token(
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
-    return call_function_on_contract_with_tx(
+    return call_function_on_contract_tx(
         web3=web3,
         contract_address=market.collateral_token_contract_address_checksummed,
         contract_abi=WXDAI_ABI,
@@ -168,7 +168,7 @@ def omen_calculate_buy_amount(
     return min_outcome_tokens_to_buy
 
 
-def omen_buy_shares(
+def omen_buy_shares_tx(
     web3: Web3,
     market: Market,
     amount_wei: Wei,
@@ -178,7 +178,7 @@ def omen_buy_shares(
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
-    return call_function_on_contract_with_tx(
+    return call_function_on_contract_tx(
         web3=web3,
         contract_address=market.market_maker_contract_address_checksummed,
         contract_abi=OMEN_FPMM_ABI,
@@ -194,7 +194,7 @@ def omen_buy_shares(
     )
 
 
-def omen_buy_outcome(
+def omen_buy_outcome_tx(
     amount: xDai,
     from_address: HexAddress,
     from_private_key: PrivateKey,
@@ -219,7 +219,7 @@ def omen_buy_outcome(
     # Calculate the amount of shares we will get for the given investment amount.
     expected_shares = omen_calculate_buy_amount(web3, market, amount_wei, outcome_index)
     # Approve the market maker to withdraw our collateral token.
-    approve_tx_receipt = omen_approve_market_maker_to_spend_collateral_token(
+    approve_tx_receipt = omen_approve_market_maker_to_spend_collateral_token_tx(
         web3=web3,
         market=market,
         amount_wei=amount_wei,
@@ -232,7 +232,7 @@ def omen_buy_outcome(
     # Deposit xDai to the collateral token,
     # this can be skipped, if we know we already have enough collateral tokens.
     if auto_deposit:
-        deposit_receipt = omen_deposit_collateral_token(
+        deposit_receipt = omen_deposit_collateral_token_tx(
             web3=web3,
             market=market,
             amount_wei=amount_wei,
@@ -243,7 +243,7 @@ def omen_buy_outcome(
         nonce += ONE_NONCE  # Increase after each tx.
         check_tx_receipt(deposit_receipt)
     # Buy shares using the deposited xDai in the collateral token.
-    buy_receipt = omen_buy_shares(
+    buy_receipt = omen_buy_shares_tx(
         web3,
         market,
         amount_wei,
@@ -257,7 +257,7 @@ def omen_buy_outcome(
     check_tx_receipt(buy_receipt)
 
 
-def omen_sell_outcome(market: Market) -> None:
+def omen_sell_outcome_tx(market: Market) -> None:
     # TODO in next MR.
     ...
 
