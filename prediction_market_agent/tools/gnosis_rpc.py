@@ -1,10 +1,7 @@
 import requests
-from typing import NewType
+from web3.types import Wei
 
 GNOSIS_RPC_URL = "https://rpc.gnosischain.com/"
-
-# Useful tool https://gnosisscan.io/unitconverter
-Wei = NewType("Wei", int)
 
 
 def get_balance(address: str) -> Wei:
