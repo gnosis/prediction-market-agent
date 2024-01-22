@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import NewType
+from typing import NewType, Union
 from web3.types import Wei
 from eth_typing.evm import (
     Address,
@@ -15,3 +15,7 @@ PrivateKey = NewType("PrivateKey", str)
 xDai = NewType("xDai", Decimal)
 GNO = NewType("GNO", Decimal)
 ABI = NewType("Abi", str)
+
+
+def to_xdai(amount: Union[str, int, float, Decimal]) -> xDai:
+    return xDai(Decimal(amount))

@@ -2,6 +2,8 @@ from enum import Enum
 import argparse
 
 import prediction_market_agent as pma
+from prediction_market_agent.tools.types import to_xdai
+from prediction_market_agent.tools.utils import should_not_happen, check_not_none
 
 
 class AgentType(Enum):
@@ -81,18 +83,23 @@ if __name__ == "__main__":
         user_input = input(prompt)
         do_bet = user_input.lower().strip() == "y" if user_input else True
 
-    if market != Market.MANIFOLD:
-        raise NotImplementedError(
-            "Only Manifold is supported for betting at the moment."
-        )
-
     if do_bet:
         print(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
+        amount = to_xdai(input("How much do you want to bet? (in xDai): "))
         pma.manifold.place_bet(
-            amount=5,
+            amount=amount,
             market_id=market.id,
             outcome=result,
             api_key=keys.manifold,
+        ) if selected_market == Market.MANIFOLD else pma.omen.binary_omen_buy_outcome_tx(
+            amount=amount,
+            from_address=check_not_none(keys.bet_from_address),
+            from_private_key=check_not_none(keys.bet_from_private_key),
+            market=market,
+            binary_outcome=result,
+            auto_deposit=True,
+        ) if selected_market == Market.OMEN else should_not_happen(
+            f"Unknown market: {market}"
         )
