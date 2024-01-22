@@ -16,18 +16,36 @@ from prediction_market_agent.tools.web3_utils import (
     call_function_on_contract_tx,
     WXDAI_ABI,
     xdai_to_wei,
-    remove_fraction_wei,
+    remove_fraction,
+    add_fraction,
     check_tx_receipt,
     ONE_NONCE,
 )
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
-from prediction_market_agent.tools.types import ABI, HexAddress, PrivateKey, xDai, Wei
+from prediction_market_agent.tools.types import (
+    ABI,
+    HexAddress,
+    PrivateKey,
+    xDai,
+    Wei,
+    OmenOutcomeToken,
+)
 
 with open(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "abis/omen_fpmm.abi.json")
 ) as f:
     # File content taken from https://github.com/protofire/omen-exchange/blob/master/app/src/abi/marketMaker.json.
+    # Factory contract at https://gnosisscan.io/address/0x9083a2b699c0a4ad06f63580bde2635d26a3eef0.
     OMEN_FPMM_ABI = ABI(f.read())
+
+with open(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "abis/omen_fpmm_conditionaltokens.abi.json",
+    )
+) as f:
+    # Based on the code from OMEN_FPMM_ABI's factory contract.
+    OMEN_FPMM_CONDITIONALTOKENS_ABI = ABI(f.read())
 
 THEGRAPH_QUERY_URL = "https://api.thegraph.com/subgraphs/name/protofire/omen-xdai"
 
@@ -128,6 +146,33 @@ def omen_approve_market_maker_to_spend_collateral_token_tx(
     )
 
 
+def omen_approve_all_market_maker_to_move_conditionaltokens_tx(
+    web3: Web3,
+    market: Market,
+    approve: bool,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    tx_params: Optional[TxParams] = None,
+) -> TxReceipt:
+    # Get the address of conditional token's of this market.
+    conditionaltokens_address = omen_get_market_maker_conditionaltokens_address(
+        web3, market
+    )
+    return call_function_on_contract_tx(
+        web3=web3,
+        contract_address=Web3.to_checksum_address(conditionaltokens_address),
+        contract_abi=OMEN_FPMM_CONDITIONALTOKENS_ABI,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        function_name="setApprovalForAll",
+        function_params=[
+            market.market_maker_contract_address_checksummed,
+            approve,
+        ],
+        tx_params=tx_params,
+    )
+
+
 def omen_deposit_collateral_token_tx(
     web3: Web3,
     market: Market,
@@ -147,16 +192,36 @@ def omen_deposit_collateral_token_tx(
     )
 
 
+def omen_withdraw_collateral_token_tx(
+    web3: Web3,
+    market: Market,
+    amount_wei: Wei,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    tx_params: Optional[TxParams] = None,
+) -> TxReceipt:
+    return call_function_on_contract_tx(
+        web3=web3,
+        contract_address=market.collateral_token_contract_address_checksummed,
+        contract_abi=WXDAI_ABI,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        function_name="withdraw",
+        function_params=[amount_wei],
+        tx_params=tx_params or {},
+    )
+
+
 def omen_calculate_buy_amount(
     web3: Web3,
     market: Market,
     investment_amount: Wei,
     outcome_index: int,
-) -> Wei:
+) -> OmenOutcomeToken:
     """
     Returns amount of shares we will get for the given outcome_index for the given investment amount.
     """
-    calculated_shares: Wei = call_function_on_contract(
+    calculated_shares: OmenOutcomeToken = call_function_on_contract(
         web3,
         market.market_maker_contract_address_checksummed,
         OMEN_FPMM_ABI,
@@ -164,8 +229,42 @@ def omen_calculate_buy_amount(
         [investment_amount, outcome_index],
     )
     # Allow 1% slippage.
-    min_outcome_tokens_to_buy = remove_fraction_wei(calculated_shares, 0.01)
+    min_outcome_tokens_to_buy = remove_fraction(calculated_shares, 0.01)
     return min_outcome_tokens_to_buy
+
+
+def omen_calculate_sell_amount(
+    web3: Web3,
+    market: Market,
+    return_amount: Wei,
+    outcome_index: int,
+) -> OmenOutcomeToken:
+    """
+    Returns amount of shares we will sell for the requested wei.
+    """
+    calculated_shares: OmenOutcomeToken = call_function_on_contract(
+        web3,
+        market.market_maker_contract_address_checksummed,
+        OMEN_FPMM_ABI,
+        "calcSellAmount",
+        [return_amount, outcome_index],
+    )
+    # Allow 1% slippage.
+    max_outcome_tokens_to_sell = add_fraction(calculated_shares, 0.01)
+    return max_outcome_tokens_to_sell
+
+
+def omen_get_market_maker_conditionaltokens_address(
+    web3: Web3,
+    market: Market,
+) -> HexAddress:
+    address: HexAddress = call_function_on_contract(
+        web3,
+        market.market_maker_contract_address_checksummed,
+        OMEN_FPMM_ABI,
+        "conditionalTokens",
+    )
+    return address
 
 
 def omen_buy_shares_tx(
@@ -173,7 +272,7 @@ def omen_buy_shares_tx(
     market: Market,
     amount_wei: Wei,
     outcome_index: int,
-    min_outcome_tokens_to_buy: Wei,
+    min_outcome_tokens_to_buy: OmenOutcomeToken,
     from_address: HexAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
@@ -194,6 +293,32 @@ def omen_buy_shares_tx(
     )
 
 
+def omen_sell_shares_tx(
+    web3: Web3,
+    market: Market,
+    amount_wei: Wei,
+    outcome_index: int,
+    max_outcome_tokens_to_sell: OmenOutcomeToken,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    tx_params: Optional[TxParams] = None,
+) -> TxReceipt:
+    return call_function_on_contract_tx(
+        web3=web3,
+        contract_address=market.market_maker_contract_address_checksummed,
+        contract_abi=OMEN_FPMM_ABI,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        function_name="sell",
+        function_params=[
+            amount_wei,
+            outcome_index,
+            max_outcome_tokens_to_sell,
+        ],
+        tx_params=tx_params,
+    )
+
+
 def omen_buy_outcome_tx(
     amount: xDai,
     from_address: HexAddress,
@@ -209,7 +334,7 @@ def omen_buy_outcome_tx(
     amount_wei = xdai_to_wei(amount)
 
     # Get the index of the outcome we want to buy.
-    outcome_index: int = market.outcomes.index(outcome)
+    outcome_index: int = market.get_outcome_index(outcome)
 
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
@@ -275,9 +400,69 @@ def binary_omen_buy_outcome_tx(
     )
 
 
-def omen_sell_outcome_tx(market: Market) -> None:
-    # TODO in next MR.
-    ...
+def omen_sell_outcome_tx(
+    amount: xDai,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    market: Market,
+    outcome: str,
+    auto_withdraw: bool,
+) -> None:
+    """
+    Sells the given amount of shares for the given outcome in the given market.
+    """
+    web3 = Web3(Web3.HTTPProvider(GNOSIS_RPC_URL))
+    amount_wei = xdai_to_wei(amount)
+
+    # Get the index of the outcome we want to buy.
+    outcome_index: int = market.get_outcome_index(outcome)
+
+    # Get the current nonce for the given from_address.
+    # If making multiple transactions quickly after each other,
+    # it's better to increae it manually (otherwise we could get stale value from the network and error out).
+    nonce = web3.eth.get_transaction_count(from_address)
+
+    # Calculate the amount of wei we will get for the given selling amount.
+    max_outcome_tokens_to_sell = omen_calculate_sell_amount(
+        web3, market, amount_wei, outcome_index
+    )
+
+    # Approve the market maker to move our (all) conditional tokens.
+    approve_tx_receipt = omen_approve_all_market_maker_to_move_conditionaltokens_tx(
+        web3=web3,
+        market=market,
+        approve=True,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        tx_params={"nonce": nonce},
+    )
+    nonce += ONE_NONCE  # Increase after each tx.
+    check_tx_receipt(approve_tx_receipt)
+    # Sell the shares.
+    sell_receipt = omen_sell_shares_tx(
+        web3,
+        market,
+        amount_wei,
+        outcome_index,
+        max_outcome_tokens_to_sell,
+        from_address,
+        from_private_key,
+        tx_params={"nonce": nonce},
+    )
+    nonce += ONE_NONCE  # Increase after each tx.
+    check_tx_receipt(sell_receipt)
+    if auto_withdraw:
+        # Optionally, withdraw from the collateral token back to the `from_address` wallet.
+        withdraw_receipt = omen_withdraw_collateral_token_tx(
+            web3=web3,
+            market=market,
+            amount_wei=amount_wei,
+            from_address=from_address,
+            from_private_key=from_private_key,
+            tx_params={"nonce": nonce},
+        )
+        nonce += ONE_NONCE  # Increase after each tx.
+        check_tx_receipt(withdraw_receipt)
 
 
 if __name__ == "__main__":

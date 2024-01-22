@@ -2,7 +2,7 @@ from enum import Enum
 import argparse
 
 import prediction_market_agent as pma
-from prediction_market_agent.tools.types import to_xdai
+from prediction_market_agent.tools.types import xdai_type
 from prediction_market_agent.tools.utils import should_not_happen, check_not_none
 
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         print(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
-        amount = to_xdai(input("How much do you want to bet? (in xDai): "))
+        amount = xdai_type(input("How much do you want to bet? (in xDai): "))
         pma.manifold.place_bet(
             amount=amount,
             market_id=market.id,
