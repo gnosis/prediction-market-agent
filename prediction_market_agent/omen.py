@@ -257,6 +257,24 @@ def omen_buy_outcome_tx(
     check_tx_receipt(buy_receipt)
 
 
+def binary_omen_buy_outcome_tx(
+    amount: xDai,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    market: Market,
+    binary_outcome: bool,
+    auto_deposit: bool,
+) -> None:
+    omen_buy_outcome_tx(
+        amount=amount,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        market=market,
+        outcome="Yes" if binary_outcome else "No",
+        auto_deposit=auto_deposit,
+    )
+
+
 def omen_sell_outcome_tx(market: Market) -> None:
     # TODO in next MR.
     ...

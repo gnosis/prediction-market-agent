@@ -13,6 +13,10 @@ class Market(BaseModel):
     outcomes: list[str]
 
     @property
+    def question(self) -> str:
+        return self.title
+
+    @property
     def market_maker_contract_address(self) -> HexAddress:
         return self.id
 
