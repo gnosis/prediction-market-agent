@@ -422,7 +422,7 @@ def omen_sell_outcome_tx(
     # it's better to increae it manually (otherwise we could get stale value from the network and error out).
     nonce = web3.eth.get_transaction_count(from_address)
 
-    # Calculate the amount of shares we will sale for the given selling amount of xdai.
+    # Calculate the amount of shares we will sell for the given selling amount of xdai.
     max_outcome_tokens_to_sell = omen_calculate_sell_amount(
         web3, market, amount_wei, outcome_index
     )
