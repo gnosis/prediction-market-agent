@@ -16,6 +16,7 @@ xDai = NewType("xDai", Decimal)
 GNO = NewType("GNO", Decimal)
 ABI = NewType("Abi", str)
 OmenOutcomeToken = NewType("OmenOutcomeToken", int)
+Probability = NewType("Probability", Decimal)
 
 
 def xdai_type(amount: Union[str, int, float, Decimal]) -> xDai:

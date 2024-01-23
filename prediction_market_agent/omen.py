@@ -60,6 +60,9 @@ query getFixedProductMarketMaker($id: String!) {
         usdVolume
         collateralToken
         outcomes
+        outcomeTokenAmounts
+        outcomeTokenMarginalPrices
+        fee
     }
 }
 """
