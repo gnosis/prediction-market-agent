@@ -74,9 +74,7 @@ def get_market_moving_bet(
                 investment_amount=int(bet_amount),
                 outcome_index=bet_outcome_index,
             )
-            assert np.isclose(
-                float(expected_trade) / dx, 1, rtol=0.01
-            )  # TODO always 1% off, investigate
+            assert np.isclose(float(expected_trade), dx)
 
         new_amounts[bet_outcome_index] -= dx
         # Check that the invariant is restored
