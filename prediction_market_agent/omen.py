@@ -228,9 +228,7 @@ def omen_calculate_buy_amount(
         "calcBuyAmount",
         [investment_amount, outcome_index],
     )
-    # Allow 1% slippage.
-    min_outcome_tokens_to_buy = remove_fraction(calculated_shares, 0.01)
-    return min_outcome_tokens_to_buy
+    return calculated_shares
 
 
 def omen_calculate_sell_amount(
@@ -249,9 +247,7 @@ def omen_calculate_sell_amount(
         "calcSellAmount",
         [return_amount, outcome_index],
     )
-    # Allow 1% slippage.
-    max_outcome_tokens_to_sell = add_fraction(calculated_shares, 0.01)
-    return max_outcome_tokens_to_sell
+    return calculated_shares
 
 
 def omen_get_market_maker_conditionaltokens_address(
@@ -343,6 +339,8 @@ def omen_buy_outcome_tx(
 
     # Calculate the amount of shares we will get for the given investment amount.
     expected_shares = omen_calculate_buy_amount(web3, market, amount_wei, outcome_index)
+    # Allow 1% slippage.
+    expected_shares = remove_fraction(expected_shares, 0.01)
     # Approve the market maker to withdraw our collateral token.
     approve_tx_receipt = omen_approve_market_maker_to_spend_collateral_token_tx(
         web3=web3,
@@ -426,6 +424,8 @@ def omen_sell_outcome_tx(
     max_outcome_tokens_to_sell = omen_calculate_sell_amount(
         web3, market, amount_wei, outcome_index
     )
+    # Allow 1% slippage.
+    max_outcome_tokens_to_sell = add_fraction(max_outcome_tokens_to_sell, 0.01)
 
     # Approve the market maker to move our (all) conditional tokens.
     approve_tx_receipt = omen_approve_all_market_maker_to_move_conditionaltokens_tx(
