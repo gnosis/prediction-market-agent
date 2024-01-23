@@ -41,5 +41,15 @@ class Market(BaseModel):
         except ValueError:
             raise ValueError(f"Outcome `{outcome}` not found in `{self.outcomes}`.")
 
+    def get_outcome_str(self, outcome_index: int) -> str:
+        n_outcomes = len(self.outcomes)
+        if outcome_index >= n_outcomes:
+            raise ValueError(
+                f"Outcome index `{outcome_index}` not valid. There are only "
+                f"`{n_outcomes}` outcomes."
+            )
+        else:
+            return self.outcomes[outcome_index]
+
     def __repr__(self):
         return f"Market: {self.title}"

@@ -206,8 +206,11 @@ if __name__ == "__main__":
         max_bet=xDai(10),  # This significantly changes the outcome
     )
 
-    def get_outcome_str(outcome_index: OutcomeIndex) -> str:
-        return "'Yes'" if outcome_index == 0 else "'No'"
+    market = get_market(market_address)
 
+    def get_outcome_str(outcome_index: int) -> str:
+        return market.get_outcome_str(outcome_index)
+
+    get_market(market_address).get_outcome_str(0)
     print(f"Market moving bet: {mov_bet[0]:.2f} on {get_outcome_str(mov_bet[1])}")
     print(f"Kelly criterion bet: {kelly_bet[0]:.2f} on {get_outcome_str(kelly_bet[1])}")
