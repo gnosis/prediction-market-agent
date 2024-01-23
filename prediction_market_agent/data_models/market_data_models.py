@@ -1,7 +1,13 @@
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import Wei
-from prediction_market_agent.tools.types import USD, xDai, HexAddress, ChecksumAddress
+from prediction_market_agent.tools.types import (
+    USD,
+    OmenOutcomeToken,
+    xDai,
+    HexAddress,
+    ChecksumAddress,
+)
 
 
 class Market(BaseModel):
@@ -11,7 +17,7 @@ class Market(BaseModel):
     usdVolume: USD
     collateralToken: HexAddress
     outcomes: list[str]
-    outcomeTokenAmounts: list[int] = []
+    outcomeTokenAmounts: list[OmenOutcomeToken] = []
     outcomeTokenMarginalPrices: list[xDai] = []
     fee: Wei = None
 

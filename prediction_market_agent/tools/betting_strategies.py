@@ -7,14 +7,14 @@ from prediction_market_agent.omen import get_market, omen_calculate_buy_amount
 from prediction_market_agent.data_models.market_data_models import Market
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
 from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai
-from prediction_market_agent.tools.types import xDai
+from prediction_market_agent.tools.types import Probability, xDai
 
 OutcomeIndex = t.Literal[0, 1]
 
 
 def get_market_moving_bet(
     market_address: str,
-    target_p_yes: float,
+    target_p_yes: Probability,
     max_iters: int = 100,
     check_vs_contract: bool = False,  # Disable by default, as it's slow
     verbose: bool = False,
@@ -47,7 +47,9 @@ def get_market_moving_bet(
 
     fixed_product = reduce(lambda x, y: x * y, amounts, 1)
     assert np.isclose(float(sum(prices)), 1)
-    current_p_yes = prices[0]
+
+    # For FPMMs, the probability is equal to the marginal price
+    current_p_yes = Probability(prices[0])
     bet_outcome_index = 0 if target_p_yes > current_p_yes else 1
 
     min_bet_amount = 0
@@ -170,14 +172,15 @@ def _get_kelly_criterion_bet(
 
 def get_kelly_criterion_bet(
     market_address: str,
-    estimated_p_yes: float,
+    estimated_p_yes: Probability,
     max_bet: xDai,
 ) -> t.Tuple[xDai, OutcomeIndex]:
     market: Market = get_market(market_address)
     if len(market.outcomeTokenAmounts) != 2:
         raise ValueError("Only binary markets are supported.")
 
-    current_p_yes = market.outcomeTokenMarginalPrices[0]
+    # For FPMMs, the probability is equal to the marginal price
+    current_p_yes = Probability(market.outcomeTokenMarginalPrices[0])
     outcome_index = 0 if estimated_p_yes > current_p_yes else 1
     estimated_p_win = estimated_p_yes if outcome_index == 0 else 1 - estimated_p_yes
 
