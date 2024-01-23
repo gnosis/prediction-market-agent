@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Any
+from typing import Optional, Any, TypeVar
 from web3 import Web3
 from web3.types import Wei, TxReceipt, TxParams, Nonce
 from prediction_market_agent.tools.types import (
@@ -27,11 +27,26 @@ def xdai_to_wei(native: xDai) -> Wei:
     return Web3.to_wei(native, "ether")
 
 
-def remove_fraction_wei(amount: Wei, fraction: float) -> Wei:
-    """Removes the given fraction from the given integer amount and returns the value as an integer."""
+RemoveOrAddFractionAmountType = TypeVar("RemoveOrAddFractionAmountType", bound=int)
+
+
+def remove_fraction(
+    amount: RemoveOrAddFractionAmountType, fraction: float
+) -> RemoveOrAddFractionAmountType:
+    """Removes the given fraction from the given integer-bounded amount and returns the value as an original type."""
     if 0 <= fraction <= 1:
         keep_percentage = 1 - fraction
-        return Wei(int(amount * keep_percentage))
+        return type(amount)(int(amount * keep_percentage))
+    raise ValueError(f"The given fraction {fraction!r} is not in the range [0, 1].")
+
+
+def add_fraction(
+    amount: RemoveOrAddFractionAmountType, fraction: float
+) -> RemoveOrAddFractionAmountType:
+    """Adds the given fraction to the given integer-bounded amount and returns the value as an original type."""
+    if 0 <= fraction <= 1:
+        keep_percentage = 1 + fraction
+        return type(amount)(int(amount * keep_percentage))
     raise ValueError(f"The given fraction {fraction!r} is not in the range [0, 1].")
 
 

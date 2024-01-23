@@ -15,7 +15,8 @@ PrivateKey = NewType("PrivateKey", str)
 xDai = NewType("xDai", Decimal)
 GNO = NewType("GNO", Decimal)
 ABI = NewType("Abi", str)
+OmenOutcomeToken = NewType("OmenOutcomeToken", int)
 
 
-def to_xdai(amount: Union[str, int, float, Decimal]) -> xDai:
+def xdai_type(amount: Union[str, int, float, Decimal]) -> xDai:
     return xDai(Decimal(amount))

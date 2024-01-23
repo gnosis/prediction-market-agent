@@ -32,5 +32,11 @@ class Market(BaseModel):
     def collateral_token_contract_address_checksummed(self) -> ChecksumAddress:
         return Web3.to_checksum_address(self.collateral_token_contract_address)
 
+    def get_outcome_index(self, outcome: str) -> int:
+        try:
+            return self.outcomes.index(outcome)
+        except ValueError:
+            raise ValueError(f"Outcome `{outcome}` not found in `{self.outcomes}`.")
+
     def __repr__(self):
         return f"Market: {self.title}"
