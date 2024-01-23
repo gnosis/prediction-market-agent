@@ -25,6 +25,7 @@ crewai = "*"
 # metagpt = "*" # Commented out because requires super old version of langchain, and conflicts with crewai.
 replicate = "*"
 typer = "^0.9.0"
+web3 = "^6.14.0"
 
 [build-system]
 requires = ["poetry-core"]
