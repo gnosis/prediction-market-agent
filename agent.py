@@ -6,9 +6,7 @@ from decimal import Decimal
 import prediction_market_agent as pma
 from prediction_market_agent.markets.all_markets import MarketType, get_binary_markets
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.agents.all_agents import AgentType, get_agent
-from prediction_market_agent.tools.utils import should_not_happen, check_not_none
-from prediction_market_agent.tools.types import Mana, xDai
+from prediction_market_agent.agents.all_agents import AgentType, get_agent, place_bet
 
 
 def main(
@@ -38,20 +36,12 @@ def main(
         amount = Decimal("0.1")
         logging.info(f"Placing bet of {amount} on market [{market.id}]: {answer}")
 
-        pma.manifold.place_bet(
-            amount=Mana(amount),
-            market_id=market.id,
-            outcome=answer,
-            api_key=check_not_none(keys.manifold),
-        ) if market_type == MarketType.MANIFOLD else pma.omen.binary_omen_buy_outcome_tx(
-            amount=xDai(amount),
-            from_address=check_not_none(keys.bet_from_address),
-            from_private_key=check_not_none(keys.bet_from_private_key),
+        place_bet(
             market=market,
-            binary_outcome=answer,
-            auto_deposit=True,
-        ) if market_type == MarketType.OMEN else should_not_happen(
-            f"Unknown market: {market}"
+            amount=amount,
+            outcome=answer,
+            keys=keys,
+            omen_auto_deposit=True,
         )
 
         logging.info(f"Sleeping for {sleep_time} seconds...")
