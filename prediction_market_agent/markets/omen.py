@@ -10,7 +10,7 @@ from typing import Optional
 from web3 import Web3
 from web3.types import TxReceipt, TxParams
 from pprint import pprint
-from prediction_market_agent.data_models.market_data_models import Market
+from prediction_market_agent.data_models.market_data_models import OmenMarket
 from prediction_market_agent.tools.web3_utils import (
     call_function_on_contract,
     call_function_on_contract_tx,
@@ -20,6 +20,7 @@ from prediction_market_agent.tools.web3_utils import (
     add_fraction,
     check_tx_receipt,
     ONE_NONCE,
+    Nonce,
 )
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
 from prediction_market_agent.tools.types import (
@@ -32,7 +33,9 @@ from prediction_market_agent.tools.types import (
 )
 
 with open(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), "abis/omen_fpmm.abi.json")
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "../abis/omen_fpmm.abi.json"
+    )
 ) as f:
     # File content taken from https://github.com/protofire/omen-exchange/blob/master/app/src/abi/marketMaker.json.
     # Factory contract at https://gnosisscan.io/address/0x9083a2b699c0a4ad06f63580bde2635d26a3eef0.
@@ -41,7 +44,7 @@ with open(
 with open(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "abis/omen_fpmm_conditionaltokens.abi.json",
+        "../abis/omen_fpmm_conditionaltokens.abi.json",
     )
 ) as f:
     # Based on the code from OMEN_FPMM_ABI's factory contract.
@@ -85,7 +88,7 @@ query getFixedProductMarketMakers($first: Int!, $outcomes: [String!]) {
 """
 
 
-def get_omen_markets(first: int, outcomes: list[str]) -> dict:
+def get_omen_markets(first: int, outcomes: list[str]) -> list[OmenMarket]:
     markets = requests.post(
         THEGRAPH_QUERY_URL,
         json={
@@ -97,19 +100,18 @@ def get_omen_markets(first: int, outcomes: list[str]) -> dict:
         },
         headers={"Content-Type": "application/json"},
     ).json()["data"]["fixedProductMarketMakers"]
-    return markets
+    return [OmenMarket.model_validate(market) for market in markets]
 
 
-def get_omen_binary_markets(first: int) -> dict:
-    return get_omen_markets(first, ["Yes", "No"])
+def get_omen_binary_markets(limit: int) -> list[OmenMarket]:
+    return get_omen_markets(limit, ["Yes", "No"])
 
 
-def pick_binary_market() -> Market:
-    market = get_omen_binary_markets(first=1)[0]
-    return Market.model_validate(market)
+def pick_binary_market() -> OmenMarket:
+    return get_omen_binary_markets(limit=1)[0]
 
 
-def get_market(market_id: str) -> Market:
+def get_market(market_id: str) -> OmenMarket:
     market = requests.post(
         THEGRAPH_QUERY_URL,
         json={
@@ -120,12 +122,12 @@ def get_market(market_id: str) -> Market:
         },
         headers={"Content-Type": "application/json"},
     ).json()["data"]["fixedProductMarketMaker"]
-    return Market.model_validate(market)
+    return OmenMarket.model_validate(market)
 
 
 def omen_approve_market_maker_to_spend_collateral_token_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     amount_wei: Wei,
     from_address: HexAddress,
     from_private_key: PrivateKey,
@@ -148,7 +150,7 @@ def omen_approve_market_maker_to_spend_collateral_token_tx(
 
 def omen_approve_all_market_maker_to_move_conditionaltokens_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     approve: bool,
     from_address: HexAddress,
     from_private_key: PrivateKey,
@@ -175,7 +177,7 @@ def omen_approve_all_market_maker_to_move_conditionaltokens_tx(
 
 def omen_deposit_collateral_token_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     amount_wei: Wei,
     from_address: HexAddress,
     from_private_key: PrivateKey,
@@ -194,7 +196,7 @@ def omen_deposit_collateral_token_tx(
 
 def omen_withdraw_collateral_token_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     amount_wei: Wei,
     from_address: HexAddress,
     from_private_key: PrivateKey,
@@ -214,7 +216,7 @@ def omen_withdraw_collateral_token_tx(
 
 def omen_calculate_buy_amount(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     investment_amount: Wei,
     outcome_index: int,
 ) -> OmenOutcomeToken:
@@ -235,7 +237,7 @@ def omen_calculate_buy_amount(
 
 def omen_calculate_sell_amount(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     return_amount: Wei,
     outcome_index: int,
 ) -> OmenOutcomeToken:
@@ -256,7 +258,7 @@ def omen_calculate_sell_amount(
 
 def omen_get_market_maker_conditionaltokens_address(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
 ) -> HexAddress:
     address: HexAddress = call_function_on_contract(
         web3,
@@ -269,7 +271,7 @@ def omen_get_market_maker_conditionaltokens_address(
 
 def omen_buy_shares_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     amount_wei: Wei,
     outcome_index: int,
     min_outcome_tokens_to_buy: OmenOutcomeToken,
@@ -295,7 +297,7 @@ def omen_buy_shares_tx(
 
 def omen_sell_shares_tx(
     web3: Web3,
-    market: Market,
+    market: OmenMarket,
     amount_wei: Wei,
     outcome_index: int,
     max_outcome_tokens_to_sell: OmenOutcomeToken,
@@ -323,7 +325,7 @@ def omen_buy_outcome_tx(
     amount: xDai,
     from_address: HexAddress,
     from_private_key: PrivateKey,
-    market: Market,
+    market: OmenMarket,
     outcome: str,
     auto_deposit: bool,
 ) -> None:
@@ -339,7 +341,7 @@ def omen_buy_outcome_tx(
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
     # it's better to increae it manually (otherwise we could get stale value from the network and error out).
-    nonce = web3.eth.get_transaction_count(from_address)
+    nonce: Nonce = web3.eth.get_transaction_count(from_address)
 
     # Calculate the amount of shares we will get for the given investment amount.
     expected_shares = omen_calculate_buy_amount(web3, market, amount_wei, outcome_index)
@@ -386,7 +388,7 @@ def binary_omen_buy_outcome_tx(
     amount: xDai,
     from_address: HexAddress,
     from_private_key: PrivateKey,
-    market: Market,
+    market: OmenMarket,
     binary_outcome: bool,
     auto_deposit: bool,
 ) -> None:
@@ -404,7 +406,7 @@ def omen_sell_outcome_tx(
     amount: xDai,
     from_address: HexAddress,
     from_private_key: PrivateKey,
-    market: Market,
+    market: OmenMarket,
     outcome: str,
     auto_withdraw: bool,
 ) -> None:
@@ -420,7 +422,7 @@ def omen_sell_outcome_tx(
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
     # it's better to increae it manually (otherwise we could get stale value from the network and error out).
-    nonce = web3.eth.get_transaction_count(from_address)
+    nonce: Nonce = web3.eth.get_transaction_count(from_address)
 
     # Calculate the amount of shares we will sell for the given selling amount of xdai.
     max_outcome_tokens_to_sell = omen_calculate_sell_amount(

@@ -30,7 +30,7 @@ class CrewAIAgent(AbstractAgent):
             allow_delegation=True,
         )
 
-    def run(self, market: str) -> bool:
+    def answer_boolean_market(self, market: str) -> bool:
         from crewai import Task, Crew
 
         task1 = Task(

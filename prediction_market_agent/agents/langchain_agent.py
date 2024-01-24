@@ -19,7 +19,7 @@ class LangChainAgent(AbstractAgent):
             tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
         )
 
-    def run(self, market: str) -> bool:
+    def answer_boolean_market(self, market: str) -> bool:
         objective = utils.get_market_prompt(market)
         result_str = self._agent.run(objective)
         return utils.parse_result_to_boolean(result_str)

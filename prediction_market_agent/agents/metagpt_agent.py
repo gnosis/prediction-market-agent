@@ -15,9 +15,7 @@ class MetaGPTAgent(AbstractAgent):
             from metagpt.roles import Searcher
             from metagpt.roles.researcher import Researcher
         except ImportError:
-            raise RuntimeError(
-                "You need to install the `metagpt` package manually."
-            )
+            raise RuntimeError("You need to install the `metagpt` package manually.")
 
         if cheap:
             self._agent = Searcher()
@@ -25,7 +23,7 @@ class MetaGPTAgent(AbstractAgent):
             # Gives better results but is very expensive (~$0.3 / run!!)
             self._agent = Researcher()
 
-    def run(self, market: str) -> bool:
+    def answer_boolean_market(self, market: str) -> bool:
         async def main(objective: str):
             await self._agent.run(objective)
 

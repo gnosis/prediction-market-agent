@@ -78,7 +78,7 @@ If you want to answer, return a completion in form of a dictionary with a single
         if self.verbose:
             print(f"{message}\n")
 
-    def run(self, market: str) -> bool:
+    def answer_boolean_market(self, market: str) -> bool:
         cycle_count = 0
         answer: Optional[str] = None
         # Get the main objective prompt.
@@ -155,4 +155,6 @@ If you want to answer, return a completion in form of a dictionary with a single
 
 if __name__ == "__main__":
     agent = CustomAgent(verbose=True)
-    agent.run("Will the price of GNO be above $1000 at the end of the 2024?")
+    agent.answer_boolean_market(
+        "Will the price of GNO be above $1000 at the end of the 2024?"
+    )

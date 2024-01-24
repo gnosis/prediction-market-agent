@@ -10,12 +10,14 @@ from eth_typing.evm import (
 Wad = Wei  # Wei tends to be referred to as `wad` variable in contracts.
 USD = NewType(
     "USD", Decimal
-)  # Decimals are more precise than float, good for finances.
+)  # Decimals are more precise than floats, good for finances.
 PrivateKey = NewType("PrivateKey", str)
 xDai = NewType("xDai", Decimal)
 GNO = NewType("GNO", Decimal)
 ABI = NewType("Abi", str)
 OmenOutcomeToken = NewType("OmenOutcomeToken", int)
+Probability = NewType("Probability", float)
+Mana = NewType("Mana", Decimal)  # Manifold's "currency"
 
 
 def xdai_type(amount: Union[str, int, float, Decimal]) -> xDai:
