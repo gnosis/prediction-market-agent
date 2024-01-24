@@ -44,20 +44,21 @@ def get_binary_markets(
 
 def place_bet(
     market: t.Union[omen.OmenMarket, manifold.ManifoldMarket],
-    amount: t.Union[manifold.Mana, omen.xDai],
     outcome: bool,
     keys: APIKeys,
     omen_auto_deposit: bool,
+    amount_mana: t.Optional[manifold.Mana] = None,
+    amount_xdai: t.Optional[omen.xDai] = None,
 ) -> None:
     manifold.place_bet(
-        amount=amount,
+        amount=check_not_none(amount_mana),
         market_id=market.id,
         outcome=outcome,
         api_key=check_not_none(keys.manifold),
     ) if isinstance(
         market, manifold.ManifoldMarket
     ) else omen.binary_omen_buy_outcome_tx(
-        amount=amount,
+        amount=check_not_none(amount_xdai),
         from_address=check_not_none(keys.bet_from_address),
         from_private_key=check_not_none(keys.bet_from_private_key),
         market=market,
@@ -66,5 +67,5 @@ def place_bet(
     ) if isinstance(
         market, omen.OmenMarket
     ) else should_not_happen(
-        f"Unknown market `{type(market)}` type or amount currency `{type(amount)}`."
+        f"Unknown market {market}."
     )

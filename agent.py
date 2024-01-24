@@ -1,14 +1,18 @@
 import typer
 import time
 import logging
+import typing as t
 from decimal import Decimal
 from datetime import timedelta
 
 import prediction_market_agent as pma
+from prediction_market_agent.tools.gtypes import xDai, Mana
 from prediction_market_agent.markets.all_markets import (
     MarketType,
     get_binary_markets,
     place_bet,
+    omen,
+    manifold,
 )
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
@@ -32,7 +36,10 @@ def main(
             f"Found {len(available_markets)} markets: {[m.question for m in available_markets]}"
         )
 
-        market = agent.pick_market(available_markets)
+        market = t.cast(
+            t.Union[manifold.ManifoldMarket, omen.OmenMarket],
+            agent.pick_market(available_markets),
+        )  # TODO: Mypy bug: Works in VSCode type-checking, but doesn't in Mypy.
         logging.info(f"Picked market [{market.id}]: {market.question}")
         answer = agent.answer_binary_market(market)
         logging.info(f"Answered market [{market.id}]: {answer}")
@@ -43,7 +50,8 @@ def main(
 
         place_bet(
             market=market,
-            amount=amount,
+            amount_mana=Mana(amount),
+            amount_xdai=xDai(amount),
             outcome=answer,
             keys=keys,
             omen_auto_deposit=True,

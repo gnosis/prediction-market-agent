@@ -121,7 +121,7 @@ If you want to answer, return a completion in form of a dictionary with a single
                     else should_not_happen("Unknown tool requested from the LLM.")
                 )(
                     **tool_params
-                )  # type: ignore # Ignore input arguments, as `tool_params` come from the LLM.
+                )  # type: ignore # Ignore typing of input arguments, as `tool_params` come from the LLM.
                 self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(

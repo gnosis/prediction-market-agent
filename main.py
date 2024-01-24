@@ -1,10 +1,13 @@
 import typer
 import prediction_market_agent as pma
 from decimal import Decimal
+from prediction_market_agent.tools.utils import should_not_happen
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
-from prediction_market_agent.tools.types import xDai, Mana
+from prediction_market_agent.tools.gtypes import xDai, Mana
 from prediction_market_agent.markets.all_markets import (
     MarketType,
+    omen,
+    manifold,
     get_binary_markets,
     place_bet,
 )
@@ -48,7 +51,8 @@ def main(
         )
         place_bet(
             market=market,
-            amount=amount,
+            amount_mana=Mana(amount),
+            amount_xdai=xDai(amount),
             outcome=result,
             keys=keys,
             omen_auto_deposit=True,
