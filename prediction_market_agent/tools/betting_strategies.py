@@ -3,17 +3,23 @@ import numpy as np
 import typing as t
 from web3 import Web3
 
-from prediction_market_agent.omen import get_market, omen_calculate_buy_amount
+from prediction_market_agent.markets.omen import (
+    get_market,
+    omen_calculate_buy_amount,
+    OmenMarket,
+)
 from prediction_market_agent.data_models.market_data_models import Market
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
-from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai
-from prediction_market_agent.tools.types import Probability, xDai
+from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai, ONE_XDAI
+from prediction_market_agent.tools.gtypes import Probability, xDai, xdai_type, wei_type
+from prediction_market_agent.tools.utils import check_not_none
+
 
 OutcomeIndex = t.Literal[0, 1]
 
 
 def get_market_moving_bet(
-    market_address: str,
+    market: OmenMarket,
     target_p_yes: Probability,
     max_iters: int = 100,
     check_vs_contract: bool = False,  # Disable by default, as it's slow
@@ -38,10 +44,8 @@ def get_market_moving_bet(
     new_product - fixed_product = dx * na_y
     dx = (new_product - fixed_product) / na_y
     """
-    web3 = Web3(Web3.HTTPProvider(GNOSIS_RPC_URL))
-    market: Market = get_market(market_address)
     amounts = market.outcomeTokenAmounts
-    prices = market.outcomeTokenMarginalPrices
+    prices = market.outcomeTokenProbabilities
     if len(amounts) != 2 or len(prices) != 2:
         raise ValueError("Only binary markets are supported.")
 
@@ -50,30 +54,37 @@ def get_market_moving_bet(
 
     # For FPMMs, the probability is equal to the marginal price
     current_p_yes = Probability(prices[0])
-    bet_outcome_index = 0 if target_p_yes > current_p_yes else 1
+    bet_outcome_index: OutcomeIndex = 0 if target_p_yes > current_p_yes else 1
 
     min_bet_amount = 0
     max_bet_amount = 100 * sum(amounts)  # TODO set a better upper bound
 
     # Binary search for the optimal bet amount
     for _ in range(max_iters):
-        bet_amount = (min_bet_amount + max_bet_amount) / 2
-        bet_amount_ = bet_amount * (xdai_to_wei(1) - market.fee) / xdai_to_wei(1)
+        bet_amount = (min_bet_amount + max_bet_amount) // 2
+        bet_amount_ = (
+            bet_amount
+            * (
+                xdai_to_wei(ONE_XDAI)
+                - check_not_none(market.fee, "No fee for the market.")
+            )
+            / xdai_to_wei(ONE_XDAI)
+        )
 
         # Initial new amounts are old amounts + equal new amounts for each outcome
         amounts_diff = bet_amount_
         new_amounts = [amounts[i] + amounts_diff for i in range(len(amounts))]
 
         # Now give away tokens at `bet_outcome_index` to restore invariant
-        new_product = reduce(lambda x, y: x * y, new_amounts, 1)
+        new_product = reduce(lambda x, y: x * y, new_amounts, 1.0)
         dx = (new_product - fixed_product) / new_amounts[1 - bet_outcome_index]
 
         # Sanity check the number of tokens against the contract
         if check_vs_contract:
             expected_trade = omen_calculate_buy_amount(
-                web3=web3,
+                web3=Web3(Web3.HTTPProvider(GNOSIS_RPC_URL)),
                 market=market,
-                investment_amount=int(bet_amount),
+                investment_amount=wei_type(bet_amount),
                 outcome_index=bet_outcome_index,
             )
             assert np.isclose(float(expected_trade), dx)
@@ -81,16 +92,17 @@ def get_market_moving_bet(
         new_amounts[bet_outcome_index] -= dx
         # Check that the invariant is restored
         assert np.isclose(
-            reduce(lambda x, y: x * y, new_amounts, 1), float(fixed_product)
+            reduce(lambda x, y: x * y, new_amounts, 1.0), float(fixed_product)
         )
-        new_p_yes = new_amounts[1] / sum(new_amounts)
+        new_p_yes = Probability(new_amounts[1] / sum(new_amounts))
+        bet_amount_wei = wei_type(bet_amount)
         if verbose:
-            outcome = "'Yes'" if bet_outcome_index == 0 else "'No'"
+            outcome = market.get_outcome_str(bet_outcome_index)
             print(
-                f"Target p_yes: {target_p_yes:.2f}, bet: {wei_to_xdai(bet_amount):.2f}xDai for {outcome}, new p_yes: {new_p_yes:.2f}"
+                f"Target p_yes: {target_p_yes:.2f}, bet: {wei_to_xdai(bet_amount_wei):.2f}{market.BET_AMOUNT_CURRENCY} for {outcome}, new p_yes: {new_p_yes:.2f}"
             )
         if abs(target_p_yes - new_p_yes) < 0.01:
-            return wei_to_xdai(bet_amount), bet_outcome_index
+            break
         elif new_p_yes > target_p_yes:
             if bet_outcome_index == 0:
                 max_bet_amount = bet_amount
@@ -101,6 +113,7 @@ def get_market_moving_bet(
                 min_bet_amount = bet_amount
             else:
                 max_bet_amount = bet_amount
+    return wei_to_xdai(bet_amount_wei), bet_outcome_index
 
 
 def _get_kelly_criterion_bet(
@@ -171,49 +184,53 @@ def _get_kelly_criterion_bet(
 
 
 def get_kelly_criterion_bet(
-    market_address: str,
+    market: OmenMarket,
     estimated_p_yes: Probability,
     max_bet: xDai,
 ) -> t.Tuple[xDai, OutcomeIndex]:
-    market: Market = get_market(market_address)
     if len(market.outcomeTokenAmounts) != 2:
         raise ValueError("Only binary markets are supported.")
 
-    # For FPMMs, the probability is equal to the marginal price
-    current_p_yes = Probability(market.outcomeTokenMarginalPrices[0])
-    outcome_index = 0 if estimated_p_yes > current_p_yes else 1
+    current_p_yes = market.outcomeTokenProbabilities[0]
+    outcome_index: OutcomeIndex = 0 if estimated_p_yes > current_p_yes else 1
     estimated_p_win = estimated_p_yes if outcome_index == 0 else 1 - estimated_p_yes
 
-    kelly_bet_wei = _get_kelly_criterion_bet(
-        x=market.outcomeTokenAmounts[outcome_index],
-        y=market.outcomeTokenAmounts[1 - outcome_index],
-        p=estimated_p_win,
-        c=1,  # confidence
-        b=xdai_to_wei(max_bet),  # bankroll, or max bet, in Wei
-        f=(xdai_to_wei(1) - market.fee) / xdai_to_wei(1),  # fee fraction
+    kelly_bet_wei = wei_type(
+        _get_kelly_criterion_bet(
+            x=market.outcomeTokenAmounts[outcome_index],
+            y=market.outcomeTokenAmounts[1 - outcome_index],
+            p=estimated_p_win,
+            c=1,  # confidence
+            b=xdai_to_wei(max_bet),  # bankroll, or max bet, in Wei
+            f=(
+                xdai_to_wei(ONE_XDAI)
+                - check_not_none(market.fee, "No fee for the market.")
+            )
+            / xdai_to_wei(ONE_XDAI),  # fee fraction
+        )
     )
     return wei_to_xdai(kelly_bet_wei), outcome_index
 
 
 if __name__ == "__main__":
     market_address = "0xa3e47bb771074b33f2e279b9801341e9e0c9c6d7"
-    est_p_yes = 0.1
+    market = get_market(market_address)
+
+    est_p_yes = Probability(0.1)
     mov_bet = get_market_moving_bet(
-        market_address=market_address,
+        market=market,
         target_p_yes=est_p_yes,
         verbose=True,
     )
     kelly_bet = get_kelly_criterion_bet(
-        market_address=market_address,
+        market=market,
         estimated_p_yes=est_p_yes,
-        max_bet=xDai(10),  # This significantly changes the outcome
+        max_bet=xdai_type(10),  # This significantly changes the outcome
     )
 
-    market = get_market(market_address)
-
-    def get_outcome_str(outcome_index: int) -> str:
-        return market.get_outcome_str(outcome_index)
-
-    get_market(market_address).get_outcome_str(0)
-    print(f"Market moving bet: {mov_bet[0]:.2f} on {get_outcome_str(mov_bet[1])}")
-    print(f"Kelly criterion bet: {kelly_bet[0]:.2f} on {get_outcome_str(kelly_bet[1])}")
+    print(
+        f"Market moving bet: {mov_bet[0]:.2f} on {market.get_outcome_str(mov_bet[1])}"
+    )
+    print(
+        f"Kelly criterion bet: {kelly_bet[0]:.2f} on {market.get_outcome_str(kelly_bet[1])}"
+    )

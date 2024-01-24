@@ -7,7 +7,7 @@ class AlwaysYesAgent(AbstractAgent):
     Save OpenAI API credits. Always say yes!
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def answer_boolean_market(self, market: MarketProtocol) -> bool:

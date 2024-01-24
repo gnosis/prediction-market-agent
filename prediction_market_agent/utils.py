@@ -1,7 +1,13 @@
 import dotenv
 import os
 import typing as t
-from prediction_market_agent.tools.types import HexAddress, PrivateKey
+from web3 import Web3
+from prediction_market_agent.tools.gtypes import (
+    ChecksumAddress,
+    PrivateKey,
+    HexAddress,
+    HexStr,
+)
 
 
 def get_api_key(name: str) -> str:
@@ -24,12 +30,21 @@ def get_openai_api_key() -> str:
     return get_api_key("OPENAI_API_KEY")
 
 
-def get_bet_from_address() -> HexAddress:
-    return HexAddress(get_api_key("BET_FROM_ADDRESS"))
+def get_bet_from_address() -> ChecksumAddress:
+    address = get_api_key("BET_FROM_ADDRESS")
+    return verify_address(address)
 
 
 def get_bet_from_private_key() -> PrivateKey:
     return PrivateKey(get_api_key("BET_FROM_PRIVATE_KEY"))
+
+
+def verify_address(address: str) -> ChecksumAddress:
+    if not Web3.is_checksum_address(address):
+        raise ValueError(
+            f"The address {address} is not a valid checksum address, please fix your input."
+        )
+    return ChecksumAddress(HexAddress(HexStr(address)))
 
 
 class APIKeys:
@@ -38,7 +53,7 @@ class APIKeys:
         manifold: t.Optional[str] = None,
         serp: t.Optional[str] = None,
         openai: t.Optional[str] = None,
-        bet_from_address: t.Optional[HexAddress] = None,
+        bet_from_address: t.Optional[ChecksumAddress] = None,
         bet_from_private_key: t.Optional[PrivateKey] = None,
     ):
         self.manifold = manifold

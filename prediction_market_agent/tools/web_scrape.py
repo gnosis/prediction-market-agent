@@ -7,7 +7,7 @@ from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-def _summary(objective, content):
+def _summary(objective: str, content: str) -> str:
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
     text_splitter = RecursiveCharacterTextSplitter(
         separators=["\n\n", "\n"], chunk_size=10000, chunk_overlap=500
@@ -26,14 +26,15 @@ def _summary(objective, content):
         combine_prompt=t,
         verbose=False,
     )
-    return summary_chain.run(input_documents=docs, objective=objective)
+    summary: str = summary_chain.run(input_documents=docs, objective=objective)
+    return summary
 
 
-def web_scrape(objective: str, url: str):
+def web_scrape(objective: str, url: str) -> str:
     response = requests.get(url)
     response.raise_for_status()
     soup = bs4.BeautifulSoup(response.content, "html.parser")
-    text = soup.get_text()
+    text: str = soup.get_text()
     if len(text) > 10000:
         text = _summary(objective, text)
     return text
@@ -63,6 +64,6 @@ web_scraping_schema = {
 
 
 class WebScrapingTool:
-    def __init__(self):
+    def __init__(self) -> None:
         self.fn = web_scrape
         self.schema = web_scraping_schema

@@ -1,7 +1,12 @@
+import typing as t
 from functools import wraps
 
+F = t.TypeVar("F", bound=t.Callable[..., t.Any])
 
-def tool_exception_handler(map_exception_to_output: dict[Exception, str]):
+
+def tool_exception_handler(
+    map_exception_to_output: dict[t.Type[Exception], str]
+) -> t.Callable[[F], F]:
     """
     Example usage:
 
@@ -14,9 +19,9 @@ def tool_exception_handler(map_exception_to_output: dict[Exception, str]):
     Now you can provide `web_scrape_structured_handled` to the agent, and it will not crash if the URL is not reachable, but returns the pre-defined output instead.
     """
 
-    def decorator(fn):
+    def decorator(fn: F) -> F:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
             try:
                 return fn(*args, **kwargs)
             except Exception as e:
@@ -24,6 +29,6 @@ def tool_exception_handler(map_exception_to_output: dict[Exception, str]):
                     raise e
                 return map_exception_to_output[type(e)]
 
-        return wrapper
+        return t.cast(F, wrapper)
 
     return decorator

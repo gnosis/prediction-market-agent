@@ -2,13 +2,14 @@ import typing as t
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import Wei
-from prediction_market_agent.tools.types import (
+from prediction_market_agent.tools.gtypes import (
     USD,
     HexAddress,
     ChecksumAddress,
     Probability,
     Mana,
     OmenOutcomeToken,
+    xDai,
 )
 from datetime import datetime
 
@@ -55,7 +56,7 @@ class OmenMarket(Market):
     collateralToken: HexAddress
     outcomes: list[str]
     outcomeTokenAmounts: list[OmenOutcomeToken]
-    outcomeTokenMarginalPrices: list[Probability]
+    outcomeTokenMarginalPrices: list[xDai]
     fee: t.Optional[Wei]
 
     @property
@@ -78,6 +79,10 @@ class OmenMarket(Market):
     def collateral_token_contract_address_checksummed(self) -> ChecksumAddress:
         return Web3.to_checksum_address(self.collateral_token_contract_address)
 
+    @property
+    def outcomeTokenProbabilities(self) -> list[Probability]:
+        return [Probability(float(x)) for x in self.outcomeTokenMarginalPrices]
+
     def get_outcome_index(self, outcome: str) -> int:
         try:
             return self.outcomes.index(outcome)
@@ -94,7 +99,7 @@ class OmenMarket(Market):
         else:
             return self.outcomes[outcome_index]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Market: {self.title}"
 
 

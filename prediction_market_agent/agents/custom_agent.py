@@ -15,7 +15,7 @@ from prediction_market_agent.tools.web_scrape_structured import (
 )
 from prediction_market_agent.tools.tool_exception_handler import tool_exception_handler
 from prediction_market_agent.data_models.market_data_models import MarketProtocol
-from prediction_market_agent.tools.utils import check_not_none
+from prediction_market_agent.tools.utils import check_not_none, should_not_happen
 
 
 class CustomAgent(AbstractAgent):
@@ -49,14 +49,12 @@ If you want to answer, return a completion in form of a dictionary with a single
         self.verbose = verbose
         self.max_cycles = max_cycles
         self.keys = utils.get_keys()
-        self.tools = {
-            "GoogleSearchTool": google_search,
-            "WebScrapingTool": tool_exception_handler(
-                map_exception_to_output={
-                    requests.exceptions.HTTPError: "Couldn't reach the URL. Don't scrape the same domain again."
-                }
-            )(web_scrape_structured_and_summarized),
-        }
+        self.google_search = google_search
+        self.web_scrap_and_summarize = tool_exception_handler(
+            map_exception_to_output={
+                requests.exceptions.HTTPError: "Couldn't reach the URL. Don't scrape the same domain again."
+            }
+        )(web_scrape_structured_and_summarized)
         self.model = model
 
     def verbose_print(self, message: str) -> None:
@@ -115,7 +113,15 @@ If you want to answer, return a completion in form of a dictionary with a single
             elif tool_name := completion_dict.get("tool_name"):
                 tool_params = completion_dict.get("tool_params")
                 self.verbose_print(f"Agent: Using {tool_name=} with {tool_params=}.")
-                tool_output = self.tools[tool_name](**tool_params)
+                tool_output = (
+                    self.google_search
+                    if tool_name == "GoogleSearchTool"
+                    else self.web_scrap_and_summarize
+                    if tool_name == "WebScrapingTool"
+                    else should_not_happen("Unknown tool requested from the LLM.")
+                )(
+                    **tool_params
+                )  # type: ignore # Ignore input arguments, as `tool_params` come from the LLM.
                 self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(

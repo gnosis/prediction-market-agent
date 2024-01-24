@@ -9,7 +9,7 @@ from langchain_community.tools import DuckDuckGoSearchRun
 
 
 class CrewAIAgent(AbstractAgent):
-    def __init__(self):
+    def __init__(self) -> None:
         try:
             from crewai import Agent
         except ImportError:
@@ -65,4 +65,4 @@ class CrewAIAgent(AbstractAgent):
         assert "report" in report
         result = json.loads(result)
         assert "prediction" in result
-        return eval(result["prediction"])
+        return True if result["prediction"] == "True" else False

@@ -31,6 +31,6 @@ google_search_schema = {
 
 
 class GoogleSearchTool:
-    def __init__(self):
+    def __init__(self) -> None:
         self.fn = google_search
         self.schema = google_search_schema

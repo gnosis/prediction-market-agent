@@ -1,14 +1,15 @@
 import typer
+from prediction_market_agent.utils import verify_address
 from prediction_market_agent.markets.omen import (
     omen_buy_outcome_tx,
     get_market,
     omen_sell_outcome_tx,
 )
-from prediction_market_agent.tools.types import (
-    HexAddress,
+from prediction_market_agent.tools.gtypes import (
     PrivateKey,
     xdai_type,
 )
+from eth_typing import HexStr
 
 app = typer.Typer()
 
@@ -39,7 +40,7 @@ def buy(
     market = get_market(market_id)
     omen_buy_outcome_tx(
         amount=xdai_type(amount),
-        from_address=HexAddress(from_address),
+        from_address=verify_address(from_address),
         from_private_key=PrivateKey(from_private_key),
         market=market,
         outcome=outcome,
@@ -73,7 +74,7 @@ def sell(
     market = get_market(market_id)
     omen_sell_outcome_tx(
         amount=xdai_type(amount),
-        from_address=HexAddress(from_address),
+        from_address=verify_address(from_address),
         from_private_key=PrivateKey(from_private_key),
         market=market,
         outcome=outcome,

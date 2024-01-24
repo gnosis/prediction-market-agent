@@ -13,7 +13,7 @@ from prediction_market_agent.markets.all_markets import (
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
 from prediction_market_agent.tools.utils import should_not_happen, check_not_none
-from prediction_market_agent.tools.types import Mana, xDai
+from prediction_market_agent.tools.gtypes import Mana, xDai
 
 
 def main(

@@ -6,7 +6,11 @@ from enum import Enum
 from openai import OpenAI
 from typing import Optional, Literal
 from openai.types.chat.chat_completion import ChatCompletion
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+from openai.types.chat.chat_completion_message_param import (
+    ChatCompletionMessageParam,
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+)
 
 ROLE_KEY = "role"
 CONTENT_KEY = "content"
@@ -55,19 +59,25 @@ class ChatOpenAIModel(AbstractAiChatModel):
         self.client = OpenAI(api_key=api_key)
 
     def complete(self, messages: list[Message]) -> Optional[str]:
-        # TODO: Check `ChatCompletionMessageParam` to support all roles, not just hardcoded system and user.
-        messages_formatted: list[dict[str, str]] = []
+        messages_formatted: list[ChatCompletionMessageParam] = []
         if self.system_prompt is not None:
             messages_formatted.append(
-                {
-                    ROLE_KEY: OpenAiRole.system.value,
-                    CONTENT_KEY: self.system_prompt,
-                }
+                ChatCompletionSystemMessageParam(
+                    role=OpenAiRole.system.value, content=self.system_prompt
+                )
             )
         for message in messages:
-            messages_formatted.append(
-                {ROLE_KEY: message.role, CONTENT_KEY: message.content}
-            )
+            if message.role == OpenAiRole.user.value:
+                messages_formatted.append(
+                    ChatCompletionUserMessageParam(
+                        role=message.role, content=message.content  # type: ignore # This is OK due to the if check.
+                    )
+                )
+            else:
+                # TODO: Check `ChatCompletionMessageParam` to support all roles, not just hardcoded system and user.
+                raise ValueError(
+                    f"Only `user` role is supported at the moment, but got `{message.role}`."
+                )
         response: ChatCompletion = self.client.chat.completions.create(
             model=self.model,
             messages=messages_formatted,

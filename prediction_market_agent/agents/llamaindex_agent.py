@@ -10,7 +10,7 @@ from prediction_market_agent.data_models.market_data_models import MarketProtoco
 
 
 class LlamaIndexAgent(AbstractAgent):
-    def __init__(self):
+    def __init__(self) -> None:
         google_search_tool = FunctionTool.from_defaults(fn=google_search)
         web_scraping_tool = FunctionTool.from_defaults(fn=web_scrape)
         llm = OpenAI(model="gpt-3.5-turbo-0613")
