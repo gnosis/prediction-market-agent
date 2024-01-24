@@ -16,7 +16,7 @@ claim_receipt = omen_claim_winnings(
     from_address=get_bet_from_address(),
     from_private_key=get_bet_from_private_key(),
 )
-check_tx_receipt(web3, claim_receipt)
+check_tx_receipt(claim_receipt)
 
 """
 TODO debug error web3.eth.estimate_gas ValueError: {'code': -32015, 'message': 'revert'}

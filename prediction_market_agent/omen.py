@@ -485,16 +485,20 @@ def omen_claim_winnings(
 
     Also see https://github.com/valory-xyz/trader/pull/59 for Olas implementation.
     """
+    # Get the address of conditional token's of this market.
+    conditionaltokens_address = omen_get_market_maker_conditionaltokens_address(
+        web3, market
+    )
 
     # `redeemPositions` function params:
     collateral_token = market.collateral_token_contract_address_checksummed
-    condition_id = market.condition.id
+    condition_id = bytes.fromhex(market.condition.id[2:])
     parent_collection_id = bytes.fromhex(HASH_ZERO[2:])  # Taken from Olas
     index_sets = market.condition.index_sets  # Taken from Olas
 
     return call_function_on_contract_tx(
         web3=web3,
-        contract_address=market.market_maker_contract_address_checksummed,
+        contract_address=conditionaltokens_address,
         contract_abi=OMEN_FPMM_CONDITIONALTOKENS_ABI,
         from_address=from_address,
         from_private_key=from_private_key,
