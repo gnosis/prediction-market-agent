@@ -9,6 +9,7 @@ from prediction_market_agent.tools.types import (
     Probability,
     Mana,
     OmenOutcomeToken,
+    xDai,
 )
 from datetime import datetime
 
@@ -47,7 +48,7 @@ class OmenMarket(Market):
     collateralToken: HexAddress
     outcomes: list[str]
     outcomeTokenAmounts: list[OmenOutcomeToken] = []
-    outcomeTokenMarginalPrices: list[Probability] = []
+    outcomeTokenMarginalPrices: list[xDai] = []
     fee: t.Optional[Wei] = None
 
     @property
