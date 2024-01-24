@@ -16,7 +16,7 @@ xDai = NewType("xDai", Decimal)
 GNO = NewType("GNO", Decimal)
 ABI = NewType("Abi", str)
 OmenOutcomeToken = NewType("OmenOutcomeToken", int)
-Probability = NewType("Probability", float)
+Probability = NewType("Probability", Decimal)
 Mana = NewType("Mana", Decimal)  # Manifold's "currency"
 
 
