@@ -22,7 +22,7 @@ def main(
 
     # Create the agent and run it
     agent = get_agent(agent_type)
-    result = agent.answer_boolean_market(market.question)
+    result = agent.answer_boolean_market(market)
 
     # Place a bet based on the result
     if auto_bet:

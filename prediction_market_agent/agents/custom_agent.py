@@ -14,6 +14,7 @@ from prediction_market_agent.tools.web_scrape_structured import (
     web_scrape_structured_and_summarized,
 )
 from prediction_market_agent.tools.tool_exception_handler import tool_exception_handler
+from prediction_market_agent.data_models.market_data_models import MarketProtocol
 
 
 class CustomAgent(AbstractAgent):
@@ -78,11 +79,11 @@ If you want to answer, return a completion in form of a dictionary with a single
         if self.verbose:
             print(f"{message}\n")
 
-    def answer_boolean_market(self, market: str) -> bool:
+    def answer_boolean_market(self, market: MarketProtocol) -> bool:
         cycle_count = 0
         answer: Optional[str] = None
         # Get the main objective prompt.
-        objective = utils.get_market_prompt(market)
+        objective = utils.get_market_prompt(market.question)
         # Keep track of history of messages.
         messages: list[Message] = [Message(role="user", content=objective)]
 

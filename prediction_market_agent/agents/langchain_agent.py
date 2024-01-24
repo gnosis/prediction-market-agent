@@ -5,6 +5,7 @@ from langchain_community.llms import OpenAI
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.data_models.market_data_models import MarketProtocol
 
 
 class LangChainAgent(AbstractAgent):
@@ -19,7 +20,7 @@ class LangChainAgent(AbstractAgent):
             tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
         )
 
-    def answer_boolean_market(self, market: str) -> bool:
-        objective = utils.get_market_prompt(market)
+    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+        objective = utils.get_market_prompt(market.question)
         result_str = self._agent.run(objective)
         return utils.parse_result_to_boolean(result_str)
