@@ -11,7 +11,7 @@ def main(
     market_type: MarketType = MarketType.MANIFOLD,
     agent_type: AgentType = AgentType.ALWAYS_YES,
     auto_bet: bool = False,
-):
+) -> None:
     """
     Picks one market and answers it, optionally placing a bet.
     """
