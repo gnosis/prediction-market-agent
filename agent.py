@@ -29,8 +29,7 @@ def main(
             f"Found {len(available_markets)} markets: {[m.question for m in available_markets]}"
         )
 
-        # TODO: Pick the market with agent-specific logic, for now just pick the first one.
-        market = available_markets[0]  # agent.pick_market(available_markets)
+        market = agent.pick_market(available_markets)
         logging.info(f"Picked market [{market.id}]: {market.question}")
         answer = agent.answer_boolean_market(market)
         logging.info(f"Answered market [{market.id}]: {answer}")
