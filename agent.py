@@ -2,17 +2,22 @@ import typer
 import time
 import logging
 from decimal import Decimal
+from datetime import timedelta
 
 import prediction_market_agent as pma
-from prediction_market_agent.markets.all_markets import MarketType, get_binary_markets
+from prediction_market_agent.markets.all_markets import (
+    MarketType,
+    get_binary_markets,
+    place_bet,
+)
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.agents.all_agents import AgentType, get_agent, place_bet
+from prediction_market_agent.agents.all_agents import AgentType, get_agent
 
 
 def main(
     market_type: MarketType = MarketType.MANIFOLD,
     agent_type: AgentType = AgentType.ALWAYS_YES,
-    sleep_time: int = 1 * 24 * 60 * 60,
+    sleep_time: int = timedelta(days=1).seconds,
 ):
     """
     Start the agent as a continuous process. Picks a market and answers it, forever and ever.
@@ -44,7 +49,7 @@ def main(
             omen_auto_deposit=True,
         )
 
-        logging.info(f"Sleeping for {sleep_time} seconds...")
+        logging.info(f"Sleeping for {timedelta(seconds=sleep_time)}...")
         time.sleep(sleep_time)
 
 
