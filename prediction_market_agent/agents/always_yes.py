@@ -10,5 +10,5 @@ class AlwaysYesAgent(AbstractAgent):
     def __init__(self):
         pass
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         return True

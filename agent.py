@@ -34,7 +34,7 @@ def main(
 
         market = agent.pick_market(available_markets)
         logging.info(f"Picked market [{market.id}]: {market.question}")
-        answer = agent.answer_boolean_market(market)
+        answer = agent.answer_binary_market(market)
         logging.info(f"Answered market [{market.id}]: {answer}")
 
         # TODO: Calculate the amount to bet based on the confidence of the answer.

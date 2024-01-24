@@ -31,7 +31,7 @@ class CrewAIAgent(AbstractAgent):
             allow_delegation=True,
         )
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         from crewai import Task, Crew
 
         task1 = Task(

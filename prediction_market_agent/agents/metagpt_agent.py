@@ -24,7 +24,7 @@ class MetaGPTAgent(AbstractAgent):
             # Gives better results but is very expensive (~$0.3 / run!!)
             self._agent = Researcher()
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         async def main(objective: str):
             await self._agent.run(objective)
 

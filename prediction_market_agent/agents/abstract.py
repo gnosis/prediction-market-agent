@@ -15,7 +15,7 @@ class AbstractAgent:
         # TODO: Pick the market with agent-specific logic, for now just pick the first one.
         return markets[0]
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         """
         Execute the agent, and return the final result as a string.
         """
