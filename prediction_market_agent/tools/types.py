@@ -22,3 +22,7 @@ Mana = NewType("Mana", Decimal)  # Manifold's "currency"
 
 def xdai_type(amount: Union[str, int, float, Decimal]) -> xDai:
     return xDai(Decimal(amount))
+
+
+def mana_type(amount: Union[str, int, float, Decimal]) -> Mana:
+    return Mana(Decimal(amount))

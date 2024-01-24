@@ -4,7 +4,12 @@ import logging
 from decimal import Decimal
 
 import prediction_market_agent as pma
-from prediction_market_agent.markets.all_markets import MarketType, get_binary_markets
+from prediction_market_agent.markets.all_markets import (
+    MarketType,
+    get_binary_markets,
+    omen,
+    manifold,
+)
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
 from prediction_market_agent.tools.utils import should_not_happen, check_not_none
@@ -44,14 +49,18 @@ def main(
             market_id=market.id,
             outcome=answer,
             api_key=check_not_none(keys.manifold),
-        ) if market_type == MarketType.MANIFOLD else pma.omen.binary_omen_buy_outcome_tx(
+        ) if isinstance(
+            market, manifold.ManifoldMarket
+        ) else pma.omen.binary_omen_buy_outcome_tx(
             amount=xDai(amount),
             from_address=check_not_none(keys.bet_from_address),
             from_private_key=check_not_none(keys.bet_from_private_key),
             market=market,
             binary_outcome=answer,
             auto_deposit=True,
-        ) if market_type == MarketType.OMEN else should_not_happen(
+        ) if isinstance(
+            market, omen.OmenMarket
+        ) else should_not_happen(
             f"Unknown market: {market}"
         )
 

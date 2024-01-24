@@ -1,5 +1,6 @@
 import autogen
 import re
+import typing as t
 
 from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
 
@@ -11,7 +12,7 @@ from prediction_market_agent.data_models.market_data_models import MarketProtoco
 
 
 class AutoGenAgent(AbstractAgent):
-    def get_base_llm_config(self):
+    def get_base_llm_config(self) -> dict[str, t.Any]:
         keys = utils.get_keys()
         return {
             "config_list": [
@@ -23,7 +24,7 @@ class AutoGenAgent(AbstractAgent):
             "temperature": 0,
         }
 
-    def __init__(self):
+    def __init__(self) -> None:
         google_search_tool = GoogleSearchTool()
         web_scaping_tool = WebScrapingTool()
         llm_config = self.get_base_llm_config()
@@ -57,11 +58,11 @@ class AutoGenAgent(AbstractAgent):
         match = re.search(pattern, message)
 
         if match:
-            return eval(match.group(1))
+            return True if match.group(1) == "True" else False
         else:
             raise ValueError("Result found in Termination message")
 
-    def answer_boolean_market(self, market: MarketProtocol) -> str:
+    def answer_boolean_market(self, market: MarketProtocol) -> bool:
         """
         TODO have assistant alsways return in json format with format:
         {

@@ -22,6 +22,13 @@ def get_binary_markets(
     ...
 
 
+@t.overload
+def get_binary_markets(
+    market_type: MarketType,
+) -> t.Union[list[manifold.ManifoldMarket], list[omen.OmenMarket]]:
+    ...
+
+
 def get_binary_markets(
     market_type: MarketType,
 ) -> t.Union[list[manifold.ManifoldMarket], list[omen.OmenMarket]]:

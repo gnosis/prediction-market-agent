@@ -5,9 +5,6 @@ MarketVar = t.TypeVar("MarketVar", bound=MarketProtocol)
 
 
 class AbstractAgent:
-    def __init__(self):
-        pass
-
     def pick_market(self, markets: list[MarketVar]) -> MarketVar:
         """
         Given a list of markets, pick one to answer.

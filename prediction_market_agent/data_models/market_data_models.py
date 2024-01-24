@@ -13,6 +13,7 @@ from prediction_market_agent.tools.types import (
 from datetime import datetime
 
 
+@t.runtime_checkable
 class MarketProtocol(t.Protocol):
     """
     Protocol for markets, which are questions that can be answered by the agent.
@@ -23,10 +24,17 @@ class MarketProtocol(t.Protocol):
     for example, Omen doesn't have `question` field, but property `question` is created (see below) to adhere to this protocol.
     """
 
-    BET_AMOUNT_CURRENCY: str
+    @property
+    def BET_AMOUNT_CURRENCY(self) -> str:
+        ...
 
-    id: str
-    question: str
+    @property
+    def id(self) -> str:
+        ...
+
+    @property
+    def question(self) -> str:
+        ...
 
 
 class Market(BaseModel):
@@ -46,9 +54,9 @@ class OmenMarket(Market):
     usdVolume: USD
     collateralToken: HexAddress
     outcomes: list[str]
-    outcomeTokenAmounts: list[OmenOutcomeToken] = []
-    outcomeTokenMarginalPrices: list[Probability] = []
-    fee: t.Optional[Wei] = None
+    outcomeTokenAmounts: list[OmenOutcomeToken]
+    outcomeTokenMarginalPrices: list[Probability]
+    fee: t.Optional[Wei]
 
     @property
     def question(self) -> str:

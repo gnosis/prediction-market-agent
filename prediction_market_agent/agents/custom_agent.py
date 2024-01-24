@@ -15,6 +15,7 @@ from prediction_market_agent.tools.web_scrape_structured import (
 )
 from prediction_market_agent.tools.tool_exception_handler import tool_exception_handler
 from prediction_market_agent.data_models.market_data_models import MarketProtocol
+from prediction_market_agent.tools.utils import check_not_none
 
 
 class CustomAgent(AbstractAgent):
@@ -58,23 +59,6 @@ If you want to answer, return a completion in form of a dictionary with a single
         }
         self.model = model
 
-    @staticmethod
-    def init_with_openai(verbose: bool = True, max_cycles: int = 10) -> "CustomAgent":
-        model = ChatOpenAIModel(
-            model="gpt-4",  # I tried gpt-3.5-turbo, but it fails at providing correct inputs to the tools.
-            system_prompt=CustomAgent.SYSTEM_PROMPT,
-        )
-        return CustomAgent(model=model, verbose=verbose, max_cycles=max_cycles)
-
-    staticmethod
-
-    def init_with_llama(verbose: bool = True, max_cycles: int = 10) -> "CustomAgent":
-        model = ChatReplicateLLamaModel(
-            model="meta/llama-2-70b-chat",
-            system_prompt=CustomAgent.SYSTEM_PROMPT,
-        )
-        return CustomAgent(model=model, verbose=verbose, max_cycles=max_cycles)
-
     def verbose_print(self, message: str) -> None:
         if self.verbose:
             print(f"{message}\n")
@@ -107,7 +91,9 @@ If you want to answer, return a completion in form of a dictionary with a single
                 )
 
             # Because of the system prompt, completions are expected to be JSON-parseable.
-            completion_str = self.model.complete(messages)
+            completion_str = check_not_none(
+                self.model.complete(messages), "Couldn't complete the prompt."
+            )
             self.verbose_print(f"Completion: {completion_str}")
             try:
                 completion_dict = json.loads(completion_str)
@@ -129,7 +115,7 @@ If you want to answer, return a completion in form of a dictionary with a single
             elif tool_name := completion_dict.get("tool_name"):
                 tool_params = completion_dict.get("tool_params")
                 self.verbose_print(f"Agent: Using {tool_name=} with {tool_params=}.")
-                tool_output = self.tools[tool_name](**tool_params)  # type: ignore
+                tool_output = self.tools[tool_name](**tool_params)
                 self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(
@@ -154,8 +140,25 @@ If you want to answer, return a completion in form of a dictionary with a single
         return utils.parse_result_to_boolean(answer)
 
 
-if __name__ == "__main__":
-    agent = CustomAgent(verbose=True)
-    agent.answer_boolean_market(
-        "Will the price of GNO be above $1000 at the end of the 2024?"
-    )
+class CustomAgentOpenAi(CustomAgent):
+    def __init__(self, verbose: bool = True, max_cycles: int = 10):
+        super().__init__(
+            model=ChatOpenAIModel(
+                model="gpt-4",  # I tried gpt-3.5-turbo, but it fails at providing correct inputs to the tools.
+                system_prompt=CustomAgent.SYSTEM_PROMPT,
+            ),
+            verbose=verbose,
+            max_cycles=max_cycles,
+        )
+
+
+class CustomAgentLlama(CustomAgent):
+    def __init__(self, verbose: bool = True, max_cycles: int = 10):
+        super().__init__(
+            model=ChatReplicateLLamaModel(
+                model="meta/llama-2-70b-chat",
+                system_prompt=CustomAgent.SYSTEM_PROMPT,
+            ),
+            verbose=verbose,
+            max_cycles=max_cycles,
+        )
