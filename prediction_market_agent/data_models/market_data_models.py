@@ -1,6 +1,8 @@
 from pydantic import BaseModel
+import typing as t
 from web3 import Web3
 from web3.types import Wei
+
 from prediction_market_agent.tools.types import (
     USD,
     OmenOutcomeToken,
@@ -8,6 +10,15 @@ from prediction_market_agent.tools.types import (
     HexAddress,
     ChecksumAddress,
 )
+
+
+class Condition(BaseModel):
+    id: HexAddress
+    outcomeSlotCount: int
+
+    @property
+    def index_sets(self) -> t.List[int]:
+        return [i + 1 for i in range(self.outcomeSlotCount)]
 
 
 class Market(BaseModel):
@@ -18,8 +29,9 @@ class Market(BaseModel):
     collateralToken: HexAddress
     outcomes: list[str]
     outcomeTokenAmounts: list[OmenOutcomeToken] = []
-    outcomeTokenMarginalPrices: list[xDai] = []
+    outcomeTokenMarginalPrices: t.Optional[list[xDai]] = []
     fee: Wei = None
+    condition: t.Optional[Condition] = None
 
     @property
     def question(self) -> str:
