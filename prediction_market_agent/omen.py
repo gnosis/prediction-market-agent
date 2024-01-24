@@ -8,6 +8,7 @@ import os
 import requests
 from typing import Optional
 from web3 import Web3
+from web3.constants import HASH_ZERO
 from web3.types import TxReceipt, TxParams
 from pprint import pprint
 from prediction_market_agent.data_models.market_data_models import Market
@@ -63,6 +64,10 @@ query getFixedProductMarketMaker($id: String!) {
         outcomeTokenAmounts
         outcomeTokenMarginalPrices
         fee
+        condition {
+            id
+            outcomeSlotCount
+        }
     }
 }
 """
@@ -337,7 +342,7 @@ def omen_buy_outcome_tx(
 
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
-    # it's better to increae it manually (otherwise we could get stale value from the network and error out).
+    # it's better to increase it manually (otherwise we could get stale value from the network and error out).
     nonce = web3.eth.get_transaction_count(from_address)
 
     # Calculate the amount of shares we will get for the given investment amount.
@@ -466,6 +471,42 @@ def omen_sell_outcome_tx(
         )
         nonce += ONE_NONCE  # Increase after each tx.
         check_tx_receipt(withdraw_receipt)
+
+
+def omen_claim_winnings(
+    web3: Web3,
+    market: Market,
+    from_address: HexAddress,
+    from_private_key: PrivateKey,
+    tx_params: Optional[TxParams] = None,
+) -> TxReceipt:
+    """
+    See https://gnosisscan.io/address/0x9083a2b699c0a4ad06f63580bde2635d26a3eef0#code -> `redeemPositions` function.
+
+    Also see https://github.com/valory-xyz/trader/pull/59 for Olas implementation.
+    """
+
+    # `redeemPositions` function params:
+    collateral_token = market.collateral_token_contract_address_checksummed
+    condition_id = market.condition.id
+    parent_collection_id = bytes.fromhex(HASH_ZERO[2:])  # Taken from Olas
+    index_sets = market.condition.index_sets  # Taken from Olas
+
+    return call_function_on_contract_tx(
+        web3=web3,
+        contract_address=market.market_maker_contract_address_checksummed,
+        contract_abi=OMEN_FPMM_CONDITIONALTOKENS_ABI,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        function_name="redeemPositions",
+        function_params=[
+            collateral_token,
+            parent_collection_id,
+            condition_id,
+            index_sets,
+        ],
+        tx_params=tx_params,
+    )
 
 
 if __name__ == "__main__":
