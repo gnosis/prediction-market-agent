@@ -18,7 +18,7 @@ def main(
     market_type: MarketType = MarketType.MANIFOLD,
     agent_type: AgentType = AgentType.ALWAYS_YES,
     sleep_time: int = timedelta(days=1).seconds,
-):
+) -> None:
     """
     Start the agent as a continuous process. Picks a market and answers it, forever and ever.
     """
