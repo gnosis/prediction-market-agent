@@ -2,13 +2,11 @@ import typer
 import prediction_market_agent as pma
 from decimal import Decimal
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
-from prediction_market_agent.tools.gtypes import xDai, Mana
-from prediction_market_agent.tools.utils import should_not_happen, check_not_none
+from prediction_market_agent.tools.types import xDai, Mana
 from prediction_market_agent.markets.all_markets import (
     MarketType,
     get_binary_markets,
-    omen,
-    manifold,
+    place_bet,
 )
 
 
@@ -27,7 +25,7 @@ def main(
 
     # Create the agent and run it
     agent = get_agent(agent_type)
-    result = agent.answer_boolean_market(market)
+    result = agent.answer_binary_market(market)
 
     # Place a bet based on the result
     if auto_bet:
@@ -48,24 +46,12 @@ def main(
         amount = Decimal(
             input(f"How much do you want to bet? (in {market.BET_AMOUNT_CURRENCY}): ")
         )
-        pma.manifold.place_bet(
-            amount=Mana(amount),
-            market_id=market.id,
-            outcome=result,
-            api_key=check_not_none(keys.manifold),
-        ) if isinstance(
-            market, manifold.ManifoldMarket
-        ) else pma.omen.binary_omen_buy_outcome_tx(
-            amount=xDai(amount),
-            from_address=check_not_none(keys.bet_from_address),
-            from_private_key=check_not_none(keys.bet_from_private_key),
+        place_bet(
             market=market,
-            binary_outcome=result,
-            auto_deposit=True,
-        ) if isinstance(
-            market, omen.OmenMarket
-        ) else should_not_happen(
-            f"Unknown market: {market}"
+            amount=amount,
+            outcome=result,
+            keys=keys,
+            omen_auto_deposit=True,
         )
 
 

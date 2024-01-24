@@ -62,7 +62,7 @@ class AutoGenAgent(AbstractAgent):
         else:
             raise ValueError("Result found in Termination message")
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         """
         TODO have assistant alsways return in json format with format:
         {

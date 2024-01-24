@@ -61,7 +61,7 @@ If you want to answer, return a completion in form of a dictionary with a single
         if self.verbose:
             print(f"{message}\n")
 
-    def answer_boolean_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: MarketProtocol) -> bool:
         cycle_count = 0
         answer: Optional[str] = None
         # Get the main objective prompt.
