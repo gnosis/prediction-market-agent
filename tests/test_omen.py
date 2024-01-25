@@ -1,6 +1,7 @@
 import time
 from prediction_market_agent.utils import get_keys
 from prediction_market_agent.markets.all_markets import omen
+from prediction_market_agent.tools.gtypes import xdai_type
 
 
 def test_omen_pick_binary_market() -> None:
@@ -22,7 +23,7 @@ def test_omen_get_market() -> None:
 def test_omen_buy_and_sell_outcome() -> None:
     # Tests both buying and selling, so we are back at the square one in the wallet (minues fees).
     market = omen.pick_binary_market()
-    amount = omen.xDai("0.001")
+    amount = xdai_type(0.001)
     keys = get_keys()
     omen.binary_omen_buy_outcome_tx(
         amount=amount,

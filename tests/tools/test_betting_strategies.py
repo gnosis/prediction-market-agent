@@ -8,6 +8,8 @@ from prediction_market_agent.tools.gtypes import (
     usd_type,
     HexAddress,
     OmenOutcomeToken,
+    HexStr,
+    Wei,
     xDai,
 )
 from prediction_market_agent.tools.betting_strategies import (
@@ -16,11 +18,11 @@ from prediction_market_agent.tools.betting_strategies import (
 )
 
 TEST_OMEN_MARKET = omen.OmenMarket(
-    id=HexAddress("0x76a7a3487f85390dc568f3fce01e0a649cb39651"),
+    id=HexAddress(HexStr("0x76a7a3487f85390dc568f3fce01e0a649cb39651")),
     title="Will Plex launch a store for movies and TV shows by 26 January 2024?",
-    collateralVolume=4369016776639073062,
+    collateralVolume=Wei(4369016776639073062),
     usdVolume=usd_type("4.369023756584789670441178585394842"),
-    collateralToken=HexAddress("0xe91d153e0b41518a2ce8dd3d7944fa863463a97d"),
+    collateralToken=HexAddress(HexStr("0xe91d153e0b41518a2ce8dd3d7944fa863463a97d")),
     outcomes=["Yes", "No"],
     outcomeTokenAmounts=[
         OmenOutcomeToken(7277347438897016099),

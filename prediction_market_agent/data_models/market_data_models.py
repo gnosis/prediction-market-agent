@@ -80,8 +80,12 @@ class OmenMarket(Market):
         return Web3.to_checksum_address(self.collateral_token_contract_address)
 
     @property
-    def outcomeTokenProbabilities(self) -> list[Probability]:
-        return [Probability(float(x)) for x in self.outcomeTokenMarginalPrices]
+    def outcomeTokenProbabilities(self) -> t.Optional[list[Probability]]:
+        return (
+            [Probability(float(x)) for x in self.outcomeTokenMarginalPrices]
+            if self.outcomeTokenMarginalPrices is not None
+            else None
+        )
 
     def get_outcome_index(self, outcome: str) -> int:
         try:
