@@ -1,4 +1,5 @@
 name: "Prepare Python environment"
+description: "Set up Python and install dependencies"
 runs:
   using: "composite"
   steps:
