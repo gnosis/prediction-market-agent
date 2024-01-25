@@ -474,7 +474,3 @@ def omen_sell_outcome_tx(
         )
         nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
         check_tx_receipt(withdraw_receipt)
-
-
-if __name__ == "__main__":
-    pprint(get_omen_binary_markets(3))

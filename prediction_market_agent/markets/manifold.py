@@ -68,13 +68,3 @@ def place_bet(amount: Mana, market_id: str, outcome: bool, api_key: str) -> None
         raise Exception(
             f"Placing bet failed: {response.status_code} {response.reason} {response.text}"
         )
-
-
-if __name__ == "__main__":
-    # A test run
-    market = pick_binary_market()
-    print(market.question)
-    print("Placing bet on market:", market.question)
-    place_bet(
-        mana_type(2), market.id, True, check_not_none(utils.get_manifold_api_key())
-    )

@@ -90,10 +90,3 @@ class ChatOpenAIModel(AbstractAiChatModel):
         )
         completion = response.choices[0].message.content
         return completion
-
-
-if __name__ == "__main__":
-    model = ChatOpenAIModel()
-    messages = [Message(role="user", content="Hello, how are you?")]
-    completion = model.complete(messages)
-    print(completion)
