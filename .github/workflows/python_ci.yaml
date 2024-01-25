@@ -9,6 +9,7 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
       - name: Run mypy
         run: poetry run mypy
@@ -16,12 +17,14 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
         run: poetry run pytest
   black:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
       - name: Check with black
         run: poetry run black --check .
