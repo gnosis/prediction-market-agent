@@ -56,7 +56,7 @@ class OmenMarket(Market):
     collateralToken: HexAddress
     outcomes: list[str]
     outcomeTokenAmounts: list[OmenOutcomeToken]
-    outcomeTokenMarginalPrices: list[xDai]
+    outcomeTokenMarginalPrices: t.Optional[list[xDai]]
     fee: t.Optional[Wei]
 
     @property
