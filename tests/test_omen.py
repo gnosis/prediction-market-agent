@@ -1,4 +1,6 @@
 import time
+import pytest
+from tests.utils import RUN_PAID_TESTS
 from prediction_market_agent.utils import get_keys
 from prediction_market_agent.markets.all_markets import omen
 from prediction_market_agent.tools.gtypes import xdai_type
@@ -20,6 +22,7 @@ def test_omen_get_market() -> None:
     ), "Omen market question doesn't match the expected value."
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_omen_buy_and_sell_outcome() -> None:
     # Tests both buying and selling, so we are back at the square one in the wallet (minues fees).
     market = omen.pick_binary_market()

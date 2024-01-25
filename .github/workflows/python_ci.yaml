@@ -4,6 +4,14 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+env:
+  MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY }}
+  SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  BET_FROM_ADDRESS: ${{ secrets.BET_FROM_ADDRESS }}
+  BET_FROM_PRIVATE_KEY: ${{ secrets.BET_FROM_PRIVATE_KEY }}
 
 jobs:
   mypy:
@@ -20,14 +28,18 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
-        env:
-          MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY }}
-          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          BET_FROM_ADDRESS: ${{ secrets.BET_FROM_ADDRESS }}
-          BET_FROM_PRIVATE_KEY: ${{ secrets.BET_FROM_PRIVATE_KEY }}
-        shell: bash
         run: poetry run pytest
+
+  pytest-paid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/python_prepare
+      - name: Run pytest
+        run: poetry run pytest
+    if: github.event_name == 'workflow_dispatch'
+    # TODO: Remove once the environment variables are fixed in the new repository.
+    continue-on-error: true
 
   black:
     runs-on: ubuntu-latest
