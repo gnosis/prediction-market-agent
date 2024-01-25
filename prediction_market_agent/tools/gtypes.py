@@ -21,6 +21,10 @@ Probability = NewType("Probability", float)
 Mana = NewType("Mana", Decimal)  # Manifold's "currency"
 
 
+def usd_type(amount: Union[str, int, float, Decimal]) -> USD:
+    return USD(Decimal(amount))
+
+
 def wei_type(amount: Union[str, int]) -> Wei:
     return Wei(int(amount))
 
