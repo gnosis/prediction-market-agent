@@ -28,6 +28,7 @@ typer = "^0.9.0"
 web3 = "^6.14.0"
 mypy = "^1.8.0"
 types-requests = "^2.31.0.20240106"
+black = "^23.12.1"
 
 [build-system]
 requires = ["poetry-core"]
