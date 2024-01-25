@@ -37,6 +37,8 @@ jobs:
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
         run: poetry run pytest
+        env:
+          RUN_PAID_TESTS: "1"
     if: github.event_name == 'workflow_dispatch'
     # TODO: Remove once the environment variables are fixed in the new repository.
     continue-on-error: true
