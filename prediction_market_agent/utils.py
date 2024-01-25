@@ -8,6 +8,7 @@ from prediction_market_agent.tools.gtypes import (
     HexAddress,
     HexStr,
 )
+from prediction_market_agent.tools.utils import check_not_none
 
 
 def get_api_key(name: str) -> t.Optional[str]:
@@ -54,11 +55,40 @@ class APIKeys:
         bet_from_address: t.Optional[ChecksumAddress] = None,
         bet_from_private_key: t.Optional[PrivateKey] = None,
     ):
-        self.manifold = manifold
-        self.serp = serp
-        self.openai = openai
-        self.bet_from_address = bet_from_address
-        self.bet_from_private_key = bet_from_private_key
+        self._manifold = manifold
+        self._serp = serp
+        self._openai = openai
+        self._bet_from_address = bet_from_address
+        self._bet_from_private_key = bet_from_private_key
+
+    @property
+    def manifold(self) -> str:
+        return check_not_none(
+            self._manifold, "MANIFOLD_API_KEY missing in the environment."
+        )
+
+    @property
+    def serp(self) -> str:
+        return check_not_none(self._serp, "SERP_API_KEY missing in the environment.")
+
+    @property
+    def openai(self) -> str:
+        return check_not_none(
+            self._openai, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def bet_from_address(self) -> ChecksumAddress:
+        return check_not_none(
+            self._bet_from_address, "BET_FROM_ADDRESS missing in the environment."
+        )
+
+    @property
+    def bet_from_private_key(self) -> PrivateKey:
+        return check_not_none(
+            self._bet_from_private_key,
+            "BET_FROM_PRIVATE_KEY missing in the environment.",
+        )
 
 
 def get_keys() -> APIKeys:
