@@ -6,11 +6,11 @@ on:
     branches: [main]
 
 env:
-  MANIFOLD_API_KEY: ${{ secrets. MANIFOLD_API_KEY}}
-  SERP_API_KEY: ${{ secrets. SERP_API_KEY}}
-  OPENAI_API_KEY: ${{ secrets. OPENAI_API_KEY}}
-  BET_FROM_ADDRESS: ${{ secrets. BET_FROM_ADDRESS}}
-  BET_FROM_PRIVATE_KEY: ${{ secrets. BET_FROM_PRIVATE_KEY}}
+  MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY}}
+  SERP_API_KEY: ${{ secrets.SERP_API_KEY}}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
+  BET_FROM_ADDRESS: ${{ secrets.BET_FROM_ADDRESS}}
+  BET_FROM_PRIVATE_KEY: ${{ secrets.BET_FROM_PRIVATE_KEY}}
 
 jobs:
   mypy:
