@@ -10,33 +10,31 @@ from prediction_market_agent.tools.gtypes import (
 )
 
 
-def get_api_key(name: str) -> str:
+def get_api_key(name: str) -> t.Optional[str]:
     dotenv.load_dotenv()
-    key = os.getenv(name)
-    if not key:
-        raise Exception(f"No API key found. Please set env var '{name}'.")
-    return key
+    return os.getenv(name)
 
 
-def get_manifold_api_key() -> str:
+def get_manifold_api_key() -> t.Optional[str]:
     return get_api_key("MANIFOLD_API_KEY")
 
 
-def get_serp_api_key() -> str:
+def get_serp_api_key() -> t.Optional[str]:
     return get_api_key("SERP_API_KEY")
 
 
-def get_openai_api_key() -> str:
+def get_openai_api_key() -> t.Optional[str]:
     return get_api_key("OPENAI_API_KEY")
 
 
-def get_bet_from_address() -> ChecksumAddress:
+def get_bet_from_address() -> t.Optional[ChecksumAddress]:
     address = get_api_key("BET_FROM_ADDRESS")
-    return verify_address(address)
+    return verify_address(address) if address else None
 
 
-def get_bet_from_private_key() -> PrivateKey:
-    return PrivateKey(get_api_key("BET_FROM_PRIVATE_KEY"))
+def get_bet_from_private_key() -> t.Optional[PrivateKey]:
+    private_key = get_api_key("BET_FROM_PRIVATE_KEY")
+    return PrivateKey(private_key) if private_key else None
 
 
 def verify_address(address: str) -> ChecksumAddress:
