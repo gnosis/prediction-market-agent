@@ -7,7 +7,10 @@ from prediction_market_agent.agents.always_yes import AlwaysYesAgent
 from prediction_market_agent.agents.llamaindex_agent import LlamaIndexAgent
 from prediction_market_agent.agents.metagpt_agent import MetaGPTAgent
 from prediction_market_agent.agents.crewai_agent import CrewAIAgent
-from prediction_market_agent.agents.custom_agent import CustomAgent
+from prediction_market_agent.agents.custom_agent import (
+    CustomAgentOpenAi,
+    CustomAgentLlama,
+)
 
 
 class AgentType(str, Enum):
@@ -21,15 +24,15 @@ class AgentType(str, Enum):
     CUSTOM_LLAMA = "custom_llama"
 
 
-AGENT_MAPPING: t.Dict[AgentType, AbstractAgent] = {
+AGENT_MAPPING: dict[AgentType, t.Type[AbstractAgent]] = {
     AgentType.LANGCHAIN: LangChainAgent,
     AgentType.AUTOGEN: AutoGenAgent,
     AgentType.ALWAYS_YES: AlwaysYesAgent,
     AgentType.LLAMAINDEX: LlamaIndexAgent,
     AgentType.METAGPT: MetaGPTAgent,
     AgentType.CREWAI: CrewAIAgent,
-    AgentType.CUSTOM_OPENAI: CustomAgent.init_with_openai,
-    AgentType.CUSTOM_LLAMA: CustomAgent.init_with_llama,
+    AgentType.CUSTOM_OPENAI: CustomAgentOpenAi,
+    AgentType.CUSTOM_LLAMA: CustomAgentLlama,
 }
 
 

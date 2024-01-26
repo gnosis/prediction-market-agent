@@ -4,7 +4,7 @@ import typing as t
 from prediction_market_agent import utils
 
 
-def google_search(query: str) -> t.List[str]:
+def google_search(query: str) -> list[str]:
     params = {"q": query, "api_key": utils.get_keys().serp, "num": 4}
     search = serpapi.GoogleSearch(params)
     urls = [result["link"] for result in search.get_dict()["organic_results"]]
@@ -31,6 +31,6 @@ google_search_schema = {
 
 
 class GoogleSearchTool:
-    def __init__(self):
+    def __init__(self) -> None:
         self.fn = google_search
         self.schema = google_search_schema

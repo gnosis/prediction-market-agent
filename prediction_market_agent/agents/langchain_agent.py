@@ -9,7 +9,7 @@ from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class LangChainAgent(AbstractAgent):
-    def __init__(self):
+    def __init__(self) -> None:
         keys = utils.get_keys()
         llm = OpenAI(openai_api_key=keys.openai)
         # Can use pre-defined search tool

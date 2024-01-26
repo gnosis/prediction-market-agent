@@ -2,7 +2,7 @@ import typing as t
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import Wei
-from prediction_market_agent.tools.types import (
+from prediction_market_agent.tools.gtypes import (
     USD,
     HexAddress,
     ChecksumAddress,
@@ -23,6 +23,7 @@ class AgentMarket(BaseModel):
     id: str
     question: str
     outcomes: list[str]
+    bet_amount_currency: str
     original_market: t.Union["OmenMarket", "ManifoldMarket"]
 
 
@@ -39,9 +40,9 @@ class OmenMarket(BaseModel):
     usdVolume: USD
     collateralToken: HexAddress
     outcomes: list[str]
-    outcomeTokenAmounts: list[OmenOutcomeToken] = []
-    outcomeTokenMarginalPrices: list[xDai] = []
-    fee: t.Optional[Wei] = None
+    outcomeTokenAmounts: list[OmenOutcomeToken]
+    outcomeTokenMarginalPrices: list[xDai]
+    fee: t.Optional[Wei]
 
     @property
     def market_maker_contract_address(self) -> HexAddress:
@@ -58,6 +59,10 @@ class OmenMarket(BaseModel):
     @property
     def collateral_token_contract_address_checksummed(self) -> ChecksumAddress:
         return Web3.to_checksum_address(self.collateral_token_contract_address)
+
+    @property
+    def outcomeTokenProbabilities(self) -> list[Probability]:
+        return [Probability(float(x)) for x in self.outcomeTokenMarginalPrices]
 
     def get_outcome_index(self, outcome: str) -> int:
         try:
@@ -80,11 +85,12 @@ class OmenMarket(BaseModel):
             id=self.id,
             question=self.title,
             outcomes=self.outcomes,
+            bet_amount_currency=self.BET_AMOUNT_CURRENCY,
             original_market=self,
         )
 
-    def __repr__(self):
-        return f"Market: {self.title}"
+    def __repr__(self) -> str:
+        return f"Omen's market: {self.title}"
 
 
 class ManifoldPool(BaseModel):
@@ -132,5 +138,9 @@ class ManifoldMarket(BaseModel):
             id=self.id,
             question=self.question,
             outcomes=self.outcomes,
+            bet_amount_currency=self.BET_AMOUNT_CURRENCY,
             original_market=self,
         )
+
+    def __repr__(self) -> str:
+        return f"Manifold's market: {self.question}"

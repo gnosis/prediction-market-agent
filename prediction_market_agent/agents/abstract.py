@@ -1,11 +1,7 @@
-import typing as t
 from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class AbstractAgent:
-    def __init__(self):
-        pass
-
     def pick_market(self, markets: list[AgentMarket]) -> AgentMarket:
         """
         Given a list of markets, pick one to answer.

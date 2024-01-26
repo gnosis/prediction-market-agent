@@ -1,7 +1,7 @@
 import requests
 import typing as t
 from prediction_market_agent import utils
-from prediction_market_agent.tools.types import Mana
+from prediction_market_agent.tools.gtypes import Mana, mana_type
 from prediction_market_agent.data_models.market_data_models import ManifoldMarket
 
 """
@@ -20,7 +20,7 @@ def get_manifold_binary_markets(
     sort: str = "liquidity",
 ) -> list[ManifoldMarket]:
     url = "https://api.manifold.markets/v0/search-markets"
-    params = {
+    params: dict[str, t.Union[str, int, float]] = {
         "term": term,
         "sort": sort,
         "limit": limit,
@@ -42,7 +42,7 @@ def pick_binary_market() -> ManifoldMarket:
     return get_manifold_binary_markets(1)[0]
 
 
-def place_bet(amount: Mana, market_id: str, outcome: bool, api_key: str):
+def place_bet(amount: Mana, market_id: str, outcome: bool, api_key: str) -> None:
     outcome_str = "YES" if outcome else "NO"
     url = "https://api.manifold.markets/v0/bet"
     params = {
@@ -59,7 +59,10 @@ def place_bet(amount: Mana, market_id: str, outcome: bool, api_key: str):
 
     if response.status_code == 200:
         data = response.json()
-        assert data["isFilled"]
+        if not data["isFilled"]:
+            raise RuntimeError(
+                f"Placing bet failed: {response.status_code} {response.reason} {response.text}"
+            )
     else:
         raise Exception(
             f"Placing bet failed: {response.status_code} {response.reason} {response.text}"
@@ -71,4 +74,4 @@ if __name__ == "__main__":
     market = pick_binary_market()
     print(market.question)
     print("Placing bet on market:", market.question)
-    place_bet(2, market.id, True, utils.get_manifold_api_key())
+    place_bet(mana_type(2), market.id, True, utils.get_manifold_api_key())

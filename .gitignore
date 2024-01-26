@@ -6,3 +6,5 @@ requirements.txt
 __pycache__
 *.egg-info
 logs
+.mypy_cache
+.pytest_cache

@@ -23,12 +23,13 @@ from prediction_market_agent.tools.web3_utils import (
     Nonce,
 )
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
-from prediction_market_agent.tools.types import (
+from prediction_market_agent.tools.gtypes import (
     ABI,
     HexAddress,
     PrivateKey,
     xDai,
     Wei,
+    ChecksumAddress,
     OmenOutcomeToken,
 )
 
@@ -135,7 +136,7 @@ def omen_approve_market_maker_to_spend_collateral_token_tx(
     web3: Web3,
     market: OmenMarket,
     amount_wei: Wei,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -158,7 +159,7 @@ def omen_approve_all_market_maker_to_move_conditionaltokens_tx(
     web3: Web3,
     market: OmenMarket,
     approve: bool,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -185,7 +186,7 @@ def omen_deposit_collateral_token_tx(
     web3: Web3,
     market: OmenMarket,
     amount_wei: Wei,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -204,7 +205,7 @@ def omen_withdraw_collateral_token_tx(
     web3: Web3,
     market: OmenMarket,
     amount_wei: Wei,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -277,7 +278,7 @@ def omen_buy_shares_tx(
     amount_wei: Wei,
     outcome_index: int,
     min_outcome_tokens_to_buy: OmenOutcomeToken,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -303,7 +304,7 @@ def omen_sell_shares_tx(
     amount_wei: Wei,
     outcome_index: int,
     max_outcome_tokens_to_sell: OmenOutcomeToken,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     tx_params: Optional[TxParams] = None,
 ) -> TxReceipt:
@@ -325,7 +326,7 @@ def omen_sell_shares_tx(
 
 def omen_buy_outcome_tx(
     amount: xDai,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     market: OmenMarket,
     outcome: str,
@@ -336,6 +337,7 @@ def omen_buy_outcome_tx(
     """
     web3 = Web3(Web3.HTTPProvider(GNOSIS_RPC_URL))
     amount_wei = xdai_to_wei(amount)
+    from_address_checksummed = Web3.to_checksum_address(from_address)
 
     # Get the index of the outcome we want to buy.
     outcome_index: int = market.get_outcome_index(outcome)
@@ -343,7 +345,7 @@ def omen_buy_outcome_tx(
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
     # it's better to increae it manually (otherwise we could get stale value from the network and error out).
-    nonce: Nonce = web3.eth.get_transaction_count(from_address)
+    nonce: Nonce = web3.eth.get_transaction_count(from_address_checksummed)
 
     # Calculate the amount of shares we will get for the given investment amount.
     expected_shares = omen_calculate_buy_amount(web3, market, amount_wei, outcome_index)
@@ -354,11 +356,11 @@ def omen_buy_outcome_tx(
         web3=web3,
         market=market,
         amount_wei=amount_wei,
-        from_address=from_address,
+        from_address=from_address_checksummed,
         from_private_key=from_private_key,
         tx_params={"nonce": nonce},
     )
-    nonce += ONE_NONCE  # Increase after each tx.
+    nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
     check_tx_receipt(approve_tx_receipt)
     # Deposit xDai to the collateral token,
     # this can be skipped, if we know we already have enough collateral tokens.
@@ -367,11 +369,11 @@ def omen_buy_outcome_tx(
             web3=web3,
             market=market,
             amount_wei=amount_wei,
-            from_address=from_address,
+            from_address=from_address_checksummed,
             from_private_key=from_private_key,
             tx_params={"nonce": nonce},
         )
-        nonce += ONE_NONCE  # Increase after each tx.
+        nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
         check_tx_receipt(deposit_receipt)
     # Buy shares using the deposited xDai in the collateral token.
     buy_receipt = omen_buy_shares_tx(
@@ -380,17 +382,17 @@ def omen_buy_outcome_tx(
         amount_wei,
         outcome_index,
         expected_shares,
-        from_address,
+        from_address_checksummed,
         from_private_key,
         tx_params={"nonce": nonce},
     )
-    nonce += ONE_NONCE  # Increase after each tx.
+    nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
     check_tx_receipt(buy_receipt)
 
 
 def binary_omen_buy_outcome_tx(
     amount: xDai,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     market: OmenMarket,
     binary_outcome: bool,
@@ -408,7 +410,7 @@ def binary_omen_buy_outcome_tx(
 
 def omen_sell_outcome_tx(
     amount: xDai,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     market: OmenMarket,
     outcome: str,
@@ -419,6 +421,7 @@ def omen_sell_outcome_tx(
     """
     web3 = Web3(Web3.HTTPProvider(GNOSIS_RPC_URL))
     amount_wei = xdai_to_wei(amount)
+    from_address_checksummed = Web3.to_checksum_address(from_address)
 
     # Get the index of the outcome we want to buy.
     outcome_index: int = market.get_outcome_index(outcome)
@@ -426,7 +429,7 @@ def omen_sell_outcome_tx(
     # Get the current nonce for the given from_address.
     # If making multiple transactions quickly after each other,
     # it's better to increae it manually (otherwise we could get stale value from the network and error out).
-    nonce: Nonce = web3.eth.get_transaction_count(from_address)
+    nonce: Nonce = web3.eth.get_transaction_count(from_address_checksummed)
 
     # Calculate the amount of shares we will sell for the given selling amount of xdai.
     max_outcome_tokens_to_sell = omen_calculate_sell_amount(
@@ -440,11 +443,11 @@ def omen_sell_outcome_tx(
         web3=web3,
         market=market,
         approve=True,
-        from_address=from_address,
+        from_address=from_address_checksummed,
         from_private_key=from_private_key,
         tx_params={"nonce": nonce},
     )
-    nonce += ONE_NONCE  # Increase after each tx.
+    nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
     check_tx_receipt(approve_tx_receipt)
     # Sell the shares.
     sell_receipt = omen_sell_shares_tx(
@@ -453,11 +456,11 @@ def omen_sell_outcome_tx(
         amount_wei,
         outcome_index,
         max_outcome_tokens_to_sell,
-        from_address,
+        from_address_checksummed,
         from_private_key,
         tx_params={"nonce": nonce},
     )
-    nonce += ONE_NONCE  # Increase after each tx.
+    nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
     check_tx_receipt(sell_receipt)
     if auto_withdraw:
         # Optionally, withdraw from the collateral token back to the `from_address` wallet.
@@ -465,11 +468,11 @@ def omen_sell_outcome_tx(
             web3=web3,
             market=market,
             amount_wei=amount_wei,
-            from_address=from_address,
+            from_address=from_address_checksummed,
             from_private_key=from_private_key,
             tx_params={"nonce": nonce},
         )
-        nonce += ONE_NONCE  # Increase after each tx.
+        nonce = Nonce(nonce + ONE_NONCE)  # Increase after each tx.
         check_tx_receipt(withdraw_receipt)
 
 

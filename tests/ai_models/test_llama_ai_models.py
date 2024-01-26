@@ -1,27 +1,27 @@
 from prediction_market_agent.ai_models.llama_ai_models import (
     construct_llama_prompt,
-    LlamaMessage,
+    Message,
     LlamaRole,
 )
 
 
-def test_construct_llama_prompt_0():
+def test_construct_llama_prompt_0() -> None:
     prompt = construct_llama_prompt([])
     assert prompt == ""
 
 
-def test_construct_llama_prompt_1():
+def test_construct_llama_prompt_1() -> None:
     prompt = construct_llama_prompt(
-        [LlamaMessage(role=LlamaRole.user, content="Hello!")]
+        [Message(role=LlamaRole.user.value, content="Hello!")]
     )
     assert prompt == "[INST] Hello! [/INST]"
 
 
-def test_construct_llama_prompt_2():
+def test_construct_llama_prompt_2() -> None:
     prompt = construct_llama_prompt(
         [
-            LlamaMessage(role=LlamaRole.user, content="Hello!"),
-            LlamaMessage(role=LlamaRole.assistant, content="Bonjour!"),
+            Message(role=LlamaRole.user.value, content="Hello!"),
+            Message(role=LlamaRole.assistant.value, content="Bonjour!"),
         ]
     )
     assert prompt == "[INST] Hello! [/INST]\nBonjour!"

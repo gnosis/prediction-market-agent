@@ -47,6 +47,12 @@ optional arguments:
 
 ## Testing
 
+Run the type checking:
+
+```bash
+mypy
+```
+
 Run the tets:
 
 ```bash

@@ -1,16 +1,19 @@
 import os
 from typing import Optional, Any, TypeVar
 from web3 import Web3
+from decimal import Decimal
 from web3.types import Wei, TxReceipt, TxParams, Nonce
-from prediction_market_agent.tools.types import (
+from prediction_market_agent.tools.gtypes import (
     ABI,
     xDai,
     HexAddress,
     PrivateKey,
     ChecksumAddress,
+    xdai_type,
 )
 
 ONE_NONCE = Nonce(1)
+ONE_XDAI = xdai_type(1)
 
 with open(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), "../abis/wxdai.abi.json")
@@ -20,7 +23,7 @@ with open(
 
 
 def wei_to_xdai(wei: Wei) -> xDai:
-    return xDai(Web3.from_wei(wei, "ether"))
+    return xDai(Decimal((Web3.from_wei(wei, "ether"))))
 
 
 def xdai_to_wei(native: xDai) -> Wei:
@@ -65,7 +68,7 @@ def call_function_on_contract(
     function_params: Optional[list[Any]] = None,
 ) -> Any:
     contract = web3.eth.contract(address=contract_address, abi=contract_abi)
-    output = contract.functions[function_name](*(function_params or [])).call()
+    output = contract.functions[function_name](*(function_params or [])).call()  # type: ignore # TODO: Fix Mypy, as this works just OK.
     return output
 
 
@@ -74,7 +77,7 @@ def call_function_on_contract_tx(
     *,
     contract_address: ChecksumAddress,
     contract_abi: ABI,
-    from_address: HexAddress,
+    from_address: ChecksumAddress,
     from_private_key: PrivateKey,
     function_name: str,
     function_params: Optional[list[Any]] = None,
@@ -90,7 +93,7 @@ def call_function_on_contract_tx(
     tx_params["from"] = tx_params.get("from", from_address)
 
     # Build the transaction.
-    tx = contract.functions[function_name](*(function_params or [])).build_transaction(
+    tx = contract.functions[function_name](*(function_params or [])).build_transaction(  # type: ignore # TODO: Fix Mypy, as this works just OK.
         tx_params
     )
     # Sign with the private key.

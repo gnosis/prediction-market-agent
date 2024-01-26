@@ -4,14 +4,17 @@ import json
 import os
 
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.tools.utils import check_not_none
 from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class MetaGPTAgent(AbstractAgent):
-    def __init__(self, cheap=True):
+    def __init__(self, cheap: bool = True) -> None:
         dotenv.load_dotenv()
         os.environ["OPENAI_API_MODEL"] = "gpt-4-1106-preview"
-        os.environ["SERPAPI_API_KEY"] = os.getenv("SERP_API_KEY")
+        os.environ["SERPAPI_API_KEY"] = check_not_none(
+            os.getenv("SERP_API_KEY"), "SERPAPI_API_KEY must be set in .env"
+        )
         try:
             from metagpt.roles import Searcher
             from metagpt.roles.researcher import Researcher
@@ -25,7 +28,7 @@ class MetaGPTAgent(AbstractAgent):
             self._agent = Researcher()
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
-        async def main(objective: str):
+        async def main(objective: str) -> None:
             await self._agent.run(objective)
 
         objective = (
@@ -39,4 +42,5 @@ class MetaGPTAgent(AbstractAgent):
         asyncio.run(main(objective=objective))
         result = json.loads(self._agent.rc.history[-1].content)
         assert "prediction" in result
-        return result["prediction"]
+        prediction: bool = result["prediction"]
+        return prediction
