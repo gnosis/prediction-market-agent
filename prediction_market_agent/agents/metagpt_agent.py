@@ -4,6 +4,7 @@ import json
 import os
 
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class MetaGPTAgent(AbstractAgent):
@@ -15,9 +16,7 @@ class MetaGPTAgent(AbstractAgent):
             from metagpt.roles import Searcher
             from metagpt.roles.researcher import Researcher
         except ImportError:
-            raise RuntimeError(
-                "You need to install the `metagpt` package manually."
-            )
+            raise RuntimeError("You need to install the `metagpt` package manually.")
 
         if cheap:
             self._agent = Searcher()
@@ -25,13 +24,13 @@ class MetaGPTAgent(AbstractAgent):
             # Gives better results but is very expensive (~$0.3 / run!!)
             self._agent = Researcher()
 
-    def run(self, market: str) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
         async def main(objective: str):
             await self._agent.run(objective)
 
         objective = (
             f"Research and report on the following question:\n\n"
-            f"{market}\n\n"
+            f"{market.question}\n\n"
             f"Search and scrape the web for information that will help you give a high quality, nuanced answer to the question.\n\n"
             f"Return your answer in raw JSON format, with no special formatting such as newlines, as follows:\n\n"
             f'{{"prediction": <PREDICTION>, "reasoning": <REASONING>}}\n\n'

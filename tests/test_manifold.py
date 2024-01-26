@@ -1,5 +1,5 @@
 from prediction_market_agent import utils
-from prediction_market_agent import manifold
+from prediction_market_agent.markets import manifold
 
 
 def test_manifold():

@@ -1,4 +1,5 @@
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class AlwaysYesAgent(AbstractAgent):
@@ -9,5 +10,5 @@ class AlwaysYesAgent(AbstractAgent):
     def __init__(self):
         pass
 
-    def run(self, objective: str) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
         return True

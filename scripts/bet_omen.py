@@ -1,5 +1,5 @@
 import typer
-from prediction_market_agent.omen import (
+from prediction_market_agent.markets.omen import (
     omen_buy_outcome_tx,
     get_market,
     omen_sell_outcome_tx,

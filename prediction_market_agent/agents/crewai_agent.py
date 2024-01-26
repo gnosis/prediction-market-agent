@@ -1,5 +1,6 @@
 import json
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 from langchain_community.tools import DuckDuckGoSearchRun
 
@@ -30,13 +31,13 @@ class CrewAIAgent(AbstractAgent):
             allow_delegation=True,
         )
 
-    def run(self, market: str) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
         from crewai import Task, Crew
 
         task1 = Task(
             description=(
                 f"Research and report on the following question:\n\n"
-                f"{market}\n\n"
+                f"{market.question}\n\n"
                 f"Search and scrape the web for information that will help you give a high quality, nuanced answer to the question.\n\n"
                 f"Return your answer in raw JSON format, with no special formatting such as newlines, as follows:\n\n"
                 f'{{"report": <REPORT>}}\n\n'
@@ -47,7 +48,7 @@ class CrewAIAgent(AbstractAgent):
         task2 = Task(
             description=(
                 f"Take the report produced by the 'Research Analyst' and come up with a boolean answer to the the question:\n\n"
-                f"{market}\n\n"
+                f"{market.question}\n\n"
                 f"Return your answer in raw JSON format, with no special formatting such as newlines, as follows:\n\n"
                 f'{{"prediction": <PREDICTION>}}\n\n'
                 f'where <PREDICTION> is a boolean string (either "True" or "False")'

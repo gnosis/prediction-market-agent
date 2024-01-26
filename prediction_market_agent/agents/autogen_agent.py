@@ -7,6 +7,7 @@ from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import GoogleSearchTool
 from prediction_market_agent.tools.web_scrape import WebScrapingTool
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class AutoGenAgent(AbstractAgent):
@@ -60,7 +61,7 @@ class AutoGenAgent(AbstractAgent):
         else:
             raise ValueError("Result found in Termination message")
 
-    def run(self, market: str) -> str:
+    def answer_binary_market(self, market: AgentMarket) -> str:
         """
         TODO have assistant alsways return in json format with format:
         {
@@ -74,7 +75,7 @@ class AutoGenAgent(AbstractAgent):
         """
         objective = (
             f"Research and report on the following question:\n\n"
-            f"{market}\n\n"
+            f"{market.question}\n\n"
             f"Only when the task is completed, your final reponse should contain your reasoning, and as well as the result of your research in the structured json string:\n"
             f'{{"result": "<RESULT>"}}\n'
             f"where <RESULT> is your answer to the question, an can be ONLY either 'True' or 'False'. If you are unsure, make your best guess.\n"
