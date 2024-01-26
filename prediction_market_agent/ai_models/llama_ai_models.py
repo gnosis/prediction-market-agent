@@ -62,17 +62,3 @@ def construct_llama_prompt(messages: list[Message]) -> str:
         )
         for message in messages
     )
-
-
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-    model = ChatReplicateLLamaModel()
-    messages = [
-        Message(role=LlamaRole.user.value, content="Hello!"),
-        Message(role=LlamaRole.assistant.value, content="Bonjour!"),
-    ]
-    completion = model.complete(messages)
-    print(completion)

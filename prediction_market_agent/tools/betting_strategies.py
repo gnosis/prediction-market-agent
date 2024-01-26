@@ -44,7 +44,9 @@ def get_market_moving_bet(
     dx = (new_product - fixed_product) / na_y
     """
     amounts = market.outcomeTokenAmounts
-    prices = market.outcomeTokenProbabilities
+    prices = check_not_none(
+        market.outcomeTokenProbabilities, "No probabilities, is marked closed?"
+    )
     if len(amounts) != 2 or len(prices) != 2:
         raise ValueError("Only binary markets are supported.")
 
@@ -190,7 +192,9 @@ def get_kelly_criterion_bet(
     if len(market.outcomeTokenAmounts) != 2:
         raise ValueError("Only binary markets are supported.")
 
-    current_p_yes = market.outcomeTokenProbabilities[0]
+    current_p_yes = check_not_none(
+        market.outcomeTokenProbabilities, "No probabilities, is marked closed?"
+    )[0]
     outcome_index: OutcomeIndex = 0 if estimated_p_yes > current_p_yes else 1
     estimated_p_win = estimated_p_yes if outcome_index == 0 else 1 - estimated_p_yes
 
@@ -209,27 +213,3 @@ def get_kelly_criterion_bet(
         )
     )
     return wei_to_xdai(kelly_bet_wei), outcome_index
-
-
-if __name__ == "__main__":
-    market_address = "0xa3e47bb771074b33f2e279b9801341e9e0c9c6d7"
-    market = get_market(market_address)
-
-    est_p_yes = Probability(0.1)
-    mov_bet = get_market_moving_bet(
-        market=market,
-        target_p_yes=est_p_yes,
-        verbose=True,
-    )
-    kelly_bet = get_kelly_criterion_bet(
-        market=market,
-        estimated_p_yes=est_p_yes,
-        max_bet=xdai_type(10),  # This significantly changes the outcome
-    )
-
-    print(
-        f"Market moving bet: {mov_bet[0]:.2f} on {market.get_outcome_str(mov_bet[1])}"
-    )
-    print(
-        f"Kelly criterion bet: {kelly_bet[0]:.2f} on {market.get_outcome_str(kelly_bet[1])}"
-    )

@@ -33,6 +33,9 @@ from prediction_market_agent.tools.gtypes import (
     OmenOutcomeToken,
 )
 
+OMEN_TRUE_OUTCOME = "Yes"
+OMEN_FALSE_OUTCOME = "No"
+
 with open(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "../abis/omen_fpmm.abi.json"
@@ -111,7 +114,7 @@ def get_omen_markets(first: int, outcomes: list[str]) -> list[OmenMarket]:
 
 
 def get_omen_binary_markets(limit: int) -> list[OmenMarket]:
-    return get_omen_markets(limit, ["Yes", "No"])
+    return get_omen_markets(limit, [OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME])
 
 
 def pick_binary_market() -> OmenMarket:
@@ -403,7 +406,7 @@ def binary_omen_buy_outcome_tx(
         from_address=from_address,
         from_private_key=from_private_key,
         market=market,
-        outcome="Yes" if binary_outcome else "No",
+        outcome=OMEN_TRUE_OUTCOME if binary_outcome else OMEN_FALSE_OUTCOME,
         auto_deposit=auto_deposit,
     )
 
@@ -476,5 +479,19 @@ def omen_sell_outcome_tx(
         check_tx_receipt(withdraw_receipt)
 
 
-if __name__ == "__main__":
-    pprint(get_omen_binary_markets(3))
+def binary_omen_sell_outcome_tx(
+    amount: xDai,
+    from_address: ChecksumAddress,
+    from_private_key: PrivateKey,
+    market: OmenMarket,
+    binary_outcome: bool,
+    auto_withdraw: bool,
+) -> None:
+    omen_sell_outcome_tx(
+        amount=amount,
+        from_address=from_address,
+        from_private_key=from_private_key,
+        market=market,
+        outcome=OMEN_TRUE_OUTCOME if binary_outcome else OMEN_FALSE_OUTCOME,
+        auto_withdraw=auto_withdraw,
+    )

@@ -17,7 +17,3 @@ def get_balance(address: str) -> Wei:
     ).json()
     balance = Wei(int(response["result"], 16))  # Convert hex value to int.
     return balance
-
-
-if __name__ == "__main__":
-    print(get_balance("0xf3318C420e5e30C12786C4001D600e9EE1A7eBb1"))

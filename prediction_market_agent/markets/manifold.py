@@ -2,6 +2,7 @@ import requests
 import typing as t
 from prediction_market_agent import utils
 from prediction_market_agent.tools.gtypes import Mana, mana_type
+from prediction_market_agent.tools.utils import check_not_none
 from prediction_market_agent.data_models.market_data_models import ManifoldMarket
 
 """
@@ -67,11 +68,3 @@ def place_bet(amount: Mana, market_id: str, outcome: bool, api_key: str) -> None
         raise Exception(
             f"Placing bet failed: {response.status_code} {response.reason} {response.text}"
         )
-
-
-if __name__ == "__main__":
-    # A test run
-    market = pick_binary_market()
-    print(market.question)
-    print("Placing bet on market:", market.question)
-    place_bet(mana_type(2), market.id, True, utils.get_manifold_api_key())

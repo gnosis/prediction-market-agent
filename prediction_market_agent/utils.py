@@ -8,35 +8,34 @@ from prediction_market_agent.tools.gtypes import (
     HexAddress,
     HexStr,
 )
+from prediction_market_agent.tools.utils import check_not_none
 
 
-def get_api_key(name: str) -> str:
+def get_api_key(name: str) -> t.Optional[str]:
     dotenv.load_dotenv()
-    key = os.getenv(name)
-    if not key:
-        raise Exception(f"No API key found. Please set env var '{name}'.")
-    return key
+    return os.getenv(name)
 
 
-def get_manifold_api_key() -> str:
+def get_manifold_api_key() -> t.Optional[str]:
     return get_api_key("MANIFOLD_API_KEY")
 
 
-def get_serp_api_key() -> str:
+def get_serp_api_key() -> t.Optional[str]:
     return get_api_key("SERP_API_KEY")
 
 
-def get_openai_api_key() -> str:
+def get_openai_api_key() -> t.Optional[str]:
     return get_api_key("OPENAI_API_KEY")
 
 
-def get_bet_from_address() -> ChecksumAddress:
+def get_bet_from_address() -> t.Optional[ChecksumAddress]:
     address = get_api_key("BET_FROM_ADDRESS")
-    return verify_address(address)
+    return verify_address(address) if address else None
 
 
-def get_bet_from_private_key() -> PrivateKey:
-    return PrivateKey(get_api_key("BET_FROM_PRIVATE_KEY"))
+def get_bet_from_private_key() -> t.Optional[PrivateKey]:
+    private_key = get_api_key("BET_FROM_PRIVATE_KEY")
+    return PrivateKey(private_key) if private_key else None
 
 
 def verify_address(address: str) -> ChecksumAddress:
@@ -56,11 +55,40 @@ class APIKeys:
         bet_from_address: t.Optional[ChecksumAddress] = None,
         bet_from_private_key: t.Optional[PrivateKey] = None,
     ):
-        self.manifold = manifold
-        self.serp = serp
-        self.openai = openai
-        self.bet_from_address = bet_from_address
-        self.bet_from_private_key = bet_from_private_key
+        self._manifold = manifold
+        self._serp = serp
+        self._openai = openai
+        self._bet_from_address = bet_from_address
+        self._bet_from_private_key = bet_from_private_key
+
+    @property
+    def manifold(self) -> str:
+        return check_not_none(
+            self._manifold, "MANIFOLD_API_KEY missing in the environment."
+        )
+
+    @property
+    def serp(self) -> str:
+        return check_not_none(self._serp, "SERP_API_KEY missing in the environment.")
+
+    @property
+    def openai(self) -> str:
+        return check_not_none(
+            self._openai, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def bet_from_address(self) -> ChecksumAddress:
+        return check_not_none(
+            self._bet_from_address, "BET_FROM_ADDRESS missing in the environment."
+        )
+
+    @property
+    def bet_from_private_key(self) -> PrivateKey:
+        return check_not_none(
+            self._bet_from_private_key,
+            "BET_FROM_PRIVATE_KEY missing in the environment.",
+        )
 
 
 def get_keys() -> APIKeys:

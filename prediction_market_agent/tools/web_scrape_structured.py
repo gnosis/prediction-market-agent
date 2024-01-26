@@ -94,11 +94,3 @@ def pretty_html_from_page_content(page_content_html: str, remove_a_links: bool) 
     ).prettify()
     page_content_body_text_clean = prettify_html(page_content_body_text)
     return page_content_body_text_clean
-
-
-if __name__ == "__main__":
-    print(
-        web_scrape_structured(
-            "https://ambcrypto.com/predictions/gnosis-price-prediction"
-        )
-    )

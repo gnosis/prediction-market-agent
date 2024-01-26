@@ -1,0 +1,15 @@
+name: "Prepare Python environment"
+description: "Set up Python and install dependencies"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install Poetry
+      shell: bash
+      run: curl -sSL https://install.python-poetry.org | python3 -
+    - name: Install dependencies
+      shell: bash
+      run: poetry install
