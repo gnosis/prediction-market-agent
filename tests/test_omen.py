@@ -17,7 +17,7 @@ def test_omen_pick_binary_market() -> None:
 def test_omen_get_market() -> None:
     market = omen.get_market("0xa3e47bb771074b33f2e279b9801341e9e0c9c6d7")
     assert (
-        market.question
+        market.title
         == "Will Bethesda's 'Indiana Jones and the Great Circle' be released by January 25, 2024?"
     ), "Omen market question doesn't match the expected value."
 
