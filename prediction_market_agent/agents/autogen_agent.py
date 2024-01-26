@@ -8,7 +8,7 @@ from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import GoogleSearchTool
 from prediction_market_agent.tools.web_scrape import WebScrapingTool
-from prediction_market_agent.data_models.market_data_models import MarketProtocol
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class AutoGenAgent(AbstractAgent):
@@ -62,7 +62,7 @@ class AutoGenAgent(AbstractAgent):
         else:
             raise ValueError("Result found in Termination message")
 
-    def answer_binary_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> str:
         """
         TODO have assistant alsways return in json format with format:
         {

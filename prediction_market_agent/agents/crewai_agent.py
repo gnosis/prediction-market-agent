@@ -1,6 +1,6 @@
 import json
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.data_models.market_data_models import MarketProtocol
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 from langchain_community.tools import DuckDuckGoSearchRun
 
@@ -31,7 +31,7 @@ class CrewAIAgent(AbstractAgent):
             allow_delegation=True,
         )
 
-    def answer_binary_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
         from crewai import Task, Crew
 
         task1 = Task(

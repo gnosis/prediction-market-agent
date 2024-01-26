@@ -4,8 +4,8 @@ import json
 import os
 
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.data_models.market_data_models import MarketProtocol
 from prediction_market_agent.tools.utils import check_not_none
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class MetaGPTAgent(AbstractAgent):
@@ -27,8 +27,8 @@ class MetaGPTAgent(AbstractAgent):
             # Gives better results but is very expensive (~$0.3 / run!!)
             self._agent = Researcher()
 
-    def answer_binary_market(self, market: MarketProtocol) -> bool:
-        async def main(objective: str) -> None:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
+        async def main(objective: str):
             await self._agent.run(objective)
 
         objective = (

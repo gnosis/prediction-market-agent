@@ -28,7 +28,7 @@ def main(
 
     # Create the agent and run it
     agent = get_agent(agent_type)
-    result = agent.answer_binary_market(market)
+    result = agent.answer_binary_market(market.to_agent_market())
 
     # Place a bet based on the result
     if auto_bet:

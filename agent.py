@@ -36,20 +36,19 @@ def main(
             f"Found {len(available_markets)} markets: {[m.question for m in available_markets]}"
         )
 
-        market = t.cast(
-            t.Union[manifold.ManifoldMarket, omen.OmenMarket],
-            agent.pick_market(available_markets),
-        )  # TODO: Mypy bug: Works in VSCode type-checking, but doesn't in Mypy.
-        logging.info(f"Picked market [{market.id}]: {market.question}")
-        answer = agent.answer_binary_market(market)
-        logging.info(f"Answered market [{market.id}]: {answer}")
+        agent_market = agent.pick_market(
+            [x.to_agent_market() for x in available_markets]
+        )
+        logging.info(f"Picked market [{agent_market.id}]: {agent_market.question}")
+        answer = agent.answer_binary_market(agent_market)
+        logging.info(f"Answered market [{agent_market.id}]: {answer}")
 
         # TODO: Calculate the amount to bet based on the confidence of the answer.
         amount = Decimal("0.1")
-        logging.info(f"Placing bet of {amount} on market [{market.id}]: {answer}")
+        logging.info(f"Placing bet of {amount} on market [{agent_market.id}]: {answer}")
 
         place_bet(
-            market=market,
+            market=agent_market.original_market,
             amount_mana=Mana(amount),
             amount_xdai=xDai(amount),
             outcome=answer,
