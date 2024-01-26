@@ -31,14 +31,14 @@ def main(
 
     while True:
         # TODO: Agent needs to keep track of the questions it has answered. It should skip them or re-evaluate.
-        available_markets = get_binary_markets(market_type)
+        available_markets = [
+            x.to_agent_market() for x in get_binary_markets(market_type)
+        ]
         logging.info(
             f"Found {len(available_markets)} markets: {[m.question for m in available_markets]}"
         )
 
-        agent_market = agent.pick_market(
-            [x.to_agent_market() for x in available_markets]
-        )
+        agent_market = agent.pick_market(available_markets)
         logging.info(f"Picked market [{agent_market.id}]: {agent_market.question}")
         answer = agent.answer_binary_market(agent_market)
         logging.info(f"Answered market [{agent_market.id}]: {answer}")

@@ -23,6 +23,7 @@ class AgentMarket(BaseModel):
     id: str
     question: str
     outcomes: list[str]
+    bet_amount_currency: str
     original_market: t.Union["OmenMarket", "ManifoldMarket"]
 
 
@@ -84,11 +85,12 @@ class OmenMarket(BaseModel):
             id=self.id,
             question=self.title,
             outcomes=self.outcomes,
+            bet_amount_currency=self.BET_AMOUNT_CURRENCY,
             original_market=self,
         )
 
-    def __repr__(self):
-        return f"Market: {self.title}"
+    def __repr__(self) -> str:
+        return f"Omen's market: {self.title}"
 
 
 class ManifoldPool(BaseModel):
@@ -136,5 +138,9 @@ class ManifoldMarket(BaseModel):
             id=self.id,
             question=self.question,
             outcomes=self.outcomes,
+            bet_amount_currency=self.BET_AMOUNT_CURRENCY,
             original_market=self,
         )
+
+    def __repr__(self) -> str:
+        return f"Manifold's market: {self.question}"

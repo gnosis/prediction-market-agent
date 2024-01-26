@@ -8,7 +8,6 @@ from prediction_market_agent.markets.omen import (
     omen_calculate_buy_amount,
     OmenMarket,
 )
-from prediction_market_agent.data_models.market_data_models import Market
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
 from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai, ONE_XDAI
 from prediction_market_agent.tools.gtypes import Probability, xDai, xdai_type, wei_type

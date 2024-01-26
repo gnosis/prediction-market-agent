@@ -24,11 +24,11 @@ def main(
     keys = pma.utils.get_keys()
 
     # Pick a market
-    market = get_binary_markets(market_type)[0]
+    market = get_binary_markets(market_type)[0].to_agent_market()
 
     # Create the agent and run it
     agent = get_agent(agent_type)
-    result = agent.answer_binary_market(market.to_agent_market())
+    result = agent.answer_binary_market(market)
 
     # Place a bet based on the result
     if auto_bet:
@@ -47,10 +47,10 @@ def main(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
         amount = Decimal(
-            input(f"How much do you want to bet? (in {market.BET_AMOUNT_CURRENCY}): ")
+            input(f"How much do you want to bet? (in {market.bet_amount_currency}): ")
         )
         place_bet(
-            market=market,
+            market=market.original_market,
             amount_mana=Mana(amount),
             amount_xdai=xDai(amount),
             outcome=result,

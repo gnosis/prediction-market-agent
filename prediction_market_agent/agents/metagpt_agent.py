@@ -28,7 +28,7 @@ class MetaGPTAgent(AbstractAgent):
             self._agent = Researcher()
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
-        async def main(objective: str):
+        async def main(objective: str) -> None:
             await self._agent.run(objective)
 
         objective = (
