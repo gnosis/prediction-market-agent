@@ -14,31 +14,23 @@ from prediction_market_agent.tools.types import (
 from datetime import datetime
 
 
-class MarketProtocol(t.Protocol):
+class AgentMarket(BaseModel):
     """
-    Protocol for markets, which are questions that can be answered by the agent.
-
-    Market must have an unique ID (so the agent can store information about it) and question to be answered.
-
-    Protocol, instead of parent Base class, is used to allow markets with different data models to be used,
-    for example, Omen doesn't have `question` field, but property `question` is created (see below) to adhere to this protocol.
+    Common market class that can be created from vendor specific markets.
+    Contains everything that is needed for an agent to make a prediction.
     """
-
-    BET_AMOUNT_CURRENCY: str
 
     id: str
     question: str
+    outcomes: list[str]
+    original_market: t.Union["OmenMarket", "ManifoldMarket"]
 
 
-class Market(BaseModel):
+class OmenMarket(BaseModel):
     """
-    Most probably this class will be empty and serve just as parent for markets,
-    as we can't guarantee any common fields/methods between different markets,
-    but, it's still good to have.
+    https://aiomen.eth.limo
     """
 
-
-class OmenMarket(Market):
     BET_AMOUNT_CURRENCY: t.ClassVar[str] = "xDai"
 
     id: HexAddress
@@ -50,10 +42,6 @@ class OmenMarket(Market):
     outcomeTokenAmounts: list[OmenOutcomeToken] = []
     outcomeTokenMarginalPrices: list[xDai] = []
     fee: t.Optional[Wei] = None
-
-    @property
-    def question(self) -> str:
-        return self.title
 
     @property
     def market_maker_contract_address(self) -> HexAddress:
@@ -87,6 +75,14 @@ class OmenMarket(Market):
         else:
             return self.outcomes[outcome_index]
 
+    def to_agent_market(self) -> AgentMarket:
+        return AgentMarket(
+            id=self.id,
+            question=self.title,
+            outcomes=self.outcomes,
+            original_market=self,
+        )
+
     def __repr__(self):
         return f"Market: {self.title}"
 
@@ -96,7 +92,11 @@ class ManifoldPool(BaseModel):
     YES: float
 
 
-class ManifoldMarket(Market):
+class ManifoldMarket(BaseModel):
+    """
+    https://manifold.markets
+    """
+
     BET_AMOUNT_CURRENCY: t.ClassVar[str] = "Mana"
 
     id: str
@@ -126,3 +126,11 @@ class ManifoldMarket(Market):
     @property
     def outcomes(self) -> list[str]:
         return list(self.pool.model_fields.keys())
+
+    def to_agent_market(self) -> "AgentMarket":
+        return AgentMarket(
+            id=self.id,
+            question=self.question,
+            outcomes=self.outcomes,
+            original_market=self,
+        )

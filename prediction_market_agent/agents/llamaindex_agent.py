@@ -6,7 +6,7 @@ from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import google_search
 from prediction_market_agent.tools.web_scrape import web_scrape
 from prediction_market_agent import utils
-from prediction_market_agent.data_models.market_data_models import MarketProtocol
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 
 
 class LlamaIndexAgent(AbstractAgent):
@@ -21,7 +21,7 @@ class LlamaIndexAgent(AbstractAgent):
             system_prompt="You are a researcher with tools to search and web scrape, in order to produce high quality, fact-based results for the research objective you've been given. Make sure you search for a variety of high quality sources, and that the results you produce are relevant to the objective you've been given. Do not try to scrape URLs that prevent scraping. Scrape from sufficient sources to produce a high quality result.",
         )
 
-    def answer_binary_market(self, market: MarketProtocol) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool:
         objective = utils.get_market_prompt(market.question)
         response = self._agent.chat(objective).response
         return utils.parse_result_to_boolean(response)
