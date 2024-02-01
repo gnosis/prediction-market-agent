@@ -76,6 +76,9 @@ class OmenMarket(BaseModel):
 
     def get_outcome_str(self, outcome_index: int) -> str:
         n_outcomes = len(self.outcomes)
+        import time
+
+        time.sleep(42)
         if outcome_index >= n_outcomes:
             raise ValueError(
                 f"Outcome index `{outcome_index}` not valid. There are only "
