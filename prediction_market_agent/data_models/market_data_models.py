@@ -44,7 +44,7 @@ class OmenMarket(BaseModel):
     https://aiomen.eth.limo
     """
 
-    BET_AMOUNT_CURRENCY: Currency = Currency.xDai
+    BET_AMOUNT_CURRENCY: t.ClassVar[Currency] = Currency.xDai
 
     id: HexAddress
     title: str
