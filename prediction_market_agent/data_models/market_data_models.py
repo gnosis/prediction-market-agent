@@ -1,3 +1,5 @@
+from decimal import Decimal
+from enum import Enum
 import typing as t
 from pydantic import BaseModel
 from web3 import Web3
@@ -14,6 +16,16 @@ from prediction_market_agent.tools.gtypes import (
 from datetime import datetime
 
 
+class Currency(str, Enum):
+    xDai = "xDai"
+    Mana = "Mana"
+
+
+class BetAmount(BaseModel):
+    amount: Decimal
+    currency: Currency
+
+
 class AgentMarket(BaseModel):
     """
     Common market class that can be created from vendor specific markets.
@@ -23,7 +35,7 @@ class AgentMarket(BaseModel):
     id: str
     question: str
     outcomes: list[str]
-    bet_amount_currency: str
+    bet_amount_currency: Currency
     original_market: t.Union["OmenMarket", "ManifoldMarket"]
 
 
@@ -32,7 +44,7 @@ class OmenMarket(BaseModel):
     https://aiomen.eth.limo
     """
 
-    BET_AMOUNT_CURRENCY: t.ClassVar[str] = "xDai"
+    BET_AMOUNT_CURRENCY: t.ClassVar[Currency] = Currency.xDai
 
     id: HexAddress
     title: str
@@ -107,7 +119,7 @@ class ManifoldMarket(BaseModel):
     https://manifold.markets
     """
 
-    BET_AMOUNT_CURRENCY: t.ClassVar[str] = "Mana"
+    BET_AMOUNT_CURRENCY: Currency = Currency.Mana
 
     id: str
     question: str

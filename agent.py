@@ -1,7 +1,6 @@
 import typer
 import time
 import logging
-import typing as t
 from decimal import Decimal
 from datetime import timedelta
 
@@ -9,10 +8,9 @@ import prediction_market_agent as pma
 from prediction_market_agent.tools.gtypes import xDai, Mana
 from prediction_market_agent.markets.all_markets import (
     MarketType,
+    get_bet_amount,
     get_binary_markets,
     place_bet,
-    omen,
-    manifold,
 )
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
@@ -49,8 +47,7 @@ def main(
 
         place_bet(
             market=agent_market.original_market,
-            amount_mana=Mana(amount),
-            amount_xdai=xDai(amount),
+            amount=get_bet_amount(amount, market_type),
             outcome=answer,
             keys=keys,
             omen_auto_deposit=True,
