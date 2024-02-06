@@ -1,8 +1,9 @@
+from decimal import Decimal
+from enum import Enum
 import typing as t
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import Wei
-from prediction_market_agent.markets.all_markets import Currency
 from prediction_market_agent.tools.gtypes import (
     USD,
     HexAddress,
@@ -13,6 +14,16 @@ from prediction_market_agent.tools.gtypes import (
     xDai,
 )
 from datetime import datetime
+
+
+class Currency(str, Enum):
+    xDai = "xDai"
+    Mana = "Mana"
+
+
+class BetAmount(BaseModel):
+    amount: Decimal
+    currency: Currency
 
 
 class AgentMarket(BaseModel):

@@ -1,22 +1,12 @@
 from decimal import Decimal
 import typing as t
 from enum import Enum
+from prediction_market_agent.data_models.market_data_models import BetAmount, Currency
 
-from pydantic import BaseModel
 from prediction_market_agent.markets import manifold, omen
-from prediction_market_agent.tools.gtypes import Mana
+from prediction_market_agent.tools.gtypes import Mana, xDai
 from prediction_market_agent.tools.utils import should_not_happen, check_not_none
 from prediction_market_agent.utils import APIKeys
-
-
-class Currency(str, Enum):
-    xDai = "xDai"
-    Mana = "Mana"
-
-
-class BetAmount(BaseModel):
-    amount: Decimal
-    currency: Currency
 
 
 class MarketType(str, Enum):
@@ -82,7 +72,7 @@ def place_bet(
     elif isinstance(market, omen.OmenMarket):
         if amount.currency != Currency.xDai:
             raise ValueError(f"Omen bets are made in xDai. Got {amount.currency}.")
-        amount_xdai = Mana(amount.amount)
+        amount_xdai = xDai(amount.amount)
         omen.binary_omen_buy_outcome_tx(
             amount=check_not_none(amount_xdai),
             from_address=check_not_none(keys.bet_from_address),
