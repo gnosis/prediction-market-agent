@@ -89,6 +89,7 @@ A list of framework projects that had traction but are no longer under developme
 - [SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
 - [Open Interpreter](https://github.com/KillianLucas/open-interpreter)
 - [Agent OS](https://github.com/smartcomputer-ai/agent-os)
+- [Council](https://github.com/chain-ml/council)
 
 ## TODOs
 
