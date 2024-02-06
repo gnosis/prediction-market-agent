@@ -6,6 +6,7 @@ from prediction_market_agent.agents.all_agents import AgentType, get_agent
 from prediction_market_agent.tools.gtypes import xDai, Mana
 from prediction_market_agent.markets.all_markets import (
     MarketType,
+    get_bet_amount,
     omen,
     manifold,
     get_binary_markets,
@@ -51,8 +52,7 @@ def main(
         )
         place_bet(
             market=market.original_market,
-            amount_mana=Mana(amount),
-            amount_xdai=xDai(amount),
+            amount=get_bet_amount(amount, market_type),
             outcome=result,
             keys=keys,
             omen_auto_deposit=True,

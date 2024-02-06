@@ -2,6 +2,7 @@ import typing as t
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import Wei
+from prediction_market_agent.markets.all_markets import Currency
 from prediction_market_agent.tools.gtypes import (
     USD,
     HexAddress,
@@ -23,7 +24,7 @@ class AgentMarket(BaseModel):
     id: str
     question: str
     outcomes: list[str]
-    bet_amount_currency: str
+    bet_amount_currency: Currency
     original_market: t.Union["OmenMarket", "ManifoldMarket"]
 
 
@@ -32,7 +33,7 @@ class OmenMarket(BaseModel):
     https://aiomen.eth.limo
     """
 
-    BET_AMOUNT_CURRENCY: t.ClassVar[str] = "xDai"
+    BET_AMOUNT_CURRENCY: Currency = Currency.xDai
 
     id: HexAddress
     title: str
@@ -107,7 +108,7 @@ class ManifoldMarket(BaseModel):
     https://manifold.markets
     """
 
-    BET_AMOUNT_CURRENCY: t.ClassVar[str] = "Mana"
+    BET_AMOUNT_CURRENCY: Currency = Currency.Mana
 
     id: str
     question: str

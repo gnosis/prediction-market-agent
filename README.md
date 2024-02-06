@@ -37,12 +37,16 @@ Execute `main.py` with optional arguments:
 
 ```bash
 % python main.py --help
-usage: main.py [-h] [--agent-type {langchain,autogen,always_yes}] [--auto-bet AUTO_BET]
+Usage: main.py [OPTIONS]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --agent-type {langchain,autogen,always_yes}
-  --auto-bet AUTO_BET   If true, does not require user input to place the bet.
+  Picks one market and answers it, optionally placing a bet.
+
+Options:
+  --market-type [manifold|omen]   [default: MarketType.MANIFOLD]
+  --agent-type [langchain|autogen|always_yes|coin_flip|llamaindex|metagpt|crewai|custom_openai|custom_llama]
+                                  [default: AgentType.ALWAYS_YES]
+  --auto-bet / --no-auto-bet      [default: no-auto-bet]
+  --help                          Show this message and exit.
 ```
 
 ## Testing
