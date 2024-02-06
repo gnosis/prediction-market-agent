@@ -26,19 +26,22 @@ def get_bet_amount(amount: Decimal, market_type: MarketType) -> BetAmount:
 @t.overload
 def get_binary_markets(
     market_type: t.Literal[MarketType.MANIFOLD],
-) -> list[manifold.ManifoldMarket]: ...
+) -> list[manifold.ManifoldMarket]:
+    ...
 
 
 @t.overload
 def get_binary_markets(
     market_type: t.Literal[MarketType.OMEN],
-) -> list[omen.OmenMarket]: ...
+) -> list[omen.OmenMarket]:
+    ...
 
 
 @t.overload
 def get_binary_markets(
     market_type: MarketType,
-) -> t.Union[list[manifold.ManifoldMarket], list[omen.OmenMarket]]: ...
+) -> t.Union[list[manifold.ManifoldMarket], list[omen.OmenMarket]]:
+    ...
 
 
 def get_binary_markets(
