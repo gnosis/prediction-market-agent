@@ -87,6 +87,8 @@ A list of framework projects that had traction but are no longer under developme
   - Note: Pip installing this [package](https://docs.tavily.com/docs/gpt-researcher/pip-package) breaks langchain agent atm due to incompatible dependencies.
 - [OpenAI assistants API](https://platform.openai.com/docs/assistants)
 - [SuperAGI](https://github.com/TransformerOptimus/SuperAGI)
+- [Open Interpreter](https://github.com/KillianLucas/open-interpreter)
+- [Agent OS](https://github.com/smartcomputer-ai/agent-os)
 - [Council](https://github.com/chain-ml/council)
 
 ## TODOs
