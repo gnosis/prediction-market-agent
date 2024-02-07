@@ -1,8 +1,10 @@
 from enum import Enum
+import subprocess
 import time
+import tempfile
 from pydantic import BaseModel
-from prediction_market_agent.data_models.market_data_models import AgentMarket
 
+from prediction_market_agent.data_models.market_data_models import AgentMarket
 from prediction_market_agent.markets.all_markets import (
     MarketType,
     get_binary_markets,
@@ -35,8 +37,17 @@ class DeployableAgent(BaseModel):
     ):
         if deployment_type == DeploymentType.GOOGLE_CLOUD:
             # Deploy to Google Cloud Functions, and use Google Cloud Scheduler to run the function
-            name = f"{self.__class__.__name__.lower()}.{market_type}.{int(time.time())}"
-            # TODO
+            gcp_function_name = self.get_gcloud_fname(market_type=MarketType.MANIFOLD)
+
+            cmd = (
+                f"gcloud functions deploy {gcp_function_name} "
+                f"--runtime=python310 "
+                f"--trigger-http "
+                f"--allow-unauthenticated "
+                f"--entry-point= "
+                # f"--source={file} "
+            )
+            # subprocess.run(cmd, shell=True)
         elif deployment_type == DeploymentType.LOCAL:
             while True:
                 self.run(market_type, api_keys)
@@ -57,3 +68,6 @@ class DeployableAgent(BaseModel):
                 keys=api_keys,
                 omen_auto_deposit=True,
             )
+
+    def get_gcloud_fname(self, market_type: MarketType) -> str:
+        return f"{self.__class__.__name__.lower()}-{market_type}-{int(time.time())}"
