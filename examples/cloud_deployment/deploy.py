@@ -15,7 +15,7 @@ if __name__ == "__main__":
     fname = deploy_to_gcp(
         requirements_file=f"{current_dir}/../../pyproject.toml",
         extra_deps=[
-            "git+https://github.com/evangriffiths/prediction-market-agent.git@evan/deploy-agent"
+            "git+https://github.com/gnosis/prediction-market-agent.git@evan/deploy-agent"
         ],
         function_file=f"{current_dir}/agent.py",
         market_type=MarketType.MANIFOLD,
