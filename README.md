@@ -65,6 +65,12 @@ pytest tests
 
 Note: these make actual API calls!
 
+## Deploying
+
+To deploy an agent to google cloud, see the example in `examples/cloud_deployment`.
+
+Requires the gcloud cli (see [here](https://cloud.google.com/sdk/docs/install)), and auth to have been completed (i.e. `gcloud auth login`).
+
 ## Frameworks implemented
 
 | Framework | Notes |

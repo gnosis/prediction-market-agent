@@ -1,20 +1,31 @@
+from decimal import Decimal
 from functools import reduce
 import numpy as np
 import typing as t
 from web3 import Web3
+from prediction_market_agent.data_models.market_data_models import BetAmount, Currency
 
 from prediction_market_agent.markets.omen import (
-    get_market,
     omen_calculate_buy_amount,
     OmenMarket,
 )
+from prediction_market_agent.markets.all_markets import MarketType
 from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
 from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai, ONE_XDAI
-from prediction_market_agent.tools.gtypes import Probability, xDai, xdai_type, wei_type
+from prediction_market_agent.tools.gtypes import Probability, xDai, wei_type
 from prediction_market_agent.tools.utils import check_not_none
 
 
 OutcomeIndex = t.Literal[0, 1]
+
+
+def get_tiny_bet(market_type: MarketType) -> BetAmount:
+    if market_type == MarketType.OMEN:
+        return BetAmount(amount=Decimal(0.00001), currency=Currency.xDai)
+    elif market_type == MarketType.MANIFOLD:
+        return BetAmount(amount=Decimal(1), currency=Currency.Mana)
+    else:
+        raise ValueError(f"Unknown market type: {market_type}")
 
 
 def get_market_moving_bet(

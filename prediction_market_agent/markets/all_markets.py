@@ -48,7 +48,9 @@ def get_binary_markets(
     market_type: MarketType,
 ) -> t.Union[list[manifold.ManifoldMarket], list[omen.OmenMarket]]:
     if market_type == MarketType.MANIFOLD:
-        return manifold.get_manifold_binary_markets(limit=10)
+        return manifold.get_manifold_binary_markets(
+            limit=20, sort="close-date"
+        )  # Pick markets closing soonest
     elif market_type == MarketType.OMEN:
         return omen.get_omen_binary_markets(limit=10)
     else:
