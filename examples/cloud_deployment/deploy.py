@@ -31,7 +31,7 @@ if __name__ == "__main__":
     assert response.ok
 
     # Schedule the function
-    schedule_deployed_gcp_function(fname, sleep_time=60 * 10)
+    schedule_deployed_gcp_function(fname, cron_schedule="* * * * *")
 
     # Delete the function
     remove_deployed_gcp_function(fname)

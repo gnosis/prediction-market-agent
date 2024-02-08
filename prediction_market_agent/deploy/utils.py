@@ -47,12 +47,13 @@ def gcloud_deploy_cmd(
     return cmd
 
 
-def gcloud_schedule_cmd(function_name: str, sleep_time: int) -> str:
+def gcloud_schedule_cmd(function_name: str, cron_schedule: str) -> str:
     return (
         f"gcloud scheduler jobs create http {function_name} "
-        f"--schedule '*/{sleep_time} * * * *' "
+        f"--schedule '{cron_schedule}' "
         f"--uri {get_gcloud_function_uri(function_name)} "
-        f"--http-method POST"
+        f"--http-method POST "
+        f"--location {get_gcloud_region()}"
     )
 
 
@@ -121,3 +122,7 @@ def get_gcp_function(fname: str) -> Function:
 
 def gcp_function_is_active(fname: str) -> bool:
     return get_gcp_function(fname).state == Function.State.ACTIVE
+
+
+def convert_seconds_to_cron_string(seconds: int) -> str:
+    return f"*/* * * * *"

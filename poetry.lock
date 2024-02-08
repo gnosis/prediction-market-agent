@@ -695,6 +695,21 @@ openai = ">=1.7.1,<2.0.0"
 pydantic = ">=2.4.2,<3.0.0"
 
 [[package]]
+name = "cron-validator"
+version = "1.0.8"
+description = "Unix cron implementation by Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "cron-validator-1.0.8.tar.gz", hash = "sha256:dd485257adb6f590b3e9433f641440c801d307015259c1ee3eb6e21c964c8026"},
+    {file = "cron_validator-1.0.8-py3-none-any.whl", hash = "sha256:6477fcc3d60bfbd1ec00a708f0b8b5136c1fef8140c10effea1f45b79d778653"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+pytz = "*"
+
+[[package]]
 name = "cryptography"
 version = "42.0.2"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
@@ -4872,4 +4887,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.10"
-content-hash = "9cc7a0118546f86fbd9f1dbbcb99d2ca472e912da3c4959e7eaedd3f741228fa"
+content-hash = "406b2ab8c00c3c932932cbea541582cc6a00995409268700c24134b81269e2cc"

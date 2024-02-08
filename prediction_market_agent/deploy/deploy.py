@@ -1,3 +1,4 @@
+from cron_validator import CronValidator
 from enum import Enum
 import os
 from pydantic import BaseModel
@@ -96,7 +97,7 @@ def deploy_to_gcp(
         # Copy function_file to tempdir/main.py
         shutil.copy(function_file, f"{tempdir}/main.py")
 
-        # If the file is a .toml file, convert it to a requirements file
+        # If the file is a .toml file, convert it to a requirements.txt file
         if requirements_file.endswith(".toml"):
             export_requirements_from_toml(output_dir=tempdir, extra_deps=extra_deps)
         else:
@@ -116,8 +117,12 @@ def deploy_to_gcp(
     return gcp_fname
 
 
-def schedule_deployed_gcp_function(function_name: str, sleep_time: int):
-    cmd = gcloud_schedule_cmd(function_name=function_name, sleep_time=sleep_time)
+def schedule_deployed_gcp_function(function_name: str, cron_schedule: str):
+    # Validate the cron schedule
+    if not CronValidator().parse(cron_schedule):
+        raise ValueError(f"Invalid cron schedule {cron_schedule}")
+
+    cmd = gcloud_schedule_cmd(function_name=function_name, cron_schedule=cron_schedule)
     subprocess.run(cmd, shell=True)
 
 
