@@ -122,7 +122,3 @@ def get_gcp_function(fname: str) -> Function:
 
 def gcp_function_is_active(fname: str) -> bool:
     return get_gcp_function(fname).state == Function.State.ACTIVE
-
-
-def convert_seconds_to_cron_string(seconds: int) -> str:
-    return f"*/* * * * *"

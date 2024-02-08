@@ -33,9 +33,7 @@ class DeploymentType(str, Enum):
 
 class DeployableAgent(BaseModel):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
-        if len(markets) > 1:
-            return markets[:1]
-        return markets
+        return markets[:1]
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
         raise NotImplementedError("This method should be implemented by the subclass")
