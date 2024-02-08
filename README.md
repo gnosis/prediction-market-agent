@@ -65,6 +65,10 @@ pytest tests
 
 Note: these make actual API calls!
 
+## Deploying
+
+To deploy an agent to google cloud, see the example in `examples/cloud_deployment`
+
 ## Frameworks implemented
 
 | Framework | Notes |
