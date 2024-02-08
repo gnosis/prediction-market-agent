@@ -11,7 +11,9 @@ import time
 from prediction_market_agent.data_models.market_data_models import AgentMarket
 from prediction_market_agent.deploy.utils import (
     export_requirements_from_toml,
+    gcloud_create_topic_cmd,
     gcloud_delete_function_cmd,
+    gcloud_delete_topic_cmd,
     gcloud_deploy_cmd,
     gcloud_schedule_cmd,
     get_gcloud_function_uri,
@@ -113,6 +115,10 @@ def deploy_to_gcp(
         else:
             shutil.copy(requirements_file, f"{tempdir}/requirements.txt")
 
+        # Create the topic used to trigger the function. Note we use the
+        # convention that the topic name is the same as the function name
+        subprocess.run(gcloud_create_topic_cmd(gcp_fname), shell=True)
+
         # Deploy the function
         cmd = gcloud_deploy_cmd(
             gcp_function_name=gcp_fname,
@@ -143,5 +149,5 @@ def run_deployed_gcp_function(function_name: str) -> requests.Response:
 
 
 def remove_deployed_gcp_function(function_name: str) -> None:
-    cmd = gcloud_delete_function_cmd(function_name)
-    subprocess.run(cmd, shell=True)
+    subprocess.run(gcloud_delete_function_cmd(function_name), shell=True)
+    subprocess.run(gcloud_delete_topic_cmd(function_name), shell=True)
