@@ -40,11 +40,11 @@ class DeployableAgent(BaseModel):
 
     def deploy(
         self,
-        sleep_time: int,
         market_type: MarketType,
         deployment_type: DeploymentType,
         api_keys: APIKeys,
-        timeout: int,
+        sleep_time: float,
+        timeout: float,
         place_bet: bool,
     ) -> None:
         if deployment_type == DeploymentType.GOOGLE_CLOUD:
@@ -56,14 +56,14 @@ class DeployableAgent(BaseModel):
             start_time = time.time()
             while True:
                 self.run(
-                    market_type=market_type, api_keys=api_keys, place_bet=place_bet
+                    market_type=market_type, api_keys=api_keys, _place_bet=place_bet
                 )
                 time.sleep(sleep_time)
                 if time.time() - start_time > timeout:
                     break
 
     def run(
-        self, market_type: MarketType, api_keys: APIKeys, place_bet: bool = True
+        self, market_type: MarketType, api_keys: APIKeys, _place_bet: bool = True
     ) -> None:
         available_markets = [
             x.to_agent_market() for x in get_binary_markets(market_type)
@@ -71,7 +71,7 @@ class DeployableAgent(BaseModel):
         markets = self.pick_markets(available_markets)
         for market in markets:
             result = self.answer_binary_market(market)
-            if place_bet:
+            if _place_bet:
                 print(f"Placing bet on {market} with result {result}")
                 place_bet(
                     market=market.original_market,

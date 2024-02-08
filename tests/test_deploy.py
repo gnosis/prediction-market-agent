@@ -6,7 +6,7 @@ from prediction_market_agent.markets.all_markets import MarketType
 from prediction_market_agent.utils import get_keys
 
 
-def test_local_deployment():
+def test_local_deployment() -> None:
     class DeployableCoinFlipAgent(DeployableAgent):
         def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
             if len(markets) > 1:
