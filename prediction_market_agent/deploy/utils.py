@@ -7,7 +7,7 @@ from google.cloud.functions_v2.services.function_service.client import (
 from google.cloud.functions_v2.types.functions import Function
 
 
-def export_requirements_from_toml(output_dir: str, extra_deps: list[str] = []):
+def export_requirements_from_toml(output_dir: str, extra_deps: list[str] = []) -> None:
     if not os.path.exists(output_dir):
         raise ValueError(f"Directory {output_dir} does not exist")
     output_file = f"{output_dir}/requirements.txt"
@@ -57,7 +57,7 @@ def gcloud_schedule_cmd(function_name: str, cron_schedule: str) -> str:
     )
 
 
-def gcloud_delete_function_cmd(fname: str) -> None:
+def gcloud_delete_function_cmd(fname: str) -> str:
     return f"gcloud functions delete {fname} --region={get_gcloud_region()} --quiet"
 
 
@@ -89,7 +89,7 @@ def get_gcloud_region() -> str:
     return "europe-west2"  # London
 
 
-def get_gcloud_python_runtime_str():
+def get_gcloud_python_runtime_str() -> str:
     return f"python{sys.version_info.major}{sys.version_info.minor}"
 
 

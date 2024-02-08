@@ -1,3 +1,4 @@
+from decimal import Decimal
 from functools import reduce
 import numpy as np
 import typing as t
@@ -20,9 +21,9 @@ OutcomeIndex = t.Literal[0, 1]
 
 def get_tiny_bet(market_type: MarketType) -> BetAmount:
     if market_type == MarketType.OMEN:
-        return BetAmount(amount=0.00001, currency=Currency.xDai)
+        return BetAmount(amount=Decimal(0.00001), currency=Currency.xDai)
     elif market_type == MarketType.MANIFOLD:
-        return BetAmount(amount=1, currency=Currency.Mana)
+        return BetAmount(amount=Decimal(1), currency=Currency.Mana)
     else:
         raise ValueError(f"Unknown market type: {market_type}")
 

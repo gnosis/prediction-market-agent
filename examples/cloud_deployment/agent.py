@@ -1,3 +1,4 @@
+from flask.wrappers import Request
 import functions_framework
 import random
 
@@ -18,6 +19,6 @@ class DeployableCoinFlipAgent(DeployableAgent):
 
 
 @functions_framework.http
-def main(request):
+def main(request: Request) -> str:
     DeployableCoinFlipAgent().run(market_type=MarketType.MANIFOLD, api_keys=get_keys())
     return "Success"

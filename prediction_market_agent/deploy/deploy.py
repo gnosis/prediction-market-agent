@@ -44,7 +44,7 @@ class DeployableAgent(BaseModel):
         market_type: MarketType,
         deployment_type: DeploymentType,
         api_keys: APIKeys,
-    ):
+    ) -> None:
         if deployment_type == DeploymentType.GOOGLE_CLOUD:
             # Deploy to Google Cloud Functions, and use Google Cloud Scheduler to run the function
             raise NotImplementedError("TODO not currently possible programatically")
@@ -53,7 +53,7 @@ class DeployableAgent(BaseModel):
                 self.run(market_type, api_keys)
                 time.sleep(sleep_time)
 
-    def run(self, market_type: MarketType, api_keys: APIKeys):
+    def run(self, market_type: MarketType, api_keys: APIKeys) -> None:
         available_markets = [
             x.to_agent_market() for x in get_binary_markets(market_type)
         ]
@@ -115,7 +115,7 @@ def deploy_to_gcp(
     return gcp_fname
 
 
-def schedule_deployed_gcp_function(function_name: str, cron_schedule: str):
+def schedule_deployed_gcp_function(function_name: str, cron_schedule: str) -> None:
     # Validate the cron schedule
     if not CronValidator().parse(cron_schedule):
         raise ValueError(f"Invalid cron schedule {cron_schedule}")
@@ -130,6 +130,6 @@ def run_deployed_gcp_function(function_name: str) -> requests.Response:
     return requests.post(uri, headers=header)
 
 
-def remove_deployed_gcp_function(function_name: str):
+def remove_deployed_gcp_function(function_name: str) -> None:
     cmd = gcloud_delete_function_cmd(function_name)
     subprocess.run(cmd, shell=True)
