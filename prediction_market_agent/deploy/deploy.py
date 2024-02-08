@@ -50,7 +50,7 @@ class DeployableAgent(BaseModel):
         if deployment_type == DeploymentType.GOOGLE_CLOUD:
             # Deploy to Google Cloud Functions, and use Google Cloud Scheduler to run the function
             raise NotImplementedError(
-                "TODO not currently possible via DeployableAgent class"
+                "TODO not currently possible via DeployableAgent class. See examples/cloud_deployment/ instead."
             )
         elif deployment_type == DeploymentType.LOCAL:
             start_time = time.time()
