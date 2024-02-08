@@ -44,30 +44,42 @@ class DeployableAgent(BaseModel):
         market_type: MarketType,
         deployment_type: DeploymentType,
         api_keys: APIKeys,
+        timeout: int,
+        place_bet: bool,
     ) -> None:
         if deployment_type == DeploymentType.GOOGLE_CLOUD:
             # Deploy to Google Cloud Functions, and use Google Cloud Scheduler to run the function
-            raise NotImplementedError("TODO not currently possible programatically")
+            raise NotImplementedError(
+                "TODO not currently possible via DeployableAgent class"
+            )
         elif deployment_type == DeploymentType.LOCAL:
+            start_time = time.time()
             while True:
-                self.run(market_type, api_keys)
+                self.run(
+                    market_type=market_type, api_keys=api_keys, place_bet=place_bet
+                )
                 time.sleep(sleep_time)
+                if time.time() - start_time > timeout:
+                    break
 
-    def run(self, market_type: MarketType, api_keys: APIKeys) -> None:
+    def run(
+        self, market_type: MarketType, api_keys: APIKeys, place_bet: bool = True
+    ) -> None:
         available_markets = [
             x.to_agent_market() for x in get_binary_markets(market_type)
         ]
         markets = self.pick_markets(available_markets)
         for market in markets:
             result = self.answer_binary_market(market)
-            print(f"Placing bet on {market} with result {result}")
-            place_bet(
-                market=market.original_market,
-                amount=get_tiny_bet(market_type),
-                outcome=result,
-                keys=api_keys,
-                omen_auto_deposit=True,
-            )
+            if place_bet:
+                print(f"Placing bet on {market} with result {result}")
+                place_bet(
+                    market=market.original_market,
+                    amount=get_tiny_bet(market_type),
+                    outcome=result,
+                    keys=api_keys,
+                    omen_auto_deposit=True,
+                )
 
     @classmethod
     def get_gcloud_fname(cls, market_type: MarketType) -> str:

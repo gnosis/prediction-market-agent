@@ -131,7 +131,7 @@ class ManifoldMarket(BaseModel):
     creatorUsername: str
     isResolved: bool
     lastBetTime: datetime
-    lastCommentTime:t.Optional[datetime]
+    lastCommentTime: t.Optional[datetime] = None  # Not always present
     lastUpdatedTime: datetime
     mechanism: str
     outcomeType: str
