@@ -33,7 +33,7 @@ def gcloud_deploy_cmd(
     cmd = (
         f"gcloud functions deploy {gcp_function_name} "
         f"--runtime {get_gcloud_python_runtime_str()} "
-        f"--trigger-http "
+        f"--trigger-topic {gcp_function_name} "
         f"--gen2 "
         f"--region {get_gcloud_region()} "
         f"--source {source} "
@@ -49,16 +49,24 @@ def gcloud_deploy_cmd(
 
 def gcloud_schedule_cmd(function_name: str, cron_schedule: str) -> str:
     return (
-        f"gcloud scheduler jobs create http {function_name} "
+        f"gcloud scheduler jobs create pubsub {function_name} "
         f"--schedule '{cron_schedule}' "
-        f"--uri {get_gcloud_function_uri(function_name)} "
-        f"--http-method POST "
-        f"--location {get_gcloud_region()}"
+        f"--topic {function_name} "
+        f"--location {get_gcloud_region()} "
+        "--message-body '{}' "
     )
 
 
 def gcloud_delete_function_cmd(fname: str) -> str:
     return f"gcloud functions delete {fname} --region={get_gcloud_region()} --quiet"
+
+
+def gcloud_create_topic_cmd(topic_name: str) -> str:
+    return f"gcloud pubsub topics create {topic_name}"
+
+
+def gcloud_delete_topic_cmd(topic_name: str) -> str:
+    return f"gcloud pubsub topics delete {topic_name}"
 
 
 def get_gcloud_project_id() -> str:
