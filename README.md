@@ -103,12 +103,11 @@ A list of framework projects that had traction but are no longer under developme
 
 ## TODOs
 
-- Add `omen.py` that contains abstractions for getting markets and placing bets with the [Omen prediction market](https://omen.eth.limo/).
 - Implement agents for frameworks in `Other frameworks to try`
 - Add option to main.py to use a locally running llm (e.g. Ollama+litellm).
-- Bet more intelligently, based on prediction probability, market odds, market liquidity etc.
 - Extend the agent with tools to pick the market.
 - Split agent functionality into:
   1. Researcher: generates report from a market question
   2. Predictor: Generates a `p_yes`, `p_no` for the market, from which it places a bet.
 - Seeing some reponses like `Error: 401 Client Error: HTTP Forbidden for url` from web scraping tool (e.g. for Reuters). Look to improve.
+- Add `polymarket.py` that contains abstractions for getting markets and placing bets with the [Polymarket prediction market](https://polymarket.com/).
