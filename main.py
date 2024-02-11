@@ -50,7 +50,6 @@ def main(
             market=market.original_market,
             amount=get_bet_amount(amount, market_type),
             outcome=result,
-            keys=keys,
             omen_auto_deposit=True,
         )
 
