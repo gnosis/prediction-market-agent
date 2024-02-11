@@ -18,7 +18,7 @@ class AutoGenAgent(AbstractAgent):
             "config_list": [
                 {
                     "model": "gpt-4",
-                    "api_key": keys.openai,
+                    "api_key": keys.openai_api_key,
                 }
             ],
             "temperature": 0,

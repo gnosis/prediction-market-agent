@@ -11,7 +11,7 @@ from prediction_market_agent_tooling.markets.data_models import AgentMarket
 class LangChainAgent(AbstractAgent):
     def __init__(self) -> None:
         keys = utils.APIKeys()
-        llm = OpenAI(openai_api_key=keys.openai)
+        llm = OpenAI(openai_api_key=keys.openai_api_key)
         # Can use pre-defined search tool
         # TODO: Tavily tool could give better results
         # https://docs.tavily.com/docs/tavily-api/langchain
