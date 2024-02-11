@@ -3340,8 +3340,8 @@ web3 = "^6.15.1"
 [package.source]
 type = "git"
 url = "git@github.com:gnosis/prediction-market-agent-tooling.git"
-reference = "peter/fix-typing"
-resolved_reference = "348797d3f6f758db85b2966b903d48751ec19c34"
+reference = "main"
+resolved_reference = "f0b069b6df6c8ea6ff1cd43d7548a8235d8d3b4d"
 
 [[package]]
 name = "proto-plus"
@@ -5155,4 +5155,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.10"
-content-hash = "c4f1d4d0c07c4710351fed210b79dcef8a99547eb290d0415d6871cef17f304d"
+content-hash = "270965a5cc3901721e606762729add1ecb674d086eba6c7167e9074191478b7c"
