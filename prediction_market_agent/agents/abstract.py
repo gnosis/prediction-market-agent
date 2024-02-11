@@ -1,4 +1,4 @@
-from prediction_market_agent.data_models.market_data_models import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class AbstractAgent:

@@ -1,104 +1,26 @@
-import dotenv
-import os
 import typing as t
-from web3 import Web3
-from prediction_market_agent.tools.gtypes import (
-    ChecksumAddress,
-    PrivateKey,
-    HexAddress,
-    HexStr,
+from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
+    should_not_happen,
 )
-from prediction_market_agent.tools.utils import check_not_none
+from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
 
 
-def get_api_key(name: str) -> t.Optional[str]:
-    dotenv.load_dotenv()
-    return os.getenv(name)
-
-
-def get_manifold_api_key() -> t.Optional[str]:
-    return get_api_key("MANIFOLD_API_KEY")
-
-
-def get_serp_api_key() -> t.Optional[str]:
-    return get_api_key("SERP_API_KEY")
-
-
-def get_openai_api_key() -> t.Optional[str]:
-    return get_api_key("OPENAI_API_KEY")
-
-
-def get_bet_from_address() -> t.Optional[ChecksumAddress]:
-    address = get_api_key("BET_FROM_ADDRESS")
-    return verify_address(address) if address else None
-
-
-def get_bet_from_private_key() -> t.Optional[PrivateKey]:
-    private_key = get_api_key("BET_FROM_PRIVATE_KEY")
-    return PrivateKey(private_key) if private_key else None
-
-
-def verify_address(address: str) -> ChecksumAddress:
-    if not Web3.is_checksum_address(address):
-        raise ValueError(
-            f"The address {address} is not a valid checksum address, please fix your input."
-        )
-    return ChecksumAddress(HexAddress(HexStr(address)))
-
-
-class APIKeys:
-    def __init__(
-        self,
-        manifold: t.Optional[str] = None,
-        serp: t.Optional[str] = None,
-        openai: t.Optional[str] = None,
-        bet_from_address: t.Optional[ChecksumAddress] = None,
-        bet_from_private_key: t.Optional[PrivateKey] = None,
-    ):
-        self._manifold = manifold
-        self._serp = serp
-        self._openai = openai
-        self._bet_from_address = bet_from_address
-        self._bet_from_private_key = bet_from_private_key
+class APIKeys(APIKeysBase):
+    SERP_API_KEY: t.Optional[str] = None
+    OPENAI_API_KEY: t.Optional[str] = None
 
     @property
-    def manifold(self) -> str:
-        return check_not_none(
-            self._manifold, "MANIFOLD_API_KEY missing in the environment."
+    def serp_api_key(self) -> str:
+        return check_not_none(  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+            self.SERP_API_KEY, "SERP_API_KEY missing in the environment."
         )
 
     @property
-    def serp(self) -> str:
-        return check_not_none(self._serp, "SERP_API_KEY missing in the environment.")
-
-    @property
-    def openai(self) -> str:
-        return check_not_none(
-            self._openai, "OPENAI_API_KEY missing in the environment."
+    def openai_api_key(self) -> str:
+        return check_not_none(  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+            self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
         )
-
-    @property
-    def bet_from_address(self) -> ChecksumAddress:
-        return check_not_none(
-            self._bet_from_address, "BET_FROM_ADDRESS missing in the environment."
-        )
-
-    @property
-    def bet_from_private_key(self) -> PrivateKey:
-        return check_not_none(
-            self._bet_from_private_key,
-            "BET_FROM_PRIVATE_KEY missing in the environment.",
-        )
-
-
-def get_keys() -> APIKeys:
-    return APIKeys(
-        manifold=get_manifold_api_key(),
-        serp=get_serp_api_key(),
-        openai=get_openai_api_key(),
-        bet_from_address=get_bet_from_address(),
-        bet_from_private_key=get_bet_from_private_key(),
-    )
 
 
 def get_market_prompt(question: str) -> str:
@@ -111,7 +33,15 @@ def get_market_prompt(question: str) -> str:
 
 
 def parse_result_to_boolean(result: str) -> bool:
-    return True if result == "Yes" else False
+    return (  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+        True
+        if result.lower() == "yes"
+        else (
+            False
+            if result.lower() == "no"
+            else should_not_happen(f"Invalid result: {result}")
+        )
+    )
 
 
 def parse_result_to_str(result: bool) -> str:

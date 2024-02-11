@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-from prediction_market_agent.markets.all_markets import omen
-from prediction_market_agent.tools.gtypes import (
+from prediction_market_agent_tooling.markets.markets import omen
+from prediction_market_agent_tooling.gtypes import (
     Probability,
     xdai_type,
     wei_type,

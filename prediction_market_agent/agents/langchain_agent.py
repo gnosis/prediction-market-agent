@@ -5,12 +5,12 @@ from langchain_community.llms import OpenAI
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.data_models.market_data_models import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class LangChainAgent(AbstractAgent):
     def __init__(self) -> None:
-        keys = utils.get_keys()
+        keys = utils.APIKeys()
         llm = OpenAI(openai_api_key=keys.openai)
         # Can use pre-defined search tool
         # TODO: Tavily tool could give better results

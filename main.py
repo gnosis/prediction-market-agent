@@ -1,14 +1,10 @@
 import typer
 import prediction_market_agent as pma
 from decimal import Decimal
-from prediction_market_agent.tools.utils import should_not_happen
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
-from prediction_market_agent.tools.gtypes import xDai, Mana
-from prediction_market_agent.markets.all_markets import (
+from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_bet_amount,
-    omen,
-    manifold,
     get_binary_markets,
     place_bet,
 )
@@ -22,7 +18,7 @@ def main(
     """
     Picks one market and answers it, optionally placing a bet.
     """
-    keys = pma.utils.get_keys()
+    keys = pma.utils.APIKeys()
 
     # Pick a market
     market = get_binary_markets(market_type)[0].to_agent_market()

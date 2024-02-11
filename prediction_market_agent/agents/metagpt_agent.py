@@ -4,8 +4,8 @@ import json
 import os
 
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.tools.utils import check_not_none
-from prediction_market_agent.data_models.market_data_models import AgentMarket
+from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class MetaGPTAgent(AbstractAgent):

@@ -3,17 +3,24 @@ from functools import reduce
 import numpy as np
 import typing as t
 from web3 import Web3
-from prediction_market_agent.data_models.market_data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.data_models import (
+    BetAmount,
+    Currency,
+)
 
-from prediction_market_agent.markets.omen import (
+from prediction_market_agent_tooling.markets.omen import (
     omen_calculate_buy_amount,
     OmenMarket,
 )
-from prediction_market_agent.markets.all_markets import MarketType
-from prediction_market_agent.tools.gnosis_rpc import GNOSIS_RPC_URL
-from prediction_market_agent.tools.web3_utils import xdai_to_wei, wei_to_xdai, ONE_XDAI
-from prediction_market_agent.tools.gtypes import Probability, xDai, wei_type
-from prediction_market_agent.tools.utils import check_not_none
+from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.gnosis_rpc import GNOSIS_RPC_URL
+from prediction_market_agent_tooling.tools.web3_utils import (
+    xdai_to_wei,
+    wei_to_xdai,
+    ONE_XDAI,
+)
+from prediction_market_agent_tooling.gtypes import Probability, xDai, wei_type
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 
 OutcomeIndex = t.Literal[0, 1]

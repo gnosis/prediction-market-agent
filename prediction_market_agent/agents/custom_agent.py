@@ -14,8 +14,11 @@ from prediction_market_agent.tools.web_scrape_structured import (
     web_scrape_structured_and_summarized,
 )
 from prediction_market_agent.tools.tool_exception_handler import tool_exception_handler
-from prediction_market_agent.tools.utils import check_not_none, should_not_happen
-from prediction_market_agent.data_models.market_data_models import AgentMarket
+from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
+    should_not_happen,
+)
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class CustomAgent(AbstractAgent):
@@ -48,7 +51,7 @@ If you want to answer, return a completion in form of a dictionary with a single
 
         self.verbose = verbose
         self.max_cycles = max_cycles
-        self.keys = utils.get_keys()
+        self.keys = utils.APIKeys()
         self.google_search = google_search
         self.web_scrap_and_summarize = tool_exception_handler(
             map_exception_to_output={
@@ -116,12 +119,12 @@ If you want to answer, return a completion in form of a dictionary with a single
                 tool_output = (
                     self.google_search
                     if tool_name == "GoogleSearchTool"
-                    else self.web_scrap_and_summarize
-                    if tool_name == "WebScrapingTool"
-                    else should_not_happen("Unknown tool requested from the LLM.")
-                )(
-                    **tool_params
-                )  # type: ignore # Ignore typing of input arguments, as `tool_params` come from the LLM.
+                    else (
+                        self.web_scrap_and_summarize
+                        if tool_name == "WebScrapingTool"
+                        else should_not_happen("Unknown tool requested from the LLM.")
+                    )
+                )(**tool_params)
                 self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(
