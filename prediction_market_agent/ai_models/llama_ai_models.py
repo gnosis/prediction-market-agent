@@ -4,7 +4,7 @@ from prediction_market_agent.ai_models.abstract_ai_models import (
 )
 from enum import Enum
 from typing import Optional, Literal
-from prediction_market_agent.tools.utils import should_not_happen
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 import replicate
 
 
@@ -56,9 +56,11 @@ def construct_llama_prompt(messages: list[Message]) -> str:
         (
             message.content
             if message.role == LlamaRole.assistant.value
-            else f"[INST] {message.content} [/INST]"
-            if message.role == LlamaRole.user.value
-            else should_not_happen(f"Invalid role in the message: {message}")
+            else (
+                f"[INST] {message.content} [/INST]"
+                if message.role == LlamaRole.user.value
+                else should_not_happen(f"Invalid role in the message: {message}")
+            )
         )
         for message in messages
     )

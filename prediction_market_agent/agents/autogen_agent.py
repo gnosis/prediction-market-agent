@@ -8,17 +8,17 @@ from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import GoogleSearchTool
 from prediction_market_agent.tools.web_scrape import WebScrapingTool
-from prediction_market_agent.data_models.market_data_models import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class AutoGenAgent(AbstractAgent):
     def get_base_llm_config(self) -> dict[str, t.Any]:
-        keys = utils.get_keys()
+        keys = utils.APIKeys()
         return {
             "config_list": [
                 {
                     "model": "gpt-4",
-                    "api_key": keys.openai,
+                    "api_key": keys.openai_api_key,
                 }
             ],
             "temperature": 0,
