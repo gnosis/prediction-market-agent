@@ -1,15 +1,17 @@
-from prediction_market_agent.ai_models.abstract_ai_models import (
-    AbstractAiChatModel,
-    Message,
-)
 from enum import Enum
+from typing import Literal, Optional
+
 from openai import OpenAI
-from typing import Optional, Literal
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_message_param import (
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
+)
+
+from prediction_market_agent.ai_models.abstract_ai_models import (
+    AbstractAiChatModel,
+    Message,
 )
 
 ROLE_KEY = "role"

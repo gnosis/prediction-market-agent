@@ -50,3 +50,23 @@ jobs:
       - uses: ./.github/actions/python_prepare
       - name: Check with black
         run: poetry run black --check .
+
+  autoflake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/python_prepare
+      - name: Check with autoflake
+        run: |
+          poetry run autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive .
+          git diff --exit-code --quiet || exit 1
+
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/python_prepare
+      - name: Check with isort
+        run: |
+          poetry run isort --profile black .
+          git diff --exit-code --quiet || exit 1

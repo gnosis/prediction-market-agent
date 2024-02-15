@@ -1,12 +1,12 @@
 from llama_index.agent import OpenAIAgent
 from llama_index.llms import OpenAI
 from llama_index.tools import FunctionTool
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
+from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import google_search
 from prediction_market_agent.tools.web_scrape import web_scrape
-from prediction_market_agent import utils
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class LlamaIndexAgent(AbstractAgent):
