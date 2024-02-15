@@ -174,6 +174,21 @@ tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
 tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "autoflake"
+version = "2.2.1"
+description = "Removes unused imports and unused variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "autoflake-2.2.1-py3-none-any.whl", hash = "sha256:265cde0a43c1f44ecfb4f30d95b0437796759d07be7706a2f70e4719234c0f79"},
+    {file = "autoflake-2.2.1.tar.gz", hash = "sha256:62b7b6449a692c3c9b0c916919bbc21648da7281e8506bcf8d3f8280e431ebc1"},
+]
+
+[package.dependencies]
+pyflakes = ">=3.0.0"
+tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.12.3"
 description = "Screen-scraping library"
@@ -3512,6 +3527,17 @@ pydantic = ">=2.3.0"
 python-dotenv = ">=0.21.0"
 
 [[package]]
+name = "pyflakes"
+version = "3.2.0"
+description = "passive checker of Python programs"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pyflakes-3.2.0-py2.py3-none-any.whl", hash = "sha256:84b5be138a2dfbb40689ca07e2152deb896a65c3a3e24c251c5c62489568074a"},
+    {file = "pyflakes-3.2.0.tar.gz", hash = "sha256:1c61603ff154621fb2a9172037d84dca3500def8c8b630657d1701f026f8af3f"},
+]
+
+[[package]]
 name = "pyproject-hooks"
 version = "1.0.0"
 description = "Wrappers to call pyproject.toml-based build backend hooks."
@@ -4981,4 +5007,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.10"
-content-hash = "55056af30c8b9acb85280d1442ab5b0f2af061d7c89df7c14ed470a389650f55"
+content-hash = "7c6bfc5b16504c0556ddfb95409b1283f4ea7b7f08e87ae2e960bc01bf707ff3"

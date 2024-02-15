@@ -38,6 +38,7 @@ cron-validator = "^1.0.8"
 # TODO: Change to the correct version once it's released.
 prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "peter/fix-apikeys" }
 pydantic-settings = "^2.1.0"
+autoflake = "^2.2.1"
 
 [build-system]
 requires = ["poetry-core"]

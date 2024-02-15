@@ -1,13 +1,15 @@
-import typer
-import prediction_market_agent as pma
 from decimal import Decimal
-from prediction_market_agent.agents.all_agents import AgentType, get_agent
+
+import typer
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_bet_amount,
     get_binary_markets,
     place_bet,
 )
+
+import prediction_market_agent as pma
+from prediction_market_agent.agents.all_agents import AgentType, get_agent
 
 
 def main(
@@ -18,8 +20,6 @@ def main(
     """
     Picks one market and answers it, optionally placing a bet.
     """
-    keys = pma.utils.APIKeys()
-
     # Pick a market
     market = get_binary_markets(market_type)[0].to_agent_market()
 
