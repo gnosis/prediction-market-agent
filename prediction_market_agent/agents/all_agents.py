@@ -1,16 +1,17 @@
 import typing as t
 from enum import Enum
+
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.agents.langchain_agent import LangChainAgent
-from prediction_market_agent.agents.autogen_agent import AutoGenAgent
 from prediction_market_agent.agents.always_yes import AlwaysYesAgent
-from prediction_market_agent.agents.llamaindex_agent import LlamaIndexAgent
-from prediction_market_agent.agents.metagpt_agent import MetaGPTAgent
+from prediction_market_agent.agents.autogen_agent import AutoGenAgent
 from prediction_market_agent.agents.crewai_agent import CrewAIAgent
 from prediction_market_agent.agents.custom_agent import (
-    CustomAgentOpenAi,
     CustomAgentLlama,
+    CustomAgentOpenAi,
 )
+from prediction_market_agent.agents.langchain_agent import LangChainAgent
+from prediction_market_agent.agents.llamaindex_agent import LlamaIndexAgent
+from prediction_market_agent.agents.metagpt_agent import MetaGPTAgent
 
 
 class AgentType(str, Enum):

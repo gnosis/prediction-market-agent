@@ -1,7 +1,7 @@
 from prediction_market_agent.ai_models.llama_ai_models import (
-    construct_llama_prompt,
-    Message,
     LlamaRole,
+    Message,
+    construct_llama_prompt,
 )
 
 

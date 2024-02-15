@@ -1,17 +1,18 @@
-import pytest
 import numpy as np
-from prediction_market_agent_tooling.markets.markets import omen
+import pytest
 from prediction_market_agent_tooling.gtypes import (
-    Probability,
-    xdai_type,
-    wei_type,
-    usd_type,
     HexAddress,
-    OmenOutcomeToken,
     HexStr,
+    OmenOutcomeToken,
+    Probability,
     Wei,
+    usd_type,
+    wei_type,
     xDai,
+    xdai_type,
 )
+from prediction_market_agent_tooling.markets.markets import omen
+
 from prediction_market_agent.tools.betting_strategies import (
     get_kelly_criterion_bet,
     get_market_moving_bet,

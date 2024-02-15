@@ -1,10 +1,9 @@
 import bs4
 import requests
-
 from langchain.chains.summarize import load_summarize_chain
-from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI
 
 
 def _summary(objective: str, content: str) -> str:

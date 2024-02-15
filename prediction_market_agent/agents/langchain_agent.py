@@ -1,11 +1,9 @@
-from langchain.agents import load_tools
-from langchain.agents import initialize_agent
-from langchain.agents import AgentType
+from langchain.agents import AgentType, initialize_agent, load_tools
 from langchain_community.llms import OpenAI
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class LangChainAgent(AbstractAgent):

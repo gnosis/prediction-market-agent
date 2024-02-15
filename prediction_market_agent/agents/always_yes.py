@@ -1,5 +1,6 @@
-from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent_tooling.markets.data_models import AgentMarket
+
+from prediction_market_agent.agents.abstract import AbstractAgent
 
 
 class AlwaysYesAgent(AbstractAgent):

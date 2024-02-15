@@ -1,14 +1,14 @@
-import autogen
 import re
 import typing as t
 
+import autogen
 from autogen.agentchat.contrib.gpt_assistant_agent import GPTAssistantAgent
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.tools.google_search import GoogleSearchTool
 from prediction_market_agent.tools.web_scrape import WebScrapingTool
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 
 class AutoGenAgent(AbstractAgent):

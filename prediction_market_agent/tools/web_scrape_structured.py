@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup, Comment, Tag
+
 from prediction_market_agent.tools.web_scrape import _summary
 
 

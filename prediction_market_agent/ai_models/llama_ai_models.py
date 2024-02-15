@@ -1,11 +1,13 @@
+from enum import Enum
+from typing import Literal, Optional
+
+import replicate
+from prediction_market_agent_tooling.tools.utils import should_not_happen
+
 from prediction_market_agent.ai_models.abstract_ai_models import (
     AbstractAiChatModel,
     Message,
 )
-from enum import Enum
-from typing import Optional, Literal
-from prediction_market_agent_tooling.tools.utils import should_not_happen
-import replicate
 
 
 class LlamaRole(Enum):

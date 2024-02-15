@@ -39,6 +39,7 @@ cron-validator = "^1.0.8"
 prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "peter/fix-apikeys" }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,8 +1,9 @@
 import json
-from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
 
 from langchain_community.tools import DuckDuckGoSearchRun
+from prediction_market_agent_tooling.markets.data_models import AgentMarket
+
+from prediction_market_agent.agents.abstract import AbstractAgent
 
 # TODO can use langchain's @tool decorator on our own tool methods to create a
 # tool useable by a crew agent
@@ -32,7 +33,7 @@ class CrewAIAgent(AbstractAgent):
         )
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
-        from crewai import Task, Crew
+        from crewai import Crew, Task
 
         task1 = Task(
             description=(
