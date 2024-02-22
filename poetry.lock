@@ -3545,13 +3545,13 @@ poetry-core = ">=1.7.0,<2.0.0"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.2.5"
+version = "0.2.6"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = ">=3.10,<3.12"
 files = [
-    {file = "prediction_market_agent_tooling-0.2.5-py3-none-any.whl", hash = "sha256:2d9cb2fea67ffccaa3ee33fc7da4dfc54ec278bd06e88570f07cbfc665a7b4ef"},
-    {file = "prediction_market_agent_tooling-0.2.5.tar.gz", hash = "sha256:edca15a808da1847da492db456335da18328c6b6d50489359d00751de60ec88f"},
+    {file = "prediction_market_agent_tooling-0.2.6-py3-none-any.whl", hash = "sha256:24fe9f09d6820d9b910102e6f52128294da4203452be51d2e48977a7b3080bfa"},
+    {file = "prediction_market_agent_tooling-0.2.6.tar.gz", hash = "sha256:f3855e1eb33215ac52e97084e5c9a66ecc8720f29a061253b374e846062bb318"},
 ]
 
 [package.dependencies]
@@ -5684,4 +5684,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "4ce5af211cbbca0b1b899c01daa3854ddf0ca9aca6a95f3b0f87ad907727065a"
+content-hash = "b048c95c66125788554b431580ab67469d71259c6705e021e9281c91d5ae02b0"

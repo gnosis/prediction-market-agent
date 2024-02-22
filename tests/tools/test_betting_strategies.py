@@ -11,7 +11,7 @@ from prediction_market_agent_tooling.gtypes import (
     xDai,
     xdai_type,
 )
-from prediction_market_agent_tooling.markets.markets import omen
+from prediction_market_agent_tooling.markets.omen import omen
 
 from prediction_market_agent.tools.betting_strategies import (
     get_kelly_criterion_bet,
@@ -59,7 +59,7 @@ def test_get_market_moving_bet_0(
         float(expected_buying_xdai_amount),
         atol=2.0,  # We don't expect it to be 100% accurate, but close enough.
     ), f"To move this martket to ~{wanted_p_yes_on_the_market}% for yes, the amount should be {expected_buying_xdai_amount}xDai, according to aiomen website."
-    assert outcome_index == TEST_OMEN_MARKET.get_outcome_index(
+    assert outcome_index == TEST_OMEN_MARKET.outcomes.index(
         expected_buying_outcome
     ), f"The buying outcome index should `{expected_buying_outcome}`."
 
@@ -79,4 +79,4 @@ def test_kelly_criterion_bet_0(est_p_yes: Probability, expected_outcome: str) ->
     )
     # Kelly estimates the best bet for maximizing the expected value of the logarithm of the wealth.
     # We don't know the real best xdai_amount, but at least we know which outcome index makes sense.
-    assert outcome_index == TEST_OMEN_MARKET.get_outcome_index(expected_outcome)
+    assert outcome_index == TEST_OMEN_MARKET.outcomes.index(expected_outcome)

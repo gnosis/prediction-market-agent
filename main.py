@@ -3,9 +3,7 @@ from decimal import Decimal
 import typer
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
-    get_bet_amount,
     get_binary_markets,
-    place_bet,
 )
 
 import prediction_market_agent as pma
@@ -21,7 +19,7 @@ def main(
     Picks one market and answers it, optionally placing a bet.
     """
     # Pick a market
-    market = get_binary_markets(market_type)[0].to_agent_market()
+    market = get_binary_markets(market_type)[0]
 
     # Create the agent and run it
     agent = get_agent(agent_type)
@@ -44,13 +42,11 @@ def main(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
         amount = Decimal(
-            input(f"How much do you want to bet? (in {market.bet_amount_currency}): ")
+            input(f"How much do you want to bet? (in {market.currency}): ")
         )
-        place_bet(
-            market=market.original_market,
-            amount=get_bet_amount(amount, market_type),
+        market.place_bet(
+            amount=market.get_bet_amount(amount),
             outcome=result,
-            omen_auto_deposit=True,
         )
 
 

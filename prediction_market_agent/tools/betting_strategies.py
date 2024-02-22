@@ -6,8 +6,9 @@ import numpy as np
 from prediction_market_agent_tooling.gtypes import Probability, wei_type, xDai
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen import (
-    OmenMarket,
+from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
+from prediction_market_agent_tooling.markets.omen.omen import (
+    OmenAgentMarket,
     omen_calculate_buy_amount,
 )
 from prediction_market_agent_tooling.tools.gnosis_rpc import GNOSIS_RPC_URL
@@ -57,6 +58,7 @@ def get_market_moving_bet(
     new_product - fixed_product = dx * na_y
     dx = (new_product - fixed_product) / na_y
     """
+    market_agent = OmenAgentMarket.from_data_model(market)
     amounts = market.outcomeTokenAmounts
     prices = check_not_none(
         market.outcomeTokenProbabilities, "No probabilities, is marked closed?"
@@ -98,7 +100,7 @@ def get_market_moving_bet(
         if check_vs_contract:
             expected_trade = omen_calculate_buy_amount(
                 web3=Web3(Web3.HTTPProvider(GNOSIS_RPC_URL)),
-                market=market,
+                market=market_agent,
                 investment_amount=wei_type(bet_amount),
                 outcome_index=bet_outcome_index,
             )
@@ -114,7 +116,7 @@ def get_market_moving_bet(
         if verbose:
             outcome = market.get_outcome_str(bet_outcome_index)
             print(
-                f"Target p_yes: {target_p_yes:.2f}, bet: {wei_to_xdai(bet_amount_wei):.2f}{market.BET_AMOUNT_CURRENCY} for {outcome}, new p_yes: {new_p_yes:.2f}"
+                f"Target p_yes: {target_p_yes:.2f}, bet: {wei_to_xdai(bet_amount_wei):.2f}{market_agent.currency} for {outcome}, new p_yes: {new_p_yes:.2f}"
             )
         if abs(target_p_yes - new_p_yes) < 0.01:
             break
