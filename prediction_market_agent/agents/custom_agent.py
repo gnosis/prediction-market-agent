@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 import requests
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     should_not_happen,
@@ -118,7 +118,7 @@ If you want to answer, return a completion in form of a dictionary with a single
             elif tool_name := completion_dict.get("tool_name"):
                 tool_params = completion_dict.get("tool_params")
                 self.verbose_print(f"Agent: Using {tool_name=} with {tool_params=}.")
-                tool_output = (
+                tool_output = (  # type: ignore # Untyped for the sake of simplicity when the LLM is used.
                     self.google_search
                     if tool_name == "GoogleSearchTool"
                     else (
@@ -126,7 +126,9 @@ If you want to answer, return a completion in form of a dictionary with a single
                         if tool_name == "WebScrapingTool"
                         else should_not_happen("Unknown tool requested from the LLM.")
                     )
-                )(**tool_params)
+                )(
+                    **tool_params
+                )
                 self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(

@@ -13,13 +13,13 @@ class APIKeys(APIKeysBase):
 
     @property
     def serp_api_key(self) -> str:
-        return check_not_none(  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+        return check_not_none(
             self.SERP_API_KEY, "SERP_API_KEY missing in the environment."
         )
 
     @property
     def openai_api_key(self) -> str:
-        return check_not_none(  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+        return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
         )
 
@@ -34,7 +34,7 @@ def get_market_prompt(question: str) -> str:
 
 
 def parse_result_to_boolean(result: str) -> bool:
-    return (  # type: ignore  # Remove once PMAT is correctly released and this doesn't ignore his typing.
+    return (
         True
         if result.lower() == "yes"
         else (

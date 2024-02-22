@@ -3,7 +3,7 @@ import json
 import os
 
 import dotenv
-from prediction_market_agent_tooling.markets.data_models import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.abstract import AbstractAgent
