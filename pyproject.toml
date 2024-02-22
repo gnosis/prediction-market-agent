@@ -6,7 +6,7 @@ authors = ["Gnosis"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.10"
+python = "~3.10.0"
 python-dotenv = "*"
 openai = "*"
 langchain = "~0.1.1"
@@ -35,8 +35,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-# TODO: Change to the correct version once it's released.
-prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "peter/fix-apikeys" }
+prediction-market-agent-tooling = "0.2.5"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
