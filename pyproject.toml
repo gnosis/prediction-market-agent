@@ -39,8 +39,6 @@ prediction-market-agent-tooling = "0.2.6"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
-litellm = "^1.30.7"
-llama-index-core = "^0.10.18.post1"
 
 [build-system]
 requires = ["poetry-core"]
