@@ -10,10 +10,11 @@ from prediction_market_agent.tools.web_scrape import web_scrape
 
 
 class LlamaIndexAgent(AbstractAgent):
-    def __init__(self) -> None:
+    def __init__(self, llm=None) -> None:
         google_search_tool = FunctionTool.from_defaults(fn=google_search)
         web_scraping_tool = FunctionTool.from_defaults(fn=web_scrape)
-        llm = OpenAI(model="gpt-3.5-turbo-0613")
+        if not llm:
+            llm = OpenAI(model="gpt-3.5-turbo-0613")
         self._agent = OpenAIAgent.from_tools(
             tools=[google_search_tool, web_scraping_tool],
             llm=llm,
