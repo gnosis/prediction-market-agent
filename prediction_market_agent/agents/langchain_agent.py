@@ -12,12 +12,18 @@ from prediction_market_agent.agents.abstract import AbstractAgent
 class LangChainAgent(AbstractAgent):
     def __init__(self, llm: Optional[BaseLLM] = None) -> None:
         keys = utils.APIKeys()
-        llm = OpenAI(openai_api_key=keys.openai_api_key) if not llm else llm
+        llm = (
+            OpenAI(openai_api_key=keys.openai_api_key.get_secret_value())
+            if not llm
+            else llm
+        )
         # Can use pre-defined search tool
         # TODO: Tavily tool could give better results
         # https://docs.tavily.com/docs/tavily-api/langchain
         tools = load_tools(
-            ["serpapi", "llm-math"], llm=llm, serpapi_api_key=keys.serp_api_key
+            ["serpapi", "llm-math"],
+            llm=llm,
+            serpapi_api_key=keys.serp_api_key.get_secret_value(),
         )
         self._agent = initialize_agent(
             tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True

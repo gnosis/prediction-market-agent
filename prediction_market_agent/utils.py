@@ -5,20 +5,21 @@ from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     should_not_happen,
 )
+from pydantic import SecretStr
 
 
 class APIKeys(APIKeysBase):
-    SERP_API_KEY: t.Optional[str] = None
-    OPENAI_API_KEY: t.Optional[str] = None
+    SERP_API_KEY: t.Optional[SecretStr] = None
+    OPENAI_API_KEY: t.Optional[SecretStr] = None
 
     @property
-    def serp_api_key(self) -> str:
+    def serp_api_key(self) -> SecretStr:
         return check_not_none(
             self.SERP_API_KEY, "SERP_API_KEY missing in the environment."
         )
 
     @property
-    def openai_api_key(self) -> str:
+    def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
         )

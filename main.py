@@ -1,10 +1,9 @@
 from decimal import Decimal
 
 import typer
-from prediction_market_agent_tooling.markets.markets import (
-    MarketType,
-    get_binary_markets,
-)
+from prediction_market_agent_tooling.markets.agent_market import SortBy
+from prediction_market_agent_tooling.markets.markets import MARKET_TYPE_MAP, MarketType
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 import prediction_market_agent as pma
 from prediction_market_agent.agents.all_agents import AgentType, get_agent
@@ -19,7 +18,8 @@ def main(
     Picks one market and answers it, optionally placing a bet.
     """
     # Pick a market
-    market = get_binary_markets(market_type)[0]
+    cls = check_not_none(MARKET_TYPE_MAP.get(market_type))
+    market = cls.get_binary_markets(limit=1, sort_by=SortBy.NEWEST)[0]
 
     # Create the agent and run it
     agent = get_agent(agent_type)
