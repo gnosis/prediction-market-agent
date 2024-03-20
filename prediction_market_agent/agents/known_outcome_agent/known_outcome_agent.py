@@ -1,4 +1,5 @@
 import json
+import typing as t
 from datetime import datetime
 from enum import Enum
 
@@ -99,7 +100,9 @@ If the question is of the format: "Will X happen on Y?"
 """
 
 
-def completion_str_to_json(completion: str) -> dict:
+def completion_str_to_json(
+    completion: str,
+) -> dict[str, t.Any]:  # noqa: F811 # Allow t.Any in the return type
     """
     Cleans completion JSON in form of a string:
 
@@ -115,7 +118,7 @@ def completion_str_to_json(completion: str) -> dict:
     start_index = completion.find("{")
     end_index = completion.rfind("}")
     completion = completion[start_index : end_index + 1]
-    return json.loads(completion)
+    return json.loads(completion)  # type: ignore # Allow t.Any in the return type
 
 
 def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
@@ -132,7 +135,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
         search_prompt = ChatPromptTemplate.from_template(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
-        search_query = llm.invoke(search_prompt).content.strip('"')
+        search_query = str(llm.invoke(search_prompt).content).strip('"')
         search_results = web_search(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")
@@ -151,7 +154,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
                 question=question,
                 scraped_content=scraped_content,
             )
-            answer = llm.invoke(prompt).content
+            answer = str(llm.invoke(prompt).content)
             parsed_answer = Answer.model_validate(completion_str_to_json(answer))
 
             if parsed_answer.result is not Result.UNKNOWN:

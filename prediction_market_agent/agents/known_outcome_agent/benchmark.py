@@ -1,4 +1,5 @@
 import time
+import typing as t
 from datetime import datetime, timedelta
 
 import pytz
@@ -11,6 +12,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
     Prediction,
 )
+from prediction_market_agent_tooling.tools.utils import DatetimeWithTimezone
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -20,21 +22,21 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
 
 
 class QuestionWithKnownOutcome(BaseModel):
-    url: str | None = None
+    url: t.Optional[str] = None
     question: str
     result: Result
-    notes: str | None = None
+    notes: t.Optional[str] = None
 
     def to_market(self) -> Market:
-        dt = datetime.now(tz=pytz.UTC)
+        dt = DatetimeWithTimezone(datetime.now(tz=pytz.UTC))
         return Market(
             url=self.url if self.url else "",
             question=self.question,
-            source=MarketSource.MANIFOLD,  # hack
+            source=MarketSource.MANIFOLD,
             p_yes=self.result.to_p_yes() if self.result != Result.UNKNOWN else 0.5,
             volume=0.0,
-            created_time=dt,  # hack
-            close_time=dt,  # hack
+            created_time=dt,
+            close_time=dt,
         )
 
 

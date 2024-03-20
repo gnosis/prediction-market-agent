@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup, Comment, Tag
 
-from prediction_market_agent.tools.web_scrape import _summary
+from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 
 
 def web_scrape_structured_and_summarized(

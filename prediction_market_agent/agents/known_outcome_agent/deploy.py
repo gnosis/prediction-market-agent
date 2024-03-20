@@ -1,4 +1,5 @@
 import getpass
+from decimal import Decimal
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -7,6 +8,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import get_current_git_commit_sha
+from prediction_market_agent_tooling.tools.web3_utils import verify_address
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
@@ -49,7 +51,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if market.currency == Currency.xDai:
-            return BetAmount(amount=0.1, currency=Currency.xDai)
+            return BetAmount(amount=Decimal(0.1), currency=Currency.xDai)
         else:
             raise NotImplementedError("This agent only supports xDai markets")
 
@@ -68,7 +70,9 @@ if __name__ == "__main__":
         },
         memory=1024,
         api_keys=APIKeys(
-            BET_FROM_ADDRESS="0x3666DA333dAdD05083FEf9FF6dDEe588d26E4307",
+            BET_FROM_ADDRESS=verify_address(
+                "0x3666DA333dAdD05083FEf9FF6dDEe588d26E4307"
+            ),
             BET_FROM_PRIVATE_KEY=None,
             OPENAI_API_KEY=None,
             MANIFOLD_API_KEY=None,
