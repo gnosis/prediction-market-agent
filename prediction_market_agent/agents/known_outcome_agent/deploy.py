@@ -74,5 +74,5 @@ if __name__ == "__main__":
             MANIFOLD_API_KEY=None,
         ),
         cron_schedule="0 */4 * * *",
-        timeout=640,
+        timeout=540,
     )
