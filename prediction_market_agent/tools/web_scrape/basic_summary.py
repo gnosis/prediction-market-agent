@@ -6,10 +6,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
 
 
-def _summary(objective: str, content: str) -> str:
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
+def _summary(
+    objective: str, content: str, separators: list[str] = ["\n\n", "\n"]
+) -> str:
+    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0125")
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n"], chunk_size=10000, chunk_overlap=500
+        separators=separators, chunk_size=10000, chunk_overlap=500
     )
     docs = text_splitter.create_documents([content])
     map_prompt = (

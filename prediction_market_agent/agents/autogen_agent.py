@@ -7,8 +7,8 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.tools.google_search import GoogleSearchTool
-from prediction_market_agent.tools.web_scrape import WebScrapingTool
+from prediction_market_agent.tools.web_scrape.basic_summary import WebScrapingTool
+from prediction_market_agent.tools.web_search.google import GoogleSearchTool
 
 
 class AutoGenAgent(AbstractAgent):

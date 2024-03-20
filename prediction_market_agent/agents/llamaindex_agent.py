@@ -5,8 +5,8 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 
 from prediction_market_agent import utils
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.tools.google_search import google_search
-from prediction_market_agent.tools.web_scrape import web_scrape
+from prediction_market_agent.tools.web_scrape.basic_summary import web_scrape
+from prediction_market_agent.tools.web_search.google import google_search
 
 
 class LlamaIndexAgent(AbstractAgent):
