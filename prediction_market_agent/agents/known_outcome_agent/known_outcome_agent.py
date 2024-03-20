@@ -23,10 +23,21 @@ class Result(str, Enum):
         else:
             raise ValueError("Unexpected result")
 
+    def to_boolean(self) -> bool:
+        if self is Result.YES:
+            return True
+        elif self is Result.NO:
+            return False
+        else:
+            raise ValueError("Unexpected result")
+
 
 class Answer(BaseModel):
     result: Result
     reasoning: str
+
+    def has_known_outcome(self) -> bool:
+        return self.result is not Result.UNKNOWN
 
 
 GENERATE_SEARCH_QUERY_PROMPT = """
