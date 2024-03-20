@@ -2,19 +2,12 @@ import json
 from datetime import datetime
 from enum import Enum
 
-import requests
-import tenacity
-from bs4 import BeautifulSoup
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from markdown_it import MarkdownIt
-from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
-from prediction_market_agent_tooling.tools.utils import secret_str_from_env
 from pydantic import BaseModel
-from requests import Response
-from tavily import TavilyClient
 
-from prediction_market_agent.tools.web_scrape_structured import web_scrape_structured
+from prediction_market_agent.tools.web_scrape.markdown import web_scrape
+from prediction_market_agent.tools.web_search.tavily import web_search
 
 
 class Result(str, Enum):
@@ -29,11 +22,6 @@ class Result(str, Enum):
             return 0.0
         else:
             raise ValueError("Unexpected result")
-
-
-class WebSearchResult(BaseModel):
-    url: str
-    query: str
 
 
 class Answer(BaseModel):
@@ -74,7 +62,9 @@ The information you have scraped from the web is:
 {scraped_content}
 ```
 
-Answer in json format with the following fields:
+You goal is to determine whether the answer can be inferred with a reasonable
+degree of certainty from the scraped web content. Answer in json format with the
+following fields:
 - "result": "<RESULT>",
 - "reasoning": "<REASONING>",
 
@@ -98,81 +88,6 @@ If the question is of the format: "Will X happen on Y?"
 """
 
 
-@tenacity.retry(
-    stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1), reraise=True
-)
-@persistent_inmemory_cache
-def web_search(query: str, max_results: int) -> list[WebSearchResult]:
-    """
-    Web search using Tavily API.
-
-    TODO replace with GoogleSearchTool?
-    """
-    tavily_api_key = secret_str_from_env("TAVILY_API_KEY")
-    tavily = TavilyClient(api_key=tavily_api_key.get_secret_value())
-    response = tavily.search(
-        query=query,
-        search_depth="advanced",
-        max_results=max_results,
-        include_raw_content=True,
-    )
-
-    results = [
-        WebSearchResult(
-            url=result["url"],
-            query=query,
-        )
-        for result in response["results"]
-    ]
-
-    return results
-
-
-@tenacity.retry(
-    stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1), reraise=True
-)
-@persistent_inmemory_cache
-def fetch_html(url: str, timeout: int) -> Response:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
-    }
-    response = requests.get(url, headers=headers, timeout=timeout)
-    return response
-
-
-def web_scrape(url: str, timeout: int = 10) -> str:
-    """
-    Taken from evo.prophet
-    """
-    try:
-        response = fetch_html(url=url, timeout=timeout)
-
-        if "text/html" in response.headers.get("Content-Type", ""):
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            [x.extract() for x in soup.findAll("script")]
-            [x.extract() for x in soup.findAll("style")]
-            [x.extract() for x in soup.findAll("noscript")]
-            [x.extract() for x in soup.findAll("link")]
-            [x.extract() for x in soup.findAll("head")]
-            [x.extract() for x in soup.findAll("image")]
-            [x.extract() for x in soup.findAll("img")]
-
-            text: str = soup.get_text()
-            text = MarkdownIt(text)
-            text = "  ".join([x.strip() for x in text.split("\n")])
-            text = " ".join([x.strip() for x in text.split("  ")])
-
-            return text
-        else:
-            print("Non-HTML content received")
-            return ""
-
-    except requests.RequestException as e:
-        print(f"HTTP request failed: {e}")
-        return ""
-
-
 def completion_str_to_json(completion: str) -> dict:
     """
     Cleans completion JSON in form of a string:
@@ -193,6 +108,11 @@ def completion_str_to_json(completion: str) -> dict:
 
 
 def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
+    """
+    In a loop, perform web search and scrape to find if the answer to the
+    question is known. Break if the answer is found, or after a certain number
+    of tries, and no definite answer is found, return an 'unknown' answer.
+    """
     tries = 0
     date_str = datetime.now().strftime("%d %B %Y")
     previous_urls = []
@@ -210,8 +130,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
             if result.url in previous_urls:
                 continue
             previous_urls.append(result.url)
-            # scraped_content = web_scrape(url=result.url)
-            scraped_content = web_scrape_structured(url=result.url)
+
+            scraped_content = web_scrape(url=result.url)
+
             prompt = ChatPromptTemplate.from_template(
                 template=ANSWER_FROM_WEBSCRAPE_PROMPT
             ).format_messages(
@@ -219,11 +140,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
                 question=question,
                 scraped_content=scraped_content,
             )
-            try:
-                answer = llm.invoke(prompt).content
-                parsed_answer = Answer.model_validate(completion_str_to_json(answer))
-            except ValueError as e:
-                breakpoint()
+            answer = llm.invoke(prompt).content
+            parsed_answer = Answer.model_validate(completion_str_to_json(answer))
+
             if parsed_answer.result is not Result.UNKNOWN:
                 return parsed_answer
 

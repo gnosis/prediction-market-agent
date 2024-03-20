@@ -16,11 +16,11 @@ from prediction_market_agent.ai_models.abstract_ai_models import (
 )
 from prediction_market_agent.ai_models.llama_ai_models import ChatReplicateLLamaModel
 from prediction_market_agent.ai_models.openai_ai_models import ChatOpenAIModel
-from prediction_market_agent.tools.google_search import google_search
 from prediction_market_agent.tools.tool_exception_handler import tool_exception_handler
-from prediction_market_agent.tools.web_scrape_structured import (
+from prediction_market_agent.tools.web_scrape.structured_summary import (
     web_scrape_structured_and_summarized,
 )
+from prediction_market_agent.tools.web_search.google import google_search
 
 
 class CustomAgent(AbstractAgent):

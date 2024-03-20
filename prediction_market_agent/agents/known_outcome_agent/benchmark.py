@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from dotenv import load_dotenv
@@ -38,67 +38,6 @@ class QuestionWithKnownOutcome(BaseModel):
         )
 
 
-qs_with_known_outcome: list[QuestionWithKnownOutcome] = [
-    QuestionWithKnownOutcome(
-        question="Will 'Barbie' win an Academy Award for best original song by 19 March 2024?",
-        url="https://aiomen.eth.limo/#/0xceb2a4ecc217cab440acf60737a9fcfd6d3fbf4b",
-        result=Result.YES,
-        notes="Happened on 10th March 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will the 2024 Oscars winner for Best Picture be announced by 19 March 2024?",
-        url="https://aiomen.eth.limo/#/0xb88e4507709148e096bcdfb861b17db7b4d54e6b",
-        result=Result.YES,
-        notes="Happened on 10th March 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will Liverpool win against Atalanta in the Europa League quarter-finals by 21 March 2024?",
-        url="https://aiomen.eth.limo/#/0x1d5a462c801360b4bebbda2b9656e52801a27a3b",
-        result=Result.NO,
-        notes="The match is scheduled for 11 April 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will Donald Trump officially become the GOP nominee for the 2024 presidential elections by 22 March 2024?",
-        url="https://aiomen.eth.limo/#/0x859a6b465ee1e4a73aab0f2da4428c6255da466c",
-        result=Result.YES,
-        notes="Happened on 10th March 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will SpaceX successfully test a Starship reentry without losing contact by 21 March 2024?",
-        url="https://aiomen.eth.limo/#/0xcc9123af8db309e0c60c63f9e2b8b82fc86f458b",
-        result=Result.NO,
-        notes="The only scheduled test flight occured, and contact was lost during the test.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will Arsenal reach the Champions League semi-finals on 19 March 2024?",
-        url="https://aiomen.eth.limo/#/0x606efd175b245cd60282a98cef402d4f5e950f92",
-        result=Result.NO,
-        notes="They are scheduled to play the first leg of the quarter-finals on 9 April 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will the jury deliver a verdict on James Crumbley's 'bad parenting' case on 19 March 2024?",
-        url="https://aiomen.eth.limo/#/0xe55171beda0d60fd45092ff8bf93d5cb566a2510",
-        result=Result.NO,
-        notes="The verdict was announced on 15th March 2024.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will Lewis Hamilton win the 2024/2025 F1 drivers champtionship?",
-        result=Result.UNKNOWN,
-        notes="Outcome is uncertain.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will the cost of grain in the Spain increase by 20% by 19 July 2024?",
-        result=Result.UNKNOWN,
-        notes="Outcome is uncertain.",
-    ),
-    QuestionWithKnownOutcome(
-        question="Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028?",
-        result=Result.UNKNOWN,
-        notes="Outcome is uncertain.",
-    ),
-]
-
-
 class KnownOutcomeAgent(AbstractBenchmarkedAgent):
     def __init__(
         self,
@@ -133,26 +72,72 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             )
 
 
-# if __name__ == "__main__":
-#     load_dotenv()
-#     for q in qs_with_known_outcome:
-#         print("Answering question:", q.question)
-#         answer = get_known_outcome(
-#             model="gpt-3.5-turbo-0125",
-#             question=q.question,
-#             max_tries=3,
-#         )
-#         if answer.result != q.result:
-#             print(
-#                 f"Question: {q.question}\n"
-#                 f"Known Result: {q.result}\n"
-#                 f"Notes: {q.notes}\n"
-#                 f"LLM Answer: {answer.result} {answer.reasoning}\n"
-#             )
-#             raise ValueError("Incorrect answer.")
-
 if __name__ == "__main__":
     load_dotenv()
+    tomorrow_str = (datetime.now(tz=pytz.UTC) + timedelta(days=1)).strftime("%d %B %Y")
+
+    # Fetch questions from existing markets, or make some up, where the
+    # outcome is known.
+    qs_with_known_outcome: list[QuestionWithKnownOutcome] = [
+        QuestionWithKnownOutcome(
+            question=f"Will 'Barbie' win an Academy Award for best original song by {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0xceb2a4ecc217cab440acf60737a9fcfd6d3fbf4b",
+            result=Result.YES,
+            notes="Happened on 10th March 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will the 2024 Oscars winner for Best Picture be announced by {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0xb88e4507709148e096bcdfb861b17db7b4d54e6b",
+            result=Result.YES,
+            notes="Happened on 10th March 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will Liverpool win against Atalanta in the Europa League quarter-finals by {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0x1d5a462c801360b4bebbda2b9656e52801a27a3b",
+            result=Result.NO,
+            notes="The match is scheduled for 11 April 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will Donald Trump officially become the GOP nominee for the 2024 presidential elections by {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0x859a6b465ee1e4a73aab0f2da4428c6255da466c",
+            result=Result.YES,
+            notes="Happened on 10th March 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will SpaceX successfully test a Starship reentry without losing contact by {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0xcc9123af8db309e0c60c63f9e2b8b82fc86f458b",
+            result=Result.NO,
+            notes="The only scheduled test flight occured, and contact was lost during the test.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will Arsenal reach the Champions League semi-finals on {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0x606efd175b245cd60282a98cef402d4f5e950f92",
+            result=Result.NO,
+            notes="They are scheduled to play the first leg of the quarter-finals on 9 April 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will the jury deliver a verdict on James Crumbley's 'bad parenting' case on {tomorrow_str}?",
+            url="https://aiomen.eth.limo/#/0xe55171beda0d60fd45092ff8bf93d5cb566a2510",
+            result=Result.NO,
+            notes="The verdict was announced on 15th March 2024.",
+        ),
+        QuestionWithKnownOutcome(
+            question="Will Lewis Hamilton win the 2024/2025 F1 drivers champtionship?",
+            result=Result.UNKNOWN,
+            notes="Outcome is uncertain.",
+        ),
+        QuestionWithKnownOutcome(
+            question="Will the cost of grain in the Spain increase by 20% by 19 July 2024?",
+            result=Result.UNKNOWN,
+            notes="Outcome is uncertain.",
+        ),
+        QuestionWithKnownOutcome(
+            question="Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028?",
+            result=Result.UNKNOWN,
+            notes="Outcome is uncertain.",
+        ),
+    ]
+
     benchmarker = Benchmarker(
         markets=[q.to_market() for q in qs_with_known_outcome],
         agents=[
@@ -163,7 +148,7 @@ if __name__ == "__main__":
                 max_workers=1,
             ),
         ],
-        cache_path="./.cache.KnownOutcomeAgent.json",
+        cache_path="./benchmark_cache.json",
     )
     benchmarker.run_agents()
     md = benchmarker.generate_markdown_report()
@@ -173,4 +158,6 @@ if __name__ == "__main__":
         print(f"Writing benchmark report to: {output}")
         f.write(md)
 
-    # TODO check all predictions are correct
+    # Check all predictions are correct, i.e. mean-squared-error == 0
+    metrics = benchmarker.compute_metrics()
+    assert metrics["MSE for `p_yes`"][0] == 0.0
