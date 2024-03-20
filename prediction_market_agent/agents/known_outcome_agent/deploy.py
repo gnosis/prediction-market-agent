@@ -66,12 +66,12 @@ if __name__ == "__main__":
         secrets={
             "OPENAI_API_KEY": "EVAN_OPENAI_API_KEY:latest",
             "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-            "BET_FROM_PRIVATE_KEY": "0x3666DA333dAdD05083FEf9FF6dDEe588d26E4307:latest",
+            "BET_FROM_PRIVATE_KEY": "EVAN_OMEN_BETTER_0_PKEY:latest",
         },
         memory=1024,
         api_keys=APIKeys(
             BET_FROM_ADDRESS=verify_address(
-                "0x3666DA333dAdD05083FEf9FF6dDEe588d26E4307"
+                "0xb611A9f02B318339049264c7a66ac3401281cc3c"
             ),
             BET_FROM_PRIVATE_KEY=None,
             OPENAI_API_KEY=None,
