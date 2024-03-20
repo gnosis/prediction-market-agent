@@ -12,7 +12,6 @@ from prediction_market_agent_tooling.tools.utils import (
     get_current_git_commit_sha,
     get_current_git_url,
 )
-from prediction_market_agent_tooling.tools.web3_utils import verify_address
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
@@ -71,9 +70,6 @@ if __name__ == "__main__":
         },
         memory=1024,
         api_keys=APIKeys(
-            BET_FROM_ADDRESS=verify_address(
-                "0xb611A9f02B318339049264c7a66ac3401281cc3c"
-            ),
             BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
             OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
             MANIFOLD_API_KEY=None,
