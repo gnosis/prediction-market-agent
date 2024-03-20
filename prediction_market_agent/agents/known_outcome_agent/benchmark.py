@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
-    Market,
-    MarketSource,
     OutcomePrediction,
     Prediction,
 )
+from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
@@ -26,16 +26,19 @@ class QuestionWithKnownOutcome(BaseModel):
     result: Result
     notes: t.Optional[str] = None
 
-    def to_market(self) -> Market:
-        dt = utcnow()
-        return Market(
+    def to_market(self) -> AgentMarket:
+        return AgentMarket(
             url=self.url if self.url else "",
+            id=self.question,
             question=self.question,
-            source=MarketSource.MANIFOLD,
-            p_yes=self.result.to_p_yes() if self.result != Result.UNKNOWN else 0.5,
-            volume=0.0,
-            created_time=dt,
-            close_time=dt,
+            p_yes=Probability(
+                self.result.to_p_yes() if self.result != Result.UNKNOWN else 0.5
+            ),
+            volume=None,
+            created_time=None,
+            close_time=None,
+            resolution=None,
+            outcomes=["YES", "NO"],
         )
 
 
