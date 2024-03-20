@@ -133,7 +133,6 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
         raise ValueError(f"Unknown model: {model}")
 
     if len(content) > max_length:
-        breakpoint()
         return _summary(content=content, objective=question, separators=["  "])
     else:
         return content

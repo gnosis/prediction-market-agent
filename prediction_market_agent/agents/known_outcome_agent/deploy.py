@@ -4,6 +4,7 @@ from decimal import Decimal
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
+from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -66,17 +67,15 @@ if __name__ == "__main__":
         market_type=MarketType.OMEN,
         labels={OWNER_KEY: getpass.getuser()},
         secrets={
-            "OPENAI_API_KEY": "EVAN_OPENAI_API_KEY:latest",
             "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-            "BET_FROM_PRIVATE_KEY": "EVAN_OMEN_BETTER_0_PKEY:latest",
         },
         memory=1024,
         api_keys=APIKeys(
             BET_FROM_ADDRESS=verify_address(
                 "0xb611A9f02B318339049264c7a66ac3401281cc3c"
             ),
-            BET_FROM_PRIVATE_KEY=None,
-            OPENAI_API_KEY=None,
+            BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
+            OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
             MANIFOLD_API_KEY=None,
         ),
         cron_schedule="0 */4 * * *",
