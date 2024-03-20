@@ -7,6 +7,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
+from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.tools.web_search.tavily import web_search
 
@@ -100,9 +101,7 @@ If the question is of the format: "Will X happen on Y?"
 """
 
 
-def completion_str_to_json(
-    completion: str,
-) -> dict[str, t.Any]:  # noqa: F811 # Allow t.Any in the return type
+def completion_str_to_json(completion: str) -> dict[str, t.Any]:
     """
     Cleans completion JSON in form of a string:
 
@@ -118,7 +117,26 @@ def completion_str_to_json(
     start_index = completion.find("{")
     end_index = completion.rfind("}")
     completion = completion[start_index : end_index + 1]
-    return json.loads(completion)  # type: ignore # Allow t.Any in the return type
+    completion_dict: dict[str, t.Any] = json.loads(completion)
+    return completion_dict
+
+
+def summarize_if_required(content: str, model: str, question: str) -> str:
+    """
+    If the content is too long to fit in the model's context, summarize it.
+    """
+    if model == "gpt-3.5-turbo-0125":  # 16k context length
+        max_length = 10000
+    elif model == "gpt-4-1106-preview":  # 128k context length
+        max_length = 100000
+    else:
+        raise ValueError(f"Unknown model: {model}")
+
+    if len(content) > max_length:
+        breakpoint()
+        return _summary(content=content, objective=question, separators=["  "])
+    else:
+        return content
 
 
 def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
@@ -130,7 +148,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
     tries = 0
     date_str = datetime.now().strftime("%d %B %Y")
     previous_urls = []
-    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0.4)
+    llm = ChatOpenAI(model=model, temperature=0.4)
     while tries < max_tries:
         search_prompt = ChatPromptTemplate.from_template(
             template=GENERATE_SEARCH_QUERY_PROMPT
@@ -146,6 +164,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
             previous_urls.append(result.url)
 
             scraped_content = web_scrape(url=result.url)
+            scraped_content = summarize_if_required(
+                content=scraped_content, model=model, question=question
+            )
 
             prompt = ChatPromptTemplate.from_template(
                 template=ANSWER_FROM_WEBSCRAPE_PROMPT

@@ -7,7 +7,10 @@ from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import get_current_git_commit_sha
+from prediction_market_agent_tooling.tools.utils import (
+    get_current_git_commit_sha,
+    get_current_git_url,
+)
 from prediction_market_agent_tooling.tools.web3_utils import verify_address
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -21,7 +24,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-3.5-turbo-0125"
+    model = "gpt-4-1106-preview"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -32,7 +35,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
-            if not market_is_saturated(market=markets[0]):
+            if not market_is_saturated(market=market):
                 answer = get_known_outcome(
                     model=self.model,
                     question=market.question,
@@ -58,9 +61,8 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
 if __name__ == "__main__":
     agent = DeployableKnownOutcomeAgent()
-    github_repo_url = "https://github.com/gnosis/prediction-market-agent"
     agent.deploy_gcp(
-        repository=f"git+{github_repo_url}.git@{get_current_git_commit_sha()}",
+        repository=f"git+{get_current_git_url()}.git@{get_current_git_commit_sha()}",
         market_type=MarketType.OMEN,
         labels={OWNER_KEY: getpass.getuser()},
         secrets={

@@ -1,8 +1,7 @@
 import time
 import typing as t
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-import pytz
 from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
@@ -12,7 +11,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
     Prediction,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeWithTimezone
+from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -28,7 +27,7 @@ class QuestionWithKnownOutcome(BaseModel):
     notes: t.Optional[str] = None
 
     def to_market(self) -> Market:
-        dt = DatetimeWithTimezone(datetime.now(tz=pytz.UTC))
+        dt = utcnow()
         return Market(
             url=self.url if self.url else "",
             question=self.question,
@@ -76,7 +75,7 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
 
 if __name__ == "__main__":
     load_dotenv()
-    tomorrow_str = (datetime.now(tz=pytz.UTC) + timedelta(days=1)).strftime("%d %B %Y")
+    tomorrow_str = (utcnow() + timedelta(days=1)).strftime("%d %B %Y")
 
     # Fetch questions from existing markets, or make some up, where the
     # outcome is known.
@@ -145,12 +144,11 @@ if __name__ == "__main__":
         agents=[
             KnownOutcomeAgent(
                 agent_name="known_outcome",
-                model="gpt-3.5-turbo-0125",
+                model="gpt-4-1106-preview",
                 max_tries=3,
                 max_workers=1,
             ),
         ],
-        cache_path="./benchmark_cache.json",
     )
     benchmarker.run_agents()
     md = benchmarker.generate_markdown_report()
