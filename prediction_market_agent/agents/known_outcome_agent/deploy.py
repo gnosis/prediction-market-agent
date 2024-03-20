@@ -63,7 +63,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 if __name__ == "__main__":
     agent = DeployableKnownOutcomeAgent()
     agent.deploy_gcp(
-        repository=f"git+{get_current_git_url()}.git@{get_current_git_commit_sha()}",
+        repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
         market_type=MarketType.OMEN,
         labels={OWNER_KEY: getpass.getuser()},
         secrets={
@@ -78,6 +78,6 @@ if __name__ == "__main__":
             OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
             MANIFOLD_API_KEY=None,
         ),
-        cron_schedule="0 */4 * * *",
+        cron_schedule="0 */12 * * *",
         timeout=540,
     )
