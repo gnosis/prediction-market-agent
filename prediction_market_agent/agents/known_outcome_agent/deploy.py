@@ -36,15 +36,25 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
+            print(f"Looking at market {market.id=} {market.question=}")
             if not market_is_saturated(market=market):
+                print(f"Predicting market {market.id=} {market.question=}")
                 answer = get_known_outcome(
                     model=self.model,
                     question=market.question,
                     max_tries=3,
                 )
                 if answer.has_known_outcome():
+                    print(
+                        f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
+                    )
                     picked_markets.append(market)
                     self.markets_with_known_outcomes[market.id] = answer.result
+
+            else:
+                print(
+                    f"Skipping market {market.id=} {market.question=}, because it is already saturated."
+                )
 
         return picked_markets
 
