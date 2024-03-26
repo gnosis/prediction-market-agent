@@ -39,11 +39,17 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             print(f"Looking at market {market.id=} {market.question=}")
             if not market_is_saturated(market=market):
                 print(f"Predicting market {market.id=} {market.question=}")
-                answer = get_known_outcome(
-                    model=self.model,
-                    question=market.question,
-                    max_tries=3,
-                )
+                try:
+                    answer = get_known_outcome(
+                        model=self.model,
+                        question=market.question,
+                        max_tries=3,
+                    )
+                except Exception as e:
+                    print(
+                        f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+                    )
+                    continue
                 if answer.has_known_outcome():
                     print(
                         f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
