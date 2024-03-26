@@ -1,16 +1,15 @@
 import json
 import typing as t
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
-
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
-from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent.tools.web_search.tavily import web_search
 
 
@@ -155,26 +154,27 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
     else:
         return content
 
+
 def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
-    """ Asks the model if the event referenced by the question has finished (given the
+    """Asks the model if the event referenced by the question has finished (given the
     current date) (returning 1), if the event has not yet finished (returning 0) or
      if it cannot be sure (returning -1)."""
     date_str = utcnow().strftime("%Y-%m-%d %H:%M:%S %Z")
     llm = ChatOpenAI(model=model, temperature=0.0)
     prompt = ChatPromptTemplate.from_template(
-                template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
-            ).format_messages(
-                date_str=date_str,
-                question=question,
-            )
+        template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
+    ).format_messages(
+        date_str=date_str,
+        question=question,
+    )
     answer = str(llm.invoke(prompt).content)
     try:
         parsed_answer = int(answer)
         if parsed_answer == 1:
             return True
     except Exception as e:
-        print ("Exception occured, cannot assert if title happened in the past. ", e)
-        
+        print("Exception occured, cannot assert if title happened in the past. ", e)
+
     return False
 
 

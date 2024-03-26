@@ -1,19 +1,10 @@
-import getpass
 from decimal import Decimal
 
 from dotenv import load_dotenv
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
-from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import (
-    get_current_git_commit_sha,
-    get_current_git_url,
-)
-from prediction_market_agent_tooling.tools.web3_utils import verify_address
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
@@ -39,12 +30,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             if not market_is_saturated(market=market):
-
-                if not has_question_event_happened_in_the_past(model=self.model,
-                                                                        question=market.question):
+                if not has_question_event_happened_in_the_past(
+                    model=self.model, question=market.question
+                ):
                     # event happened
                     continue
-                
 
                 answer = get_known_outcome(
                     model=self.model,
@@ -73,10 +63,7 @@ if __name__ == "__main__":
     agent = DeployableKnownOutcomeAgent()
     load_dotenv()
     agent.deploy_local(
-        market_type=MarketType.OMEN,
-        sleep_time=10,
-        timeout=540,
-        place_bet=False
+        market_type=MarketType.OMEN, sleep_time=10, timeout=540, place_bet=False
     )
     # agent.deploy_gcp(
     #     repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
