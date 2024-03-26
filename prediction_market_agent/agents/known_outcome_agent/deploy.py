@@ -57,6 +57,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                     picked_markets.append(market)
                     self.markets_with_known_outcomes[market.id] = answer.result
 
+                    # Return as soon as we have picked a market, because otherwise it will take too long and we will run out of time in GCP Function (540s timeout)
+                    # TODO: After PMAT is updated in this repository, we can return `None` in `answer_binary_market` method and PMAT won't place the bet.
+                    # So we can move this logic out of `pick_markets` into `answer_binary_market`, and simply process as many bets as we have time for.
+                    return picked_markets
+
             else:
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
