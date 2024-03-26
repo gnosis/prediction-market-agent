@@ -1,6 +1,7 @@
 import getpass
 from decimal import Decimal
 
+from dotenv import load_dotenv
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
@@ -17,6 +18,7 @@ from prediction_market_agent_tooling.tools.web3_utils import verify_address
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
     get_known_outcome,
+    has_question_event_happened_in_the_past,
 )
 
 
@@ -25,7 +27,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-3.5-turbo"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -37,6 +39,13 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             if not market_is_saturated(market=market):
+
+                if not has_question_event_happened_in_the_past(model=self.model,
+                                                                        question=market.question):
+                    # event happened
+                    continue
+                
+
                 answer = get_known_outcome(
                     model=self.model,
                     question=market.question,
@@ -62,22 +71,29 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
 if __name__ == "__main__":
     agent = DeployableKnownOutcomeAgent()
-    agent.deploy_gcp(
-        repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
+    load_dotenv()
+    agent.deploy_local(
         market_type=MarketType.OMEN,
-        labels={OWNER_KEY: getpass.getuser()},
-        secrets={
-            "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-        },
-        memory=1024,
-        api_keys=APIKeys(
-            BET_FROM_ADDRESS=verify_address(
-                "0xb611A9f02B318339049264c7a66ac3401281cc3c"
-            ),
-            BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
-            OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
-            MANIFOLD_API_KEY=None,
-        ),
-        cron_schedule="0 */12 * * *",
+        sleep_time=10,
         timeout=540,
+        place_bet=False
     )
+    # agent.deploy_gcp(
+    #     repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
+    #     market_type=MarketType.OMEN,
+    #     labels={OWNER_KEY: getpass.getuser()},
+    #     secrets={
+    #         "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
+    #     },
+    #     memory=1024,
+    #     api_keys=APIKeys(
+    #         BET_FROM_ADDRESS=verify_address(
+    #             "0xb611A9f02B318339049264c7a66ac3401281cc3c"
+    #         ),
+    #         BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
+    #         OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
+    #         MANIFOLD_API_KEY=None,
+    #     ),
+    #     cron_schedule="0 */12 * * *",
+    #     timeout=540,
+    # )

@@ -1,14 +1,16 @@
 import json
 import typing as t
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
+
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
+from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent.tools.web_search.tavily import web_search
 
 
@@ -41,6 +43,22 @@ class Answer(BaseModel):
     def has_known_outcome(self) -> bool:
         return self.result is not Result.UNKNOWN
 
+
+HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT = """
+The current date is {date_str}. Your goal is to assert if a QUESTION references an event that is already finished (according to the current date and time) or if it will still take place in a later date. 
+
+For example, you should return 1 if given the event "Will Bitcoin have reached the price of $100 by 30 March 2023?", since the event ends on a data prior to the current date.
+
+Your answer MUST be an integer and follow the logic below:
+- If the event is already finished, return 1
+- If the event has not yet finished, return 0
+- If you are not sure, return -1
+
+Answer with the single prompt only, and nothing else.
+
+[QUESTION]
+"{question}"
+"""
 
 GENERATE_SEARCH_QUERY_PROMPT = """
 The current date is {date_str}. You are trying to determine whether the answer
@@ -136,6 +154,28 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
         return _summary(content=content, objective=question, separators=["  "])
     else:
         return content
+
+def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
+    """ Asks the model if the event referenced by the question has finished (given the
+    current date) (returning 1), if the event has not yet finished (returning 0) or
+     if it cannot be sure (returning -1)."""
+    date_str = utcnow().strftime("%Y-%m-%d %H:%M:%S %Z")
+    llm = ChatOpenAI(model=model, temperature=0.0)
+    prompt = ChatPromptTemplate.from_template(
+                template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
+            ).format_messages(
+                date_str=date_str,
+                question=question,
+            )
+    answer = str(llm.invoke(prompt).content)
+    try:
+        parsed_answer = int(answer)
+        if parsed_answer == 1:
+            return True
+    except Exception as e:
+        print ("Exception occured, cannot assert if title happened in the past. ", e)
+        
+    return False
 
 
 def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
