@@ -53,7 +53,7 @@ Your answer MUST be an integer and follow the logic below:
 - If the event has not yet finished, return 0
 - If you are not sure, return -1
 
-Answer with the single prompt only, and nothing else.
+Answer with the single 1, 0 or -1 only, and nothing else.
 
 [QUESTION]
 "{question}"

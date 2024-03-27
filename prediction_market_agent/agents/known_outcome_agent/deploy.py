@@ -37,13 +37,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
-            if not market_is_saturated(market=market):
-                if not has_question_event_happened_in_the_past(
-                    model=self.model, question=market.question
-                ):
-                    # event happened
-                    continue
-
+            if not market_is_saturated(
+                market=market
+            ) and has_question_event_happened_in_the_past(
+                model=self.model, question=market.question
+            ):
                 answer = get_known_outcome(
                     model=self.model,
                     question=market.question,
