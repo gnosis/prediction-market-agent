@@ -17,6 +17,7 @@ from prediction_market_agent_tooling.tools.web3_utils import verify_address
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
     get_known_outcome,
+    has_question_event_happened_in_the_past,
 )
 
 
@@ -37,7 +38,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             print(f"Looking at market {market.id=} {market.question=}")
-            if not market_is_saturated(market=market):
+            if not market_is_saturated(
+                market=market
+            ) and has_question_event_happened_in_the_past(
+                model=self.model, question=market.question
+            ):
                 print(f"Predicting market {market.id=} {market.question=}")
                 try:
                     answer = get_known_outcome(
