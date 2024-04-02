@@ -39,17 +39,28 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             print(f"Looking at market {market.id=} {market.question=}")
             if not market_is_saturated(market=market):
                 print(f"Predicting market {market.id=} {market.question=}")
-                answer = get_known_outcome(
-                    model=self.model,
-                    question=market.question,
-                    max_tries=3,
-                )
+                try:
+                    answer = get_known_outcome(
+                        model=self.model,
+                        question=market.question,
+                        max_tries=3,
+                    )
+                except Exception as e:
+                    print(
+                        f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+                    )
+                    continue
                 if answer.has_known_outcome():
                     print(
                         f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
                     )
                     picked_markets.append(market)
                     self.markets_with_known_outcomes[market.id] = answer.result
+
+                    # Return as soon as we have picked a market, because otherwise it will take too long and we will run out of time in GCP Function (540s timeout)
+                    # TODO: After PMAT is updated in this repository, we can return `None` in `answer_binary_market` method and PMAT won't place the bet.
+                    # So we can move this logic out of `pick_markets` into `answer_binary_market`, and simply process as many bets as we have time for.
+                    return picked_markets
 
             else:
                 print(
