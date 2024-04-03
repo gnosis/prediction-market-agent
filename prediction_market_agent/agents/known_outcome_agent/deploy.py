@@ -1,4 +1,5 @@
 import getpass
+import random
 from decimal import Decimal
 
 from prediction_market_agent_tooling.config import APIKeys
@@ -16,7 +17,6 @@ from prediction_market_agent_tooling.tools.utils import (
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
     get_known_outcome,
-    has_question_event_happened_in_the_past,
 )
 
 
@@ -43,16 +43,20 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
                 continue
-
-            # TODO it is currently expensive and slow to run the full evaluation
-            # on all markets, so we only run it on markets that address events
-            # that have already happened in the past.
-            if has_question_event_happened_in_the_past(
-                model=self.model, question=market.question
-            ):
-                print(f"Picking market {market.id=} {market.question=}")
+            else:
                 picked_markets.append(market)
 
+        # If all markets have a closing time set, pick the earliest closing.
+        # Otherwise pick randomly.
+        N_TO_PICK = 5
+        if all(market.close_time for market in picked_markets):
+            picked_markets = sorted(
+                picked_markets, key=lambda market: market.close_time
+            )[:N_TO_PICK]
+        else:
+            picked_markets = random.sample(
+                picked_markets, min(len(picked_markets), N_TO_PICK)
+            )
         return picked_markets
 
     def answer_binary_market(self, market: AgentMarket) -> bool | None:
@@ -67,7 +71,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
             )
             answer = None
-        if answer and answer.has_known_outcome():
+        if answer and answer.has_known_result():
             print(
                 f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
             )

@@ -32,7 +32,9 @@ class QuestionWithKnownOutcome(BaseModel):
             id=self.question,
             question=self.question,
             p_yes=Probability(
-                self.result.to_p_yes() if self.result != Result.UNKNOWN else 0.5
+                self.result.to_p_yes()
+                if self.result != Result.KNOWN_UNKNOWABLE
+                else 0.5
             ),
             volume=None,
             created_time=None,
@@ -60,7 +62,8 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             question=market_question,
             max_tries=self.max_tries,
         )
-        if answer.result == Result.UNKNOWN:
+        print(f"Answered {market_question=} with {answer.result=}, {answer.reasoning=}")
+        if not answer.has_known_result():
             return Prediction(
                 is_predictable=False,
                 outcome_prediction=None,
@@ -127,17 +130,17 @@ if __name__ == "__main__":
         ),
         QuestionWithKnownOutcome(
             question="Will Lewis Hamilton win the 2024/2025 F1 drivers champtionship?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
             question="Will the cost of grain in the Spain increase by 20% by 19 July 2024?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
             question="Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
     ]
