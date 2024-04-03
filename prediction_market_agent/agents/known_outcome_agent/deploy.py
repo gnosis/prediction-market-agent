@@ -67,7 +67,6 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
             )
             answer = None
-
         if answer and answer.has_known_outcome():
             print(
                 f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
