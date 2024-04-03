@@ -56,8 +56,6 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
         return picked_markets
 
     def answer_binary_market(self, market: AgentMarket) -> bool | None:
-        # The answer has already been determined in `pick_markets` so we just
-        # return it here.
         try:
             answer = get_known_outcome(
                 model=self.model,
@@ -68,6 +66,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             print(
                 f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
             )
+            answer = None
         if answer and answer.has_known_outcome():
             print(
                 f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
