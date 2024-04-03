@@ -135,7 +135,7 @@ be as follows:
 If the question is of the format: "Will X happen on Y?" then the result should
 be as follows:
 - If something has happened that necessarily prevents X from happening on Y, the result is 'NO'.
-- If you are confident that nothing has happened that necessarily prevents X from happening on Y, the result is 'KNOWN_UNKNOWN'.
+- If you are confident that nothing has happened that necessarily prevents X from happening on Y, the result is 'KNOWN_UNKNOWABLE'.
 - Otherwise, the result is 'UNKNOWN'.
 """
 
