@@ -33,50 +33,48 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
+            print(f"Looking at market {market.id=} {market.question=}")
+
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
-            print(f"Looking at market {market.id=} {market.question=}")
-            if not market_is_saturated(
-                market=market
-            ) and has_question_event_happened_in_the_past(
-                model=self.model, question=market.question
-            ):
-                print(f"Predicting market {market.id=} {market.question=}")
-                try:
-                    answer = get_known_outcome(
-                        model=self.model,
-                        question=market.question,
-                        max_tries=3,
-                    )
-                except Exception as e:
-                    print(
-                        f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
-                    )
-                    continue
-                if answer.has_known_outcome():
-                    print(
-                        f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
-                    )
-                    picked_markets.append(market)
-                    self.markets_with_known_outcomes[market.id] = answer.result
-
-                    # Return as soon as we have picked a market, because otherwise it will take too long and we will run out of time in GCP Function (540s timeout)
-                    # TODO: After PMAT is updated in this repository, we can return `None` in `answer_binary_market` method and PMAT won't place the bet.
-                    # So we can move this logic out of `pick_markets` into `answer_binary_market`, and simply process as many bets as we have time for.
-                    return picked_markets
-
-            else:
+            if market_is_saturated(market=market):
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
+                continue
+
+            # TODO it is currently expensive and slow to run the full evaluation
+            # on all markets, so we only run it on markets that address events
+            # that have already happened in the past.
+            if has_question_event_happened_in_the_past(
+                model=self.model, question=market.question
+            ):
+                print(f"Picking market {market.id=} {market.question=}")
+                picked_markets.append(market)
 
         return picked_markets
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> bool | None:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
-        return self.markets_with_known_outcomes[market.id].to_boolean()
+        try:
+            answer = get_known_outcome(
+                model=self.model,
+                question=market.question,
+                max_tries=3,
+            )
+        except Exception as e:
+            print(
+                f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+            )
+        if answer and answer.has_known_outcome():
+            print(
+                f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
+            )
+            return answer.result.to_boolean()
+
+        return None
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if market.currency == Currency.xDai:
