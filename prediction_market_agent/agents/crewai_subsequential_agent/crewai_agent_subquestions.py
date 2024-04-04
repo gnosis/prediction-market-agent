@@ -123,12 +123,8 @@ class CrewAIAgentSubquestions(AbstractAgent):
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
 
-        # outcomes = self.split_research_into_outcomes(market.question)
-
-        outcomes = Outcomes(outcomes=['Donald Trump wins the 2024 presidential election',
-                                      'Joe Biden wins the 2024 presidential election',
-                                      'An independent candidate wins the 2024 presidential election',
-                                      'None of the above candidates win the 2024 presidential election, and someone else comes forward as the winner'])
+        outcomes = self.split_research_into_outcomes(market.question)
+        print ("outcomes ", outcomes)
 
         outcomes_with_probs = []
         task_map = {}

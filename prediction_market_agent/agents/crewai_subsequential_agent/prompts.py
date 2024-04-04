@@ -1,5 +1,4 @@
-# ToDo - Test both research prompts
-CREATE_OUTCOMES_FROM_SCENARIO_PROMPT =         """
+CREATE_OUTCOMES_FROM_SCENARIO_PROMPT = """
         You are asked about a SCENARIO, which can have multiple, mutually-exclusive outcomes.
         You should break down the SCENARIO into a list of possible outcomes.
         
@@ -22,13 +21,6 @@ CREATE_OUTCOMES_FROM_SCENARIO_PROMPT =         """
         [SCENARIO]
         {scenario}
         """
-# research_prompt2 =         """
-#         You are asked about a SCENARIO, which can have multiple, mutually-exclusive outcomes.
-#         You should break down the SCENARIO into a list of possible outcomes.
-        
-#         [SCENARIO]
-#         {scenario}
-#         """
 
 CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT = '''
   A list containing multiple bullet points. Each bullet point should start with '-'.
@@ -56,7 +48,6 @@ PROBABILITY_FOR_ONE_OUTCOME_PROMPT = """
             SENTENCE: {sentence}
 """
 
-# ToDo - Test both research prompts
 RESEARCH_OUTCOME_PROMPT = """
                 Research and report on the following sentence:
                 {sentence}
@@ -91,8 +82,8 @@ considering the probabilities of the other related outcomes.
 
 OUTCOME_TO_ASSESS: {outcome_to_assess}
 OUTCOMES_WITH_PROBABILITIES: {outcomes_with_probabilities}
-"""                
-PROBABILITY_CLASS_OUTPUT="""
+"""
+PROBABILITY_CLASS_OUTPUT = """
         Your response should be a JSON string containing the following keys:
     - "decision": The decision you made. Either `y` (for `Yes`) or `n` (for `No`).
     - "p_yes": Probability that the sentence outcome will be `Yes`. Ranging from 0 (lowest probability) to 1 (maximum probability).
