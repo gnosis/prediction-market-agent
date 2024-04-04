@@ -43,7 +43,6 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
-                continue
             else:
                 picked_markets.append(market)
 
