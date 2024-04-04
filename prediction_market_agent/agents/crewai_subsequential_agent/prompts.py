@@ -93,7 +93,7 @@ OUTCOME_TO_ASSESS: {outcome_to_assess}
 OUTCOMES_WITH_PROBABILITIES: {outcomes_with_probabilities}
 """                
 PROBABILITY_CLASS_OUTPUT="""
-        Your response should include:
+        Your response should be a JSON string containing the following keys:
     - "decision": The decision you made. Either `y` (for `Yes`) or `n` (for `No`).
     - "p_yes": Probability that the sentence outcome will be `Yes`. Ranging from 0 (lowest probability) to 1 (maximum probability).
     - "p_no": Probability that the sentence outcome will be `No`. Ranging from 0 (lowest probability) to 1 (maximum probability).
@@ -103,4 +103,5 @@ PROBABILITY_CLASS_OUTPUT="""
   Ensure p_yes + p_no equals 1.
     
     Format your response in JSON format, including the keys "decision", "p_yes", "p_no" and "confidence".
+    Only output the JSON-formatted string, nothing else.
 """
