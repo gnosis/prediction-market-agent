@@ -10,6 +10,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
     get_current_git_commit_sha,
     get_current_git_url,
 )
@@ -51,7 +52,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
         N_TO_PICK = 5
         if all(market.close_time for market in picked_markets):
             picked_markets = sorted(
-                picked_markets, key=lambda market: market.close_time
+                picked_markets, key=lambda market: check_not_none(market.close_time)
             )[:N_TO_PICK]
         else:
             picked_markets = random.sample(
