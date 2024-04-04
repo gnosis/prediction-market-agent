@@ -6,9 +6,9 @@ from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarked
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
-    Prediction, Market,
+    Prediction,
 )
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import Probability, DatetimeWithTimezone
 from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -21,21 +21,25 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
 
 
 def build_market_from_question_without_validation(question: str) -> Market:
-    return Market.model_construct(url=question,question=question, p_yes = 0.5)
+    return Market(url=question,
+                  question=question, p_yes=0.5,
+                  source=MarketSource.MANIFOLD,
+                  volume=0,
+                  created_time=DatetimeWithTimezone(datetime(2024, 1, 1)),
+                  close_time=DatetimeWithTimezone(datetime(2024, 3, 15))
+                  )
 
 
 def build_binary_agent_market_from_question(question: str) -> AgentMarket:
     return AgentMarket(
-        url="",
         id=question,
         question=question,
         p_yes=Probability(0.5),
-        volume=None,
-        created_time=datetime(2024,1,1),
-        close_time=None,
+        created_time=datetime(2024, 1, 1),
         resolution=None,
         outcomes=["YES", "NO"],
     )
+
 
 class QuestionAndAnswer(BaseModel):
     question: str
@@ -43,20 +47,18 @@ class QuestionAndAnswer(BaseModel):
     bet_correct: bool
 
 
-
 class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
     def __init__(
-        self,
-        agent_name: str,
-        max_workers: int,
-        model: str,
-        max_tries: int,
+            self,
+            agent_name: str,
+            max_workers: int,
+            model: str,
+            max_tries: int,
     ) -> None:
         self.model = model
         self.max_tries = max_tries
         self.agent = CrewAIAgentSubquestions()
         super().__init__(agent_name=agent_name, max_workers=max_workers)
-
 
     def predict(self, market_question: str) -> Prediction:
 

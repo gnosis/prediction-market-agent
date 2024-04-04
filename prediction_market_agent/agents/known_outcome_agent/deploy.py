@@ -1,3 +1,4 @@
+# type: ignore
 import getpass
 import random
 from decimal import Decimal

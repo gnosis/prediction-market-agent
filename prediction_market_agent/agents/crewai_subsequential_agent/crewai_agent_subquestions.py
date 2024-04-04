@@ -1,10 +1,9 @@
+import typing as t
+
 from crewai import Agent, Task, Process, Crew
 from crewai_tools import SerperDevTool
-from langchain_community.callbacks.manager import get_openai_callback
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from pydantic import BaseModel
-from tqdm import tqdm
-import typing as t
 
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.crewai_subsequential_agent.prompts import *
@@ -21,9 +20,6 @@ class ProbabilityOutput(BaseModel):
     p_yes: float
     p_no: float
     confidence: float
-
-
-get_openai_callback()
 
 
 class CrewAIAgentSubquestions(AbstractAgent):
@@ -101,7 +97,7 @@ class CrewAIAgentSubquestions(AbstractAgent):
         result = crew.kickoff(inputs={'sentence': sentence})
         return ProbabilityOutput.model_validate_json(result)
 
-    def generate_final_decision(self, outcomes_with_probabilities) -> ProbabilityOutput:
+    def generate_final_decision(self, outcomes_with_probabilities: list[t.Tuple[str, ProbabilityOutput]]) -> ProbabilityOutput:
         task_final_decision = Task(
             description=(FINAL_DECISION_PROMPT),
             agent=self.predictor,
@@ -128,7 +124,7 @@ class CrewAIAgentSubquestions(AbstractAgent):
 
         outcomes_with_probs = []
         task_map = {}
-        for outcome in tqdm(outcomes.outcomes):
+        for outcome in outcomes.outcomes:
             tasks_for_outcome = self.build_tasks_for_outcome(input_dict={"sentence": outcome})
             task_map[outcome] = tasks_for_outcome
 
