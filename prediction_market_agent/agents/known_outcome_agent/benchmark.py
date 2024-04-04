@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
-    Market,
-    MarketSource,
     OutcomePrediction,
     Prediction,
 )
+from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
@@ -26,16 +26,21 @@ class QuestionWithKnownOutcome(BaseModel):
     result: Result
     notes: t.Optional[str] = None
 
-    def to_market(self) -> Market:
-        dt = utcnow()
-        return Market(
+    def to_market(self) -> AgentMarket:
+        return AgentMarket(
             url=self.url if self.url else "",
+            id=self.question,
             question=self.question,
-            source=MarketSource.MANIFOLD,
-            p_yes=self.result.to_p_yes() if self.result != Result.UNKNOWN else 0.5,
-            volume=0.0,
-            created_time=dt,
-            close_time=dt,
+            p_yes=Probability(
+                self.result.to_p_yes()
+                if self.result != Result.KNOWN_UNKNOWABLE
+                else 0.5
+            ),
+            volume=None,
+            created_time=None,
+            close_time=None,
+            resolution=None,
+            outcomes=["YES", "NO"],
         )
 
 
@@ -57,7 +62,8 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             question=market_question,
             max_tries=self.max_tries,
         )
-        if answer.result == Result.UNKNOWN:
+        print(f"Answered {market_question=} with {answer.result=}, {answer.reasoning=}")
+        if not answer.has_known_result():
             return Prediction(
                 is_predictable=False,
                 outcome_prediction=None,
@@ -124,17 +130,17 @@ if __name__ == "__main__":
         ),
         QuestionWithKnownOutcome(
             question="Will Lewis Hamilton win the 2024/2025 F1 drivers champtionship?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
             question="Will the cost of grain in the Spain increase by 20% by 19 July 2024?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
             question="Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028?",
-            result=Result.UNKNOWN,
+            result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
     ]

@@ -14,8 +14,21 @@ from prediction_market_agent.tools.web_search.tavily import web_search
 
 
 class Result(str, Enum):
+    """
+    With perfect information, a binary question should have one of three answers:
+    YES, NO, or KNOWN_UNKNOWABLE:
+
+    - Will the sun rise tomorrow? YES
+    - Will the Bradley Cooper win best actor at the 2024 oscars by 01/04/2024? NO (because the event has already happened, and Cillian Murphy won)
+    - Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028? KNOWN_UNKNOWABLE (because the closing date has not happened yet, and we cannot predict the outcome with reasoanable certainty)
+
+    but since the agent's information is based on web scraping, and is therefore
+    imperfect, we allow it to defer answering definitively via the UNKNOWN result.
+    """
+
     YES = "YES"
     NO = "NO"
+    KNOWN_UNKNOWABLE = "KNOWN_UNKNOWABLE"
     UNKNOWN = "UNKNOWN"
 
     def to_p_yes(self) -> float:
@@ -34,13 +47,17 @@ class Result(str, Enum):
         else:
             raise ValueError("Unexpected result")
 
+    @property
+    def is_known(self) -> bool:
+        return self in [Result.YES, Result.NO]
+
 
 class Answer(BaseModel):
     result: Result
     reasoning: str
 
-    def has_known_outcome(self) -> bool:
-        return self.result is not Result.UNKNOWN
+    def has_known_result(self) -> bool:
+        return self.result.is_known
 
 
 HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT = """
@@ -72,7 +89,7 @@ For example, if the question is:
 
 You might generate the following search query:
 
-"Champions League semi-finals draw 2024"
+"Champions League semi-finals draw 2025"
 
 Answer with the single prompt only, and nothing else.
 """
@@ -100,20 +117,25 @@ following fields:
 
 where <REASONING> is a free text field containing your reasoning, and <RESULT>
 is a multiple-choice field containing only one of 'YES' (if the answer to the
-question is yes), 'NO' (if the answer to the question is no), or 'UNKNOWN' if
-you are unable to answer the question with a reasonable degree of certainty from
-the web-scraped information. Your answer should only contain this json string,
-and nothing else.
+question is yes), 'NO' (if the answer to the question is no), 'KNOWN_UNKNOWABLE'
+(if we can answer with a reasonable degree of certainty from the web-scraped
+information that the question cannot be answered either way for the time being),
+or 'UNKNOWN' if you are unable to give one of the above answers with a
+reasonable degree of certainty from the web-scraped information. Your answer
+should only contain this json string, and nothing else.
 
 If the question is of the format: "Will X happen by Y?" then the result should
 be as follows:
 - If X has already happened, the result is 'YES'.
 - If not-X has already happened, the result is 'NO'.
 - If X has been announced to happen after Y, result 'NO'.
+- If you are confident that none of the above are the case, and the result will only be knowable in the future, or not at all, the result is 'KNOWN_UNKNOWABLE'.
 - Otherwise, the result is 'UNKNOWN'.
 
-If the question is of the format: "Will X happen on Y?"
+If the question is of the format: "Will X happen on Y?" then the result should
+be as follows:
 - If something has happened that necessarily prevents X from happening on Y, the result is 'NO'.
+- If you are confident that nothing has happened that necessarily prevents X from happening on Y, the result is 'KNOWN_UNKNOWABLE'.
 - Otherwise, the result is 'UNKNOWN'.
 """
 
@@ -192,7 +214,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
         search_prompt = ChatPromptTemplate.from_template(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
+        print(f"Invoking LLM for {search_prompt=}")
         search_query = str(llm.invoke(search_prompt).content).strip('"')
+        print(f"Searchig for {search_query=}")
         search_results = web_search(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")

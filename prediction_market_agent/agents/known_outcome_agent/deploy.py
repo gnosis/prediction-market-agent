@@ -1,4 +1,5 @@
 import getpass
+import random
 from decimal import Decimal
 
 from prediction_market_agent_tooling.config import APIKeys
@@ -9,15 +10,14 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
     get_current_git_commit_sha,
     get_current_git_url,
 )
-from prediction_market_agent_tooling.tools.web3_utils import verify_address
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
     get_known_outcome,
-    has_question_event_happened_in_the_past,
 )
 
 
@@ -34,29 +34,50 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
+            print(f"Looking at market {market.id=} {market.question=}")
+
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
-            if not market_is_saturated(
-                market=market
-            ) and has_question_event_happened_in_the_past(
-                model=self.model, question=market.question
-            ):
-                answer = get_known_outcome(
-                    model=self.model,
-                    question=market.question,
-                    max_tries=3,
+            if market_is_saturated(market=market):
+                print(
+                    f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
-                if answer.has_known_outcome():
-                    picked_markets.append(market)
-                    self.markets_with_known_outcomes[market.id] = answer.result
+            else:
+                picked_markets.append(market)
 
+        # If all markets have a closing time set, pick the earliest closing.
+        # Otherwise pick randomly.
+        N_TO_PICK = 5
+        if all(market.close_time for market in picked_markets):
+            picked_markets = sorted(
+                picked_markets, key=lambda market: check_not_none(market.close_time)
+            )[:N_TO_PICK]
+        else:
+            picked_markets = random.sample(
+                picked_markets, min(len(picked_markets), N_TO_PICK)
+            )
         return picked_markets
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
-        # The answer has already been determined in `pick_markets` so we just
-        # return it here.
-        return self.markets_with_known_outcomes[market.id].to_boolean()
+    def answer_binary_market(self, market: AgentMarket) -> bool | None:
+        try:
+            answer = get_known_outcome(
+                model=self.model,
+                question=market.question,
+                max_tries=3,
+            )
+        except Exception as e:
+            print(
+                f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+            )
+            answer = None
+        if answer and answer.has_known_result():
+            print(
+                f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
+            )
+            return answer.result.to_boolean()
+
+        return None
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if market.currency == Currency.xDai:
@@ -76,9 +97,6 @@ if __name__ == "__main__":
         },
         memory=1024,
         api_keys=APIKeys(
-            BET_FROM_ADDRESS=verify_address(
-                "0xb611A9f02B318339049264c7a66ac3401281cc3c"
-            ),
             BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
             OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
             MANIFOLD_API_KEY=None,
