@@ -17,7 +17,7 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 class DeployableThinkThoroughlyAgent(DeployableAgent):
     # For cheaper credits at this experimental stage
-    model = "gpt-3.5-turbo"
+    model = "gpt-4-turbo-preview"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}

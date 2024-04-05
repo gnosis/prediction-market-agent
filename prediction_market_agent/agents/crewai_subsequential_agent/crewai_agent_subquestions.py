@@ -1,12 +1,8 @@
 import typing as t
 
 from crewai import Agent, Task, Process, Crew
-from crewai_tools import SerperDevTool
-from langchain_openai import OpenAI
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.crewai_subsequential_agent.prompts import *
 from prediction_market_agent.tools.crewai_tools import TavilyDevTool
 
@@ -25,7 +21,7 @@ class ProbabilityOutput(BaseModel):
     confidence: float
 
 
-class CrewAIAgentSubquestions(AbstractAgent):
+class CrewAIAgentSubquestions:
     def __init__(self) -> None:
         # openai_model_name as str automatically interpreted by CrewAI, else create LLM object.
         self.researcher = Agent(
@@ -121,9 +117,9 @@ class CrewAIAgentSubquestions(AbstractAgent):
                                       'outcome_to_assess': outcomes_with_probabilities[0][0]})
         return ProbabilityOutput.model_validate_json(task_final_decision.output.raw_output)
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
+    def answer_binary_market(self, question: str) -> ProbabilityOutput:
 
-        outcomes = self.split_research_into_outcomes(market.question)
+        outcomes = self.split_research_into_outcomes(question)
         print ("outcomes ", outcomes)
 
         outcomes_with_probs = []
@@ -155,4 +151,4 @@ class CrewAIAgentSubquestions(AbstractAgent):
             outcomes_with_probs.append((outcome, prediction_result))
 
         final_answer = self.generate_final_decision(outcomes_with_probs)
-        return True if final_answer.decision == "y" else False
+        return final_answer

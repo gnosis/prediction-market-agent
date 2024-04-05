@@ -58,6 +58,7 @@ RESEARCH_OUTCOME_OUTPUT = """
                 {{"report": <REPORT>}}
                 where <REPORT> is a free text field that contains a well though out justification 
                 for the predicition based on the summary of your findings.
+                The report must not be longer than 7000 characters.
             """
 
 FINAL_DECISION_PROMPT = """
@@ -83,16 +84,18 @@ considering the probabilities of the other related outcomes.
 OUTCOME_TO_ASSESS: {outcome_to_assess}
 OUTCOMES_WITH_PROBABILITIES: {outcomes_with_probabilities}
 """
+
 PROBABILITY_CLASS_OUTPUT = """
-        Your response should be a JSON string containing the following keys:
+    Your response should be a JSON string containing the following keys:
     - "decision": The decision you made. Either `y` (for `Yes`) or `n` (for `No`).
     - "p_yes": Probability that the sentence outcome will be `Yes`. Ranging from 0 (lowest probability) to 1 (maximum probability).
     - "p_no": Probability that the sentence outcome will be `No`. Ranging from 0 (lowest probability) to 1 (maximum probability).
     - "confidence": Indicating the confidence in the estimated probabilities you provided ranging from 0 (lowest confidence) to 
     1 (maximum confidence). Confidence can be calculated based on the quality and quantity of data used for the estimation.
 
+    A valid JSON string as output could look like the example below:
+    Example output: {"decision": "y","p_yes": 0.1, "p_no": 0.9, "confidence": 0.4}
+    Do not use escape quotes and line breaks. Do not output any reasoning, only the JSON object.
+
   Ensure p_yes + p_no equals 1.
-    
-    Format your response in JSON format, including the keys "decision", "p_yes", "p_no" and "confidence".
-    Only output the JSON-formatted string, nothing else.
 """
