@@ -2,13 +2,16 @@ import typing as t
 
 from crewai import Agent, Task, Process, Crew
 from crewai_tools import SerperDevTool
+from langchain_openai import OpenAI
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.abstract import AbstractAgent
 from prediction_market_agent.agents.crewai_subsequential_agent.prompts import *
+from prediction_market_agent.tools.crewai_tools import TavilyDevTool
 
-search_tool = SerperDevTool()
+#search_tool = SerperDevTool()
+tavily_search = TavilyDevTool()
 
 
 class Outcomes(BaseModel):
@@ -24,13 +27,14 @@ class ProbabilityOutput(BaseModel):
 
 class CrewAIAgentSubquestions(AbstractAgent):
     def __init__(self) -> None:
+        # openai_model_name as str automatically interpreted by CrewAI, else create LLM object.
         self.researcher = Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
             backstory="You are a senior research analyst who is adept at researching and reporting on future events.",
             verbose=True,
             allow_delegation=False,
-            tools=[search_tool],
+            tools=[tavily_search],
         )
 
         self.predictor = Agent(
@@ -68,7 +72,7 @@ class CrewAIAgentSubquestions(AbstractAgent):
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=self.predictor,
             output_json=ProbabilityOutput,
-            async_execution=True,
+            async_execution=False,
             context=[task_research_one_outcome]
         )
 
@@ -99,9 +103,9 @@ class CrewAIAgentSubquestions(AbstractAgent):
 
     def generate_final_decision(self, outcomes_with_probabilities: list[t.Tuple[str, ProbabilityOutput]]) -> ProbabilityOutput:
         task_final_decision = Task(
-            description=(FINAL_DECISION_PROMPT),
+            description=FINAL_DECISION_PROMPT,
             agent=self.predictor,
-            expected_output=(PROBABILITY_CLASS_OUTPUT),
+            expected_output=PROBABILITY_CLASS_OUTPUT,
             output_json=ProbabilityOutput,
         )
 
@@ -111,11 +115,11 @@ class CrewAIAgentSubquestions(AbstractAgent):
             verbose=2,
         )
 
-        result = crew.kickoff(inputs={'outcomes_with_probabilities':
+        crew.kickoff(inputs={'outcomes_with_probabilities':
                                           [(i[0], i[1].dict()) for i in outcomes_with_probabilities],
                                       'number_of_outcomes': len(outcomes_with_probabilities),
                                       'outcome_to_assess': outcomes_with_probabilities[0][0]})
-        return ProbabilityOutput.model_validate_json(result)
+        return ProbabilityOutput.model_validate_json(task_final_decision.output.raw_output)
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
 
@@ -134,8 +138,10 @@ class CrewAIAgentSubquestions(AbstractAgent):
             agents=[self.researcher, self.predictor],
             tasks=all_tasks,
             verbose=2,
+            process=Process.sequential
         )
 
+        # crew.kickoff doesn't finish all async tasks when done.
         crew.kickoff()
 
         # We parse individual task results to build outcomes_with_probs

@@ -1,5 +1,8 @@
+import os
 from decimal import Decimal
 import random
+
+from langchain_openai import OpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
@@ -37,6 +40,7 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def answer_binary_market(self, market: AgentMarket) -> bool:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
+        os.environ["OPENAI_MODEL_NAME"]="gpt-4-turbo-preview"
         agent = CrewAIAgentSubquestions()
         result = agent.answer_binary_market(market)
         return result
