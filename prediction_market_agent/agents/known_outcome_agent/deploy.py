@@ -88,7 +88,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             return BetAmount(
                 # On markets without liquidity, bet just a small amount for benchmarking.
                 amount=(
-                    Decimal(0.1)
+                    Decimal(1.0)
                     if market.get_liquidity_in_xdai() > 5
                     else market.get_tiny_bet_amount().amount
                 ),
