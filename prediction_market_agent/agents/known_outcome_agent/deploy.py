@@ -10,10 +10,12 @@ from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     get_current_git_commit_sha,
     get_current_git_url,
+    should_not_happen,
 )
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -78,8 +80,18 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
         return None
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
-        if market.currency == Currency.xDai:
-            return BetAmount(amount=Decimal(0.1), currency=Currency.xDai)
+        if isinstance(market, OmenAgentMarket):
+            if market.currency != Currency.xDai:
+                should_not_happen()
+            return BetAmount(
+                # On markets without liquidity, bet just a small amount for benchmarking.
+                amount=(
+                    Decimal(1.0)
+                    if market.get_liquidity_in_xdai() > 5
+                    else market.get_tiny_bet_amount().amount
+                ),
+                currency=Currency.xDai,
+            )
         else:
             raise NotImplementedError("This agent only supports xDai markets")
 
