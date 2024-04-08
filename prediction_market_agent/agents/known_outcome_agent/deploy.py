@@ -7,14 +7,13 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
 from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.data_models import BetAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     get_current_git_commit_sha,
     get_current_git_url,
-    should_not_happen,
 )
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -28,7 +27,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-4-turbo-preview"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -36,6 +35,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
+            if not isinstance(market, OmenAgentMarket):
+                raise NotImplementedError(
+                    "This agent only supports predictions on Omen markets"
+                )
+
             print(f"Looking at market {market.id=} {market.question=}")
 
             # Assume very high probability markets are already known, and have
@@ -44,6 +48,10 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             if market_is_saturated(market=market):
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
+                )
+            elif market.get_liquidity_in_xdai() < 5:
+                print(
+                    f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
                 )
             else:
                 picked_markets.append(market)
@@ -83,17 +91,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if isinstance(market, OmenAgentMarket):
-            if market.currency != Currency.xDai:
-                should_not_happen()
-            return BetAmount(
-                # On markets without liquidity, bet just a small amount for benchmarking.
-                amount=(
-                    Decimal(1.0)
-                    if market.get_liquidity_in_xdai() > 5
-                    else market.get_tiny_bet_amount().amount
-                ),
-                currency=Currency.xDai,
-            )
+            return BetAmount(amount=(Decimal(1.0)), currency=market.currency)
         else:
             raise NotImplementedError("This agent only supports xDai markets")
 
