@@ -2,12 +2,15 @@ import os
 import pprint
 import typing as t
 from decimal import Decimal
+from typing import List
 
 from eth_typing import ChecksumAddress, HexAddress, HexStr
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.omen.data_models import OmenUserPosition
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import OmenSubgraphHandler
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.web3_utils import private_key_to_public_key
 from pydantic import SecretStr
@@ -236,6 +239,21 @@ class GetWalletBalance(Function):
         return balance.xdai
 
 
+class GetUserPositions(Function):
+    @property
+    def description(self) -> str:
+        return "Use this function to fetch the markets where the user has previously bet."
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["0x2DD9f5678484C1F59F97eD334725858b938B4102"]
+
+    def __call__(self, user_address: str) -> list[OmenUserPosition]:
+        user_address_checksummed = address_to_checksum_address(user_address)
+        omen_subgraph_handler = OmenSubgraphHandler()
+        user_positions = omen_subgraph_handler.get_user_positions(better_address=user_address_checksummed)
+        return user_positions
+
 ALL_FUNCTIONS = [
     Sum,
     Product,
@@ -248,5 +266,6 @@ ALL_FUNCTIONS = [
     SellNo,
     # BalanceToOutcomes,
     SummarizeLearning,
-    GetWalletBalance
+    GetWalletBalance,
+    GetUserPositions
 ]
