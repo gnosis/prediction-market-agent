@@ -1,3 +1,4 @@
+from eth_typing import HexStr, HexAddress, ChecksumAddress
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
@@ -5,6 +6,8 @@ from prediction_market_agent_tooling.markets.agent_market import (
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
+def address_to_checksum_address(address: str) -> ChecksumAddress:
+    return ChecksumAddress(HexAddress(HexStr(address)))
 
 def get_omen_binary_markets() -> list[OmenAgentMarket]:
     # Get the 5 markets that are closing soonest
