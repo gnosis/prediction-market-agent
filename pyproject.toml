@@ -41,6 +41,8 @@ autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
+microchain = "^0.0.4"
+microchain-python = "^0.3.4"
 
 [build-system]
 requires = ["poetry-core"]
