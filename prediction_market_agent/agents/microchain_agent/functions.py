@@ -7,7 +7,7 @@ from prediction_market_agent_tooling.markets.data_models import BetAmount, Curre
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.web3_utils import private_key_to_public_key
 
-from prediction_market_agent.agents.microchain_agent.tools import (
+from prediction_market_agent.agents.microchain_agent.utils import (
     get_omen_binary_market_from_question,
     get_omen_binary_markets,
     get_omen_market_token_balance,
