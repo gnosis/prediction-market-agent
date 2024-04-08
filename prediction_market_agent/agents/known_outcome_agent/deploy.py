@@ -49,7 +49,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
-            elif market.get_liquidity_in_xdai() > 5:
+            elif market.get_liquidity_in_xdai() < 5:
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
                 )
