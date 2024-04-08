@@ -1,20 +1,16 @@
-import os
 import pprint
 import typing as t
+from decimal import Decimal
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.tools.web3_utils import private_key_to_public_key
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_omen_binary_market_from_question,
     get_omen_binary_markets,
     get_omen_market_token_balance,
 )
-
-PRIVATE_KEY = os.getenv("BET_FROM_PRIVATE_KEY")
-PUBLIC_KEY = private_key_to_public_key(PRIVATE_KEY)
 
 balance = 50
 outcomeTokens = {}
@@ -125,7 +121,7 @@ class BuyTokens(Function):
             market=market_obj, outcome=outcome_bool
         )
         market_obj.place_bet(
-            outcome_bool, BetAmount(amount=amount, currency=Currency.xDai)
+            outcome_bool, BetAmount(amount=Decimal(amount), currency=Currency.xDai)
         )
         tokens = (
             get_omen_market_token_balance(market=market_obj, outcome=outcome_bool)
@@ -135,12 +131,12 @@ class BuyTokens(Function):
 
 
 class BuyYes(BuyTokens):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("yes")
 
 
 class BuyNo(BuyTokens):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("no")
 
 

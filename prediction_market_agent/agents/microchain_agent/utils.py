@@ -1,3 +1,5 @@
+from typing import List, cast
+
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
@@ -13,6 +15,7 @@ def get_omen_binary_markets() -> list[OmenAgentMarket]:
         sort_by=SortBy.CLOSING_SOONEST,
         limit=5,
     )
+    return cast(List[OmenAgentMarket], markets)
 
 
 def get_omen_binary_market_from_question(market: str) -> OmenAgentMarket:
