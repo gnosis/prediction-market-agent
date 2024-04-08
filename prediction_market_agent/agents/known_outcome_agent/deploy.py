@@ -27,7 +27,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-4-turbo-preview"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -35,6 +35,11 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
+            if not isinstance(market, OmenAgentMarket):
+                raise NotImplementedError(
+                    "This agent only supports predictions on Omen markets"
+                )
+
             print(f"Looking at market {market.id=} {market.question=}")
 
             # Assume very high probability markets are already known, and have
@@ -43,6 +48,10 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             if market_is_saturated(market=market):
                 print(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
+                )
+            elif market.get_liquidity_in_xdai() > 5:
+                print(
+                    f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
                 )
             else:
                 picked_markets.append(market)
