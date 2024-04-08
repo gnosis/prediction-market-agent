@@ -1,7 +1,10 @@
-from crewai import Agent, Task, Process, Crew
+from crewai import Agent, Crew, Process, Task
+from crewai_tools import BaseTool
 
 from prediction_market_agent.agents.abstract import AbstractAgent
-from prediction_market_agent.agents.general_agent.omen_functions import GetBinaryMarketsTool
+from prediction_market_agent.agents.general_agent.omen_functions import (
+    GetBinaryMarketsTool,
+)
 
 
 class GeneralAgent(AbstractAgent):
@@ -15,8 +18,7 @@ class GeneralAgent(AbstractAgent):
             tools=self.get_tools(),
         )
 
-
-    def run(self):
+    def run(self) -> None:
         """
         Method where agent should reason and execute actions on Omen.
         """
@@ -26,11 +28,10 @@ class GeneralAgent(AbstractAgent):
             tasks=[task],
             process=Process.sequential,  # Optional: Sequential task execution is default
         )
-        result = crew.kickoff(inputs={'topic': 'AI in healthcare'})
+        result = crew.kickoff(inputs={"topic": "AI in healthcare"})
         print(result)
 
-
-    def get_tools(self):
+    def get_tools(self) -> list[BaseTool]:
         return [GetBinaryMarketsTool()]
 
     def prepare_task(self) -> Task:
@@ -38,6 +39,6 @@ class GeneralAgent(AbstractAgent):
             description=(
                 "Find 1 or more markets on Omen that you could place bets on."
             ),
-            expected_output='A list of 1 or more markets, only displaying the market title.',
+            expected_output="A list of 1 or more markets, only displaying the market title.",
             agent=self.gambler,
         )
