@@ -1,13 +1,20 @@
+import os
 import pprint
 import typing as t
 
 from microchain import Function
-from prediction_market_agent_tooling.markets.agent_market import (
-    AgentMarket,
-    FilterBy,
-    SortBy,
-)
+from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.tools.web3_utils import private_key_to_public_key
+
+from prediction_market_agent.agents.microchain_agent.tools import (
+    get_omen_binary_market_from_question,
+    get_omen_binary_markets,
+    get_omen_market_token_balance,
+)
+
+PRIVATE_KEY = os.getenv("BET_FROM_PRIVATE_KEY")
+PUBLIC_KEY = private_key_to_public_key(PRIVATE_KEY)
 
 balance = 50
 outcomeTokens = {}
@@ -51,13 +58,7 @@ class GetMarkets(Function):
         return []
 
     def __call__(self) -> list[str]:
-        # Get the 5 markets that are closing soonest
-        markets: list[AgentMarket] = OmenAgentMarket.get_binary_markets(
-            filter_by=FilterBy.OPEN,
-            sort_by=SortBy.CLOSING_SOONEST,
-            limit=5,
-        )
-
+        markets: list[OmenAgentMarket] = get_omen_binary_markets()
         market_questions_and_prices = []
         for market in markets:
             market_questions_and_prices.append(market.question)
@@ -98,44 +99,49 @@ class GetBalance(Function):
         return balance
 
 
-class BuyYes(Function):
+class BuyTokens(Function):
+    def __init__(self, outcome: str):
+        self.outcome = outcome
+        super().__init__()
+
     @property
     def description(self) -> str:
-        return "Use this function to buy yes outcome tokens of a prediction market. The second parameter specifies how much $ you spend."
+        return f"Use this function to buy {self.outcome} outcome tokens of a prediction market. The second parameter specifies how much $ you spend."
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 2]
+        return ["Will Joe Biden get reelected in 2024?", 2.3]
 
-    def __call__(self, market: str, amount: int) -> str:
-        global balance
-        if amount > balance:
-            return (
-                f"Your balance of {balance} $ is not large enough to spend {amount} $."
-            )
+    def __call__(self, market: str, amount: float) -> str:
+        if self.outcome == "yes":
+            outcome_bool = True
+        elif self.outcome == "no":
+            outcome_bool = False
+        else:
+            raise ValueError(f"Invalid outcome: {self.outcome}")
 
-        balance -= amount
-        return "Bought " + str(amount * 2) + " yes outcome token of: " + market
+        market_obj: OmenAgentMarket = get_omen_binary_market_from_question(market)
+        before_balance = get_omen_market_token_balance(
+            market=market_obj, outcome=outcome_bool
+        )
+        market_obj.place_bet(
+            outcome_bool, BetAmount(amount=amount, currency=Currency.xDai)
+        )
+        tokens = (
+            get_omen_market_token_balance(market=market_obj, outcome=outcome_bool)
+            - before_balance
+        )
+        return f"Bought {tokens} {self.outcome} outcome tokens of: {market}"
 
 
-class BuyNo(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to buy no outcome tokens of a prdiction market. The second parameter specifies how much $ you spend."
+class BuyYes(BuyTokens):
+    def __init__(self):
+        super().__init__("yes")
 
-    @property
-    def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 4]
 
-    def __call__(self, market: str, amount: int) -> str:
-        global balance
-        if amount > balance:
-            return (
-                f"Your balance of {balance} $ is not large enough to spend {amount} $."
-            )
-
-        balance -= amount
-        return "Bought " + str(amount * 2) + " no outcome token of: " + market
+class BuyNo(BuyTokens):
+    def __init__(self):
+        super().__init__("no")
 
 
 class SellYes(Function):
