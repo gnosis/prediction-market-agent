@@ -1,6 +1,7 @@
 import requests
 import tenacity
 from bs4 import BeautifulSoup
+from loguru import logger
 from markdownify import markdownify
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
 from requests import Response
@@ -45,9 +46,9 @@ def web_scrape(url: str, timeout: int = 10) -> str:
 
             return text
         else:
-            print("Non-HTML content received")
+            logger.warning("Non-HTML content received")
             return ""
 
     except requests.RequestException as e:
-        print(f"HTTP request failed: {e}")
+        logger.error(f"HTTP request failed: {e}")
         return ""
