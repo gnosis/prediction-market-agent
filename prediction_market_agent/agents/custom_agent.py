@@ -2,6 +2,7 @@ import json
 from typing import Optional
 
 import requests
+from loguru import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
@@ -62,9 +63,9 @@ If you want to answer, return a completion in form of a dictionary with a single
         )(web_scrape_structured_and_summarized)
         self.model = model
 
-    def verbose_print(self, message: str) -> None:
+    def verbose_log(self, message: str) -> None:
         if self.verbose:
-            print(f"{message}\n")
+            logger.info(f"{message}\n")
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
         cycle_count = 0
@@ -78,7 +79,7 @@ If you want to answer, return a completion in form of a dictionary with a single
             cycle_count += 1
             if cycle_count == self.max_cycles - 1:
                 # If we reached the maximum number of cycles, ask to provide an answer based on available information.
-                self.verbose_print(
+                self.verbose_log(
                     f"Agent: Reached {cycle_count} cycles, asking to provide answer now."
                 )
                 messages.append(
@@ -97,7 +98,7 @@ If you want to answer, return a completion in form of a dictionary with a single
             completion_str = check_not_none(
                 self.model.complete(messages), "Couldn't complete the prompt."
             )
-            self.verbose_print(f"Completion: {completion_str}")
+            self.verbose_log(f"Completion: {completion_str}")
             try:
                 completion_dict = json.loads(completion_str)
             except json.decoder.JSONDecodeError:
@@ -108,7 +109,7 @@ If you want to answer, return a completion in form of a dictionary with a single
             # - tool_name: Name of the tool to be used.
             # - answer: Final answer to the question.
             if thinking := completion_dict.get("thinking"):
-                self.verbose_print(f"Agent: Thinking about {thinking=}.")
+                self.verbose_log(f"Agent: Thinking about {thinking=}.")
                 messages.append(
                     Message(
                         role="assistant", content=json.dumps({"thinking": thinking})
@@ -117,7 +118,7 @@ If you want to answer, return a completion in form of a dictionary with a single
 
             elif tool_name := completion_dict.get("tool_name"):
                 tool_params = completion_dict.get("tool_params")
-                self.verbose_print(f"Agent: Using {tool_name=} with {tool_params=}.")
+                self.verbose_log(f"Agent: Using {tool_name=} with {tool_params=}.")
                 tool_output = (  # type: ignore # Untyped for the sake of simplicity when the LLM is used.
                     self.google_search
                     if tool_name == "GoogleSearchTool"
@@ -129,7 +130,7 @@ If you want to answer, return a completion in form of a dictionary with a single
                 )(
                     **tool_params
                 )
-                self.verbose_print(f"Tool: {tool_name=} returns {tool_output=}.")
+                self.verbose_log(f"Tool: {tool_name=} returns {tool_output=}.")
                 messages.append(
                     Message(
                         role="assistant",
@@ -140,7 +141,7 @@ If you want to answer, return a completion in form of a dictionary with a single
                 )
 
             elif answer := completion_dict.get("answer"):
-                self.verbose_print(f"Agent: Answering {answer=}.")
+                self.verbose_log(f"Agent: Answering {answer=}.")
                 messages.append(
                     Message(role="assistant", content=json.dumps({"answer": answer}))
                 )
