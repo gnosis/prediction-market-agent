@@ -17,11 +17,9 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetUserPositions,
     GetWalletBalance,
 )
-from prediction_market_agent.agents.microchain_agent.tools import (
-    get_omen_market_token_balance,
-)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_omen_binary_markets,
+    get_omen_market_token_balance,
 )
 from tests.utils import RUN_PAID_TESTS
 
@@ -54,13 +52,13 @@ def test_buy_no() -> None:
     print(buy_yes(market.question, 0.0001))
 
 
-def test_replicator_has_balance_lt_0() -> None:
-    balance = GetWalletBalance().__call__(REPLICATOR_ADDRESS)
+def test_replicator_has_balance_gt_0() -> None:
+    balance = GetWalletBalance()(REPLICATOR_ADDRESS)
     assert balance > 0
 
 
 def test_agent_0_has_bet_on_market() -> None:
-    user_positions = GetUserPositions().__call__(AGENT_0_ADDRESS)
+    user_positions = GetUserPositions()(AGENT_0_ADDRESS)
     # Assert 3 conditionIds are included
     expected_condition_ids = [
         HexBytes("0x9c7711bee0902cc8e6838179058726a7ba769cc97d4d0ea47b31370d2d7a117b"),
