@@ -2,14 +2,17 @@ import pprint
 import typing as t
 from decimal import Decimal
 
+from eth_utils import to_checksum_address
 from microchain import Function
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_FALSE_OUTCOME,
     OMEN_TRUE_OUTCOME,
-    get_boolean_outcome,
+    get_boolean_outcome, OmenUserPosition,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import OmenSubgraphHandler
+from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -208,6 +211,37 @@ class SummarizeLearning(Function):
         # pprint.pprint(outcomeTokens)
         return summary
 
+
+class GetWalletBalance(Function):
+    @property
+    def description(self) -> str:
+        return "Use this function to fetch your balance, given in xDAI units."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self, user_address: str) -> Decimal:
+        # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
+        user_address_checksummed = to_checksum_address(user_address)
+        balance = get_balances(user_address_checksummed)
+        return balance.xdai
+
+
+class GetUserPositions(Function):
+    @property
+    def description(self) -> str:
+        return "Use this function to fetch the markets where the user has previously bet."
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["0x2DD9f5678484C1F59F97eD334725858b938B4102"]
+
+    def __call__(self, user_address: str) -> list[OmenUserPosition]:
+        user_address_checksummed = to_checksum_address(user_address)
+        omen_subgraph_handler = OmenSubgraphHandler()
+        user_positions = omen_subgraph_handler.get_user_positions(better_address=user_address_checksummed)
+        return user_positions
 
 ALL_FUNCTIONS = [
     Sum,
