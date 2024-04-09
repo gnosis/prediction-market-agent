@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 import typer
+from loguru import logger
 from prediction_market_agent_tooling.markets.agent_market import SortBy
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
@@ -43,7 +44,7 @@ def main(
         do_bet = user_input.lower().strip() == "y" if user_input else True
 
     if do_bet:
-        print(
+        logger.info(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
         amount = Decimal(

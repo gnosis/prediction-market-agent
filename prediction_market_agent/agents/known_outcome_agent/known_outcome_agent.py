@@ -5,6 +5,7 @@ from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
@@ -195,7 +196,9 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
         if parsed_answer == 1:
             return True
     except Exception as e:
-        print("Exception occured, cannot assert if title happened in the past. ", e)
+        logger.error(
+            "Exception occured, cannot assert if title happened in the past. ", e
+        )
 
     return False
 
@@ -214,9 +217,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
         search_prompt = ChatPromptTemplate.from_template(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
-        print(f"Invoking LLM for {search_prompt=}")
+        logger.debug(f"Invoking LLM for {search_prompt=}")
         search_query = str(llm.invoke(search_prompt).content).strip('"')
-        print(f"Searching for {search_query=}")
+        logger.debug(f"Searching for {search_query=}")
         search_results = web_search(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")

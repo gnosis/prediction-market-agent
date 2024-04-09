@@ -2,6 +2,7 @@ import getpass
 import random
 from decimal import Decimal
 
+from loguru import logger
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
@@ -40,17 +41,17 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                     "This agent only supports predictions on Omen markets"
                 )
 
-            print(f"Looking at market {market.id=} {market.question=}")
+            logger.info(f"Looking at market {market.id=} {market.question=}")
 
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             if market_is_saturated(market=market):
-                print(
+                logger.info(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
                 )
             elif market.get_liquidity_in_xdai() < 5:
-                print(
+                logger.info(
                     f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
                 )
             else:
@@ -77,12 +78,12 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 max_tries=3,
             )
         except Exception as e:
-            print(
-                f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+            logger.error(
+                f"Failed to predict market {market.id=} {market.question=}: {e}"
             )
             answer = None
         if answer and answer.has_known_result():
-            print(
+            logger.info(
                 f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
             )
             return answer.result.to_boolean()
