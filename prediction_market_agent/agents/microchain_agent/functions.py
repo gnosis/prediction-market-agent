@@ -8,10 +8,13 @@ from prediction_market_agent_tooling.markets.data_models import BetAmount, Curre
 from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_FALSE_OUTCOME,
     OMEN_TRUE_OUTCOME,
-    get_boolean_outcome, OmenUserPosition,
+    OmenUserPosition,
+    get_boolean_outcome,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import OmenSubgraphHandler
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    OmenSubgraphHandler,
+)
 from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -231,7 +234,9 @@ class GetWalletBalance(Function):
 class GetUserPositions(Function):
     @property
     def description(self) -> str:
-        return "Use this function to fetch the markets where the user has previously bet."
+        return (
+            "Use this function to fetch the markets where the user has previously bet."
+        )
 
     @property
     def example_args(self) -> list[str]:
@@ -240,8 +245,11 @@ class GetUserPositions(Function):
     def __call__(self, user_address: str) -> list[OmenUserPosition]:
         user_address_checksummed = to_checksum_address(user_address)
         omen_subgraph_handler = OmenSubgraphHandler()
-        user_positions = omen_subgraph_handler.get_user_positions(better_address=user_address_checksummed)
+        user_positions = omen_subgraph_handler.get_user_positions(
+            better_address=user_address_checksummed
+        )
         return user_positions
+
 
 ALL_FUNCTIONS = [
     Sum,
@@ -256,5 +264,5 @@ ALL_FUNCTIONS = [
     # BalanceToOutcomes,
     SummarizeLearning,
     GetWalletBalance,
-    GetUserPositions
+    GetUserPositions,
 ]

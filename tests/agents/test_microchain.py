@@ -1,17 +1,25 @@
+import typing as t
+
 import pytest
 from dotenv import load_dotenv
-from eth_typing import HexStr, HexAddress
+from eth_typing import HexAddress, HexStr
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import OmenSubgraphHandler
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    OmenSubgraphHandler,
+)
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     BuyNo,
     BuyYes,
-    GetMarkets, GetUserPositions, GetWalletBalance,
+    GetMarkets,
+    GetUserPositions,
+    GetWalletBalance,
 )
-from prediction_market_agent.agents.microchain_agent.tools import get_omen_market_token_balance
+from prediction_market_agent.agents.microchain_agent.tools import (
+    get_omen_market_token_balance,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_omen_binary_markets,
 )
@@ -22,9 +30,9 @@ AGENT_0_ADDRESS = "0x2DD9f5678484C1F59F97eD334725858b938B4102"
 
 
 @pytest.fixture(scope="session", autouse=True)
-def do_something(request):
+def before_all_tests() -> t.Generator[None, None, None]:
     load_dotenv()
-    yield
+    yield None
 
 
 def test_get_markets() -> None:
@@ -46,12 +54,12 @@ def test_buy_no() -> None:
     print(buy_yes(market.question, 0.0001))
 
 
-def test_replicator_has_balance_lt_0():
+def test_replicator_has_balance_lt_0() -> None:
     balance = GetWalletBalance().__call__(REPLICATOR_ADDRESS)
     assert balance > 0
 
 
-def test_agent_0_has_bet_on_market():
+def test_agent_0_has_bet_on_market() -> None:
     user_positions = GetUserPositions().__call__(AGENT_0_ADDRESS)
     # Assert 3 conditionIds are included
     expected_condition_ids = [
@@ -66,16 +74,22 @@ def test_agent_0_has_bet_on_market():
 def test_balance_for_user_in_market() -> None:
     user_address = AGENT_0_ADDRESS
     subgraph_handler = OmenSubgraphHandler()
-    market_id = HexAddress(HexStr('0x59975b067b0716fef6f561e1e30e44f606b08803'))  # yes/no
+    market_id = HexAddress(
+        HexStr("0x59975b067b0716fef6f561e1e30e44f606b08803")
+    )  # yes/no
     market = subgraph_handler.get_omen_market(market_id)
     omen_agent_market = OmenAgentMarket.from_data_model(market)
-    outcomes = omen_agent_market.outcomes
-    balance_yes = get_omen_market_token_balance(user_address=Web3.to_checksum_address(user_address),
-                                                market=omen_agent_market,
-                                                market_outcome=outcomes[0])
+    balance_yes = get_omen_market_token_balance(
+        user_address=Web3.to_checksum_address(user_address),
+        market_condition_id=omen_agent_market.condition.id,
+        market_index_set=market.condition.index_sets[0],
+    )
+
     assert balance_yes == 1959903969410997
 
-    balance_no = get_omen_market_token_balance(user_address=Web3.to_checksum_address(user_address),
-                                               market=omen_agent_market,
-                                               market_outcome=outcomes[1])
+    balance_no = get_omen_market_token_balance(
+        user_address=Web3.to_checksum_address(user_address),
+        market_condition_id=omen_agent_market.condition.id,
+        market_index_set=market.condition.index_sets[1],
+    )
     assert balance_no == 0
