@@ -6,6 +6,21 @@ from prediction_market_agent_tooling.markets.agent_market import (
     SortBy,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from pydantic import BaseModel
+
+
+class MicroMarket(BaseModel):
+    question: str
+    p_yes: float
+
+    def from_agent_market(market: OmenAgentMarket) -> "MicroMarket":
+        return MicroMarket(
+            question=market.question,
+            p_yes=float(market.p_yes),
+        )
+
+    def __str__(self) -> str:
+        return f"'{self.question}' with probability of yes: {self.p_yes:.2%}"
 
 
 def get_omen_binary_markets() -> list[OmenAgentMarket]:

@@ -4,9 +4,15 @@ from decimal import Decimal
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.omen.data_models import (
+    OMEN_FALSE_OUTCOME,
+    OMEN_TRUE_OUTCOME,
+    get_boolean_outcome,
+)
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
 from prediction_market_agent.agents.microchain_agent.utils import (
+    MicroMarket,
     get_omen_binary_market_from_question,
     get_omen_binary_markets,
     get_omen_market_token_balance,
@@ -54,12 +60,9 @@ class GetMarkets(Function):
         return []
 
     def __call__(self) -> list[str]:
-        markets: list[OmenAgentMarket] = get_omen_binary_markets()
-        market_questions_and_prices = []
-        for market in markets:
-            market_questions_and_prices.append(market.question)
-            market_questions_and_prices.append(str(market.p_yes))
-        return market_questions_and_prices
+        return [
+            str(MicroMarket.from_agent_market(m)) for m in get_omen_binary_markets()
+        ]
 
 
 class GetPropabilityForQuestion(Function):
@@ -109,12 +112,7 @@ class BuyTokens(Function):
         return ["Will Joe Biden get reelected in 2024?", 2.3]
 
     def __call__(self, market: str, amount: float) -> str:
-        if self.outcome == "yes":
-            outcome_bool = True
-        elif self.outcome == "no":
-            outcome_bool = False
-        else:
-            raise ValueError(f"Invalid outcome: {self.outcome}")
+        outcome_bool = get_boolean_outcome(self.outcome)
 
         market_obj: OmenAgentMarket = get_omen_binary_market_from_question(market)
         before_balance = get_omen_market_token_balance(
@@ -132,12 +130,12 @@ class BuyTokens(Function):
 
 class BuyYes(BuyTokens):
     def __init__(self) -> None:
-        super().__init__("yes")
+        super().__init__(OMEN_TRUE_OUTCOME)
 
 
 class BuyNo(BuyTokens):
     def __init__(self) -> None:
-        super().__init__("no")
+        super().__init__(OMEN_FALSE_OUTCOME)
 
 
 class SellYes(Function):
