@@ -3,19 +3,19 @@ import getpass
 import random
 from decimal import Decimal
 
+from loguru import logger
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
 from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.data_models import BetAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     get_current_git_commit_sha,
     get_current_git_url,
-    should_not_happen,
 )
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -26,7 +26,7 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-4-turbo-preview"
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -34,14 +34,23 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
-            print(f"Looking at market {market.id=} {market.question=}")
+            if not isinstance(market, OmenAgentMarket):
+                raise NotImplementedError(
+                    "This agent only supports predictions on Omen markets"
+                )
+
+            logger.info(f"Looking at market {market.id=} {market.question=}")
 
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             if market_is_saturated(market=market):
-                print(
+                logger.info(
                     f"Skipping market {market.id=} {market.question=}, because it is already saturated."
+                )
+            elif market.get_liquidity_in_xdai() < 5:
+                logger.info(
+                    f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
                 )
             else:
                 picked_markets.append(market)
@@ -67,12 +76,12 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 max_tries=3,
             )
         except Exception as e:
-            print(
-                f"Error: Failed to predict market {market.id=} {market.question=}: {e}"
+            logger.error(
+                f"Failed to predict market {market.id=} {market.question=}: {e}"
             )
             answer = None
         if answer and answer.has_known_result():
-            print(
+            logger.info(
                 f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
             )
             return answer.result.to_boolean()
@@ -81,17 +90,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if isinstance(market, OmenAgentMarket):
-            if market.currency != Currency.xDai:
-                should_not_happen()
-            return BetAmount(
-                # On markets without liquidity, bet just a small amount for benchmarking.
-                amount=(
-                    Decimal(1.0)
-                    if market.get_liquidity_in_xdai() > 5
-                    else market.get_tiny_bet_amount().amount
-                ),
-                currency=Currency.xDai,
-            )
+            return BetAmount(amount=(Decimal(1.0)), currency=market.currency)
         else:
             raise NotImplementedError("This agent only supports xDai markets")
 

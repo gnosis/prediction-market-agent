@@ -35,12 +35,14 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = "^0.9.1"
+prediction-market-agent-tooling = "^0.9.3"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
+# TODO remove when PR is merged
+microchain-python = {git = "https://github.com/evangriffiths/microchain.git", rev = "evan/token-tracker"}
 
 [build-system]
 requires = ["poetry-core"]

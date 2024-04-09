@@ -4,6 +4,7 @@ import typing as t
 from datetime import timedelta
 
 from dotenv import load_dotenv
+from loguru import logger
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
@@ -63,7 +64,9 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             question=market_question,
             max_tries=self.max_tries,
         )
-        print(f"Answered {market_question=} with {answer.result=}, {answer.reasoning=}")
+        logger.info(
+            f"Answered {market_question=} with {answer.result=}, {answer.reasoning=}"
+        )
         if not answer.has_known_result():
             return Prediction(
                 is_predictable=False,
@@ -162,7 +165,7 @@ if __name__ == "__main__":
 
     output = f"./known_outcome_agent_benchmark_report.{int(time.time())}.md"
     with open(output, "w") as f:
-        print(f"Writing benchmark report to: {output}")
+        logger.info(f"Writing benchmark report to: {output}")
         f.write(md)
 
     # Check all predictions are correct, i.e. mean-squared-error == 0
