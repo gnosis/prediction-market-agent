@@ -13,6 +13,7 @@ class MicroMarket(BaseModel):
     question: str
     p_yes: float
 
+    @staticmethod
     def from_agent_market(market: OmenAgentMarket) -> "MicroMarket":
         return MicroMarket(
             question=market.question,
