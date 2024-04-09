@@ -71,8 +71,8 @@ def test_agent_0_has_bet_on_market(market_type: MarketType) -> None:
         HexBytes("0xe2bf80af2a936cdabeef4f511620a2eec46f1caf8e75eb5dc189372367a9154c"),
         HexBytes("0x3f8153364001b26b983dd92191a084de8230f199b5ad0b045e9e1df61089b30d"),
     ]
-    unique_condition_ids: HexBytes = sum(
-        [u.position.conditionIds for u in user_positions], [HexBytes("")]
+    unique_condition_ids: list[HexBytes] = sum(
+        [u.position.conditionIds for u in user_positions], []
     )
     assert set(expected_condition_ids).issubset(unique_condition_ids)
 
