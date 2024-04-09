@@ -1,6 +1,6 @@
 import os
-from decimal import Decimal
 import random
+from decimal import Decimal
 
 from langchain_openai import OpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -8,7 +8,9 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import CrewAIAgentSubquestions
+from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
+    CrewAIAgentSubquestions,
+)
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
 )
@@ -40,10 +42,10 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def answer_binary_market(self, market: AgentMarket) -> bool:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
-        os.environ["OPENAI_MODEL_NAME"]="gpt-4-turbo-preview"
+        os.environ["OPENAI_MODEL_NAME"] = "gpt-4-turbo-preview"
         agent = CrewAIAgentSubquestions()
-        result = agent.answer_binary_market(market)
-        return result
+        result = agent.answer_binary_market(market.question)
+        return True if result.decision == "y" else False
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if market.currency == Currency.xDai:
@@ -54,10 +56,9 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent()
-    agent.deploy_local(market_type=MarketType.OMEN,
-                       sleep_time=540,
-                       timeout=180,
-                       place_bet=False)
+    agent.deploy_local(
+        market_type=MarketType.OMEN, sleep_time=540, timeout=180, place_bet=False
+    )
     # agent.deploy_gcp(
     #     repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
     #     market_type=MarketType.OMEN,

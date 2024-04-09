@@ -4,7 +4,9 @@ from datetime import datetime
 import typer
 from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import (
-    AbstractBenchmarkedAgent, RandomAgent, FixedAgent,
+    AbstractBenchmarkedAgent,
+    FixedAgent,
+    RandomAgent,
 )
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
@@ -12,15 +14,27 @@ from prediction_market_agent_tooling.benchmark.utils import (
     Prediction,
 )
 from prediction_market_agent_tooling.gtypes import Probability
-from prediction_market_agent_tooling.markets.agent_market import SortBy, FilterBy, AgentMarket
-from prediction_market_agent_tooling.markets.markets import get_binary_markets, MarketType
+from prediction_market_agent_tooling.markets.agent_market import (
+    AgentMarket,
+    FilterBy,
+    SortBy,
+)
+from prediction_market_agent_tooling.markets.markets import (
+    MarketType,
+    get_binary_markets,
+)
 
-from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import CrewAIAgentSubquestions
+from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
+    CrewAIAgentSubquestions,
+)
 
 
 def build_binary_agent_market_from_question(question: str) -> AgentMarket:
     return AgentMarket(
         id=question,
+        url=question,
+        close_time=None,
+        volume=None,
         question=question,
         p_yes=Probability(0.5),
         created_time=datetime(2024, 1, 1),
@@ -31,11 +45,11 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
 
 class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
     def __init__(
-            self,
-            agent_name: str,
-            max_workers: int,
-            model: str,
-            max_tries: int,
+        self,
+        agent_name: str,
+        max_workers: int,
+        model: str,
+        max_tries: int,
     ) -> None:
         self.model = model
         self.max_tries = max_tries
@@ -44,20 +58,22 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
 
     def predict(self, market_question: str) -> Prediction:
         result = self.agent.answer_binary_market(market_question)
-        return Prediction(outcome_prediction=OutcomePrediction(
-            p_yes=result.p_yes,
-            confidence=result.confidence))
+        return Prediction(
+            outcome_prediction=OutcomePrediction(
+                p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+            )
+        )
 
 
 def main(
-        n: int = 10,
-        output: str = "./benchmark_report.md",
-        reference: MarketType = MarketType.MANIFOLD,
-        filter: FilterBy = FilterBy.OPEN,
-        sort: SortBy = SortBy.NONE,
-        max_workers: int = 1,
-        cache_path: t.Optional[str] = "predictions_cache.json",
-        only_cached: bool = False,
+    n: int = 5,
+    output: str = "./benchmark_report.md",
+    reference: MarketType = MarketType.MANIFOLD,
+    filter: FilterBy = FilterBy.OPEN,
+    sort: SortBy = SortBy.NONE,
+    max_workers: int = 1,
+    cache_path: t.Optional[str] = "predictions_cache.json",
+    only_cached: bool = False,
 ) -> None:
     """
     Polymarket usually contains higher quality questions,
@@ -65,7 +81,6 @@ def main(
     """
     load_dotenv()
     markets = get_binary_markets(n, reference, filter_by=filter, sort_by=sort)
-    markets = markets[:1]
     markets_deduplicated = list(({m.question: m for m in markets}.values()))
     if len(markets) != len(markets_deduplicated):
         print(
@@ -77,8 +92,12 @@ def main(
     benchmarker = Benchmarker(
         markets=markets_deduplicated,
         agents=[
-            CrewAIAgentSubquestionsBenchmark("subsequential-questions-crewai", max_workers=max_workers, max_tries=3,
-                                             model="gpt-3.5-turbo-0125"),
+            CrewAIAgentSubquestionsBenchmark(
+                "subsequential-questions-crewai",
+                max_workers=max_workers,
+                max_tries=1,
+                model="gpt-3.5-turbo-0125",
+            ),
             RandomAgent(agent_name="random", max_workers=max_workers),
             FixedAgent(
                 fixed_answer=False, agent_name="fixed-no", max_workers=max_workers
@@ -91,7 +110,9 @@ def main(
         only_cached=only_cached,
     )
 
-    benchmarker.run_agents(enable_timing=False)  # Caching of search etc. can distort timings
+    benchmarker.run_agents(
+        enable_timing=False
+    )  # Caching of search etc. can distort timings
     md = benchmarker.generate_markdown_report()
 
     with open(output, "w") as f:

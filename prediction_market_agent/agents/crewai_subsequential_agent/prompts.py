@@ -22,12 +22,12 @@ CREATE_OUTCOMES_FROM_SCENARIO_PROMPT = """
         {scenario}
         """
 
-CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT = '''
+CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT = """
   A list containing multiple bullet points. Each bullet point should start with '-'.
   Each bullet point should contain a possible outcome resulting from the
   provided SCENARIO. The produced outcomes should be mutually exclusive, i.e. only one of them should be true whereas
   the remaining ones should be false.
-  '''
+  """
 
 PROBABILITY_FOR_ONE_OUTCOME_PROMPT = """
                             Your task is to determine the probability of a prediction market affirmation being answered 'Yes' or 'No'.
@@ -93,9 +93,8 @@ PROBABILITY_CLASS_OUTPUT = """
     - "confidence": Indicating the confidence in the estimated probabilities you provided ranging from 0 (lowest confidence) to 
     1 (maximum confidence). Confidence can be calculated based on the quality and quantity of data used for the estimation.
 
-    A valid JSON string as output could look like the example below:
-    Example output: {"decision": "y","p_yes": 0.1, "p_no": 0.9, "confidence": 0.4}
-    Do not use escape quotes and line breaks. Do not output any reasoning, only the JSON object.
+    Do not surround the output object with escape quotes, line breaks nor '''. 
+    Do not output any reasoning, only the JSON object.
 
   Ensure p_yes + p_no equals 1.
 """
