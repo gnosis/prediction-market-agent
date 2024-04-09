@@ -1,17 +1,20 @@
 import os
 
 from dotenv import load_dotenv
-from functions import ALL_FUNCTIONS
+from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.markets.markets import MarketType
 
 load_dotenv()
 
 engine = Engine()
 engine.register(Reasoning())
 engine.register(Stop())
-for function in ALL_FUNCTIONS:
+for function in MISC_FUNCTIONS:
     engine.register(function())
+for function in MARKET_FUNCTIONS:
+    engine.register(function(market_type=MarketType.OMEN))
 
 generator = OpenAIChatGenerator(
     model="gpt-4-turbo-preview",
