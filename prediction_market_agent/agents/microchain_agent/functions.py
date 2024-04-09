@@ -2,17 +2,24 @@ import pprint
 import typing as t
 from decimal import Decimal
 
+from eth_utils import to_checksum_address
 from microchain import Function
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_FALSE_OUTCOME,
     OMEN_TRUE_OUTCOME,
+    OmenUserPosition,
     get_boolean_outcome,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    OmenSubgraphHandler,
+)
+from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
+    fetch_public_key_from_env,
     get_omen_binary_market_from_question,
     get_omen_binary_markets,
     get_omen_market_token_balance,
@@ -100,6 +107,7 @@ class GetBalance(Function):
 
 class BuyTokens(Function):
     def __init__(self, outcome: str):
+        self.user_address = fetch_public_key_from_env()
         self.outcome = outcome
         super().__init__()
 
@@ -115,14 +123,23 @@ class BuyTokens(Function):
         outcome_bool = get_boolean_outcome(self.outcome)
 
         market_obj: OmenAgentMarket = get_omen_binary_market_from_question(market)
+        outcome_index = market_obj.get_outcome_index(self.outcome)
+        market_index_set = outcome_index + 1
+
         before_balance = get_omen_market_token_balance(
-            market=market_obj, outcome=outcome_bool
+            user_address=self.user_address,
+            market_condition_id=market_obj.condition.id,
+            market_index_set=market_index_set,
         )
         market_obj.place_bet(
             outcome_bool, BetAmount(amount=Decimal(amount), currency=Currency.xDai)
         )
         tokens = (
-            get_omen_market_token_balance(market=market_obj, outcome=outcome_bool)
+            get_omen_market_token_balance(
+                user_address=self.user_address,
+                market_condition_id=market_obj.condition.id,
+                market_index_set=market_index_set,
+            )
             - before_balance
         )
         return f"Bought {tokens} {self.outcome} outcome tokens of: {market}"
@@ -209,6 +226,39 @@ class SummarizeLearning(Function):
         return summary
 
 
+class GetWalletBalance(Function):
+    @property
+    def description(self) -> str:
+        return "Use this function to fetch your balance, given in xDAI units."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self, user_address: str) -> Decimal:
+        # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
+        user_address_checksummed = to_checksum_address(user_address)
+        balance = get_balances(user_address_checksummed)
+        return balance.xdai
+
+
+class GetUserPositions(Function):
+    @property
+    def description(self) -> str:
+        return (
+            "Use this function to fetch the markets where the user has previously bet."
+        )
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["0x2DD9f5678484C1F59F97eD334725858b938B4102"]
+
+    def __call__(self, user_address: str) -> list[OmenUserPosition]:
+        return OmenSubgraphHandler().get_user_positions(
+            better_address=to_checksum_address(user_address)
+        )
+
+
 ALL_FUNCTIONS = [
     Sum,
     Product,
@@ -221,4 +271,6 @@ ALL_FUNCTIONS = [
     SellNo,
     # BalanceToOutcomes,
     SummarizeLearning,
+    GetWalletBalance,
+    GetUserPositions,
 ]
