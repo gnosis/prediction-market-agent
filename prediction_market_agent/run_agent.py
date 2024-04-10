@@ -18,7 +18,7 @@ class RunnableAgent(str, Enum):
 
 
 RUNNABLE_AGENTS = {
-    RunnableAgent.value: DeployableCoinFlipAgent,
+    RunnableAgent.coinflip: DeployableCoinFlipAgent,
 }
 
 
