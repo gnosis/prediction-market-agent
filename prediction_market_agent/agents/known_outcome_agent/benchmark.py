@@ -1,6 +1,6 @@
 import time
 import typing as t
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -39,7 +39,7 @@ class QuestionWithKnownOutcome(BaseModel):
             ),
             volume=None,
             created_time=None,
-            close_time=None,
+            close_time=datetime.now() + timedelta(days=1),
             resolution=None,
             outcomes=["YES", "NO"],
         )

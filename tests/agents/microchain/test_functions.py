@@ -16,6 +16,7 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     BuyNo,
     BuyYes,
     GetBalance,
+    GetMarketProbability,
     GetMarkets,
     GetUserPositions,
 )
@@ -79,7 +80,7 @@ def test_balance_for_user_in_market() -> None:
     market_id = HexAddress(
         HexStr("0x59975b067b0716fef6f561e1e30e44f606b08803")
     )  # yes/no
-    market = subgraph_handler.get_omen_market(market_id)
+    market = subgraph_handler.get_omen_market_by_market_id(market_id)
     omen_agent_market = OmenAgentMarket.from_data_model(market)
     balance_yes = get_market_token_balance(
         user_address=Web3.to_checksum_address(user_address),
@@ -108,3 +109,10 @@ def test_engine_help(market_type: MarketType) -> None:
         engine.register(function(market_type=market_type))
 
     print(engine.help)
+
+
+@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+def test_get_probability(market_type: MarketType) -> None:
+    market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
+    get_market_probability = GetMarketProbability(market_type=market_type)
+    get_market_probability(market_id)
