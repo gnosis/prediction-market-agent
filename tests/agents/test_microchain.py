@@ -1,7 +1,4 @@
-import typing as t
-
 import pytest
-from dotenv import load_dotenv
 from eth_typing import HexAddress, HexStr
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
@@ -26,12 +23,6 @@ from tests.utils import RUN_PAID_TESTS
 
 REPLICATOR_ADDRESS = "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
 AGENT_0_ADDRESS = "0x2DD9f5678484C1F59F97eD334725858b938B4102"
-
-
-@pytest.fixture(scope="session", autouse=True)
-def before_all_tests() -> t.Generator[None, None, None]:
-    load_dotenv()
-    yield None
 
 
 # TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
