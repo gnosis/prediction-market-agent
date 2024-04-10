@@ -236,9 +236,9 @@ class GetWalletBalance(MarketFunction):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self, user_address: str) -> Decimal:
+    def __call__(self) -> Decimal:
         # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
-        user_address_checksummed = to_checksum_address(user_address)
+        user_address_checksummed = APIKeys().bet_from_address
         balance = get_balances(user_address_checksummed)
         return balance.xdai
 
