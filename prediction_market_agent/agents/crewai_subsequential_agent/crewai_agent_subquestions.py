@@ -3,10 +3,17 @@ import typing as t
 from crewai import Agent, Crew, Process, Task
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.crewai_subsequential_agent.prompts import *
+from prediction_market_agent.agents.crewai_subsequential_agent.prompts import (
+    PROBABILITY_CLASS_OUTPUT,
+    FINAL_DECISION_PROMPT,
+    PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
+    RESEARCH_OUTCOME_OUTPUT,
+    RESEARCH_OUTCOME_PROMPT,
+    CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT,
+    CREATE_OUTCOMES_FROM_SCENARIO_PROMPT,
+)
 from prediction_market_agent.tools.crewai_tools import TavilyDevTool
 
-# search_tool = SerperDevTool()
 tavily_search = TavilyDevTool()
 
 
@@ -22,7 +29,7 @@ class ProbabilityOutput(BaseModel):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self) -> None:
+    def __init__(self, openai_model_name: str | None) -> None:
         # openai_model_name as str automatically interpreted by CrewAI, else create LLM object.
         self.researcher = Agent(
             role="Research Analyst",

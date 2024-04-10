@@ -6,6 +6,8 @@ from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 from pydantic.v1 import BaseModel, Field
 from pydantic.v1.types import SecretStr
 
+from prediction_market_agent.utils import APIKeys
+
 
 class TavilyDevToolSchema(BaseModel):
     """Input for TXTSearchTool."""
@@ -31,6 +33,7 @@ you should probably use this tool to see if that can provide any information."""
         search_query: str,
         **kwargs: Any,
     ) -> Any:
+        keys = APIKeys()
         return TavilySearchAPIWrapper(
             tavily_api_key=SecretStr(os.environ["TAVILY_API_KEY"])
         ).results(query=search_query)

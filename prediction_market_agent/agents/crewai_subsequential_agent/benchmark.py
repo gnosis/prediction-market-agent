@@ -51,7 +51,6 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         model: str,
         max_tries: int,
     ) -> None:
-        self.model = model
         self.max_tries = max_tries
         self.agent = CrewAIAgentSubquestions()
         super().__init__(agent_name=agent_name, max_workers=max_workers)

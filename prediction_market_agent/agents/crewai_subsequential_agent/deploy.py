@@ -2,7 +2,6 @@ import os
 import random
 from decimal import Decimal
 
-from langchain_openai import OpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
@@ -11,18 +10,11 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
     CrewAIAgentSubquestions,
 )
-from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
-    Result,
-)
 from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableThinkThoroughlyAgent(DeployableAgent):
     # For cheaper credits at this experimental stage
-    model = "gpt-4-turbo-preview"
-
-    def load(self) -> None:
-        self.markets_with_known_outcomes: dict[str, Result] = {}
 
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         # We simply pick 5 random markets to bet on
