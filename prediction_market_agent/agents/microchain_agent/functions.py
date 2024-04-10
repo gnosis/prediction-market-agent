@@ -27,6 +27,10 @@ from prediction_market_agent.agents.microchain_agent.utils import (
 )
 from prediction_market_agent.utils import APIKeys
 
+outcomeTokens = {}
+outcomeTokens["Will Joe Biden get reelected in 2024?"] = {"yes": 0, "no": 0}
+outcomeTokens["Will Bitcoin hit 100k in 2024?"] = {"yes": 0, "no": 0}
+
 
 class Sum(Function):
     @property
