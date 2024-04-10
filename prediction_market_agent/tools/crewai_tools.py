@@ -1,4 +1,3 @@
-import os
 from typing import Any, Type
 
 from crewai_tools.tools.base_tool import BaseTool
@@ -35,5 +34,5 @@ you should probably use this tool to see if that can provide any information."""
     ) -> Any:
         keys = APIKeys()
         return TavilySearchAPIWrapper(
-            tavily_api_key=SecretStr(os.environ["TAVILY_API_KEY"])
+            tavily_api_key=SecretStr(keys.tavily_api_key.get_secret_value())
         ).results(query=search_query)

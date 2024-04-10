@@ -1,4 +1,3 @@
-import os
 import random
 from decimal import Decimal
 
@@ -15,6 +14,8 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 class DeployableThinkThoroughlyAgent(DeployableAgent):
     # For cheaper credits at this experimental stage
+    def __init__(self) -> None:
+        super().__init__()
 
     def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
         # We simply pick 5 random markets to bet on
@@ -34,9 +35,7 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def answer_binary_market(self, market: AgentMarket) -> bool:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
-        os.environ["OPENAI_MODEL_NAME"] = "gpt-4-turbo-preview"
-        agent = CrewAIAgentSubquestions()
-        result = agent.answer_binary_market(market.question)
+        result = CrewAIAgentSubquestions().answer_binary_market(market.question)
         return True if result.decision == "y" else False
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:

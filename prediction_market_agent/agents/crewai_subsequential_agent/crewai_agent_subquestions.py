@@ -1,18 +1,21 @@
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
+from langchain_core.language_models import BaseChatModel
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.crewai_subsequential_agent.prompts import (
-    PROBABILITY_CLASS_OUTPUT,
+    CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT,
+    CREATE_OUTCOMES_FROM_SCENARIO_PROMPT,
     FINAL_DECISION_PROMPT,
+    PROBABILITY_CLASS_OUTPUT,
     PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_OUTPUT,
     RESEARCH_OUTCOME_PROMPT,
-    CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT,
-    CREATE_OUTCOMES_FROM_SCENARIO_PROMPT,
 )
 from prediction_market_agent.tools.crewai_tools import TavilyDevTool
+from prediction_market_agent.utils import APIKeys
 
 tavily_search = TavilyDevTool()
 
@@ -29,8 +32,8 @@ class ProbabilityOutput(BaseModel):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self, openai_model_name: str | None) -> None:
-        # openai_model_name as str automatically interpreted by CrewAI, else create LLM object.
+    def __init__(self) -> None:
+        llm = self._build_llm()
         self.researcher = Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -38,6 +41,7 @@ class CrewAIAgentSubquestions:
             verbose=True,
             allow_delegation=False,
             tools=[tavily_search],
+            llm=llm,
         )
 
         self.predictor = Agent(
@@ -46,7 +50,20 @@ class CrewAIAgentSubquestions:
             backstory="You are a professional gambler who is adept at predicting and betting on the outcomes of future events.",
             verbose=True,
             allow_delegation=False,
+            llm=llm,
         )
+
+    def _build_llm(self) -> BaseChatModel:
+        keys = APIKeys()
+        llm = ChatOpenAI(
+            model="gpt-3.5-turbo-0125",
+            openai_api_key=keys.openai_api_key.get_secret_value(),  # type: ignore
+        )
+        # llm = OpenAI(
+        #     openai_api_key=keys.openai_api_key.get_secret_value(),  # type: ignore
+        #     model_name="gpt-4-turbo-preview",
+        # )
+        return llm
 
     def split_research_into_outcomes(self, question: str) -> Outcomes:
         create_outcomes_task = Task(

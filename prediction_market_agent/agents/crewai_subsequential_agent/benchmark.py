@@ -2,7 +2,6 @@ import typing as t
 from datetime import datetime
 
 import typer
-from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import (
     AbstractBenchmarkedAgent,
     FixedAgent,
@@ -46,9 +45,8 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
 class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
     def __init__(
         self,
-        agent_name: str,
         max_workers: int,
-        model: str,
+        agent_name: str,
         max_tries: int,
     ) -> None:
         self.max_tries = max_tries
@@ -65,8 +63,8 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
 
 
 def main(
-    n: int = 5,
-    output: str = "./benchmark_report.md",
+    n: int = 50,
+    output: str = "./benchmark_report_50markets.md",
     reference: MarketType = MarketType.MANIFOLD,
     filter: FilterBy = FilterBy.OPEN,
     sort: SortBy = SortBy.NONE,
@@ -78,7 +76,6 @@ def main(
     Polymarket usually contains higher quality questions,
     but on Manifold, additionally to filtering by MarketFilter.resolved, you can sort by MarketSort.newest.
     """
-    load_dotenv()
     markets = get_binary_markets(n, reference, filter_by=filter, sort_by=sort)
     markets_deduplicated = list(({m.question: m for m in markets}.values()))
     if len(markets) != len(markets_deduplicated):
@@ -92,10 +89,9 @@ def main(
         markets=markets_deduplicated,
         agents=[
             CrewAIAgentSubquestionsBenchmark(
-                "subsequential-questions-crewai",
+                agent_name="subsequential-questions-crewai",
                 max_workers=max_workers,
                 max_tries=1,
-                model="gpt-3.5-turbo-0125",
             ),
             RandomAgent(agent_name="random", max_workers=max_workers),
             FixedAgent(
