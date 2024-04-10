@@ -1,5 +1,3 @@
-import os
-
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
@@ -18,8 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
-from prediction_market_agent_tooling.tools.web3_utils import private_key_to_public_key
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel
 from web3.types import Wei
 
 
@@ -75,13 +72,6 @@ def get_market_token_balance(
     position_as_int = int(position_for_index_set.id.hex(), 16)
     balance = OmenConditionalTokenContract().balanceOf(user_address, position_as_int)
     return balance
-
-
-def fetch_public_key_from_env() -> ChecksumAddress:
-    private_key = os.environ.get("BET_FROM_PRIVATE_KEY")
-    if private_key is None:
-        raise EnvironmentError("Could not load private key using env var")
-    return private_key_to_public_key(SecretStr(private_key))
 
 
 def get_yes_outcome(market_type: MarketType) -> str:

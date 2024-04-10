@@ -5,6 +5,7 @@ from typing import cast
 
 from eth_utils import to_checksum_address
 from microchain import Function
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -20,7 +21,6 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
-    fetch_public_key_from_env,
     get_binary_market_from_question,
     get_binary_markets,
     get_market_token_balance,
@@ -118,7 +118,7 @@ class GetBalance(MarketFunction):
 class BuyTokens(MarketFunction):
     def __init__(self, market_type: MarketType, outcome: str):
         self.outcome = outcome
-        self.user_address = fetch_public_key_from_env()
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
