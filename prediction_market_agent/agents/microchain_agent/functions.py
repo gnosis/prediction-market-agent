@@ -5,7 +5,6 @@ from typing import cast
 
 from eth_utils import to_checksum_address
 from microchain import Function
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -27,6 +26,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
+from prediction_market_agent.utils import APIKeys
 
 balance = 50
 outcomeTokens = {}
@@ -236,9 +236,9 @@ class GetWalletBalance(MarketFunction):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self, user_address: str) -> Decimal:
+    def __call__(self) -> Decimal:
         # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
-        user_address_checksummed = to_checksum_address(user_address)
+        user_address_checksummed = APIKeys().bet_from_address
         balance = get_balances(user_address_checksummed)
         return balance.xdai
 

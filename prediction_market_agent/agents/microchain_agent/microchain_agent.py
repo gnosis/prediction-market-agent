@@ -1,12 +1,9 @@
-import os
-
-from dotenv import load_dotenv
 from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-load_dotenv()
+from prediction_market_agent.utils import APIKeys
 
 engine = Engine()
 engine.register(Reasoning())
@@ -18,7 +15,7 @@ for function in MARKET_FUNCTIONS:
 
 generator = OpenAIChatGenerator(
     model="gpt-4-turbo-preview",
-    api_key=os.getenv("OPENAI_API_KEY"),
+    api_key=APIKeys().openai_api_key.get_secret_value(),
     api_base="https://api.openai.com/v1",
     temperature=0.7,
 )

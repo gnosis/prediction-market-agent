@@ -1,5 +1,7 @@
 import pytest
 from eth_typing import HexAddress, HexStr
+from microchain import Engine
+from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
@@ -9,6 +11,8 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.functions import (
+    MARKET_FUNCTIONS,
+    MISC_FUNCTIONS,
     BuyNo,
     BuyYes,
     GetMarkets,
@@ -50,7 +54,7 @@ def test_buy_no(market_type: MarketType) -> None:
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
-    balance = GetWalletBalance(market_type=market_type)(REPLICATOR_ADDRESS)
+    balance = GetWalletBalance(market_type=market_type)()
     assert balance > 0
 
 
@@ -91,3 +95,16 @@ def test_balance_for_user_in_market() -> None:
         market_index_set=market.condition.index_sets[1],
     )
     assert balance_no == 0
+
+
+@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+def test_engine_help(market_type: MarketType) -> None:
+    engine = Engine()
+    engine.register(Reasoning())
+    engine.register(Stop())
+    for function in MISC_FUNCTIONS:
+        engine.register(function())
+    for function in MARKET_FUNCTIONS:
+        engine.register(function(market_type=market_type))
+
+    print(engine.help)
