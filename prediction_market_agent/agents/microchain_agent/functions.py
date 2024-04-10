@@ -219,7 +219,7 @@ class GetBalance(MarketFunction):
         return []
 
     def __call__(self) -> Decimal:
-        return get_balance(market_type=self.market_type).value
+        return get_balance(market_type=self.market_type).amount
 
 
 class GetUserPositions(MarketFunction):
