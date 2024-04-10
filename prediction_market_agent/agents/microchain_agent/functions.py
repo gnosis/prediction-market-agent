@@ -132,11 +132,15 @@ class BuyTokens(MarketFunction):
 
     @property
     def description(self) -> str:
-        return f"Use this function to buy {self.outcome} outcome tokens of a prediction market. The second parameter specifies how much $ you spend."
+        return (
+            f"Use this function to buy {self.outcome} outcome tokens of a "
+            f"prediction market. The first parameter is the market id. The "
+            f"second parameter specifies how much {self.currency} you spend."
+        )
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 2.3]
+        return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
         outcome_bool = get_boolean_outcome(self.outcome)
