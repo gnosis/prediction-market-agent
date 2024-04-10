@@ -5,7 +5,6 @@ from typing import cast
 
 from eth_utils import to_checksum_address
 from microchain import Function
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -27,6 +26,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
+from prediction_market_agent.utils import APIKeys
 
 balance = 50
 outcomeTokens = {}

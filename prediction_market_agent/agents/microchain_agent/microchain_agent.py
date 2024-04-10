@@ -1,8 +1,9 @@
 from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.markets import MarketType
+
+from prediction_market_agent.utils import APIKeys
 
 engine = Engine()
 engine.register(Reasoning())
