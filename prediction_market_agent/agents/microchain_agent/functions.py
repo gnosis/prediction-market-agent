@@ -1,4 +1,3 @@
-import pprint
 import typing as t
 from decimal import Decimal
 from typing import cast
@@ -16,10 +15,10 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
+    get_balance,
     get_binary_market_from_question,
     get_binary_markets,
     get_market_token_balance,
@@ -27,11 +26,6 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.utils import APIKeys
-
-balance = 50
-outcomeTokens = {}
-outcomeTokens["Will Joe Biden get reelected in 2024?"] = {"yes": 0, "no": 0}
-outcomeTokens["Will Bitcoin hit 100k in 2024?"] = {"yes": 0, "no": 0}
 
 
 class Sum(Function):
@@ -98,21 +92,6 @@ class GetPropabilityForQuestion(MarketFunction):
             return 0.22
 
         return 0.0
-
-
-class GetBalance(MarketFunction):
-    @property
-    def description(self) -> str:
-        return "Use this function to get your own balance in $"
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> float:
-        print(f"Your balance is: {balance} and ")
-        pprint.pprint(outcomeTokens)
-        return balance
 
 
 class BuyTokens(MarketFunction):
@@ -222,25 +201,21 @@ class SummarizeLearning(Function):
         ]
 
     def __call__(self, summary: str) -> str:
-        # print(summary)
-        # pprint.pprint(outcomeTokens)
         return summary
 
 
-class GetWalletBalance(MarketFunction):
+class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
-        return "Use this function to fetch your balance, given in xDAI units."
+        currency = self.market_type.market_class.currency
+        return f"Use this function to fetch your balance, given in {currency} units."
 
     @property
     def example_args(self) -> list[str]:
         return []
 
     def __call__(self) -> Decimal:
-        # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
-        user_address_checksummed = APIKeys().bet_from_address
-        balance = get_balances(user_address_checksummed)
-        return balance.xdai
+        return get_balance(market_type=self.market_type).value
 
 
 class GetUserPositions(MarketFunction):
@@ -263,7 +238,7 @@ class GetUserPositions(MarketFunction):
 MISC_FUNCTIONS = [
     Sum,
     Product,
-    SummarizeLearning,
+    # SummarizeLearning,
 ]
 
 # Functions that interact with the prediction markets
@@ -275,6 +250,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    GetWalletBalance,
     GetUserPositions,
 ]
