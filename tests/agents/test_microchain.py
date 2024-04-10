@@ -15,9 +15,9 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     MISC_FUNCTIONS,
     BuyNo,
     BuyYes,
+    GetBalance,
     GetMarkets,
     GetUserPositions,
-    GetWalletBalance,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_binary_markets,
@@ -54,7 +54,7 @@ def test_buy_no(market_type: MarketType) -> None:
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
-    balance = GetWalletBalance(market_type=market_type)()
+    balance = GetBalance(market_type=market_type)()
     assert balance > 0
 
 
