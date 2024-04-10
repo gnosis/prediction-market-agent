@@ -54,7 +54,7 @@ def test_buy_no(market_type: MarketType) -> None:
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
-    balance = GetWalletBalance(market_type=market_type)(REPLICATOR_ADDRESS)
+    balance = GetWalletBalance(market_type=market_type)()
     assert balance > 0
 
 
