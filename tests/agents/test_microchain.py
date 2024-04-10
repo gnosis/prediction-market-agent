@@ -98,7 +98,7 @@ def test_balance_for_user_in_market() -> None:
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_engine_help(market_type) -> None:
+def test_engine_help(market_type: MarketType) -> None:
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
