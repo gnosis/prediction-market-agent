@@ -34,7 +34,8 @@ def before_all_tests() -> t.Generator[None, None, None]:
     yield None
 
 
-@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+# TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
+@pytest.mark.parametrize("market_type", [MarketType.OMEN, MarketType.MANIFOLD])
 def test_get_markets(market_type: MarketType) -> None:
     get_markets = GetMarkets(market_type=market_type)
     assert len(get_markets()) > 0

@@ -275,7 +275,6 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    # BalanceToOutcomes,
     GetWalletBalance,
     GetUserPositions,
 ]

@@ -43,7 +43,11 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
     cls = market_type.market_class
     markets: list[AgentMarket] = cls.get_binary_markets(
         filter_by=FilterBy.OPEN,
-        sort_by=SortBy.CLOSING_SOONEST,
+        sort_by=(
+            SortBy.NONE
+            if market_type == MarketType.POLYMARKET
+            else SortBy.CLOSING_SOONEST
+        ),
         limit=5,
     )
     return markets
