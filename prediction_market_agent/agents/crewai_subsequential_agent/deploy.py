@@ -1,10 +1,9 @@
 import random
-from decimal import Decimal
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 
 from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
     CrewAIAgentSubquestions,
@@ -36,13 +35,13 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
         result = CrewAIAgentSubquestions().answer_binary_market(market.question)
-        return True if result.decision == "y" else False
-
-    def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
-        if market.currency == Currency.xDai:
-            return BetAmount(amount=Decimal(0.1), currency=Currency.xDai)
-        else:
-            raise NotImplementedError("This agent only supports xDai markets")
+        return (
+            True
+            if result.decision == "y"
+            else False
+            if result.decision == "n"
+            else should_not_happen()
+        )
 
 
 if __name__ == "__main__":
@@ -50,22 +49,3 @@ if __name__ == "__main__":
     agent.deploy_local(
         market_type=MarketType.OMEN, sleep_time=540, timeout=180, place_bet=False
     )
-    # agent.deploy_gcp(
-    #     repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
-    #     market_type=MarketType.OMEN,
-    #     labels={OWNER_KEY: getpass.getuser()},
-    #     secrets={
-    #         "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-    #     },
-    #     memory=1024,
-    #     api_keys=APIKeys(
-    #         BET_FROM_ADDRESS=verify_address(
-    #             "0xb611A9f02B318339049264c7a66ac3401281cc3c"
-    #         ),
-    #         BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
-    #         OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
-    #         MANIFOLD_API_KEY=None,
-    #     ),
-    #     cron_schedule="0 */12 * * *",
-    #     timeout=540,
-    # )

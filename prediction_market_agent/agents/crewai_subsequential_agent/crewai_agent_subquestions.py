@@ -3,6 +3,7 @@ import typing as t
 from crewai import Agent, Crew, Process, Task
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
+from loguru import logger
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.crewai_subsequential_agent.prompts import (
@@ -57,12 +58,8 @@ class CrewAIAgentSubquestions:
         keys = APIKeys()
         llm = ChatOpenAI(
             model="gpt-3.5-turbo-0125",
-            openai_api_key=keys.openai_api_key.get_secret_value(),  # type: ignore
+            api_key=keys.openai_api_key.get_secret_value(),
         )
-        # llm = OpenAI(
-        #     openai_api_key=keys.openai_api_key.get_secret_value(),  # type: ignore
-        #     model_name="gpt-4-turbo-preview",
-        # )
         return llm
 
     def split_research_into_outcomes(self, question: str) -> Outcomes:
@@ -152,7 +149,7 @@ class CrewAIAgentSubquestions:
 
     def answer_binary_market(self, question: str) -> ProbabilityOutput:
         outcomes = self.split_research_into_outcomes(question)
-        print("outcomes ", outcomes)
+        logger.debug("outcomes ", outcomes)
 
         outcomes_with_probs = []
         task_map = {}
@@ -181,7 +178,7 @@ class CrewAIAgentSubquestions:
                     tasks[1].output.raw_output
                 )
             except Exception as e:
-                print("Could not parse result as ProbabilityOutput ", e)
+                logger.error("Could not parse result as ProbabilityOutput ", e)
                 prediction_result = ProbabilityOutput(
                     p_yes=0.5, p_no=0.5, confidence=0, decision=""
                 )

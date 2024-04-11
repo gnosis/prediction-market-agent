@@ -2,6 +2,7 @@ import typing as t
 from datetime import datetime
 
 import typer
+from loguru import logger
 from prediction_market_agent_tooling.benchmark.agents import (
     AbstractBenchmarkedAgent,
     FixedAgent,
@@ -47,9 +48,7 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         self,
         max_workers: int,
         agent_name: str,
-        max_tries: int,
     ) -> None:
-        self.max_tries = max_tries
         self.agent = CrewAIAgentSubquestions()
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
@@ -79,11 +78,11 @@ def main(
     markets = get_binary_markets(n, reference, filter_by=filter, sort_by=sort)
     markets_deduplicated = list(({m.question: m for m in markets}.values()))
     if len(markets) != len(markets_deduplicated):
-        print(
+        logger.debug(
             f"Warning: Deduplicated markets from {len(markets)} to {len(markets_deduplicated)}."
         )
 
-    print(f"Found {len(markets_deduplicated)} markets.")
+    logger.debug(f"Found {len(markets_deduplicated)} markets.")
 
     benchmarker = Benchmarker(
         markets=markets_deduplicated,
@@ -91,7 +90,6 @@ def main(
             CrewAIAgentSubquestionsBenchmark(
                 agent_name="subsequential-questions-crewai",
                 max_workers=max_workers,
-                max_tries=1,
             ),
             RandomAgent(agent_name="random", max_workers=max_workers),
             FixedAgent(
@@ -111,7 +109,7 @@ def main(
     md = benchmarker.generate_markdown_report()
 
     with open(output, "w") as f:
-        print(f"Writing benchmark report to: {output}")
+        logger.info(f"Writing benchmark report to: {output}")
         f.write(md)
 
 
