@@ -1,3 +1,4 @@
+import typing as t
 from decimal import Decimal
 
 from eth_typing import ChecksumAddress
@@ -28,23 +29,23 @@ from prediction_market_agent.utils import APIKeys
 
 class MicroMarket(BaseModel):
     question: str
-    p_yes: float
+    id: str
 
     @staticmethod
     def from_agent_market(market: AgentMarket) -> "MicroMarket":
         return MicroMarket(
             question=market.question,
-            p_yes=float(market.p_yes),
+            id=market.id,
         )
 
     def __str__(self) -> str:
-        return f"'{self.question}' with probability of yes: {self.p_yes:.2%}"
+        return f"'{self.question}', id: {self.id}"
 
 
 def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
     # Get the 5 markets that are closing soonest
     cls = market_type.market_class
-    markets: list[AgentMarket] = cls.get_binary_markets(
+    markets: t.Sequence[AgentMarket] = cls.get_binary_markets(
         filter_by=FilterBy.OPEN,
         sort_by=(
             SortBy.NONE
@@ -53,7 +54,7 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
         ),
         limit=5,
     )
-    return markets
+    return list(markets)
 
 
 def get_balance(market_type: MarketType) -> BetAmount:
@@ -66,16 +67,6 @@ def get_balance(market_type: MarketType) -> BetAmount:
         )
     else:
         raise ValueError(f"Market type '{market_type}' not supported")
-
-
-def get_binary_market_from_question(
-    market: str, market_type: MarketType
-) -> AgentMarket:
-    markets = get_binary_markets(market_type=market_type)
-    for m in markets:
-        if m.question == market:
-            return m
-    raise ValueError(f"Market '{market}' not found")
 
 
 def get_market_token_balance(
@@ -102,5 +93,12 @@ def get_yes_outcome(market_type: MarketType) -> str:
 def get_no_outcome(market_type: MarketType) -> str:
     if market_type == MarketType.OMEN:
         return OMEN_FALSE_OUTCOME
+    else:
+        raise ValueError(f"Market type '{market_type}' not supported")
+
+
+def get_example_market_id(market_type: MarketType) -> str:
+    if market_type == MarketType.OMEN:
+        return "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     else:
         raise ValueError(f"Market type '{market_type}' not supported")

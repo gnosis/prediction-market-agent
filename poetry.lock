@@ -1020,13 +1020,13 @@ files = [
 
 [[package]]
 name = "crewai"
-version = "0.28.6"
+version = "0.28.7"
 description = "Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks."
 optional = false
 python-versions = "<=3.13,>=3.10"
 files = [
-    {file = "crewai-0.28.6-py3-none-any.whl", hash = "sha256:7e92a8ef1b8618d463768c1229f892fa8233b6afa499bb03b026ecc368b64611"},
-    {file = "crewai-0.28.6.tar.gz", hash = "sha256:dceaebc7d531c4ced3c0283c9fb3649aafb4f10c6a37f7d670a9cdda2fd8eda0"},
+    {file = "crewai-0.28.7-py3-none-any.whl", hash = "sha256:b17e7d1b140ef56dbcc513a5760ae08ff1a4c1d81ba873f69c349ff8615198aa"},
+    {file = "crewai-0.28.7.tar.gz", hash = "sha256:f30fce7a341983cc18cd6513e6b41cdc88f1b8875cb75a5dff4191ae7aff2cc4"},
 ]
 
 [package.dependencies]
@@ -1044,7 +1044,7 @@ python-dotenv = "1.0.0"
 regex = ">=2023.12.25,<2024.0.0"
 
 [package.extras]
-tools = ["crewai-tools (>=0.1.6,<0.2.0)"]
+tools = ["crewai-tools (>=0.1.7,<0.2.0)"]
 
 [[package]]
 name = "cron-validator"
@@ -3374,13 +3374,13 @@ test = ["pytest"]
 
 [[package]]
 name = "mako"
-version = "1.3.2"
+version = "1.3.3"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "Mako-1.3.2-py3-none-any.whl", hash = "sha256:32a99d70754dfce237019d17ffe4a282d2d3351b9c476e90d8a60e63f133b80c"},
-    {file = "Mako-1.3.2.tar.gz", hash = "sha256:2a0c8ad7f6274271b3bb7467dd37cf9cc6dab4bc19cb69a4ef10669402de698e"},
+    {file = "Mako-1.3.3-py3-none-any.whl", hash = "sha256:5324b88089a8978bf76d1629774fcc2f1c07b82acdf00f4c5dd8ceadfffc4b40"},
+    {file = "Mako-1.3.3.tar.gz", hash = "sha256:e16c01d9ab9c11f7290eef1cfefc093fb5a45ee4a3da09e2fec2e4d1bae54e73"},
 ]
 
 [package.dependencies]
@@ -4721,13 +4721,13 @@ test = ["coverage", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.10.0"
+version = "0.11.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.12,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.10.0-py3-none-any.whl", hash = "sha256:532c971cd4961b0775eca1026781646215e48851d42faa20b1f1b0fb373195ee"},
-    {file = "prediction_market_agent_tooling-0.10.0.tar.gz", hash = "sha256:50b8865f1609efab364eb25e1c52be2512da2ed3c3cc494ec82e327bdc0fc267"},
+    {file = "prediction_market_agent_tooling-0.11.0-py3-none-any.whl", hash = "sha256:462c2ae9882d81e96d4995705bf849c0a2e17b227c9ad046a0a79ab0b724815a"},
+    {file = "prediction_market_agent_tooling-0.11.0.tar.gz", hash = "sha256:669b6a6aa6f0925251fbabbbd4329c16625de4ed1d9dd39f08d62ae28948a8a9"},
 ]
 
 [package.dependencies]
@@ -6655,13 +6655,13 @@ telegram = ["requests"]
 
 [[package]]
 name = "trove-classifiers"
-version = "2024.3.25"
+version = "2024.4.10"
 description = "Canonical source for classifiers on PyPI (pypi.org)."
 optional = false
 python-versions = "*"
 files = [
-    {file = "trove-classifiers-2024.3.25.tar.gz", hash = "sha256:6de68d06edd6fec5032162b6af22e818a4bb6f4ae2258e74699f8a41064b7cad"},
-    {file = "trove_classifiers-2024.3.25-py3-none-any.whl", hash = "sha256:c400e0bdceb018913339d53b07682d09a42aada687d070e90ee3c08477bec024"},
+    {file = "trove-classifiers-2024.4.10.tar.gz", hash = "sha256:49f40bb6a746b72a1cba4f8d55ee8252169cda0f70802e3fd24f04b7fb25a492"},
+    {file = "trove_classifiers-2024.4.10-py3-none-any.whl", hash = "sha256:678bd6fcc5218d72e3304e27a608acc9b91e17bd00c3f3d8c968497c843ad98b"},
 ]
 
 [[package]]
@@ -7418,4 +7418,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "b88aab899df02f0aa3c6007cc26728d3f735565734e06a74c6f8766a8a92a0dd"
+content-hash = "e11761e4d354c4ed463eb0239d2604e7e4d4a8578fe1f528b566f3614d4b44ef"

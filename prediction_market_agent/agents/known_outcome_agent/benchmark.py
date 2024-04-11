@@ -39,7 +39,7 @@ class QuestionWithKnownOutcome(BaseModel):
             ),
             volume=None,
             created_time=None,
-            close_time=None,
+            close_time=utcnow() + timedelta(days=1),
             resolution=None,
             outcomes=["YES", "NO"],
         )
