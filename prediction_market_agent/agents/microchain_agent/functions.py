@@ -205,6 +205,8 @@ class SellTokens(MarketFunction):
             user_id=self.user_address,
             outcome=self.outcome,
         )
+        if amount >= float(before_balance.amount):
+            return f"Your balance of {self.outcome} outcome tokens is not large enough to sell {amount}."
 
         market.sell_tokens(
             outcome=self.outcome_bool,
