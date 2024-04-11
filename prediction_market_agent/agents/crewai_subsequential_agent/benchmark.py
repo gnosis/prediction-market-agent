@@ -1,5 +1,5 @@
 import typing as t
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import typer
 from loguru import logger
@@ -23,6 +23,7 @@ from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
     CrewAIAgentSubquestions,
@@ -33,7 +34,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
     return AgentMarket(
         id=question,
         url=question,
-        close_time=None,
+        close_time=utcnow() + timedelta(days=1),
         volume=None,
         question=question,
         p_yes=Probability(0.5),

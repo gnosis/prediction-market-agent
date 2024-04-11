@@ -1,5 +1,5 @@
 import random
-
+import typing as t
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -16,9 +16,10 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def __init__(self) -> None:
         super().__init__()
 
-    def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
+    def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
         # We simply pick 5 random markets to bet on
         picked_markets: list[AgentMarket] = []
+        markets = list(markets)
         random.shuffle(markets)
         for market in markets:
             # Assume very high probability markets are already known, and have
