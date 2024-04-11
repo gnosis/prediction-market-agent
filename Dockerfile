@@ -27,3 +27,5 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY prediction_market_agent ./prediction_market_agent
 
 ENV PYTHONPATH=/app
+
+CMD ["bash", "-c", "python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]

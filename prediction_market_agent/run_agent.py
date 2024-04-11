@@ -10,10 +10,7 @@ from enum import Enum
 
 import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
-
-from prediction_market_agent.agents.coinflip_agent.coinflip_agent import (
-    DeployableCoinFlipAgent,
-)
+from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 
 
 class RunnableAgent(str, Enum):
