@@ -4,10 +4,11 @@ If the agent adheres to PMAT standard (subclasses DeployableAgent),
 simply add the agent to the `RunnableAgent` enum and then `RUNNABLE_AGENTS` dict.
 """
 
-import typer
-
 from enum import Enum
+
+import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
+
 from prediction_market_agent.agents.coinflip_agent.coinflip_agent import (
     DeployableCoinFlipAgent,
 )
