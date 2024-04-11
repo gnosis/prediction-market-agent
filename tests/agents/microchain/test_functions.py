@@ -2,6 +2,7 @@ import pytest
 from eth_typing import HexAddress, HexStr
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
@@ -115,4 +116,8 @@ def test_engine_help(market_type: MarketType) -> None:
 def test_get_probability(market_type: MarketType) -> None:
     market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     get_market_probability = GetMarketProbability(market_type=market_type)
-    get_market_probability(market_id)
+    # TODO this will need fixing once https://github.com/gnosis/prediction-market-agent-tooling/issues/181 is resolved
+    assert float(get_market_probability(market_id)[0]) == 0.5
+
+    market: AgentMarket = market_type.market_class.get_binary_market(market_id)
+    assert market.is_resolved  # Probability wont change after resolution
