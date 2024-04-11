@@ -151,9 +151,9 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
 
         # Check that the wallet balance has increased by the amount sold
         assert np.isclose(
-            final_wallet_balance,
-            before_wallet_balance,
-            rtol=1 - buy_sell_amount,
+            final_wallet_balance - after_wallet_balance,
+            buy_sell_amount,
+            rtol=0.01,
         )
 
         # Check that the number of tokens bought and sold is approximately equal
