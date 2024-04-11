@@ -195,7 +195,8 @@ class SellTokens(MarketFunction):
         return (
             f"Use this function to sell {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
-            f"second parameter specifies the quantity of tokens to sell."
+            f"second parameter specifies the value of tokens to sell in "
+            f"{self.currency}."
         )
 
     @property
