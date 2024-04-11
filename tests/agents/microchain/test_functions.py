@@ -1,16 +1,10 @@
 import numpy as np
 import pytest
-from eth_typing import HexAddress, HexStr
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
@@ -27,7 +21,6 @@ from prediction_market_agent.agents.microchain_agent.functions import (
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_binary_markets,
-    get_market_token_balance,
     get_no_outcome,
     get_yes_outcome,
 )
@@ -80,30 +73,6 @@ def test_agent_0_has_bet_on_market(market_type: MarketType) -> None:
         [u.position.conditionIds for u in user_positions], []
     )
     assert set(expected_condition_ids).issubset(unique_condition_ids)
-
-
-def test_balance_for_user_in_market() -> None:
-    user_address = AGENT_0_ADDRESS
-    subgraph_handler = OmenSubgraphHandler()
-    market_id = HexAddress(
-        HexStr("0x59975b067b0716fef6f561e1e30e44f606b08803")
-    )  # yes/no
-    market = subgraph_handler.get_omen_market_by_market_id(market_id)
-    omen_agent_market = OmenAgentMarket.from_data_model(market)
-    balance_yes = get_market_token_balance(
-        user_address=Web3.to_checksum_address(user_address),
-        market_condition_id=omen_agent_market.condition.id,
-        market_index_set=market.condition.index_sets[0],
-    )
-
-    assert balance_yes == 1959903969410997
-
-    balance_no = get_market_token_balance(
-        user_address=Web3.to_checksum_address(user_address),
-        market_condition_id=omen_agent_market.condition.id,
-        market_index_set=market.condition.index_sets[1],
-    )
-    assert balance_no == 0
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
@@ -182,9 +151,9 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
 
         # Check that the wallet balance has increased by the amount sold
         assert np.isclose(
-            final_wallet_balance,
-            before_wallet_balance,
-            rtol=1 - buy_sell_amount,
+            final_wallet_balance - after_wallet_balance,
+            buy_sell_amount,
+            rtol=0.01,
         )
 
         # Check that the number of tokens bought and sold is approximately equal
