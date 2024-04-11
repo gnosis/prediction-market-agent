@@ -13,6 +13,9 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_FALSE_OUTCOME,
     OMEN_TRUE_OUTCOME,
 )
+from prediction_market_agent_tooling.markets.omen.data_models import (
+    get_boolean_outcome as get_omen_boolean_outcome,
+)
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     OmenConditionalTokenContract,
 )
@@ -81,6 +84,13 @@ def get_market_token_balance(
     position_as_int = int(position_for_index_set.id.hex(), 16)
     balance = OmenConditionalTokenContract().balanceOf(user_address, position_as_int)
     return balance
+
+
+def get_boolean_outcome(market_type: MarketType, outcome: str) -> bool:
+    if market_type == MarketType.OMEN:
+        return get_omen_boolean_outcome(outcome)
+    else:
+        raise ValueError(f"Market type '{market_type}' not supported")
 
 
 def get_yes_outcome(market_type: MarketType) -> str:
