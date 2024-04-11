@@ -1,6 +1,5 @@
 import typing as t
 from decimal import Decimal
-from typing import cast
 
 from eth_utils import to_checksum_address
 from microchain import Function
@@ -19,8 +18,8 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
-    get_binary_market_from_question,
     get_binary_markets,
+    get_example_market_id,
     get_market_token_balance,
     get_no_outcome,
     get_yes_outcome,
@@ -63,11 +62,18 @@ class MarketFunction(Function):
         self.market_type = market_type
         super().__init__()
 
+    @property
+    def currency(self) -> Currency:
+        return self.market_type.market_class.currency
+
 
 class GetMarkets(MarketFunction):
     @property
     def description(self) -> str:
-        return "Use this function to get a list of predction markets and the current yes prices"
+        return (
+            "Use this function to get a list of predction market questions, "
+            "and the corresponding market IDs"
+        )
 
     @property
     def example_args(self) -> list[str]:
@@ -80,7 +86,27 @@ class GetMarkets(MarketFunction):
         ]
 
 
-class GetPropabilityForQuestion(MarketFunction):
+class GetMarketProbability(MarketFunction):
+    @property
+    def description(self) -> str:
+        return (
+            f"Use this function to get the probability of a 'Yes' outcome for "
+            f"a binary prediction market. This is equivalent to the price of "
+            f"the 'Yes' token in {self.currency}. Pass in the market id as a "
+            f"string."
+        )
+
+    @property
+    def example_args(self) -> list[str]:
+        return [get_example_market_id(self.market_type)]
+
+    def __call__(self, market_id: str) -> list[str]:
+        return [
+            str(self.market_type.market_class.get_binary_market(id=market_id).p_yes)
+        ]
+
+
+class PredictPropabilityForQuestion(MarketFunction):
     @property
     def description(self) -> str:
         return "Use this function to research the probability of an event occuring"
@@ -106,21 +132,23 @@ class BuyTokens(MarketFunction):
 
     @property
     def description(self) -> str:
-        return f"Use this function to buy {self.outcome} outcome tokens of a prediction market. The second parameter specifies how much $ you spend."
+        return (
+            f"Use this function to buy {self.outcome} outcome tokens of a "
+            f"prediction market. The first parameter is the market id. The "
+            f"second parameter specifies how much {self.currency} you spend."
+        )
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 2.3]
+        return [get_example_market_id(self.market_type), 2.3]
 
-    def __call__(self, market: str, amount: float) -> str:
+    def __call__(self, market_id: str, amount: float) -> str:
         outcome_bool = get_boolean_outcome(self.outcome)
 
-        market_obj: AgentMarket = get_binary_market_from_question(
-            market=market, market_type=self.market_type
+        market_obj: AgentMarket = self.market_type.market_class.get_binary_market(
+            market_id
         )
-        market_obj = cast(
-            OmenAgentMarket, market_obj
-        )  # TODO fix with 0.10.0 PMAT release
+        market_obj = t.cast(OmenAgentMarket, market_obj)
         outcome_index = market_obj.get_outcome_index(self.outcome)
         market_index_set = outcome_index + 1
 
@@ -140,7 +168,7 @@ class BuyTokens(MarketFunction):
             )
             - before_balance
         )
-        return f"Bought {tokens} {self.outcome} outcome tokens of: {market}"
+        return f"Bought {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
 class BuyYes(BuyTokens):
@@ -211,8 +239,9 @@ class SummarizeLearning(Function):
 class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
-        currency = self.market_type.market_class.currency
-        return f"Use this function to fetch your balance, given in {currency} units."
+        return (
+            f"Use this function to fetch your balance, given in {self.currency} units."
+        )
 
     @property
     def example_args(self) -> list[str]:
@@ -248,7 +277,8 @@ MISC_FUNCTIONS = [
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
-    GetPropabilityForQuestion,
+    GetMarketProbability,
+    PredictPropabilityForQuestion,
     GetBalance,
     BuyYes,
     BuyNo,
