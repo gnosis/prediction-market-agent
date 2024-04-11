@@ -1,7 +1,9 @@
+import json
 import typing as t
 from decimal import Decimal
 
 from eth_utils import to_checksum_address
+from mech_client.interact import ConfirmationType, interact
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
@@ -12,6 +14,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 
 from prediction_market_agent.agents.microchain_agent.utils import (
+    MechResult,
     MicroMarket,
     get_balance,
     get_binary_markets,
@@ -19,6 +22,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
+    saved_str_to_tmpfile,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -101,19 +105,30 @@ class GetMarketProbability(MarketFunction):
 class PredictPropabilityForQuestion(MarketFunction):
     @property
     def description(self) -> str:
-        return "Use this function to research the probability of an event occuring"
+        return (
+            "Use this function to research perform research and predict the "
+            "probability of an event occuring. Returns the probability. The "
+            "one parameter is the market id of the prediction market you want "
+            "to predict the probability of. Note, this costs money to run."
+        )
 
     @property
     def example_args(self) -> list[str]:
         return ["Will Joe Biden get reelected in 2024?"]
 
-    def __call__(self, a: str) -> float:
-        if a == "Will Joe Biden get reelected in 2024?":
-            return 0.41
-        if a == "Will Bitcoin hit 100k in 2024?":
-            return 0.22
-
-        return 0.0
+    def __call__(self, question: str) -> float:
+        private_key = APIKeys().bet_from_private_key.get_secret_value()
+        with saved_str_to_tmpfile(private_key) as tmpfile_path:
+            response = interact(
+                prompt=question,
+                confirmation_type=ConfirmationType.ON_CHAIN,
+                agent_id=3,
+                private_key_path=tmpfile_path,
+                tool="prediction-online",
+            )
+            result = json.loads(response)["result"]
+            MechResult.model_validate(result)
+            return float(result["p_yes"])
 
 
 class BuyTokens(MarketFunction):

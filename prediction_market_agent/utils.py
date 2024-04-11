@@ -1,6 +1,7 @@
 import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
+from prediction_market_agent_tooling.gtypes import PrivateKey
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     should_not_happen,
@@ -12,6 +13,7 @@ class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
+    BET_FROM_PRIVATE_KEY: t.Optional[SecretStr] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
@@ -29,6 +31,13 @@ class APIKeys(APIKeysBase):
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
             self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def bet_from_private_key(self) -> PrivateKey:
+        return check_not_none(
+            self.BET_FROM_PRIVATE_KEY,
+            "BET_FROM_PRIVATE_KEY missing in the environment.",
         )
 
 

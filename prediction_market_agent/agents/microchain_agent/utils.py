@@ -1,4 +1,7 @@
+import os
+import tempfile
 import typing as t
+from contextlib import contextmanager
 from decimal import Decimal
 
 from eth_typing import ChecksumAddress
@@ -43,6 +46,13 @@ class MicroMarket(BaseModel):
 
     def __str__(self) -> str:
         return f"'{self.question}', id: {self.id}"
+
+
+class MechResult(BaseModel):
+    p_yes: float
+    p_no: float
+    confidence: float
+    info_utility: float
 
 
 def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
@@ -112,3 +122,15 @@ def get_example_market_id(market_type: MarketType) -> str:
         return "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     else:
         raise ValueError(f"Market type '{market_type}' not supported")
+
+
+@contextmanager
+def saved_str_to_tmpfile(s: str):
+    # Write the string to the temporary file
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(s.encode())
+
+    yield tmp.name
+
+    # Finally remove the temporary file
+    os.remove(tmp.name)
