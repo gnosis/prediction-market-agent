@@ -22,10 +22,7 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
     Result,
     get_known_outcome,
 )
-
-
-def market_is_saturated(market: AgentMarket) -> bool:
-    return market.p_yes > 0.95 or market.p_no > 0.95
+from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
