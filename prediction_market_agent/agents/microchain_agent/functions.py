@@ -1,13 +1,12 @@
-import pprint
 import typing as t
 from decimal import Decimal
 
 from eth_utils import to_checksum_address
 from microchain import Function
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
-    OMEN_FALSE_OUTCOME,
-    OMEN_TRUE_OUTCOME,
     OmenUserPosition,
     get_boolean_outcome,
 )
@@ -15,17 +14,18 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.balances import get_balances
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
-    fetch_public_key_from_env,
-    get_omen_binary_market_from_question,
-    get_omen_binary_markets,
-    get_omen_market_token_balance,
+    get_balance,
+    get_binary_markets,
+    get_example_market_id,
+    get_market_token_balance,
+    get_no_outcome,
+    get_yes_outcome,
 )
+from prediction_market_agent.utils import APIKeys
 
-balance = 50
 outcomeTokens = {}
 outcomeTokens["Will Joe Biden get reelected in 2024?"] = {"yes": 0, "no": 0}
 outcomeTokens["Will Bitcoin hit 100k in 2024?"] = {"yes": 0, "no": 0}
@@ -57,10 +57,23 @@ class Product(Function):
         return a * b
 
 
-class GetMarkets(Function):
+class MarketFunction(Function):
+    def __init__(self, market_type: MarketType) -> None:
+        self.market_type = market_type
+        super().__init__()
+
+    @property
+    def currency(self) -> Currency:
+        return self.market_type.market_class.currency
+
+
+class GetMarkets(MarketFunction):
     @property
     def description(self) -> str:
-        return "Use this function to get a list of predction markets and the current yes prices"
+        return (
+            "Use this function to get a list of predction market questions, "
+            "and the corresponding market IDs"
+        )
 
     @property
     def example_args(self) -> list[str]:
@@ -68,11 +81,32 @@ class GetMarkets(Function):
 
     def __call__(self) -> list[str]:
         return [
-            str(MicroMarket.from_agent_market(m)) for m in get_omen_binary_markets()
+            str(MicroMarket.from_agent_market(m))
+            for m in get_binary_markets(market_type=self.market_type)
         ]
 
 
-class GetPropabilityForQuestion(Function):
+class GetMarketProbability(MarketFunction):
+    @property
+    def description(self) -> str:
+        return (
+            f"Use this function to get the probability of a 'Yes' outcome for "
+            f"a binary prediction market. This is equivalent to the price of "
+            f"the 'Yes' token in {self.currency}. Pass in the market id as a "
+            f"string."
+        )
+
+    @property
+    def example_args(self) -> list[str]:
+        return [get_example_market_id(self.market_type)]
+
+    def __call__(self, market_id: str) -> list[str]:
+        return [
+            str(self.market_type.market_class.get_binary_market(id=market_id).p_yes)
+        ]
+
+
+class PredictPropabilityForQuestion(MarketFunction):
     @property
     def description(self) -> str:
         return "Use this function to research the probability of an event occuring"
@@ -90,43 +124,35 @@ class GetPropabilityForQuestion(Function):
         return 0.0
 
 
-class GetBalance(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to get your own balance in $"
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> float:
-        print(f"Your balance is: {balance} and ")
-        pprint.pprint(outcomeTokens)
-        return balance
-
-
-class BuyTokens(Function):
-    def __init__(self, outcome: str):
-        self.user_address = fetch_public_key_from_env()
+class BuyTokens(MarketFunction):
+    def __init__(self, market_type: MarketType, outcome: str):
         self.outcome = outcome
-        super().__init__()
+        self.user_address = APIKeys().bet_from_address
+        super().__init__(market_type=market_type)
 
     @property
     def description(self) -> str:
-        return f"Use this function to buy {self.outcome} outcome tokens of a prediction market. The second parameter specifies how much $ you spend."
+        return (
+            f"Use this function to buy {self.outcome} outcome tokens of a "
+            f"prediction market. The first parameter is the market id. The "
+            f"second parameter specifies how much {self.currency} you spend."
+        )
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 2.3]
+        return [get_example_market_id(self.market_type), 2.3]
 
-    def __call__(self, market: str, amount: float) -> str:
+    def __call__(self, market_id: str, amount: float) -> str:
         outcome_bool = get_boolean_outcome(self.outcome)
 
-        market_obj: OmenAgentMarket = get_omen_binary_market_from_question(market)
+        market_obj: AgentMarket = self.market_type.market_class.get_binary_market(
+            market_id
+        )
+        market_obj = t.cast(OmenAgentMarket, market_obj)
         outcome_index = market_obj.get_outcome_index(self.outcome)
         market_index_set = outcome_index + 1
 
-        before_balance = get_omen_market_token_balance(
+        before_balance = get_market_token_balance(
             user_address=self.user_address,
             market_condition_id=market_obj.condition.id,
             market_index_set=market_index_set,
@@ -135,27 +161,31 @@ class BuyTokens(Function):
             outcome_bool, BetAmount(amount=Decimal(amount), currency=Currency.xDai)
         )
         tokens = (
-            get_omen_market_token_balance(
+            get_market_token_balance(
                 user_address=self.user_address,
                 market_condition_id=market_obj.condition.id,
                 market_index_set=market_index_set,
             )
             - before_balance
         )
-        return f"Bought {tokens} {self.outcome} outcome tokens of: {market}"
+        return f"Bought {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
 class BuyYes(BuyTokens):
-    def __init__(self) -> None:
-        super().__init__(OMEN_TRUE_OUTCOME)
+    def __init__(self, market_type: MarketType) -> None:
+        super().__init__(
+            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+        )
 
 
 class BuyNo(BuyTokens):
-    def __init__(self) -> None:
-        super().__init__(OMEN_FALSE_OUTCOME)
+    def __init__(self, market_type: MarketType) -> None:
+        super().__init__(
+            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+        )
 
 
-class SellYes(Function):
+class SellYes(MarketFunction):
     @property
     def description(self) -> str:
         return "Use this function to sell yes outcome tokens of a prediction market. The second parameter specifies how much tokens you sell."
@@ -173,7 +203,7 @@ class SellYes(Function):
         return "Sold " + str(amount) + " yes outcome token of: " + market
 
 
-class SellNo(Function):
+class SellNo(MarketFunction):
     @property
     def description(self) -> str:
         return "Use this function to sell no outcome tokens of a prdiction market. The second parameter specifies how much tokens you sell."
@@ -191,24 +221,6 @@ class SellNo(Function):
         return "Sold " + str(amount) + " no outcome token of: " + market
 
 
-class BalanceToOutcomes(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to convert your balance into equal units of 'yes' and 'no' outcome tokens. The function takes the amount of balance as the argument."
-
-    @property
-    def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 50]
-
-    def __call__(self, market: str, amount: int) -> str:
-        global balance
-        global outcomeTokens
-        outcomeTokens[market]["yes"] += amount
-        outcomeTokens[market]["no"] += amount
-        balance -= amount
-        return f"Converted {amount} units of balance into {amount} 'yes' outcome tokens and {amount} 'no' outcome tokens. Remaining balance is {balance}."
-
-
 class SummarizeLearning(Function):
     @property
     def description(self) -> str:
@@ -221,28 +233,25 @@ class SummarizeLearning(Function):
         ]
 
     def __call__(self, summary: str) -> str:
-        # print(summary)
-        # pprint.pprint(outcomeTokens)
         return summary
 
 
-class GetWalletBalance(Function):
+class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
-        return "Use this function to fetch your balance, given in xDAI units."
+        return (
+            f"Use this function to fetch your balance, given in {self.currency} units."
+        )
 
     @property
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self, user_address: str) -> Decimal:
-        # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
-        user_address_checksummed = to_checksum_address(user_address)
-        balance = get_balances(user_address_checksummed)
-        return balance.xdai
+    def __call__(self) -> Decimal:
+        return get_balance(market_type=self.market_type).amount
 
 
-class GetUserPositions(Function):
+class GetUserPositions(MarketFunction):
     @property
     def description(self) -> str:
         return (
@@ -259,18 +268,21 @@ class GetUserPositions(Function):
         )
 
 
-ALL_FUNCTIONS = [
+MISC_FUNCTIONS = [
     Sum,
     Product,
+    # SummarizeLearning,
+]
+
+# Functions that interact with the prediction markets
+MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
-    GetPropabilityForQuestion,
+    GetMarketProbability,
+    PredictPropabilityForQuestion,
     GetBalance,
     BuyYes,
     BuyNo,
     SellYes,
     SellNo,
-    # BalanceToOutcomes,
-    SummarizeLearning,
-    GetWalletBalance,
     GetUserPositions,
 ]

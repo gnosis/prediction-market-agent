@@ -1,5 +1,6 @@
 import getpass
 import random
+import typing as t
 from decimal import Decimal
 
 from loguru import logger
@@ -30,7 +31,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
 
-    def pick_markets(self, markets: list[AgentMarket]) -> list[AgentMarket]:
+    def pick_markets(self, markets: t.Sequence[AgentMarket]) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
             if not isinstance(market, OmenAgentMarket):
