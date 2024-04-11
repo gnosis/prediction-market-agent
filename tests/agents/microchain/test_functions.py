@@ -120,4 +120,4 @@ def test_get_probability(market_type: MarketType) -> None:
     assert float(get_market_probability(market_id)[0]) == 0.5
 
     market: AgentMarket = market_type.market_class.get_binary_market(market_id)
-    assert market.is_resolved  # Probability wont change after resolution
+    assert market.is_resolved()  # Probability wont change after resolution
