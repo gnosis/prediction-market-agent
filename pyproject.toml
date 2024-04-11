@@ -9,7 +9,7 @@ readme = "README.md"
 python = "~3.10.0"
 python-dotenv = "*"
 openai = "*"
-langchain = "~0.1.1"
+langchain = "^0.1.1"
 langchain-experimental = "*"
 langchain-community = "*"
 langchain-openai = "*"
@@ -21,7 +21,7 @@ google-search-results = "*"
 pytest = "*"
 llama-index = "~0.9.0"
 duckduckgo-search = "*"
-crewai = "*"
+crewai = {extras = ["tools"], version = "^0.28.5"}
 # metagpt = "*" # Commented out because requires super old version of langchain, and conflicts with crewai.
 replicate = "*"
 typer = "^0.9.0"
@@ -35,7 +35,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = "^0.11.0"
+prediction-market-agent-tooling = "^0.13.1"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -43,6 +43,8 @@ markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
 # TODO remove when PR is merged
 microchain-python = {git = "https://github.com/evangriffiths/microchain.git", rev = "evan/token-tracker"}
+# Prediction Prophet doesn't have a package, so reference the git repo directly with a specific commit that was tested with PMA.
+prediction-prophet = {git = "https://github.com/polywrap/predictionprophet", rev = "7479eabdefeb25f7226fe00554297d8d71ffd441"}
 
 [build-system]
 requires = ["poetry-core"]
