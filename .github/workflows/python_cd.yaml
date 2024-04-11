@@ -1,7 +1,6 @@
 name: Python CD
 
 on:
-  pull_request:
   release:
     types: [ published ]
 
