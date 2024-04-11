@@ -23,7 +23,7 @@ RUNNABLE_AGENTS = {
 
 
 def main(agent: RunnableAgent, market_type: MarketType):
-    RUNNABLE_AGENTS[agent].run(market_type)
+    RUNNABLE_AGENTS[agent]().run(market_type)
 
 
 if __name__ == "__main__":
