@@ -17,7 +17,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGPT3Agent,
     DeployablePredictionProphetGPT4Agent,
 )
-from prediction_market_agent.agents.replicator_agent.deploy import (
+from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
 
@@ -27,7 +27,7 @@ class RunnableAgent(str, Enum):
     prophet_gpt3 = "prophet_gpt3"
     prophet_gpt4 = "prophet_gpt4"
     olas_embedding_oa = "olas_embedding_oa"
-    replicator = "replicator"
+    replicate_to_omen = "replicate_to_omen"
 
 
 RUNNABLE_AGENTS = {
@@ -35,7 +35,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.prophet_gpt3: DeployablePredictionProphetGPT3Agent,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4Agent,
     RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
-    RunnableAgent.replicator: DeployableReplicateToOmenAgent,
+    RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
 }
 
 
