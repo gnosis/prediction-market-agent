@@ -114,7 +114,7 @@ class PredictPropabilityForQuestion(MarketFunction):
 
     @property
     def example_args(self) -> list[str]:
-        return ["Will Joe Biden get reelected in 2024?"]
+        return [get_example_market_id(self.market_type)]
 
     def __call__(self, question: str) -> float:
         private_key = APIKeys().bet_from_private_key.get_secret_value()
