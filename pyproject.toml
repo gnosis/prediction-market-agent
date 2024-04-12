@@ -41,10 +41,10 @@ markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
 # TODO remove when PR is merged
 microchain-python = {git = "https://github.com/evangriffiths/microchain.git", rev = "evan/token-tracker"}
-mech-client = {git = "https://github.com/valory-xyz/mech-client.git", rev = "main"}
 types-requests = "2.31.0.0"
 crewai = {version = "0.11.0", extras = ["tools"]}
 setuptools = "^69.2.0"
+mech-client = "^0.2.13"
 
 [build-system]
 requires = ["poetry-core"]

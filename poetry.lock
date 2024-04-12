@@ -3100,24 +3100,20 @@ name = "mech-client"
 version = "0.2.13"
 description = "Basic client to interact with a mech"
 optional = false
-python-versions = "^3.10"
-files = []
-develop = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "mech_client-0.2.13-py3-none-any.whl", hash = "sha256:b0bb53b5c9de29bcb811e7edd34ca1f89961b2189069d7006926d53fa301c29e"},
+    {file = "mech_client-0.2.13.tar.gz", hash = "sha256:dd908b81a21b78fde9f654676cc70f63c910e2d04d2b21ba4bf15012461f00d5"},
+]
 
 [package.dependencies]
 asn1crypto = ">=1.4.0,<1.5.0"
 gql = ">=3.4.1"
-open-aea = {version = "==1.50.0", extras = ["cli"]}
-open-aea-cli-ipfs = "==1.50.0"
-open-aea-ledger-cosmos = "==1.50.0"
-open-aea-ledger-ethereum = "==1.50.0"
+open-aea = {version = "1.50.0", extras = ["cli"]}
+open-aea-cli-ipfs = "1.50.0"
+open-aea-ledger-cosmos = "1.50.0"
+open-aea-ledger-ethereum = "1.50.0"
 websocket-client = ">=0.32.0,<1"
-
-[package.source]
-type = "git"
-url = "https://github.com/valory-xyz/mech-client.git"
-reference = "main"
-resolved_reference = "77fac8a937f373bc807e3396a6bfd9c185577952"
 
 [[package]]
 name = "microchain-python"
@@ -6325,4 +6321,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "f7697fd0cb66e79383244c40d31239d92450ddb154f2410ef3b07cdaa8cb07d0"
+content-hash = "5b195713a3b2a291ecc259b1b912233d7092854834130d97a05596d5598e4f25"

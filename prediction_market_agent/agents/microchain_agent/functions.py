@@ -3,7 +3,7 @@ import typing as t
 from decimal import Decimal
 
 from eth_utils import to_checksum_address
-from mech_client.interact import ConfirmationType, interact
+from mech_client.interact import interact
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
@@ -121,14 +121,15 @@ class PredictPropabilityForQuestion(MarketFunction):
         with saved_str_to_tmpfile(private_key) as tmpfile_path:
             response = interact(
                 prompt=question,
-                confirmation_type=ConfirmationType.ON_CHAIN,
+                # Taken from https://github.com/valory-xyz/mech?tab=readme-ov-file#examples-of-deployed-mechs
                 agent_id=3,
                 private_key_path=tmpfile_path,
-                tool="prediction-online",
+                # To see a list of available tools, comment out the tool parameter
+                # and run the function. You will be prompted to select a tool.
+                tool="claude-prediction-online",
             )
-            result = json.loads(response)["result"]
-            MechResult.model_validate(result)
-            return float(result["p_yes"])
+            result = json.loads(response["result"])
+            return MechResult.model_validate(result).p_yes
 
 
 class BuyTokens(MarketFunction):
