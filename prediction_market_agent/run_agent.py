@@ -15,16 +15,21 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
 )
+from prediction_market_agent.agents.known_outcome_agent.deploy import (
+    DeployableKnownOutcomeAgent,
+)
 
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
     think_thoroughly = "think_thoroughly"
+    knownoutcome = "knownoutcome"
 
 
 RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
+    RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
 }
 
 
