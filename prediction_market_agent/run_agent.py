@@ -12,14 +12,19 @@ import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
+    DeployableThinkThoroughlyAgent,
+)
 
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
+    think_thoroughly = "think_thoroughly"
 
 
 RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
+    RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
 }
 
 
