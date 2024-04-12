@@ -12,11 +12,11 @@ import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
-from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
-    DeployableReplicateToOmenAgent,
-)
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
+)
+from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
+    DeployableReplicateToOmenAgent,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
