@@ -11,6 +11,7 @@ from pydantic import SecretStr
 class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
+    TAVILY_API_KEY: t.Optional[SecretStr] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
@@ -22,6 +23,12 @@ class APIKeys(APIKeysBase):
     def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def tavily_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
         )
 
 
