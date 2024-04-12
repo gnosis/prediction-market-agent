@@ -70,6 +70,13 @@ def get_boolean_outcome(market_type: MarketType, outcome: str) -> bool:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
+def get_boolean_outcome(market_type: MarketType, outcome: str) -> bool:
+    if market_type == MarketType.OMEN:
+        return get_omen_boolean_outcome(outcome)
+    else:
+        raise ValueError(f"Market type '{market_type}' not supported")
+
+
 def get_yes_outcome(market_type: MarketType) -> str:
     if market_type == MarketType.OMEN:
         return OMEN_TRUE_OUTCOME
