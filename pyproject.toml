@@ -44,7 +44,9 @@ tavily-python = "^0.3.1"
 # TODO remove when PR is merged
 microchain-python = {git = "https://github.com/evangriffiths/microchain.git", rev = "evan/token-tracker"}
 # Prediction Prophet doesn't have a package, so reference the git repo directly with a specific commit that was tested with PMA.
-prediction-prophet = {git = "https://github.com/polywrap/predictionprophet", rev = "7479eabdefeb25f7226fe00554297d8d71ffd441"}
+# Prediction Prophet is a dependency of PMAT >=0.13.1, so as long as we don't introduce breaking changes for Prophet, this should be fine,
+# but if this becomes a pain point for any reason, Peter volunteers to fix it! 
+prediction-prophet = {git = "https://github.com/polywrap/predictionprophet", rev = "5133907b5d5db6ee92cda2986ab45e7e3f65fea5"}
 
 [build-system]
 requires = ["poetry-core"]
