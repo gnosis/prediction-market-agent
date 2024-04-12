@@ -25,7 +25,7 @@ from prediction_market_agent_tooling.markets.markets import (
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
+from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
 )
 

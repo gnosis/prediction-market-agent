@@ -1,4 +1,3 @@
-# type: ignore
 import time
 import typing as t
 from datetime import timedelta

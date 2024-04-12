@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from loguru import logger
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.crewai_subsequential_agent.prompts import (
+from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_OUTCOMES_FROM_SCENARIO_OUTPUT,
     CREATE_OUTCOMES_FROM_SCENARIO_PROMPT,
     FINAL_DECISION_PROMPT,
