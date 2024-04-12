@@ -12,14 +12,25 @@ import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.prophet_agent.deploy import (
+    DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT3Agent,
+    DeployablePredictionProphetGPT4Agent,
+)
 
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
+    prophet_gpt3 = "prophet_gpt3"
+    prophet_gpt4 = "prophet_gpt4"
+    olas_embedding_oa = "olas_embedding_oa"
 
 
 RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
+    RunnableAgent.prophet_gpt3: DeployablePredictionProphetGPT3Agent,
+    RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4Agent,
+    RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
 }
 
 
