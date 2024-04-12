@@ -34,7 +34,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         self, market_type: MarketType = MarketType.MANIFOLD, _place_bet: bool = True
     ) -> None:
         if market_type != MarketType.OMEN:
-            raise RuntimeError(f"Can replicate only into Omen.")
+            raise RuntimeError("Can replicate only into Omen.")
 
         keys = APIKeys()
         settings = ReplicateSettings()
