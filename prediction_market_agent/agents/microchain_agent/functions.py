@@ -4,13 +4,9 @@ from decimal import Decimal
 from eth_utils import to_checksum_address
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount, Currency
+from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.data_models import (
-    OmenUserPosition,
-    get_boolean_outcome,
-)
-from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.markets.omen.data_models import OmenUserPosition
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -19,16 +15,12 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
     get_binary_markets,
+    get_boolean_outcome,
     get_example_market_id,
-    get_market_token_balance,
     get_no_outcome,
     get_yes_outcome,
 )
 from prediction_market_agent.utils import APIKeys
-
-outcomeTokens = {}
-outcomeTokens["Will Joe Biden get reelected in 2024?"] = {"yes": 0, "no": 0}
-outcomeTokens["Will Bitcoin hit 100k in 2024?"] = {"yes": 0, "no": 0}
 
 
 class Sum(Function):
@@ -127,6 +119,9 @@ class PredictPropabilityForQuestion(MarketFunction):
 class BuyTokens(MarketFunction):
     def __init__(self, market_type: MarketType, outcome: str):
         self.outcome = outcome
+        self.outcome_bool = get_boolean_outcome(
+            outcome=self.outcome, market_type=market_type
+        )
         self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
@@ -143,31 +138,27 @@ class BuyTokens(MarketFunction):
         return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
-        outcome_bool = get_boolean_outcome(self.outcome)
-
-        market_obj: AgentMarket = self.market_type.market_class.get_binary_market(
-            market_id
-        )
-        market_obj = t.cast(OmenAgentMarket, market_obj)
-        outcome_index = market_obj.get_outcome_index(self.outcome)
-        market_index_set = outcome_index + 1
-
-        before_balance = get_market_token_balance(
-            user_address=self.user_address,
-            market_condition_id=market_obj.condition.id,
-            market_index_set=market_index_set,
-        )
-        market_obj.place_bet(
-            outcome_bool, BetAmount(amount=Decimal(amount), currency=Currency.xDai)
-        )
-        tokens = (
-            get_market_token_balance(
-                user_address=self.user_address,
-                market_condition_id=market_obj.condition.id,
-                market_index_set=market_index_set,
+        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
+        account_balance = float(get_balance(market_type=self.market_type).amount)
+        if account_balance < amount:
+            return (
+                f"Your balance of {self.currency} ({account_balance}) is not "
+                f"large enough to buy {amount} tokens."
             )
-            - before_balance
+
+        before_balance = market.get_token_balance(
+            user_id=self.user_address,
+            outcome=self.outcome,
         )
+        market.buy_tokens(
+            outcome=self.outcome_bool,
+            amount=TokenAmount(amount=Decimal(amount), currency=self.currency),
+        )
+        after_balance = market.get_token_balance(
+            user_id=self.user_address,
+            outcome=self.outcome,
+        )
+        tokens = float(after_balance.amount - before_balance.amount)
         return f"Bought {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
@@ -185,40 +176,61 @@ class BuyNo(BuyTokens):
         )
 
 
-class SellYes(MarketFunction):
+class SellTokens(MarketFunction):
+    def __init__(self, market_type: MarketType, outcome: str):
+        self.outcome = outcome
+        self.outcome_bool = get_boolean_outcome(
+            outcome=self.outcome,
+            market_type=market_type,
+        )
+        self.user_address = APIKeys().bet_from_address
+        super().__init__(market_type=market_type)
+
     @property
     def description(self) -> str:
-        return "Use this function to sell yes outcome tokens of a prediction market. The second parameter specifies how much tokens you sell."
+        return (
+            f"Use this function to sell {self.outcome} outcome tokens of a "
+            f"prediction market. The first parameter is the market id. The "
+            f"second parameter specifies the value of tokens to sell in "
+            f"{self.currency}."
+        )
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 2]
+        return [get_example_market_id(self.market_type), 2.3]
 
-    def __call__(self, market: str, amount: int) -> str:
-        global outcomeTokens
-        if amount > outcomeTokens[market]["yes"]:
-            return f"Your balance of {outcomeTokens[market]['yes']} yes outcome tokens is not large enough to sell {amount}."
+    def __call__(self, market_id: str, amount: float) -> str:
+        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
+        before_balance = market.get_token_balance(
+            user_id=self.user_address,
+            outcome=self.outcome,
+        )
 
-        outcomeTokens[market]["yes"] -= amount
-        return "Sold " + str(amount) + " yes outcome token of: " + market
+        market.sell_tokens(
+            outcome=self.outcome_bool,
+            amount=TokenAmount(amount=Decimal(amount), currency=self.currency),
+        )
+
+        after_balance = market.get_token_balance(
+            user_id=self.user_address,
+            outcome=self.outcome,
+        )
+        tokens = float(before_balance.amount - after_balance.amount)
+        return f"Sold {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
-class SellNo(MarketFunction):
-    @property
-    def description(self) -> str:
-        return "Use this function to sell no outcome tokens of a prdiction market. The second parameter specifies how much tokens you sell."
+class SellYes(SellTokens):
+    def __init__(self, market_type: MarketType) -> None:
+        super().__init__(
+            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+        )
 
-    @property
-    def example_args(self) -> list[t.Union[str, float]]:
-        return ["Will Joe Biden get reelected in 2024?", 4]
 
-    def __call__(self, market: str, amount: int) -> str:
-        global outcomeTokens
-        if amount > outcomeTokens[market]["no"]:
-            return f"Your balance of {outcomeTokens[market]['no']} no outcome tokens is not large enough to sell {amount}."
-
-        outcomeTokens[market]["no"] -= amount
-        return "Sold " + str(amount) + " no outcome token of: " + market
+class SellNo(SellTokens):
+    def __init__(self, market_type: MarketType) -> None:
+        super().__init__(
+            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+        )
 
 
 class SummarizeLearning(Function):
