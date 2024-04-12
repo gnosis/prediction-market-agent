@@ -12,30 +12,29 @@ import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
-from prediction_market_agent.agents.prophet_agent.deploy import (
-    DeployableOlasEmbeddingOAAgent,
-    DeployablePredictionProphetGPT3Agent,
-    DeployablePredictionProphetGPT4Agent,
-)
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
+)
+from prediction_market_agent.agents.known_outcome_agent.deploy import (
+    DeployableKnownOutcomeAgent,
+)
+from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
+    DeployableThinkThoroughlyAgent,
 )
 
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
-    prophet_gpt3 = "prophet_gpt3"
-    prophet_gpt4 = "prophet_gpt4"
-    olas_embedding_oa = "olas_embedding_oa"
     replicate_to_omen = "replicate_to_omen"
+    think_thoroughly = "think_thoroughly"
+    knownoutcome = "knownoutcome"
 
 
 RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
-    RunnableAgent.prophet_gpt3: DeployablePredictionProphetGPT3Agent,
-    RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4Agent,
-    RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
+    RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
+    RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
 }
 
 

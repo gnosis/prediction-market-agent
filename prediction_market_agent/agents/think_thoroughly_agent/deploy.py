@@ -6,17 +6,13 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import should_not_happen
 
-from prediction_market_agent.agents.crewai_subsequential_agent.crewai_agent_subquestions import (
+from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
 )
 from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableThinkThoroughlyAgent(DeployableAgent):
-    # For cheaper credits at this experimental stage
-    def __init__(self) -> None:
-        super().__init__()
-
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
         # We simply pick 5 random markets to bet on
         picked_markets: list[AgentMarket] = []

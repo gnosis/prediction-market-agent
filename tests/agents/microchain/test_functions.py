@@ -1,15 +1,10 @@
+import numpy as np
 import pytest
-from eth_typing import HexAddress, HexStr
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
@@ -20,11 +15,16 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetMarketProbability,
     GetMarkets,
     GetUserPositions,
+    SellNo,
+    SellYes,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
+    get_balance,
     get_binary_markets,
-    get_market_token_balance,
+    get_no_outcome,
+    get_yes_outcome,
 )
+from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
 REPLICATOR_ADDRESS = "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
@@ -75,30 +75,6 @@ def test_agent_0_has_bet_on_market(market_type: MarketType) -> None:
     assert set(expected_condition_ids).issubset(unique_condition_ids)
 
 
-def test_balance_for_user_in_market() -> None:
-    user_address = AGENT_0_ADDRESS
-    subgraph_handler = OmenSubgraphHandler()
-    market_id = HexAddress(
-        HexStr("0x59975b067b0716fef6f561e1e30e44f606b08803")
-    )  # yes/no
-    market = subgraph_handler.get_omen_market_by_market_id(market_id)
-    omen_agent_market = OmenAgentMarket.from_data_model(market)
-    balance_yes = get_market_token_balance(
-        user_address=Web3.to_checksum_address(user_address),
-        market_condition_id=omen_agent_market.condition.id,
-        market_index_set=market.condition.index_sets[0],
-    )
-
-    assert balance_yes == 1959903969410997
-
-    balance_no = get_market_token_balance(
-        user_address=Web3.to_checksum_address(user_address),
-        market_condition_id=omen_agent_market.condition.id,
-        market_index_set=market.condition.index_sets[1],
-    )
-    assert balance_no == 0
-
-
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_engine_help(market_type: MarketType) -> None:
     engine = Engine()
@@ -121,3 +97,66 @@ def test_get_probability(market_type: MarketType) -> None:
 
     market: AgentMarket = market_type.market_class.get_binary_market(market_id)
     assert market.is_resolved()  # Probability wont change after resolution
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+def test_buy_sell_tokens(market_type: MarketType) -> None:
+    """
+    Test buying and selling tokens for a market
+    """
+    market = get_binary_markets(market_type=market_type)[0]
+    from_address = APIKeys().bet_from_address
+    outcomes_functions = {
+        get_yes_outcome(market_type=market_type): [
+            BuyYes(market_type=market_type),
+            SellYes(market_type=market_type),
+        ],
+        get_no_outcome(market_type=market_type): [
+            BuyNo(market_type=market_type),
+            SellNo(market_type=market_type),
+        ],
+    }
+
+    # Needs to be big enough below for fees to be relatively small enough
+    # for checks to pass
+    buy_sell_amount = 0.1
+
+    def get_balances() -> tuple[float, float]:
+        wallet_balance = get_balance(market_type=market_type).amount
+        token_balance = market.get_token_balance(
+            user_id=from_address,
+            outcome=outcome,
+        ).amount
+        return float(wallet_balance), float(token_balance)
+
+    for outcome, functions in outcomes_functions.items():
+        buy_tokens, sell_tokens = functions
+
+        before_wallet_balance, before_tokens = get_balances()
+        buy_tokens(market.id, buy_sell_amount)
+        after_wallet_balance, after_tokens = get_balances()
+
+        # Check that the wallet balance has decreased by the amount bought
+        assert np.isclose(
+            before_wallet_balance - after_wallet_balance,
+            buy_sell_amount,
+            rtol=0.01,
+        )
+
+        # Can't sell the exact amount bought due to fees
+        buy_sell_amount *= 0.96
+        sell_tokens(market.id, buy_sell_amount)
+        final_wallet_balance, final_tokens = get_balances()
+
+        # Check that the wallet balance has increased by the amount sold
+        assert np.isclose(
+            final_wallet_balance - after_wallet_balance,
+            buy_sell_amount,
+            rtol=0.01,
+        )
+
+        # Check that the number of tokens bought and sold is approximately equal
+        n_tokens_bought = after_tokens - before_tokens
+        n_tokens_sold = after_tokens - final_tokens
+        assert np.isclose(n_tokens_bought, n_tokens_sold, rtol=0.02)
