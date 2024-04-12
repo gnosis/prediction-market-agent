@@ -7,24 +7,11 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 
 from prediction_market_agent.agents.microchain_agent.functions import (
-    MARKET_FUNCTIONS,
-    MISC_FUNCTIONS,
-    BuyNo,
-    BuyYes,
-    GetBalance,
-    GetMarketProbability,
-    GetMarkets,
-    GetUserPositions,
-    PredictPropabilityForQuestion,
-    SellNo,
-    SellYes,
-)
+    MARKET_FUNCTIONS, MISC_FUNCTIONS, BuyNo, BuyYes, GetBalance,
+    GetMarketProbability, GetMarkets, GetUserPositions,
+    PredictPropabilityForQuestion, SellNo, SellYes)
 from prediction_market_agent.agents.microchain_agent.utils import (
-    get_balance,
-    get_binary_markets,
-    get_no_outcome,
-    get_yes_outcome,
-)
+    get_balance, get_binary_markets, get_no_outcome, get_yes_outcome)
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 

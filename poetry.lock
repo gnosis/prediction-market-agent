@@ -4152,7 +4152,7 @@ langchain = ["langchain (>=0.1.9,<0.2.0)", "langchain-openai (>=0.0.5,<0.0.6)"]
 type = "git"
 url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
 reference = "evan/mech-client-deps-compat"
-resolved_reference = "4da2b0833f545de8cfc3b5b7c962340d8c1777c2"
+resolved_reference = "aa2356d41f44d5095ab60cea06e8c7de37e924bc"
 
 [[package]]
 name = "proto-plus"
