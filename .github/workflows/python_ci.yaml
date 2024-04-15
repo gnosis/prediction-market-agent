@@ -21,7 +21,7 @@ jobs:
           submodules: true
       - uses: ./.github/actions/python_prepare
       - name: Run mypy
-        run: poetry run mypy
+        run: poetry run mypy --config-file mypy.ini .
 
   pytest:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
           submodules: true
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
-        run: poetry run pytest
+        run: poetry run pytest tests
 
   pytest-paid:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
           submodules: true
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
-        run: poetry run pytest
+        run: poetry run pytest tests
         env:
           RUN_PAID_TESTS: "1"
     if: github.event_name == 'workflow_dispatch'
