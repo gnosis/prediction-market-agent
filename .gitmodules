@@ -1,0 +1,3 @@
+[submodule "prediction_market_agent/agents/microchain_agent/mech/mech"]
+	path = prediction_market_agent/agents/microchain_agent/mech/mech
+	url = https://github.com/valory-xyz/mech.git

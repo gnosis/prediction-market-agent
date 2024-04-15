@@ -13,7 +13,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 
-from prediction_market_agent.agents.microchain_agent.mech import (
+from prediction_market_agent.agents.microchain_agent.mech.mech.packages.polywrap.customs.prediction_with_research_report import (
     prediction_with_research_report,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -170,7 +170,7 @@ class PredictPropabilityForQuestionLocal(MarketFunction):
                 "tavily": tavily_api_key,
             },
         }
-        response = prediction_with_research_report.run(**kwargs)  # type: ignore
+        response = prediction_with_research_report.run(**kwargs)
         result = completion_str_to_json(str(response[0]))
         return str(MechResult.model_validate(result).p_yes)
 
@@ -349,7 +349,8 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    PredictPropabilityForQuestion,
+    # PredictPropabilityForQuestion,
+    PredictPropabilityForQuestionLocal,
     GetBalance,
     BuyYes,
     BuyNo,

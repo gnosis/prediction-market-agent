@@ -30,5 +30,5 @@ Only output valid Python function calls.
 """
 
 agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
-agent.run(iterations=3)
+agent.run(iterations=10)
 generator.print_usage()
