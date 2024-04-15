@@ -102,7 +102,7 @@ def get_example_market_id(market_type: MarketType) -> str:
 
 
 @contextmanager
-def saved_str_to_tmpfile(s: str):
+def saved_str_to_tmpfile(s: str) -> t.Iterator[str]:
     # Write the string to the temporary file
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(s.encode())

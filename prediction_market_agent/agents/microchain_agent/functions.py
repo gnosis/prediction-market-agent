@@ -116,7 +116,7 @@ class PredictPropabilityForQuestion(MarketFunction):
     def example_args(self) -> list[str]:
         return [get_example_market_id(self.market_type)]
 
-    def __call__(self, question: str) -> float:
+    def __call__(self, question: str) -> str:
         private_key = APIKeys().bet_from_private_key.get_secret_value()
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
@@ -138,7 +138,7 @@ class PredictPropabilityForQuestion(MarketFunction):
                 tool="claude-prediction-online",
             )
             result = json.loads(response["result"])
-            return MechResult.model_validate(result).p_yes
+            return str(MechResult.model_validate(result).p_yes)
 
 
 class BuyTokens(MarketFunction):

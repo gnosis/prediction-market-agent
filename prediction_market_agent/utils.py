@@ -13,7 +13,6 @@ class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
-    BET_FROM_PRIVATE_KEY: t.Optional[SecretStr] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
