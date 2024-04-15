@@ -44,6 +44,7 @@ tavily-python = "^0.3.1"
 # TODO remove when PR is merged
 microchain-python = {git = "https://github.com/evangriffiths/microchain.git", rev = "evan/token-tracker"}
 setuptools = "^69.5.1"
+jsonschema = "4.3.3"
 
 [build-system]
 requires = ["poetry-core"]

@@ -7,11 +7,26 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 
 from prediction_market_agent.agents.microchain_agent.functions import (
-    MARKET_FUNCTIONS, MISC_FUNCTIONS, BuyNo, BuyYes, GetBalance,
-    GetMarketProbability, GetMarkets, GetUserPositions,
-    PredictPropabilityForQuestion, SellNo, SellYes)
+    MARKET_FUNCTIONS,
+    MISC_FUNCTIONS,
+    BuyNo,
+    BuyYes,
+    GetBalance,
+    GetMarketProbability,
+    GetMarkets,
+    GetUserPositions,
+    MarketFunction,
+    PredictPropabilityForQuestion,
+    PredictPropabilityForQuestionLocal,
+    SellNo,
+    SellYes,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
-    get_balance, get_binary_markets, get_no_outcome, get_yes_outcome)
+    get_balance,
+    get_binary_markets,
+    get_no_outcome,
+    get_yes_outcome,
+)
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
@@ -151,12 +166,21 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+@pytest.mark.parametrize(
+    "prediction_method",
+    [
+        PredictPropabilityForQuestion,
+        PredictPropabilityForQuestionLocal,
+    ],
+)
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_predict_probability(market_type: MarketType) -> None:
+def test_predict_probability(
+    market_type: MarketType, prediction_method: MarketFunction
+) -> None:
     """
     Test calling a mech to predict the probability of a market
     """
-    predict_probability = PredictPropabilityForQuestion(market_type=market_type)
+    predict_probability = prediction_method(market_type=market_type)
     market = get_binary_markets(market_type=market_type)[0]
     p_yes = predict_probability(market.id)
     assert 0.0 <= float(p_yes) <= 1.0

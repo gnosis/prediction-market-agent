@@ -13,6 +13,9 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 
+from prediction_market_agent.agents.microchain_agent.mech import (
+    prediction_with_research_report,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     MechResult,
     MicroMarket,
@@ -24,7 +27,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
     saved_str_to_tmpfile,
 )
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
 class Sum(Function):
@@ -139,6 +142,37 @@ class PredictPropabilityForQuestion(MarketFunction):
             )
             result = json.loads(response["result"])
             return str(MechResult.model_validate(result).p_yes)
+
+
+class PredictPropabilityForQuestionLocal(MarketFunction):
+    @property
+    def description(self) -> str:
+        return (
+            "Use this function to research perform research and predict the "
+            "probability of an event occuring. Returns the probability. The "
+            "one parameter is the market id of the prediction market you want "
+            "to predict the probability of."
+        )
+
+    @property
+    def example_args(self) -> list[str]:
+        return [get_example_market_id(self.market_type)]
+
+    def __call__(self, question: str) -> str:
+        keys = APIKeys()
+        openai_api_key = keys.openai_api_key.get_secret_value()
+        tavily_api_key = keys.tavily_api_key.get_secret_value()
+        kwargs = {
+            "tool": "prediction-with-research-conservative",
+            "prompt": question,
+            "api_keys": {
+                "openai": openai_api_key,
+                "tavily": tavily_api_key,
+            },
+        }
+        response = prediction_with_research_report.run(**kwargs)  # type: ignore
+        result = completion_str_to_json(str(response[0]))
+        return str(MechResult.model_validate(result).p_yes)
 
 
 class BuyTokens(MarketFunction):
