@@ -355,7 +355,7 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictPropabilityForQuestion,
+    # PredictPropabilityForQuestion, # Too flaky, use local version for now
     PredictPropabilityForQuestionLocal,
     GetBalance,
     BuyYes,
