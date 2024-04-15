@@ -119,7 +119,10 @@ class PredictPropabilityForQuestion(MarketFunction):
     def example_args(self) -> list[str]:
         return [get_example_market_id(self.market_type)]
 
-    def __call__(self, question: str) -> str:
+    def __call__(self, market_id: str) -> str:
+        question = self.market_type.market_class.get_binary_market(
+            id=market_id
+        ).question
         private_key = APIKeys().bet_from_private_key.get_secret_value()
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
@@ -158,7 +161,10 @@ class PredictPropabilityForQuestionLocal(MarketFunction):
     def example_args(self) -> list[str]:
         return [get_example_market_id(self.market_type)]
 
-    def __call__(self, question: str) -> str:
+    def __call__(self, market_id: str) -> str:
+        question = self.market_type.market_class.get_binary_market(
+            id=market_id
+        ).question
         keys = APIKeys()
         openai_api_key = keys.openai_api_key.get_secret_value()
         tavily_api_key = keys.tavily_api_key.get_secret_value()
