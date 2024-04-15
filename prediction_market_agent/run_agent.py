@@ -15,15 +15,25 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
+    DeployableReplicateToOmenAgent,
+)
+from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
+    DeployableThinkThoroughlyAgent,
+)
 
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
+    replicate_to_omen = "replicate_to_omen"
+    think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
 
 
 RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
+    RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
+    RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
 }
 

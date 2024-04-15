@@ -118,6 +118,15 @@ class PredictPropabilityForQuestion(MarketFunction):
 
     def __call__(self, question: str) -> float:
         private_key = APIKeys().bet_from_private_key.get_secret_value()
+        # 0.01 xDai is hardcoded cost for an interaction with the mech-client
+        MECH_CALL_XDAI_LIMIT = 0.011
+        account_balance = float(get_balance(market_type=self.market_type).amount)
+        if account_balance < MECH_CALL_XDAI_LIMIT:
+            return (
+                f"Your balance of {self.currency} ({account_balance}) is not "
+                f"large enough to make a mech call (min required "
+                f"{MECH_CALL_XDAI_LIMIT})."
+            )
         with saved_str_to_tmpfile(private_key) as tmpfile_path:
             response = interact(
                 prompt=question,
