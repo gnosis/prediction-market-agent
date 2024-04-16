@@ -105,7 +105,7 @@ class GetMarketProbability(MarketFunction):
         ]
 
 
-class PredictPropabilityForQuestion(MarketFunction):
+class PredictProbabilityForQuestion(MarketFunction):
     @property
     def description(self) -> str:
         return (
@@ -147,7 +147,7 @@ class PredictPropabilityForQuestion(MarketFunction):
             return str(MechResult.model_validate(result).p_yes)
 
 
-class PredictPropabilityForQuestionLocal(MarketFunction):
+class PredictProbabilityForQuestionLocal(MarketFunction):
     @property
     def description(self) -> str:
         return (
@@ -355,8 +355,8 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictPropabilityForQuestion, # Too flaky, use local version for now
-    PredictPropabilityForQuestionLocal,
+    # PredictProbabilityForQuestion, # Too flaky, use local version for now
+    PredictProbabilityForQuestionLocal,
     GetBalance,
     BuyYes,
     BuyNo,
