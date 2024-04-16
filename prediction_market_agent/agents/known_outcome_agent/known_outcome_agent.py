@@ -1,5 +1,3 @@
-import json
-import typing as t
 from datetime import datetime
 from enum import Enum
 
@@ -12,6 +10,7 @@ from pydantic import BaseModel
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.tools.web_search.tavily import web_search
+from prediction_market_agent.utils import completion_str_to_json
 
 
 class Result(str, Enum):
@@ -139,26 +138,6 @@ be as follows:
 - If you are confident that nothing has happened that necessarily prevents X from happening on Y, the result is 'KNOWN_UNKNOWABLE'.
 - Otherwise, the result is 'UNKNOWN'.
 """
-
-
-def completion_str_to_json(completion: str) -> dict[str, t.Any]:
-    """
-    Cleans completion JSON in form of a string:
-
-    ```json
-    {
-        ...
-    }
-    ```
-
-    into just { ... }
-    ```
-    """
-    start_index = completion.find("{")
-    end_index = completion.rfind("}")
-    completion = completion[start_index : end_index + 1]
-    completion_dict: dict[str, t.Any] = json.loads(completion)
-    return completion_dict
 
 
 def summarize_if_required(content: str, model: str, question: str) -> str:
