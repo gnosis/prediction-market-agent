@@ -1,3 +1,4 @@
+import json
 import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
@@ -55,3 +56,23 @@ def parse_result_to_boolean(result: str) -> bool:
 
 def parse_result_to_str(result: bool) -> str:
     return "Yes" if result else "No"
+
+
+def completion_str_to_json(completion: str) -> dict[str, t.Any]:
+    """
+    Cleans completion JSON in form of a string:
+
+    ```json
+    {
+        ...
+    }
+    ```
+
+    into just { ... }
+    ```
+    """
+    start_index = completion.find("{")
+    end_index = completion.rfind("}")
+    completion = completion[start_index : end_index + 1]
+    completion_dict: dict[str, t.Any] = json.loads(completion)
+    return completion_dict

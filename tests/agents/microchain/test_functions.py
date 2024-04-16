@@ -15,6 +15,9 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetMarketProbability,
     GetMarkets,
     GetUserPositions,
+    MarketFunction,
+    PredictProbabilityForQuestion,
+    PredictProbabilityForQuestionLocal,
     SellNo,
     SellYes,
 )
@@ -160,3 +163,24 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
         n_tokens_bought = after_tokens - before_tokens
         n_tokens_sold = after_tokens - final_tokens
         assert np.isclose(n_tokens_bought, n_tokens_sold, rtol=0.02)
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+@pytest.mark.parametrize(
+    "prediction_method",
+    [
+        PredictProbabilityForQuestion,
+        PredictProbabilityForQuestionLocal,
+    ],
+)
+@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+def test_predict_probability(
+    market_type: MarketType, prediction_method: MarketFunction
+) -> None:
+    """
+    Test calling a mech to predict the probability of a market
+    """
+    predict_probability = prediction_method(market_type=market_type)
+    market = get_binary_markets(market_type=market_type)[0]
+    p_yes = predict_probability(market.id)
+    assert 0.0 <= float(p_yes) <= 1.0

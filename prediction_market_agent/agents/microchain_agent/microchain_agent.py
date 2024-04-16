@@ -20,7 +20,7 @@ generator = OpenAIChatGenerator(
     temperature=0.7,
 )
 agent = Agent(llm=LLM(generator=generator), engine=engine)
-agent.prompt = f"""Act as a agent. You can use the following functions:
+agent.prompt = f"""Act as a agent to maximise your profit. You can use the following functions:
  
 {engine.help}
  
@@ -30,5 +30,5 @@ Only output valid Python function calls.
 """
 
 agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
-agent.run(iterations=3)
+agent.run(iterations=10)
 generator.print_usage()
