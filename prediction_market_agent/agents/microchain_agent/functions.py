@@ -168,15 +168,14 @@ class PredictProbabilityForQuestionLocal(MarketFunction):
         keys = APIKeys()
         openai_api_key = keys.openai_api_key.get_secret_value()
         tavily_api_key = keys.tavily_api_key.get_secret_value()
-        kwargs = {
-            "tool": "prediction-with-research-conservative",
-            "prompt": question,
-            "api_keys": {
+        response = prediction_with_research_report.run(
+            tool="prediction-with-research-conservative",
+            prompt=question,
+            api_keys={
                 "openai": openai_api_key,
                 "tavily": tavily_api_key,
             },
-        }
-        response = prediction_with_research_report.run(**kwargs)
+        )
         result = completion_str_to_json(str(response[0]))
         return str(MechResult.model_validate(result).p_yes)
 
