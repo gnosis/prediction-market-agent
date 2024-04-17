@@ -16,8 +16,8 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetMarkets,
     GetUserPositions,
     MarketFunction,
-    PredictProbabilityForQuestion,
     PredictProbabilityForQuestionLocal,
+    PredictProbabilityForQuestionRemote,
     SellNo,
     SellYes,
 )
@@ -169,7 +169,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
 @pytest.mark.parametrize(
     "prediction_method",
     [
-        PredictProbabilityForQuestion,
+        PredictProbabilityForQuestionRemote,
         PredictProbabilityForQuestionLocal,
     ],
 )
