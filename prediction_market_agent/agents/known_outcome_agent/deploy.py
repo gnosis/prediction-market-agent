@@ -1,22 +1,13 @@
-import getpass
 import random
 import typing as t
 from decimal import Decimal
 
 from loguru import logger
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
-from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount
-from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.tools.utils import (
-    check_not_none,
-    get_current_git_commit_sha,
-    get_current_git_url,
-)
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
@@ -93,23 +84,3 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             return BetAmount(amount=(Decimal(1.0)), currency=market.currency)
         else:
             raise NotImplementedError("This agent only supports xDai markets")
-
-
-if __name__ == "__main__":
-    agent = DeployableKnownOutcomeAgent()
-    agent.deploy_gcp(
-        repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
-        market_type=MarketType.OMEN,
-        labels={OWNER_KEY: getpass.getuser()},
-        secrets={
-            "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-        },
-        memory=1024,
-        api_keys=APIKeys(
-            BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
-            OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
-            MANIFOLD_API_KEY=None,
-        ),
-        cron_schedule="0 */12 * * *",
-        timeout=540,
-    )
