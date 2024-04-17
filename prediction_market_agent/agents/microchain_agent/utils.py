@@ -162,6 +162,7 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResult:
             tool=mech_tool.value,
             confirmation_type=ConfirmationType.WAIT_FOR_BOTH,
         )
+        os.environ["MECHX_LEDGER_DEFAULT_GAS_PRICE_STRATEGY"] = None
         result = json.loads(response["result"])
         return MechResult.model_validate(result)
 
