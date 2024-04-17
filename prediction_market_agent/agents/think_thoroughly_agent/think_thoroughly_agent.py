@@ -15,7 +15,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     RESEARCH_OUTCOME_OUTPUT,
     RESEARCH_OUTCOME_PROMPT,
 )
-from prediction_market_agent.tools.crewai_tools import TavilyDevTool
+from prediction_market_agent.tools.custom_crewai_tools import TavilyDevTool
 from prediction_market_agent.utils import APIKeys
 
 tavily_search = TavilyDevTool()
