@@ -142,12 +142,12 @@ def saved_str_to_tmpfile(s: str) -> t.Iterator[str]:
     os.remove(tmp.name)
 
 
-class MechType(str, Enum):
+class MechTool(str, Enum):
     PREDICTION_WITH_RESEARCH_REPORT = "prediction-with-research-report-conservative"
     PREDICTION_ONLINE = "prediction-online"
 
 
-def mech_request(question: str, mech_type: MechType) -> MechResult:
+def mech_request(question: str, mech_tool: MechTool) -> MechResult:
     private_key = MicrochainAPIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures
@@ -159,27 +159,27 @@ def mech_request(question: str, mech_type: MechType) -> MechResult:
             private_key_path=tmpfile_path,
             # To see a list of available tools, comment out the tool parameter
             # and run the function. You will be prompted to select a tool.
-            tool=mech_type.value,
+            tool=mech_tool.value,
             confirmation_type=ConfirmationType.WAIT_FOR_BOTH,
         )
         result = json.loads(response["result"])
         return MechResult.model_validate(result)
 
 
-def mech_request_local(question: str, mech_type: MechType) -> MechResult:
+def mech_request_local(question: str, mech_tool: MechTool) -> MechResult:
     keys = MicrochainAPIKeys()
-    if mech_type == MechType.PREDICTION_WITH_RESEARCH_REPORT:
+    if mech_tool == MechTool.PREDICTION_WITH_RESEARCH_REPORT:
         response = prediction_with_research_report.run(
-            tool=mech_type.value,
+            tool=mech_tool.value,
             prompt=question,
             api_keys={
                 "openai": keys.openai_api_key.get_secret_value(),
                 "tavily": keys.tavily_api_key.get_secret_value(),
             },
         )
-    elif mech_type == MechType.PREDICTION_ONLINE:
+    elif mech_tool == MechTool.PREDICTION_ONLINE:
         response = prediction_request.run(
-            tool=mech_type.value,
+            tool=mech_tool.value,
             prompt=question,
             api_keys={
                 "openai": keys.openai_api_key.get_secret_value(),
@@ -188,7 +188,7 @@ def mech_request_local(question: str, mech_type: MechType) -> MechResult:
             },
         )
     else:
-        raise ValueError(f"Mech type '{mech_type}' not supported")
+        raise ValueError(f"Mech type '{mech_tool}' not supported")
 
     result = completion_str_to_json(str(response[0]))
     return MechResult.model_validate(result)

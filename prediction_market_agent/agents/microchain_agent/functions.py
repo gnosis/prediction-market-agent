@@ -13,7 +13,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MechResult,
-    MechType,
+    MechTool,
     MicrochainAPIKeys,
     MicroMarket,
     get_balance,
@@ -105,11 +105,11 @@ class GetMarketProbability(MarketFunction):
 class PredictProbabilityForQuestionBase(MarketFunction):
     def __init__(
         self,
-        mech_request: t.Callable[[str, MechType], MechResult],
+        mech_request: t.Callable[[str, MechTool], MechResult],
         market_type: MarketType,
-        mech_type: MechType = MechType.PREDICTION_ONLINE,
+        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
-        self.mech_type = mech_type
+        self.mech_tool = mech_tool
         self.mech_request = mech_request
         self._description = (
             "Use this function to research perform research and predict the "
@@ -127,7 +127,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        result: MechResult = self.mech_request(question, self.mech_type)
+        result: MechResult = self.mech_request(question, self.mech_tool)
         return str(result.p_yes)
 
 
@@ -135,9 +135,9 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
-        mech_type: MechType = MechType.PREDICTION_ONLINE,
+        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
-        self.mech_type = mech_type
+        self.mech_tool = mech_tool
         super().__init__(market_type=market_type, mech_request=mech_request)
 
     @property
@@ -161,9 +161,9 @@ class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
-        mech_type: MechType = MechType.PREDICTION_ONLINE,
+        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
-        self.mech_type = mech_type
+        self.mech_tool = mech_tool
         super().__init__(market_type=market_type, mech_request=mech_request_local)
 
     @property
