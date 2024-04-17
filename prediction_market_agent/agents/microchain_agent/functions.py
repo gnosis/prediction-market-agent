@@ -131,7 +131,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         return str(result.p_yes)
 
 
-class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
+class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
@@ -345,7 +345,7 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictProbabilityForQuestion, # Quite slow, use local version for now
+    # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
     PredictProbabilityForQuestionLocal,
     GetBalance,
     BuyYes,

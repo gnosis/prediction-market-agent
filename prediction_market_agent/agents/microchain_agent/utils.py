@@ -1,4 +1,3 @@
-import json
 import os
 import tempfile
 import typing as t
@@ -151,7 +150,11 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResult:
     private_key = MicrochainAPIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures
-        os.environ["MECHX_LEDGER_DEFAULT_GAS_PRICE_STRATEGY"] = "gas_station"
+        mech_strategy_env_var = "MECHX_LEDGER_DEFAULT_GAS_PRICE_STRATEGY"
+        if os.getenv(mech_strategy_env_var):
+            raise ValueError(f"{mech_strategy_env_var} already set in the environment.")
+        os.environ[mech_strategy_env_var] = "gas_station"
+
         response = interact(
             prompt=question,
             # Taken from https://github.com/valory-xyz/mech?tab=readme-ov-file#examples-of-deployed-mechs
@@ -162,9 +165,8 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResult:
             tool=mech_tool.value,
             confirmation_type=ConfirmationType.WAIT_FOR_BOTH,
         )
-        os.environ["MECHX_LEDGER_DEFAULT_GAS_PRICE_STRATEGY"] = None
-        result = json.loads(response["result"])
-        return MechResult.model_validate(result)
+        del os.environ[mech_strategy_env_var]
+        return MechResult.model_validate_json(response["result"])
 
 
 def mech_request_local(question: str, mech_tool: MechTool) -> MechResult:
