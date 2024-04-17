@@ -1,22 +1,13 @@
-import getpass
 import random
 import typing as t
 from decimal import Decimal
 
 from loguru import logger
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.deploy.constants import OWNER_KEY
-from prediction_market_agent_tooling.gtypes import SecretStr, private_key_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount
-from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
-from prediction_market_agent_tooling.tools.utils import (
-    check_not_none,
-    get_current_git_commit_sha,
-    get_current_git_url,
-)
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
     Result,
