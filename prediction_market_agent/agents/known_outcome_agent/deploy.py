@@ -93,23 +93,3 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             return BetAmount(amount=(Decimal(1.0)), currency=market.currency)
         else:
             raise NotImplementedError("This agent only supports xDai markets")
-
-
-if __name__ == "__main__":
-    agent = DeployableKnownOutcomeAgent()
-    agent.deploy_gcp(
-        repository=f"git+{get_current_git_url()}@{get_current_git_commit_sha()}",
-        market_type=MarketType.OMEN,
-        labels={OWNER_KEY: getpass.getuser()},
-        secrets={
-            "TAVILY_API_KEY": "GNOSIS_AI_TAVILY_API_KEY:latest",
-        },
-        memory=1024,
-        api_keys=APIKeys(
-            BET_FROM_PRIVATE_KEY=private_key_type("EVAN_OMEN_BETTER_0_PKEY:latest"),
-            OPENAI_API_KEY=SecretStr("EVAN_OPENAI_API_KEY:latest"),
-            MANIFOLD_API_KEY=None,
-        ),
-        cron_schedule="0 */12 * * *",
-        timeout=540,
-    )
