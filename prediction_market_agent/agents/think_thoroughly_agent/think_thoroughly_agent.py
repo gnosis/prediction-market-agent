@@ -75,7 +75,9 @@ class CrewAIAgentSubquestions:
             tasks=[create_outcomes_task],
         )
         result = report_crew.kickoff(inputs={"scenario": question})
-        return Outcomes.model_validate_json(result)
+        outcomes = Outcomes.model_validate_json(result)
+        logger.info(f"Created possible outcomes: {outcomes.outcomes}")
+        return outcomes
 
     def build_tasks_for_outcome(self, input_dict: dict[str, t.Any] = {}) -> list[Task]:
         task_research_one_outcome = Task(
@@ -116,7 +118,11 @@ class CrewAIAgentSubquestions:
         )
 
         result = crew.kickoff(inputs={"sentence": sentence})
-        return ProbabilityOutput.model_validate_json(result)
+        output = ProbabilityOutput.model_validate_json(result)
+        logger.info(
+            f"For the sentence '{sentence}', the prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
+        )
+        return output
 
     def generate_final_decision(
         self, outcomes_with_probabilities: list[t.Tuple[str, ProbabilityOutput]]
@@ -143,13 +149,16 @@ class CrewAIAgentSubquestions:
                 "outcome_to_assess": outcomes_with_probabilities[0][0],
             }
         )
-        return ProbabilityOutput.model_validate_json(
+        output = ProbabilityOutput.model_validate_json(
             task_final_decision.output.raw_output
         )
+        logger.info(
+            f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
+        )
+        return output
 
     def answer_binary_market(self, question: str) -> ProbabilityOutput:
         outcomes = self.split_research_into_outcomes(question)
-        logger.debug("outcomes ", outcomes)
 
         outcomes_with_probs = []
         task_map = {}
@@ -173,12 +182,13 @@ class CrewAIAgentSubquestions:
 
         # We parse individual task results to build outcomes_with_probs
         for outcome, tasks in task_map.items():
+            raw_output = tasks[1].output.raw_output
             try:
-                prediction_result = ProbabilityOutput.model_validate_json(
-                    tasks[1].output.raw_output
-                )
+                prediction_result = ProbabilityOutput.model_validate_json(raw_output)
             except Exception as e:
-                logger.error("Could not parse result as ProbabilityOutput ", e)
+                logger.error(
+                    f"Could not parse the result ('{raw_output}') as ProbabilityOutput because of {e}"
+                )
                 prediction_result = ProbabilityOutput(
                     p_yes=0.5, p_no=0.5, confidence=0, decision=""
                 )

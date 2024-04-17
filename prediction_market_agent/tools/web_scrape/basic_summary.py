@@ -5,11 +5,17 @@ from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
 
+from prediction_market_agent.utils import APIKeys
+
 
 def _summary(
     objective: str, content: str, separators: list[str] = ["\n\n", "\n"]
 ) -> str:
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0125")
+    llm = ChatOpenAI(
+        temperature=0,
+        model="gpt-3.5-turbo-0125",
+        api_key=APIKeys().openai_api_key.get_secret_value(),
+    )
     text_splitter = RecursiveCharacterTextSplitter(
         separators=separators, chunk_size=10000, chunk_overlap=500
     )

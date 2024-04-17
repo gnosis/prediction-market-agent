@@ -17,7 +17,8 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableKnownOutcomeAgent(DeployableAgent):
-    model = "gpt-4-turbo-preview"
+    model = "gpt-4-1106-preview"
+    min_liquidity = 5
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
@@ -30,18 +31,16 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                     "This agent only supports predictions on Omen markets"
                 )
 
-            logger.info(f"Looking at market {market.id=} {market.question=}")
-
             # Assume very high probability markets are already known, and have
             # been correctly bet on, and therefore the value of betting on them
             # is low.
             if market_is_saturated(market=market):
                 logger.info(
-                    f"Skipping market {market.id=} {market.question=}, because it is already saturated."
+                    f"Skipping market {market.url} with the question '{market.question}', because it is already saturated."
                 )
-            elif market.get_liquidity_in_xdai() < 5:
+            elif market.get_liquidity_in_xdai() < self.min_liquidity:
                 logger.info(
-                    f"Skipping market {market.id=} {market.question=}, because it has insufficient liquidity."
+                    f"Skipping market {market.url} with the question '{market.question}', because it has insufficient liquidity (at least {self.min_liquidity} required)."
                 )
             else:
                 picked_markets.append(market)
@@ -68,14 +67,16 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             )
         except Exception as e:
             logger.error(
-                f"Failed to predict market {market.id=} {market.question=}: {e}"
+                f"Failed to predict market {market.url} with the question '{market.question}' because of '{e}'."
             )
             answer = None
         if answer and answer.has_known_result():
             logger.info(
-                f"Picking market {market.id=} {market.question=} with answer {answer.result=}"
+                f"Picking market {market.url} with the question '{market.question}' with answer '{answer.result}'"
             )
             return answer.result.to_boolean()
+
+        logger.info(f"No definite answer found for the market {market.url}.")
 
         return None
 
