@@ -137,7 +137,7 @@ class CrewAIAgentSubquestions:
         crew.kickoff(
             inputs={
                 "outcomes_with_probabilities": [
-                    (i[0], i[1].dict()) for i in outcomes_with_probabilities
+                    (i[0], i[1].model_dump()) for i in outcomes_with_probabilities
                 ],
                 "number_of_outcomes": len(outcomes_with_probabilities),
                 "outcome_to_assess": outcomes_with_probabilities[0][0],
