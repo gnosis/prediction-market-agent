@@ -1,9 +1,7 @@
-import json
 import typing as t
 from decimal import Decimal
 
 from eth_utils import to_checksum_address
-from mech_client.interact import interact
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
@@ -13,11 +11,10 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 
-from prediction_market_agent.agents.microchain_agent.mech.mech.packages.polywrap.customs.prediction_with_research_report import (
-    prediction_with_research_report,
-)
 from prediction_market_agent.agents.microchain_agent.utils import (
     MechResult,
+    MechType,
+    MicrochainAPIKeys,
     MicroMarket,
     get_balance,
     get_binary_markets,
@@ -25,9 +22,9 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
-    saved_str_to_tmpfile,
+    mech_request,
+    mech_request_local,
 )
-from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
 class Sum(Function):
@@ -105,15 +102,22 @@ class GetMarketProbability(MarketFunction):
         ]
 
 
-class PredictProbabilityForQuestion(MarketFunction):
-    @property
-    def description(self) -> str:
-        return (
+class PredictProbabilityForQuestionBase(MarketFunction):
+    def __init__(
+        self,
+        mech_request: t.Callable[[str, MechType], MechResult],
+        market_type: MarketType,
+        mech_type: MechType = MechType.PREDICTION_ONLINE,
+    ) -> None:
+        self.mech_type = mech_type
+        self.mech_request = mech_request
+        self._description = (
             "Use this function to research perform research and predict the "
             "probability of an event occuring. Returns the probability. The "
             "one parameter is the market id of the prediction market you want "
-            "to predict the probability of. Note, this costs money to run."
+            "to predict the probability of."
         )
+        super().__init__(market_type=market_type)
 
     @property
     def example_args(self) -> list[str]:
@@ -123,7 +127,24 @@ class PredictProbabilityForQuestion(MarketFunction):
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        private_key = APIKeys().bet_from_private_key.get_secret_value()
+        result: MechResult = self.mech_request(question, self.mech_type)
+        return str(result.p_yes)
+
+
+class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
+    def __init__(
+        self,
+        market_type: MarketType,
+        mech_type: MechType = MechType.PREDICTION_ONLINE,
+    ) -> None:
+        self.mech_type = mech_type
+        super().__init__(market_type=market_type, mech_request=mech_request)
+
+    @property
+    def description(self) -> str:
+        return self._description + " Note, this costs money to run."
+
+    def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
         account_balance = float(get_balance(market_type=self.market_type).amount)
@@ -133,51 +154,21 @@ class PredictProbabilityForQuestion(MarketFunction):
                 f"large enough to make a mech call (min required "
                 f"{MECH_CALL_XDAI_LIMIT})."
             )
-        with saved_str_to_tmpfile(private_key) as tmpfile_path:
-            response = interact(
-                prompt=question,
-                # Taken from https://github.com/valory-xyz/mech?tab=readme-ov-file#examples-of-deployed-mechs
-                agent_id=3,
-                private_key_path=tmpfile_path,
-                # To see a list of available tools, comment out the tool parameter
-                # and run the function. You will be prompted to select a tool.
-                tool="claude-prediction-online",
-            )
-            result = json.loads(response["result"])
-            return str(MechResult.model_validate(result).p_yes)
+        return super().__call__(market_id)
 
 
-class PredictProbabilityForQuestionLocal(MarketFunction):
+class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
+    def __init__(
+        self,
+        market_type: MarketType,
+        mech_type: MechType = MechType.PREDICTION_ONLINE,
+    ) -> None:
+        self.mech_type = mech_type
+        super().__init__(market_type=market_type, mech_request=mech_request_local)
+
     @property
     def description(self) -> str:
-        return (
-            "Use this function to research perform research and predict the "
-            "probability of an event occuring. Returns the probability. The "
-            "one parameter is the market id of the prediction market you want "
-            "to predict the probability of."
-        )
-
-    @property
-    def example_args(self) -> list[str]:
-        return [get_example_market_id(self.market_type)]
-
-    def __call__(self, market_id: str) -> str:
-        question = self.market_type.market_class.get_binary_market(
-            id=market_id
-        ).question
-        keys = APIKeys()
-        openai_api_key = keys.openai_api_key.get_secret_value()
-        tavily_api_key = keys.tavily_api_key.get_secret_value()
-        response = prediction_with_research_report.run(
-            tool="prediction-with-research-conservative",
-            prompt=question,
-            api_keys={
-                "openai": openai_api_key,
-                "tavily": tavily_api_key,
-            },
-        )
-        result = completion_str_to_json(str(response[0]))
-        return str(MechResult.model_validate(result).p_yes)
+        return self._description
 
 
 class BuyTokens(MarketFunction):
@@ -186,7 +177,7 @@ class BuyTokens(MarketFunction):
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = APIKeys().bet_from_address
+        self.user_address = MicrochainAPIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -247,7 +238,7 @@ class SellTokens(MarketFunction):
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = APIKeys().bet_from_address
+        self.user_address = MicrochainAPIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -354,7 +345,7 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictProbabilityForQuestion, # Too flaky, use local version for now
+    # PredictProbabilityForQuestion, # Quite slow, use local version for now
     PredictProbabilityForQuestionLocal,
     GetBalance,
     BuyYes,

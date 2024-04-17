@@ -45,6 +45,9 @@ microchain-python = "^0.3.5"
 setuptools = "^69.5.1"
 jsonschema = "^4.3.3"
 chromadb = "^0.4.24"
+spacy = "^3.7.4"
+readability-lxml = "^0.8.1"
+lxml = {extras = ["html-clean"], version = "^5.2.1"}
 
 [build-system]
 requires = ["poetry-core"]
