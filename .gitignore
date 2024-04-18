@@ -6,6 +6,7 @@ __pycache__
 logs
 .mypy_cache
 .pytest_cache
+.venv
 
 # Created on mech-client `interact` call
 acn_cert.txt
