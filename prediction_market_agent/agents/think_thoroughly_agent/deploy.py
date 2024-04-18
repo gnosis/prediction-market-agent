@@ -1,6 +1,7 @@
 import random
 import typing as t
 
+from loguru import logger
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -26,6 +27,10 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
                 picked_markets.append(market)
                 if len(picked_markets) == 5:
                     break
+            else:
+                logger.info(
+                    f"Market {market.url} is too saturated to bet on with p_yes {market.p_yes}."
+                )
 
         return picked_markets
 

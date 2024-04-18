@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.tools.web_search.tavily import web_search
-from prediction_market_agent.utils import completion_str_to_json
+from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
 class Result(str, Enum):
@@ -149,7 +149,9 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
     elif model == "gpt-4-1106-preview":  # 128k context length
         max_length = 100000
     else:
-        raise ValueError(f"Unknown model: {model}")
+        raise ValueError(
+            f"Unknown model `{model}`, please add him to the `summarize_if_required` function."
+        )
 
     if len(content) > max_length:
         return _summary(content=content, objective=question, separators=["  "])
@@ -162,7 +164,11 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
     current date) (returning 1), if the event has not yet finished (returning 0) or
      if it cannot be sure (returning -1)."""
     date_str = utcnow().strftime("%Y-%m-%d %H:%M:%S %Z")
-    llm = ChatOpenAI(model=model, temperature=0.0)
+    llm = ChatOpenAI(
+        model=model,
+        temperature=0.0,
+        api_key=APIKeys().openai_api_key.get_secret_value(),
+    )
     prompt = ChatPromptTemplate.from_template(
         template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
     ).format_messages(
@@ -176,7 +182,7 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
             return True
     except Exception as e:
         logger.error(
-            "Exception occured, cannot assert if title happened in the past. ", e
+            f"Exception occured, cannot assert if title happened in the past because of '{e}'."
         )
 
     return False
@@ -191,14 +197,18 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
     tries = 0
     date_str = datetime.now().strftime("%d %B %Y")
     previous_urls = []
-    llm = ChatOpenAI(model=model, temperature=0.4)
+    llm = ChatOpenAI(
+        model=model,
+        temperature=0.4,
+        api_key=APIKeys().openai_api_key.get_secret_value(),
+    )
     while tries < max_tries:
         search_prompt = ChatPromptTemplate.from_template(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
-        logger.debug(f"Invoking LLM for {search_prompt=}")
+        logger.debug(f"Invoking LLM for the prompt '{search_prompt[0]}'")
         search_query = str(llm.invoke(search_prompt).content).strip('"')
-        logger.debug(f"Searching for {search_query=}")
+        logger.debug(f"Searching web for the search query '{search_query}'")
         search_results = web_search(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")

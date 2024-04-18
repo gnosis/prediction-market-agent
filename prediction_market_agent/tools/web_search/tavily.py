@@ -1,11 +1,9 @@
 import tenacity
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
-from prediction_market_agent_tooling.tools.utils import (
-    check_not_none,
-    secret_str_from_env,
-)
 from pydantic import BaseModel
 from tavily import TavilyClient
+
+from prediction_market_agent.utils import APIKeys
 
 
 class WebSearchResult(BaseModel):
@@ -21,8 +19,7 @@ def web_search(query: str, max_results: int) -> list[WebSearchResult]:
     """
     Web search using Tavily API.
     """
-    tavily_api_key = check_not_none(secret_str_from_env("TAVILY_API_KEY"))
-    tavily = TavilyClient(api_key=tavily_api_key.get_secret_value())
+    tavily = TavilyClient(api_key=APIKeys().tavily_api_key.get_secret_value())
     response = tavily.search(
         query=query,
         search_depth="advanced",
