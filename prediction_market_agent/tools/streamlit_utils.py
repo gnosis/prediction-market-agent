@@ -7,7 +7,7 @@ if t.TYPE_CHECKING:
     from loguru import Message
 
 
-def loguru_streamlit_sink(log: Message) -> None:
+def loguru_streamlit_sink(log: "Message") -> None:
     record = log.record
     level = record["level"].name
 
