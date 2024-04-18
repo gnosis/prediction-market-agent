@@ -65,7 +65,7 @@ market = (
     [m for m in markets if m.question == question][0]
     if not custom_question_input
     # If custom question is provided, just take some random market and update its question.
-    else markets[0].model_copy(update={"question": question})
+    else markets[0].model_copy(update={"question": question, "p_yes": 0.5})
 )
 
 for idx, (column, AgentClass) in enumerate(
