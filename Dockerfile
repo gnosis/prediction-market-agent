@@ -28,4 +28,8 @@ COPY prediction_market_agent ./prediction_market_agent
 
 ENV PYTHONPATH=/app
 
+# TODO: This is a hotfix, because we are unable to lock this version with mech-client, remove this ASAP when PRs are merged into Valory and update pyproject in PMAT.
+# This also works locally, after doing `poetry install` just go to `poetry shell` and run `pip install crewai["tools"]==0.22.5`.
+RUN pip install 'crewai[tools]'==0.22.5
+
 CMD ["bash", "-c", "python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]
