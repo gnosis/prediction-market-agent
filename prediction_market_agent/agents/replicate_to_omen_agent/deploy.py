@@ -16,7 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen_resolve_replicated import
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
-from pydantic_settings import BaseSettings, SettingsConfigDict, mode
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ReplicateSettings(BaseSettings):
