@@ -1,6 +1,5 @@
 import random
 import typing as t
-from decimal import Decimal
 
 from loguru import logger
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -82,6 +81,6 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
 
     def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
         if isinstance(market, OmenAgentMarket):
-            return BetAmount(amount=(Decimal(1.0)), currency=market.currency)
+            return BetAmount(amount=1.0, currency=market.currency)
         else:
             raise NotImplementedError("This agent only supports xDai markets")

@@ -2,7 +2,6 @@ import os
 import tempfile
 import typing as t
 from contextlib import contextmanager
-from decimal import Decimal
 from enum import Enum
 
 from mech_client.interact import ConfirmationType, interact
@@ -94,7 +93,7 @@ def get_balance(market_type: MarketType) -> BetAmount:
     if market_type == MarketType.OMEN:
         # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
         return BetAmount(
-            amount=Decimal(get_balances(MicrochainAPIKeys().bet_from_address).xdai),
+            amount=get_balances(MicrochainAPIKeys().bet_from_address).xdai,
             currency=currency,
         )
     else:

@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import typer
 from loguru import logger
 from prediction_market_agent_tooling.markets.agent_market import SortBy
@@ -47,9 +45,7 @@ def main(
         logger.info(
             f"Placing bet with position {pma.utils.parse_result_to_str(result)} on market '{market.question}'"
         )
-        amount = Decimal(
-            input(f"How much do you want to bet? (in {market.currency}): ")
-        )
+        amount = float(input(f"How much do you want to bet? (in {market.currency}): "))
         market.place_bet(
             amount=market.get_bet_amount(amount),
             outcome=result,
