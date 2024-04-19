@@ -1,15 +1,10 @@
 import typing as t
 from decimal import Decimal
 
-from eth_utils import to_checksum_address
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.data_models import OmenUserPosition
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MechResult,
@@ -318,21 +313,28 @@ class GetBalance(MarketFunction):
         return get_balance(market_type=self.market_type).amount
 
 
-class GetUserPositions(MarketFunction):
+class GetPositions(MarketFunction):
+    def __init__(self, market_type: MarketType) -> None:
+        self.user_address = MicrochainAPIKeys().bet_from_address
+        super().__init__(market_type=market_type)
+
     @property
     def description(self) -> str:
         return (
-            "Use this function to fetch the markets where the user has previously bet."
+            "Use this function to fetch the live markets where you have "
+            "previously bet, and the token amounts you hold for each outcome."
         )
 
     @property
     def example_args(self) -> list[str]:
-        return ["0x2DD9f5678484C1F59F97eD334725858b938B4102"]
+        return []
 
-    def __call__(self, user_address: str) -> list[OmenUserPosition]:
-        return OmenSubgraphHandler().get_user_positions(
-            better_address=to_checksum_address(user_address)
+    def __call__(self) -> list[str]:
+        self.user_address = MicrochainAPIKeys().bet_from_address
+        positions = self.market_type.market_class.get_positions(
+            user_id=self.user_address
         )
+        return [str(position) for position in positions]
 
 
 MISC_FUNCTIONS = [
@@ -352,5 +354,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    GetUserPositions,
+    GetPositions,
 ]

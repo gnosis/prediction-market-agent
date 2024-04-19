@@ -4,7 +4,6 @@ from microchain import Engine
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
@@ -14,7 +13,7 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetBalance,
     GetMarketProbability,
     GetMarkets,
-    GetUserPositions,
+    GetPositions,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
@@ -64,18 +63,10 @@ def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_agent_0_has_bet_on_market(market_type: MarketType) -> None:
-    user_positions = GetUserPositions(market_type=market_type)(AGENT_0_ADDRESS)
-    # Assert 3 conditionIds are included
-    expected_condition_ids = [
-        HexBytes("0x9c7711bee0902cc8e6838179058726a7ba769cc97d4d0ea47b31370d2d7a117b"),
-        HexBytes("0xe2bf80af2a936cdabeef4f511620a2eec46f1caf8e75eb5dc189372367a9154c"),
-        HexBytes("0x3f8153364001b26b983dd92191a084de8230f199b5ad0b045e9e1df61089b30d"),
-    ]
-    unique_condition_ids: list[HexBytes] = sum(
-        [u.position.conditionIds for u in user_positions], []
-    )
-    assert set(expected_condition_ids).issubset(unique_condition_ids)
+def test_get_positions(market_type: MarketType) -> None:
+    get_positions = GetPositions(market_type=market_type)
+    positions = get_positions()
+    assert len(positions) > 0
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
