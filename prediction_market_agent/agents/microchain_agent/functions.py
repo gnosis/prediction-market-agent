@@ -4,6 +4,7 @@ from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MechResult,
@@ -280,6 +281,32 @@ class SellNo(SellTokens):
         super().__init__(
             market_type=market_type, outcome=get_no_outcome(market_type=market_type)
         )
+
+
+class RedeemWinningBets(MarketFunction):
+    @property
+    def description(self) -> str:
+        # ToDo - implement
+        return "Use this function summarize your learnings and save them so that you can access them later."
+
+    @property
+    def example_args(self) -> list[str]:
+        # ToDo - implement
+        return [
+            "Today I learned that I need to check my balance fore making decisions about how much to invest."
+        ]
+
+    def __call__(self, market_id: str) -> str:
+        # ToDo - implement
+        # ToDo - Implement functions in PMAT (redeemable by, redeem_positions) in general agent, release new version
+        #  market_redeemable_by, if yes, then call redeem_positions
+        keys = MicrochainAPIKeys()
+        # ToDo - Make it AgentMarket instead of Omen after changes above were implemented
+        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
+        omen_agent_market = OmenAgentMarket()
+        user_address = MicrochainAPIKeys().bet_from_address
+        if omen_agent_market.market_redeemable_by(user_address):
+            omen_agent_market.redeem_positions(keys.bet_from_private_key)
 
 
 class SummarizeLearning(Function):
