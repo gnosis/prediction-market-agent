@@ -1,5 +1,4 @@
 import typing as t
-from decimal import Decimal
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -202,7 +201,7 @@ class BuyTokens(MarketFunction):
         )
         market.buy_tokens(
             outcome=self.outcome_bool,
-            amount=TokenAmount(amount=Decimal(amount), currency=self.currency),
+            amount=TokenAmount(amount=amount, currency=self.currency),
         )
         after_balance = market.get_token_balance(
             user_id=self.user_address,
@@ -258,7 +257,7 @@ class SellTokens(MarketFunction):
 
         market.sell_tokens(
             outcome=self.outcome_bool,
-            amount=TokenAmount(amount=Decimal(amount), currency=self.currency),
+            amount=TokenAmount(amount=amount, currency=self.currency),
         )
 
         after_balance = market.get_token_balance(
@@ -309,7 +308,7 @@ class GetBalance(MarketFunction):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> Decimal:
+    def __call__(self) -> float:
         return get_balance(market_type=self.market_type).amount
 
 
