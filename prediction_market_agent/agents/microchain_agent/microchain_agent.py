@@ -10,7 +10,7 @@ from prediction_market_agent.utils import APIKeys
 def main(
     api_base: str = "https://api.openai.com/v1",
     model: str = "gpt-4-turbo-preview",
-):
+) -> None:
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
