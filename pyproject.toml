@@ -9,7 +9,7 @@ readme = "README.md"
 python = "~3.10.0"
 python-dotenv = "*"
 openai = "*"
-langchain = "^0.1.1"
+langchain = "^0.0.303"
 langchain-experimental = "*"
 langchain-community = "*"
 langchain-openai = "*"
@@ -21,7 +21,7 @@ google-search-results = "*"
 pytest = "*"
 llama-index = "~0.9.0"
 duckduckgo-search = "*"
-crewai = {extras = ["tools"], version = "^0.11.0"}
+# crewai = {extras = ["tools"], version = "^0.11.0"}
 # metagpt = "*" # Commented out because requires super old version of langchain, and conflicts with crewai.
 replicate = "*"
 typer = "^0.9.0"
@@ -35,19 +35,20 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.14.1", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "evan/mech-deps-compatibility-1", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
-tavily-python = "^0.3.1"
+tavily-python = "^0.3.0"
 microchain-python = "^0.3.5"
 setuptools = "^69.5.1"
 jsonschema = "^4.3.3"
-chromadb = "^0.4.24"
-spacy = "^3.7.4"
+chromadb = "^0.4.13"
+spacy = "^3.7.2"
 readability-lxml = "^0.8.1"
 lxml = {extras = ["html-clean"], version = "^5.2.1"}
+mech = { git = "https://github.com/valory-xyz/mech.git", branch = "main" }
 
 [build-system]
 requires = ["poetry-core"]
