@@ -32,7 +32,7 @@ class RunnableAgent(str, Enum):
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
     # Mechs
-    mech_prediction_online = "mech_prediction_online"
+    mech_prediction_online = "mech_prediction-online"
 
 
 RUNNABLE_AGENTS = {
