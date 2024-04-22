@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from enum import Enum
 
 from mech_client.interact import ConfirmationType, interact
-from pydantic import BaseModel
+from prediction_market_agent_tooling.benchmark.utils import OutcomePrediction
 
 from prediction_market_agent.tools.mech.api_keys import MechAPIKeys
 from prediction_market_agent.tools.mech.mech.packages.polywrap.customs.prediction_with_research_report import (
@@ -15,13 +15,6 @@ from prediction_market_agent.tools.mech.mech.packages.valory.customs.prediction_
     prediction_request,
 )
 from prediction_market_agent.utils import completion_str_to_json
-
-
-class MechResult(BaseModel):
-    p_yes: float
-    p_no: float
-    confidence: float
-    info_utility: float
 
 
 @contextmanager
@@ -41,7 +34,7 @@ class MechTool(str, Enum):
     PREDICTION_ONLINE = "prediction-online"
 
 
-def mech_request(question: str, mech_tool: MechTool) -> MechResult:
+def mech_request(question: str, mech_tool: MechTool) -> OutcomePrediction:
     private_key = MechAPIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures
@@ -61,10 +54,10 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResult:
             confirmation_type=ConfirmationType.WAIT_FOR_BOTH,
         )
         del os.environ[mech_strategy_env_var]
-        return MechResult.model_validate_json(response["result"])
+        return OutcomePrediction.model_validate_json(response["result"])
 
 
-def mech_request_local(question: str, mech_tool: MechTool) -> MechResult:
+def mech_request_local(question: str, mech_tool: MechTool) -> OutcomePrediction:
     keys = MechAPIKeys()
     if mech_tool == MechTool.PREDICTION_WITH_RESEARCH_REPORT:
         response = prediction_with_research_report.run(
@@ -89,4 +82,4 @@ def mech_request_local(question: str, mech_tool: MechTool) -> MechResult:
         raise ValueError(f"Mech type '{mech_tool}' not supported")
 
     result = completion_str_to_json(str(response[0]))
-    return MechResult.model_validate(result)
+    return OutcomePrediction.model_validate(result)
