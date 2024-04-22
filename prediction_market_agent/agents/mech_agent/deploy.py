@@ -13,13 +13,15 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
-    def __init__(self, tool: MechTool, local: bool) -> None:
-        self.tool: MechTool = tool
-        self.local: bool = local
-        super().__init__()
+    def load(self, tool: MechTool, local: bool) -> None:
+        self.tool: MechTool | None = None
+        self.local: bool | None = None
 
     @property
     def prediction_fn(self) -> t.Callable[[str, MechTool], OutcomePrediction]:
+        if self.local is None:
+            raise ValueError("Local mode not set")
+
         return mech_request_local if self.local else mech_request
 
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
@@ -29,16 +31,14 @@ class DeployableMechAgentBase(DeployableAgent):
         return markets
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
+        if self.tool is None:
+            raise ValueError("Tool not set")
+
         result: OutcomePrediction = self.prediction_fn(market.question, self.tool)
         return True if result.p_yes >= 0.5 else False
 
 
-class DeployableRemoteMechAgentBase(DeployableMechAgentBase):
-    def __init__(self, tool: MechTool) -> None:
-        self.tool: MechTool = tool
-        super().__init__(tool=tool, local=False)
-
-
-class DeployablePredictionOnlineAgent(DeployableRemoteMechAgentBase):
-    def __init__(self) -> None:
-        super().__init__(tool=MechTool.PREDICTION_ONLINE)
+class DeployablePredictionOnlineAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_ONLINE

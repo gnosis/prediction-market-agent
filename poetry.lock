@@ -2226,13 +2226,13 @@ protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4
 
 [[package]]
 name = "google-cloud-secret-manager"
-version = "2.19.0"
+version = "2.20.0"
 description = "Google Cloud Secret Manager API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-secret-manager-2.19.0.tar.gz", hash = "sha256:bb918435835a14eb94785f4d4d9087bdcf1b6de306432d7edaa7d62e7f780c30"},
-    {file = "google_cloud_secret_manager-2.19.0-py2.py3-none-any.whl", hash = "sha256:7dd9ad9ab3e70f9a7fbac432938b702ba23bce1207e9bda86463b6d6b1f5cdbb"},
+    {file = "google-cloud-secret-manager-2.20.0.tar.gz", hash = "sha256:a086a7413aaf4fffbd1c4fe9229ef0ce9bcf48f5a8df5b449c4a32deb5a2cfde"},
+    {file = "google_cloud_secret_manager-2.20.0-py2.py3-none-any.whl", hash = "sha256:c20bf22e59d220c51aa84a1db3411b14b83aa71f788fae8d273c03a4bf3e77ed"},
 ]
 
 [package.dependencies]
