@@ -3,7 +3,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     redeem_from_all_user_positions,
 )
 
-from prediction_market_agent.agents.microchain_agent.utils import MicrochainAPIKeys
+from prediction_market_agent.utils import APIKeys
 
 
 class RedeemWinningBets(Function):
@@ -16,7 +16,7 @@ class RedeemWinningBets(Function):
         return []
 
     def __call__(self) -> None:
-        redeem_from_all_user_positions(MicrochainAPIKeys().bet_from_private_key)
+        redeem_from_all_user_positions(APIKeys().bet_from_private_key)
 
 
 # Functions that interact exclusively with Omen prediction markets
