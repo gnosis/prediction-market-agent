@@ -9,7 +9,7 @@ from prediction_market_agent.agents.microchain_agent.utils import MicrochainAPIK
 class RedeemWinningBets(Function):
     @property
     def description(self) -> str:
-        return "Use this function to redeem winnings from a position that you opened which has already been resolved. Use this to retrieve funds from a bet you placed in a market, after the market has been resolved."
+        return "Use this function to redeem winnings from a position that you opened which has already been resolved. Use this to retrieve funds from a bet you placed in a market, after the market has been resolved. If you have outstanding winnings to be redeemed, your balance will be updated."
 
     @property
     def example_args(self) -> list[str]:
