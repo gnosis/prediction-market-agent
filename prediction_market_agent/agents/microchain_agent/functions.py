@@ -6,9 +6,6 @@ from prediction_market_agent_tooling.markets.data_models import Currency, TokenA
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.utils import (
-    MechResult,
-    MechTool,
-    MicrochainAPIKeys,
     MicroMarket,
     get_balance,
     get_binary_markets,
@@ -16,9 +13,14 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
+)
+from prediction_market_agent.tools.mech.utils import (
+    MechResult,
+    MechTool,
     mech_request,
     mech_request_local,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 class Sum(Function):
@@ -171,7 +173,7 @@ class BuyTokens(MarketFunction):
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -232,7 +234,7 @@ class SellTokens(MarketFunction):
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -314,7 +316,7 @@ class GetBalance(MarketFunction):
 
 class GetPositions(MarketFunction):
     def __init__(self, market_type: MarketType) -> None:
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -329,7 +331,7 @@ class GetPositions(MarketFunction):
         return []
 
     def __call__(self) -> list[str]:
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = APIKeys().bet_from_address
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address
         )
