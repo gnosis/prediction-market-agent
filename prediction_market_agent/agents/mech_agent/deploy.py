@@ -13,7 +13,7 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
-    def load(self, tool: MechTool, local: bool) -> None:
+    def load(self) -> None:
         self.tool: MechTool | None = None
         self.local: bool | None = None
 
