@@ -15,6 +15,9 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.mech_agent.deploy import (
+    DeployablePredictionOnlineAgent,
+)
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
@@ -28,6 +31,8 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
+    # Mechs
+    mech_prediction_online = "mech_prediction_online"
 
 
 RUNNABLE_AGENTS = {
@@ -35,6 +40,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
+    RunnableAgent.mech_prediction_online: DeployablePredictionOnlineAgent,
 }
 
 
