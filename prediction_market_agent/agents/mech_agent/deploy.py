@@ -13,7 +13,7 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
-    def __init__(self, tool: MechTool, local: bool):
+    def __init__(self, tool: MechTool, local: bool) -> None:
         self.tool: MechTool = tool
         self.local: bool = local
         super().__init__()
@@ -33,12 +33,12 @@ class DeployableMechAgentBase(DeployableAgent):
         return True if result.p_yes >= 0.5 else False
 
 
-class DeployableRemoteMechAgentBase(DeployableAgent):
-    def __init__(self, tool: MechTool):
+class DeployableRemoteMechAgentBase(DeployableMechAgentBase):
+    def __init__(self, tool: MechTool) -> None:
         self.tool: MechTool = tool
         super().__init__(tool=tool, local=False)
 
 
 class DeployablePredictionOnlineAgent(DeployableRemoteMechAgentBase):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(tool=MechTool.PREDICTION_ONLINE)
