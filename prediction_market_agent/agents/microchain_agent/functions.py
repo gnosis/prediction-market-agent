@@ -2,14 +2,12 @@ import typing as t
 
 from microchain import Function
 from prediction_market_agent_tooling.config import PrivateCredentials
+from prediction_market_agent_tooling.benchmark.utils import OutcomePrediction
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.utils import (
-    MechResult,
-    MechTool,
-    MicrochainAPIKeys,
     MicroMarket,
     get_balance,
     get_binary_markets,
@@ -17,9 +15,13 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
+)
+from prediction_market_agent.tools.mech.utils import (
+    MechTool,
     mech_request,
     mech_request_local,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 class Sum(Function):
@@ -104,7 +106,7 @@ class GetMarketProbability(MarketFunction):
 class PredictProbabilityForQuestionBase(MarketFunction):
     def __init__(
         self,
-        mech_request: t.Callable[[str, MechTool], MechResult],
+        mech_request: t.Callable[[str, MechTool], OutcomePrediction],
         market_type: MarketType,
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
@@ -126,7 +128,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        result: MechResult = self.mech_request(question, self.mech_tool)
+        result: OutcomePrediction = self.mech_request(question, self.mech_tool)
         return str(result.p_yes)
 
 
@@ -179,6 +181,7 @@ class BuyTokens(MarketFunction):
         self.user_address = PrivateCredentials.from_api_keys(
             MicrochainAPIKeys()
         ).public_key
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property

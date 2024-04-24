@@ -26,7 +26,7 @@ class ReplicateSettings(BaseSettings):
 
     N_TO_REPLICATE: int
     INITIAL_FUNDS: str
-    CLOSE_TIME_UP_TO_N_DAYS: int
+    CLOSE_TIME_UP_TO_N_DAYS: list[int]
 
 
 class DeployableReplicateToOmenAgent(DeployableAgent):
@@ -57,25 +57,31 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         logger.info("Redeeming funds from previously unfunded markets.")
         redeem_from_all_user_positions(credentials)
 
-        close_time_before = utcnow() + timedelta(days=settings.CLOSE_TIME_UP_TO_N_DAYS)
-        initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
+        for close_time_days in settings.CLOSE_TIME_UP_TO_N_DAYS:
+            close_time_before = utcnow() + timedelta(days=close_time_days)
+            initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
 
-        logger.info(f"Replicating from {MarketType.MANIFOLD}.")
-        omen_replicate_from_tx(
-            private_credentials=credentials,
-            market_type=MarketType.MANIFOLD,
-            n_to_replicate=settings.N_TO_REPLICATE,
-            initial_funds=initial_funds_per_market,
-            close_time_before=close_time_before,
-            auto_deposit=True,
-        )
-        logger.info(f"Replicating from {MarketType.POLYMARKET}.")
-        omen_replicate_from_tx(
-            private_credentials=credentials,
-            market_type=MarketType.POLYMARKET,
-            n_to_replicate=settings.N_TO_REPLICATE,
-            initial_funds=initial_funds_per_market,
-            close_time_before=close_time_before,
-            auto_deposit=True,
-        )
+            logger.info(
+                f"Replicating from {MarketType.MANIFOLD} markets closing in {close_time_days} days."
+            )
+            omen_replicate_from_tx(
+                market_type=MarketType.MANIFOLD,
+                n_to_replicate=settings.N_TO_REPLICATE,
+                initial_funds=initial_funds_per_market,
+                from_private_key=keys.bet_from_private_key,
+                close_time_before=close_time_before,
+                auto_deposit=True,
+            )
+            logger.info(
+                f"Replicating from {MarketType.POLYMARKET} markets closing in {close_time_days} days."
+            )
+            omen_replicate_from_tx(
+                market_type=MarketType.POLYMARKET,
+                n_to_replicate=settings.N_TO_REPLICATE,
+                initial_funds=initial_funds_per_market,
+                from_private_key=keys.bet_from_private_key,
+                close_time_before=close_time_before,
+                auto_deposit=True,
+            )
+
         logger.debug("Done.")
