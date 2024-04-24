@@ -69,10 +69,7 @@ def mech_request_local(question: str, mech_tool: MechTool) -> OutcomePrediction:
                 "tavily": keys.tavily_api_key.get_secret_value(),
             },
         )
-    elif (
-        mech_tool == MechTool.PREDICTION_ONLINE
-        or mech_tool == MechTool.PREDICTION_OFFLINE
-    ):
+    elif mech_tool in [MechTool.PREDICTION_ONLINE, MechTool.PREDICTION_OFFLINE]:
         response = prediction_request.run(
             tool=mech_tool.value,
             prompt=question,
