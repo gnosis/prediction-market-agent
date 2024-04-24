@@ -25,8 +25,8 @@ from prediction_market_agent_tooling.markets.markets import (
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
-    CrewAIAgentSubquestions,
+from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
+    DeployableThinkThoroughlyAgent,
 )
 
 
@@ -37,7 +37,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         close_time=utcnow() + timedelta(days=1),
         volume=None,
         question=question,
-        p_yes=Probability(0.5),
+        current_p_yes=Probability(0.5),
         created_time=datetime(2024, 1, 1),
         resolution=None,
         outcomes=["YES", "NO"],
@@ -50,14 +50,18 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         max_workers: int,
         agent_name: str,
     ) -> None:
-        self.agent = CrewAIAgentSubquestions(self.langfuse_wrapper)
+        self.agent = DeployableThinkThoroughlyAgent(self.langfuse_wrapper).agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:
         result = self.agent.answer_binary_market(market_question)
         return Prediction(
-            outcome_prediction=OutcomePrediction(
-                p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+            outcome_prediction=(
+                OutcomePrediction(
+                    p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+                )
+                if result
+                else None
             )
         )
 

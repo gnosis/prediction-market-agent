@@ -14,6 +14,11 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableThinkThoroughlyAgent(DeployableAgent):
+    model: str = "gpt-4-turbo-2024-04-09"
+
+    def load(self) -> None:
+        self.agent = CrewAIAgentSubquestions(model=self.model)
+
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
         # We simply pick 5 random markets to bet on
         picked_markets: list[AgentMarket] = []
@@ -29,7 +34,7 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
                     break
             else:
                 logger.info(
-                    f"Market {market.url} is too saturated to bet on with p_yes {market.p_yes}."
+                    f"Market {market.url} is too saturated to bet on with p_yes {market.current_p_yes}."
                 )
 
         return picked_markets
@@ -37,14 +42,12 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def answer_binary_market(self, market: AgentMarket) -> bool:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
-        result = CrewAIAgentSubquestions(self.langfuse_wrapper).answer_binary_market(
-            market.question
-        )
+        result = self.agent.answer_binary_market(market.question)
         return (
             True
-            if result.decision == "y"
+            if result and result.decision == "y"
             else False
-            if result.decision == "n"
+            if result and result.decision == "n"
             else should_not_happen()
         )
 

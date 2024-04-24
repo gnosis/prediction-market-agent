@@ -32,7 +32,7 @@ class QuestionWithKnownOutcome(BaseModel):
             url=self.url if self.url else "",
             id=self.question,
             question=self.question,
-            p_yes=Probability(
+            current_p_yes=Probability(
                 self.result.to_p_yes()
                 if self.result != Result.KNOWN_UNKNOWABLE
                 else 0.5
@@ -53,7 +53,7 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
         model: str,
         max_tries: int,
     ) -> None:
-        self.model = model
+        self.model: str = model
         self.max_tries = max_tries
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
