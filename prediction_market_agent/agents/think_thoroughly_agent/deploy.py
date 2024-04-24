@@ -46,7 +46,9 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
         return (
             True
             if result and result.decision == "y"
-            else False if result and result.decision == "n" else should_not_happen()
+            else False
+            if result and result.decision == "n"
+            else should_not_happen()
         )
 
 
