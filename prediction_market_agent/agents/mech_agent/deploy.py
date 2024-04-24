@@ -42,3 +42,9 @@ class DeployablePredictionOnlineAgent(DeployableMechAgentBase):
     def load(self) -> None:
         self.local = True
         self.tool = MechTool.PREDICTION_ONLINE
+
+
+class DeployablePredictionOfflineAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_OFFLINE
