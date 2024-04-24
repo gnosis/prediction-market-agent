@@ -57,7 +57,7 @@ def get_balance(market_type: MarketType) -> BetAmount:
         # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
         return BetAmount(
             amount=get_balances(
-                PrivateCredentials.from_api_keys(MicrochainAPIKeys()).public_key
+                PrivateCredentials.from_api_keys(APIKeys()).public_key
             ).xdai,
             currency=currency,
         )

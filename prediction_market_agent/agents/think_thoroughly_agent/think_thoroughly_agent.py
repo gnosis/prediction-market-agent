@@ -35,7 +35,8 @@ class ProbabilityOutput(BaseModel):
 
 
 class CrewAIAgentSubquestions:
-    model: str = "gpt-4-turbo-2024-04-09"
+    def __init__(self, model: str) -> None:
+        self.model = model
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")

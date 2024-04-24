@@ -25,8 +25,8 @@ from prediction_market_agent_tooling.markets.markets import (
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
-    CrewAIAgentSubquestions,
+from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
+    DeployableThinkThoroughlyAgent,
 )
 
 
@@ -50,7 +50,7 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         max_workers: int,
         agent_name: str,
     ) -> None:
-        self.agent = CrewAIAgentSubquestions()
+        self.agent = DeployableThinkThoroughlyAgent().agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:

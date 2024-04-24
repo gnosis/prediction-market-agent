@@ -68,7 +68,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 market_type=MarketType.MANIFOLD,
                 n_to_replicate=settings.N_TO_REPLICATE,
                 initial_funds=initial_funds_per_market,
-                from_private_key=keys.bet_from_private_key,
+                private_credentials=credentials,
                 close_time_before=close_time_before,
                 auto_deposit=True,
             )
@@ -79,7 +79,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 market_type=MarketType.POLYMARKET,
                 n_to_replicate=settings.N_TO_REPLICATE,
                 initial_funds=initial_funds_per_market,
-                from_private_key=keys.bet_from_private_key,
+                private_credentials=credentials,
                 close_time_before=close_time_before,
                 auto_deposit=True,
             )
