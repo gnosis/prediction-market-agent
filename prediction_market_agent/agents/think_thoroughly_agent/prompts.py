@@ -21,11 +21,11 @@ Example 1:
 - SCENARIO: Will Gnosis Pay reach 100,000 users by 2025?
 - Possible other SCENARIOs:
   - Will Gnosis Pay have less than 25,000 users by 2025?
-  - Will Gnosis Pay reache more than 25,000 users but less than 50,000 users by 2025?
-  - Will Gnosis Pay reache more than 50,000 users but less than 75,000 users by 2025?
-  - Will Gnosis Pay reache 100,000 users or more by 2025?
-  - Will Gnosis Pay reache 100,000 users or more by 2028?
-  - Will Gnosis Pay reache 100,000 users or more by 2030?
+  - Will Gnosis Pay reach more than 25,000 users but less than 50,000 users by 2025?
+  - Will Gnosis Pay reach more than 50,000 users but less than 75,000 users by 2025?
+  - Will Gnosis Pay reach 100,000 users or more by 2025?
+  - Will Gnosis Pay reach 100,000 users or more by 2028?
+  - Will Gnosis Pay reach 100,000 users or more by 2030?
 
 Example 2:
 - SCENARIO: Will the price of Bitcoin go up again in the next 2 months?
