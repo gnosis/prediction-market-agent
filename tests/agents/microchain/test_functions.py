@@ -87,9 +87,7 @@ def test_engine_help(market_type: MarketType) -> None:
 def test_get_probability(market_type: MarketType) -> None:
     market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     get_market_probability = GetMarketProbability(market_type=market_type)
-    # TODO this will need fixing once https://github.com/gnosis/prediction-market-agent-tooling/issues/181 is resolved
-    assert float(get_market_probability(market_id)[0]) == 0.5
-
+    assert float(get_market_probability(market_id)[0]) == 0.0
     market: AgentMarket = market_type.market_class.get_binary_market(market_id)
     assert market.is_resolved()  # Probability wont change after resolution
 
