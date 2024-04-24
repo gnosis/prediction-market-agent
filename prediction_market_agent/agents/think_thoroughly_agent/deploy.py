@@ -37,7 +37,9 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
     def answer_binary_market(self, market: AgentMarket) -> bool:
         # The answer has already been determined in `pick_markets` so we just
         # return it here.
-        result = CrewAIAgentSubquestions().answer_binary_market(market.question)
+        result = CrewAIAgentSubquestions(self.langfuse_wrapper).answer_binary_market(
+            market.question
+        )
         return (
             True
             if result.decision == "y"

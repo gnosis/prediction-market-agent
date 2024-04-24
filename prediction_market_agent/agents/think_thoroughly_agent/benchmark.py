@@ -50,7 +50,7 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         max_workers: int,
         agent_name: str,
     ) -> None:
-        self.agent = CrewAIAgentSubquestions()
+        self.agent = CrewAIAgentSubquestions(self.langfuse_wrapper)
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:

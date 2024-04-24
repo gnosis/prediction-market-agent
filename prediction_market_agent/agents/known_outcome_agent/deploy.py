@@ -63,6 +63,7 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
                 model=self.model,
                 question=market.question,
                 max_tries=3,
+                callbacks=[self.langfuse_wrapper.get_langfuse_handler()],
             )
         except Exception as e:
             logger.error(

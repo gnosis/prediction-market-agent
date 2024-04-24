@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
+from langchain_core.callbacks import Callbacks
 from langchain_openai import ChatOpenAI
 from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -159,7 +160,9 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
         return content
 
 
-def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
+def has_question_event_happened_in_the_past(
+    model: str, question: str, callbacks: Callbacks
+) -> bool:
     """Asks the model if the event referenced by the question has finished (given the
     current date) (returning 1), if the event has not yet finished (returning 0) or
      if it cannot be sure (returning -1)."""
@@ -168,6 +171,7 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
         model=model,
         temperature=0.0,
         api_key=APIKeys().openai_api_key.get_secret_value(),
+        callbacks=callbacks,
     )
     prompt = ChatPromptTemplate.from_template(
         template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
@@ -188,7 +192,9 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
     return False
 
 
-def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
+def get_known_outcome(
+    model: str, question: str, max_tries: int, callbacks: Callbacks = None
+) -> Answer:
     """
     In a loop, perform web search and scrape to find if the answer to the
     question is known. Break if the answer is found, or after a certain number
@@ -201,6 +207,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
         model=model,
         temperature=0.4,
         api_key=APIKeys().openai_api_key.get_secret_value(),
+        callbacks=callbacks,
     )
     while tries < max_tries:
         search_prompt = ChatPromptTemplate.from_template(

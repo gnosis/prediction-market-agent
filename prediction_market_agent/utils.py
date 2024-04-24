@@ -13,6 +13,9 @@ class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
+    LANGFUSE_SECRET_KEY: t.Optional[SecretStr] = None
+    LANGFUSE_PUBLIC_KEY: t.Optional[SecretStr] = None
+    LANGFUSE_HOST: t.Optional[str] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
@@ -30,6 +33,24 @@ class APIKeys(APIKeysBase):
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
             self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def langfuse_secret_key(self) -> SecretStr:
+        return check_not_none(
+            self.LANGFUSE_SECRET_KEY, "LANGFUSE_SECRET_KEY missing in the environment."
+        )
+
+    @property
+    def langfuse_public_key(self) -> SecretStr:
+        return check_not_none(
+            self.LANGFUSE_PUBLIC_KEY, "LANGFUSE_PUBLIC_KEY missing in the environment."
+        )
+
+    @property
+    def langfuse_host(self) -> str:
+        return check_not_none(
+            self.LANGFUSE_HOST, "LANGFUSE_HOST missing in the environment."
         )
 
 

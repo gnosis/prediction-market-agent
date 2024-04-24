@@ -4,6 +4,9 @@ from crewai import Agent, Crew, Process, Task
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from loguru import logger
+from prediction_market_agent_tooling.monitor.langfuse.langfuse_wrapper import (
+    LangfuseWrapper,
+)
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
@@ -33,8 +36,8 @@ class ProbabilityOutput(BaseModel):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self) -> None:
-        llm = self._build_llm()
+    def __init__(self, langfuse_wrapper: LangfuseWrapper) -> None:
+        llm = self._build_llm(langfuse_wrapper)
         self.researcher = Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -54,11 +57,12 @@ class CrewAIAgentSubquestions:
             llm=llm,
         )
 
-    def _build_llm(self) -> BaseChatModel:
+    def _build_llm(self, langfuse_wrapper: LangfuseWrapper) -> BaseChatModel:
         keys = APIKeys()
         llm = ChatOpenAI(
             model="gpt-3.5-turbo-0125",
             api_key=keys.openai_api_key.get_secret_value(),
+            callbacks=[langfuse_wrapper.get_langfuse_handler()],
         )
         return llm
 
