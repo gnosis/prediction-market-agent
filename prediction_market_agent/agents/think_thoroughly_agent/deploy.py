@@ -29,7 +29,7 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
                     break
             else:
                 logger.info(
-                    f"Market {market.url} is too saturated to bet on with p_yes {market.p_yes}."
+                    f"Market {market.url} is too saturated to bet on with p_yes {market.current_p_yes}."
                 )
 
         return picked_markets
@@ -40,9 +40,9 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
         result = CrewAIAgentSubquestions().answer_binary_market(market.question)
         return (
             True
-            if result.decision == "y"
+            if result and result.decision == "y"
             else False
-            if result.decision == "n"
+            if result and result.decision == "n"
             else should_not_happen()
         )
 

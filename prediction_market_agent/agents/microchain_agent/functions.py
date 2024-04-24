@@ -1,6 +1,7 @@
 import typing as t
 
 from microchain import Function
+from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -92,7 +93,11 @@ class GetMarketProbability(MarketFunction):
 
     def __call__(self, market_id: str) -> list[str]:
         return [
-            str(self.market_type.market_class.get_binary_market(id=market_id).p_yes)
+            str(
+                self.market_type.market_class.get_binary_market(
+                    id=market_id
+                ).current_p_yes
+            )
         ]
 
 
@@ -171,7 +176,9 @@ class BuyTokens(MarketFunction):
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = PrivateCredentials.from_api_keys(
+            MicrochainAPIKeys()
+        ).public_key
         super().__init__(market_type=market_type)
 
     @property
@@ -232,7 +239,9 @@ class SellTokens(MarketFunction):
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = PrivateCredentials.from_api_keys(
+            MicrochainAPIKeys()
+        ).public_key
         super().__init__(market_type=market_type)
 
     @property
@@ -314,7 +323,9 @@ class GetBalance(MarketFunction):
 
 class GetPositions(MarketFunction):
     def __init__(self, market_type: MarketType) -> None:
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = PrivateCredentials.from_api_keys(
+            MicrochainAPIKeys()
+        ).public_key
         super().__init__(market_type=market_type)
 
     @property
@@ -329,7 +340,9 @@ class GetPositions(MarketFunction):
         return []
 
     def __call__(self) -> list[str]:
-        self.user_address = MicrochainAPIKeys().bet_from_address
+        self.user_address = PrivateCredentials.from_api_keys(
+            MicrochainAPIKeys()
+        ).public_key
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address
         )

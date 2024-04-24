@@ -37,7 +37,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         close_time=utcnow() + timedelta(days=1),
         volume=None,
         question=question,
-        p_yes=Probability(0.5),
+        current_p_yes=Probability(0.5),
         created_time=datetime(2024, 1, 1),
         resolution=None,
         outcomes=["YES", "NO"],
@@ -56,8 +56,12 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
     def predict(self, market_question: str) -> Prediction:
         result = self.agent.answer_binary_market(market_question)
         return Prediction(
-            outcome_prediction=OutcomePrediction(
-                p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+            outcome_prediction=(
+                OutcomePrediction(
+                    p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+                )
+                if result
+                else None
             )
         )
 
