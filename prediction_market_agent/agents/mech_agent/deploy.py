@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 
 from prediction_market_agent.tools.mech.utils import (
+    MechResponse,
     MechTool,
     mech_request,
     mech_request_local,
@@ -20,7 +21,7 @@ class DeployableMechAgentBase(DeployableAgent):
         self.local: bool | None = None
 
     @property
-    def prediction_fn(self) -> t.Callable[[str, MechTool], OutcomePrediction]:
+    def prediction_fn(self) -> t.Callable[[str, MechTool], MechResponse]:
         if self.local is None:
             raise ValueError("Local mode not set")
 
@@ -36,8 +37,14 @@ class DeployableMechAgentBase(DeployableAgent):
         if self.tool is None:
             raise ValueError("Tool not set")
 
-        result: OutcomePrediction = self.prediction_fn(market.question, self.tool)
-        return result
+        response: MechResponse = self.prediction_fn(market.question, self.tool)
+        outcome_prediction = OutcomePrediction(
+            decision=response.p_yes > 0.5,
+            p_yes=response.p_yes,
+            confidence=response.confidence,
+            info_utility=response.info_utility,
+        )
+        return outcome_prediction
 
 
 class DeployablePredictionOnlineAgent(DeployableMechAgentBase):
