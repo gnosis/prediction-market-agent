@@ -58,15 +58,15 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:
-        answer = get_known_outcome(
+        outcome = get_known_outcome(
             model=self.model,
             question=market_question,
             max_tries=self.max_tries,
         )
         logger.info(
-            f"Answered {market_question=} with {answer.result=}, {answer.reasoning=}"
+            f"Answered {market_question=} with {outcome.result=}, {outcome.reasoning=}"
         )
-        if not answer.has_known_result():
+        if not outcome.has_known_result():
             return Prediction(
                 is_predictable=False,
                 outcome_prediction=None,
@@ -75,7 +75,8 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             return Prediction(
                 is_predictable=True,
                 outcome_prediction=OutcomePrediction(
-                    p_yes=answer.result.to_p_yes(),
+                    decision=outcome.result.to_boolean(),
+                    p_yes=outcome.result.to_p_yes(),
                     confidence=1.0,
                     info_utility=None,
                 ),
