@@ -13,6 +13,8 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
+    max_markets_per_run: int = 5
+
     def load(self) -> None:
         self.tool: MechTool | None = None
         self.local: bool | None = None
@@ -25,20 +27,62 @@ class DeployableMechAgentBase(DeployableAgent):
         return mech_request_local if self.local else mech_request
 
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
-        # We simply pick 5 random markets to bet on
+        # We randomly pick markets to bet on
         markets = list(markets)
         random.shuffle(markets)
-        return markets
+        return markets[: self.max_markets_per_run]
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> OutcomePrediction:
         if self.tool is None:
             raise ValueError("Tool not set")
 
         result: OutcomePrediction = self.prediction_fn(market.question, self.tool)
-        return True if result.p_yes >= 0.5 else False
+        return result
 
 
 class DeployablePredictionOnlineAgent(DeployableMechAgentBase):
     def load(self) -> None:
         self.local = True
         self.tool = MechTool.PREDICTION_ONLINE
+
+
+class DeployablePredictionOfflineAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_OFFLINE
+
+
+class DeployablePredictionOnlineSMEAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_ONLINE_SME
+
+
+class DeployablePredictionOfflineSMEAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_OFFLINE_SME
+
+
+class DeployablePredictionRequestRAGAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_REQUEST_RAG
+
+
+class DeployablePredictionRequestReasoningAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_REQUEST_REASONING
+
+
+class DeployablePredictionUrlCotAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_URL_COT
+
+
+class DeployablePredictionWithResearchBoldAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_WITH_RESEARCH_REPORT_BOLD

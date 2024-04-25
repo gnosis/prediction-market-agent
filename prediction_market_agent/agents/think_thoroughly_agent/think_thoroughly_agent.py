@@ -9,6 +9,9 @@ from prediction_market_agent_tooling.monitor.langfuse.langfuse_wrapper import (
 )
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.tools.parallelism import par_generator
+from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
@@ -27,14 +30,6 @@ from prediction_market_agent.utils import APIKeys
 
 class Scenarios(BaseModel):
     scenarios: list[str]
-
-
-class ProbabilityOutput(BaseModel):
-    reasoning: str
-    decision: t.Literal["y", "n"] | None
-    p_yes: float
-    p_no: float
-    confidence: float
 
 
 class CrewAIAgentSubquestions:
@@ -64,6 +59,9 @@ class CrewAIAgentSubquestions:
             allow_delegation=False,
             llm=self._build_llm(),
         )
+
+    def _build_tavily_search(self) -> TavilyDevTool:
+        return TavilyDevTool()
 
     def _build_tavily_search(self) -> TavilyDevTool:
         return TavilyDevTool()
@@ -122,22 +120,20 @@ class CrewAIAgentSubquestions:
         logger.info(f"Created possible hypothetical scenarios: {scenarios.scenarios}")
         return scenarios
 
-    def generate_prediction_for_one_outcome(
-        self, sentence: str
-    ) -> ProbabilityOutput | None:
+    def generate_prediction_for_one_outcome(self, sentence: str) -> Answer | None:
         researcher = self._get_researcher()
         predictor = self._get_predictor()
 
         task_research_one_outcome = Task(
             description=RESEARCH_OUTCOME_PROMPT,
-            agent=researcher,
+            agent=self.researcher,
             expected_output=RESEARCH_OUTCOME_OUTPUT,
         )
         task_create_probability_for_one_outcome = Task(
             description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=predictor,
-            output_json=ProbabilityOutput,
+            output_json=Answer,
             context=[task_research_one_outcome],
         )
         crew = Crew(
@@ -149,24 +145,24 @@ class CrewAIAgentSubquestions:
 
         result = crew.kickoff(inputs={"sentence": sentence})
         try:
-            output = ProbabilityOutput.model_validate_json(result)
+            output = Answer.model_validate_json(result)
             return output
         except ValueError as e:
             logger.error(
-                f"Could not parse the result ('{result}') as ProbabilityOutput because of {e}"
+                f"Could not parse the result ('{result}') as Answer because of {e}"
             )
             return None
 
     def generate_final_decision(
-        self, scenarios_with_probabilities: list[t.Tuple[str, ProbabilityOutput]]
-    ) -> ProbabilityOutput:
+        self, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
+    ) -> Answer:
         predictor = self._get_predictor()
 
         task_final_decision = Task(
             description=FINAL_DECISION_PROMPT,
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_json=ProbabilityOutput,
+            output_json=Answer,
         )
 
         crew = Crew(
@@ -184,15 +180,13 @@ class CrewAIAgentSubquestions:
                 "scenario_to_assess": scenarios_with_probabilities[0][0],
             }
         )
-        output = ProbabilityOutput.model_validate_json(
-            task_final_decision.output.raw_output
-        )
+        output = Answer.model_validate_json(task_final_decision.output.raw_output)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
         return output
 
-    def answer_binary_market(self, question: str) -> ProbabilityOutput | None:
+    def answer_binary_market(self, question: str) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 

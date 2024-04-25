@@ -2,7 +2,7 @@ import random
 import typing as t
 
 from loguru import logger
-from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
@@ -57,9 +57,9 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             )
         return picked_markets
 
-    def answer_binary_market(self, market: AgentMarket) -> bool | None:
+    def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         try:
-            answer = get_known_outcome(
+            outcome = get_known_outcome(
                 model=self.model,
                 question=market.question,
                 max_tries=3,
@@ -69,18 +69,23 @@ class DeployableKnownOutcomeAgent(DeployableAgent):
             logger.error(
                 f"Failed to predict market {market.url} with the question '{market.question}' because of '{e}'."
             )
-            answer = None
-        if answer and answer.has_known_result():
-            logger.info(
-                f"Picking market {market.url} with the question '{market.question}' with answer '{answer.result}'"
+            outcome = None
+        if outcome and outcome.has_known_result():
+            answer = Answer(
+                decision=outcome.result.to_boolean(),
+                p_yes=outcome.result.to_p_yes(),
+                confidence=1.0,
             )
-            return answer.result.to_boolean()
+            logger.info(
+                f"Picking market {market.url} with the question '{market.question}' with answer '{answer}'"
+            )
+            return answer
 
         logger.info(f"No definite answer found for the market {market.url}.")
 
         return None
 
-    def calculate_bet_amount(self, answer: bool, market: AgentMarket) -> BetAmount:
+    def calculate_bet_amount(self, answer: Answer, market: AgentMarket) -> BetAmount:
         if isinstance(market, OmenAgentMarket):
             return BetAmount(amount=1.0, currency=market.currency)
         else:

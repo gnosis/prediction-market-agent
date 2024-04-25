@@ -50,7 +50,7 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         max_workers: int,
         agent_name: str,
     ) -> None:
-        self.agent = DeployableThinkThoroughlyAgent(self.langfuse_wrapper).agent
+        self.agent = DeployableThinkThoroughlyAgent().agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:
@@ -58,7 +58,10 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(
-                    p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+                    decision=result.decision,
+                    p_yes=result.p_yes,
+                    confidence=result.confidence,
+                    info_utility=None,
                 )
                 if result
                 else None
