@@ -8,6 +8,9 @@ from mech_client.interact import ConfirmationType, interact
 from prediction_market_agent_tooling.benchmark.utils import OutcomePrediction
 
 from prediction_market_agent.tools.mech.api_keys import MechAPIKeys
+from prediction_market_agent.tools.mech.mech.packages.napthaai.customs.prediction_request_rag import (
+    prediction_request_rag,
+)
 from prediction_market_agent.tools.mech.mech.packages.nickcom007.customs.prediction_request_sme import (
     prediction_request_sme,
 )
@@ -38,6 +41,7 @@ class MechTool(str, Enum):
     PREDICTION_OFFLINE = "prediction-offline"
     PREDICTION_ONLINE_SME = "prediction-online-sme"
     PREDICTION_OFFLINE_SME = "prediction-offline-sme"
+    PREDICTION_REQUEST_RAG = "prediction-request-rag"
 
 
 def mech_request(question: str, mech_tool: MechTool) -> OutcomePrediction:
@@ -86,6 +90,16 @@ def mech_request_local(question: str, mech_tool: MechTool) -> OutcomePrediction:
         )
     elif mech_tool in [MechTool.PREDICTION_ONLINE_SME, MechTool.PREDICTION_OFFLINE_SME]:
         response = prediction_request_sme.run(
+            tool=mech_tool.value,
+            prompt=question,
+            api_keys={
+                "openai": keys.openai_api_key.get_secret_value(),
+                "google_api_key": keys.google_search_api_key.get_secret_value(),
+                "google_engine_id": keys.google_search_engine_id.get_secret_value(),
+            },
+        )
+    elif mech_tool == MechTool.PREDICTION_REQUEST_RAG:
+        response = prediction_request_rag.run(
             tool=mech_tool.value,
             prompt=question,
             api_keys={

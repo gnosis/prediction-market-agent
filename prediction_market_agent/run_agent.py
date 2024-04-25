@@ -20,6 +20,7 @@ from prediction_market_agent.agents.mech_agent.deploy import (
     DeployablePredictionOfflineSMEAgent,
     DeployablePredictionOnlineAgent,
     DeployablePredictionOnlineSMEAgent,
+    DeployablePredictionRequestRAGAgent,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
@@ -39,6 +40,7 @@ class RunnableAgent(str, Enum):
     mech_prediction_offline = "mech_prediction-offline"
     mech_prediction_online_sme = "mech_prediction-online-sme"
     mech_prediction_offline_sme = "mech_prediction-offline-sme"
+    mech_prediction_request_rag = "mech_prediction-request-rag"
 
 
 RUNNABLE_AGENTS = {
@@ -50,6 +52,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.mech_prediction_offline: DeployablePredictionOfflineAgent,
     RunnableAgent.mech_prediction_online_sme: DeployablePredictionOnlineSMEAgent,
     RunnableAgent.mech_prediction_offline_sme: DeployablePredictionOfflineSMEAgent,
+    RunnableAgent.mech_prediction_request_rag: DeployablePredictionRequestRAGAgent,
 }
 
 
