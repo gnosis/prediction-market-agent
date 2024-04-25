@@ -35,7 +35,8 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.17.0", extras = ["langchain", "google"] }
+#prediction-market-agent-tooling = { version = "^0.17.0", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -50,6 +51,7 @@ readability-lxml = "^0.8.1" # TODO remove with https://github.com/gnosis/predict
 lxml = {extras = ["html-clean"], version = "^5.2.1"} # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
 pypdf2 = "^3.0.1" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
 faiss-cpu = "^1.8.0" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
+langfuse = "^2.27.1"
 
 [build-system]
 requires = ["poetry-core"]

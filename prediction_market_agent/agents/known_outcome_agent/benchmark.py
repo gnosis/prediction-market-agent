@@ -62,7 +62,6 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             model=self.model,
             question=market_question,
             max_tries=self.max_tries,
-            callbacks=[self.langfuse_wrapper.get_langfuse_handler()],
         )
         logger.info(
             f"Answered {market_question=} with {outcome.result=}, {outcome.reasoning=}"

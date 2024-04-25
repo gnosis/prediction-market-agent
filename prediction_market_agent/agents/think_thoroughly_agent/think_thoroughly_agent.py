@@ -4,12 +4,10 @@ from crewai import Agent, Crew, Process, Task
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from loguru import logger
+from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.monitor.langfuse.langfuse_wrapper import (
     LangfuseWrapper,
 )
-from prediction_market_agent_tooling.tools.parallelism import par_generator
-from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -63,16 +61,14 @@ class CrewAIAgentSubquestions:
     def _build_tavily_search(self) -> TavilyDevTool:
         return TavilyDevTool()
 
-    def _build_tavily_search(self) -> TavilyDevTool:
-        return TavilyDevTool()
-
-    def _build_llm(self, langfuse_wrapper: LangfuseWrapper) -> BaseChatModel:
+    def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()
+        # ToDo - Add Langfuse callback handler here once integration becomes clear (see
+        #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = ChatOpenAI(
             model=self.model,
             api_key=keys.openai_api_key.get_secret_value(),
             temperature=0.0,
-            callbacks=[langfuse_wrapper.get_langfuse_handler()],
         )
         return llm
 
@@ -126,7 +122,7 @@ class CrewAIAgentSubquestions:
 
         task_research_one_outcome = Task(
             description=RESEARCH_OUTCOME_PROMPT,
-            agent=self.researcher,
+            agent=researcher,
             expected_output=RESEARCH_OUTCOME_OUTPUT,
         )
         task_create_probability_for_one_outcome = Task(
