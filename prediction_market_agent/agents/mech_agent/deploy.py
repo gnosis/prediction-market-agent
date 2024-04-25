@@ -13,10 +13,11 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
+    max_markets_per_run: int = 5
+
     def load(self) -> None:
         self.tool: MechTool | None = None
         self.local: bool | None = None
-        self.max_markets_per_run = 5
 
     @property
     def prediction_fn(self) -> t.Callable[[str, MechTool], OutcomePrediction]:
