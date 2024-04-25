@@ -84,4 +84,4 @@ def test_get_probability(
     m_json = json.loads(agent.history[-3]["content"])
     m = MarketIDAndProbability.model_validate(m_json)
     market: AgentMarket = market_type.market_class.get_binary_market(m.market_id)
-    assert market.p_yes == m.probability
+    assert market.current_p_yes == m.probability

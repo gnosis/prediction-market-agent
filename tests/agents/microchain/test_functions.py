@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -86,9 +87,7 @@ def test_engine_help(market_type: MarketType) -> None:
 def test_get_probability(market_type: MarketType) -> None:
     market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     get_market_probability = GetMarketProbability(market_type=market_type)
-    # TODO this will need fixing once https://github.com/gnosis/prediction-market-agent-tooling/issues/181 is resolved
-    assert float(get_market_probability(market_id)[0]) == 0.5
-
+    assert float(get_market_probability(market_id)[0]) == 0.0
     market: AgentMarket = market_type.market_class.get_binary_market(market_id)
     assert market.is_resolved()  # Probability wont change after resolution
 
@@ -100,7 +99,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     Test buying and selling tokens for a market
     """
     market = get_binary_markets(market_type=market_type)[0]
-    from_address = APIKeys().bet_from_address
+    from_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
     outcomes_functions = {
         get_yes_outcome(market_type=market_type): [
             BuyYes(market_type=market_type),

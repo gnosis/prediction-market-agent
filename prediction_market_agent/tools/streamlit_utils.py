@@ -14,6 +14,8 @@ def loguru_streamlit_sink(log: "Message") -> None:
     message = record["message"]
     # Replace escaped newlines with actual newlines.
     message = message.replace("\\n", "\n")
+    # Fix malformed dollar signs in the messages.
+    message = message.replace("$", "\$")
 
     if level == "ERROR":
         st.error(message, icon="❌")
