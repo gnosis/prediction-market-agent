@@ -72,3 +72,9 @@ class DeployablePredictionRequestReasoningAgent(DeployableMechAgentBase):
     def load(self) -> None:
         self.local = True
         self.tool = MechTool.PREDICTION_REQUEST_REASONING
+
+
+class DeployablePredictionUrlCotAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_URL_COT
