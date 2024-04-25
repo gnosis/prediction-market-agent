@@ -8,15 +8,16 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
     redeem_from_all_user_positions,
 )
-from prediction_market_agent_tooling.markets.omen.omen_replicate import (
+from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
     omen_unfund_replicated_known_markets_tx,
 )
-from prediction_market_agent_tooling.markets.omen.omen_resolve_replicated import (
+from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
-from prediction_market_agent_tooling.tools.utils import utcnow
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ReplicateSettings(BaseSettings):
