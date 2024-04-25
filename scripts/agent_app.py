@@ -7,11 +7,11 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 import typing as t
 
 import streamlit as st
-from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
+from prediction_market_agent_tooling.tools.costs import openai_costs
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -21,7 +21,9 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
 )
 from prediction_market_agent.tools.streamlit_utils import add_sink_to_logger
 
-AGENTS = [DeployableKnownOutcomeAgent, DeployableThinkThoroughlyAgent]
+AGENTS: list[
+    t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
+] = [DeployableKnownOutcomeAgent, DeployableThinkThoroughlyAgent]
 
 st.set_page_config(layout="wide")
 add_sink_to_logger()
@@ -45,7 +47,9 @@ if not agent_class_names:
     st.stop()
 
 # Get the agent classes from the names.
-agent_classes: list[t.Type[DeployableAgent]] = []
+agent_classes: list[
+    t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
+] = []
 for AgentClass in AGENTS:
     if AgentClass.__name__ in agent_class_names:
         agent_classes.append(AgentClass)
@@ -65,36 +69,42 @@ market = (
     [m for m in markets if m.question == question][0]
     if not custom_question_input
     # If custom question is provided, just take some random market and update its question.
-    else markets[0].model_copy(update={"question": question, "p_yes": 0.5})
+    else markets[0].model_copy(update={"question": question, "current_p_yes": 0.5})
 )
 
 for idx, (column, AgentClass) in enumerate(
     zip(st.columns(len(agent_classes)), agent_classes)
 ):
     with column:
-        # Show the agent's title.
-        st.write(
-            f"## {AgentClass.__name__.replace('Deployable', '').replace('Agent', '')}"
-        )
-
-        # Simulate deployable agent logic.
         agent = AgentClass()
 
-        if not agent.pick_markets([market]):
-            st.warning("Agent wouldn't pick this market to bet on.")
-            if not st.checkbox(
-                "Continue with the prediction anyway",
-                value=False,
-                key=f"continue_{idx}",
-            ):
+        # This needs to be a separate block to measure the time and cost and then write it into the column section.
+        with openai_costs(agent.model) as costs:
+            # Show the agent's title.
+            st.write(
+                f"## {agent.__class__.__name__.replace('Deployable', '').replace('Agent', '')}"
+            )
+
+            # Simulate deployable agent logic.
+            with st.spinner("Agent is verifying the market..."):
+                if not agent.pick_markets([market]):
+                    st.warning("Agent wouldn't pick this market to bet on.")
+                    if not st.checkbox(
+                        "Continue with the prediction anyway",
+                        value=False,
+                        key=f"continue_{idx}",
+                    ):
+                        continue
+
+            with st.spinner("Agent is making a decision..."):
+                answer = agent.answer_binary_market(market)
+
+            if answer is None:
+                st.error("Agent failed to answer this market.")
                 continue
 
-        answer = agent.answer_binary_market(market)
+            with st.spinner("Agent is calculating the bet amount..."):
+                bet_amount = agent.calculate_bet_amount(answer, market)
 
-        if answer is None:
-            st.error("Agent failed to answer this market.")
-            continue
-
-        bet_amount = agent.calculate_bet_amount(answer, market)
-
+        st.warning(f"Took {costs.time / 60:.2f} minutes and {costs.cost:.2f} USD.")
         st.success(f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!")
