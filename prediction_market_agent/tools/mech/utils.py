@@ -43,6 +43,7 @@ def saved_str_to_tmpfile(s: str) -> t.Iterator[str]:
 
 class MechTool(str, Enum):
     PREDICTION_WITH_RESEARCH_REPORT = "prediction-with-research-conservative"
+    PREDICTION_WITH_RESEARCH_REPORT_BOLD = "prediction-with-research-bold"
     PREDICTION_ONLINE = "prediction-online"
     PREDICTION_OFFLINE = "prediction-offline"
     PREDICTION_ONLINE_SME = "prediction-online-sme"
@@ -77,7 +78,10 @@ def mech_request(question: str, mech_tool: MechTool) -> OutcomePrediction:
 
 def mech_request_local(question: str, mech_tool: MechTool) -> OutcomePrediction:
     keys = MechAPIKeys()
-    if mech_tool == MechTool.PREDICTION_WITH_RESEARCH_REPORT:
+    if mech_tool in [
+        MechTool.PREDICTION_WITH_RESEARCH_REPORT,
+        MechTool.PREDICTION_WITH_RESEARCH_REPORT_BOLD,
+    ]:
         response = prediction_with_research_report.run(
             tool=mech_tool.value,
             prompt=question,

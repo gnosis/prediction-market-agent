@@ -16,6 +16,7 @@ class DeployableMechAgentBase(DeployableAgent):
     def load(self) -> None:
         self.tool: MechTool | None = None
         self.local: bool | None = None
+        self.max_markets_per_run = 5
 
     @property
     def prediction_fn(self) -> t.Callable[[str, MechTool], OutcomePrediction]:
@@ -25,10 +26,10 @@ class DeployableMechAgentBase(DeployableAgent):
         return mech_request_local if self.local else mech_request
 
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
-        # We simply pick 5 random markets to bet on
+        # We randomly pick markets to bet on
         markets = list(markets)
         random.shuffle(markets)
-        return markets
+        return markets[: self.max_markets_per_run]
 
     def answer_binary_market(self, market: AgentMarket) -> bool:
         if self.tool is None:
@@ -78,3 +79,9 @@ class DeployablePredictionUrlCotAgent(DeployableMechAgentBase):
     def load(self) -> None:
         self.local = True
         self.tool = MechTool.PREDICTION_URL_COT
+
+
+class DeployablePredictionWithResearchBoldAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_WITH_RESEARCH_REPORT_BOLD
