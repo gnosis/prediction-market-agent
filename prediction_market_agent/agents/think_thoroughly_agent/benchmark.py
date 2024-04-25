@@ -58,7 +58,10 @@ class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(
-                    p_yes=result.p_yes, confidence=result.confidence, info_utility=None
+                    decision=result.decision,
+                    p_yes=result.p_yes,
+                    confidence=result.confidence,
+                    info_utility=None,
                 )
                 if result
                 else None

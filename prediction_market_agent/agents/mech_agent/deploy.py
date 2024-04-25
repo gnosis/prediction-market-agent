@@ -28,14 +28,14 @@ class DeployableMechAgentBase(DeployableAgent):
         # We simply pick 5 random markets to bet on
         markets = list(markets)
         random.shuffle(markets)
-        return markets
+        return markets[:5]
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
+    def answer_binary_market(self, market: AgentMarket) -> OutcomePrediction:
         if self.tool is None:
             raise ValueError("Tool not set")
 
         result: OutcomePrediction = self.prediction_fn(market.question, self.tool)
-        return True if result.p_yes >= 0.5 else False
+        return result
 
 
 class DeployablePredictionOnlineAgent(DeployableMechAgentBase):

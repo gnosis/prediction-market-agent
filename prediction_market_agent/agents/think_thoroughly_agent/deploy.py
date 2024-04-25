@@ -2,10 +2,9 @@ import random
 import typing as t
 
 from loguru import logger
-from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import should_not_happen
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
@@ -39,17 +38,8 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
 
         return picked_markets
 
-    def answer_binary_market(self, market: AgentMarket) -> bool:
-        # The answer has already been determined in `pick_markets` so we just
-        # return it here.
-        result = self.agent.answer_binary_market(market.question)
-        return (
-            True
-            if result and result.decision == "y"
-            else False
-            if result and result.decision == "n"
-            else should_not_happen()
-        )
+    def answer_binary_market(self, market: AgentMarket) -> Answer | None:
+        return self.agent.answer_binary_market(market.question)
 
 
 if __name__ == "__main__":
