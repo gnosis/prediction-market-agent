@@ -14,6 +14,9 @@ from prediction_market_agent.tools.mech.mech.packages.napthaai.customs.predictio
 from prediction_market_agent.tools.mech.mech.packages.napthaai.customs.prediction_request_reasoning import (
     prediction_request_reasoning,
 )
+from prediction_market_agent.tools.mech.mech.packages.napthaai.customs.prediction_url_cot import (
+    prediction_url_cot,
+)
 from prediction_market_agent.tools.mech.mech.packages.nickcom007.customs.prediction_request_sme import (
     prediction_request_sme,
 )
@@ -46,6 +49,7 @@ class MechTool(str, Enum):
     PREDICTION_OFFLINE_SME = "prediction-offline-sme"
     PREDICTION_REQUEST_RAG = "prediction-request-rag"
     PREDICTION_REQUEST_REASONING = "prediction-request-reasoning"
+    PREDICTION_URL_COT = "prediction-url-cot"
 
 
 def mech_request(question: str, mech_tool: MechTool) -> OutcomePrediction:
@@ -114,6 +118,16 @@ def mech_request_local(question: str, mech_tool: MechTool) -> OutcomePrediction:
         )
     elif mech_tool == MechTool.PREDICTION_REQUEST_REASONING:
         response = prediction_request_reasoning.run(
+            tool=mech_tool.value,
+            prompt=question,
+            api_keys={
+                "openai": keys.openai_api_key.get_secret_value(),
+                "google_api_key": keys.google_search_api_key.get_secret_value(),
+                "google_engine_id": keys.google_search_engine_id.get_secret_value(),
+            },
+        )
+    elif mech_tool == MechTool.PREDICTION_URL_COT:
+        response = prediction_url_cot.run(
             tool=mech_tool.value,
             prompt=question,
             api_keys={
