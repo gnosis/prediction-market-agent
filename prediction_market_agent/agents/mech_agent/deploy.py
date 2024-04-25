@@ -66,3 +66,9 @@ class DeployablePredictionRequestRAGAgent(DeployableMechAgentBase):
     def load(self) -> None:
         self.local = True
         self.tool = MechTool.PREDICTION_REQUEST_RAG
+
+
+class DeployablePredictionRequestReasoningAgent(DeployableMechAgentBase):
+    def load(self) -> None:
+        self.local = True
+        self.tool = MechTool.PREDICTION_REQUEST_REASONING
