@@ -4,6 +4,7 @@ from enum import Enum
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from loguru import logger
+from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
@@ -31,11 +32,11 @@ class Result(str, Enum):
     KNOWN_UNKNOWABLE = "KNOWN_UNKNOWABLE"
     UNKNOWN = "UNKNOWN"
 
-    def to_p_yes(self) -> float:
+    def to_p_yes(self) -> Probability:
         if self is Result.YES:
-            return 1.0
+            return Probability(1.0)
         elif self is Result.NO:
-            return 0.0
+            return Probability(0.0)
         else:
             raise ValueError("Unexpected result")
 
@@ -52,7 +53,7 @@ class Result(str, Enum):
         return self in [Result.YES, Result.NO]
 
 
-class Answer(BaseModel):
+class KnownOutcomeOutput(BaseModel):
     result: Result
     reasoning: str
 
@@ -188,7 +189,7 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
     return False
 
 
-def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
+def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcomeOutput:
     """
     In a loop, perform web search and scrape to find if the answer to the
     question is known. Break if the answer is found, or after a certain number
@@ -231,11 +232,13 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> Answer:
                 scraped_content=scraped_content,
             )
             answer = str(llm.invoke(prompt).content)
-            parsed_answer = Answer.model_validate(completion_str_to_json(answer))
+            parsed_answer = KnownOutcomeOutput.model_validate(
+                completion_str_to_json(answer)
+            )
 
             if parsed_answer.result is not Result.UNKNOWN:
                 return parsed_answer
 
         tries += 1
 
-    return Answer(result=Result.UNKNOWN, reasoning="Max tries exceeded.")
+    return KnownOutcomeOutput(result=Result.UNKNOWN, reasoning="Max tries exceeded.")
