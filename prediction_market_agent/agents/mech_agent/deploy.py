@@ -14,7 +14,7 @@ from prediction_market_agent.tools.mech.utils import (
 
 
 class DeployableMechAgentBase(DeployableAgent):
-    max_markets_per_run: int = 5
+    bet_on_n_markets_per_run: int = 5
 
     def load(self) -> None:
         self.tool: MechTool | None = None
@@ -26,12 +26,6 @@ class DeployableMechAgentBase(DeployableAgent):
             raise ValueError("Local mode not set")
 
         return mech_request_local if self.local else mech_request
-
-    def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
-        # We randomly pick markets to bet on
-        markets = list(markets)
-        random.shuffle(markets)
-        return markets[: self.max_markets_per_run]
 
     def answer_binary_market(self, market: AgentMarket) -> OutcomePrediction:
         if self.tool is None:
