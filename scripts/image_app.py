@@ -1,9 +1,9 @@
 import streamlit as st
+from openai import OpenAI
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
-from openai import OpenAI
 
 st.title("Prediction market thumbnail generator")
 
@@ -29,10 +29,8 @@ market = (
     else markets[0].model_copy(update={"question": question, "current_p_yes": 0.5})
 )
 
-client = OpenAI()
-
 with st.spinner("Generating image..."):
-    response = client.images.generate(
+    response = OpenAI().images.generate(
         model="dall-e-3",
         prompt=prompt_template.format(market=market.question),
         size="1024x1024",
@@ -41,4 +39,7 @@ with st.spinner("Generating image..."):
     )
 image_url = response.data[0].url
 
-st.image(image_url, use_column_width=True)
+if image_url is not None:
+    st.image(image_url, use_column_width=True)
+else:
+    st.error("Failed to generate image.")
