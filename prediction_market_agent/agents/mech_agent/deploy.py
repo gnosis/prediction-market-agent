@@ -1,4 +1,3 @@
-import random
 import typing as t
 
 from prediction_market_agent_tooling.benchmark.utils import OutcomePrediction
