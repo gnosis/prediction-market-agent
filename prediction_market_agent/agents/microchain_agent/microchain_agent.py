@@ -1,12 +1,14 @@
 import typer
-from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS, SummarizeLearnings
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
+from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.utils import APIKeys
 
 
@@ -24,6 +26,12 @@ def main(
     for function in OMEN_FUNCTIONS:
         engine.register(function())
 
+    # This description below serves to unique identify agent entries on the LTM, and should be
+    # unique across instances (i.e. markets).
+    unique_task_description = f"microchain-agent-demo"
+    long_term_memory = LongTermMemory(unique_task_description, DBStorage())
+    engine.register(SummarizeLearnings(long_term_memory))
+
     generator = OpenAIChatGenerator(
         model=model,
         api_key=APIKeys().openai_api_key.get_secret_value(),
@@ -35,13 +43,17 @@ def main(
     
     {engine.help}
     
+    Do not call other functions except for the GetMarket function and the GetBalance.
+    
     Only output valid Python function calls.
     
     """
 
     agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
-    agent.run(iterations=10)
+    agent.run(iterations=2)
     # generator.print_usage() # Waiting for microchain release
+    # ToDo - Add agent.history to the DB
+    print("finished")
 
 
 if __name__ == "__main__":

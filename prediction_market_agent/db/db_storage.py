@@ -71,7 +71,7 @@ class DBStorage:
                 f"MEMORY ERROR: An error occurred while saving to LTM: {e}",
             )
 
-    def load(self, task_description: str, latest_n: int) -> list[TableOutput]:
+    def load(self, task_description: str, latest_n: int = 5) -> list[TableOutput]:
         """Queries the LTM table by task description with error handling."""
         key = "task_description"
         try:
@@ -83,7 +83,7 @@ class DBStorage:
                     FROM long_term_memories
                     WHERE task_description = :{key}
                     ORDER BY datetime DESC, score ASC
-                    LIMIT {latest_n if latest_n else 1000}
+                    LIMIT {latest_n}
                 """
                     ),
                     {key: task_description},
