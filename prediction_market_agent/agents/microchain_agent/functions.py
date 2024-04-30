@@ -343,6 +343,26 @@ class GetPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
+class SummarizeLearnings(Function):
+    @property
+    def description(self) -> str:
+        return """Use this function to fetch information about the previous actions you executed. Examples of past 
+        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
+        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
+        markets you requested, among others."""
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> list[str]:
+        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        positions = self.market_type.market_class.get_positions(
+            user_id=self.user_address
+        )
+        return [str(position) for position in positions]
+
+
 MISC_FUNCTIONS = [
     Sum,
     Product,
