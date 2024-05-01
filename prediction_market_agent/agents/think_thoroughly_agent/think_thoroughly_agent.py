@@ -60,6 +60,8 @@ class CrewAIAgentSubquestions:
 
     def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()
+        # ToDo - Add Langfuse callback handler here once integration becomes clear (see
+        #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = ChatOpenAI(
             model=self.model,
             api_key=keys.openai_api_key.get_secret_value(),
