@@ -2,7 +2,7 @@ import typing as t
 from datetime import datetime, timedelta
 
 import typer
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.benchmark.agents import (
     AbstractBenchmarkedAgent,
     FixedAgent,

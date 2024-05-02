@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.config import APIKeys, PrivateCredentials
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import xdai_type
