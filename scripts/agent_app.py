@@ -4,6 +4,10 @@ PYTHONPATH=. streamlit run scripts/agent_app.py
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
 """
 
+from prediction_market_agent.utils import patch_sqlite3
+
+patch_sqlite3()
+
 import typing as t
 
 import streamlit as st

@@ -1,6 +1,7 @@
 import json
 import typing as t
 
+from loguru import logger
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
@@ -76,3 +77,22 @@ def completion_str_to_json(completion: str) -> dict[str, t.Any]:
     completion = completion[start_index : end_index + 1]
     completion_dict: dict[str, t.Any] = json.loads(completion)
     return completion_dict
+
+
+def patch_sqlite3() -> None:
+    """
+    Helps in the environemnt where one can't update system's sqlite3 installation, for example, Streamlit Cloud, where we get:
+
+    ```
+    Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0.
+    ```
+
+    This function patches the sqlite3 module to use pysqlite3 instead of sqlite3.
+    """
+    try:
+        __import__("pysqlite3")
+        import sys
+
+        sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+    except ImportError:
+        logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
