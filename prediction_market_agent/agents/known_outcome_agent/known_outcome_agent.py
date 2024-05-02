@@ -206,7 +206,7 @@ def get_known_outcome(
     previous_urls = []
     llm = ChatOpenAI(
         model=model,
-        temperature=0.4,
+        temperature=0.0,
         api_key=APIKeys().openai_api_key.get_secret_value(),
         callbacks=callbacks,
     )
