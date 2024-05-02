@@ -26,12 +26,10 @@ class DBStorage:
         """
         Creates the tables if they don't exist
         """
-        try:
-            # trick for making models import mandatory - models must be imported for metadata.create_all to work
-            logger.debug(f"tables being added {LongTermMemories}")
-            SQLModel.metadata.create_all(self.engine)
-        except Exception as e:
-            logger.warning("Could not create table(s) ", e)
+
+        # trick for making models import mandatory - models must be imported for metadata.create_all to work
+        logger.debug(f"tables being added {LongTermMemories}")
+        SQLModel.metadata.create_all(self.engine)
 
     def save_multiple(
         self,

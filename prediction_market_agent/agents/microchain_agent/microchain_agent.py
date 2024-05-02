@@ -52,8 +52,6 @@ def main(
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
 
-    print("finished")
-
 
 if __name__ == "__main__":
     typer.run(main)

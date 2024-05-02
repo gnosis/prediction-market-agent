@@ -74,7 +74,6 @@ class GetMarkets(MarketFunction):
     def example_args(self) -> list[str]:
         return []
 
-    # @my_decorator
     def __call__(self) -> list[str]:
         return [
             str(MicroMarket.from_agent_market(m))
@@ -303,7 +302,6 @@ class GetBalance(MarketFunction):
     def example_args(self) -> list[str]:
         return []
 
-    # @my_decorator
     def __call__(self) -> float:
         return get_balance(market_type=self.market_type).amount
 
