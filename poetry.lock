@@ -2235,13 +2235,13 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "functions-framework"
-version = "3.6.0"
+version = "3.5.0"
 description = "An open source FaaS (Function as a service) framework for writing portable Python functions -- brought to you by the Google Cloud Functions team."
 optional = false
-python-versions = "<4,>=3.5"
+python-versions = ">=3.5, <4"
 files = [
-    {file = "functions_framework-3.6.0-py3-none-any.whl", hash = "sha256:94c9a4d610374a5c41f97369efbba3817d025e403cc683dbfdb0c19fd6eed76a"},
-    {file = "functions_framework-3.6.0.tar.gz", hash = "sha256:c48c969826bd06424ea0e15fa8447c41ba3ad7134da7d411152391c1e67ff2bd"},
+    {file = "functions-framework-3.5.0.tar.gz", hash = "sha256:b6d0d640016d14241c928b0f0c71e831387897709dc70bf19698a64c381f9e57"},
+    {file = "functions_framework-3.5.0-py3-none-any.whl", hash = "sha256:ca4a027d1e8b0a201364614d06fef4abe5294ccb412b35bb982026a6b3e1be58"},
 ]
 
 [package.dependencies]
@@ -3240,13 +3240,13 @@ extended-testing = ["aiosqlite (>=0.19.0,<0.20.0)", "aleph-alpha-client (>=2.15.
 
 [[package]]
 name = "langchain-core"
-version = "0.1.48"
+version = "0.1.49"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langchain_core-0.1.48-py3-none-any.whl", hash = "sha256:f3078d97a38ac79083cf5a9f3dfd2bb340c08fd93d0064c608be9aa40a73b038"},
-    {file = "langchain_core-0.1.48.tar.gz", hash = "sha256:f0a9b0a8f22f219ef6fd84e2b1d92a8014e84514c0a1b553370fd40296813c16"},
+    {file = "langchain_core-0.1.49-py3-none-any.whl", hash = "sha256:4250bfa1861f4c1df3c911b40a974be4df291e1e9057a673fff65895320fdc7d"},
+    {file = "langchain_core-0.1.49.tar.gz", hash = "sha256:04f1e9f25656b98f35d5de9336ea2d1becb576184929a11036c71127caf0dca8"},
 ]
 
 [package.dependencies]
@@ -3332,13 +3332,13 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "langfuse"
-version = "2.28.1"
+version = "2.28.2"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langfuse-2.28.1-py3-none-any.whl", hash = "sha256:7a2012569b933cb6fa3c9f6f1d5cb84405baf977f3e8a940e4e65a13d24c20b3"},
-    {file = "langfuse-2.28.1.tar.gz", hash = "sha256:269605e1310c85d4facce8fea76e60f84a638c3607db66dfc8c089199de67202"},
+    {file = "langfuse-2.28.2-py3-none-any.whl", hash = "sha256:0faf14051a5cf1ca36a35ef73a0b4f0030157733b3e93dc092957fa95a8d8e90"},
+    {file = "langfuse-2.28.2.tar.gz", hash = "sha256:217c1a43117b8952b9135bb927636f11d5a883ee09acc90b5d7e70d43bf8d30f"},
 ]
 
 [package.dependencies]
@@ -3356,13 +3356,13 @@ openai = ["openai (>=0.27.8)"]
 
 [[package]]
 name = "langsmith"
-version = "0.1.52"
+version = "0.1.53"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langsmith-0.1.52-py3-none-any.whl", hash = "sha256:4518e269b9a0e10197550f050b6518d1276fe68732f7b8579b3e1302b8471d29"},
-    {file = "langsmith-0.1.52.tar.gz", hash = "sha256:f767fddb13c794bea7cc827a77f050a8a1c075ab1d997eb37849b975b0eef1b0"},
+    {file = "langsmith-0.1.53-py3-none-any.whl", hash = "sha256:867f9c4176f92e019398dda22a210db68c98a810234a5266cf4609236dcd3043"},
+    {file = "langsmith-0.1.53.tar.gz", hash = "sha256:0ac271080fb67806f1b2c5de0e7c698c45a57b18b5d46e984e9b15dd38f0bc42"},
 ]
 
 [package.dependencies]
@@ -4688,13 +4688,13 @@ web3 = ">=6.0.0,<7"
 
 [[package]]
 name = "openai"
-version = "1.25.0"
+version = "1.25.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.25.0-py3-none-any.whl", hash = "sha256:d0cfdf6afb31a5dabf3b95966cb31f3c757a0edaf3228715409cb404b9933de0"},
-    {file = "openai-1.25.0.tar.gz", hash = "sha256:22c35b26b8281cd2759b1a4c05ac99e2f2b26a9df71f90a0b4ddb75aa27adc81"},
+    {file = "openai-1.25.1-py3-none-any.whl", hash = "sha256:aa2f381f476f5fa4df8728a34a3e454c321caa064b7b68ab6e9daa1ed082dbf9"},
+    {file = "openai-1.25.1.tar.gz", hash = "sha256:f561ce86f4b4008eb6c78622d641e4b7e1ab8a8cdb15d2f0b2a49942d40d21a8"},
 ]
 
 [package.dependencies]
@@ -7239,13 +7239,13 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.7
 
 [[package]]
 name = "streamlit"
-version = "1.33.0"
+version = "1.34.0"
 description = "A faster way to build and share data apps"
 optional = false
 python-versions = "!=3.9.7,>=3.8"
 files = [
-    {file = "streamlit-1.33.0-py2.py3-none-any.whl", hash = "sha256:bfacb5d1edefcf803c2040b051a21b4c81317a9865448e6767d0a0c6aae7edae"},
-    {file = "streamlit-1.33.0.tar.gz", hash = "sha256:a8da8ff46f5b948c56d2dc7aca7a61cf8d995f4f21744cf82258ae75e63004ba"},
+    {file = "streamlit-1.34.0-py2.py3-none-any.whl", hash = "sha256:411183cf7f525e468eb256b343c914782d11cd894b5e30a4ab3bb1d54e3ae339"},
+    {file = "streamlit-1.34.0.tar.gz", hash = "sha256:135a3b79a686b3132b73f204450ad6e889de04f3349d692925e09f0e21e74b52"},
 ]
 
 [package.dependencies]
