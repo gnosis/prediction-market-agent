@@ -1,6 +1,5 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
-from decimal import Decimal
-from typing import Sequence, Dict, Any
+from typing import Any, Dict, Sequence
 
 from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import LongTermMemories

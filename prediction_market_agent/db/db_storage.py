@@ -1,10 +1,9 @@
 import json
-from decimal import Decimal
-from typing import Sequence, Any, Dict
+from typing import Any, Dict, Sequence
 
 from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlmodel import create_engine, SQLModel, Session, select, desc
+from sqlmodel import Session, SQLModel, create_engine, desc, select
 
 from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.utils import DBKeys
@@ -22,7 +21,7 @@ class DBStorage:
 
         self.engine = create_engine(sqlalchemy_db_url)
 
-    def _initialize_db(self):
+    def _initialize_db(self) -> None:
         """
         Creates the tables if they don't exist
         """
@@ -52,7 +51,6 @@ class DBStorage:
         self, task_description: str, latest_n: int = 5
     ) -> Sequence[LongTermMemories]:
         """Queries the LTM table by task description with error handling."""
-        key = "task_description"
         with Session(self.engine) as session:
             items = session.exec(
                 select(LongTermMemories)

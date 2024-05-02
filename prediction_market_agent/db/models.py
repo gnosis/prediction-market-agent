@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 
 class LongTermMemories(SQLModel, table=True):
