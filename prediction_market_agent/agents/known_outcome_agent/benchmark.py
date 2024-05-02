@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
 )
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.markets.markets import AgentMarket
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -58,7 +58,7 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
 
     def predict(self, market_question: str) -> Prediction:
         outcome = get_known_outcome(
-            model=self.model,
+            model=check_not_none(self.model),
             question=market_question,
             max_tries=self.max_tries,
         )
