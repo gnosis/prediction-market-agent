@@ -1,3 +1,7 @@
+from prediction_market_agent.utils import patch_sqlite3
+
+patch_sqlite3()
+
 from typing import Any, Type
 
 from crewai_tools.tools.base_tool import BaseTool
