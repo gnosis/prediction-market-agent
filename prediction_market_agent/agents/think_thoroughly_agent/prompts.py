@@ -67,6 +67,14 @@ Research and report on the following sentence:
 {sentence}
 Search and scrape the web for information that will help you give a high quality, nuanced answer to the question.
 """
+RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT = """
+Research and report on the following sentence:
+{sentence}
+Search and scrape the web for information that will help you give a high quality, nuanced answer to the question.
+
+You can use the following estimates, but you should not take them as the ground truth, they were generated independently and can be incorrect:
+{previous_scenarios_with_probabilities}
+"""
 RESEARCH_OUTCOME_OUTPUT = """
 Return your answer in raw JSON format, with no special formatting such as newlines, as follows:
 {{"report": <REPORT>}}
