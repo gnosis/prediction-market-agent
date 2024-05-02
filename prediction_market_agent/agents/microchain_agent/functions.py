@@ -1,5 +1,4 @@
 import typing as t
-from functools import wraps
 
 from microchain import Function
 from prediction_market_agent_tooling.config import PrivateCredentials
@@ -17,7 +16,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
-from prediction_market_agent.db.db_storage import DBStorage
+from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
@@ -25,17 +24,6 @@ from prediction_market_agent.tools.mech.utils import (
     mech_request_local,
 )
 from prediction_market_agent.utils import APIKeys
-
-
-# def my_decorator(f):
-#     @wraps(f)
-#     def wrapper(*args, **kwds):
-#         print("Calling decorated function")
-#         output = f(*args, **kwds)
-#         print(f"output {output}, called function {args}, parameters {kwds}")
-#         return output
-#
-#     return wrapper
 
 
 class Sum(Function):
@@ -361,7 +349,7 @@ class SummarizeLearnings(Function):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> list[t.Dict[str, any]]:
+    def __call__(self) -> t.Sequence[LongTermMemories]:
         return self.long_term_memory.search()
 
 

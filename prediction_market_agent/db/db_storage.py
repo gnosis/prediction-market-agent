@@ -1,22 +1,26 @@
+import json
 from decimal import Decimal
-from decimal import Decimal
-from typing import Sequence
+from typing import Sequence, Any, Dict
 
 from loguru import logger
-from sqlmodel import create_engine, SQLModel, Session, select
+from prediction_market_agent_tooling.tools.utils import utcnow
+from sqlmodel import create_engine, SQLModel, Session, select, desc
 
 from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.utils import DBKeys
 
 
 class DBStorage:
-    def __init__(self):
-        keys = DBKeys()
-        if not keys.sqlalchemy_db_url:
-            raise EnvironmentError(
-                "Cannot initialize DBHandler without a valid sqlalchemy_db_url"
-            )
-        self.engine = create_engine(keys.sqlalchemy_db_url)
+    def __init__(self, sqlalchemy_db_url: str | None = None):
+        if not sqlalchemy_db_url:
+            keys = DBKeys()
+            if not keys.sqlalchemy_db_url:
+                raise EnvironmentError(
+                    "Cannot initialize DBHandler without a valid sqlalchemy_db_url"
+                )
+            sqlalchemy_db_url = keys.sqlalchemy_db_url
+
+        self.engine = create_engine(sqlalchemy_db_url)
 
     def _initialize_db(self):
         """
@@ -29,19 +33,21 @@ class DBStorage:
         except Exception as e:
             logger.warning("Could not create table(s) ", e)
 
-    def save(
+    def save_multiple(
         self,
         task_description: str,
-        metadata_: str,
-        score: Decimal,
+        history: list[Dict[str, Any]],
     ) -> None:
         """Saves data to the LTM table with error handling."""
 
         with Session(self.engine) as session:
-            long_term_memory_item = LongTermMemories(
-                task_description=task_description, metadata_=metadata_, score=score
-            )
-            session.add(long_term_memory_item)
+            for history_item in history:
+                long_term_memory_item = LongTermMemories(
+                    task_description=task_description,
+                    metadata_=json.dumps(history_item),
+                    datetime_=utcnow(),
+                )
+                session.add(long_term_memory_item)
             session.commit()
 
     def load(
@@ -53,6 +59,7 @@ class DBStorage:
             items = session.exec(
                 select(LongTermMemories)
                 .where(LongTermMemories.task_description == task_description)
+                .order_by(desc(LongTermMemories.datetime_))
                 .limit(latest_n)
             ).all()
             return items

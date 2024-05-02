@@ -43,16 +43,15 @@ def main(
     
     {engine.help}
     
-    Do not call other functions except for the GetMarket function and the GetBalance.
-    
     Only output valid Python function calls.
     
     """
 
     agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
-    agent.run(iterations=2)
+    agent.run(iterations=10)
     # generator.print_usage() # Waiting for microchain release
-    # ToDo - Add agent.history to the DB
+    long_term_memory.save_history(agent.history)
+
     print("finished")
 
 
