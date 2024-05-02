@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
 )
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.markets.markets import AgentMarket
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -53,13 +53,12 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
         model: str,
         max_tries: int,
     ) -> None:
-        self.model: str = model
         self.max_tries = max_tries
-        super().__init__(agent_name=agent_name, max_workers=max_workers)
+        super().__init__(agent_name=agent_name, max_workers=max_workers, model=model)
 
     def predict(self, market_question: str) -> Prediction:
         outcome = get_known_outcome(
-            model=self.model,
+            model=check_not_none(self.model),
             question=market_question,
             max_tries=self.max_tries,
         )
@@ -86,12 +85,14 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
 if __name__ == "__main__":
     load_dotenv()
     tomorrow_str = (utcnow() + timedelta(days=1)).strftime("%d %B %Y")
+    next_year = (utcnow() + timedelta(365)).year
+    year_after_next = (utcnow() + timedelta(365 * 2)).year
 
     # Fetch questions from existing markets, or make some up, where the
     # outcome is known.
     qs_with_known_outcome: list[QuestionWithKnownOutcome] = [
         QuestionWithKnownOutcome(
-            question=f"Will 'Barbie' win an Academy Award for best original song by {tomorrow_str}?",
+            question=f"Will 'Barbie' win a 2024 Academy Award for best original song by {tomorrow_str}?",
             url="https://aiomen.eth.limo/#/0xceb2a4ecc217cab440acf60737a9fcfd6d3fbf4b",
             result=Result.YES,
             notes="Happened on 10th March 2024.",
@@ -103,28 +104,10 @@ if __name__ == "__main__":
             notes="Happened on 10th March 2024.",
         ),
         QuestionWithKnownOutcome(
-            question=f"Will Liverpool win against Atalanta in the Europa League quarter-finals by {tomorrow_str}?",
-            url="https://aiomen.eth.limo/#/0x1d5a462c801360b4bebbda2b9656e52801a27a3b",
-            result=Result.NO,
-            notes="The match is scheduled for 11 April 2024.",
-        ),
-        QuestionWithKnownOutcome(
             question=f"Will Donald Trump officially become the GOP nominee for the 2024 presidential elections by {tomorrow_str}?",
             url="https://aiomen.eth.limo/#/0x859a6b465ee1e4a73aab0f2da4428c6255da466c",
             result=Result.YES,
             notes="Happened on 10th March 2024.",
-        ),
-        QuestionWithKnownOutcome(
-            question=f"Will SpaceX successfully test a Starship reentry without losing contact by {tomorrow_str}?",
-            url="https://aiomen.eth.limo/#/0xcc9123af8db309e0c60c63f9e2b8b82fc86f458b",
-            result=Result.NO,
-            notes="The only scheduled test flight occured, and contact was lost during the test.",
-        ),
-        QuestionWithKnownOutcome(
-            question=f"Will Arsenal reach the Champions League semi-finals on {tomorrow_str}?",
-            url="https://aiomen.eth.limo/#/0x606efd175b245cd60282a98cef402d4f5e950f92",
-            result=Result.NO,
-            notes="They are scheduled to play the first leg of the quarter-finals on 9 April 2024.",
         ),
         QuestionWithKnownOutcome(
             question=f"Will the jury deliver a verdict on James Crumbley's 'bad parenting' case on {tomorrow_str}?",
@@ -133,17 +116,22 @@ if __name__ == "__main__":
             notes="The verdict was announced on 15th March 2024.",
         ),
         QuestionWithKnownOutcome(
-            question="Will Lewis Hamilton win the 2024/2025 F1 drivers champtionship?",
+            question=f"Will Liverpool win the premier league title for the season starting in {next_year} by {tomorrow_str}?",
+            result=Result.NO,
+            notes="The result will not be known until next year.",
+        ),
+        QuestionWithKnownOutcome(
+            question=f"Will Lewis Hamilton win the {next_year}/{year_after_next} F1 drivers champtionship?",
             result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
-            question="Will the cost of grain in the Spain increase by 20% by 19 July 2024?",
+            question=f"Will the cost of grain in the Spain increase by 20% by 19 July {next_year}?",
             result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
         QuestionWithKnownOutcome(
-            question="Will over 360 pople have died while climbing Mount Everest by 1st Jan 2028?",
+            question=f"Will over 360 pople have died while climbing Mount Everest by 1st Jan {year_after_next}?",
             result=Result.KNOWN_UNKNOWABLE,
             notes="Outcome is uncertain.",
         ),
