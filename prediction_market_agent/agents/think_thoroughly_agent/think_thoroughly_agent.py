@@ -18,6 +18,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_OUTPUT,
     RESEARCH_OUTCOME_PROMPT,
+    RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
 )
 from prediction_market_agent.tools.custom_crewai_tools import TavilyDevTool
 from prediction_market_agent.utils import APIKeys
@@ -113,12 +114,20 @@ class CrewAIAgentSubquestions:
         logger.info(f"Created possible hypothetical scenarios: {scenarios.scenarios}")
         return scenarios
 
-    def generate_prediction_for_one_outcome(self, sentence: str) -> Answer | None:
+    def generate_prediction_for_one_outcome(
+        self,
+        sentence: str,
+        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
+    ) -> Answer | None:
         researcher = self._get_researcher()
         predictor = self._get_predictor()
 
         task_research_one_outcome = Task(
-            description=RESEARCH_OUTCOME_PROMPT,
+            description=(
+                RESEARCH_OUTCOME_PROMPT
+                if not previous_scenarios_and_answers
+                else RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT
+            ),
             agent=researcher,
             expected_output=RESEARCH_OUTCOME_OUTPUT,
         )
@@ -136,7 +145,14 @@ class CrewAIAgentSubquestions:
             process=Process.sequential,
         )
 
-        result = crew.kickoff(inputs={"sentence": sentence})
+        inputs = {"sentence": sentence}
+        if previous_scenarios_and_answers:
+            inputs["previous_scenarios_with_probabilities"] = "\n".join(
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}%, because {a.reasoning}"
+                for s, a in previous_scenarios_and_answers
+            )
+
+        result = crew.kickoff(inputs=inputs)
         try:
             output = Answer.model_validate_json(result)
             return output
@@ -179,27 +195,38 @@ class CrewAIAgentSubquestions:
         )
         return output
 
-    def answer_binary_market(self, question: str) -> Answer | None:
+    def answer_binary_market(
+        self, question: str, n_iterations: int = 2
+    ) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 
-        sub_predictions = par_generator(
-            hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
-            lambda x: (x, self.generate_prediction_for_one_outcome(x)),
-        )
-
-        outcomes_with_probs = []
-        for scenario, prediction in sub_predictions:
-            if prediction is None:
-                continue
-            outcomes_with_probs.append((scenario, prediction))
+        scenarios_with_probs: list[tuple[str, Answer]] = []
+        for iteration in range(n_iterations):
             logger.info(
-                f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
+                f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
+            sub_predictions = par_generator(
+                hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
+                lambda x: (
+                    x,
+                    self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
+                ),
+            )
+
+            scenarios_with_probs = []
+            for scenario, prediction in sub_predictions:
+                if prediction is None:
+                    continue
+                scenarios_with_probs.append((scenario, prediction))
+                logger.info(
+                    f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
+                )
+
         final_answer = (
-            self.generate_final_decision(outcomes_with_probs)
-            if outcomes_with_probs
+            self.generate_final_decision(scenarios_with_probs)
+            if scenarios_with_probs
             else None
         )
         return final_answer
