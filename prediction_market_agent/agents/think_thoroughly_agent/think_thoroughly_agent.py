@@ -206,7 +206,7 @@ class CrewAIAgentSubquestions:
         return output
 
     def answer_binary_market(
-        self, question: str, n_iterations: int = 2
+        self, question: str, n_iterations: int = 1
     ) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
