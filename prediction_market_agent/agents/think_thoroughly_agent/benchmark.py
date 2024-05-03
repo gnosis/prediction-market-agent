@@ -2,7 +2,6 @@ import typing as t
 from datetime import datetime, timedelta
 
 import typer
-from loguru import logger
 from prediction_market_agent_tooling.benchmark.agents import (
     AbstractBenchmarkedAgent,
     FixedAgent,
@@ -14,6 +13,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     Prediction,
 )
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
