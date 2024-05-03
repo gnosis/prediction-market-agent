@@ -17,10 +17,6 @@ class DBKeys(BaseSettings):
     )
     SQLALCHEMY_DB_URL: t.Optional[str] = None
 
-    @property
-    def sqlalchemy_db_url(self) -> str | None:
-        return self.SQLALCHEMY_DB_URL
-
 
 class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None

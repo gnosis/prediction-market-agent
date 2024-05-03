@@ -1,5 +1,5 @@
 import typer
-from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS, SummarizeLearnings
+from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS, RememberPastLearnings
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -16,21 +16,22 @@ def main(
     api_base: str = "https://api.openai.com/v1",
     model: str = "gpt-4-turbo-preview",
 ) -> None:
+    market_type = MarketType.OMEN
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
     for function in MISC_FUNCTIONS:
         engine.register(function())
     for function in MARKET_FUNCTIONS:
-        engine.register(function(market_type=MarketType.OMEN))
+        engine.register(function(market_type=market_type))
     for function in OMEN_FUNCTIONS:
         engine.register(function())
 
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
-    unique_task_description = f"microchain-agent-demo"
+    unique_task_description = f"microchain-agent-demo-{market_type}"
     long_term_memory = LongTermMemory(unique_task_description, DBStorage())
-    engine.register(SummarizeLearnings(long_term_memory))
+    engine.register(RememberPastLearnings(long_term_memory))
 
     generator = OpenAIChatGenerator(
         model=model,

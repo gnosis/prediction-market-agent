@@ -330,7 +330,7 @@ class GetPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
-class SummarizeLearnings(Function):
+class RememberPastLearnings(Function):
     def __init__(self, long_term_memory: LongTermMemory) -> None:
         self.long_term_memory = long_term_memory
         super().__init__()
