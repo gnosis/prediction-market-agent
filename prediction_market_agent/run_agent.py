@@ -25,6 +25,9 @@ from prediction_market_agent.agents.mech_agent.deploy import (
     DeployablePredictionUrlCotAgent,
     DeployablePredictionWithResearchBoldAgent,
 )
+from prediction_market_agent.agents.microchain_agent.deploy import (
+    DeployableMicrochainAgent,
+)
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
@@ -38,6 +41,7 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
+    microchain = "microchain"
     # Mechs
     mech_prediction_online = "mech_prediction-online"
     mech_prediction_offline = "mech_prediction-offline"
@@ -54,6 +58,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
+    RunnableAgent.microchain: DeployableMicrochainAgent,
     RunnableAgent.mech_prediction_online: DeployablePredictionOnlineAgent,
     RunnableAgent.mech_prediction_offline: DeployablePredictionOfflineAgent,
     RunnableAgent.mech_prediction_online_sme: DeployablePredictionOnlineSMEAgent,
