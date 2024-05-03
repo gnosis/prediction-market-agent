@@ -26,7 +26,10 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
 )
-from prediction_market_agent.tools.streamlit_utils import add_sink_to_logger
+from prediction_market_agent.tools.streamlit_utils import (
+    add_sink_to_logger,
+    streamlit_escape,
+)
 
 AGENTS: list[
     t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
@@ -113,4 +116,8 @@ for idx, (column, AgentClass) in enumerate(
                 bet_amount = agent.calculate_bet_amount(answer, market)
 
         st.warning(f"Took {costs.time / 60:.2f} minutes and {costs.cost:.2f} USD.")
-        st.success(f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!")
+        st.success(
+            streamlit_escape(
+                f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!"
+            )
+        )

@@ -11,11 +11,7 @@ def loguru_streamlit_sink(log: "Message") -> None:
     record = log.record
     level = record["level"].name
 
-    message = record["message"]
-    # Replace escaped newlines with actual newlines.
-    message = message.replace("\\n", "\n")
-    # Fix malformed dollar signs in the messages.
-    message = message.replace("$", "\$")
+    message = streamlit_escape(record["message"])
 
     if level == "ERROR":
         st.error(message, icon="❌")
@@ -35,3 +31,15 @@ def add_sink_to_logger() -> None:
     Needs to be behind a cache decorator, so it only runs once per streamlit session (otherwise we would see duplicated messages).
     """
     logger.add(loguru_streamlit_sink)
+
+
+def streamlit_escape(message: str) -> str:
+    """
+    Escapes the string for streamlit writes.
+    """
+    # Replace escaped newlines with actual newlines.
+    message = message.replace("\\n", "\n")
+    # Fix malformed dollar signs in the messages.
+    message = message.replace("$", "\$")
+
+    return message
