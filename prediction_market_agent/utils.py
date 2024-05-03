@@ -1,3 +1,4 @@
+import asyncio
 import json
 import typing as t
 
@@ -98,14 +99,13 @@ def patch_sqlite3() -> None:
         logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
 
 
-def streamlit_asyncio_event_loop_hack():
+def streamlit_asyncio_event_loop_hack() -> asyncio.AbstractEventLoop:
     """
     This function is a hack to make Streamlit work with asyncio event loop.
     See https://github.com/streamlit/streamlit/issues/744
     """
-    import asyncio
 
-    def get_or_create_eventloop():
+    def get_or_create_eventloop() -> asyncio.AbstractEventLoop:
         try:
             return asyncio.get_event_loop()
         except RuntimeError as ex:
@@ -113,8 +113,9 @@ def streamlit_asyncio_event_loop_hack():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 return asyncio.get_event_loop()
+            else:
+                raise ex
 
     loop = get_or_create_eventloop()
     asyncio.set_event_loop(loop)
-
     return loop

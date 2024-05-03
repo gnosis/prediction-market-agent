@@ -17,7 +17,7 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent.agents.microchain_agent.microchain_agent import get_agent
 
 
-def check_api_keys():
+def check_api_keys() -> None:
     keys = APIKeys()
     if not keys.OPENAI_API_KEY:
         st.error("No OpenAI API Key provided via env var/secret.")
@@ -27,16 +27,15 @@ def check_api_keys():
         st.stop()
 
 
-def run_agent(agent: Agent, iterations: int):
+def run_agent(agent: Agent, iterations: int) -> None:
     with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
-                # st.session_state.is_first_run = False
         st.session_state.running_cost += costs.cost
 
 
-def execute_reasoning(agent: Agent, reasoning: str):
+def execute_reasoning(agent: Agent, reasoning: str) -> None:
     with openai_costs(model) as costs:
         agent.execute_command(f'Reasoning("{reasoning}")')
         st.session_state.running_cost += costs.cost
@@ -55,7 +54,6 @@ if "agent" not in st.session_state:
     st.session_state.agent.bootstrap = [f'Reasoning("I need to reason step by step")']
     st.session_state.agent.reset()
     st.session_state.agent.build_initial_messages()
-    # st.session_state.is_first_run = True
     st.session_state.running_cost = 0.0
 
 user_reasoning = st.text_input("Reasoning")
@@ -63,9 +61,15 @@ if st.button("Intervene by adding reasoning"):
     execute_reasoning(agent=st.session_state.agent, reasoning=user_reasoning)
 
 # Allow the user to run the
-iterations = st.number_input("Run iterations", value=1)
+iterations = st.number_input(
+    "Run iterations",
+    value=1,
+    step=1,
+    min_value=1,
+    max_value=100,
+)
 if st.button("Run the agent"):
-    run_agent(agent=st.session_state.agent, iterations=iterations)
+    run_agent(agent=st.session_state.agent, iterations=int(iterations))
 
 # Display the agent's history
 history = st.session_state.agent.history[3:]  # Skip the initial messages
