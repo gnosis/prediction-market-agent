@@ -4,13 +4,16 @@ PYTHONPATH=. streamlit run scripts/agent_app.py
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
 """
 
+import streamlit as st
+
+st.set_page_config(layout="wide")
+
 from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
 
 import typing as t
 
-import streamlit as st
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -29,7 +32,6 @@ AGENTS: list[
     t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
 ] = [DeployableKnownOutcomeAgent, DeployableThinkThoroughlyAgent]
 
-st.set_page_config(layout="wide")
 add_sink_to_logger()
 
 st.title("Agent's decision-making process")
