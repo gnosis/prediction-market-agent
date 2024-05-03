@@ -3,7 +3,6 @@ import typing as t
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from loguru import logger
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
 from prediction_market_agent_tooling.benchmark.utils import (
@@ -11,6 +10,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     Prediction,
 )
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from pydantic import BaseModel

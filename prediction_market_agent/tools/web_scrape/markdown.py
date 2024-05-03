@@ -1,8 +1,8 @@
 import requests
 import tenacity
 from bs4 import BeautifulSoup
-from loguru import logger
 from markdownify import markdownify
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
 from requests import Response
 

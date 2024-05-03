@@ -3982,7 +3982,7 @@ termcolor = "2.4.0"
 type = "git"
 url = "https://github.com/evangriffiths/microchain.git"
 reference = "evan/continue-run"
-resolved_reference = "e1281346d3ab98a22fe8cca0a9514da9eabe2b70"
+resolved_reference = "1f4f5bf5ea446522fba6e475f0ba929ea0185c96"
 
 [[package]]
 name = "mmh3"
@@ -5309,13 +5309,13 @@ test = ["coverage", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.21.1"
+version = "0.22.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.12,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.21.1-py3-none-any.whl", hash = "sha256:a6e98d4beffa141b5c169413f6da769ca7262599f70a186c205fe666fbd636fb"},
-    {file = "prediction_market_agent_tooling-0.21.1.tar.gz", hash = "sha256:caa826102e29b69d3e00856ebc7128fa49d21d011c433da49a9da4f689adff42"},
+    {file = "prediction_market_agent_tooling-0.22.0-py3-none-any.whl", hash = "sha256:cfb70da8daf76b7d8dc18ab993d54a41c3d4238f2eb00b28f483f03f153a1ec4"},
+    {file = "prediction_market_agent_tooling-0.22.0.tar.gz", hash = "sha256:53378726cc2e733eb838a238fb13de05d3e0666fd9fe5d4e7e7f49b2ccbdb961"},
 ]
 
 [package.dependencies]
@@ -8500,4 +8500,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "dd31fe9a705cb604dec9f9811882693d13bc7a7e111a2f58a2c62ccbd93f1e08"
+content-hash = "fb0c917de7a54ec9bdc571fc180d1c7cbf9dcd05e9f849c5defb9e430d217ca3"
