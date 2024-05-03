@@ -3,6 +3,7 @@ import typing as t
 from crewai import Agent, Crew, Process, Task
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
+from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
@@ -152,7 +153,14 @@ class CrewAIAgentSubquestions:
                 for s, a in previous_scenarios_and_answers
             )
 
-        result = crew.kickoff(inputs=inputs)
+        try:
+            result = crew.kickoff(inputs=inputs)
+        except APIError as e:
+            logger.error(
+                f"Could not retrieve response from the model provider because of {e}"
+            )
+            return None
+
         try:
             output = Answer.model_validate_json(result)
             return output
