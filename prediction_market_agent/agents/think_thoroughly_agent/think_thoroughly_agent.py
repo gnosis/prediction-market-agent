@@ -149,7 +149,7 @@ class CrewAIAgentSubquestions:
         inputs = {"sentence": sentence}
         if previous_scenarios_and_answers:
             inputs["previous_scenarios_with_probabilities"] = "\n".join(
-                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}%, because {a.reasoning}"
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
                 for s, a in previous_scenarios_and_answers
             )
 
@@ -171,7 +171,7 @@ class CrewAIAgentSubquestions:
             return None
 
     def generate_final_decision(
-        self, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
+        self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
     ) -> Answer:
         predictor = self._get_predictor()
 
@@ -188,13 +188,15 @@ class CrewAIAgentSubquestions:
             verbose=2,
         )
 
+        logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
             inputs={
-                "scenarios_with_probabilities": [
-                    (i[0], i[1].model_dump()) for i in scenarios_with_probabilities
-                ],
+                "scenarios_with_probabilities": "\n".join(
+                    f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                    for s, a in scenarios_with_probabilities
+                ),
                 "number_of_scenarios": len(scenarios_with_probabilities),
-                "scenario_to_assess": scenarios_with_probabilities[0][0],
+                "scenario_to_assess": question,
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
@@ -233,7 +235,7 @@ class CrewAIAgentSubquestions:
                 )
 
         final_answer = (
-            self.generate_final_decision(scenarios_with_probs)
+            self.generate_final_decision(question, scenarios_with_probs)
             if scenarios_with_probs
             else None
         )
