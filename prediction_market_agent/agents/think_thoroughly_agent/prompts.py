@@ -93,8 +93,10 @@ confidence (confidence level in the values of p_yes and p_no).
 You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, 
 considering the probabilities of the other related SCENARIOs.
 
+SCENARIOS_WITH_PROBABILITIES: 
+{scenarios_with_probabilities}
+
 SCENARIO_TO_ASSESS: {scenario_to_assess}
-SCENARIOS_WITH_PROBABILITIES: {scenarios_with_probabilities}
 """
 
 PROBABILITY_CLASS_OUTPUT = """
