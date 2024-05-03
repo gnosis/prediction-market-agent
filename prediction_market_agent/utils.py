@@ -96,3 +96,25 @@ def patch_sqlite3() -> None:
         sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
     except ImportError:
         logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
+
+
+def streamlit_asyncio_event_loop_hack():
+    """
+    This function is a hack to make Streamlit work with asyncio event loop.
+    See https://github.com/streamlit/streamlit/issues/744
+    """
+    import asyncio
+
+    def get_or_create_eventloop():
+        try:
+            return asyncio.get_event_loop()
+        except RuntimeError as ex:
+            if "There is no current event loop in thread" in str(ex):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                return asyncio.get_event_loop()
+
+    loop = get_or_create_eventloop()
+    asyncio.set_event_loop(loop)
+
+    return loop
