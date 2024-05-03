@@ -1,12 +1,7 @@
-"""
-PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.py
-
-Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
-"""
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
-from prediction_market_agent.streamlit_utils import (
+from prediction_market_agent.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
-)  # noqa
+)
 
 streamlit_asyncio_event_loop_hack()
 
