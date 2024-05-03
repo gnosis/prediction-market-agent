@@ -18,5 +18,4 @@ class DeployableMicrochainAgent(DeployableAgent):
             market_type=market_type,
             model=self.model,
         )
-        agent.bootstrap = ['Reasoning("I need to reason step by step")']
         agent.run(self.n_iterations)

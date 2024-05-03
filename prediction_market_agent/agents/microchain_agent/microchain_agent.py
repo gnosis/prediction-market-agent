@@ -41,6 +41,10 @@ def get_agent(
     )
     agent = Agent(llm=LLM(generator=generator), engine=engine)
     agent.prompt = SYSTEM_PROMPT.format(engine_help=engine.help)
+    agent.bootstrap = [
+        'Reasoning("I need to reason step by step. Start by assessing my '
+        'current position and balance.")'
+    ]
     return agent
 
 
@@ -49,14 +53,15 @@ def main(
     api_base: str = "https://api.openai.com/v1",
     model: str = "gpt-4-turbo-preview",
     iterations: int = 10,
-    seed_prompt: str = "I need to reason step-by-step",
+    seed_prompt: str | None = None,
 ) -> None:
     agent = get_agent(
         market_type=market_type,
         api_base=api_base,
         model=model,
     )
-    agent.bootstrap = [f'Reasoning("{seed_prompt}")']
+    if seed_prompt:
+        agent.bootstrap = [f'Reasoning("{seed_prompt}")']
     agent.run(iterations=iterations)
     # generator.print_usage() # Waiting for microchain release
 

@@ -2,7 +2,7 @@
 
 This agent participates in prediction markets with a high degree of autonomy. It is equipped with tools to access the prediction market APIs, and can use its own reasoning to guide its betting strategy.
 
-## Useage
+## Usage
 
 Run the agent in the terminal via:
 

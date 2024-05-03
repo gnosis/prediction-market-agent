@@ -3,18 +3,25 @@ PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.p
 
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
 """
-import streamlit as st
-
-from prediction_market_agent.utils import APIKeys, streamlit_asyncio_event_loop_hack
-
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
+from prediction_market_agent.streamlit_utils import (
+    streamlit_asyncio_event_loop_hack,
+)  # noqa
+
 streamlit_asyncio_event_loop_hack()
 
+import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent import get_agent
+from prediction_market_agent.agents.microchain_agent.utils import (
+    has_been_run_past_initialization,
+)
+from prediction_market_agent.streamlit_utils import check_required_api_keys
+from prediction_market_agent.utils import APIKeys
 
 
 def check_api_keys() -> None:
@@ -44,8 +51,12 @@ def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
 st.set_page_config(layout="wide")
 st.title("Microchain Agent")
 st.write(
-    "This agent participates in prediction markets with a high degree of autonomy. It is equipped with tools to access the prediction market APIs, and can use its own reasoning to guide its betting strategy."
+    "This agent participates in prediction markets with a high degree of "
+    "autonomy. It is equipped with tools to access the prediction market APIs, "
+    "and can use its own reasoning to guide its betting strategy."
 )
+
+check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 
 # Ask the user to choose a model
 model = st.selectbox(
@@ -53,21 +64,16 @@ model = st.selectbox(
     ["gpt-4-turbo-2024-04-09", "gpt-3.5-turbo-0125"],
     index=0,
 )
-check_api_keys()
+if model is None:
+    st.error("Please select a model.")
+model = check_not_none(model)
 
 # Initialize the agent
 if "agent" not in st.session_state:
     st.session_state.agent = get_agent(market_type=MarketType.OMEN, model=model)
-    st.session_state.agent.bootstrap = [
-        'Reasoning("I need to reason step by step. Start by assessing my current position and balance.")'
-    ]
     st.session_state.agent.reset()
     st.session_state.agent.build_initial_messages()
     st.session_state.running_cost = 0.0
-    st.info(
-        "Start by clicking 'Run' to see the agent in action. Alternatively bootstrap the agent with your own reasoning before running."
-    )
-
 
 user_reasoning = st.text_input("Reasoning")
 if st.button("Intervene by adding reasoning"):
@@ -90,6 +96,12 @@ if st.button("Run the agent"):
         agent=st.session_state.agent,
         iterations=int(iterations),
         model=model,
+    )
+
+if not has_been_run_past_initialization(st.session_state.agent):
+    st.info(
+        "Start by clicking 'Run' to see the agent in action. Alternatively "
+        "bootstrap the agent with your own reasoning before running."
     )
 
 # Display the agent's history
