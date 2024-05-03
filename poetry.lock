@@ -3980,9 +3980,9 @@ termcolor = "2.4.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/evangriffiths/microchain.git"
-reference = "evan/continue-run"
-resolved_reference = "1f4f5bf5ea446522fba6e475f0ba929ea0185c96"
+url = "https://github.com/galatolofederico/microchain.git"
+reference = "main"
+resolved_reference = "74c6bdb99d4359680ed7bce83b932e0ed7ba5c62"
 
 [[package]]
 name = "mmh3"
@@ -8500,4 +8500,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "fb0c917de7a54ec9bdc571fc180d1c7cbf9dcd05e9f849c5defb9e430d217ca3"
+content-hash = "caed83eb671412cdf4fe18eee52e446c9cb1fb46acb8231ee1e02c5a7fcd1d3e"

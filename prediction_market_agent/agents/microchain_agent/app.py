@@ -27,7 +27,7 @@ def check_api_keys() -> None:
         st.stop()
 
 
-def run_agent(agent: Agent, iterations: int) -> None:
+def run_agent(agent: Agent, iterations: int, model: str) -> None:
     with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
@@ -35,7 +35,7 @@ def run_agent(agent: Agent, iterations: int) -> None:
         st.session_state.running_cost += costs.cost
 
 
-def execute_reasoning(agent: Agent, reasoning: str) -> None:
+def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
     with openai_costs(model) as costs:
         agent.execute_command(f'Reasoning("{reasoning}")')
         st.session_state.running_cost += costs.cost
@@ -43,22 +43,39 @@ def execute_reasoning(agent: Agent, reasoning: str) -> None:
 
 st.set_page_config(layout="wide")
 st.title("Microchain Agent")
+st.write(
+    "This agent participates in prediction markets with a high degree of autonomy. It is equipped with tools to access the prediction market APIs, and can use its own reasoning to guide its betting strategy."
+)
 
 # Ask the user to choose a model
-model = st.text_input("Model", "gpt-4-turbo-preview")
+model = st.selectbox(
+    "Model",
+    ["gpt-4-turbo-2024-04-09", "gpt-3.5-turbo-0125"],
+    index=0,
+)
 check_api_keys()
 
 # Initialize the agent
 if "agent" not in st.session_state:
     st.session_state.agent = get_agent(market_type=MarketType.OMEN, model=model)
-    st.session_state.agent.bootstrap = [f'Reasoning("I need to reason step by step")']
+    st.session_state.agent.bootstrap = [
+        'Reasoning("I need to reason step by step. Start by assessing my current position and balance.")'
+    ]
     st.session_state.agent.reset()
     st.session_state.agent.build_initial_messages()
     st.session_state.running_cost = 0.0
+    st.info(
+        "Start by clicking 'Run' to see the agent in action. Alternatively bootstrap the agent with your own reasoning before running."
+    )
+
 
 user_reasoning = st.text_input("Reasoning")
 if st.button("Intervene by adding reasoning"):
-    execute_reasoning(agent=st.session_state.agent, reasoning=user_reasoning)
+    execute_reasoning(
+        agent=st.session_state.agent,
+        reasoning=user_reasoning,
+        model=model,
+    )
 
 # Allow the user to run the
 iterations = st.number_input(
@@ -69,7 +86,11 @@ iterations = st.number_input(
     max_value=100,
 )
 if st.button("Run the agent"):
-    run_agent(agent=st.session_state.agent, iterations=int(iterations))
+    run_agent(
+        agent=st.session_state.agent,
+        iterations=int(iterations),
+        model=model,
+    )
 
 # Display the agent's history
 history = st.session_state.agent.history[3:]  # Skip the initial messages
