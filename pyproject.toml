@@ -41,7 +41,7 @@ autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
-microchain-python = { git = "https://github.com/galatolofederico/microchain.git", branch = "main" }
+microchain-python = "^0.3.6"
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 setuptools = "^69.5.1" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
 jsonschema = "^4.3.3" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
