@@ -32,5 +32,6 @@ def check_required_api_keys(required_keys: list[str]) -> None:
     for key in required_keys:
         if not getattr(keys, key):
             st.error(f"Environment variable for key {key} has not been set.")
+            has_missing_keys = True
     if has_missing_keys:
         st.stop()
