@@ -4,8 +4,8 @@ from enum import Enum
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.callbacks import Callbacks
 from langchain_openai import ChatOpenAI
-from loguru import logger
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 

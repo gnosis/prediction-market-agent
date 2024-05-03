@@ -1,7 +1,7 @@
 import typing as t
 
 import streamlit as st
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 
 if t.TYPE_CHECKING:
     from loguru import Message

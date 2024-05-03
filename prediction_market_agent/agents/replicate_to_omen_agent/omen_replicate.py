@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
-from loguru import logger
 from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, wei_type, xDai
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.categorize import infer_category
 from prediction_market_agent_tooling.markets.markets import (

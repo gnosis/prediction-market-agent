@@ -5,6 +5,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
