@@ -15,6 +15,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.autogen_general_agent.prompts import (
     INFLUENCER_PROMPT,
+    CRITIC_PROMPT,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -33,13 +34,10 @@ def reflection_message(
     sender: AssistantAgent,
     config: Optional[Any] = None,
 ) -> str:
-    print("Reflecting...", "yellow")
-    return f"""
-        Reflect and provide critique on the following tweet. \n\n {recipient.chat_messages_for_summary(sender)[-1]['content']}
-        Note that it should not include inappropriate language.
-        Note also that the tweet should not sound robotic, instead as human-like as possible.
-        Also make sure to ask the recipient for an improved version of the tweet, following your critic, and nothing else.
-        """
+    reflect_prompt = Template(CRITIC_PROMPT).substitute(
+        TWEET=recipient.chat_messages_for_summary(sender)[-1]["content"]
+    )
+    return reflect_prompt
 
 
 def build_llm_config(model: str) -> Dict[str, Any]:
@@ -63,7 +61,6 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
             "work_dir": "tasks",
             "use_docker": False,
         },
-        # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
     )
 
     writer = autogen.AssistantAgent(
@@ -94,7 +91,18 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
-def build_tweet(model: str) -> str:
+def build_tweet(
+    model: str,
+) -> str:
+    """
+    Builds a tweet based on the five markets on Omen that are closing soonest.
+
+    This function utilizes the writer and critic agents to generate the tweet content. It first initializes the
+    necessary agents based on the provided model. Then, it registers a chat between the writer and critic agents.
+
+    The tweet content is generated using a template that includes questions about each market's title and likelihood.
+    """
+
     agents = build_agents(model)
     user_proxy, writer, critic = (
         agents[AutogenAgentType.USER],
@@ -115,18 +123,17 @@ def build_tweet(model: str) -> str:
 
     sh = OmenSubgraphHandler()
     one_year_ago = utcnow() - datetime.timedelta(days=365)
-    markets_closing_sooner = sh.get_omen_binary_markets_simple(
+    markets_closing_soonest = sh.get_omen_binary_markets_simple(
         limit=5,
         sort_by=SortBy.CLOSING_SOONEST,
         filter_by=FilterBy.OPEN,
         created_after=one_year_ago,
     )
-    print(f"closing markets {markets_closing_sooner}")
 
     task = Template(INFLUENCER_PROMPT).substitute(
         QUESTIONS=[
             {"question": m.question_title, "likelihood": m.current_p_yes}
-            for m in markets_closing_sooner
+            for m in markets_closing_soonest
         ]
     )
 

@@ -9,3 +9,10 @@ INFLUENCER_PROMPT = """
         Pick a single topic for the tweet.
         Do not add any reasoning or additional explanation, simply output the tweet.
         """
+
+CRITIC_PROMPT = """
+        Reflect and provide critique on the following tweet. \n\n $TWEET
+        Note that it should not include inappropriate language.
+        Note also that the tweet should not sound robotic, instead as human-like as possible.
+        Also make sure to ask the recipient for an improved version of the tweet, following your critic, and nothing else.
+        """
