@@ -1,13 +1,13 @@
 import datetime
 from enum import Enum
 from string import Template
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 import autogen
 from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
 from loguru import logger
-from prediction_market_agent_tooling.markets.agent_market import SortBy, FilterBy
+from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -17,7 +17,6 @@ from prediction_market_agent.agents.autogen_general_agent.prompts import (
     INFLUENCER_PROMPT,
 )
 from prediction_market_agent.utils import APIKeys
-
 
 # We have an influencer and a critic. Based on https://microsoft.github.io/autogen/docs/notebooks/agentchat_nestedchat/.
 
@@ -30,10 +29,10 @@ class AutogenAgentType(str, Enum):
 
 def reflection_message(
     recipient: UserProxyAgent,
-    messages: list[Dict],
+    messages: list[Dict[Any, Any]],
     sender: AssistantAgent,
     config: Optional[Any] = None,
-):
+) -> str:
     print("Reflecting...", "yellow")
     return f"""
         Reflect and provide critique on the following tweet. \n\n {recipient.chat_messages_for_summary(sender)[-1]['content']}
@@ -144,4 +143,6 @@ def build_tweet(model: str) -> str:
 
     tweet = res.summary
     logger.debug(f"Cast to post - {tweet}")
-    return tweet
+    return str(
+        tweet
+    )  # Casting needed as summary is of type any and no Pydantic support
