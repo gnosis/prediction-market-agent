@@ -1,7 +1,7 @@
 import typing as t
 
 from prediction_market_agent_tooling.benchmark.utils import OutcomePrediction
-from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 
 from prediction_market_agent.tools.mech.utils import (
@@ -12,7 +12,7 @@ from prediction_market_agent.tools.mech.utils import (
 )
 
 
-class DeployableMechAgentBase(DeployableAgent):
+class DeployableMechAgentBase(DeployableTraderAgent):
     bet_on_n_markets_per_run: int = 5
 
     def load(self) -> None:

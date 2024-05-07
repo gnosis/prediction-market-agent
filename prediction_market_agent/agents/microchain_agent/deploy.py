@@ -9,7 +9,7 @@ class DeployableMicrochainAgent(DeployableAgent):
     model = "gpt-4-1106-preview"
     n_iterations = 50
 
-    def run(self, market_type: MarketType, _place_bet: bool = True) -> None:
+    def run(self, market_type: MarketType) -> None:
         """
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.

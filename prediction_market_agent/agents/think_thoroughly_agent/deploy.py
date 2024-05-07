@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -7,7 +7,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
 )
 
 
-class DeployableThinkThoroughlyAgent(DeployableAgent):
+class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
     model: str = "gpt-4-turbo-2024-04-09"
     bet_on_n_markets_per_run = 1
 
@@ -19,7 +19,9 @@ class DeployableThinkThoroughlyAgent(DeployableAgent):
 
 
 if __name__ == "__main__":
-    agent = DeployableThinkThoroughlyAgent()
+    agent = DeployableThinkThoroughlyAgent(place_bet=False)
     agent.deploy_local(
-        market_type=MarketType.OMEN, sleep_time=540, timeout=180, place_bet=False
+        market_type=MarketType.OMEN,
+        sleep_time=540,
+        timeout=180,
     )
