@@ -1,3 +1,4 @@
+from loguru import logger
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -18,11 +19,12 @@ class DeployableFarcasterAgent(DeployableAgent):
     def run(self, market_type: MarketType, _place_bet: bool = True) -> None:
         # It should post a message (cast) on each run.
         tweet = build_tweet(self.model)
-        self.farcaster_handler.post_cast(tweet)
+        if tweet:
+            self.farcaster_handler.post_cast(tweet)
+        else:
+            logger.info("Post could not be constructed, exiting.")
 
 
 if __name__ == "__main__":
     agent = DeployableFarcasterAgent()
-    agent.deploy_local(
-        market_type=MarketType.OMEN, sleep_time=540, timeout=180, place_bet=False
-    )
+    agent.deploy_local(market_type=MarketType.OMEN, sleep_time=540, timeout=180)

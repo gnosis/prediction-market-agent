@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from string import Template
 from typing import Any, Dict, Optional
@@ -7,11 +7,13 @@ import autogen
 from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
 from loguru import logger
-from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.omen.data_models import OmenBet
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic import BaseModel
+from web3 import Web3
 
 from prediction_market_agent.agents.autogen_general_agent.prompts import (
     CRITIC_PROMPT,
@@ -19,7 +21,18 @@ from prediction_market_agent.agents.autogen_general_agent.prompts import (
 )
 from prediction_market_agent.utils import APIKeys
 
+
 # We have an influencer and a critic. Based on https://microsoft.github.io/autogen/docs/notebooks/agentchat_nestedchat/.
+
+
+# Added this class because properties are not automatically dumped when doing class.dict(include=...),
+# hence new class with less fields is the easiest approach.
+class BetInputPrompt(BaseModel):
+    title: str
+    boolean_outcome: bool
+    collateralAmountUSD: float
+    creation_datetime: datetime
+    probability: float
 
 
 class AutogenAgentType(str, Enum):
@@ -91,9 +104,19 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
+def deduplicate_bets(bets: list[OmenBet]) -> list[OmenBet]:
+    seen_titles = set()
+    unique = []
+    for bet in bets:
+        if bet.title not in seen_titles:
+            unique.append(bet)
+            seen_titles.add(bet.title)
+    return unique
+
+
 def build_tweet(
     model: str,
-) -> str:
+) -> str | None:
     """
     Builds a tweet based on the five markets on Omen that are closing soonest.
 
@@ -122,18 +145,46 @@ def build_tweet(
     )
 
     sh = OmenSubgraphHandler()
-    one_year_ago = utcnow() - datetime.timedelta(days=365)
-    markets_closing_soonest = sh.get_omen_binary_markets_simple(
-        limit=5,
-        sort_by=SortBy.CLOSING_SOONEST,
-        filter_by=FilterBy.OPEN,
-        created_after=one_year_ago,
-    )
+    one_month_ago = utcnow() - timedelta(days=30)
+    # markets_closing_soonest = sh.get_omen_binary_markets_simple(
+    #     limit=5,
+    #     sort_by=SortBy.CLOSING_SOONEST,
+    #     filter_by=FilterBy.OPEN,
+    #     created_after=one_year_ago,
+    # )
+    reference_agent = Web3.to_checksum_address(
+        "0xc918c15b87746e6351e5f0646ddcaaca11af8568"
+    )  # Think-thoroughly
+    bets = sh.get_bets(better_address=reference_agent, start_time=one_month_ago)
+    # get unique titles
+    bets = deduplicate_bets(bets)
+    # get bets we placed 24h ago
+    one_day_ago = utcnow() - timedelta(days=1)
 
+    bets_last_24h = [
+        b
+        for b in bets
+        if b.creation_datetime.replace(tzinfo=timezone.utc) >= one_day_ago
+    ]
+    if len(bets_last_24h) == 0:
+        logger.info("No bets in the last 24h. Exiting.")
+        return None
+
+    # ToDO - fetch agent reasoning from DB and construct better tweets
+    #  See https://github.com/gnosis/prediction-market-agent/issues/150
+
+    model: str = "gpt-4-turbo-2024-04-09"
+    bets_last_24h.sort(key=lambda x: x.creation_datetime)
     task = Template(INFLUENCER_PROMPT).substitute(
-        QUESTIONS=[
-            {"question": m.question_title, "likelihood": m.current_p_yes}
-            for m in markets_closing_soonest
+        BETS=[
+            BetInputPrompt(
+                title=m.title,
+                boolean_outcome=m.boolean_outcome,
+                collateralAmountUSD=m.collateralAmountUSD,
+                creation_datetime=m.creation_datetime,
+                probability=m.probability,
+            )
+            for m in bets_last_24h
         ]
     )
 
@@ -153,3 +204,4 @@ def build_tweet(
     return str(
         tweet
     )  # Casting needed as summary is of type any and no Pydantic support
+    return ""

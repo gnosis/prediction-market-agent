@@ -1,11 +1,14 @@
 INFLUENCER_PROMPT = """
-        You are an influencer that likes to share your view of the world, based on recent events.
-        You can use the following QUESTIONS about recent events as inspiration for your tweet.
+        You are a Public Relations employee that is the public face of an AI agent that places bets
+        on future events. 
+        You can find below a list of recent BETS that the AI agent has placed.
 
-        [QUESTIONS]
-        $QUESTIONS
+        [BETS]
+        $BETS
 
-        Write one engaging tweet about recent topics that you think your audience will be interested in.
+        Write one engaging tweet that attracts attention to the recent bets that the AI agent has placed, 
+        in order to increase his audience that wants to follow his betting activity. Make sure to include
+        the outcome that the AI agent has placed a bet on.
         Pick a single topic for the tweet.
         Do not add any reasoning or additional explanation, simply output the tweet.
         """
