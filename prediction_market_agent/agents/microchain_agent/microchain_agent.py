@@ -5,11 +5,13 @@ from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.functions import (
-    MARKET_FUNCTIONS, MISC_FUNCTIONS)
-from prediction_market_agent.agents.microchain_agent.memory import \
-    LongTermMemory
-from prediction_market_agent.agents.microchain_agent.omen_functions import \
-    OMEN_FUNCTIONS
+    MARKET_FUNCTIONS,
+    MISC_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.omen_functions import (
+    OMEN_FUNCTIONS,
+)
 from prediction_market_agent.utils import APIKeys
 
 SYSTEM_PROMPT = """Act as a agent to maximise your profit.

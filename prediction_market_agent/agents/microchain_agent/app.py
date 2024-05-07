@@ -11,10 +11,10 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
-from prediction_market_agent.agents.microchain_agent.microchain_agent import \
-    build_agent
-from prediction_market_agent.agents.microchain_agent.utils import \
-    has_been_run_past_initialization
+from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.utils import (
+    has_been_run_past_initialization,
+)
 from prediction_market_agent.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
