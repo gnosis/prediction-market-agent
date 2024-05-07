@@ -8,6 +8,14 @@ from prediction_market_agent_tooling.tools.utils import (
     should_not_happen,
 )
 from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class DBKeys(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+    SQLALCHEMY_DB_URL: t.Optional[str] = None
 
 
 class APIKeys(APIKeysBase):

@@ -2,7 +2,7 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.microchain_agent import get_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
 
 
 class DeployableMicrochainAgent(DeployableAgent):
@@ -14,7 +14,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
-        agent: Agent = get_agent(
+        agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
         )
