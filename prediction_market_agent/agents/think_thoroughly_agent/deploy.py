@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -7,7 +7,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
 )
 
 
-class DeployableThinkThoroughlyAgent(DeployableAgent):
+class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
     model: str = "gpt-4-turbo-2024-04-09"
     bet_on_n_markets_per_run = 1
 
