@@ -1,7 +1,7 @@
 import random
 import typing as t
 
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount
@@ -15,7 +15,7 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
 from prediction_market_agent.agents.utils import market_is_saturated
 
 
-class DeployableKnownOutcomeAgent(DeployableAgent):
+class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     model = "gpt-4-1106-preview"
     min_liquidity = 5
 

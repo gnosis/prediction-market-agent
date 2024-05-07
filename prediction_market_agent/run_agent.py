@@ -1,6 +1,6 @@
 """
 Entrypoint for running the agent in GKE.
-If the agent adheres to PMAT standard (subclasses DeployableAgent), 
+If the agent adheres to PMAT standard (subclasses deployable agent), 
 simply add the agent to the `RunnableAgent` enum and then `RUNNABLE_AGENTS` dict.
 
 Can also be executed locally, simply by running `python prediction_market_agent/run_agent.py <agent> <market_type>`.

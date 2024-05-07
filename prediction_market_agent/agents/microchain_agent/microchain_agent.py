@@ -1,9 +1,14 @@
 import typer
-from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS
+from functions import RememberPastLearnings
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.functions import (
+    MARKET_FUNCTIONS,
+    MISC_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -19,10 +24,11 @@ Only output valid Python function calls.
 """
 
 
-def get_agent(
+def build_agent(
     market_type: MarketType,
     model: str,
     api_base: str = "https://api.openai.com/v1",
+    long_term_memory: LongTermMemory | None = None,
 ) -> Agent:
     engine = Engine()
     engine.register(Reasoning())
@@ -33,6 +39,10 @@ def get_agent(
         engine.register(function(market_type=market_type))
     for function in OMEN_FUNCTIONS:
         engine.register(function())
+
+    if long_term_memory:
+        engine.register(RememberPastLearnings(long_term_memory))
+
     generator = OpenAIChatGenerator(
         model=model,
         api_key=APIKeys().openai_api_key.get_secret_value(),
@@ -55,15 +65,22 @@ def main(
     iterations: int = 10,
     seed_prompt: str | None = None,
 ) -> None:
-    agent = get_agent(
+    # This description below serves to unique identify agent entries on the LTM, and should be
+    # unique across instances (i.e. markets).
+    unique_task_description = f"microchain-agent-demo-{market_type}"
+    long_term_memory = LongTermMemory(unique_task_description)
+
+    agent = build_agent(
         market_type=market_type,
         api_base=api_base,
         model=model,
+        long_term_memory=long_term_memory,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']
     agent.run(iterations=iterations)
     # generator.print_usage() # Waiting for microchain release
+    long_term_memory.save_history(agent.history)
 
 
 if __name__ == "__main__":
