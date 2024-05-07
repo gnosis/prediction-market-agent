@@ -19,7 +19,9 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
 
 
 if __name__ == "__main__":
-    agent = DeployableThinkThoroughlyAgent()
+    agent = DeployableThinkThoroughlyAgent(place_bet=False)
     agent.deploy_local(
-        market_type=MarketType.OMEN, sleep_time=540, timeout=180, place_bet=False
+        market_type=MarketType.OMEN,
+        sleep_time=540,
+        timeout=180,
     )
