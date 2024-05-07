@@ -33,6 +33,7 @@ def run_agent(agent: Agent, iterations: int, model: str) -> None:
     with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
+                # TODO with spinner...
                 agent.run(iterations=1, resume=True)
         st.session_state.running_cost += costs.cost
 
@@ -41,6 +42,17 @@ def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
     with openai_costs(model) as costs:
         agent.execute_command(f'Reasoning("{reasoning}")')
         st.session_state.running_cost += costs.cost
+
+
+def display_agent_history_callback(agent: Agent) -> None:
+    """
+    A callback to display the agent's history in the Streamlit app after a run
+    with a single interation.
+    """
+    history_depth = 2  # One for the user input, one for the agent's reply
+    history = agent.history[-2:]
+    for h in history:
+        st.chat_message(h["role"]).write(h["content"])
 
 
 st.set_page_config(layout="wide")
@@ -70,6 +82,9 @@ if "agent" not in st.session_state:
     st.session_state.agent.build_initial_messages()
     st.session_state.running_cost = 0.0
 
+    # Add a callback to display the agent's history after each run
+    st.session_state.agent.on_iteration_end = display_agent_history_callback
+
 user_reasoning = st.text_input("Reasoning")
 if st.button("Intervene by adding reasoning"):
     execute_reasoning(
@@ -87,6 +102,11 @@ iterations = st.number_input(
     max_value=100,
 )
 if st.button("Run the agent"):
+    # Display the agent's history
+    history = st.session_state.agent.history[3:]  # Skip the initial messages
+    for h in history:
+        st.chat_message(h["role"]).write(h["content"])
+
     run_agent(
         agent=st.session_state.agent,
         iterations=int(iterations),
@@ -98,11 +118,11 @@ if not has_been_run_past_initialization(st.session_state.agent):
         "Start by clicking 'Run' to see the agent in action. Alternatively "
         "bootstrap the agent with your own reasoning before running."
     )
-
-# Display the agent's history
-history = st.session_state.agent.history[3:]  # Skip the initial messages
-for h in history:
-    st.chat_message(h["role"]).write(h["content"])
+else:
+    st.info(
+        "Run complete. Click 'Run' to allow the agent to continue, or add your "
+        "own reasoning."
+    )
 
 # Display running cost
 # st.info(f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}")  # TODO debug why always == 0.0
