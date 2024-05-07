@@ -118,7 +118,7 @@ def build_tweet(
                 "max_turns": 1,
             }
         ],
-        trigger=writer,  # condition=my_condition,
+        trigger=writer,
     )
 
     sh = OmenSubgraphHandler()
