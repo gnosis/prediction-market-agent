@@ -181,6 +181,10 @@ class BuyTokens(MarketFunction):
             outcome=self.outcome, market_type=market_type
         )
         self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+
+        # Prevent the agent from spending recklessly!
+        self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
+
         super().__init__(market_type=market_type)
 
     @property
@@ -189,6 +193,7 @@ class BuyTokens(MarketFunction):
             f"Use this function to buy {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
             f"second parameter specifies how much {self.currency} you spend."
+            f"This is capped at {self.MAX_AMOUNT}{self.currency}."
         )
 
     @property
@@ -196,7 +201,9 @@ class BuyTokens(MarketFunction):
         return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
-        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
+        if amount > self.MAX_AMOUNT:
+            return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
+
         account_balance = float(get_balance(market_type=self.market_type).amount)
         if account_balance < amount:
             return (
@@ -204,6 +211,7 @@ class BuyTokens(MarketFunction):
                 f"large enough to buy {amount} tokens."
             )
 
+        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
         before_balance = market.get_token_balance(
             user_id=self.user_address,
             outcome=self.outcome,

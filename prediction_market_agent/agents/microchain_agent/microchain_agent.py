@@ -4,6 +4,10 @@ from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.functions import (
+    MARKET_FUNCTIONS,
+    MISC_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
@@ -11,11 +15,21 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
 from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.utils import APIKeys
 
+SYSTEM_PROMPT = """Act as a agent to maximise your profit.
 
-def main(
+You can use the following functions:
+
+{engine_help}
+
+Only output valid Python function calls.
+"""
+
+
+def get_agent(
+    market_type: MarketType,
+    model: str,
     api_base: str = "https://api.openai.com/v1",
-    model: str = "gpt-4-turbo-preview",
-) -> None:
+) -> Agent:
     market_type = MarketType.OMEN
     engine = Engine()
     engine.register(Reasoning())
@@ -40,16 +54,29 @@ def main(
         temperature=0.7,
     )
     agent = Agent(llm=LLM(generator=generator), engine=engine)
-    agent.prompt = f"""Act as a agent to maximise your profit. You can use the following functions:
-    
-    {engine.help}
-    
-    Only output valid Python function calls.
-    
-    """
+    agent.prompt = SYSTEM_PROMPT.format(engine_help=engine.help)
+    agent.bootstrap = [
+        'Reasoning("I need to reason step by step. Start by assessing my '
+        'current position and balance.")'
+    ]
+    return agent
 
-    agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
-    agent.run(iterations=10)
+
+def main(
+    market_type: MarketType = MarketType.OMEN,
+    api_base: str = "https://api.openai.com/v1",
+    model: str = "gpt-4-turbo-preview",
+    iterations: int = 10,
+    seed_prompt: str | None = None,
+) -> None:
+    agent = get_agent(
+        market_type=market_type,
+        api_base=api_base,
+        model=model,
+    )
+    if seed_prompt:
+        agent.bootstrap = [f'Reasoning("{seed_prompt}")']
+    agent.run(iterations=iterations)
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
 

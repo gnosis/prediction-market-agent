@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from loguru import logger
 from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.gtypes import HexAddress, HexBytes
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.data_models import RealityQuestion
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     claim_bonds_on_realitio_questions,

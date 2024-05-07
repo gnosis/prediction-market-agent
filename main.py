@@ -1,5 +1,5 @@
 import typer
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import SortBy
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,

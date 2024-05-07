@@ -3,13 +3,13 @@ import typing as t
 
 from prediction_market_agent_tooling.deploy.agent import (
     Answer,
-    DeployableAgent,
+    DeployableTraderAgent,
     Probability,
 )
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 
 
-class DeployableCoinFlipAgent(DeployableAgent):
+class DeployableCoinFlipAgent(DeployableTraderAgent):
     def pick_markets(self, markets: t.Sequence[AgentMarket]) -> t.Sequence[AgentMarket]:
         return random.sample(markets, 1)
 

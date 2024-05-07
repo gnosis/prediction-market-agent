@@ -3,8 +3,9 @@ import typing as t
 from crewai import Agent, Crew, Process, Task
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
-from loguru import logger
+from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -148,11 +149,18 @@ class CrewAIAgentSubquestions:
         inputs = {"sentence": sentence}
         if previous_scenarios_and_answers:
             inputs["previous_scenarios_with_probabilities"] = "\n".join(
-                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}%, because {a.reasoning}"
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
                 for s, a in previous_scenarios_and_answers
             )
 
-        result = crew.kickoff(inputs=inputs)
+        try:
+            result = crew.kickoff(inputs=inputs)
+        except APIError as e:
+            logger.error(
+                f"Could not retrieve response from the model provider because of {e}"
+            )
+            return None
+
         try:
             output = Answer.model_validate_json(result)
             return output
@@ -163,7 +171,7 @@ class CrewAIAgentSubquestions:
             return None
 
     def generate_final_decision(
-        self, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
+        self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
     ) -> Answer:
         predictor = self._get_predictor()
 
@@ -180,13 +188,15 @@ class CrewAIAgentSubquestions:
             verbose=2,
         )
 
+        logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
             inputs={
-                "scenarios_with_probabilities": [
-                    (i[0], i[1].model_dump()) for i in scenarios_with_probabilities
-                ],
+                "scenarios_with_probabilities": "\n".join(
+                    f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                    for s, a in scenarios_with_probabilities
+                ),
                 "number_of_scenarios": len(scenarios_with_probabilities),
-                "scenario_to_assess": scenarios_with_probabilities[0][0],
+                "scenario_to_assess": question,
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
@@ -196,7 +206,7 @@ class CrewAIAgentSubquestions:
         return output
 
     def answer_binary_market(
-        self, question: str, n_iterations: int = 2
+        self, question: str, n_iterations: int = 1
     ) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
@@ -225,7 +235,7 @@ class CrewAIAgentSubquestions:
                 )
 
         final_answer = (
-            self.generate_final_decision(scenarios_with_probs)
+            self.generate_final_decision(question, scenarios_with_probs)
             if scenarios_with_probs
             else None
         )
