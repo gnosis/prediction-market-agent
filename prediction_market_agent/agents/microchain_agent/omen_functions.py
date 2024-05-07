@@ -1,8 +1,7 @@
 from microchain import Function
 from prediction_market_agent_tooling.config import PrivateCredentials
-from prediction_market_agent_tooling.markets.omen.omen import (
-    redeem_from_all_user_positions,
-)
+from prediction_market_agent_tooling.markets.omen.omen import \
+    redeem_from_all_user_positions
 
 from prediction_market_agent.utils import APIKeys
 

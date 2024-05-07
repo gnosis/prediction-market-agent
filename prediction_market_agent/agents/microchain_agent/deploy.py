@@ -2,7 +2,8 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import \
+    build_agent
 
 
 class DeployableMicrochainAgent(DeployableAgent):

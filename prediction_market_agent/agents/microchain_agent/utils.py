@@ -2,20 +2,15 @@ import typing as t
 
 from microchain import Agent
 from prediction_market_agent_tooling.config import PrivateCredentials
-from prediction_market_agent_tooling.markets.agent_market import (
-    AgentMarket,
-    FilterBy,
-    SortBy,
-)
+from prediction_market_agent_tooling.markets.agent_market import (AgentMarket,
+                                                                  FilterBy,
+                                                                  SortBy)
 from prediction_market_agent_tooling.markets.data_models import BetAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
-    OMEN_FALSE_OUTCOME,
-    OMEN_TRUE_OUTCOME,
-)
-from prediction_market_agent_tooling.markets.omen.data_models import (
-    get_boolean_outcome as get_omen_boolean_outcome,
-)
+    OMEN_FALSE_OUTCOME, OMEN_TRUE_OUTCOME)
+from prediction_market_agent_tooling.markets.omen.data_models import \
+    get_boolean_outcome as get_omen_boolean_outcome
 from prediction_market_agent_tooling.tools.balances import get_balances
 from pydantic import BaseModel
 
