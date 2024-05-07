@@ -1,9 +1,9 @@
 import typer
-from functions import MARKET_FUNCTIONS, MISC_FUNCTIONS, RememberPastLearnings
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from functions import RememberPastLearnings
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
     MISC_FUNCTIONS,
@@ -69,7 +69,7 @@ def main(
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
     unique_task_description = f"microchain-agent-demo-{market_type}"
-    long_term_memory = LongTermMemory(unique_task_description, DBStorage())
+    long_term_memory = LongTermMemory(unique_task_description)
 
     agent = build_agent(
         market_type=market_type,
