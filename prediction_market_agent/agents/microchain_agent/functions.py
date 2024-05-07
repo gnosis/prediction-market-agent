@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
@@ -15,6 +16,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
+from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
@@ -297,21 +299,6 @@ class SellNo(SellTokens):
         )
 
 
-class SummarizeLearning(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function summarize your learnings and save them so that you can access them later."
-
-    @property
-    def example_args(self) -> list[str]:
-        return [
-            "Today I learned that I need to check my balance fore making decisions about how much to invest."
-        ]
-
-    def __call__(self, summary: str) -> str:
-        return summary
-
-
 class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
@@ -351,10 +338,30 @@ class GetPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
+class RememberPastLearnings(Function):
+    def __init__(self, long_term_memory: LongTermMemory) -> None:
+        self.long_term_memory = long_term_memory
+        super().__init__()
+
+    @property
+    def description(self) -> str:
+        return """Use this function to fetch information about the previous actions you executed. Examples of past 
+        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
+        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
+        markets you requested, among others.
+        """
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> t.Sequence[LongTermMemories]:
+        return self.long_term_memory.search()
+
+
 MISC_FUNCTIONS = [
     Sum,
     Product,
-    # SummarizeLearning,
 ]
 
 # Functions that interact with the prediction markets
