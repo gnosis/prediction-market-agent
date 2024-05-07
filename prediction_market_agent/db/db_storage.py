@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict, Sequence
 
 from loguru import logger
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import utcnow, check_not_none
 from sqlmodel import Session, SQLModel, create_engine, desc, select
 
 from prediction_market_agent.db.models import LongTermMemories
@@ -11,15 +11,11 @@ from prediction_market_agent.utils import DBKeys
 
 class DBStorage:
     def __init__(self, sqlalchemy_db_url: str | None = None):
-        if not sqlalchemy_db_url:
-            keys = DBKeys()
-            if not keys.sqlalchemy_db_url:
-                raise EnvironmentError(
-                    "Cannot initialize DBHandler without a valid sqlalchemy_db_url"
-                )
-            sqlalchemy_db_url = keys.sqlalchemy_db_url
-
-        self.engine = create_engine(sqlalchemy_db_url)
+        self.engine = create_engine(
+            sqlalchemy_db_url
+            if sqlalchemy_db_url
+            else check_not_none(DBKeys().SQLALCHEMY_DB_URL)
+        )
 
     def _initialize_db(self) -> None:
         """

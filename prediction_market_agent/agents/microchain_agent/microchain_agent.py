@@ -25,12 +25,12 @@ Only output valid Python function calls.
 """
 
 
-def get_agent(
+def build_agent(
     market_type: MarketType,
     model: str,
     api_base: str = "https://api.openai.com/v1",
+    long_term_memory: LongTermMemory | None = None,
 ) -> Agent:
-    market_type = MarketType.OMEN
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
@@ -41,11 +41,8 @@ def get_agent(
     for function in OMEN_FUNCTIONS:
         engine.register(function())
 
-    # This description below serves to unique identify agent entries on the LTM, and should be
-    # unique across instances (i.e. markets).
-    unique_task_description = f"microchain-agent-demo-{market_type}"
-    long_term_memory = LongTermMemory(unique_task_description, DBStorage())
-    engine.register(RememberPastLearnings(long_term_memory))
+    if long_term_memory:
+        engine.register(RememberPastLearnings(long_term_memory))
 
     generator = OpenAIChatGenerator(
         model=model,
@@ -69,10 +66,16 @@ def main(
     iterations: int = 10,
     seed_prompt: str | None = None,
 ) -> None:
-    agent = get_agent(
+    # This description below serves to unique identify agent entries on the LTM, and should be
+    # unique across instances (i.e. markets).
+    unique_task_description = f"microchain-agent-demo-{market_type}"
+    long_term_memory = LongTermMemory(unique_task_description, DBStorage())
+
+    agent = build_agent(
         market_type=market_type,
         api_base=api_base,
         model=model,
+        long_term_memory=long_term_memory,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']

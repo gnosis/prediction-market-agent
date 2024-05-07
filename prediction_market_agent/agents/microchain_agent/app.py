@@ -11,7 +11,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
-from prediction_market_agent.agents.microchain_agent.microchain_agent import get_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
 from prediction_market_agent.agents.microchain_agent.utils import (
     has_been_run_past_initialization,
 )
@@ -65,7 +65,7 @@ model = check_not_none(model)
 
 # Initialize the agent
 if "agent" not in st.session_state:
-    st.session_state.agent = get_agent(market_type=MarketType.OMEN, model=model)
+    st.session_state.agent = build_agent(market_type=MarketType.OMEN, model=model)
     st.session_state.agent.reset()
     st.session_state.agent.build_initial_messages()
     st.session_state.running_cost = 0.0
