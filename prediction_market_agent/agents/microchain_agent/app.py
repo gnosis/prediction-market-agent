@@ -77,10 +77,10 @@ def maybe_initialize_agent(model: str) -> None:
 
 
 def get_market_function_bullet_point_list() -> str:
-    l = ""
+    bullet_points = ""
     for function in MARKET_FUNCTIONS:
-        l += f"  - {function.__name__}\n"
-    return l
+        bullet_points += f"  - {function.__name__}\n"
+    return bullet_points
 
 
 st.set_page_config(
