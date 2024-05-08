@@ -94,12 +94,15 @@ def get_example_market_id(market_type: MarketType) -> str:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
+def get_initial_history_length(agent: Agent) -> int:
+    initialized_history_length = 1
+    if agent.bootstrap:
+        initialized_history_length += len(agent.bootstrap) * 2
+    return initialized_history_length
+
+
 def has_been_run_past_initialization(agent: Agent) -> bool:
     if not hasattr(agent, "history"):
         return False
 
-    initialized_history_length = 1
-    if agent.bootstrap:
-        initialized_history_length += len(agent.bootstrap) * 2
-
-    return len(agent.history) > initialized_history_length
+    return len(agent.history) > get_initial_history_length(agent)
