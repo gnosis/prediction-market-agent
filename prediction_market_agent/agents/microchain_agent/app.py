@@ -12,6 +12,7 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
+from prediction_market_agent.agents.microchain_agent.functions import MARKET_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
@@ -64,13 +65,22 @@ def agent_is_initialized() -> bool:
 def maybe_initialize_agent(model: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
-        st.session_state.agent = build_agent(market_type=MarketType.OMEN, model=model)
+        st.session_state.agent = build_agent(
+            market_type=MarketType.OMEN, model=model, allow_stop=False
+        )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
         st.session_state.running_cost = 0.0
 
         # Add a callback to display the agent's history after each run
         st.session_state.agent.on_iteration_end = display_new_history_callback
+
+
+def get_market_function_bullet_point_list() -> str:
+    l = ""
+    for function in MARKET_FUNCTIONS:
+        l += f"  - {function.__name__}\n"
+    return l
 
 
 st.set_page_config(
@@ -111,13 +121,19 @@ with st.sidebar:
         "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/prediction_market_agent/agents/microchain_agent)"
     )
 
-st.write(
+with st.expander(
     "Interact with an autonomous agent that participates in prediction "
-    "markets. Click 'Run' to see the agent in action, or bootstrap the agent "
-    "with your own reasoning. It is equipped with tools to access the "
-    "prediction market APIs, and can use its own reasoning to guide its "
-    "betting strategy."
-)
+    "markets. More info..."
+):
+    st.markdown(
+        "To start, click 'Run' to see the agent in action, or bootstrap the "
+        "agent with your own reasoning."
+    )
+    st.markdown(
+        "It is equipped with the following tools to access the "
+        "[AIOmen](https://aiomen.eth.limo/) prediction market APIs:"
+    )
+    st.markdown(get_market_function_bullet_point_list())
 
 # Placeholder for the agent's history
 history_container = st.container()
