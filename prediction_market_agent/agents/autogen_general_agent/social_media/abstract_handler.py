@@ -1,5 +1,5 @@
-from abc import ABCMeta, abstractmethod
 import typing as t
+from abc import ABCMeta, abstractmethod
 
 
 class AbstractSocialMediaHandler(metaclass=ABCMeta):
