@@ -113,7 +113,7 @@ with st.sidebar:
     st.divider()
     st.subheader("Built by Gnosis AI")
     st.image(
-        "https://assets-global.website-files.com/63692bf32544bee8b1836ea6/63bea29e26bbff45e81efe4a_gnosis-owl-cream.png",  # TODO change to in-repo link
+        "https://assets-global.website-files.com/63692bf32544bee8b1836ea6/63bea29e26bbff45e81efe4a_gnosis-owl-cream.png",
         width=30,
     )
 
