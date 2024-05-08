@@ -22,11 +22,6 @@ from prediction_market_agent.agents.autogen_general_agent.prompts import (
 from prediction_market_agent.utils import APIKeys
 
 
-# We have an influencer and a critic. Based on https://microsoft.github.io/autogen/docs/notebooks/agentchat_nestedchat/.
-
-
-# Added this class because properties are not automatically dumped when doing class.dict(include=...),
-# hence new class with less fields is the easiest approach.
 class BetInputPrompt(BaseModel):
     title: str
     boolean_outcome: bool
@@ -82,7 +77,7 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
         system_message="""
         You are a professional influencer, known for your insightful and engaging tweets.
         You transform complex concepts into compelling narratives.
-        You should imporve the quality of the content based on the feedback from the user.
+        You should improve the quality of the content based on the feedback from the user.
         You must always return only the tweet.
         """,
     )
@@ -106,13 +101,8 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
 
 
 def deduplicate_bets(bets: list[OmenBet]) -> list[OmenBet]:
-    seen_titles = set()
-    unique = []
-    for bet in bets:
-        if bet.title not in seen_titles:
-            unique.append(bet)
-            seen_titles.add(bet.title)
-    return unique
+    seen_titles = {bet.title: bet for bet in bets}
+    return list(seen_titles.values())
 
 
 def build_social_media_text(
@@ -194,7 +184,6 @@ def build_social_media_text(
         )
 
     tweet = res.summary
-    logger.debug(f"Cast to post - {tweet}")
     return str(
         tweet
     )  # Casting needed as summary is of type any and no Pydantic support

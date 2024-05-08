@@ -22,13 +22,6 @@ class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
-    FARCASTER_PRIVATE_KEY: t.Optional[SecretStr] = None
-
-    TWITTER_ACCESS_TOKEN: t.Optional[SecretStr] = None
-    TWITTER_ACCESS_TOKEN_SECRET: t.Optional[SecretStr] = None
-    TWITTER_BEARER_TOKEN: t.Optional[SecretStr] = None
-    TWITTER_API_KEY: t.Optional[SecretStr] = None
-    TWITTER_API_KEY_SECRET: t.Optional[SecretStr] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
@@ -46,6 +39,22 @@ class APIKeys(APIKeysBase):
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
             self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+
+class SocialMediaAPIKeys(APIKeys):
+    FARCASTER_PRIVATE_KEY: t.Optional[SecretStr] = None
+    TWITTER_ACCESS_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_ACCESS_TOKEN_SECRET: t.Optional[SecretStr] = None
+    TWITTER_BEARER_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_API_KEY: t.Optional[SecretStr] = None
+    TWITTER_API_KEY_SECRET: t.Optional[SecretStr] = None
+
+    @property
+    def farcaster_private_key(self) -> SecretStr:
+        return check_not_none(
+            self.FARCASTER_PRIVATE_KEY,
+            "FARCASTER_PRIVATE_KEY missing in the environment.",
         )
 
     @property

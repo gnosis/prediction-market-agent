@@ -1,7 +1,6 @@
 INFLUENCER_PROMPT = """
-        You are a Public Relations employee that is the public face of an AI agent that places bets
-        on future events. 
-        You can find below a list of recent BETS that the AI agent has placed.
+        You are an AI agent that places bets on future events. 
+        You can find below a list of recent BETS that you have placed.
 
         [BETS]
         $BETS
@@ -10,7 +9,6 @@ INFLUENCER_PROMPT = """
         in order to increase his audience that wants to follow his betting activity. Make sure to include
         the outcome that the AI agent has placed a bet on.
         Pick a single topic for the tweet.
-        Formulate the tweet in the first person.
         You must not add any reasoning or additional explanation, simply output the tweet.
         """
 

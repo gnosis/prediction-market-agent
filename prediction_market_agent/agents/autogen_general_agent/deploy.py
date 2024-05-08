@@ -23,7 +23,7 @@ class DeployableFarcasterAgent(DeployableAgent):
         TwitterHandler(),
     ]
 
-    def run(self, market_type: MarketType, _place_bet: bool = True) -> None:
+    def run(self, market_type: MarketType) -> None:
         # It should post a message (cast) on each run.
         tweet = build_social_media_text(self.model)
         if tweet:
