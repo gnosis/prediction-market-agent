@@ -54,6 +54,7 @@ faiss-cpu = "^1.8.0" # TODO remove with https://github.com/gnosis/prediction-mar
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.18"
 mech-client = "^0.2.13"
+streamlit-extras = "^0.4.2"
 
 [build-system]
 requires = ["poetry-core"]
