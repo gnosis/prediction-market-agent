@@ -6,5 +6,5 @@ class AbstractSocialMediaHandler(metaclass=ABCMeta):
     client: t.Any
 
     @abstractmethod
-    def post(self, text: str):
+    def post(self, text: str) -> None:
         pass

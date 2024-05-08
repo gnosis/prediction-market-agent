@@ -30,9 +30,6 @@ class APIKeys(APIKeysBase):
     TWITTER_API_KEY: t.Optional[SecretStr] = None
     TWITTER_API_KEY_SECRET: t.Optional[SecretStr] = None
 
-    TWITTER_CLIENT_ID: t.Optional[SecretStr] = None
-    TWITTER_CLIENT_SECRET: t.Optional[SecretStr] = None
-
     @property
     def serp_api_key(self) -> SecretStr:
         return check_not_none(
@@ -49,6 +46,41 @@ class APIKeys(APIKeysBase):
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
             self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def twitter_access_token(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_ACCESS_TOKEN,
+            "TWITTER_ACCESS_TOKEN missing in the environment.",
+        )
+
+    @property
+    def twitter_access_token_secret(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_ACCESS_TOKEN_SECRET,
+            "TWITTER_ACCESS_TOKEN_SECRET missing in the environment.",
+        )
+
+    @property
+    def twitter_bearer_token(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_BEARER_TOKEN,
+            "TWITTER_BEARER_TOKEN missing in the environment.",
+        )
+
+    @property
+    def twitter_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_API_KEY,
+            "TWITTER_API_KEY missing in the environment.",
+        )
+
+    @property
+    def twitter_api_key_secret(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_API_KEY_SECRET,
+            "TWITTER_API_KEY_SECRET missing in the environment.",
         )
 
 
