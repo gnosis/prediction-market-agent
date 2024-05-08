@@ -80,9 +80,10 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
         name="Writer",
         llm_config=llm_config,
         system_message="""
-        You are a professional writer, known for your insightful and engaging articles.
+        You are a professional influencer, known for your insightful and engaging tweets.
         You transform complex concepts into compelling narratives.
         You should imporve the quality of the content based on the feedback from the user.
+        You must always return only the tweet.
         """,
     )
 
@@ -93,7 +94,7 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
             You are a critic, known for your thoroughness and commitment to standards.
             Your task is to scrutinize content for any harmful elements or regulatory violations, ensuring
             all materials align with required guidelines.
-            For code
+            References to betting and gambling are allowed.
             """,
     )
 
@@ -114,7 +115,7 @@ def deduplicate_bets(bets: list[OmenBet]) -> list[OmenBet]:
     return unique
 
 
-def build_tweet(
+def build_social_media_text(
     model: str,
 ) -> str | None:
     """
@@ -146,12 +147,6 @@ def build_tweet(
 
     sh = OmenSubgraphHandler()
     one_month_ago = utcnow() - timedelta(days=30)
-    # markets_closing_soonest = sh.get_omen_binary_markets_simple(
-    #     limit=5,
-    #     sort_by=SortBy.CLOSING_SOONEST,
-    #     filter_by=FilterBy.OPEN,
-    #     created_after=one_year_ago,
-    # )
     reference_agent = Web3.to_checksum_address(
         "0xc918c15b87746e6351e5f0646ddcaaca11af8568"
     )  # Think-thoroughly
@@ -173,7 +168,6 @@ def build_tweet(
     # ToDO - fetch agent reasoning from DB and construct better tweets
     #  See https://github.com/gnosis/prediction-market-agent/issues/150
 
-    model: str = "gpt-4-turbo-2024-04-09"
     bets_last_24h.sort(key=lambda x: x.creation_datetime)
     task = Template(INFLUENCER_PROMPT).substitute(
         BETS=[
@@ -204,4 +198,3 @@ def build_tweet(
     return str(
         tweet
     )  # Casting needed as summary is of type any and no Pydantic support
-    return ""

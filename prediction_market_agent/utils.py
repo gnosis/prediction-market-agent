@@ -24,6 +24,15 @@ class APIKeys(APIKeysBase):
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     FARCASTER_PRIVATE_KEY: t.Optional[SecretStr] = None
 
+    TWITTER_ACCESS_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_ACCESS_TOKEN_SECRET: t.Optional[SecretStr] = None
+    TWITTER_BEARER_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_API_KEY: t.Optional[SecretStr] = None
+    TWITTER_API_KEY_SECRET: t.Optional[SecretStr] = None
+
+    TWITTER_CLIENT_ID: t.Optional[SecretStr] = None
+    TWITTER_CLIENT_SECRET: t.Optional[SecretStr] = None
+
     @property
     def serp_api_key(self) -> SecretStr:
         return check_not_none(
