@@ -10,6 +10,7 @@ INFLUENCER_PROMPT = """
         in order to increase his audience that wants to follow his betting activity. Make sure to include
         the outcome that the AI agent has placed a bet on.
         Pick a single topic for the tweet.
+        Formulate the tweet in the first person.
         Do not add any reasoning or additional explanation, simply output the tweet.
         """
 
