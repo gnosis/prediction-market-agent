@@ -178,9 +178,8 @@ with history_container:
     if agent_is_initialized() and has_been_run_past_initialization(
         st.session_state.agent
     ):
-        st.info(
-            "Run complete. Click 'Run' to allow the agent to continue, or add your "
-            "own reasoning."
-        )
         # Display running cost
-        # st.info(f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}")  # TODO debug why always == 0.0
+        if st.session_state.running_cost > 0.0:
+            st.info(
+                f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
+            )  # TODO debug why always == 0.0
