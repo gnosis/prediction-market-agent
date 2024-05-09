@@ -23,11 +23,11 @@ class BetInputPrompt(BaseModel):
     creation_datetime: datetime
 
     @staticmethod
-    def from_bet(bet: Bet):
+    def from_bet(bet: Bet) -> "BetInputPrompt":
         return BetInputPrompt(
             title=bet.market_question,
             boolean_outcome=bet.outcome,
-            collateral_amount=bet.amount,
+            collateral_amount=bet.amount.amount,
             creation_datetime=bet.created_time,
         )
 

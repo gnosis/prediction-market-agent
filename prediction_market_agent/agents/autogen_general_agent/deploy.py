@@ -2,9 +2,7 @@ from datetime import timedelta
 
 from loguru import logger
 from prediction_market_agent_tooling.config import PrivateCredentials
-from prediction_market_agent_tooling.deploy.agent import (
-    DeployableTraderAgent,
-)
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -48,11 +46,11 @@ class DeployableSocialMediaAgent(DeployableTraderAgent):
         market = markets[0]
         better_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
         one_day_ago = utcnow() - timedelta(days=1)
-        return market.get_latest_bets(
+        return market.get_bets_made_since(
             better_address=better_address, start_time=one_day_ago
         )
 
-    def post(self, tweet: str | None):
+    def post(self, tweet: str | None) -> None:
         if not tweet:
             logger.info("No tweet was produced. Exiting.")
             return
