@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from enum import Enum
 from string import Template
 from typing import Any, Dict, Optional
@@ -6,14 +6,8 @@ from typing import Any, Dict, Optional
 import autogen
 from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
-from loguru import logger
-from prediction_market_agent_tooling.markets.omen.data_models import OmenBet
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.markets.data_models import Bet
 from pydantic import BaseModel
-from web3 import Web3
 
 from prediction_market_agent.agents.autogen_general_agent.prompts import (
     CRITIC_PROMPT,
@@ -25,9 +19,17 @@ from prediction_market_agent.utils import APIKeys
 class BetInputPrompt(BaseModel):
     title: str
     boolean_outcome: bool
-    collateralAmountUSD: float
+    collateral_amount: float
     creation_datetime: datetime
-    probability: float
+
+    @staticmethod
+    def from_bet(bet: Bet):
+        return BetInputPrompt(
+            title=bet.market_question,
+            boolean_outcome=bet.outcome,
+            collateral_amount=bet.amount,
+            creation_datetime=bet.created_time,
+        )
 
 
 class AutogenAgentType(str, Enum):
@@ -100,14 +102,7 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
-def deduplicate_bets(bets: list[OmenBet]) -> list[OmenBet]:
-    seen_titles = {bet.title: bet for bet in bets}
-    return list(seen_titles.values())
-
-
-def build_social_media_text(
-    model: str,
-) -> str | None:
+def build_social_media_text(model: str, bets: list[Bet]) -> str | None:
     """
     Builds a tweet based on the five markets on Omen that are closing soonest.
 
@@ -135,41 +130,11 @@ def build_social_media_text(
         trigger=writer,
     )
 
-    sh = OmenSubgraphHandler()
-    one_month_ago = utcnow() - timedelta(days=30)
-    reference_agent = Web3.to_checksum_address(
-        "0xc918c15b87746e6351e5f0646ddcaaca11af8568"
-    )  # Think-thoroughly
-    bets = sh.get_bets(better_address=reference_agent, start_time=one_month_ago)
-    # get unique titles
-    bets = deduplicate_bets(bets)
-    # get bets we placed 24h ago
-    one_day_ago = utcnow() - timedelta(days=1)
-
-    bets_last_24h = [
-        b
-        for b in bets
-        if b.creation_datetime.replace(tzinfo=timezone.utc) >= one_day_ago
-    ]
-    if len(bets_last_24h) == 0:
-        logger.info("No bets in the last 24h. Exiting.")
-        return None
-
     # ToDO - fetch agent reasoning from DB and construct better tweets
     #  See https://github.com/gnosis/prediction-market-agent/issues/150
 
-    bets_last_24h.sort(key=lambda x: x.creation_datetime)
     task = Template(INFLUENCER_PROMPT).substitute(
-        BETS=[
-            BetInputPrompt(
-                title=m.title,
-                boolean_outcome=m.boolean_outcome,
-                collateralAmountUSD=m.collateralAmountUSD,
-                creation_datetime=m.creation_datetime,
-                probability=m.probability,
-            )
-            for m in bets_last_24h
-        ]
+        BETS=[BetInputPrompt.from_bet(bet) for bet in bets]
     )
 
     # in case we trigger repeated runs, Cache makes it faster.
