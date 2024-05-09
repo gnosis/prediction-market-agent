@@ -14,7 +14,11 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
 )
 from prediction_market_agent.utils import APIKeys
 
-SYSTEM_PROMPT = """Act as a agent to maximise your profit.
+SYSTEM_PROMPT = """
+Act as a trader agent in prediction markets to maximise your profit.
+
+Research markets, buy tokens you consider undervalued, and sell tokens that you
+hold and consider overvalued.
 
 You can use the following functions:
 
@@ -29,10 +33,12 @@ def build_agent(
     model: str,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemory | None = None,
+    allow_stop: bool = True,
 ) -> Agent:
     engine = Engine()
     engine.register(Reasoning())
-    engine.register(Stop())
+    if allow_stop:
+        engine.register(Stop())
     for function in MISC_FUNCTIONS:
         engine.register(function())
     for function in MARKET_FUNCTIONS:
@@ -75,6 +81,7 @@ def main(
         api_base=api_base,
         model=model,
         long_term_memory=long_term_memory,
+        allow_stop=False,  # Prevent the agent from stopping itself
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']
