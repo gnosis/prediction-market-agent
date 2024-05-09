@@ -42,6 +42,57 @@ class APIKeys(APIKeysBase):
         )
 
 
+class SocialMediaAPIKeys(APIKeys):
+    FARCASTER_PRIVATE_KEY: t.Optional[SecretStr] = None
+    TWITTER_ACCESS_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_ACCESS_TOKEN_SECRET: t.Optional[SecretStr] = None
+    TWITTER_BEARER_TOKEN: t.Optional[SecretStr] = None
+    TWITTER_API_KEY: t.Optional[SecretStr] = None
+    TWITTER_API_KEY_SECRET: t.Optional[SecretStr] = None
+
+    @property
+    def farcaster_private_key(self) -> SecretStr:
+        return check_not_none(
+            self.FARCASTER_PRIVATE_KEY,
+            "FARCASTER_PRIVATE_KEY missing in the environment.",
+        )
+
+    @property
+    def twitter_access_token(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_ACCESS_TOKEN,
+            "TWITTER_ACCESS_TOKEN missing in the environment.",
+        )
+
+    @property
+    def twitter_access_token_secret(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_ACCESS_TOKEN_SECRET,
+            "TWITTER_ACCESS_TOKEN_SECRET missing in the environment.",
+        )
+
+    @property
+    def twitter_bearer_token(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_BEARER_TOKEN,
+            "TWITTER_BEARER_TOKEN missing in the environment.",
+        )
+
+    @property
+    def twitter_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_API_KEY,
+            "TWITTER_API_KEY missing in the environment.",
+        )
+
+    @property
+    def twitter_api_key_secret(self) -> SecretStr:
+        return check_not_none(
+            self.TWITTER_API_KEY_SECRET,
+            "TWITTER_API_KEY_SECRET missing in the environment.",
+        )
+
+
 def get_market_prompt(question: str) -> str:
     prompt = (
         f"Research and report on the following question:\n\n"
