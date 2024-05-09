@@ -34,19 +34,17 @@ class DeployableSocialMediaAgent(DeployableTraderAgent):
         # We just need one market to get latest bets.
 
         bets = self.get_bets(market_type=market_type)
+        # If no bets available for the last 24h, we skip posting.
+        if not bets:
+            logger.info("No bets available from last day. No post will be created.")
+            return
         tweet = build_social_media_text(market_type, bets)
         self.post(tweet)
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
-        markets = self.get_markets(market_type=market_type, limit=1)
-        if not markets:
-            raise EnvironmentError(
-                f"Could not load market of type {market_type}. Exiting."
-            )
-        market = markets[0]
         better_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
         one_day_ago = utcnow() - timedelta(days=1)
-        return market.get_bets_made_since(
+        return market_type.market_class.get_bets_made_since(
             better_address=better_address, start_time=one_day_ago
         )
 

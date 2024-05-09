@@ -102,9 +102,9 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
-def build_social_media_text(model: str, bets: list[Bet]) -> str | None:
+def build_social_media_text(model: str, bets: list[Bet]) -> str:
     """
-    Builds a tweet based on the five markets on Omen that are closing soonest.
+    Builds a tweet based on past betting activity from a given participant.
 
     This function utilizes the writer and critic agents to generate the tweet content. It first initializes the
     necessary agents based on the provided model. Then, it registers a chat between the writer and critic agents.
