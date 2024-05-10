@@ -55,7 +55,8 @@ def build_agent(
         api_base=api_base,
         temperature=0.7,
     )
-    agent = Agent(llm=LLM(generator=generator), engine=engine, max_retries=3)
+    agent = Agent(llm=LLM(generator=generator), engine=engine)
+    agent.max_tries = 3
     agent.prompt = SYSTEM_PROMPT.format(engine_help=engine.help)
     agent.bootstrap = [
         'Reasoning("I need to reason step by step. Start by assessing my '
