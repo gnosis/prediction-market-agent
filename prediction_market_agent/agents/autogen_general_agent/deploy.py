@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from loguru import logger
-from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -42,10 +41,9 @@ class DeployableSocialMediaAgent(DeployableTraderAgent):
         self.post(tweet)
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
-        better_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
         one_day_ago = utcnow() - timedelta(days=1)
         return market_type.market_class.get_bets_made_since(
-            better_address=better_address, start_time=one_day_ago
+            better_address=APIKeys().bet_from_address, start_time=one_day_ago
         )
 
     def post(self, tweet: str | None) -> None:

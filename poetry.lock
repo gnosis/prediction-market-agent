@@ -1614,13 +1614,13 @@ cython = ["cython"]
 
 [[package]]
 name = "dataclasses-json"
-version = "0.6.5"
+version = "0.6.6"
 description = "Easily serialize dataclasses to and from JSON."
 optional = false
 python-versions = "<4.0,>=3.7"
 files = [
-    {file = "dataclasses_json-0.6.5-py3-none-any.whl", hash = "sha256:f49c77aa3a85cac5bf5b7f65f4790ca0d2be8ef4d92c75e91ba0103072788a39"},
-    {file = "dataclasses_json-0.6.5.tar.gz", hash = "sha256:1c287594d9fcea72dc42d6d3836cf14848c2dc5ce88f65ed61b36b57f515fe26"},
+    {file = "dataclasses_json-0.6.6-py3-none-any.whl", hash = "sha256:e54c5c87497741ad454070ba0ed411523d46beb5da102e221efb873801b0ba85"},
+    {file = "dataclasses_json-0.6.6.tar.gz", hash = "sha256:0c09827d26fffda27f1be2fed7a7a01a29c5ddcd2eb6393ad5ebf9d77e9deae8"},
 ]
 
 [package.dependencies]
@@ -3699,13 +3699,13 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "langfuse"
-version = "2.29.3"
+version = "2.30.0"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langfuse-2.29.3-py3-none-any.whl", hash = "sha256:7471365dc19677eecbc82319c7785f6b8c41437eabe5716c9f262e2f0a2fc43c"},
-    {file = "langfuse-2.29.3.tar.gz", hash = "sha256:408873adc3e77725b94e2105be8e1c395f7b8a604f43aa28a772df02e49be088"},
+    {file = "langfuse-2.30.0-py3-none-any.whl", hash = "sha256:f5bb91f6fc8f16d99a0f685e57e2d2b2c00edc51c4238f499916a2e7f6810fb5"},
+    {file = "langfuse-2.30.0.tar.gz", hash = "sha256:22b2612ba1a78f6bbf173a287e7d77ba9ad9a640d440949a3a7f9c249a777278"},
 ]
 
 [package.dependencies]
@@ -5800,47 +5800,51 @@ name = "prediction-market-agent-tooling"
 version = "0.26.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = "<3.12,>=3.10"
-files = [
-    {file = "prediction_market_agent_tooling-0.26.0-py3-none-any.whl", hash = "sha256:ecbf909a99d8bbc99c9e7fac6ba5f883d82db1209a997445e6c434b76c939724"},
-    {file = "prediction_market_agent_tooling-0.26.0.tar.gz", hash = "sha256:346e959561f08c9ad1ec6ec2b1155af4453fe5077dbb2825918ef8993fed4380"},
-]
+python-versions = ">=3.10,<3.12"
+files = []
+develop = false
 
 [package.dependencies]
-autoflake = ">=2.2.1,<3.0.0"
-cron-validator = ">=1.0.8,<2.0.0"
-eth-account = ">=0.8.0,<0.9.0"
-eth-typing = ">=3.0.0,<4.0.0"
-functions-framework = ">=3.5.0,<4.0.0"
-google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
-google-cloud-functions = ">=1.16.0,<2.0.0"
-google-cloud-resource-manager = ">=1.12.0,<2.0.0"
-google-cloud-secret-manager = ">=2.18.2,<3.0.0"
-isort = ">=5.13.2,<6.0.0"
-langchain = {version = ">=0.1.9,<0.2.0", optional = true, markers = "extra == \"langchain\""}
+autoflake = "^2.2.1"
+cron-validator = "^1.0.8"
+eth-account = "^0.8.0"
+eth-typing = "^3.0.0"
+functions-framework = "^3.5.0"
+google-api-python-client = {version = "2.95.0", optional = true}
+google-cloud-functions = "^1.16.0"
+google-cloud-resource-manager = "^1.12.0"
+google-cloud-secret-manager = "^2.18.2"
+isort = "^5.13.2"
+langchain = {version = "^0.1.9", optional = true}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = ">=0.0.5,<0.0.6", optional = true, markers = "extra == \"langchain\""}
-langfuse = ">=2.27.1,<3.0.0"
-loguru = ">=0.7.2,<0.8.0"
-numpy = ">=1.26.4,<2.0.0"
-prompt-toolkit = ">=3.0.43,<4.0.0"
-pydantic = ">=2.6.1,<3.0.0"
-pydantic-settings = ">=2.1.0,<3.0.0"
-safe-cli = ">=1.0.0,<2.0.0"
-safe-eth-py = ">=6.0.0b14,<7.0.0"
-scikit-learn = ">=1.3.1,<2.0.0"
-streamlit = ">=1.31.0,<2.0.0"
-subgrounds = ">=1.8.1,<2.0.0"
-tabulate = ">=0.9.0,<0.10.0"
-tqdm = ">=4.66.2,<5.0.0"
-typer = ">=0.9.0,<0.10.0"
-types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
-types-requests = ">=2.31.0.0,<3.0.0.0"
-web3 = ">=6.15.1,<7.0.0"
+langchain-openai = {version = "^0.0.5", optional = true}
+langfuse = "^2.27.1"
+loguru = "^0.7.2"
+numpy = "^1.26.4"
+prompt-toolkit = "^3.0.43"
+pydantic = "^2.6.1"
+pydantic-settings = "^2.1.0"
+safe-cli = "^1.0.0"
+safe-eth-py = "^6.0.0b14"
+scikit-learn = "^1.3.1"
+streamlit = "^1.31.0"
+subgrounds = "^1.8.1"
+tabulate = "^0.9.0"
+tqdm = "^4.66.2"
+typer = "^0.9.0"
+types-pytz = "^2024.1.0.20240203"
+types-requests = "^2.31.0.0"
+web3 = "^6.15.1"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.1.9,<0.2.0)", "langchain-openai (>=0.0.5,<0.0.6)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
+reference = "evan/remove-private-credentials"
+resolved_reference = "dc4e027c92ac828dfcc24fe6db532f2e6368d978"
 
 [[package]]
 name = "preshed"
@@ -7852,13 +7856,13 @@ streamlit = ">=1.2"
 
 [[package]]
 name = "streamlit-card"
-version = "1.0.0"
+version = "1.0.2"
 description = "A streamlit component, to make UI cards"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "streamlit-card-1.0.0.tar.gz", hash = "sha256:be8b784d8145a4efe3c97c191db7727c96dea97912385957279ec42a7f547674"},
-    {file = "streamlit_card-1.0.0-py3-none-any.whl", hash = "sha256:625ab3cd1e5368c7d9c5aeeb52a67786183e0dba940d668c556fbae01149fb3f"},
+    {file = "streamlit_card-1.0.2-py3-none-any.whl", hash = "sha256:f5d01ce57d6481eb3ba44e504146f56a7b82907d6700f0c19266ed6381a9c58f"},
+    {file = "streamlit_card-1.0.2.tar.gz", hash = "sha256:8001cd5edd8a6e2db36ee81f37dc645f08f78c21a2ba968403176c68b4f33cb1"},
 ]
 
 [package.dependencies]
@@ -9287,4 +9291,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "e6696e9d259e6960304449d9977e9ea889b469caa0271cb0562e4c8cb5785cce"
+content-hash = "e373f9242641c28fe78181c8894bc022202588fd46f2d33f7cbd7bf721a12797"

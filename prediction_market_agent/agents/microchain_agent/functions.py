@@ -1,7 +1,6 @@
 import typing as t
 
 from microchain import Function
-from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -180,7 +179,7 @@ class BuyTokens(MarketFunction):
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = APIKeys().bet_from_address
 
         # Prevent the agent from spending recklessly!
         self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
@@ -249,7 +248,7 @@ class SellTokens(MarketFunction):
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -316,7 +315,7 @@ class GetBalance(MarketFunction):
 
 class GetPositions(MarketFunction):
     def __init__(self, market_type: MarketType) -> None:
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
 
     @property
@@ -331,7 +330,7 @@ class GetPositions(MarketFunction):
         return []
 
     def __call__(self) -> list[str]:
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = APIKeys().bet_from_address
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address
         )
