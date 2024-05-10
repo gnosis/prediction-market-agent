@@ -1,7 +1,10 @@
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
+from langchain.tools.tavily_search import TavilySearchResults
+from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_core.language_models import BaseChatModel
+from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
@@ -21,7 +24,6 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     RESEARCH_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
 )
-from prediction_market_agent.tools.custom_crewai_tools import TavilyDevTool
 from prediction_market_agent.utils import APIKeys
 
 
@@ -57,8 +59,10 @@ class CrewAIAgentSubquestions:
             llm=self._build_llm(),
         )
 
-    def _build_tavily_search(self) -> TavilyDevTool:
-        return TavilyDevTool()
+    def _build_tavily_search(self) -> TavilySearchResults:
+        api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
+        api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
+        return TavilySearchResults(api_wrapper=api_wrapper)
 
     def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()

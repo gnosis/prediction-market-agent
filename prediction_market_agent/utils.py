@@ -38,7 +38,7 @@ class APIKeys(APIKeysBase):
     @property
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
-            self.TAVILY_API_KEY, "OPENAI_API_KEY missing in the environment."
+            self.TAVILY_API_KEY, "TAVILY_API_KEY missing in the environment."
         )
 
 
