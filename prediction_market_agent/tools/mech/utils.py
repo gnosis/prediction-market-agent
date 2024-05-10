@@ -6,6 +6,7 @@ from enum import Enum
 
 from mech_client.interact import ConfirmationType, interact
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.loggers import logger
 from pydantic import BaseModel
 
 from prediction_market_agent.utils import APIKeys
@@ -47,8 +48,11 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResponse:
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures
         mech_strategy_env_var = "MECHX_LEDGER_DEFAULT_GAS_PRICE_STRATEGY"
-        if os.getenv(mech_strategy_env_var):
-            raise ValueError(f"{mech_strategy_env_var} already set in the environment.")
+        if (
+            os.getenv(mech_strategy_env_var)
+            and os.getenv(mech_strategy_env_var) != "gas_station"
+        ):
+            logger.warning(f"Overwriting {mech_strategy_env_var} with 'gas_station'")
         os.environ[mech_strategy_env_var] = "gas_station"
 
         response = interact(
