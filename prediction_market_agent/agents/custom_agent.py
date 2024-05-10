@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 import requests
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,

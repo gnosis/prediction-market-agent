@@ -1,6 +1,6 @@
 """
 Entrypoint for running the agent in GKE.
-If the agent adheres to PMAT standard (subclasses DeployableAgent), 
+If the agent adheres to PMAT standard (subclasses deployable agent), 
 simply add the agent to the `RunnableAgent` enum and then `RUNNABLE_AGENTS` dict.
 
 Can also be executed locally, simply by running `python prediction_market_agent/run_agent.py <agent> <market_type>`.
@@ -11,9 +11,15 @@ from enum import Enum
 import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.autogen_general_agent.deploy import (
+    DeployableSocialMediaAgent,
+)
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
+)
+from prediction_market_agent.agents.microchain_agent.deploy import (
+    DeployableMicrochainAgent,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
@@ -28,6 +34,9 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
+    microchain = "microchain"
+    # Social media (Farcaster + Twitter)
+    social_media = "social_media"
 
 
 RUNNABLE_AGENTS = {
@@ -35,6 +44,8 @@ RUNNABLE_AGENTS = {
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
+    RunnableAgent.microchain: DeployableMicrochainAgent,
+    RunnableAgent.social_media: DeployableSocialMediaAgent,
 }
 
 

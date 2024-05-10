@@ -15,7 +15,7 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetMarketProbability,
     GetMarkets,
     GetPositions,
-    PredictProbabilityForQuestionRemote,
+    PredictProbabilityForQuestion,
     SellNo,
     SellYes,
 )
@@ -159,7 +159,7 @@ def test_predict_probability(market_type: MarketType) -> None:
     """
     Test calling a mech to predict the probability of a market
     """
-    predict_probability = PredictProbabilityForQuestionRemote(market_type=market_type)
+    predict_probability = PredictProbabilityForQuestion(market_type=market_type)
     market = get_binary_markets(market_type=market_type)[0]
     p_yes = predict_probability(market.id)
     assert 0.0 <= float(p_yes) <= 1.0

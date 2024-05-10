@@ -1,10 +1,14 @@
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
+from langchain.tools.tavily_search import TavilySearchResults
+from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_core.language_models import BaseChatModel
+from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
-from loguru import logger
+from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -18,8 +22,8 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_OUTPUT,
     RESEARCH_OUTCOME_PROMPT,
+    RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
 )
-from prediction_market_agent.tools.custom_crewai_tools import TavilyDevTool
 from prediction_market_agent.utils import APIKeys
 
 
@@ -55,8 +59,10 @@ class CrewAIAgentSubquestions:
             llm=self._build_llm(),
         )
 
-    def _build_tavily_search(self) -> TavilyDevTool:
-        return TavilyDevTool()
+    def _build_tavily_search(self) -> TavilySearchResults:
+        api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
+        api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
+        return TavilySearchResults(api_wrapper=api_wrapper)
 
     def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()
@@ -113,12 +119,20 @@ class CrewAIAgentSubquestions:
         logger.info(f"Created possible hypothetical scenarios: {scenarios.scenarios}")
         return scenarios
 
-    def generate_prediction_for_one_outcome(self, sentence: str) -> Answer | None:
+    def generate_prediction_for_one_outcome(
+        self,
+        sentence: str,
+        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
+    ) -> Answer | None:
         researcher = self._get_researcher()
         predictor = self._get_predictor()
 
         task_research_one_outcome = Task(
-            description=RESEARCH_OUTCOME_PROMPT,
+            description=(
+                RESEARCH_OUTCOME_PROMPT
+                if not previous_scenarios_and_answers
+                else RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT
+            ),
             agent=researcher,
             expected_output=RESEARCH_OUTCOME_OUTPUT,
         )
@@ -136,7 +150,21 @@ class CrewAIAgentSubquestions:
             process=Process.sequential,
         )
 
-        result = crew.kickoff(inputs={"sentence": sentence})
+        inputs = {"sentence": sentence}
+        if previous_scenarios_and_answers:
+            inputs["previous_scenarios_with_probabilities"] = "\n".join(
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                for s, a in previous_scenarios_and_answers
+            )
+
+        try:
+            result = crew.kickoff(inputs=inputs)
+        except APIError as e:
+            logger.error(
+                f"Could not retrieve response from the model provider because of {e}"
+            )
+            return None
+
         try:
             output = Answer.model_validate_json(result)
             return output
@@ -147,7 +175,7 @@ class CrewAIAgentSubquestions:
             return None
 
     def generate_final_decision(
-        self, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
+        self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
     ) -> Answer:
         predictor = self._get_predictor()
 
@@ -164,13 +192,15 @@ class CrewAIAgentSubquestions:
             verbose=2,
         )
 
+        logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
             inputs={
-                "scenarios_with_probabilities": [
-                    (i[0], i[1].model_dump()) for i in scenarios_with_probabilities
-                ],
+                "scenarios_with_probabilities": "\n".join(
+                    f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                    for s, a in scenarios_with_probabilities
+                ),
                 "number_of_scenarios": len(scenarios_with_probabilities),
-                "scenario_to_assess": scenarios_with_probabilities[0][0],
+                "scenario_to_assess": question,
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
@@ -179,27 +209,38 @@ class CrewAIAgentSubquestions:
         )
         return output
 
-    def answer_binary_market(self, question: str) -> Answer | None:
+    def answer_binary_market(
+        self, question: str, n_iterations: int = 1
+    ) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 
-        sub_predictions = par_generator(
-            hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
-            lambda x: (x, self.generate_prediction_for_one_outcome(x)),
-        )
-
-        outcomes_with_probs = []
-        for scenario, prediction in sub_predictions:
-            if prediction is None:
-                continue
-            outcomes_with_probs.append((scenario, prediction))
+        scenarios_with_probs: list[tuple[str, Answer]] = []
+        for iteration in range(n_iterations):
             logger.info(
-                f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
+                f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
+            sub_predictions = par_generator(
+                hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
+                lambda x: (
+                    x,
+                    self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
+                ),
+            )
+
+            scenarios_with_probs = []
+            for scenario, prediction in sub_predictions:
+                if prediction is None:
+                    continue
+                scenarios_with_probs.append((scenario, prediction))
+                logger.info(
+                    f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
+                )
+
         final_answer = (
-            self.generate_final_decision(outcomes_with_probs)
-            if outcomes_with_probs
+            self.generate_final_decision(question, scenarios_with_probs)
+            if scenarios_with_probs
             else None
         )
         return final_answer

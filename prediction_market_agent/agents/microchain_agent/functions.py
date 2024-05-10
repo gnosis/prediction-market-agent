@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
@@ -15,6 +16,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
+from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
@@ -131,7 +133,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         return str(response.p_yes)
 
 
-class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
+class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
@@ -164,6 +166,10 @@ class BuyTokens(MarketFunction):
             outcome=self.outcome, market_type=market_type
         )
         self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+
+        # Prevent the agent from spending recklessly!
+        self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
+
         super().__init__(market_type=market_type)
 
     @property
@@ -172,6 +178,7 @@ class BuyTokens(MarketFunction):
             f"Use this function to buy {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
             f"second parameter specifies how much {self.currency} you spend."
+            f"This is capped at {self.MAX_AMOUNT}{self.currency}."
         )
 
     @property
@@ -179,7 +186,9 @@ class BuyTokens(MarketFunction):
         return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
-        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
+        if amount > self.MAX_AMOUNT:
+            return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
+
         account_balance = float(get_balance(market_type=self.market_type).amount)
         if account_balance < amount:
             return (
@@ -187,6 +196,7 @@ class BuyTokens(MarketFunction):
                 f"large enough to buy {amount} tokens."
             )
 
+        market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
         before_balance = market.get_token_balance(
             user_id=self.user_address,
             outcome=self.outcome,
@@ -274,21 +284,6 @@ class SellNo(SellTokens):
         )
 
 
-class SummarizeLearning(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function summarize your learnings and save them so that you can access them later."
-
-    @property
-    def example_args(self) -> list[str]:
-        return [
-            "Today I learned that I need to check my balance fore making decisions about how much to invest."
-        ]
-
-    def __call__(self, summary: str) -> str:
-        return summary
-
-
 class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
@@ -328,17 +323,37 @@ class GetPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
+class RememberPastLearnings(Function):
+    def __init__(self, long_term_memory: LongTermMemory) -> None:
+        self.long_term_memory = long_term_memory
+        super().__init__()
+
+    @property
+    def description(self) -> str:
+        return """Use this function to fetch information about the previous actions you executed. Examples of past 
+        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
+        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
+        markets you requested, among others.
+        """
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> t.Sequence[LongTermMemories]:
+        return self.long_term_memory.search()
+
+
 MISC_FUNCTIONS = [
     Sum,
     Product,
-    # SummarizeLearning,
 ]
 
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    PredictProbabilityForQuestionRemote,
+    PredictProbabilityForQuestion,
     GetBalance,
     BuyYes,
     BuyNo,

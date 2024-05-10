@@ -1,5 +1,6 @@
 import typing as t
 
+from microchain import Agent
 from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
@@ -91,3 +92,17 @@ def get_example_market_id(market_type: MarketType) -> str:
         return "0x0020d13c89140b47e10db54cbd53852b90bc1391"
     else:
         raise ValueError(f"Market type '{market_type}' not supported")
+
+
+def get_initial_history_length(agent: Agent) -> int:
+    initialized_history_length = 1
+    if agent.bootstrap:
+        initialized_history_length += len(agent.bootstrap) * 2
+    return initialized_history_length
+
+
+def has_been_run_past_initialization(agent: Agent) -> bool:
+    if not hasattr(agent, "history"):
+        return False
+
+    return len(agent.history) > get_initial_history_length(agent)

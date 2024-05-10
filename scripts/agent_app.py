@@ -4,9 +4,16 @@ PYTHONPATH=. streamlit run scripts/agent_app.py
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
 """
 
+import streamlit as st
+
+st.set_page_config(layout="wide")
+
+from prediction_market_agent.utils import patch_sqlite3
+
+patch_sqlite3()
+
 import typing as t
 
-import streamlit as st
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -19,13 +26,15 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
 )
-from prediction_market_agent.tools.streamlit_utils import add_sink_to_logger
+from prediction_market_agent.tools.streamlit_utils import (
+    add_sink_to_logger,
+    streamlit_escape,
+)
 
 AGENTS: list[
     t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
 ] = [DeployableKnownOutcomeAgent, DeployableThinkThoroughlyAgent]
 
-st.set_page_config(layout="wide")
 add_sink_to_logger()
 
 st.title("Agent's decision-making process")
@@ -107,4 +116,8 @@ for idx, (column, AgentClass) in enumerate(
                 bet_amount = agent.calculate_bet_amount(answer, market)
 
         st.warning(f"Took {costs.time / 60:.2f} minutes and {costs.cost:.2f} USD.")
-        st.success(f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!")
+        st.success(
+            streamlit_escape(
+                f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!"
+            )
+        )
