@@ -1,5 +1,4 @@
 import typer
-from functions import RememberPastLearnings
 from microchain import LLM, Agent, Engine, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -7,6 +6,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
     MISC_FUNCTIONS,
+    RememberPastLearnings,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
