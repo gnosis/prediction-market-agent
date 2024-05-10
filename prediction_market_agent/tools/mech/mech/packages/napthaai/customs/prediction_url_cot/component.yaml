@@ -1,0 +1,37 @@
+name: prediction_url_cot
+author: napthaai
+version: 0.1.0
+type: custom
+description: A tool for making binary predictions on markets.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeiflni5dkn5fqe7fnu4lgbqxzfrgochhqfbgzwz3vlf5grijp3nkpm
+  prediction_url_cot.py: bafybeiczvut645b7xma2x6ivadhdbbqrvwusjoczidv2bwfbhidazshlfu
+fingerprint_ignore_patterns: []
+entry_point: prediction_url_cot.py
+callable: run
+dependencies:
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  requests: {}
+  markdownify:
+    version: ==0.11.6
+  readability-lxml:
+    version: ==0.8.1
+  anthropic:
+    version: ==0.21.3
+  tiktoken:
+    version: ==0.5.1
+  pypdf2:
+    version: ==3.0.1
+  numpy:
+    version: '>=1.19.0'
+  pydantic:
+    version: '>=1.9.0,<3'
+  openai:
+    version: ==1.11.0
+  docstring-parser:
+    version: ==0.15

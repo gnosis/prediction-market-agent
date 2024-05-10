@@ -1,0 +1,367 @@
+name: mech
+author: valory
+version: 0.1.0
+description: A decentralised task execution engine.
+aea_version: '>=1.0.0, <2.0.0'
+license: Apache-2.0
+fingerprint:
+  README.md: bafybeif7ia4jdlazy6745ke2k2x5yoqlwsgwr6sbztbgqtwvs3ndm2p7ba
+fingerprint_ignore_patterns: []
+agent: valory/mech:0.1.0:bafybeihzgbm35ykx3xvlbfbvqzhmttz3bec4ehh2wcaqi2d7pg6wrjme6e
+number_of_agents: 4
+deployment:
+  agent:
+    ports:
+      0:
+        8000: 8000
+      1:
+        8001: 8000
+      2:
+        8002: 8000
+      3:
+        8003: 8000
+---
+public_id: valory/mech_abci:0.1.0
+type: skill
+0:
+  models:
+    params:
+      args:
+        gas_params: &id001
+          gas_price: ${GAS_PRICE:int:null}
+          max_fee_per_gas: ${MAX_FEE_PER_GAS:int:null}
+          max_priority_fee_per_gas: ${MAX_PRIORITY_FEE_PER_GAS:int:null}
+        multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+        on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+        reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+        round_timeout_seconds: ${ROUND_TIMEOUT:float:150.0}
+        use_polling: ${USE_POLLING:bool:false}
+        service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        setup: &id002
+          all_participants: ${ALL_PARTICIPANTS:list:[]}
+          safe_contract_address: ${SAFE_CONTRACT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+          consensus_threshold: ${CONSENSUS_THRESHOLD:int:null}
+        share_tm_config_on_startup: ${USE_ACN:bool:false}
+        tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+        tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        termination_sleep: ${TERMINATION_SLEEP:int:900}
+        use_termination: ${USE_TERMINATION:bool:false}
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        manual_gas_limit: ${MANUAL_GAS_LIMIT:int:1000000}
+        reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
+        service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+        use_slashing: ${USE_SLASHING:bool:false}
+        termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
+        slash_cooldown_hours: ${SLASH_COOLDOWN_HOURS:int:3}
+        slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
+        light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
+        serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
+        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
+        agent_id: ${AGENT_ID:int:3}
+        metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
+        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:list:[["0x77af31De935740567Cf4fF1986D04B2c964A786a",["0x0000000000000000000000000000000000000000","1"]]]}
+        agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
+        minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
+1:
+  models:
+    params:
+      args:
+        gas_params: *id001
+        multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+        on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+        reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+        manual_gas_limit: ${MANUAL_GAS_LIMIT:int:1000000}
+        round_timeout_seconds: ${ROUND_TIMEOUT:float:150.0}
+        use_polling: ${USE_POLLING:bool:false}
+        service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        setup: *id002
+        share_tm_config_on_startup: ${USE_ACN:bool:false}
+        tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+        tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        termination_sleep: ${TERMINATION_SLEEP:int:900}
+        use_termination: ${USE_TERMINATION:bool:false}
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
+        use_slashing: ${USE_SLASHING:bool:false}
+        slash_cooldown_hours: ${SLASH_COOLDOWN_HOURS:int:3}
+        slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
+        termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
+        light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
+        serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
+        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
+        agent_id: ${AGENT_ID:int:3}
+        metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
+        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:list:[["0x77af31De935740567Cf4fF1986D04B2c964A786a",["0x0000000000000000000000000000000000000000","1"]]]}
+        agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
+        minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
+2:
+  models:
+    params:
+      args:
+        gas_params: *id001
+        multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+        on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+        reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+        round_timeout_seconds: ${ROUND_TIMEOUT:float:150.0}
+        use_polling: ${USE_POLLING:bool:false}
+        manual_gas_limit: ${MANUAL_GAS_LIMIT:int:1000000}
+        service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        setup: *id002
+        share_tm_config_on_startup: ${USE_ACN:bool:false}
+        tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+        termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
+        tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        termination_sleep: ${TERMINATION_SLEEP:int:900}
+        use_termination: ${USE_TERMINATION:bool:false}
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
+        use_slashing: ${USE_SLASHING:bool:false}
+        slash_cooldown_hours: ${SLASH_COOLDOWN_HOURS:int:3}
+        slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
+        light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
+        serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
+        service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
+        agent_id: ${AGENT_ID:int:3}
+        metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
+        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:list:[["0x77af31De935740567Cf4fF1986D04B2c964A786a",["0x0000000000000000000000000000000000000000","1"]]]}
+        agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
+        minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
+3:
+  models:
+    params:
+      args:
+        gas_params: *id001
+        multisend_address: ${MULTISEND_ADDRESS:str:0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761}
+        on_chain_service_id: ${ON_CHAIN_SERVICE_ID:int:null}
+        reset_pause_duration: ${RESET_PAUSE_DURATION:int:10}
+        round_timeout_seconds: ${ROUND_TIMEOUT:float:150.0}
+        use_polling: ${USE_POLLING:bool:false}
+        service_registry_address: ${SERVICE_REGISTRY_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        setup: *id002
+        share_tm_config_on_startup: ${USE_ACN:bool:false}
+        manual_gas_limit: ${MANUAL_GAS_LIMIT:int:1000000}
+        tendermint_com_url: ${TENDERMINT_COM_URL:str:http://localhost:8080}
+        tendermint_url: ${TENDERMINT_URL:str:http://localhost:26657}
+        termination_from_block: ${TERMINATION_FROM_BLOCK:int:0}
+        tendermint_p2p_url: ${TM_P2P_ENDPOINT_NODE_0:str:node0:26656}
+        termination_sleep: ${TERMINATION_SLEEP:int:900}
+        use_termination: ${USE_TERMINATION:bool:false}
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        reset_period_count: ${RESET_PERIOD_COUNT:int:1000}
+        use_slashing: ${USE_SLASHING:bool:false}
+        slash_cooldown_hours: ${SLASH_COOLDOWN_HOURS:int:3}
+        slash_threshold_amount: ${SLASH_THRESHOLD_AMOUNT:int:10000000000000000}
+        light_slash_unit_amount: ${LIGHT_SLASH_UNIT_AMOUNT:int:5000000000000000}
+        serious_slash_unit_amount: ${SERIOUS_SLASH_UNIT_AMOUNT:int:8000000000000000}
+        agent_registry_address: ${AGENT_REGISTRY_ADDRESS:str:0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA}
+        agent_id: ${AGENT_ID:int:3}
+        metadata_hash: ${METADATA_HASH:str:f01701220caa53607238e340da63b296acab232c18a48e954f0af6ff2b835b2d93f1962f0}
+        profit_split_freq: ${PROFIT_SPLIT_FREQ:int:100}
+        hash_checkpoint_address: ${CHECKPOINT_ADDRESS:str:0x0000000000000000000000000000000000000000}
+        service_endpoint_base: ${SERVICE_ENDPOINT_BASE:str:https://dummy_service.autonolas.tech/}
+        mech_to_subscription: ${MECH_TO_SUBSCRIPTION:list:[["0x77af31De935740567Cf4fF1986D04B2c964A786a",["0x0000000000000000000000000000000000000000","1"]]]}
+        agent_funding_amount: ${AGENT_FUNDING_AMOUNT:int:200000000000000000}
+        minimum_agent_balance: ${MINIMUM_AGENT_BALANCE:int:100000000000000000}
+---
+public_id: valory/task_execution:0.1.0
+type: skill
+0:
+  models:
+    params:
+      args:
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        task_deadline: ${TASK_DEADLINE:float:240.0}
+        file_hash_to_tools_json: ${FILE_HASH_TO_TOOLS:list:[]}
+        api_keys_json: ${API_KEYS:list:[]}
+        polling_interval: ${POLLING_INTERVAL:float:30.0}
+        agent_index: ${AGENT_INDEX_0:int:0}
+        num_agents: ${NUM_AGENTS:int:4}
+        timeout_limit: ${TIMEOUT_LIMIT:int:3}
+        mech_to_config: ${MECH_TO_CONFIG:list:[["0xFf82123dFB52ab75C417195c5fDB87630145ae81",["use_dynamic_pricing","false"]],["0x77af31De935740567Cf4fF1986D04B2c964A786a",["use_dynamic_pricing","false"]]]}
+        max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+1:
+  models:
+    params:
+      args:
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        task_deadline: ${TASK_DEADLINE:float:240.0}
+        file_hash_to_tools_json: ${FILE_HASH_TO_TOOLS:list:[]}
+        api_keys_json: ${API_KEYS:list:[]}
+        polling_interval: ${POLLING_INTERVAL:float:30.0}
+        agent_index: ${AGENT_INDEX_1:int:1}
+        num_agents: ${NUM_AGENTS:int:4}
+        mech_to_config: ${MECH_TO_CONFIG:list:[["0xFf82123dFB52ab75C417195c5fDB87630145ae81",["use_dynamic_pricing","false"]],["0x77af31De935740567Cf4fF1986D04B2c964A786a",["use_dynamic_pricing","false"]]]}
+        timeout_limit: ${TIMEOUT_LIMIT:int:3}
+        max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+2:
+  models:
+    params:
+      args:
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        task_deadline: ${TASK_DEADLINE:float:240.0}
+        file_hash_to_tools_json: ${FILE_HASH_TO_TOOLS:list:[]}
+        api_keys_json: ${API_KEYS:list:[]}
+        polling_interval: ${POLLING_INTERVAL:float:30.0}
+        agent_index: ${AGENT_INDEX_2:int:2}
+        num_agents: ${NUM_AGENTS:int:4}
+        mech_to_config: ${MECH_TO_CONFIG:list:[["0xFf82123dFB52ab75C417195c5fDB87630145ae81",["use_dynamic_pricing","false"]],["0x77af31De935740567Cf4fF1986D04B2c964A786a",["use_dynamic_pricing","false"]]]}
+        timeout_limit: ${TIMEOUT_LIMIT:int:3}
+        max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+3:
+  models:
+    params:
+      args:
+        agent_mech_contract_addresses: ${AGENT_MECH_CONTRACT_ADDRESSES:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81","0x77af31De935740567Cf4fF1986D04B2c964A786a"]}
+        task_deadline: ${TASK_DEADLINE:float:240.0}
+        file_hash_to_tools_json: ${FILE_HASH_TO_TOOLS:list:[]}
+        api_keys_json: ${API_KEYS:list:[]}
+        polling_interval: ${POLLING_INTERVAL:float:30.0}
+        agent_index: ${AGENT_INDEX_3:int:3}
+        num_agents: ${NUM_AGENTS:int:4}
+        timeout_limit: ${TIMEOUT_LIMIT:int:3}
+        mech_to_config: ${MECH_TO_CONFIG:list:[["0xFf82123dFB52ab75C417195c5fDB87630145ae81",["use_dynamic_pricing","false"]],["0x77af31De935740567Cf4fF1986D04B2c964A786a",["use_dynamic_pricing","false"]]]}
+        max_block_window: ${MAX_BLOCK_WINDOW:int:500}
+---
+public_id: valory/ledger:0.19.0
+type: connection
+0:
+  config:
+    ledger_apis:
+      ethereum:
+        address: ${ETHEREUM_LEDGER_RPC_0:str:http://host.docker.internal:8545}
+        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      gnosis:
+        address: ${GNOSIS_RPC_0:str:http://host.docker.internal:8545}
+1:
+  config:
+    ledger_apis:
+      ethereum:
+        address: ${ETHEREUM_LEDGER_RPC_1:str:http://host.docker.internal:8545}
+        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      gnosis:
+        address: ${GNOSIS_RPC_1:str:http://host.docker.internal:8545}
+2:
+  config:
+    ledger_apis:
+      ethereum:
+        address: ${ETHEREUM_LEDGER_RPC_2:str:http://host.docker.internal:8545}
+        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      gnosis:
+        address: ${GNOSIS_RPC_2:str:http://host.docker.internal:8545}
+3:
+  config:
+    ledger_apis:
+      ethereum:
+        address: ${ETHEREUM_LEDGER_RPC_3:str:http://host.docker.internal:8545}
+        chain_id: ${ETHEREUM_LEDGER_CHAIN_ID:int:1}
+        poa_chain: ${ETHEREUM_LEDGER_IS_POA_CHAIN:bool:false}
+        default_gas_price_strategy: ${ETHEREUM_LEDGER_PRICING:str:eip1559}
+      gnosis:
+        address: ${GNOSIS_RPC_3:str:http://host.docker.internal:8545}
+---
+public_id: valory/p2p_libp2p_client:0.1.0
+type: connection
+config:
+  nodes:
+  - uri: ${ACN_URI:str:acn.staging.autonolas.tech:9005}
+    public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
+  public_key: ${ACN_NODE_PUBLIC_KEY:str:02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77}
+  save_path: .certs/acn_cosmos_11000.txt
+is_abstract: false
+---
+public_id: valory/websocket_client:0.1.0:bafybeiexove4oqyhoae5xmk2hilskthosov5imdp65olpgj3cfrepbouyy
+type: connection
+0:
+  config:
+    endpoint: ${ETHEREUM_WEBSOCKET_RPC_0:str:wss://rpc.gnosischain.com/wss}
+1:
+  config:
+    endpoint: ${ETHEREUM_WEBSOCKET_RPC_1:str:wss://rpc.gnosischain.com/wss}
+2:
+  config:
+    endpoint: ${ETHEREUM_WEBSOCKET_RPC_2:str:wss://rpc.gnosischain.com/wss}
+3:
+  config:
+    endpoint: ${ETHEREUM_WEBSOCKET_RPC_3:str:wss://rpc.gnosischain.com/wss}
+---
+public_id: valory/contract_subscription:0.1.0:bafybeiby5ajjc7a3m2uq73d2pprx6enqt4ghfcq2gkmrtsr75e4d4napi4
+type: skill
+0:
+  behaviours:
+    subscriptions:
+      args:
+        contracts: ${SUBSCRIPTIONS_CONTRACTS:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81"]}
+  handlers:
+    new_event:
+      args:
+        contract_to_monitor: ${CONTRACT_TO_MONITOR:str:0xFf82123dFB52ab75C417195c5fDB87630145ae81}
+        websocket_provider: ${ETHEREUM_LEDGER_RPC_0:str:https://rpc.gnosischain.com}
+  models:
+    params:
+      args:
+        use_polling: ${USE_POLLING:str:false}
+1:
+  behaviours:
+    subscriptions:
+      args:
+        contracts: ${SUBSCRIPTIONS_CONTRACTS:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81"]}
+  handlers:
+    new_event:
+      args:
+        contract_to_monitor: ${CONTRACT_TO_MONITOR:str:0xFf82123dFB52ab75C417195c5fDB87630145ae81}
+        websocket_provider: ${ETHEREUM_LEDGER_RPC_1:str:https://rpc.gnosischain.com}
+  models:
+    params:
+      args:
+        use_polling: ${USE_POLLING:str:false}
+2:
+  behaviours:
+    subscriptions:
+      args:
+        contracts: ${SUBSCRIPTIONS_CONTRACTS:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81"]}
+  handlers:
+    new_event:
+      args:
+        contract_to_monitor: ${CONTRACT_TO_MONITOR:str:0xFf82123dFB52ab75C417195c5fDB87630145ae81}
+        websocket_provider: ${ETHEREUM_LEDGER_RPC_2:str:https://rpc.gnosischain.com}
+  models:
+    params:
+      args:
+        use_polling: ${USE_POLLING:str:false}
+3:
+  behaviours:
+    subscriptions:
+      args:
+        contracts: ${SUBSCRIPTIONS_CONTRACTS:list:["0xFf82123dFB52ab75C417195c5fDB87630145ae81"]}
+  handlers:
+    new_event:
+      args:
+        contract_to_monitor: ${CONTRACT_TO_MONITOR:str:0xFf82123dFB52ab75C417195c5fDB87630145ae81}
+        websocket_provider: ${ETHEREUM_LEDGER_RPC_3:str:https://rpc.gnosischain.com}
+  models:
+    params:
+      args:
+        use_polling: ${USE_POLLING:str:false}

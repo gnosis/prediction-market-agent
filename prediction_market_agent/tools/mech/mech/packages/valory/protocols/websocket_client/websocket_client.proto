@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package aea.valory.websocket_client.v1_0_0;
+
+message WebsocketClientMessage{
+
+  // Performatives and contents
+  message Subscribe_Performative{
+    string url = 1;
+    string subscription_id = 2;
+    string subscription_payload = 3;
+    bool subscription_payload_is_set = 4;
+  }
+
+  message Subscription_Performative{
+    bool alive = 1;
+    string subscription_id = 2;
+  }
+
+  message Check_Subscription_Performative{
+    bool alive = 1;
+    string subscription_id = 2;
+  }
+
+  message Send_Performative{
+    string payload = 1;
+    string subscription_id = 2;
+  }
+
+  message Send_Success_Performative{
+    int32 send_length = 1;
+    string subscription_id = 2;
+  }
+
+  message Recv_Performative{
+    string data = 1;
+    string subscription_id = 2;
+  }
+
+  message Error_Performative{
+    bool alive = 1;
+    string message = 2;
+    string subscription_id = 3;
+  }
+
+
+  oneof performative{
+    Check_Subscription_Performative check_subscription = 5;
+    Error_Performative error = 6;
+    Recv_Performative recv = 7;
+    Send_Performative send = 8;
+    Send_Success_Performative send_success = 9;
+    Subscribe_Performative subscribe = 10;
+    Subscription_Performative subscription = 11;
+  }
+}

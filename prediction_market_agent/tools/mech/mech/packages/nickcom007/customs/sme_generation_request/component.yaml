@@ -1,0 +1,20 @@
+name: sme_generation_request
+author: nickcom007
+version: 0.1.0
+type: custom
+description: A tool to establish Subject Matter Expert (SME) roles for specific market-related
+  questions.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  sme_generation_request.py: bafybeievtcf2hh3res2fn46jhbjvf5e77zrrvt2b5t5mkhdjnz5bz3mdqa
+fingerprint_ignore_patterns: []
+entry_point: sme_generation_request.py
+callable: run
+dependencies:
+  openai:
+    version: ==1.11.0
+  requests: {}
+  tiktoken:
+    version: ==0.5.1

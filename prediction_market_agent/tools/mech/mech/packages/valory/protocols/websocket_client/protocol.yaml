@@ -1,0 +1,21 @@
+name: websocket_client
+author: valory
+version: 0.1.0
+protocol_specification_id: valory/websocket_client:1.0.0
+type: protocol
+description: A protocol for websocket client.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeieot47xhqlvc3dwl2hc4yq3f6wcva7xf5dx5wz5n4ir6woknyqrsi
+  __init__.py: bafybeifhhqtcfac5lcrjxrcdpsrs3kyyxt7uf2qv2a4ivllyyt3c62q4aq
+  dialogues.py: bafybeienrjdbwqsx4dikqo3wjfgner5pz5qtbwfb2qtzsukn6iog6e4iyi
+  message.py: bafybeigpuhz4fw5ng3qay7duci7qhb4rj336wb2qwiyszddkjmnjebf72e
+  serialization.py: bafybeiar6guqw2qgofycbjuyhy7puxill5wcy6hsyrqmbkzcjzitxuws5i
+  tests/test_websocket_client_dialogues.py: bafybeig7cd7mllqmk6w4oaz7wqwubueaa4hpofgplhzeivqtwihalhpnne
+  tests/test_websocket_client_messages.py: bafybeibboz4j4itkwjh5ahza53v4d4dew3qxqq6fsbzragz76wnjin254u
+  websocket_client.proto: bafybeifqkmkqzbepxkj56o45ljysxujmoftjlm6pkllj7t4tbryqt42ql4
+  websocket_client_pb2.py: bafybeickjzx5ikfg5hwisfiypifzvnp4dxecqrqf6op2gzcaojmuvkcdlq
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

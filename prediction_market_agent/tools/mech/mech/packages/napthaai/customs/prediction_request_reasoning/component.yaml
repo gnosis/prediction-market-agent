@@ -1,0 +1,37 @@
+name: prediction_request_reasoning
+author: napthaai
+version: 0.1.0
+type: custom
+description: A tool that reasons over extracted information.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeib36ew6vbztldut5xayk5553rylrq7yv4cpqyhwc5ktvd4cx67vwu
+  prediction_request_reasoning.py: bafybeid3umzaz7qzxyf4pda6ffmayyhmr7fjx35bk4qzpsi33rtanddrem
+fingerprint_ignore_patterns: []
+entry_point: prediction_request_reasoning.py
+callable: run
+dependencies:
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  requests: {}
+  pydantic:
+    version: '>=1.9.0,<3'
+  faiss-cpu:
+    version: ==1.7.4
+  tiktoken:
+    version: ==0.5.1
+  markdownify:
+    version: ==0.11.6
+  openai:
+    version: ==1.11.0
+  docstring-parser:
+    version: ==0.15
+  readability-lxml:
+    version: ==0.8.1
+  pypdf2:
+    version: ==3.0.1
+  numpy:
+    version: '>=1.19.0'

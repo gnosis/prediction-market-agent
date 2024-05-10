@@ -1,0 +1,45 @@
+name: prediction_sum_url_content
+author: jhehemann
+version: 0.1.0
+type: custom
+description: A tool for making binary predictions using the sum of the content of
+  a URL article.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  prediction_sum_url_content.py: bafybeifd22uhrd35kq774cl4fyln7jbhw5ugyqrjn2zx6nrgdsw4hosfz4
+fingerprint_ignore_patterns: []
+entry_point: prediction_sum_url_content.py
+callable: run
+dependencies:
+  tqdm:
+    version: ==4.56.0
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  requests: {}
+  pydantic:
+    version: '>=1.9.0,<3'
+  faiss-cpu:
+    version: ==1.7.4
+  tiktoken:
+    version: ==0.5.1
+  markdownify:
+    version: ==0.11.6
+  openai:
+    version: ==1.11.0
+  docstring-parser:
+    version: ==0.15
+  readability-lxml:
+    version: ==0.8.1
+  pypdf2:
+    version: ==3.0.1
+  pandas: {}
+  python-dateutil:
+    version: ==2.8.2
+  beautifulsoup4:
+    version: ==4.12.2
+  spacy:
+    version: ==3.7.2

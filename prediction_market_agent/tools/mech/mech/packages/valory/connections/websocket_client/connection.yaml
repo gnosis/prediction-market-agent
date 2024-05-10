@@ -1,0 +1,27 @@
+name: websocket_client
+author: valory
+version: 0.1.0
+type: connection
+description: Simple Websocket Client to allow the agent to interact with a Websocket
+  Server.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeicyrebbic2h3ytyxeg776zelg2bpshcepnkm4qc5oypqqqfq3sqmq
+  connection.py: bafybeiakisvetjqs3qqlpdo5asm45gfygx35lw7cciypaneyqieyf6ul34
+  readme.md: bafybeihg5yfzgqvg5ngy7r2o5tfeqnelx2ffxw4po5hmheqjfhumpmxpoq
+fingerprint_ignore_patterns: []
+connections: []
+protocols:
+- valory/websocket_client:0.1.0:bafybeih43mnztdv3v2hetr2k3gezg7d3yj4ur7cxdvcyaqhg65e52s5sf4
+class_name: WebSocketClient
+config:
+  endpoint: null
+  target_skill_id: null
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  websocket_client:
+    version: <1,>=0.32.0
+is_abstract: false
+cert_requests: []

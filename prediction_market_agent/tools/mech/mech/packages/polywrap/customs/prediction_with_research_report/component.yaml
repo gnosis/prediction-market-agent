@@ -1,0 +1,32 @@
+name: prediction_with_research_report
+author: polywrap
+version: 0.1.0
+type: custom
+description: A tool for making binary predictions on markets using more robust research
+  from external sources, and OpenAI API.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  prediction_with_research_report.py: bafybeibv4yyr4a23xuybax6mb7rfdbqmc6cjpqjd6wzaesh7yj47bghhmq
+fingerprint_ignore_patterns: []
+entry_point: prediction_with_research_report.py
+callable: run
+dependencies:
+  langchain:
+    version: ==0.0.303
+  requests: {}
+  tiktoken:
+    version: ==0.5.1
+  tavily-python:
+    version: ==0.3.0
+  pydantic:
+    version: '>=1.9.0,<3'
+  beautifulsoup4:
+    version: ==4.12.2
+  markdownify:
+    version: ==0.11.6
+  openai:
+    version: ==1.11.0
+  chromadb:
+    version: ==0.4.13

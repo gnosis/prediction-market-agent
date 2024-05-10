@@ -1,0 +1,39 @@
+name: prediction_request_reasoning_claude
+author: napthaai
+version: 0.1.0
+type: custom
+description: A tool for making binary predictions on markets using claude.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeib36ew6vbztldut5xayk5553rylrq7yv4cpqyhwc5ktvd4cx67vwu
+  prediction_request_reasoning_claude.py: bafybeian5oyo5v4qvnocxhpgtxcvitlzwsa7hag4lwydmyyth2r7u6dine
+fingerprint_ignore_patterns: []
+entry_point: prediction_request_reasoning_claude.py
+callable: run
+dependencies:
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  requests: {}
+  markdownify:
+    version: ==0.11.6
+  readability-lxml:
+    version: ==0.8.1
+  openai:
+    version: ==1.11.0
+  tiktoken:
+    version: ==0.5.1
+  pypdf2:
+    version: ==3.0.1
+  numpy:
+    version: '>=1.19.0'
+  pydantic:
+    version: '>=1.9.0,<3'
+  faiss-cpu:
+    version: ==1.7.4
+  docstring-parser:
+    version: ==0.15
+  anthropic:
+    version: ==0.21.3

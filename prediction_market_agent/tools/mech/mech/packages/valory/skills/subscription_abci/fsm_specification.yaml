@@ -1,0 +1,21 @@
+alphabet_in:
+- DONE
+- ERROR
+- NO_MAJORITY
+- NO_TX
+default_start_state: UpdateSubscriptionRound
+final_states:
+- FinishedWithTxRound
+- FinishedWithoutTxRound
+label: SubscriptionUpdateAbciApp
+start_states:
+- UpdateSubscriptionRound
+states:
+- FinishedWithTxRound
+- FinishedWithoutTxRound
+- UpdateSubscriptionRound
+transition_func:
+    (UpdateSubscriptionRound, DONE): FinishedWithTxRound
+    (UpdateSubscriptionRound, ERROR): UpdateSubscriptionRound
+    (UpdateSubscriptionRound, NO_MAJORITY): UpdateSubscriptionRound
+    (UpdateSubscriptionRound, NO_TX): FinishedWithoutTxRound

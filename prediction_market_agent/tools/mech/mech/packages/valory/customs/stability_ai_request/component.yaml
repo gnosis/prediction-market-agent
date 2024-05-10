@@ -1,0 +1,17 @@
+name: stability_ai_request
+author: valory
+version: 0.1.0
+type: custom
+description: A tool that runs a prompt against StabilityAI.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  stabilityai_request.py: bafybeifhlisa7dxyvsbbvn5f6y4ltg5pcoi4vigofuj5ypvkenfomu55dy
+fingerprint_ignore_patterns: []
+entry_point: stabilityai_request.py
+callable: run
+dependencies:
+  requests: {}
+  tiktoken:
+    version: ==0.5.1

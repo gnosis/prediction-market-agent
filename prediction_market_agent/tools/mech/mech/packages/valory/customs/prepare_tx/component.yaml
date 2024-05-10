@@ -1,0 +1,16 @@
+name: prepare_tx
+author: valory
+version: 0.1.0
+type: custom
+description: A tool to prepare a transaction.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeieynbsr6aijx2totfi5iw6thjwgzko526zcs5plgvgrq2lufso2sy
+  prepare_tx.py: bafybeicrc7cvsq425umk6chgyohckss7djlelyqbnpffpe2ahf7iofl7qy
+fingerprint_ignore_patterns: []
+entry_point: prepare_tx.py
+callable: run
+dependencies:
+  openai:
+    version: ==1.11.0

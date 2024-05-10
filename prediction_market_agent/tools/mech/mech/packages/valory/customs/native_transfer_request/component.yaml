@@ -1,0 +1,18 @@
+name: native_transfer_request
+author: valory
+version: 0.1.0
+type: custom
+description: A tool to prepare a native transfer request.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  native_transfer_request.py: bafybeia34dwsstcrxdjfjlpig4gjhoeogtnvgvvk7xnisi5ik75zmawigq
+fingerprint_ignore_patterns: []
+entry_point: native_transfer_request.py
+callable: run
+dependencies:
+  tiktoken:
+    version: ==0.5.1
+  openai:
+    version: ==1.11.0

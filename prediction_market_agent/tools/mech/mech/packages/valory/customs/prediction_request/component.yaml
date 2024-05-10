@@ -1,0 +1,39 @@
+name: prediction_request
+author: valory
+version: 0.1.0
+type: custom
+description: A tool for making binary predictions on markets using OpenAI API.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  prediction_request.py: bafybeictg3mpywpdaibyagwyl4aj35o5utev44zb4h22je6njtu7ty5cwy
+fingerprint_ignore_patterns: []
+entry_point: prediction_request.py
+callable: run
+dependencies:
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  requests: {}
+  pydantic:
+    version: '>=1.9.0,<3'
+  faiss-cpu:
+    version: ==1.7.4
+  tiktoken:
+    version: ==0.5.1
+  markdownify:
+    version: ==0.11.6
+  openai:
+    version: ==1.11.0
+  docstring-parser:
+    version: ==0.15
+  readability-lxml:
+    version: ==0.8.1
+  pypdf2:
+    version: ==3.0.1
+  numpy:
+    version: '>=1.19.0'
+  spacy:
+    version: ==3.7.2

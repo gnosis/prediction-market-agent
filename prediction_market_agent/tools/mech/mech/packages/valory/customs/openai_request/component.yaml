@@ -1,0 +1,18 @@
+name: openai_request
+author: valory
+version: 0.1.0
+type: custom
+description: A tool that runs a prompt against the OpenAI API.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  openai_request.py: bafybeiap5gs7pvyyybhz7qcbb2lwb55jviryrol55mdht2qogfbp6khdtm
+fingerprint_ignore_patterns: []
+entry_point: openai_request.py
+callable: run
+dependencies:
+  openai:
+    version: ==1.11.0
+  tiktoken:
+    version: ==0.5.1

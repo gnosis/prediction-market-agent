@@ -1,0 +1,151 @@
+name: Release Flow
+
+on:
+  release:
+    types: [prereleased, released]
+
+jobs:
+  publish-packages:
+    name: Push Packages
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-versions }}
+      - uses: addnab/docker-run-action@v3
+        with:
+            image: valory/open-autonomy-user:latest
+            options: -v ${{ github.workspace }}:/work
+            run: |
+              echo "Pushing Packages"
+              cd /work
+              export AUTHOR=$(grep 'service' packages/packages.json | awk -F/ '{print $2}' | head -1)
+              autonomy init --reset --author $AUTHOR --ipfs --remote
+              autonomy push-all
+  publish-images:
+    name: Publish Docker Images
+    runs-on: ${{ matrix.os }}
+    needs:
+      - "publish-packages"
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+    env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up tag and vars
+        uses: addnab/docker-run-action@v3
+        with:
+            image: valory/open-autonomy-user:latest
+            options: -v ${{ github.workspace }}:/work
+            run: |
+              echo "Setting Tag Images"
+              cd /work
+              apt-get update && apt-get install git -y || exit 1
+              git config --global --add safe.directory /work
+              export TAG=$(git describe --exact-match --tags $(git rev-parse HEAD)) || exit 1
+              if [ $? -eq 0 ]; then
+                  export TAG=`echo $TAG | sed 's/^v//'`
+              else
+                  echo "You are not on a tagged branch"
+                  exit 1
+              fi
+              echo VERSION=$TAG> env.sh
+              echo AUTHOR=$(grep 'service' packages/packages.json | awk -F/ '{print $2}' | head -1) >> env.sh
+              echo SERVICE=$(grep 'service' packages/packages.json | awk -F/ '{print $3}' | head -1) >> env.sh
+              echo AGENT=$(grep 'agent' packages/packages.json | awk -F/ '{print $3}' | head -1) >> env.sh
+              echo DEFAULT_IMAGE_TAG=$(cat packages/packages.json | grep agent | awk -F: '{print $2}' | tr -d '", ' | head -n 1) >> env.sh
+              cat env.sh
+
+      - uses: addnab/docker-run-action@v3
+        name: Build Images
+        with:
+            image: valory/open-autonomy-user:latest
+            options: -v ${{ github.workspace }}:/work
+            shell: bash
+            run: |
+              echo "Building Docker Images"
+              cd /work
+              source env.sh || exit 1
+              pip install requests==2.28.1
+              echo "Building images for $AUTHOR for service $SERVICE"
+              autonomy init --reset --author $AUTHOR --ipfs --remote
+              autonomy fetch $AUTHOR/$SERVICE --service --local || exit 1
+              cd $SERVICE || exit 1
+              autonomy build-image || exit 1
+              autonomy build-image --version $VERSION || exit 1
+
+      - name: Docker login
+        run: |
+            echo  $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+      - name: Docker Push
+        run: |
+          source env.sh
+          echo "Pushing $DOCKER_USER/oar-$AGENT:$VERSION"
+          echo "Pushing $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG"
+          docker push $DOCKER_USER/oar-$AGENT:$VERSION
+          docker push $DOCKER_USER/oar-$AGENT:$DEFAULT_IMAGE_TAG
+  deploy-service-on-propel:
+    name: Deploy service on propel
+    environment: ${{ fromJSON('[["staging", "staging"], ["production", "shorts_production"]]')[github.event.action == 'released'][endsWith(github.event.release.name, '(shorts)')] }}
+    needs:
+    - "publish-packages"
+    - "publish-images"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10"]
+    env:
+      CMD: "propel -U ${{ vars.PROPEL_BASE_URL }}"
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-versions }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          python -m pip install --upgrade pip
+          pip install propel-client open-autonomy
+
+      - name: Make use proxy instead of actual nlb by dns override
+        run: |
+          # for staging
+          export IP_ADDR=$(dig +short balancer.tcp.propel.staging.autonolas.tech)
+          echo -e "\n$IP_ADDR\tapp.propel.staging.valory.xyz\n"  | sudo tee -a /etc/hosts
+          
+          # for prod
+          export IP_ADDR=$(dig +short balancer.tcp.propel.autonolas.tech)
+          echo -e "\n$IP_ADDR\tapp.propel.valory.xyz\n"  | sudo tee -a /etc/hosts
+
+      - name: Login to propel
+        run: |
+          $CMD login -u  '${{ vars.PROPEL_USERNAME }}' -p  '${{ secrets.PROPEL_PASSWORD }}'
+
+      - name: Do a deployment
+        run: |
+          # determine ipfs hash id
+          export IPFS_HASH=$(jq '.dev | to_entries[] | select(.key | startswith("service"))| .value' -r  ./packages/packages.json | head -n1)
+          export SERVICE_PATH=service_for_propel
+
+          # fetch service file and check it published
+          autonomy init --reset --author ci --ipfs --remote
+          autonomy fetch $IPFS_HASH --service --alias $SERVICE_PATH
+
+          # get env vars from github actions
+          echo '${{ toJSON(secrets) }}' | jq -r 'to_entries|map("export \(.key)=\(.value|tojson)")|.[]' > github.vars
+          echo >> github.vars
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries|map("export \(.key)=\(.value|tojson)")|.[]' >> github.vars
+          source github.vars
+          $CMD service deploy --name  '${{ vars.SERVICE_NAME }}'  --service-dir $SERVICE_PATH --service-ipfs-hash $IPFS_HASH  --ingress-enabled true --keys '${{ vars.SERVICE_KEYS }}' --timeout 320

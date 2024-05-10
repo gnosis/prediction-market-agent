@@ -1,0 +1,21 @@
+name: agent_mech
+author: valory
+version: 0.1.0
+type: contract
+description: agent mech contract
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeigpq5lxfj2aza6ok3fjuywtdafelkbvoqwaits7regfbgu4oynmku
+  build/AgentMech.json: bafybeifw3whznwg6i6sa6cicivsfmqchfwfdodxwaqzepd3h6otq5qpktq
+  contract.py: bafybeifb3d7uzgjkffk4j2hgc6beeesoa5e527pme6v45lofliljxtibt4
+fingerprint_ignore_patterns: []
+class_name: AgentMechContract
+contract_interface_paths:
+  ethereum: build/AgentMech.json
+dependencies:
+  open-aea-ledger-ethereum:
+    version: ==1.50.0
+  web3:
+    version: <7,>=6.0.0
+contracts: []

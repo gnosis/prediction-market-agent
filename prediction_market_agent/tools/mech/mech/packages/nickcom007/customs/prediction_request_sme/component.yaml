@@ -1,0 +1,28 @@
+name: prediction_request_sme
+author: nickcom007
+version: 0.1.0
+type: custom
+description: A tool to establish Subject Matter Expert (SME) roles for specific market-related
+  questions.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibbn67pnrrm4qm3n3kbelvbs3v7fjlrjniywmw2vbizarippidtvi
+  prediction_request_sme.py: bafybeiahteuasjn632fvfqt4to772yreohzuorwlvqgrj4dqcfl662lnyi
+fingerprint_ignore_patterns: []
+entry_point: prediction_request_sme.py
+callable: run
+dependencies:
+  requests: {}
+  google-api-python-client:
+    version: ==2.95.0
+  googlesearch-python:
+    version: ==1.2.3
+  tiktoken:
+    version: ==0.5.1
+  readability-lxml:
+    version: ==0.8.1
+  markdownify:
+    version: ==0.11.6
+  openai:
+    version: ==1.11.0

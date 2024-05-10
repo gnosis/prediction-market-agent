@@ -1,0 +1,41 @@
+name: websocket_client
+author: valory
+version: 0.1.0
+type: skill
+description: Websocket client.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibgl4hnpsd3vokfs6cfkg4elgqu7nm4yhs6sh373j6erwvgpjdqeu
+  behaviours.py: bafybeianfyloqfumjydjgogjg2sr5wrw7epzjt5o7sxv4drfasl2kgmq4i
+  dialogues.py: bafybeicc26sbiipnfublma3ywvh54elbx5y5sj7xckq3xyqyfmmoamiouy
+  handlers.py: bafybeibqfinswattz7gu4pijjxvixp5gtrgfz5idsz3uzlgrjw2vanjiu4
+  models.py: bafybeicuei7xoozvgr6kyp6cp7b6gqonlkmlgkvhhff37iecnjqzhkvbgi
+fingerprint_ignore_patterns: []
+connections:
+- valory/websocket_client:0.1.0:bafybeiflmystocxaqblhpzqlcop2vkhsknpzjx2jomohomaxamwskeokzm
+contracts: []
+protocols:
+- valory/websocket_client:0.1.0:bafybeih43mnztdv3v2hetr2k3gezg7d3yj4ur7cxdvcyaqhg65e52s5sf4
+skills: []
+behaviours:
+  websocket_subscription:
+    args: {}
+    class_name: SubscriptionBehaviour
+handlers:
+  new_event:
+    args: {}
+    class_name: WebSocketHandler
+models:
+  websocket_client_dialogues:
+    args: {}
+    class_name: WebsocketClientDialogues
+  params:
+    args:
+      websocket_provider: ws://localhost:8001
+      subscription_id: websocket-subscription
+    class_name: Params
+dependencies:
+  web3:
+    version: <7,>=6.0.0
+is_abstract: true

@@ -1,0 +1,17 @@
+name: resolve_market
+author: valory
+version: 0.1.0
+type: custom
+description: A tool for resolving markets after they have been closed.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeigiijf3cqbpr42srzgpro3rvyvb47fnikcbsii6rjr2uwp3x764hi
+  resolve_market.py: bafybeiefzb5ynub3znblpumxewouvyy37ajt72n5jc3xjzrdyyxk4iurzi
+fingerprint_ignore_patterns: []
+entry_point: resolve_market.py
+callable: run
+dependencies:
+  openai:
+    version: ==1.11.0
+  requests: {}

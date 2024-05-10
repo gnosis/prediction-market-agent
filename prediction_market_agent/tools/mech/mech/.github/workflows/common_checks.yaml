@@ -1,0 +1,156 @@
+name: main_workflow
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+
+jobs:
+  lock_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        python-version: [ "3.10" ]
+        poetry-version: ["1.3.2"]
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install and configure Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ matrix.poetry-version }}
+        virtualenvs-create: true
+        virtualenvs-in-project: false
+        virtualenvs-path: ~/my-custom-path
+        installer-parallel: true
+    - name: Check if dependencies can be locked
+      run: poetry lock --check
+    - name: Poetry install requirements and check they can be locked
+      run: poetry install --all-extras --no-interaction -vvv
+
+  copyright_and_dependencies_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.10" ]
+
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run:  |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tomte[tox,cli]==0.2.15
+        pip install --user --upgrade setuptools
+    - name: Check copyright headers
+      run: tomte check-copyright --author valory --exclude-part abci --exclude-part http_client --exclude-part ipfs --exclude-part ledger --exclude-part p2p_libp2p_client --exclude-part gnosis_safe --exclude-part gnosis_safe_proxy_factory --exclude-part multisend --exclude-part service_registry --exclude-part protocols --exclude-part abstract_abci --exclude-part abstract_round_abci --exclude-part registration_abci --exclude-part reset_pause_abci --exclude-part termination_abci --exclude-part transaction_settlement_abci --exclude-part websocket_client --exclude-part contract_subscription
+    - name: License compatibility check
+      run: tox -e liccheck
+# TODO: reactivate once false positives are fixed
+#    - name: Check dependencies
+#      run: tox -e check-dependencies
+    - name: Check doc links
+      run: tomte check-doc-links
+    - name: Check doc IPFS hashes
+      run: tox -e check-doc-hashes
+
+  linter_checks:
+    continue-on-error: False
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.10" ]
+
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/setup-go@v3
+      with:
+        go-version: "1.17.7"
+    - name: Install dependencies
+      run:  |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install tomte[tox,cli]==0.2.15
+        pip install --user --upgrade setuptools
+
+        # install Protobuf compiler
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v24.3/protoc-24.3-linux-x86_64.zip
+        unzip protoc-24.3-linux-x86_64.zip -d protoc
+        sudo mv protoc/bin/protoc /usr/local/bin/protoc
+
+        # install IPFS
+        sudo apt-get install -y wget
+        wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
+        tar xvfz go-ipfs.tar.gz
+        sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+        ipfs init
+
+        # Install `mdspell` for spelling checks
+        sudo npm install -g markdown-spellcheck
+        make protolint_install
+
+    - name: Check generate protocols
+      run: echo "Skipped..." # tox -e check-generate-all-protocols
+    - name: Security checks
+      run: tomte check-security
+    - name: Check packages
+      run: tox -e check-packages
+    - name: Check hash
+      run: tox -e check-hash
+    - name: Code checks
+      run: tomte check-code
+    - name: Check spelling
+      run: tomte check-spelling
+    - name: AbciApp consistency checks
+      run: |
+        tox -e check-abci-docstrings
+        tox -e check-abciapp-specs
+        # tox -e check-handlers
+        # ignore for now due to https://github.com/valory-xyz/open-autonomy/issues/1988
+        # tox -e analyse-service
+
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.17.7"
+      - run: |
+          wget https://github.com/zricethezav/gitleaks/releases/download/v8.10.1/gitleaks_8.10.1_linux_x64.tar.gz && \
+          tar -xzf gitleaks_8.10.1_linux_x64.tar.gz && \
+          sudo install gitleaks /usr/bin && \
+          gitleaks detect --report-format json --report-path leak_report -v
