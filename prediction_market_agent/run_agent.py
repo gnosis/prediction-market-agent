@@ -11,6 +11,9 @@ from enum import Enum
 import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.autogen_general_agent.deploy import (
+    DeployableSocialMediaAgent,
+)
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -51,6 +54,8 @@ class RunnableAgent(str, Enum):
     mech_prediction_request_reasoning = "mech_prediction-request-reasoning"
     mech_prediction_url_cot = "mech_prediction-url-cot"
     mech_prediction_with_research_bold = "mech_prediction-with-research-bold"
+    # Social media (Farcaster + Twitter)
+    social_media = "social_media"
 
 
 RUNNABLE_AGENTS = {
@@ -67,6 +72,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.mech_prediction_request_reasoning: DeployablePredictionRequestReasoningAgent,
     RunnableAgent.mech_prediction_url_cot: DeployablePredictionUrlCotAgent,
     RunnableAgent.mech_prediction_with_research_bold: DeployablePredictionWithResearchBoldAgent,
+    RunnableAgent.social_media: DeployableSocialMediaAgent,
 }
 
 
