@@ -25,6 +25,7 @@ You can use the following functions:
 {engine_help}
 
 Only output valid Python function calls.
+Make 'Reasoning' calls frequently - at least every other call.
 """
 
 
