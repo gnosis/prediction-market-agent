@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from loguru import logger
-from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -21,7 +21,7 @@ from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_h
 from prediction_market_agent.utils import APIKeys
 
 
-class DeployableSocialMediaAgent(DeployableTraderAgent):
+class DeployableSocialMediaAgent(DeployableAgent):
     model: str = "gpt-4-turbo-2024-04-09"
     social_media_handlers: list[AbstractSocialMediaHandler] = [
         FarcasterHandler(),
@@ -30,14 +30,13 @@ class DeployableSocialMediaAgent(DeployableTraderAgent):
 
     def run(self, market_type: MarketType) -> None:
         # It should post a message (cast) on each run.
-        # We just need one market to get latest bets.
 
         bets = self.get_bets(market_type=market_type)
         # If no bets available for the last 24h, we skip posting.
         if not bets:
             logger.info("No bets available from last day. No post will be created.")
             return
-        tweet = build_social_media_text(market_type, bets)
+        tweet = build_social_media_text(self.model, bets)
         self.post(tweet)
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
