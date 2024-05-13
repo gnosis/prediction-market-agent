@@ -18,16 +18,6 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
-from prediction_market_agent.agents.mech_agent.deploy import (
-    DeployablePredictionOfflineAgent,
-    DeployablePredictionOfflineSMEAgent,
-    DeployablePredictionOnlineAgent,
-    DeployablePredictionOnlineSMEAgent,
-    DeployablePredictionRequestRAGAgent,
-    DeployablePredictionRequestReasoningAgent,
-    DeployablePredictionUrlCotAgent,
-    DeployablePredictionWithResearchBoldAgent,
-)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
 )
