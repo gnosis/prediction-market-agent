@@ -38,7 +38,7 @@ class DeployableSocialMediaAgent(DeployableTraderAgent):
         if not bets:
             logger.info("No bets available from last day. No post will be created.")
             return
-        tweet = build_social_media_text(market_type, bets)
+        tweet = build_social_media_text(self.model, bets)
         self.post(tweet)
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
