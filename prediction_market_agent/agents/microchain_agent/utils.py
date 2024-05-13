@@ -1,7 +1,6 @@
 import typing as t
 
 from microchain import Agent
-from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
@@ -57,9 +56,7 @@ def get_balance(market_type: MarketType) -> BetAmount:
     if market_type == MarketType.OMEN:
         # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
         return BetAmount(
-            amount=get_balances(
-                PrivateCredentials.from_api_keys(APIKeys()).public_key
-            ).xdai,
+            amount=get_balances(APIKeys().bet_from_address).xdai,
             currency=currency,
         )
     else:
