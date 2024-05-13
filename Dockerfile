@@ -25,6 +25,7 @@ WORKDIR /app
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY prediction_market_agent ./prediction_market_agent
+COPY scripts ./scripts
 
 ENV PYTHONPATH=/app
 
