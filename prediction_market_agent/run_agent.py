@@ -18,16 +18,6 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
-from prediction_market_agent.agents.mech_agent.deploy import (
-    DeployablePredictionOfflineAgent,
-    DeployablePredictionOfflineSMEAgent,
-    DeployablePredictionOnlineAgent,
-    DeployablePredictionOnlineSMEAgent,
-    DeployablePredictionRequestRAGAgent,
-    DeployablePredictionRequestReasoningAgent,
-    DeployablePredictionUrlCotAgent,
-    DeployablePredictionWithResearchBoldAgent,
-)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
 )
@@ -45,15 +35,6 @@ class RunnableAgent(str, Enum):
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
-    # Mechs
-    mech_prediction_online = "mech_prediction-online"
-    mech_prediction_offline = "mech_prediction-offline"
-    mech_prediction_online_sme = "mech_prediction-online-sme"
-    mech_prediction_offline_sme = "mech_prediction-offline-sme"
-    mech_prediction_request_rag = "mech_prediction-request-rag"
-    mech_prediction_request_reasoning = "mech_prediction-request-reasoning"
-    mech_prediction_url_cot = "mech_prediction-url-cot"
-    mech_prediction_with_research_bold = "mech_prediction-with-research-bold"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
 
@@ -64,14 +45,6 @@ RUNNABLE_AGENTS = {
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
     RunnableAgent.microchain: DeployableMicrochainAgent,
-    RunnableAgent.mech_prediction_online: DeployablePredictionOnlineAgent,
-    RunnableAgent.mech_prediction_offline: DeployablePredictionOfflineAgent,
-    RunnableAgent.mech_prediction_online_sme: DeployablePredictionOnlineSMEAgent,
-    RunnableAgent.mech_prediction_offline_sme: DeployablePredictionOfflineSMEAgent,
-    RunnableAgent.mech_prediction_request_rag: DeployablePredictionRequestRAGAgent,
-    RunnableAgent.mech_prediction_request_reasoning: DeployablePredictionRequestReasoningAgent,
-    RunnableAgent.mech_prediction_url_cot: DeployablePredictionUrlCotAgent,
-    RunnableAgent.mech_prediction_with_research_bold: DeployablePredictionWithResearchBoldAgent,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
 }
 
