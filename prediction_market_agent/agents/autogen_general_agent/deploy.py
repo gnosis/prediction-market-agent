@@ -45,7 +45,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             better_address=APIKeys().bet_from_address, start_time=one_day_ago
         )
         # filter bets with unique title, i.e. get 1 bet per market
-        seen_titles = {bet.title: bet for bet in bets}
+        seen_titles = {bet.market_question: bet for bet in bets}
         filtered_bets = list(seen_titles.values())
         return filtered_bets
 
