@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, Sequence
 
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from sqlmodel import Session, SQLModel, create_engine, desc, select
 

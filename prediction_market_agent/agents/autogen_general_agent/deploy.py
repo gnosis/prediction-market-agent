@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from loguru import logger
 from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
