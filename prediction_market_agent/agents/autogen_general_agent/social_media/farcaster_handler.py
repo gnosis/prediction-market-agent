@@ -1,5 +1,5 @@
 from farcaster import Warpcast
-from loguru import logger
+from prediction_market_agent_tooling.loggers import logger
 
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
