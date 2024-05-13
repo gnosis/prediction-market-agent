@@ -41,9 +41,13 @@ class DeployableSocialMediaAgent(DeployableAgent):
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
         one_day_ago = utcnow() - timedelta(days=1)
-        return market_type.market_class.get_bets_made_since(
+        bets = market_type.market_class.get_bets_made_since(
             better_address=APIKeys().bet_from_address, start_time=one_day_ago
         )
+        # filter bets with unique title, i.e. get 1 bet per market
+        seen_titles = {bet.title: bet for bet in bets}
+        filtered_bets = list(seen_titles.values())
+        return filtered_bets
 
     def post(self, tweet: str | None) -> None:
         if not tweet:

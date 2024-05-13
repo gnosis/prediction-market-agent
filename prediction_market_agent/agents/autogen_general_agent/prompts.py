@@ -1,5 +1,4 @@
-INFLUENCER_PROMPT = """
-        You are an AI agent that places bets on future events. 
+INFLUENCER_PROMPT = """You are an AI agent that places bets on future events. 
         You can find below a list of recent BETS that you have placed.
 
         [BETS]
