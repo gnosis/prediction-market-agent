@@ -21,7 +21,6 @@ from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
     mech_request,
-    mech_request_local,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -134,7 +133,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         return str(response.p_yes)
 
 
-class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
+class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
@@ -158,20 +157,6 @@ class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
                 f"{MECH_CALL_XDAI_LIMIT})."
             )
         return super().__call__(market_id)
-
-
-class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
-    def __init__(
-        self,
-        market_type: MarketType,
-        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
-    ) -> None:
-        self.mech_tool = mech_tool
-        super().__init__(market_type=market_type, mech_request=mech_request_local)
-
-    @property
-    def description(self) -> str:
-        return self._description
 
 
 class BuyTokens(MarketFunction):
@@ -368,8 +353,7 @@ MISC_FUNCTIONS = [
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
-    PredictProbabilityForQuestionLocal,
+    PredictProbabilityForQuestion,
     GetBalance,
     BuyYes,
     BuyNo,
