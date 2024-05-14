@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from prediction_market_agent_tooling.config import PrivateCredentials
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import HexAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.data_models import RealityQuestion
@@ -25,9 +25,9 @@ class FinalizeAndResolveResult(BaseModel):
 
 
 def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
-    private_credentials: PrivateCredentials,
+    api_keys: APIKeys,
 ) -> FinalizeAndResolveResult:
-    public_key = private_credentials.public_key
+    public_key = api_keys.bet_from_address
     balances_start = get_balances(public_key)
     logger.info(f"{balances_start=}")
 
@@ -46,7 +46,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
         (m, find_resolution_on_other_markets(m)) for m in created_opened_markets
     ]
     finalized_markets = finalize_markets(
-        private_credentials,
+        api_keys,
         created_opened_markets_with_resolutions,
     )
     balances_after_finalization = get_balances(public_key)
@@ -61,7 +61,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     )
     # Resolve them (resolve them on Oracle).
     resolved_markets = resolve_markets(
-        private_credentials,
+        api_keys,
         created_finalized_markets,
     )
     balances_after_resolution = get_balances(public_key)
@@ -76,7 +76,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
         current_answer_before=before - timedelta(hours=24),
     )
     claimed_question_ids = claim_bonds_on_realitio_questions(
-        private_credentials,
+        api_keys,
         created_not_claimed_questions,
         auto_withdraw=True,
     )
