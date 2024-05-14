@@ -5,6 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from loguru import logger
 from pinecone import Pinecone
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
 from prediction_market_agent.utils import APIKeys
 
@@ -12,6 +13,7 @@ from prediction_market_agent.utils import APIKeys
 INDEX_NAME = "omen-markets"
 
 
+# ToDo - Move to PMAT
 class PineconeHandler:
     def __init__(self):
         k = APIKeys()
@@ -42,3 +44,7 @@ class PineconeHandler:
         ids_to_texts = self.find_texts_not_in_vec_db(texts)
         ids, missing_texts = ids_to_texts.keys(), ids_to_texts.values()
         self.vectorstore.add_texts(texts=missing_texts, ids=list(ids))
+
+    def find_nearest_questions(self, limit: int, text: str) -> list[str]:
+        documents = self.vectorstore.similarity_search(query=text, k=limit)
+        return [doc.page_content for doc in documents]
