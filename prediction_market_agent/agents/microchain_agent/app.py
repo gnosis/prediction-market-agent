@@ -101,7 +101,7 @@ with st.sidebar:
     if not agent_is_initialized():
         model = st.selectbox(
             "Model",
-            ["gpt-4-turbo-2024-04-09", "gpt-3.5-turbo-0125"],
+            ["gpt-3.5-turbo-0125", "gpt-4-turbo-2024-04-09"],
             index=0,
         )
         if model is None:
