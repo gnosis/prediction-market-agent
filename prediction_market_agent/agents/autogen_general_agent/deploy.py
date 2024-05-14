@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
@@ -34,7 +34,10 @@ class DeployableSocialMediaAgent(DeployableAgent):
     def run(self, market_type: MarketType) -> None:
         # It should post a message (cast) on each run.
 
-        bets = self.get_bets(market_type=market_type)
+        one_day_ago = utcnow() - timedelta(days=1)
+        bets = self.get_unique_bets_for_market(
+            market_type=market_type, start_time=one_day_ago
+        )
         # If no bets available for the last 24h, we skip posting.
         if not bets:
             logger.info("No bets available from last day. No post will be created.")
@@ -43,11 +46,20 @@ class DeployableSocialMediaAgent(DeployableAgent):
 
         self.post(tweet)
 
-    def get_bets(self, market_type: MarketType) -> list[Bet]:
-        one_day_ago = utcnow() - timedelta(days=1)
-        return market_type.market_class.get_bets_made_since(
-            better_address=APIKeys().bet_from_address, start_time=one_day_ago
+    def get_unique_bets_for_market(
+        self, market_type: MarketType, start_time: datetime
+    ) -> list[Bet]:
+        """
+        Returns bets for a given market since start_date.
+        Uniqueness defined by market title.
+        """
+        bets = market_type.market_class.get_bets_made_since(
+            better_address=APIKeys().bet_from_address, start_time=start_time
         )
+        # filter bets with unique title, i.e. get 1 bet per market
+        seen_titles = {bet.market_question: bet for bet in bets}
+        filtered_bets = list(seen_titles.values())
+        return filtered_bets
 
     def post(self, tweet: str | None) -> None:
         if not tweet:
