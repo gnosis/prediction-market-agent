@@ -5,6 +5,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
+
 from prediction_market_agent.agents.autogen_general_agent.social_agent import (
     build_social_media_text,
 )
