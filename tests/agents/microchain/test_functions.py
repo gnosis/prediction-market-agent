@@ -12,9 +12,9 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     BuyNo,
     BuyYes,
     GetBalance,
+    GetLiquidPositions,
     GetMarketProbability,
     GetMarkets,
-    GetPositions,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
@@ -64,9 +64,9 @@ def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_get_positions(market_type: MarketType) -> None:
-    get_positions = GetPositions(market_type=market_type)
-    positions = get_positions()
+def test_get_liquid_positions(market_type: MarketType) -> None:
+    test_get_liquid_positions = GetLiquidPositions(market_type=market_type)
+    positions = test_get_liquid_positions()
     assert len(positions) > 0
 
 

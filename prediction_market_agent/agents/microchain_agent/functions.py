@@ -313,7 +313,7 @@ class GetBalance(MarketFunction):
         return get_balance(market_type=self.market_type).amount
 
 
-class GetPositions(MarketFunction):
+class GetLiquidPositions(MarketFunction):
     def __init__(self, market_type: MarketType) -> None:
         self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
@@ -332,7 +332,8 @@ class GetPositions(MarketFunction):
     def __call__(self) -> list[str]:
         self.user_address = APIKeys().bet_from_address
         positions = self.market_type.market_class.get_positions(
-            user_id=self.user_address
+            user_id=self.user_address,
+            liquid_only=True,
         )
         return [str(position) for position in positions]
 
@@ -374,5 +375,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    GetPositions,
+    GetLiquidPositions,
 ]
