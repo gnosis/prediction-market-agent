@@ -23,10 +23,13 @@ from prediction_market_agent.utils import APIKeys
 
 class DeployableSocialMediaAgent(DeployableAgent):
     model: str = "gpt-4-turbo-2024-04-09"
-    social_media_handlers: list[AbstractSocialMediaHandler] = [
-        FarcasterHandler(),
-        TwitterHandler(),
-    ]
+    social_media_handlers: list[AbstractSocialMediaHandler] = []
+
+    def load(self) -> None:
+        self.social_media_handlers = [
+            FarcasterHandler(),
+            TwitterHandler(),
+        ]
 
     def run(self, market_type: MarketType) -> None:
         # It should post a message (cast) on each run.
@@ -37,6 +40,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             logger.info("No bets available from last day. No post will be created.")
             return
         tweet = build_social_media_text(self.model, bets)
+
         self.post(tweet)
 
     def get_bets(self, market_type: MarketType) -> list[Bet]:
