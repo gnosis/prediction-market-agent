@@ -54,9 +54,6 @@ class DeployableSocialMediaAgent(DeployableAgent):
             logger.info("No tweet was produced. Exiting.")
             return
 
-        if not self.social_media_handlers:
-            self.load()
-
         for handler in self.social_media_handlers:
             handler.post(tweet)
 
