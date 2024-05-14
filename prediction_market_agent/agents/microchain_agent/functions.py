@@ -191,8 +191,9 @@ class BuyTokens(MarketFunction):
         return (
             f"Use this function to buy {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
-            f"second parameter specifies how much {self.currency} you spend."
-            f"This is capped at {self.MAX_AMOUNT}{self.currency}."
+            f"second parameter specifies the VALUE of tokens to sell in "
+            f"{self.currency}. This is NOT the same as the number of tokens."
+            f"If this fails, try selling a smaller amount."
         )
 
     @property
