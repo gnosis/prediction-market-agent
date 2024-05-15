@@ -1,7 +1,7 @@
 from pprint import pprint
 
 import typer
-from prediction_market_agent_tooling.config import PrivateCredentials
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import private_key_type
 from web3 import Web3
 
@@ -28,13 +28,13 @@ def main(
     safe_address_checksum = (
         Web3.to_checksum_address(safe_address) if safe_address else None
     )
-    private_credentials = PrivateCredentials(
-        private_key=private_key_type(from_private_key),
-        safe_address=safe_address_checksum,
+    api_keys = APIKeys(
+        BET_FROM_PRIVATE_KEY=private_key_type(from_private_key),
+        SAFE_ADDRESS=safe_address_checksum,
     )
 
     result = omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
-        private_credentials=private_credentials
+        api_keys=api_keys
     )
     pprint(result.model_dump())
 

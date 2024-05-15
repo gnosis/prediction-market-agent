@@ -35,7 +35,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.26.0", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.28.0", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -56,6 +56,8 @@ sqlmodel = "^0.0.18"
 farcaster = "^0.7.11"
 mech-client = { git = "https://github.com/valory-xyz/mech-client.git", rev = "4a43da7ba50e5c271f8c763a3f1c7ae1cc9dfe0e" } # TODO update to 0.2.14 when available
 streamlit-extras = "^0.4.2"
+tweepy = "^4.14.0"
+
 langchain-pinecone = "^0.1.0"
 
 [build-system]

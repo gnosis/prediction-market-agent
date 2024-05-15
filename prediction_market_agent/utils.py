@@ -1,8 +1,8 @@
 import json
 import typing as t
 
-from loguru import logger
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import (
     check_not_none,
     should_not_happen,

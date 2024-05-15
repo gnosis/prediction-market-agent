@@ -25,6 +25,7 @@ You can use the following functions:
 {engine_help}
 
 Only output valid Python function calls.
+Make 'Reasoning' calls frequently - at least every other call.
 """
 
 
@@ -56,10 +57,13 @@ def build_agent(
         temperature=0.7,
     )
     agent = Agent(llm=LLM(generator=generator), engine=engine)
+    agent.max_tries = 3
     agent.prompt = SYSTEM_PROMPT.format(engine_help=engine.help)
     agent.bootstrap = [
         'Reasoning("I need to reason step by step. Start by assessing my '
-        'current position and balance.")'
+        "current positions and balance. Do I have any positions in the markets "
+        "returned from GetMarkets? Consider selling overvalued tokens AND "
+        'buying undervalued tokens.")'
     ]
     return agent
 

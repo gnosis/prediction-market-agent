@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
-from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -14,7 +13,6 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetBalance,
     GetMarketProbability,
     GetMarkets,
-    GetPositions,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
@@ -64,13 +62,6 @@ def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_get_positions(market_type: MarketType) -> None:
-    get_positions = GetPositions(market_type=market_type)
-    positions = get_positions()
-    assert len(positions) > 0
-
-
-@pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_engine_help(market_type: MarketType) -> None:
     engine = Engine()
     engine.register(Reasoning())
@@ -99,7 +90,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     Test buying and selling tokens for a market
     """
     market = get_binary_markets(market_type=market_type)[0]
-    from_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+    from_address = APIKeys().bet_from_address
     outcomes_functions = {
         get_yes_outcome(market_type=market_type): [
             BuyYes(market_type=market_type),
