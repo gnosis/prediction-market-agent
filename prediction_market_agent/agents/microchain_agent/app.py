@@ -5,6 +5,11 @@ from prediction_market_agent.streamlit_utils import (  # isort:skip
 
 streamlit_asyncio_event_loop_hack()
 
+# Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
+from prediction_market_agent.utils import patch_sqlite3  # isort:skip
+
+patch_sqlite3()
+
 import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -96,7 +101,7 @@ with st.sidebar:
     if not agent_is_initialized():
         model = st.selectbox(
             "Model",
-            ["gpt-4-turbo-2024-04-09", "gpt-3.5-turbo-0125"],
+            ["gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"],
             index=0,
         )
         if model is None:
