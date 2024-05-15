@@ -1,4 +1,5 @@
 import base64
+import typing as t
 from typing import Optional
 
 from langchain_openai import OpenAIEmbeddings
@@ -41,7 +42,7 @@ class PineconeHandler:
         return {id: self.decode_id(id) for id in missing_ids}
 
     def insert_texts_if_not_exists(
-        self, texts: list[str], metadatas: Optional[list[dict]] = None
+        self, texts: list[str], metadatas: Optional[list[dict[str, t.Any]]] = None
     ) -> None:
         ids_to_texts = self.find_texts_not_in_vec_db(texts)
         ids, missing_texts = ids_to_texts.keys(), ids_to_texts.values()
