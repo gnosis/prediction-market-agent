@@ -23,8 +23,8 @@ from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.pinecone_utils import (
-    create_texts_from_omen_markets,
     create_metadatas_from_omen_markets,
+    create_texts_from_omen_markets,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
