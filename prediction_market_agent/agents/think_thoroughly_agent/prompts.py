@@ -83,21 +83,20 @@ for the predicition based on the summary of your findings.
 The report must not be longer than 1000 words.
 """
 
-FINAL_DECISION_PROMPT = """
-Your task is to determine the probability of a SCENARIO being answered 'Yes' or 'No'.
-SCENARIOS_WITH_PROBABILITIES is provided, which contains a set of {number_of_scenarios} SCENARIOs.
-The object SCENARIOS_WITH_PROBABILITIES contains a list of tuple, where each tuple contains, as its
-first element, an scenario, and as its second entry, a probability dictionary, having properties such
-as p_yes (probability that the scenario is true), p_no (probability that the scenario is false),
-confidence (confidence level in the values of p_yes and p_no).
-You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, 
-considering the probabilities of the other related SCENARIOs.
+FINAL_DECISION_PROMPT = """Your task is to determine the probability of a SCENARIO being answered 'Yes' or 'No'. SCENARIOS_WITH_PROBABILITIES is provided, which contains a set of {number_of_scenarios} SCENARIOs. The object SCENARIOS_WITH_PROBABILITIES contains a list of tuple, where each tuple contains, as its first element, an scenario, and as its second entry, a probability dictionary, having properties such as p_yes (probability that the scenario is true), p_no (probability that the scenario is false), confidence (confidence level in the values of p_yes and p_no). 
 
 SCENARIOS_WITH_PROBABILITIES: 
 {scenarios_with_probabilities}
 
-SCENARIO_TO_ASSESS: {scenario_to_assess}
-"""
+CORRELATED_MARKETS is also provided, which contains a list of scenarios that are semantically similar to SCENARIO_TO_ASSESS. The object RELATED_MARKETS contains a list of dictionaries, where each dictionary has properties such as question_title, as p_yes (probability that the scenario is true) and p_no (probability that the scenario is false).
+
+CORRELATED_MARKETS: 
+{correlated_markets}
+ 
+You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, 
+considering the probabilities of the other related SCENARIOs.
+
+SCENARIO_TO_ASSESS: {scenario_to_assess}"""
 
 PROBABILITY_CLASS_OUTPUT = """
 Your response should be a JSON string containing the following keys:
@@ -107,8 +106,4 @@ Your response should be a JSON string containing the following keys:
 - "p_no": Probability that the sentence outcome will be `No`. Ranging from 0 (lowest probability) to 1 (maximum probability).
 - "confidence": Indicating the confidence in the estimated probabilities you provided ranging from 0 (lowest confidence) to 1 (maximum confidence). Confidence can be calculated based on the quality and quantity of data used for the estimation.
 
-Do not surround the output object with escape quotes, line breaks nor '''. 
-Do not output any other text, only the JSON object.
-
-Ensure p_yes + p_no equals 1.
-"""
+Do not surround the output object with escape quotes, line breaks nor '''. Do not output any other text, only the JSON object. Ensure p_yes + p_no equals 1."""
