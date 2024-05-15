@@ -347,11 +347,14 @@ class RememberPastLearnings(Function):
 
     @property
     def description(self) -> str:
-        return """Use this function to fetch information about the previous actions you executed. Examples of past 
-        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
-        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
-        markets you requested, among others.
-        """
+        return (
+            "Use this function to fetch information about the previous actions "
+            "you executed. Examples of past activities include previous bets "
+            "you placed, previous markets you redeemed from, balances you "
+            "requested, market positions you requested, markets you fetched, "
+            "tokens you bought, tokens you sold, probabilities for markets you "
+            "requested, among others."
+        )
 
     @property
     def example_args(self) -> list[str]:
