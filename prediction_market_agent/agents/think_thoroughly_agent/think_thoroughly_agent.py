@@ -97,10 +97,9 @@ class CrewAIAgentSubquestions:
         )
         return llm
 
-    def update_markets(self):
+    def update_markets(self) -> None:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
-        self._init_pinecone()
         created_after = utcnow() - datetime.timedelta(days=7)
         markets = self.subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,
@@ -110,9 +109,10 @@ class CrewAIAgentSubquestions:
         )
         texts = create_texts_from_omen_markets(markets)
         metadatas = create_metadatas_from_omen_markets(markets)
-        self.pinecone_handler.insert_texts_if_not_exists(
-            texts=texts, metadatas=metadatas
-        )
+        if texts:
+            logger.debug(f"Inserting {len(texts)} into the vector database.")
+            self._init_pinecone()
+            self.pinecone_handler.insert_texts_if_not_exists(texts=texts, metadatas=metadatas)  # type: ignore[union-attr]
 
     def get_required_conditions(self, question: str) -> Scenarios:
         researcher = self._get_researcher()
@@ -215,9 +215,7 @@ class CrewAIAgentSubquestions:
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
         self._init_pinecone()
-        nearest_questions = self.pinecone_handler.find_nearest_questions(
-            5, text=question
-        )
+        nearest_questions = self.pinecone_handler.find_nearest_questions(5, text=question)  # type: ignore[union-attr]
 
         markets = list(
             par_generator(

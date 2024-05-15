@@ -15,7 +15,7 @@ INDEX_NAME = "omen-markets"
 
 # ToDo - Move to PMAT
 class PineconeHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         k = APIKeys()
         self.pc = Pinecone(api_key=k.pinecone_api_key.get_secret_value())
         self.index = self.pc.Index(INDEX_NAME)
@@ -42,7 +42,7 @@ class PineconeHandler:
 
     def insert_texts_if_not_exists(
         self, texts: list[str], metadatas: Optional[list[dict]] = None
-    ):
+    ) -> None:
         ids_to_texts = self.find_texts_not_in_vec_db(texts)
         ids, missing_texts = ids_to_texts.keys(), ids_to_texts.values()
         self.vectorstore.add_texts(

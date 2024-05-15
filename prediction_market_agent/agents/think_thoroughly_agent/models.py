@@ -15,7 +15,7 @@ class CorrelatedMarketInput(BaseModel):
     question_title: str
 
     @staticmethod
-    def from_omen_market(omen_market: OmenMarket):
+    def from_omen_market(omen_market: OmenMarket) -> "CorrelatedMarketInput":
         return CorrelatedMarketInput(
             current_p_yes=omen_market.current_p_yes,
             current_p_no=omen_market.current_p_no,
