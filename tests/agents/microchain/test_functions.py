@@ -11,7 +11,6 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     BuyNo,
     BuyYes,
     GetBalance,
-    GetLiquidPositions,
     GetMarketProbability,
     GetMarkets,
     MarketFunction,
@@ -60,13 +59,6 @@ def test_buy_no(market_type: MarketType) -> None:
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
     balance = GetBalance(market_type=market_type)()
     assert balance > 0
-
-
-@pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_get_liquid_positions(market_type: MarketType) -> None:
-    get_liquid_positions = GetLiquidPositions(market_type=market_type)
-    positions = get_liquid_positions()
-    assert len(positions) > 0
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
