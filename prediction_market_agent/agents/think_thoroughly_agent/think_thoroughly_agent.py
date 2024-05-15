@@ -1,3 +1,5 @@
+import datetime
+import sys
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
@@ -8,9 +10,8 @@ from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
-from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
+from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -18,6 +19,13 @@ from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.think_thoroughly_agent.models import (
+    CorrelatedMarketInput,
+)
+from prediction_market_agent.agents.think_thoroughly_agent.pinecone_utils import (
+    create_texts_from_omen_markets,
+    create_metadatas_from_omen_markets,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
     CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -43,6 +51,7 @@ class CrewAIAgentSubquestions:
 
     def __init__(self, model: str) -> None:
         self.model = model
+        self.subgraph_handler = OmenSubgraphHandler()
 
     def _init_pinecone(self) -> None:
         if not self.pinecone_handler:
@@ -87,6 +96,23 @@ class CrewAIAgentSubquestions:
             temperature=0.0,
         )
         return llm
+
+    def update_markets(self):
+        """We use the agent's run to add embeddings of new markets that don't exist yet in the
+        vector DB."""
+        self._init_pinecone()
+        created_after = utcnow() - datetime.timedelta(days=7)
+        markets = self.subgraph_handler.get_omen_binary_markets_simple(
+            limit=sys.maxsize,
+            filter_by=FilterBy.OPEN,
+            sort_by=SortBy.NEWEST,
+            created_after=created_after,
+        )
+        texts = create_texts_from_omen_markets(markets)
+        metadatas = create_metadatas_from_omen_markets(markets)
+        self.pinecone_handler.insert_texts_if_not_exists(
+            texts=texts, metadatas=metadatas
+        )
 
     def get_required_conditions(self, question: str) -> Scenarios:
         researcher = self._get_researcher()
@@ -187,21 +213,21 @@ class CrewAIAgentSubquestions:
             )
             return None
 
-    def get_correlated_markets(self, question: str) -> list[RelatedMarketInput]:
+    def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
         self._init_pinecone()
         nearest_questions = self.pinecone_handler.find_nearest_questions(
             5, text=question
         )
-        sh = OmenSubgraphHandler()
+
         markets = list(
             par_generator(
                 [q.market_address for q in nearest_questions],
-                lambda market_address: sh.get_omen_market_by_market_id(
+                lambda market_address: self.subgraph_handler.get_omen_market_by_market_id(
                     market_id=market_address
                 ),
             )
         )
-        return [RelatedMarketInput.from_omen_market(market) for market in markets]
+        return [CorrelatedMarketInput.from_omen_market(market) for market in markets]
 
     def generate_final_decision(
         self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
