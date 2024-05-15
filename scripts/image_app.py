@@ -4,8 +4,12 @@ from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
+from prediction_market_agent_tooling.tools.streamlit_logging import streamlit_login
 
 st.title("Prediction market thumbnail generator")
+
+with st.sidebar:
+    streamlit_login()
 
 markets = get_binary_markets(42, MarketType.OMEN)
 

@@ -19,6 +19,7 @@ from prediction_market_agent_tooling.markets.markets import (
     get_binary_markets,
 )
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.streamlit_logging import streamlit_login
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -38,6 +39,9 @@ AGENTS: list[
 add_sink_to_logger()
 
 st.title("Agent's decision-making process")
+
+with st.sidebar:
+    streamlit_login()
 
 # Fetch markets from the selected market type.
 market_source = MarketType(
