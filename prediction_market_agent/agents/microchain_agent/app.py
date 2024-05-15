@@ -1,4 +1,6 @@
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+
 from prediction_market_agent.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
@@ -52,14 +54,26 @@ def display_all_history(agent: Agent) -> None:
         st.chat_message(h["role"]).write(h["content"])
 
 
+def get_history_from_last_turn(agent: Agent) -> list[dict[str, str]]:
+    if len(agent.history) < 2:
+        raise ValueError(
+            "Agent history is too short. You must call `agent.run` before calling this function."
+        )
+
+    history_depth = 2  # One for the user input, one for the agent's reply
+    history = agent.history[-history_depth:]
+    str_history: list[dict[str, str]] = [
+        {str(key): str(value) for key, value in h.items()} for h in history
+    ]  # Enforce string typing
+    return str_history
+
+
 def display_new_history_callback(agent: Agent) -> None:
     """
     A callback to display the agent's history in the Streamlit app after a run
     with a single interation.
     """
-    history_depth = 2  # One for the user input, one for the agent's reply
-    history = agent.history[-history_depth:]
-    for h in history:
+    for h in get_history_from_last_turn(agent):
         st.chat_message(h["role"]).write(h["content"])
 
 
@@ -67,11 +81,21 @@ def agent_is_initialized() -> bool:
     return "agent" in st.session_state
 
 
+def save_last_turn_history_to_memory(agent: Agent) -> None:
+    last_turn_history = get_history_from_last_turn(agent)
+    st.session_state.long_term_memory.save_history(last_turn_history)
+
+
 def maybe_initialize_agent(model: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
+        long_term_memory = LongTermMemory("microchain-streamlit-app")
+        st.session_state.long_term_memory = long_term_memory
         st.session_state.agent = build_agent(
-            market_type=MarketType.OMEN, model=model, allow_stop=False
+            market_type=MarketType.OMEN,
+            model=model,
+            allow_stop=False,
+            long_term_memory=long_term_memory,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -169,6 +193,7 @@ with history_container:
             reasoning=user_reasoning,
             model=model,
         )
+        save_last_turn_history_to_memory(st.session_state.agent)
     if run_agent_button:
         maybe_initialize_agent(model)
         run_agent(
@@ -176,6 +201,7 @@ with history_container:
             iterations=int(iterations),
             model=model,
         )
+        save_last_turn_history_to_memory(st.session_state.agent)
     if agent_is_initialized() and has_been_run_past_initialization(
         st.session_state.agent
     ):

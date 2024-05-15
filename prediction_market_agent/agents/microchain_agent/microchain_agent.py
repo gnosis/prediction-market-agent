@@ -62,7 +62,8 @@ def build_agent(
     agent.bootstrap = [
         'Reasoning("I need to reason step by step. Start by assessing my '
         "current positions and balance. Do I have any positions in the markets "
-        'returned from GetMarkets? Consider selling OR buying tokens.")'
+        "returned from GetMarkets? Consider selling overvalued tokens AND "
+        'buying undervalued tokens.")'
     ]
     return agent
 

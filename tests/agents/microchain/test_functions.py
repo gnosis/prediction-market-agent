@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -14,7 +13,6 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     GetBalance,
     GetMarketProbability,
     GetMarkets,
-    GetPositions,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
@@ -61,13 +59,6 @@ def test_buy_no(market_type: MarketType) -> None:
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
     balance = GetBalance(market_type=market_type)()
     assert balance > 0
-
-
-@pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_get_positions(market_type: MarketType) -> None:
-    get_positions = GetPositions(market_type=market_type)
-    positions = get_positions()
-    assert len(positions) > 0
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])

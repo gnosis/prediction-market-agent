@@ -257,8 +257,9 @@ class SellTokens(MarketFunction):
             f"Use this function to sell {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
             f"second parameter specifies the VALUE of tokens to sell in "
-            f"{self.currency}. This is NOT the same as the number of tokens."
-            f"If this fails, try selling a smaller amount."
+            f"{self.currency}. This is NOT the same as the number of outcome "
+            f"tokens. If this fails, try selling a smaller {self.currency} "
+            f"amount."
         )
 
     @property
@@ -314,7 +315,7 @@ class GetBalance(MarketFunction):
         return get_balance(market_type=self.market_type).amount
 
 
-class GetPositions(MarketFunction):
+class GetLiquidPositions(MarketFunction):
     def __init__(self, market_type: MarketType) -> None:
         self.user_address = APIKeys().bet_from_address
         super().__init__(market_type=market_type)
@@ -333,7 +334,8 @@ class GetPositions(MarketFunction):
     def __call__(self) -> list[str]:
         self.user_address = APIKeys().bet_from_address
         positions = self.market_type.market_class.get_positions(
-            user_id=self.user_address
+            user_id=self.user_address,
+            liquid_only=True,
         )
         return [str(position) for position in positions]
 
@@ -345,11 +347,14 @@ class RememberPastLearnings(Function):
 
     @property
     def description(self) -> str:
-        return """Use this function to fetch information about the previous actions you executed. Examples of past 
-        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
-        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
-        markets you requested, among others.
-        """
+        return (
+            "Use this function to fetch information about the previous actions "
+            "you executed. Examples of past activities include previous bets "
+            "you placed, previous markets you redeemed from, balances you "
+            "requested, market positions you requested, markets you fetched, "
+            "tokens you bought, tokens you sold, probabilities for markets you "
+            "requested, among others."
+        )
 
     @property
     def example_args(self) -> list[str]:
@@ -375,5 +380,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    GetPositions,
+    GetLiquidPositions,
 ]
