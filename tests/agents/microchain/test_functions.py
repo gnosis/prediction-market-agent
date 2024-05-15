@@ -64,8 +64,8 @@ def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_get_liquid_positions(market_type: MarketType) -> None:
-    test_get_liquid_positions = GetLiquidPositions(market_type=market_type)
-    positions = test_get_liquid_positions()
+    get_liquid_positions = GetLiquidPositions(market_type=market_type)
+    positions = get_liquid_positions()
     assert len(positions) > 0
 
 
