@@ -12,6 +12,7 @@ from prediction_market_agent.utils import patch_sqlite3  # isort:skip
 
 patch_sqlite3()
 
+
 import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -61,7 +62,11 @@ def get_history_from_last_turn(agent: Agent) -> list[dict[str, str]]:
         )
 
     history_depth = 2  # One for the user input, one for the agent's reply
-    return agent.history[-history_depth:]
+    history = agent.history[-history_depth:]
+    str_history: list[dict[str, str]] = [
+        {str(key): str(value) for key, value in h.items()} for h in history
+    ]  # Enforce string typing
+    return str_history
 
 
 def display_new_history_callback(agent: Agent) -> None:
