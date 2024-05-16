@@ -2,8 +2,12 @@ import datetime
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
-from langchain.tools.tavily_search import TavilySearchResults
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_core.callbacks import (
+    AsyncCallbackManagerForToolRun,
+    CallbackManagerForToolRun,
+)
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
@@ -16,6 +20,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
+from requests import HTTPError
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
@@ -37,6 +42,36 @@ from prediction_market_agent.utils import APIKeys
 
 class Scenarios(BaseModel):
     scenarios: list[str]
+
+
+class TavilySearchResultsThatWillThrow(TavilySearchResults):
+    def _run(
+        self,
+        query: str,
+        run_manager: CallbackManagerForToolRun | None = None,
+    ) -> list[dict[t.Hashable, t.Any]] | str:
+        """
+        Use the tool.
+        Throws an exception if it occurs, instead stringifying it.
+        """
+        return self.api_wrapper.results(
+            query,
+            self.max_results,
+        )
+
+    async def _arun(
+        self,
+        query: str,
+        run_manager: AsyncCallbackManagerForToolRun | None = None,
+    ) -> list[dict[t.Hashable, t.Any]] | str:
+        """
+        Use the tool asynchronously.
+        Throws an exception if it occurs, instead stringifying it.
+        """
+        return await self.api_wrapper.results_async(
+            query,
+            self.max_results,
+        )
 
 
 class CrewAIAgentSubquestions:
@@ -69,10 +104,10 @@ class CrewAIAgentSubquestions:
             llm=self._build_llm(),
         )
 
-    def _build_tavily_search(self) -> TavilySearchResults:
+    def _build_tavily_search(self) -> TavilySearchResultsThatWillThrow:
         api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
         api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
-        return TavilySearchResults(api_wrapper=api_wrapper)
+        return TavilySearchResultsThatWillThrow(api_wrapper=api_wrapper)
 
     def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()
@@ -177,7 +212,7 @@ class CrewAIAgentSubquestions:
 
         try:
             result = crew.kickoff(inputs=inputs)
-        except APIError as e:
+        except (APIError, HTTPError) as e:
             logger.error(
                 f"Could not retrieve response from the model provider because of {e}"
             )

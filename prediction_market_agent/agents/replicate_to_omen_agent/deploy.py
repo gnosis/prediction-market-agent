@@ -51,31 +51,23 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         logger.info("Redeeming funds from previously unfunded markets.")
         redeem_from_all_user_positions(keys)
 
-        for close_time_days in settings.CLOSE_TIME_UP_TO_N_DAYS:
-            close_time_before = utcnow() + timedelta(days=close_time_days)
-            initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
+        for replicate_from_market_type in [MarketType.MANIFOLD, MarketType.POLYMARKET]:
+            for close_time_days in settings.CLOSE_TIME_UP_TO_N_DAYS:
+                close_time_before = utcnow() + timedelta(days=close_time_days)
+                initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
 
-            logger.info(
-                f"Replicating from {MarketType.MANIFOLD} markets closing in {close_time_days} days."
-            )
-            omen_replicate_from_tx(
-                market_type=MarketType.MANIFOLD,
-                n_to_replicate=settings.N_TO_REPLICATE,
-                initial_funds=initial_funds_per_market,
-                api_keys=keys,
-                close_time_before=close_time_before,
-                auto_deposit=True,
-            )
-            logger.info(
-                f"Replicating from {MarketType.POLYMARKET} markets closing in {close_time_days} days."
-            )
-            omen_replicate_from_tx(
-                market_type=MarketType.POLYMARKET,
-                n_to_replicate=settings.N_TO_REPLICATE,
-                initial_funds=initial_funds_per_market,
-                api_keys=keys,
-                close_time_before=close_time_before,
-                auto_deposit=True,
-            )
+                logger.info(
+                    f"Replicating from {replicate_from_market_type} markets closing in {close_time_days} days."
+                )
+                omen_replicate_from_tx(
+                    market_type=replicate_from_market_type,
+                    n_to_replicate=settings.N_TO_REPLICATE,
+                    initial_funds=initial_funds_per_market,
+                    api_keys=keys,
+                    close_time_before=close_time_before,
+                    auto_deposit=True,
+                )
 
-        logger.debug("Done.")
+            logger.info(f"Replication from {replicate_from_market_type} done.")
+
+        logger.info("All done.")
