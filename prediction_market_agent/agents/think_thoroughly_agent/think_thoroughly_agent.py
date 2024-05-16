@@ -2,9 +2,9 @@ import typing as t
 
 from crewai import Agent, Crew, Process, Task
 from langchain.tools.tavily_search import (
-    TavilySearchResults,
-    CallbackManagerForToolRun,
     AsyncCallbackManagerForToolRun,
+    CallbackManagerForToolRun,
+    TavilySearchResults,
 )
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_core.language_models import BaseChatModel
