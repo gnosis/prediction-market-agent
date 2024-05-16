@@ -16,6 +16,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
+from requests import HTTPError
 
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -193,7 +194,7 @@ class CrewAIAgentSubquestions:
 
         try:
             result = crew.kickoff(inputs=inputs)
-        except APIError as e:
+        except (APIError, HTTPError) as e:
             logger.error(
                 f"Could not retrieve response from the model provider because of {e}"
             )
