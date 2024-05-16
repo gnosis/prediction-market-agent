@@ -23,10 +23,14 @@ from streamlit_extras.bottom_container import bottom
 from prediction_market_agent.agents.microchain_agent.functions import MARKET_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
 from prediction_market_agent.agents.microchain_agent.utils import (
+    get_balance,
     get_initial_history_length,
     has_been_run_past_initialization,
 )
 from prediction_market_agent.streamlit_utils import check_required_api_keys
+from prediction_market_agent.utils import APIKeys
+
+MARKET_TYPE = MarketType.OMEN
 
 
 def run_agent(agent: Agent, iterations: int, model: str) -> None:
@@ -93,7 +97,7 @@ def maybe_initialize_agent(model: str) -> None:
         long_term_memory = LongTermMemory("microchain-streamlit-app")
         st.session_state.long_term_memory = long_term_memory
         st.session_state.agent = build_agent(
-            market_type=MarketType.OMEN,
+            market_type=MARKET_TYPE,
             model=model,
             allow_stop=False,
             long_term_memory=long_term_memory,
@@ -120,8 +124,20 @@ st.set_page_config(
 )
 st.title("Prediction Market Trader Agent")
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
+keys = APIKeys()
 
 with st.sidebar:
+    st.subheader("Agent Info:")
+    with st.container(border=True):
+        st.metric(
+            label=f"Current balance ({MARKET_TYPE.market_class.currency})",
+            value=f"{get_balance(MARKET_TYPE).amount:.2f}",
+        )
+    st.write(
+        f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=keys)})."
+    )
+
+    st.divider()
     st.subheader("Configure:")
     if not agent_is_initialized():
         model = st.selectbox(
@@ -152,16 +168,17 @@ with st.sidebar:
     )
 
 with st.expander(
-    "Interact with an autonomous agent that participates in prediction "
-    "markets. More info..."
+    "Interact with an autonomous agent that uses its own balance to "
+    "participate in prediction markets. More info..."
 ):
     st.markdown(
         "To start, click 'Run' to see the agent in action, or bootstrap the "
         "agent with your own reasoning."
     )
     st.markdown(
-        "It is equipped with the following tools to access the "
-        "[AIOmen](https://aiomen.eth.limo/) prediction market APIs:"
+        f"It is equipped with the following tools to access the "
+        f"[{MARKET_TYPE}]({MARKET_TYPE.market_class.base_url}) prediction "
+        f"market APIs:"
     )
     st.markdown(get_market_function_bullet_point_list())
 
