@@ -35,10 +35,10 @@ def test_save_load_long_term_memory_item(db_storage_test: DBStorage) -> None:
 
     results = db_storage_test.load(task_description=task_description, to=timestamp)
     assert len(results) == 1
-    assert json.loads(results[0].metadata_) == first_item
+    assert json.loads(str(results[0].metadata_)) == first_item
 
     results = db_storage_test.load(task_description=task_description, from_=timestamp)
     assert len(results) == 1
-    assert json.loads(results[0].metadata_) == second_item
+    assert json.loads(str(results[0].metadata_)) == second_item
 
     assert len(db_storage_test.load(task_description=task_description)) == 2
