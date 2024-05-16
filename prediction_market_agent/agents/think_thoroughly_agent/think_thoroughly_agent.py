@@ -121,8 +121,7 @@ class CrewAIAgentSubquestions:
         )
 
         report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_required_conditions],
+            agents=[researcher], tasks=[create_required_conditions], memory=True
         )
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
         scenarios = Scenarios.model_validate_json(result)
@@ -141,8 +140,7 @@ class CrewAIAgentSubquestions:
         )
 
         report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_scenarios_task],
+            agents=[researcher], tasks=[create_scenarios_task], memory=True
         )
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
         scenarios = Scenarios.model_validate_json(result)
@@ -183,6 +181,7 @@ class CrewAIAgentSubquestions:
             tasks=[task_research_one_outcome, task_create_probability_for_one_outcome],
             verbose=2,
             process=Process.sequential,
+            memory=True,
         )
 
         inputs = {"sentence": sentence}
@@ -222,9 +221,7 @@ class CrewAIAgentSubquestions:
         )
 
         crew = Crew(
-            agents=[predictor],
-            tasks=[task_final_decision],
-            verbose=2,
+            agents=[predictor], tasks=[task_final_decision], verbose=2, memory=True
         )
 
         logger.info(f"Starting to generate final decision for '{question}'.")

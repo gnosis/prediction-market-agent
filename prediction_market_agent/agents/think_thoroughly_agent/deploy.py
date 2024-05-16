@@ -5,6 +5,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
@@ -17,9 +18,27 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         return self.agent.answer_binary_market(market.question)
 
+    def after(self, market_type: MarketType) -> None:
+        """
+        from crewai.utilities.paths import db_storage_path
+        db_path = f"{db_storage_path()}/long_term_memory_storage.db"
+        engine=sqlmodel.create_engine(f'sqlite:///{db_path}')
+        # load using pandas, store in local connection
+        """
+        self.store_memories()
+
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent(place_bet=False)
+    from crewai.utilities import paths
+
+    db_path = f"{paths.db_storage_path()}/long_term_memory_storage.db"
+    print(db_path)
+    # ToDo delete me
+    import os
+
+    k = APIKeys()
+    os.environ["OPENAI_API_KEY"] = k.openai_api_key.get_secret_value()
     agent.deploy_local(
         market_type=MarketType.OMEN,
         sleep_time=540,
