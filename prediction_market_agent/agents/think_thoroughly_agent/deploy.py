@@ -27,10 +27,6 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent(place_bet=False)
-    # We set the keys manually since it will be required by PMAT
-    if not os.environ.get("OPENAI_API_KEY"):
-        keys = APIKeys()
-        os.environ["OPENAI_API_KEY"] = keys.openai_api_key.get_secret_value()
     agent.deploy_local(
         market_type=MarketType.OMEN,
         sleep_time=540,
