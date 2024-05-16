@@ -1,4 +1,3 @@
-import os
 
 from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -7,7 +6,6 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
 )
-from prediction_market_agent.utils import APIKeys
 
 
 class DeployableThinkThoroughlyAgent(DeployableTraderAgent):

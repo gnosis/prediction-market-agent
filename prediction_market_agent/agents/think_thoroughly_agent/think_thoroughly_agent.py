@@ -1,5 +1,4 @@
 import datetime
-import sys
 import typing as t
 
 from crewai import Agent, Crew, Process, Task
@@ -11,7 +10,6 @@ from langchain_openai import ChatOpenAI
 from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -21,7 +19,6 @@ from pydantic import BaseModel
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
-    PineconeMetadata,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
