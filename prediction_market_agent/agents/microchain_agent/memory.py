@@ -1,4 +1,5 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
+from datetime import datetime
 from typing import Any, Dict, Sequence
 
 from prediction_market_agent.db.db_storage import DBStorage
@@ -18,5 +19,13 @@ class LongTermMemory:
             history=history,
         )
 
-    def search(self, latest_n: int = 5) -> Sequence[LongTermMemories]:
-        return self.storage.load(self.task_description, latest_n)
+    def search(
+        self,
+        from_: datetime | None = None,
+        to: datetime | None = None,
+    ) -> Sequence[LongTermMemories]:
+        return self.storage.load(
+            task_description=self.task_description,
+            from_=from_,
+            to=to,
+        )
