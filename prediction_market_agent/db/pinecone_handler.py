@@ -20,6 +20,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.models import (
 from prediction_market_agent.utils import APIKeys
 
 INDEX_NAME = "omen-markets"
+T = t.TypeVar("T")
 
 
 class PineconeHandler:
@@ -58,7 +59,7 @@ class PineconeHandler:
         )
 
     @staticmethod
-    def chunks(array, n_elements):
+    def chunks(array: list[T], n_elements: int) -> t.Generator[list[T], None, None]:
         """Yield successive n_elements-sized chunks from array."""
         for i in range(0, len(array), n_elements):
             yield array[i : i + n_elements]
@@ -87,7 +88,7 @@ class PineconeHandler:
                 logger.debug(f"Inserting {len(text_chunk)} into the vector database.")
                 self.insert_texts_if_not_exists(
                     texts=text_chunk, metadatas=metadata_chunk
-                )  # type: ignore[union-attr]
+                )
 
     def find_nearest_questions(self, limit: int, text: str) -> list[PineconeMetadata]:
         documents = self.vectorstore.similarity_search(query=text, k=limit)
