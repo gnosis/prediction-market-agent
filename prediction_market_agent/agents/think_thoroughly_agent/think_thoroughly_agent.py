@@ -21,10 +21,7 @@ from pydantic import BaseModel
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
-)
-from prediction_market_agent.agents.think_thoroughly_agent.pinecone_utils import (
-    create_metadatas_from_omen_markets,
-    create_texts_from_omen_markets,
+    PineconeMetadata,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -52,10 +49,7 @@ class CrewAIAgentSubquestions:
     def __init__(self, model: str) -> None:
         self.model = model
         self.subgraph_handler = OmenSubgraphHandler()
-
-    def _init_pinecone(self) -> None:
-        if not self.pinecone_handler:
-            self.pinecone_handler = PineconeHandler()
+        self.pinecone_handler = PineconeHandler()
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
@@ -101,18 +95,9 @@ class CrewAIAgentSubquestions:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
         created_after = utcnow() - datetime.timedelta(days=7)
-        markets = self.subgraph_handler.get_omen_binary_markets_simple(
-            limit=sys.maxsize,
-            filter_by=FilterBy.OPEN,
-            sort_by=SortBy.NEWEST,
-            created_after=created_after,
+        self.pinecone_handler.insert_all_omen_markets_if_not_exists(
+            created_after=created_after
         )
-        texts = create_texts_from_omen_markets(markets)
-        metadatas = create_metadatas_from_omen_markets(markets)
-        if texts:
-            logger.debug(f"Inserting {len(texts)} into the vector database.")
-            self._init_pinecone()
-            self.pinecone_handler.insert_texts_if_not_exists(texts=texts, metadatas=metadatas)  # type: ignore[union-attr]
 
     def get_required_conditions(self, question: str) -> Scenarios:
         researcher = self._get_researcher()
@@ -214,7 +199,6 @@ class CrewAIAgentSubquestions:
             return None
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
-        self._init_pinecone()
         nearest_questions = self.pinecone_handler.find_nearest_questions(5, text=question)  # type: ignore[union-attr]
 
         markets = list(
@@ -256,7 +240,10 @@ class CrewAIAgentSubquestions:
                 ),
                 "number_of_scenarios": len(scenarios_with_probabilities),
                 "scenario_to_assess": question,
-                "correlated_markets": [r.dict() for r in correlated_markets],
+                "correlated_markets": "\n".join(
+                    f"- Market '{m.question_title}' has {m.p_yes * 100:.2f}% probability of happening"
+                    for m in correlated_markets
+                ),
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)

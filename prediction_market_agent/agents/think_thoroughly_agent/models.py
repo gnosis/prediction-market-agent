@@ -8,16 +8,20 @@ class PineconeMetadata(BaseModel):
     question_title: str
     market_address: ChecksumAddress
 
+    @staticmethod
+    def from_omen_market(market: OmenMarket):
+        return PineconeMetadata(
+            question_title=market.question_title, market_address=market.id
+        )
+
 
 class CorrelatedMarketInput(BaseModel):
     current_p_yes: Probability
-    current_p_no: Probability
     question_title: str
 
     @staticmethod
     def from_omen_market(omen_market: OmenMarket) -> "CorrelatedMarketInput":
         return CorrelatedMarketInput(
             current_p_yes=omen_market.current_p_yes,
-            current_p_no=omen_market.current_p_no,
             question_title=omen_market.question_title,
         )

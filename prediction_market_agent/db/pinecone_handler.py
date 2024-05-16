@@ -1,10 +1,18 @@
 import base64
+import sys
 import typing as t
+from datetime import datetime
 from typing import Optional
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
+from loguru import logger
 from pinecone import Pinecone
+from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    OmenSubgraphHandler,
+)
+from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     PineconeMetadata,
@@ -14,7 +22,6 @@ from prediction_market_agent.utils import APIKeys
 INDEX_NAME = "omen-markets"
 
 
-# ToDo - Move to PMAT
 class PineconeHandler:
     def __init__(self) -> None:
         k = APIKeys()
@@ -49,6 +56,38 @@ class PineconeHandler:
         self.vectorstore.add_texts(
             texts=missing_texts, ids=list(ids), metadatas=metadatas
         )
+
+    @staticmethod
+    def chunks(array, n_elements):
+        """Yield successive n_elements-sized chunks from array."""
+        for i in range(0, len(array), n_elements):
+            yield array[i : i + n_elements]
+
+    def insert_all_omen_markets_if_not_exists(
+        self, created_after: datetime | None = None
+    ) -> None:
+        subgraph_handler = OmenSubgraphHandler()
+        markets = subgraph_handler.get_omen_binary_markets_simple(
+            limit=sys.maxsize,
+            filter_by=FilterBy.NONE,
+            sort_by=SortBy.NEWEST,
+            created_after=created_after,
+        )
+        texts = [m.question_title for m in markets]
+        metadatas = [
+            PineconeMetadata.from_omen_market(market).model_dump() for market in markets
+        ]
+        if texts:
+            n_elements = 100
+            chunked_texts = list(self.chunks(texts, n_elements))
+            chunked_metadatas = list(self.chunks(metadatas, n_elements))
+            for text_chunk, metadata_chunk in tqdm(
+                zip(chunked_texts, chunked_metadatas), total=len(chunked_texts)
+            ):
+                logger.debug(f"Inserting {len(text_chunk)} into the vector database.")
+                self.insert_texts_if_not_exists(
+                    texts=text_chunk, metadatas=metadata_chunk
+                )  # type: ignore[union-attr]
 
     def find_nearest_questions(self, limit: int, text: str) -> list[PineconeMetadata]:
         documents = self.vectorstore.similarity_search(query=text, k=limit)
