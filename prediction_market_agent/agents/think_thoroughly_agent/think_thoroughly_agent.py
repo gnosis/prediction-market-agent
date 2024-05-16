@@ -40,9 +40,6 @@ class Scenarios(BaseModel):
 
 
 class CrewAIAgentSubquestions:
-    pinecone_handler: t.Optional[PineconeHandler] = None
-    model: str
-
     def __init__(self, model: str) -> None:
         self.model = model
         self.subgraph_handler = OmenSubgraphHandler()
@@ -196,7 +193,9 @@ class CrewAIAgentSubquestions:
             return None
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
-        nearest_questions = self.pinecone_handler.find_nearest_questions(5, text=question)  # type: ignore[union-attr]
+        nearest_questions = self.pinecone_handler.find_nearest_questions(
+            5, text=question
+        )
 
         markets = list(
             par_generator(
@@ -238,7 +237,7 @@ class CrewAIAgentSubquestions:
                 "number_of_scenarios": len(scenarios_with_probabilities),
                 "scenario_to_assess": question,
                 "correlated_markets": "\n".join(
-                    f"- Market '{m.question_title}' has {m.p_yes * 100:.2f}% probability of happening"
+                    f"- Market '{m.question_title}' has {m.current_p_yes * 100:.2f}% probability of happening"
                     for m in correlated_markets
                 ),
             }

@@ -1,4 +1,4 @@
-from eth_typing import ChecksumAddress
+from eth_typing import HexAddress
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from pydantic import BaseModel
@@ -6,10 +6,10 @@ from pydantic import BaseModel
 
 class PineconeMetadata(BaseModel):
     question_title: str
-    market_address: ChecksumAddress
+    market_address: HexAddress
 
     @staticmethod
-    def from_omen_market(market: OmenMarket):
+    def from_omen_market(market: OmenMarket) -> "PineconeMetadata":
         return PineconeMetadata(
             question_title=market.question_title, market_address=market.id
         )
