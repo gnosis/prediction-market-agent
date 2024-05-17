@@ -20,20 +20,20 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
 
     def after(self, market_type: MarketType) -> None:
         """
-        from crewai.utilities.paths import db_storage_path
+        ToDo from crewai.utilities.paths import db_storage_path
         db_path = f"{db_storage_path()}/long_term_memory_storage.db"
         engine=sqlmodel.create_engine(f'sqlite:///{db_path}')
         # load using pandas, store in local connection
         """
-        self.store_memories()
+        # self.store_memories()
+        pass
 
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent(place_bet=False)
-    from crewai.utilities import paths
-
-    db_path = f"{paths.db_storage_path()}/long_term_memory_storage.db"
-    print(db_path)
+    # from crewai.utilities import paths
+    # db_path = f"{paths.db_storage_path()}/long_term_memory_storage.db"
+    # print(db_path)
     # ToDo delete me
     import os
 

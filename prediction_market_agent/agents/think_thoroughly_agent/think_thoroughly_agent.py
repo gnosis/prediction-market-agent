@@ -82,6 +82,7 @@ class CrewAIAgentSubquestions:
             allow_delegation=False,
             tools=[self._build_tavily_search()],
             llm=self._build_llm(),
+            memory=True,
         )
 
     def _get_predictor(self) -> Agent:
