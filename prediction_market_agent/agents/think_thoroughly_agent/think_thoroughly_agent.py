@@ -1,5 +1,6 @@
 import typing as t
 
+import tenacity
 from crewai import Agent, Crew, Process, Task
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_community.tools.tavily_search import TavilySearchResults
@@ -37,6 +38,11 @@ class Scenarios(BaseModel):
 
 
 class TavilySearchResultsThatWillThrow(TavilySearchResults):
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
     def _run(
         self,
         query: str,
@@ -51,6 +57,11 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
             self.max_results,
         )
 
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
     async def _arun(
         self,
         query: str,
