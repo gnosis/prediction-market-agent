@@ -1,6 +1,7 @@
 import datetime
 import typing as t
 
+import tenacity
 from crewai import Agent, Crew, Process, Task
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_community.tools.tavily_search import TavilySearchResults
@@ -45,6 +46,11 @@ class Scenarios(BaseModel):
 
 
 class TavilySearchResultsThatWillThrow(TavilySearchResults):
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
     def _run(
         self,
         query: str,
@@ -59,6 +65,11 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
             self.max_results,
         )
 
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
     async def _arun(
         self,
         query: str,
@@ -218,6 +229,15 @@ class CrewAIAgentSubquestions:
             )
             return None
 
+        if (
+            task_research_one_outcome.tools_errors > 0
+            or task_create_probability_for_one_outcome.tools_errors > 0
+        ):
+            logger.error(
+                f"Could not retrieve reasonable prediction for '{sentence}' because of errors in the tools"
+            )
+            return None
+
         try:
             output = Answer.model_validate_json(result)
             return output
@@ -306,6 +326,7 @@ class CrewAIAgentSubquestions:
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
+                    logger.warning(f"Could not generate prediction for '{scenario}'.")
                     continue
                 scenarios_with_probs.append((scenario, prediction))
                 logger.info(

@@ -1,9 +1,11 @@
 import typing as t
+from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -361,7 +363,8 @@ class RememberPastLearnings(Function):
         return []
 
     def __call__(self) -> t.Sequence[LongTermMemories]:
-        return self.long_term_memory.search()
+        # Get the last 24hrs of the agent's memory
+        return self.long_term_memory.search(from_=utcnow() - timedelta(days=1))
 
 
 MISC_FUNCTIONS = [
