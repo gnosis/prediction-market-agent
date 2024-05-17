@@ -25,12 +25,14 @@ T = t.TypeVar("T")
 
 class PineconeHandler:
     def __init__(self) -> None:
-        k = APIKeys()
-        self.pc = Pinecone(api_key=k.pinecone_api_key.get_secret_value())
+        keys = APIKeys()
+        self.pc = Pinecone(api_key=keys.pinecone_api_key.get_secret_value())
         self.index = self.pc.Index(INDEX_NAME)
-        self.embeddings = OpenAIEmbeddings(api_key=k.openai_api_key.get_secret_value())
+        self.embeddings = OpenAIEmbeddings(
+            api_key=keys.openai_api_key.get_secret_value()
+        )
         self.vectorstore = PineconeVectorStore(
-            pinecone_api_key=k.pinecone_api_key.get_secret_value(),
+            pinecone_api_key=keys.pinecone_api_key.get_secret_value(),
             embedding=self.embeddings,
             index_name=INDEX_NAME,
         )

@@ -83,18 +83,22 @@ for the predicition based on the summary of your findings.
 The report must not be longer than 1000 words.
 """
 
-FINAL_DECISION_PROMPT = """Your task is to determine the probability of a SCENARIO being answered 'Yes' or 'No'. SCENARIOS_WITH_PROBABILITIES is provided, which contains a set of {number_of_scenarios} SCENARIOs. The object SCENARIOS_WITH_PROBABILITIES contains a list of tuple, where each tuple contains, as its first element, an scenario, and as its second entry, a probability dictionary, having properties such as p_yes (probability that the scenario is true), p_no (probability that the scenario is false), confidence (confidence level in the values of p_yes and p_no). 
+FINAL_DECISION_PROMPT = """
+- Your task is to determine the probability of a SCENARIO being answered 'Yes' or 'No'.
+- SCENARIOS_WITH_PROBABILITIES is provided, which contains a set of {number_of_scenarios} SCENARIOs. 
+
+- The object SCENARIOS_WITH_PROBABILITIES is a list containing multiple bullet points. Each item describes a scenario, beginning with the probability of it happening, the confidence for that prediction and the reasoning carried out for that prediction.
 
 SCENARIOS_WITH_PROBABILITIES: 
 {scenarios_with_probabilities}
 
-CORRELATED_MARKETS is also provided, which contains a list of scenarios that are semantically similar to SCENARIO_TO_ASSESS. The object RELATED_MARKETS contains a list of dictionaries, where each dictionary has properties such as question_title, as p_yes (probability that the scenario is true) and p_no (probability that the scenario is false).
+- CORRELATED_MARKETS is also provided, which contains a list of bullet points, which are semantically similar to SCENARIO_TO_ASSESS.
+- The object CORRELATED_MARKETS is a list of bullet points, where each item has the properties question_title and current_p_yes (probability that the scenario is true).
 
 CORRELATED_MARKETS: 
 {correlated_markets}
  
-You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, 
-considering the probabilities of the other related SCENARIOs.
+- You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, considering the probabilities of the other related SCENARIOs.
 
 SCENARIO_TO_ASSESS: {scenario_to_assess}"""
 
