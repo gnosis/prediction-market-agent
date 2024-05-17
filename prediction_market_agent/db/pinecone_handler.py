@@ -4,6 +4,7 @@ import typing as t
 from datetime import datetime
 from typing import Optional
 
+from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from loguru import logger
@@ -93,14 +94,14 @@ class PineconeHandler:
                 )
 
     def find_nearest_questions_with_threshold(
-        self, limit: int, text: str, threshold=0.7
+        self, limit: int, text: str, threshold: float = 0.7
     ) -> list[PineconeMetadata]:
         # Note that pagination is not implemented in the Pinecone client.
         # Hence we set a large limit and hope we get enough results that satisfy the threshold.
         documents_and_scores = self.vectorstore.similarity_search_with_score(
             query=text, k=int(limit * 5)
         )
-        all_documents = []
+        all_documents: list[Document] = []
         for doc, score in documents_and_scores:
             if len(all_documents) >= limit:
                 break
