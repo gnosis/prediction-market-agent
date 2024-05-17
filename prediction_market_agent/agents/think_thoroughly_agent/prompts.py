@@ -110,4 +110,6 @@ Your response should be a JSON string containing the following keys:
 - "p_no": Probability that the sentence outcome will be `No`. Ranging from 0 (lowest probability) to 1 (maximum probability).
 - "confidence": Indicating the confidence in the estimated probabilities you provided ranging from 0 (lowest confidence) to 1 (maximum confidence). Confidence can be calculated based on the quality and quantity of data used for the estimation.
 
-Do not surround the output object with escape quotes, line breaks nor '''. Do not output any other text, only the JSON object. Ensure p_yes + p_no equals 1."""
+Do not surround the output object with escape quotes, line breaks nor '''. 
+Do not output any other text, only the JSON object. 
+Ensure p_yes + p_no equals 1."""
