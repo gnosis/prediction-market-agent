@@ -16,8 +16,8 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
+    memories_to_learnings,
 )
-from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
@@ -350,21 +350,22 @@ class RememberPastLearnings(Function):
     @property
     def description(self) -> str:
         return (
-            "Use this function to fetch information about the previous actions "
-            "you executed. Examples of past activities include previous bets "
-            "you placed, previous markets you redeemed from, balances you "
-            "requested, market positions you requested, markets you fetched, "
-            "tokens you bought, tokens you sold, probabilities for markets you "
-            "requested, among others."
+            "Use this function to fetch information about the actions you "
+            "executed over the past 24hrs. Examples of past activities include "
+            "previous bets you placed, previous markets you redeemed from, "
+            "balances you requested, market positions you requested, markets "
+            "you fetched, tokens you bought, tokens you sold, probabilities "
+            "for markets you requested, among others."
         )
 
     @property
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> t.Sequence[LongTermMemories]:
+    def __call__(self) -> str:
         # Get the last 24hrs of the agent's memory
-        return self.long_term_memory.search(from_=utcnow() - timedelta(days=1))
+        memories = self.long_term_memory.search(from_=utcnow() - timedelta(days=1))
+        return memories_to_learnings(memories=memories)
 
 
 MISC_FUNCTIONS = [
