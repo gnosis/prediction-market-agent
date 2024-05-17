@@ -92,6 +92,20 @@ class PineconeHandler:
                     texts=text_chunk, metadatas=metadata_chunk
                 )
 
-    def find_nearest_questions(self, limit: int, text: str) -> list[PineconeMetadata]:
-        documents = self.vectorstore.similarity_search(query=text, k=limit)
-        return [PineconeMetadata.model_validate(doc.metadata) for doc in documents]
+    def find_nearest_questions_with_threshold(
+        self, limit: int, text: str, threshold=0.7
+    ) -> list[PineconeMetadata]:
+        # Note that pagination is not implemented in the Pinecone client.
+        # Hence we set a large limit and hope we get enough results that satisfy the threshold.
+        documents_and_scores = self.vectorstore.similarity_search_with_score(
+            query=text, k=int(limit * 5)
+        )
+        all_documents = []
+        for doc, score in documents_and_scores:
+            if len(all_documents) >= limit:
+                break
+            if score >= threshold:
+                all_documents.append(doc)
+
+        logger.debug(f"Found {len(all_documents)} relevant documents.")
+        return [PineconeMetadata.model_validate(doc.metadata) for doc in all_documents]

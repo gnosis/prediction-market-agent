@@ -248,7 +248,7 @@ class CrewAIAgentSubquestions:
             return None
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
-        nearest_questions = self.pinecone_handler.find_nearest_questions(
+        nearest_questions = self.pinecone_handler.find_nearest_questions_with_threshold(
             5, text=question
         )
 
