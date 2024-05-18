@@ -48,7 +48,9 @@ def build_agent(
         engine.register(function())
 
     if long_term_memory:
-        engine.register(RememberPastLearnings(long_term_memory))
+        engine.register(
+            RememberPastLearnings(long_term_memory=long_term_memory, model=model)
+        )
 
     generator = OpenAIChatGenerator(
         model=model,

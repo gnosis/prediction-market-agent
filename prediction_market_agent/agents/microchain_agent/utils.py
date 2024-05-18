@@ -22,6 +22,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
 from prediction_market_agent_tooling.tools.balances import get_balances
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.microchain_agent.memory import SimpleMemory
 from prediction_market_agent.utils import APIKeys
 
 
@@ -127,14 +128,14 @@ MEMORIES:
 """
 
 
-def memories_to_learnings(memories: list[str], model: str) -> str:
+def memories_to_learnings(memories: list[SimpleMemory], model: str) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
     past learnings.
     """
     llm = ChatOpenAI(
         temperature=0,
-        model_name=model,
+        model=model,
         api_key=APIKeys().openai_api_key.get_secret_value(),
     )
     summary_chain = load_summarize_chain(
@@ -145,6 +146,6 @@ def memories_to_learnings(memories: list[str], model: str) -> str:
         verbose=False,
     )
 
-    memory_docs = [Document(page_content=memory) for memory in memories]
+    memory_docs = [Document(page_content=str(m)) for m in memories]
     summary: str = summary_chain.run(input_documents=memory_docs)
     return summary

@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict
 
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
 from prediction_market_agent.db.db_storage import DBStorage
@@ -16,7 +17,7 @@ class SimpleMemory(BaseModel):
     @staticmethod
     def from_long_term_memory(long_term_memory: LongTermMemories) -> "SimpleMemory":
         return SimpleMemory(
-            content=json.loads(long_term_memory.metadata_)["content"],
+            content=json.loads(check_not_none(long_term_memory.metadata_))["content"],
             datetime_=long_term_memory.datetime_,
         )
 

@@ -343,8 +343,9 @@ class GetLiquidPositions(MarketFunction):
 
 
 class RememberPastLearnings(Function):
-    def __init__(self, long_term_memory: LongTermMemory) -> None:
+    def __init__(self, long_term_memory: LongTermMemory, model: str) -> None:
         self.long_term_memory = long_term_memory
+        self.model = model
         super().__init__()
 
     @property
@@ -365,7 +366,7 @@ class RememberPastLearnings(Function):
     def __call__(self) -> str:
         # Get the last 24hrs of the agent's memory
         memories = self.long_term_memory.search(from_=utcnow() - timedelta(days=1))
-        return memories_to_learnings(memories=memories)
+        return memories_to_learnings(memories=memories, model=self.model)
 
 
 MISC_FUNCTIONS = [

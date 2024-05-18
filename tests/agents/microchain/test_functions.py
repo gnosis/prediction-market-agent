@@ -194,7 +194,7 @@ def test_summarizing_memories(long_term_memory: LongTermMemory) -> None:
     )
     memories = long_term_memory.search(from_=utcnow() - timedelta(days=1))
     learnings = memories_to_learnings(
-        memories=[str(m) for m in memories],
+        memories=memories,
         model="gpt-4o-2024-05-13",
     )
     print(learnings)
