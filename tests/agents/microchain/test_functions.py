@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Generator
 
 import numpy as np
@@ -7,7 +6,6 @@ from microchain import Engine
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
@@ -20,6 +18,7 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
+    RememberPastLearnings,
     SellNo,
     SellYes,
 )
@@ -29,7 +28,6 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_binary_markets,
     get_no_outcome,
     get_yes_outcome,
-    memories_to_learnings,
 )
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
@@ -183,8 +181,8 @@ def test_predict_probability(
     assert 0.0 <= float(p_yes) <= 1.0
 
 
-# @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
-def test_summarizing_memories(long_term_memory: LongTermMemory) -> None:
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+def test_remember_past_learnings(long_term_memory: LongTermMemory) -> None:
     long_term_memory.save_history(
         history=[
             {"content": "I went to the park and saw a dog."},
@@ -192,9 +190,10 @@ def test_summarizing_memories(long_term_memory: LongTermMemory) -> None:
             {"content": "I went to the park and saw a bird."},
         ]
     )
-    memories = long_term_memory.search(from_=utcnow() - timedelta(days=1))
-    learnings = memories_to_learnings(
-        memories=memories,
+    ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
+    # long_term_memory = LongTermMemory(task_description="microchain-streamlit-app")
+    remember_past_learnings = RememberPastLearnings(
+        long_term_memory=long_term_memory,
         model="gpt-4o-2024-05-13",
     )
-    print(learnings)
+    print(remember_past_learnings())
