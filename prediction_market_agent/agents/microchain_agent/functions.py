@@ -352,7 +352,7 @@ class RememberPastLearnings(Function):
     def description(self) -> str:
         return (
             "Use this function to fetch information about the actions you "
-            "executed over the past 24hrs. Examples of past activities include "
+            "executed over the past day. Examples of past activities include "
             "previous bets you placed, previous markets you redeemed from, "
             "balances you requested, market positions you requested, markets "
             "you fetched, tokens you bought, tokens you sold, probabilities "
@@ -364,8 +364,10 @@ class RememberPastLearnings(Function):
         return []
 
     def __call__(self) -> str:
-        # Get the last 24hrs of the agent's memory
-        memories = self.long_term_memory.search(from_=utcnow() - timedelta(days=1))
+        # Get the last day's of the agent's memory. Add a +1hour buffer to
+        # make sure a cronjob-scheduled agent that calls this in the middle of
+        # its run doesn't miss anything from the previous day.
+        memories = self.long_term_memory.search(from_=utcnow() - timedelta(hours=25))
         return memories_to_learnings(memories=memories, model=self.model)
 
 
