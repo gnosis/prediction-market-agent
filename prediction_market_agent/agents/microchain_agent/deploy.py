@@ -7,7 +7,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import bui
 
 
 class DeployableMicrochainAgent(DeployableAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-4o-2024-05-13"
     n_iterations = 50
 
     def run(self, market_type: MarketType) -> None:
