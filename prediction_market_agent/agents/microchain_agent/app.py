@@ -121,12 +121,13 @@ def maybe_initialize_agent(model: str) -> None:
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
-def get_function_bullet_point_list() -> str:
+def get_function_bullet_point_list(model: str) -> str:
     bullet_points = ""
     for function in build_agent_functions(
         market_type=MARKET_TYPE,
         long_term_memory=st.session_state.long_term_memory,
         allow_stop=ALLOW_STOP,
+        model=model,
     ):
         bullet_points += f"  - {function.__class__.__name__}\n"
     return bullet_points
@@ -196,7 +197,7 @@ with st.expander(
         f"[{MARKET_TYPE}]({MARKET_TYPE.market_class.base_url}) prediction "
         f"market APIs:"
     )
-    st.markdown(get_function_bullet_point_list())
+    st.markdown(get_function_bullet_point_list(model=model))
 
 # Placeholder for the agent's history
 history_container = st.container()

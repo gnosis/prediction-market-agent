@@ -32,6 +32,7 @@ def build_agent_functions(
     market_type: MarketType,
     allow_stop: bool,
     long_term_memory: LongTermMemory | None,
+    model: str,
 ) -> list[Function]:
     functions = []
 
@@ -43,7 +44,9 @@ def build_agent_functions(
     if market_type == MarketType.OMEN:
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:
-        functions.append(RememberPastLearnings(long_term_memory))
+        functions.append(
+            RememberPastLearnings(long_term_memory=long_term_memory, model=model)
+        )
     return functions
 
 
@@ -59,6 +62,7 @@ def build_agent(
         market_type=market_type,
         allow_stop=allow_stop,
         long_term_memory=long_term_memory,
+        model=model,
     ):
         engine.register(f)
 

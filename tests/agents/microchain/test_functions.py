@@ -1,3 +1,5 @@
+from typing import Generator
+
 import numpy as np
 import pytest
 from microchain import Engine
@@ -15,9 +17,11 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
+    RememberPastLearnings,
     SellNo,
     SellYes,
 )
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_binary_markets,
@@ -29,6 +33,16 @@ from tests.utils import RUN_PAID_TESTS
 
 REPLICATOR_ADDRESS = "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
 AGENT_0_ADDRESS = "0x2DD9f5678484C1F59F97eD334725858b938B4102"
+
+
+@pytest.fixture(scope="session")
+def long_term_memory() -> Generator[LongTermMemory, None, None]:
+    """Creates a in-memory SQLite DB for testing"""
+    long_term_memory = LongTermMemory(
+        task_description="test", sqlalchemy_db_url="sqlite://"
+    )
+    long_term_memory.storage._initialize_db()
+    yield long_term_memory
 
 
 # TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
@@ -162,3 +176,21 @@ def test_predict_probability(
     market = get_binary_markets(market_type=market_type)[0]
     p_yes = predict_probability(market.id)
     assert 0.0 <= float(p_yes) <= 1.0
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+def test_remember_past_learnings(long_term_memory: LongTermMemory) -> None:
+    long_term_memory.save_history(
+        history=[
+            {"content": "I went to the park and saw a dog."},
+            {"content": "I went to the park and saw a cat."},
+            {"content": "I went to the park and saw a bird."},
+        ]
+    )
+    ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
+    # long_term_memory = LongTermMemory(task_description="microchain-streamlit-app")
+    remember_past_learnings = RememberPastLearnings(
+        long_term_memory=long_term_memory,
+        model="gpt-4o-2024-05-13",
+    )
+    print(remember_past_learnings())
