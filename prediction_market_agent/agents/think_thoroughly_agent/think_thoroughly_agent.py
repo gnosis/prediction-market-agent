@@ -221,7 +221,7 @@ class CrewAIAgentSubquestions:
             return None
 
         try:
-            output = Answer.model_validate_json(result)
+            output = Answer.model_validate(result)
             return output
         except ValueError as e:
             logger.error(
@@ -299,4 +299,8 @@ class CrewAIAgentSubquestions:
             if scenarios_with_probs
             else None
         )
+        if final_answer is None:
+            logger.error(
+                f"Could not generate final decision for '{question}' with {n_iterations} iterations."
+            )
         return final_answer
