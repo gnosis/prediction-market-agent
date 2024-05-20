@@ -18,16 +18,6 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         return self.agent.answer_binary_market(market.question)
 
-    def after(self, market_type: MarketType) -> None:
-        """
-        ToDo from crewai.utilities.paths import db_storage_path
-        db_path = f"{db_storage_path()}/long_term_memory_storage.db"
-        engine=sqlmodel.create_engine(f'sqlite:///{db_path}')
-        # load using pandas, store in local connection
-        """
-        # self.store_memories()
-        pass
-
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent(place_bet=False)
