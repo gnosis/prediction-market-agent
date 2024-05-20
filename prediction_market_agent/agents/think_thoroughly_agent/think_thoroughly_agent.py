@@ -1,8 +1,13 @@
 import typing as t
 
+import tenacity
 from crewai import Agent, Crew, Process, Task
-from langchain.tools.tavily_search import TavilySearchResults
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_core.callbacks import (
+    AsyncCallbackManagerForToolRun,
+    CallbackManagerForToolRun,
+)
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
@@ -12,6 +17,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
+from requests import HTTPError
 
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -29,6 +35,46 @@ from prediction_market_agent.utils import APIKeys
 
 class Scenarios(BaseModel):
     scenarios: list[str]
+
+
+class TavilySearchResultsThatWillThrow(TavilySearchResults):
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
+    def _run(
+        self,
+        query: str,
+        run_manager: CallbackManagerForToolRun | None = None,
+    ) -> list[dict[t.Hashable, t.Any]] | str:
+        """
+        Use the tool.
+        Throws an exception if it occurs, instead stringifying it.
+        """
+        return self.api_wrapper.results(
+            query,
+            self.max_results,
+        )
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
+    async def _arun(
+        self,
+        query: str,
+        run_manager: AsyncCallbackManagerForToolRun | None = None,
+    ) -> list[dict[t.Hashable, t.Any]] | str:
+        """
+        Use the tool asynchronously.
+        Throws an exception if it occurs, instead stringifying it.
+        """
+        return await self.api_wrapper.results_async(
+            query,
+            self.max_results,
+        )
 
 
 class CrewAIAgentSubquestions:
@@ -59,10 +105,10 @@ class CrewAIAgentSubquestions:
             llm=self._build_llm(),
         )
 
-    def _build_tavily_search(self) -> TavilySearchResults:
+    def _build_tavily_search(self) -> TavilySearchResultsThatWillThrow:
         api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
         api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
-        return TavilySearchResults(api_wrapper=api_wrapper)
+        return TavilySearchResultsThatWillThrow(api_wrapper=api_wrapper)
 
     def _build_llm(self) -> BaseChatModel:
         keys = APIKeys()
@@ -159,14 +205,23 @@ class CrewAIAgentSubquestions:
 
         try:
             result = crew.kickoff(inputs=inputs)
-        except APIError as e:
+        except (APIError, HTTPError) as e:
             logger.error(
                 f"Could not retrieve response from the model provider because of {e}"
             )
             return None
 
+        if (
+            task_research_one_outcome.tools_errors > 0
+            or task_create_probability_for_one_outcome.tools_errors > 0
+        ):
+            logger.error(
+                f"Could not retrieve reasonable prediction for '{sentence}' because of errors in the tools"
+            )
+            return None
+
         try:
-            output = Answer.model_validate_json(result)
+            output = Answer.model_validate(result)
             return output
         except ValueError as e:
             logger.error(
@@ -232,6 +287,7 @@ class CrewAIAgentSubquestions:
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
+                    logger.warning(f"Could not generate prediction for '{scenario}'.")
                     continue
                 scenarios_with_probs.append((scenario, prediction))
                 logger.info(
@@ -243,4 +299,8 @@ class CrewAIAgentSubquestions:
             if scenarios_with_probs
             else None
         )
+        if final_answer is None:
+            logger.error(
+                f"Could not generate final decision for '{question}' with {n_iterations} iterations."
+            )
         return final_answer

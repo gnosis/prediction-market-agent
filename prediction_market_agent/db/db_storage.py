@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.loggers import logger
@@ -44,14 +45,23 @@ class DBStorage:
             session.commit()
 
     def load(
-        self, task_description: str, latest_n: int = 5
+        self,
+        task_description: str,
+        from_: datetime | None = None,
+        to: datetime | None = None,
     ) -> Sequence[LongTermMemories]:
-        """Queries the LTM table by task description with error handling."""
+        """
+        Queries the LTM table by task description within a specific datetime
+        range, with error handling.
+        """
         with Session(self.engine) as session:
-            items = session.exec(
-                select(LongTermMemories)
-                .where(LongTermMemories.task_description == task_description)
-                .order_by(desc(LongTermMemories.datetime_))
-                .limit(latest_n)
-            ).all()
+            query = select(LongTermMemories).where(
+                LongTermMemories.task_description == task_description
+            )
+            if from_ is not None:
+                query = query.where(LongTermMemories.datetime_ >= from_)
+            if to is not None:
+                query = query.where(LongTermMemories.datetime_ <= to)
+
+            items = session.exec(query.order_by(desc(LongTermMemories.datetime_))).all()
             return items
