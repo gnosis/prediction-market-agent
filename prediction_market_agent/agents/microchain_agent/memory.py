@@ -33,6 +33,7 @@ class AnswerWithScenario(Answer):
     def build_from_answer(answer: Answer, scenario: str) -> "AnswerWithScenario":
         return AnswerWithScenario(scenario=scenario, **answer.dict())
 
+
 class LongTermMemory:
     def __init__(self, task_description: str, sqlalchemy_db_url: str | None = None):
         self.task_description = task_description
@@ -45,10 +46,13 @@ class LongTermMemory:
             history=history,
         )
 
-    def save_answer_with_scenario(self, answer_with_scenario: AnswerWithScenario) -> None:
+    def save_answer_with_scenario(
+        self, answer_with_scenario: AnswerWithScenario
+    ) -> None:
         self.storage.save_multiple(
             task_description=self.task_description,
-            history=[answer_with_scenario.dict()])
+            history=[answer_with_scenario.dict()],
+        )
 
     def search(
         self,

@@ -19,7 +19,10 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from requests import HTTPError
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory, AnswerWithScenario
+from prediction_market_agent.agents.microchain_agent.memory import (
+    AnswerWithScenario,
+    LongTermMemory,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
     CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -135,9 +138,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher], tasks=[create_required_conditions]
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -154,9 +155,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher], tasks=[create_scenarios_task]
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -223,9 +222,10 @@ class CrewAIAgentSubquestions:
             return None
 
         try:
-
             output = Answer.model_validate(result)
-            answer_with_scenario = AnswerWithScenario.build_from_answer(output, scenario=sentence)
+            answer_with_scenario = AnswerWithScenario.build_from_answer(
+                output, scenario=sentence
+            )
             self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
             return output
         except ValueError as e:
@@ -246,9 +246,7 @@ class CrewAIAgentSubquestions:
             output_json=Answer,
         )
 
-        crew = Crew(
-            agents=[predictor], tasks=[task_final_decision], verbose=2
-        )
+        crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
 
         logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
@@ -262,7 +260,9 @@ class CrewAIAgentSubquestions:
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
-        answer_with_scenario = AnswerWithScenario.build_from_answer(output, scenario=question)
+        answer_with_scenario = AnswerWithScenario.build_from_answer(
+            output, scenario=question
+        )
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
