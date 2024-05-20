@@ -288,9 +288,6 @@ class CrewAIAgentSubquestions:
                     self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
                 ),
             )
-            # sub_predictions = []
-            # for scenario in hypothetical_scenarios.scenarios + conditional_scenarios.scenarios:
-            #     sub_predictions.append((scenario, self.generate_prediction_for_one_outcome(scenario, scenarios_with_probs)))
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
