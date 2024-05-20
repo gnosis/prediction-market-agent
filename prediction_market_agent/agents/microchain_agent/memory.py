@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict
 
+from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
@@ -25,6 +26,13 @@ class SimpleMemory(BaseModel):
         return f"{self.datetime_}: {self.content}"
 
 
+class AnswerWithScenario(Answer):
+    scenario: str
+
+    @staticmethod
+    def build_from_answer(answer: Answer, scenario: str) -> "AnswerWithScenario":
+        return AnswerWithScenario(scenario=scenario, **answer.dict())
+
 class LongTermMemory:
     def __init__(self, task_description: str, sqlalchemy_db_url: str | None = None):
         self.task_description = task_description
@@ -36,6 +44,11 @@ class LongTermMemory:
             task_description=self.task_description,
             history=history,
         )
+
+    def save_answer_with_scenario(self, answer_with_scenario: AnswerWithScenario) -> None:
+        self.storage.save_multiple(
+            task_description=self.task_description,
+            history=[answer_with_scenario.dict()])
 
     def search(
         self,

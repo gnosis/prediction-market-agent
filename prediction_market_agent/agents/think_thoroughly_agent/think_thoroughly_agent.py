@@ -19,6 +19,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from requests import HTTPError
 
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory, AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
     CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -78,8 +79,11 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, memory: bool = True) -> None:
         self.model = model
+        self.memory = memory
+        if self.memory:
+            self._long_term_memory = LongTermMemory("think-thoroughly-agent")
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
@@ -93,7 +97,6 @@ class CrewAIAgentSubquestions:
             allow_delegation=False,
             tools=[self._build_tavily_search()],
             llm=self._build_llm(),
-            memory=True,
         )
 
     def _get_predictor(self) -> Agent:
@@ -133,7 +136,7 @@ class CrewAIAgentSubquestions:
         )
 
         report_crew = Crew(
-            agents=[researcher], tasks=[create_required_conditions], memory=True
+            agents=[researcher], tasks=[create_required_conditions]
         )
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
         scenarios = Scenarios.model_validate_json(result)
@@ -152,7 +155,7 @@ class CrewAIAgentSubquestions:
         )
 
         report_crew = Crew(
-            agents=[researcher], tasks=[create_scenarios_task], memory=True
+            agents=[researcher], tasks=[create_scenarios_task]
         )
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
         scenarios = Scenarios.model_validate_json(result)
@@ -193,7 +196,6 @@ class CrewAIAgentSubquestions:
             tasks=[task_research_one_outcome, task_create_probability_for_one_outcome],
             verbose=2,
             process=Process.sequential,
-            memory=True,
         )
 
         inputs = {"sentence": sentence}
@@ -221,7 +223,10 @@ class CrewAIAgentSubquestions:
             return None
 
         try:
+
             output = Answer.model_validate(result)
+            answer_with_scenario = AnswerWithScenario.build_from_answer(output, scenario=sentence)
+            self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
             return output
         except ValueError as e:
             logger.error(
@@ -242,7 +247,7 @@ class CrewAIAgentSubquestions:
         )
 
         crew = Crew(
-            agents=[predictor], tasks=[task_final_decision], verbose=2, memory=True
+            agents=[predictor], tasks=[task_final_decision], verbose=2
         )
 
         logger.info(f"Starting to generate final decision for '{question}'.")
@@ -257,6 +262,8 @@ class CrewAIAgentSubquestions:
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
+        answer_with_scenario = AnswerWithScenario.build_from_answer(output, scenario=question)
+        self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
@@ -281,7 +288,9 @@ class CrewAIAgentSubquestions:
                     self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
                 ),
             )
-
+            # sub_predictions = []
+            # for scenario in hypothetical_scenarios.scenarios + conditional_scenarios.scenarios:
+            #     sub_predictions.append((scenario, self.generate_prediction_for_one_outcome(scenario, scenarios_with_probs)))
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
