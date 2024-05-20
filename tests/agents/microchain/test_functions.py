@@ -9,7 +9,6 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.functions import (
     MARKET_FUNCTIONS,
-    MISC_FUNCTIONS,
     BuyNo,
     BuyYes,
     GetBalance,
@@ -80,8 +79,6 @@ def test_engine_help(market_type: MarketType) -> None:
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
-    for function in MISC_FUNCTIONS:
-        engine.register(function())
     for function in MARKET_FUNCTIONS:
         engine.register(function(market_type=market_type))
 

@@ -27,32 +27,6 @@ from prediction_market_agent.tools.mech.utils import (
 from prediction_market_agent.utils import APIKeys
 
 
-class Sum(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to compute the sum of two numbers"
-
-    @property
-    def example_args(self) -> list[float]:
-        return [2, 2]
-
-    def __call__(self, a: float, b: float) -> float:
-        return a + b
-
-
-class Product(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to compute the product of two numbers"
-
-    @property
-    def example_args(self) -> list[float]:
-        return [2, 2]
-
-    def __call__(self, a: float, b: float) -> float:
-        return a * b
-
-
 class MarketFunction(Function):
     def __init__(self, market_type: MarketType) -> None:
         self.market_type = market_type
@@ -370,11 +344,6 @@ class RememberPastLearnings(Function):
         memories = self.long_term_memory.search(from_=utcnow() - timedelta(hours=25))
         return memories_to_learnings(memories=memories, model=self.model)
 
-
-MISC_FUNCTIONS = [
-    Sum,
-    Product,
-]
 
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
