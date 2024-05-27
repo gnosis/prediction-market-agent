@@ -7,7 +7,10 @@ from prediction_market_agent_tooling.markets.data_models import Currency, TokenA
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.memory import (
+    LongTermMemory,
+    SimpleMemoryMicrochain,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
@@ -16,8 +19,8 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
-    memories_to_learnings,
 )
+from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.tools.mech.utils import (
     MechResponse,
     MechTool,
@@ -342,7 +345,10 @@ class RememberPastLearnings(Function):
         # make sure a cronjob-scheduled agent that calls this in the middle of
         # its run doesn't miss anything from the previous day.
         memories = self.long_term_memory.search(from_=utcnow() - timedelta(hours=25))
-        return memories_to_learnings(memories=memories, model=self.model)
+        simple_memories = [
+            SimpleMemoryMicrochain.from_long_term_memory(ltm) for ltm in memories
+        ]
+        return memories_to_learnings(memories=simple_memories, model=self.model)
 
 
 # Functions that interact with the prediction markets

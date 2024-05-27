@@ -1,7 +1,8 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
 import json
+from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
@@ -10,19 +11,46 @@ from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import LongTermMemories
 
 
-class SimpleMemory(BaseModel):
-    content: str
+class MemoryContainer(BaseModel, ABC):
     datetime_: datetime
 
     @staticmethod
-    def from_long_term_memory(long_term_memory: LongTermMemories) -> "SimpleMemory":
-        return SimpleMemory(
+    @abstractmethod
+    def from_long_term_memory(
+        long_term_memory: LongTermMemories,
+    ) -> "MemoryContainer":
+        pass
+
+
+class SimpleMemoryMicrochain(MemoryContainer):
+    content: str
+
+    @staticmethod
+    def from_long_term_memory(
+        long_term_memory: LongTermMemories,
+    ) -> "SimpleMemoryMicrochain":
+        return SimpleMemoryMicrochain(
             content=json.loads(check_not_none(long_term_memory.metadata_))["content"],
             datetime_=long_term_memory.datetime_,
         )
 
     def __str__(self) -> str:
         return f"{self.datetime_}: {self.content}"
+
+
+class SimpleMemoryThinkThoroughly(MemoryContainer):
+    reasoning: str
+
+    @staticmethod
+    def from_long_term_memory(
+        long_term_memory: LongTermMemories,
+    ) -> "SimpleMemoryThinkThoroughly":
+        return SimpleMemoryThinkThoroughly(
+            reasoning=json.loads(check_not_none(long_term_memory.metadata_))[
+                "reasoning"
+            ],
+            datetime_=long_term_memory.datetime_,
+        )
 
 
 class LongTermMemory:
@@ -41,10 +69,9 @@ class LongTermMemory:
         self,
         from_: datetime | None = None,
         to: datetime | None = None,
-    ) -> list[SimpleMemory]:
-        long_term_memories = self.storage.load(
+    ) -> Sequence[LongTermMemories]:
+        return self.storage.load(
             task_description=self.task_description,
             from_=from_,
             to=to,
         )
-        return [SimpleMemory.from_long_term_memory(ltm) for ltm in long_term_memories]

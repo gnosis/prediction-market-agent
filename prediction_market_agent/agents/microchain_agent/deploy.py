@@ -4,6 +4,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
 
 class DeployableMicrochainAgent(DeployableAgent):
@@ -15,9 +16,10 @@ class DeployableMicrochainAgent(DeployableAgent):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
-        long_term_memory = LongTermMemory(
-            task_description=f"microchain-agent-deployment-{market_type}"
+        task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
+            market_type
         )
+        long_term_memory = LongTermMemory(task_description=task_description)
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,

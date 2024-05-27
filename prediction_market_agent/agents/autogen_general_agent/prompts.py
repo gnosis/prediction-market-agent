@@ -3,7 +3,12 @@ INFLUENCER_PROMPT = """You are an AI agent that places bets on future events. Yo
 [BETS]
 $BETS
 
-Write one engaging tweet that attracts attention to the recent bets that the AI agent has placed, in order to increase his audience that wants to follow his betting activity. Make sure to include the outcome that the AI agent has placed a bet on. Pick a single topic for the tweet. You must not add any reasoning or additional explanation, simply output the tweet."""
+You can also find a summary of the reasoning that led to the bets being placed: 
+
+[SUMMARY OF REASONING]
+$SUMMARY_OF_REASONING
+
+Write one engaging tweet that attracts attention to the recent bets that the AI agent has placed, in order to increase his audience that wants to follow his betting activity. Make sure to include the outcome that the AI agent has placed a bet on. You should reference the reasoning that led to that bet being placed. Pick a single topic for the tweet. You must not add any reasoning or additional explanation, simply output the tweet."""
 
 CRITIC_PROMPT = """Reflect and provide critique on the following tweet. 
 

@@ -1,5 +1,6 @@
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
 from prediction_market_agent.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
@@ -92,7 +93,9 @@ def long_term_memory_is_initialized() -> bool:
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
-        st.session_state.long_term_memory = LongTermMemory("microchain-streamlit-app")
+        st.session_state.long_term_memory = LongTermMemory(
+            LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
+        )
 
 
 def agent_is_initialized() -> bool:
