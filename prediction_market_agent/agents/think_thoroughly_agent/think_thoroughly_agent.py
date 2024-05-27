@@ -91,6 +91,13 @@ class CrewAIAgentSubquestions:
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
 
+    def save_answer_to_long_term_memory(self, answer_with_scenario: AnswerWithScenario) -> None:
+        if not self._long_term_memory:
+            logger.info("Did not save answer to long term memory since it was not initialized.")
+            return
+
+        self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
+
     def _get_researcher(self) -> Agent:
         return Agent(
             role="Research Analyst",
@@ -226,7 +233,7 @@ class CrewAIAgentSubquestions:
             answer_with_scenario = AnswerWithScenario.build_from_answer(
                 output, scenario=sentence
             )
-            self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
+            self.save_answer_to_long_term_memory(answer_with_scenario)
             return output
         except ValueError as e:
             logger.error(
@@ -263,7 +270,7 @@ class CrewAIAgentSubquestions:
         answer_with_scenario = AnswerWithScenario.build_from_answer(
             output, scenario=question
         )
-        self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
+        self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
