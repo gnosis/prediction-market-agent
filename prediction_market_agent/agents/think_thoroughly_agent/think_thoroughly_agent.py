@@ -101,9 +101,13 @@ class CrewAIAgentSubquestions:
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
 
-    def save_answer_to_long_term_memory(self, answer_with_scenario: AnswerWithScenario) -> None:
+    def save_answer_to_long_term_memory(
+        self, answer_with_scenario: AnswerWithScenario
+    ) -> None:
         if not self._long_term_memory:
-            logger.info("Did not save answer to long term memory since it was not initialized.")
+            logger.info(
+                "Did not save answer to long term memory since it was not initialized."
+            )
             return
 
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
