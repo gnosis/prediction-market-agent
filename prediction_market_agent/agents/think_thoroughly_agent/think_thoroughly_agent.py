@@ -92,11 +92,11 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 class CrewAIAgentSubquestions:
     def __init__(self, model: str, memory: bool = True) -> None:
         self.model = model
+        self.subgraph_handler = OmenSubgraphHandler()
+        self.pinecone_handler = PineconeHandler()
         self.memory = memory
         if self.memory:
             self._long_term_memory = LongTermMemory("think-thoroughly-agent")
-        self.subgraph_handler = OmenSubgraphHandler()
-        self.pinecone_handler = PineconeHandler()
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
