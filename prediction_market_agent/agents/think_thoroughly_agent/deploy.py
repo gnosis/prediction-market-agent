@@ -17,6 +17,10 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         return self.agent.answer_binary_market(market.question)
 
+    def before(self, market_type: MarketType) -> None:
+        self.agent.update_markets()
+        super().before(market_type=market_type)
+
 
 if __name__ == "__main__":
     agent = DeployableThinkThoroughlyAgent(place_bet=False)
