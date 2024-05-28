@@ -41,23 +41,24 @@ class SimpleMemoryMicrochain(MemoryContainer):
 
 class AnswerWithScenario(Answer):
     scenario: str
+    question: str
 
     @staticmethod
-    def build_from_answer(answer: Answer, scenario: str) -> "AnswerWithScenario":
-        return AnswerWithScenario(scenario=scenario, **answer.dict())
+    def build_from_answer(
+        answer: Answer, scenario: str, question: str
+    ) -> "AnswerWithScenario":
+        return AnswerWithScenario(scenario=scenario, question=question, **answer.dict())
 
 
 class SimpleMemoryThinkThoroughly(MemoryContainer):
-    reasoning: str
+    metadata: AnswerWithScenario
 
     @staticmethod
     def from_long_term_memory(
         long_term_memory: LongTermMemories,
     ) -> "SimpleMemoryThinkThoroughly":
         return SimpleMemoryThinkThoroughly(
-            reasoning=json.loads(check_not_none(long_term_memory.metadata_))[
-                "reasoning"
-            ],
+            metadata=AnswerWithScenario.model_validate_json(long_term_memory.metadata_),
             datetime_=long_term_memory.datetime_,
         )
 

@@ -146,7 +146,13 @@ def build_social_media_text(
         simple_memories = [
             SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
         ]
-        learnings = memories_to_learnings(memories=simple_memories, model=model)
+        # We want memories only from the bets to add relevant learnings
+        questions_from_bets = set([b.market_question for b in bets])
+        filtered_memories = [
+            m for m in simple_memories if m.metadata.question in questions_from_bets
+        ]
+        if filtered_memories:
+            learnings = memories_to_learnings(memories=filtered_memories, model=model)
 
     task = Template(INFLUENCER_PROMPT).substitute(
         BETS=[BetInputPrompt.from_bet(bet) for bet in bets],

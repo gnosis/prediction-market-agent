@@ -198,6 +198,7 @@ class CrewAIAgentSubquestions:
     def generate_prediction_for_one_outcome(
         self,
         sentence: str,
+        question: str,
         previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
     ) -> Answer | None:
         researcher = self._get_researcher()
@@ -253,7 +254,7 @@ class CrewAIAgentSubquestions:
         try:
             output = Answer.model_validate(result)
             answer_with_scenario = AnswerWithScenario.build_from_answer(
-                output, scenario=sentence
+                output, scenario=sentence, question=question
             )
             self.save_answer_to_long_term_memory(answer_with_scenario)
             return output
@@ -311,7 +312,7 @@ class CrewAIAgentSubquestions:
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
         answer_with_scenario = AnswerWithScenario.build_from_answer(
-            output, scenario=question
+            output, scenario=question, question=question
         )
         self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
@@ -335,7 +336,9 @@ class CrewAIAgentSubquestions:
                 hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
                 lambda x: (
                     x,
-                    self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
+                    self.generate_prediction_for_one_outcome(
+                        x, question, scenarios_with_probs
+                    ),
                 ),
             )
             scenarios_with_probs = []
