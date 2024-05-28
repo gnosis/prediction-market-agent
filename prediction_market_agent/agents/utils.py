@@ -1,3 +1,4 @@
+import typing as t
 from enum import Enum
 
 from langchain.chains.summarize import load_summarize_chain
@@ -7,9 +8,7 @@ from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    MemoryContainer,
-)
+from prediction_market_agent.agents.microchain_agent.memory import MemoryContainer
 from prediction_market_agent.utils import APIKeys
 
 
@@ -19,7 +18,9 @@ class LongTermMemoryTaskIdentifier(str, Enum):
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
 
     @staticmethod
-    def microchain_task_from_market(market_type: MarketType):
+    def microchain_task_from_market(
+        market_type: MarketType,
+    ) -> "LongTermMemoryTaskIdentifier":
         if market_type == MarketType.OMEN:
             return LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_OMEN
         else:
@@ -48,7 +49,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
     return market.current_p_yes > 0.95 or market.current_p_no > 0.95
 
 
-def memories_to_learnings(memories: list[MemoryContainer], model: str) -> str:
+def memories_to_learnings(memories: t.Sequence[MemoryContainer], model: str) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
     past learnings.

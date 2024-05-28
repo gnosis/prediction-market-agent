@@ -58,7 +58,9 @@ class SimpleMemoryThinkThoroughly(MemoryContainer):
         long_term_memory: LongTermMemories,
     ) -> "SimpleMemoryThinkThoroughly":
         return SimpleMemoryThinkThoroughly(
-            metadata=AnswerWithScenario.model_validate_json(long_term_memory.metadata_),
+            metadata=AnswerWithScenario.model_validate_json(
+                check_not_none(long_term_memory.metadata_)
+            ),
             datetime_=long_term_memory.datetime_,
         )
 

@@ -1,6 +1,5 @@
 import typing as t
 
-
 from microchain import Agent
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
@@ -18,7 +17,6 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
 from pydantic import BaseModel
-
 
 from prediction_market_agent.utils import APIKeys
 
@@ -106,6 +104,3 @@ def has_been_run_past_initialization(agent: Agent) -> bool:
         return False
 
     return len(agent.history) > get_initial_history_length(agent)
-
-
-

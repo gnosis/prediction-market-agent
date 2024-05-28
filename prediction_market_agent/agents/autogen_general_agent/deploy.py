@@ -47,8 +47,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
 
         long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
         tweet = build_social_media_text(self.model, bets, long_term_memory, one_day_ago)
-
-        # self.post(tweet)
+        self.post(tweet)
 
     def get_unique_bets_for_market(
         self, market_type: MarketType, start_time: datetime
