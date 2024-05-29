@@ -95,8 +95,9 @@ class CrewAIAgentSubquestions:
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
         self.memory = memory
-        if self.memory:
-        self._long_term_memory = LongTermMemory("think-thoroughly-agent") if self.memory else None
+        self._long_term_memory = (
+            LongTermMemory("think-thoroughly-agent") if self.memory else None
+        )
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
