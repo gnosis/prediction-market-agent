@@ -11,6 +11,7 @@ from prediction_market_agent.agents.microchain_agent.memory import LongTermMemor
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
 
 SYSTEM_PROMPT = """
@@ -93,7 +94,9 @@ def main(
 ) -> None:
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
-    unique_task_description = f"microchain-agent-demo-{market_type}"
+    unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
+        market_type
+    )
     long_term_memory = LongTermMemory(unique_task_description)
 
     agent = build_agent(
