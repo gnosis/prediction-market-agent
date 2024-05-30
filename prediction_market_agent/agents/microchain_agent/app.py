@@ -1,5 +1,6 @@
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
 from prediction_market_agent.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
@@ -20,8 +21,10 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
-from prediction_market_agent.agents.microchain_agent.functions import MARKET_FUNCTIONS
-from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import (
+    build_agent,
+    build_agent_functions,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_initial_history_length,
@@ -31,6 +34,7 @@ from prediction_market_agent.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
 MARKET_TYPE = MarketType.OMEN
+ALLOW_STOP = False
 
 
 def run_agent(agent: Agent, iterations: int, model: str) -> None:
@@ -82,6 +86,18 @@ def display_new_history_callback(agent: Agent) -> None:
         st.chat_message(h["role"]).write(h["content"])
 
 
+def long_term_memory_is_initialized() -> bool:
+    return "long_term_memory" in st.session_state
+
+
+def maybe_initialize_long_term_memory() -> None:
+    # Initialize the db storage
+    if not long_term_memory_is_initialized():
+        st.session_state.long_term_memory = LongTermMemory(
+            LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
+        )
+
+
 def agent_is_initialized() -> bool:
     return "agent" in st.session_state
 
@@ -94,13 +110,11 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
 def maybe_initialize_agent(model: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
-        long_term_memory = LongTermMemory("microchain-streamlit-app")
-        st.session_state.long_term_memory = long_term_memory
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
-            allow_stop=False,
-            long_term_memory=long_term_memory,
+            allow_stop=ALLOW_STOP,
+            long_term_memory=st.session_state.long_term_memory,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -110,10 +124,15 @@ def maybe_initialize_agent(model: str) -> None:
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
-def get_market_function_bullet_point_list() -> str:
+def get_function_bullet_point_list(model: str) -> str:
     bullet_points = ""
-    for function in MARKET_FUNCTIONS:
-        bullet_points += f"  - {function.__name__}\n"
+    for function in build_agent_functions(
+        market_type=MARKET_TYPE,
+        long_term_memory=st.session_state.long_term_memory,
+        allow_stop=ALLOW_STOP,
+        model=model,
+    ):
+        bullet_points += f"  - {function.__class__.__name__}\n"
     return bullet_points
 
 
@@ -125,6 +144,7 @@ st.set_page_config(
 st.title("Prediction Market Trader Agent")
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 keys = APIKeys()
+maybe_initialize_long_term_memory()
 
 with st.sidebar:
     st.subheader("Agent Info:")
@@ -180,7 +200,7 @@ with st.expander(
         f"[{MARKET_TYPE}]({MARKET_TYPE.market_class.base_url}) prediction "
         f"market APIs:"
     )
-    st.markdown(get_market_function_bullet_point_list())
+    st.markdown(get_function_bullet_point_list(model=model))
 
 # Placeholder for the agent's history
 history_container = st.container()
@@ -216,6 +236,12 @@ with history_container:
             model=model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)
+        # Run the agent after the user's reasoning
+        run_agent(
+            agent=st.session_state.agent,
+            iterations=int(iterations),
+            model=model,
+        )
     if run_agent_button:
         maybe_initialize_agent(model)
         run_agent(

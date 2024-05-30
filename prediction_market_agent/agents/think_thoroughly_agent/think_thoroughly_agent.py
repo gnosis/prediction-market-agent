@@ -1,3 +1,4 @@
+import datetime
 import typing as t
 
 import tenacity
@@ -14,11 +15,21 @@ from langchain_openai import ChatOpenAI
 from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    OmenSubgraphHandler,
+)
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from requests import HTTPError
 
+from prediction_market_agent.agents.microchain_agent.memory import (
+    AnswerWithScenario,
+    LongTermMemory,
+)
+from prediction_market_agent.agents.think_thoroughly_agent.models import (
+    CorrelatedMarketInput,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
     CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -30,6 +41,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     RESEARCH_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
 )
+from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
 
 
@@ -78,11 +90,28 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, memory: bool = True) -> None:
         self.model = model
+        self.subgraph_handler = OmenSubgraphHandler()
+        self.pinecone_handler = PineconeHandler()
+        self.memory = memory
+        self._long_term_memory = (
+            LongTermMemory("think-thoroughly-agent") if self.memory else None
+        )
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
+
+    def save_answer_to_long_term_memory(
+        self, answer_with_scenario: AnswerWithScenario
+    ) -> None:
+        if not self._long_term_memory:
+            logger.info(
+                "Did not save answer to long term memory since it was not initialized."
+            )
+            return
+
+        self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
     def _get_researcher(self) -> Agent:
         return Agent(
@@ -121,6 +150,14 @@ class CrewAIAgentSubquestions:
         )
         return llm
 
+    def update_markets(self) -> None:
+        """We use the agent's run to add embeddings of new markets that don't exist yet in the
+        vector DB."""
+        created_after = utcnow() - datetime.timedelta(days=7)
+        self.pinecone_handler.insert_all_omen_markets_if_not_exists(
+            created_after=created_after
+        )
+
     def get_required_conditions(self, question: str) -> Scenarios:
         researcher = self._get_researcher()
 
@@ -131,10 +168,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_required_conditions],
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -151,10 +185,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_scenarios_task],
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -168,6 +199,7 @@ class CrewAIAgentSubquestions:
     def generate_prediction_for_one_outcome(
         self,
         sentence: str,
+        question: str,
         previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
     ) -> Answer | None:
         researcher = self._get_researcher()
@@ -221,13 +253,32 @@ class CrewAIAgentSubquestions:
             return None
 
         try:
-            output = Answer.model_validate_json(result)
+            output = Answer.model_validate(result)
+            answer_with_scenario = AnswerWithScenario.build_from_answer(
+                output, scenario=sentence, question=question
+            )
+            self.save_answer_to_long_term_memory(answer_with_scenario)
             return output
         except ValueError as e:
             logger.error(
                 f"Could not parse the result ('{result}') as Answer because of {e}"
             )
             return None
+
+    def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
+        nearest_questions = self.pinecone_handler.find_nearest_questions_with_threshold(
+            5, text=question
+        )
+
+        markets = list(
+            par_generator(
+                [q.market_address for q in nearest_questions],
+                lambda market_address: self.subgraph_handler.get_omen_market_by_market_id(
+                    market_id=market_address
+                ),
+            )
+        )
+        return [CorrelatedMarketInput.from_omen_market(market) for market in markets]
 
     def generate_final_decision(
         self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
@@ -241,11 +292,9 @@ class CrewAIAgentSubquestions:
             output_json=Answer,
         )
 
-        crew = Crew(
-            agents=[predictor],
-            tasks=[task_final_decision],
-            verbose=2,
-        )
+        crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
+
+        correlated_markets = self.get_correlated_markets(question)
 
         logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
@@ -256,9 +305,17 @@ class CrewAIAgentSubquestions:
                 ),
                 "number_of_scenarios": len(scenarios_with_probabilities),
                 "scenario_to_assess": question,
+                "correlated_markets": "\n".join(
+                    f"- Market '{m.question_title}' has {m.current_p_yes * 100:.2f}% probability of happening"
+                    for m in correlated_markets
+                ),
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
+        answer_with_scenario = AnswerWithScenario.build_from_answer(
+            output, scenario=question, question=question
+        )
+        self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
@@ -280,10 +337,11 @@ class CrewAIAgentSubquestions:
                 hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
                 lambda x: (
                     x,
-                    self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
+                    self.generate_prediction_for_one_outcome(
+                        x, question, scenarios_with_probs
+                    ),
                 ),
             )
-
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
@@ -299,4 +357,8 @@ class CrewAIAgentSubquestions:
             if scenarios_with_probs
             else None
         )
+        if final_answer is None:
+            logger.error(
+                f"Could not generate final decision for '{question}' with {n_iterations} iterations."
+            )
         return final_answer
