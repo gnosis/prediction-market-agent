@@ -1,5 +1,4 @@
 import streamlit as st
-
 from prediction_market_agent_tooling.monitor.monitor_app import MarketType, monitor_app
 
 if __name__ == "__main__":
