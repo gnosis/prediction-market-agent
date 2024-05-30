@@ -1,3 +1,9 @@
+"""
+PYTHONPATH=. streamlit run scripts/image_app.py
+
+Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
+"""
+
 import streamlit as st
 from openai import OpenAI
 from prediction_market_agent_tooling.markets.markets import (

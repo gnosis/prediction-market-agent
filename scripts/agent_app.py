@@ -1,7 +1,7 @@
 """
 PYTHONPATH=. streamlit run scripts/agent_app.py
 
-Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
+Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 
 import streamlit as st
