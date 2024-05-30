@@ -37,7 +37,7 @@ class MicroMarket(BaseModel):
 
 
 def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
-    # Get the 5 markets that are closing soonest
+    # Get the 15 markets that are closing soonest
     cls = market_type.market_class
     markets: t.Sequence[AgentMarket] = cls.get_binary_markets(
         filter_by=FilterBy.OPEN,
@@ -46,7 +46,7 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
             if market_type == MarketType.POLYMARKET
             else SortBy.CLOSING_SOONEST
         ),
-        limit=5,
+        limit=15,
     )
     return list(markets)
 
@@ -54,9 +54,10 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
 def get_balance(market_type: MarketType) -> BetAmount:
     currency = market_type.market_class.currency
     if market_type == MarketType.OMEN:
-        # We focus solely on xDAI balance for now to avoid the agent having to wrap/unwrap xDAI.
+        balances = get_balances(APIKeys().bet_from_address)
+        total_balance = balances.xdai + balances.wxdai
         return BetAmount(
-            amount=get_balances(APIKeys().bet_from_address).xdai,
+            amount=total_balance,
             currency=currency,
         )
     else:

@@ -21,7 +21,7 @@ google-search-results = "*"
 pytest = "*"
 llama-index = "~0.9.0"
 duckduckgo-search = "*"
-crewai = "^0.22.2"
+crewai = "^0.30.11"
 # metagpt = "*" # Commented out because requires super old version of langchain, and conflicts with crewai.
 replicate = "*"
 typer = "^0.9.0"
@@ -35,7 +35,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", rev = "8cd61e2a3b5b0e4d64587c35513940a53b196cb3", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.33.0", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -54,10 +54,10 @@ faiss-cpu = "^1.8.0" # TODO remove with https://github.com/gnosis/prediction-mar
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.18"
 farcaster = "^0.7.11"
-mech-client = { git = "https://github.com/valory-xyz/mech-client.git", rev = "4a43da7ba50e5c271f8c763a3f1c7ae1cc9dfe0e" } # TODO update to 0.2.14 when available
+mech-client = { git = "https://github.com/evangriffiths/mech-client.git", branch = "evan/use-forked-open-aea" } # TODO remove when https://github.com/valory-xyz/open-aea/pull/740 makes its way into a mech-client release
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
-
+langchain-pinecone = "^0.1.1"
 
 [build-system]
 requires = ["poetry-core"]

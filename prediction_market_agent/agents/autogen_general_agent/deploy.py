@@ -18,6 +18,8 @@ from prediction_market_agent.agents.autogen_general_agent.social_media.farcaster
 from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_handler import (
     TwitterHandler,
 )
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
@@ -42,8 +44,9 @@ class DeployableSocialMediaAgent(DeployableAgent):
         if not bets:
             logger.info("No bets available from last day. No post will be created.")
             return
-        tweet = build_social_media_text(self.model, bets)
 
+        long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
+        tweet = build_social_media_text(self.model, bets, long_term_memory, one_day_ago)
         self.post(tweet)
 
     def get_unique_bets_for_market(

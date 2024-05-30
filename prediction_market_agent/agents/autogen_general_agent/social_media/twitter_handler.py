@@ -1,6 +1,5 @@
 import tweepy
 from prediction_market_agent_tooling.loggers import logger
-from tweepy import Client
 
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
@@ -9,7 +8,7 @@ from prediction_market_agent.utils import SocialMediaAPIKeys
 
 
 class TwitterHandler(AbstractSocialMediaHandler):
-    client: Client
+    client: tweepy.Client
 
     def __init__(self) -> None:
         keys = SocialMediaAPIKeys()

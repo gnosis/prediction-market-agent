@@ -13,6 +13,11 @@ from prediction_market_agent.agents.autogen_general_agent.prompts import (
     CRITIC_PROMPT,
     INFLUENCER_PROMPT,
 )
+from prediction_market_agent.agents.microchain_agent.memory import (
+    LongTermMemory,
+    SimpleMemoryThinkThoroughly,
+)
+from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.utils import APIKeys
 
 
@@ -102,7 +107,12 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
-def build_social_media_text(model: str, bets: list[Bet]) -> str:
+def build_social_media_text(
+    model: str,
+    bets: list[Bet],
+    long_term_memory: LongTermMemory | None = None,
+    memories_since: datetime | None = None,
+) -> str:
     """
     Builds a tweet based on past betting activity from a given participant.
 
@@ -130,11 +140,23 @@ def build_social_media_text(model: str, bets: list[Bet]) -> str:
         trigger=writer,
     )
 
-    # ToDO - fetch agent reasoning from DB and construct better tweets
-    #  See https://github.com/gnosis/prediction-market-agent/issues/150
+    learnings = ""
+    if long_term_memory:
+        memories = long_term_memory.search(from_=memories_since)
+        simple_memories = [
+            SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
+        ]
+        # We want memories only from the bets to add relevant learnings
+        questions_from_bets = set([b.market_question for b in bets])
+        filtered_memories = [
+            m for m in simple_memories if m.metadata.question in questions_from_bets
+        ]
+        if filtered_memories:
+            learnings = memories_to_learnings(memories=filtered_memories, model=model)
 
     task = Template(INFLUENCER_PROMPT).substitute(
-        BETS=[BetInputPrompt.from_bet(bet) for bet in bets]
+        BETS=[BetInputPrompt.from_bet(bet) for bet in bets],
+        SUMMARY_OF_REASONING=learnings,
     )
 
     # in case we trigger repeated runs, Cache makes it faster.
