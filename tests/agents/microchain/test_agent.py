@@ -8,7 +8,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.microchain_agent.functions import (
+from prediction_market_agent.agents.microchain_agent.market_functions import (
     GetMarketProbability,
     GetMarkets,
 )

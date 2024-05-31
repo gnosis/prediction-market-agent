@@ -4,6 +4,9 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    TRADING_AGENT_SYSTEM_PROMPT,
+)
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
 
@@ -23,6 +26,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
+            system_prompt=TRADING_AGENT_SYSTEM_PROMPT,  # Use pre-learned system prompt until the prompt-fetching from DB is implemented.
             allow_stop=True,
             long_term_memory=long_term_memory,
         )

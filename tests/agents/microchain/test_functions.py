@@ -7,7 +7,7 @@ from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.functions import (
+from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
     BuyNo,
     BuyYes,
@@ -17,11 +17,13 @@ from prediction_market_agent.agents.microchain_agent.functions import (
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
-    RememberPastLearnings,
     SellNo,
     SellYes,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.memory_functions import (
+    RememberPastLearnings,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_binary_markets,
