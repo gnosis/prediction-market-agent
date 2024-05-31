@@ -24,7 +24,7 @@ import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
-from prediction_market_agent_tooling.tools.streamlit_logging import streamlit_login
+from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 

@@ -19,7 +19,7 @@ from prediction_market_agent_tooling.markets.markets import (
     get_binary_markets,
 )
 from prediction_market_agent_tooling.tools.costs import openai_costs
-from prediction_market_agent_tooling.tools.streamlit_logging import streamlit_login
+from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
