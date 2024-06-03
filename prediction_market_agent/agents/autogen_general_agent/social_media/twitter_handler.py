@@ -22,10 +22,8 @@ class TwitterHandler(AbstractSocialMediaHandler):
         )
 
     def post(self, text: str, reasoning_reply_tweet: str) -> None:
-        # ToDo - Add reply
         first_tweet = self.client.create_tweet(text=text)
         logger.debug(f"Posted tweet {text} - {first_tweet}")
-        # quote tweet
         reply_tweet = self.client.create_tweet(
             text=reasoning_reply_tweet, quote_tweet_id=first_tweet.data["id"]
         )

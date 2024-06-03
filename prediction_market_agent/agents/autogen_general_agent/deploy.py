@@ -8,7 +8,6 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.autogen_general_agent.social_agent import (
     build_social_media_text,
-    extract_reasoning_behind_tweet,
     build_reply_tweet,
 )
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
@@ -23,7 +22,6 @@ from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_h
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.utils import (
     LongTermMemoryTaskIdentifier,
-    extract_reasonings_to_learnings,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -35,7 +33,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
     def load(self) -> None:
         self.social_media_handlers = [
             FarcasterHandler(),
-            # TwitterHandler(),
+            TwitterHandler(),
         ]
 
     def run(self, market_type: MarketType) -> None:
