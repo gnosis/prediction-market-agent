@@ -14,10 +14,10 @@ class AgentAction(Function):
         super().__init__()
 
 
-class GetMyCurrentPrompt(AgentAction):
+class GetMyCurrentSystemPrompt(AgentAction):
     @property
     def description(self) -> str:
-        return "Use this function to get your current prompt."
+        return "Use this function to get your current system prompt."
 
     @property
     def example_args(self) -> list[str]:
@@ -27,10 +27,10 @@ class GetMyCurrentPrompt(AgentAction):
         return str(self.agent.prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
 
 
-class UpdateMyPrompt(AgentAction):
+class UpdateMySystemPrompt(AgentAction):
     @property
     def description(self) -> str:
-        return "Use this function to update your prompt."
+        return "Use this function to update your system prompt."
 
     @property
     def example_args(self) -> list[str]:
@@ -43,6 +43,7 @@ class UpdateMyPrompt(AgentAction):
             + NON_UPDATABLE_DIVIDOR
             + SYSTEM_PROMPT.split(NON_UPDATABLE_DIVIDOR)[1]
         )
+        # TODO: This should use `system_prompt` after https://github.com/galatolofederico/microchain/pull/11 is merged.
         self.agent.prompt = prompt_template.format(engine_help=self.agent.engine.help)
         # History needs to be updated manually, because it's constructed only once in the agent initialization.
         self.agent.history[0] = dict(role="system", content=self.agent.prompt)
@@ -81,8 +82,8 @@ class UpdateMyBootstrap(AgentAction):
 
 
 AGENT_FUNCTIONS: list[t.Type[AgentAction]] = [
-    GetMyCurrentPrompt,
-    UpdateMyPrompt,
+    GetMyCurrentSystemPrompt,
+    UpdateMySystemPrompt,
     GetMyCurrentBootstrap,
     UpdateMyBootstrap,
 ]
