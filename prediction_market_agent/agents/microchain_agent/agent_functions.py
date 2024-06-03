@@ -49,7 +49,40 @@ class UpdateMyPrompt(AgentAction):
         return "The prompt has been updated"
 
 
+class GetMyCurrentBootstrap(AgentAction):
+    @property
+    def description(self) -> str:
+        return "Use this function to get your current bootstrap."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> str:
+        return (
+            str(self.agent.bootstrap[0])
+            if self.agent.bootstrap
+            else "No bootstrap available."
+        )
+
+
+class UpdateMyBootstrap(AgentAction):
+    @property
+    def description(self) -> str:
+        return "Use this function to update your bootstrap."
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["This will be my new bootstrap."]
+
+    def __call__(self, new_bootstrap: str) -> str:
+        self.agent.bootstrap = [new_bootstrap]
+        return "The bootstrap has been updated"
+
+
 AGENT_FUNCTIONS: list[t.Type[AgentAction]] = [
     GetMyCurrentPrompt,
     UpdateMyPrompt,
+    GetMyCurrentBootstrap,
+    UpdateMyBootstrap,
 ]

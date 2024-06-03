@@ -249,6 +249,12 @@ with st.expander("Agent's current system prompt"):
     else:
         st.markdown("The agent is not initialized yet.")
 
+with st.expander("Agent's current bootstrap"):
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.bootstrap)
+    else:
+        st.markdown("The agent is not initialized yet.")
+
 # Placeholder for the agent's history
 history_container = st.container()
 

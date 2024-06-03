@@ -32,6 +32,11 @@ Agent should keep a track record of what it has learned in the past, to not repe
 """
 
 
+class LearnAboutTheNextRun(LearningFunction):
+    title = "the next run"
+    knowledge = """The next run is the next time the agent will be executed. Agent can save what it wants to do the next time in the bootstrap"""
+
+
 class LearnAboutWhatMakesAGoodPrompt(LearningFunction):
     title = "what makes a good prompt"
     knowledge = """A good prompt is a prompt that is clear, concise and informative. 
@@ -63,6 +68,7 @@ an AI agent can create a profit to keep its balance positive."""
 
 LEARNING_FUNCTIONS: list[t.Type[LearningFunction]] = [
     LearnAboutLearning,
+    LearnAboutTheNextRun,
     LearnAboutWhatMakesAGoodPrompt,
     LearnAboutReasoning,
     LearnAboutSurvival,
