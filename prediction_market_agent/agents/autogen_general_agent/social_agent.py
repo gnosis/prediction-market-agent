@@ -20,7 +20,6 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 )
 from prediction_market_agent.agents.utils import (
     extract_reasonings_to_learnings,
-    memories_to_learnings,
 )
 from prediction_market_agent.utils import APIKeys
 
