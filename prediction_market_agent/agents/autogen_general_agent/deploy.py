@@ -8,6 +8,8 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.autogen_general_agent.social_agent import (
     build_social_media_text,
+    extract_reasoning_behind_tweet,
+    build_reply_tweet,
 )
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
@@ -19,7 +21,10 @@ from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_h
     TwitterHandler,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.utils import (
+    LongTermMemoryTaskIdentifier,
+    extract_reasonings_to_learnings,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -30,7 +35,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
     def load(self) -> None:
         self.social_media_handlers = [
             FarcasterHandler(),
-            TwitterHandler(),
+            # TwitterHandler(),
         ]
 
     def run(self, market_type: MarketType) -> None:
@@ -46,8 +51,16 @@ class DeployableSocialMediaAgent(DeployableAgent):
             return
 
         long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
-        tweet = build_social_media_text(self.model, bets, long_term_memory, one_day_ago)
-        self.post(tweet)
+        tweet = build_social_media_text(self.model, bets)
+        reasoning_reply_tweet = build_reply_tweet(
+            model=self.model,
+            tweet=tweet,
+            bets=bets,
+            long_term_memory=long_term_memory,
+            memories_since=one_day_ago,
+        )
+
+        self.post(tweet, reasoning_reply_tweet)
 
     def get_unique_bets_for_market(
         self, market_type: MarketType, start_time: datetime
@@ -64,13 +77,13 @@ class DeployableSocialMediaAgent(DeployableAgent):
         filtered_bets = list(seen_titles.values())
         return filtered_bets
 
-    def post(self, tweet: str | None) -> None:
-        if not tweet:
+    def post(self, tweet: str | None, reasoning_reply_tweet: str | None) -> None:
+        if not tweet or not reasoning_reply_tweet:
             logger.info("No tweet was produced. Exiting.")
             return
 
         for handler in self.social_media_handlers:
-            handler.post(tweet)
+            handler.post(tweet, reasoning_reply_tweet)
 
 
 if __name__ == "__main__":

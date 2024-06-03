@@ -12,12 +12,16 @@ from pydantic import BaseModel
 from prediction_market_agent.agents.autogen_general_agent.prompts import (
     CRITIC_PROMPT,
     INFLUENCER_PROMPT,
+    REASONING_PROMPT,
 )
 from prediction_market_agent.agents.microchain_agent.memory import (
     LongTermMemory,
     SimpleMemoryThinkThoroughly,
 )
-from prediction_market_agent.agents.utils import memories_to_learnings
+from prediction_market_agent.agents.utils import (
+    memories_to_learnings,
+    extract_reasonings_to_learnings,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -110,8 +114,6 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
 def build_social_media_text(
     model: str,
     bets: list[Bet],
-    long_term_memory: LongTermMemory | None = None,
-    memories_since: datetime | None = None,
 ) -> str:
     """
     Builds a tweet based on past betting activity from a given participant.
@@ -122,6 +124,57 @@ def build_social_media_text(
     The tweet content is generated using a template that includes questions about each market's title and likelihood.
     """
 
+    task = Template(INFLUENCER_PROMPT).substitute(
+        BETS=[BetInputPrompt.from_bet(bet) for bet in bets],
+    )
+
+    tweet = build_tweet(model=model, task=task)
+    return tweet
+
+
+def extract_reasoning_behind_tweet(
+    tweet: str,
+    bets: list[Bet],
+    long_term_memory: LongTermMemory,
+    memories_since: datetime | None = None,
+) -> str:
+    memories = long_term_memory.search(from_=memories_since)
+    simple_memories = [
+        SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
+    ]
+    # We want memories only from the bets to add relevant learnings
+    questions_from_bets = set([b.market_question for b in bets])
+    filtered_memories = [
+        m for m in simple_memories if m.metadata.question in questions_from_bets
+    ]
+    # ToDo - reply_tweet too long
+    return extract_reasonings_to_learnings(filtered_memories, tweet)
+
+
+def build_reply_tweet(
+    model: str,
+    tweet: str,
+    bets: list[Bet],
+    long_term_memory: LongTermMemory,
+    memories_since: datetime | None = None,
+) -> str:
+    reasoning = extract_reasoning_behind_tweet(
+        tweet=tweet,
+        bets=bets,
+        long_term_memory=long_term_memory,
+        memories_since=memories_since,
+    )
+
+    task = Template(REASONING_PROMPT).substitute(
+        TWEET=tweet,
+        REASONING=reasoning,
+    )
+
+    tweet = build_tweet(model=model, task=task)
+    return tweet
+
+
+def build_tweet(model: str, task: str) -> str:
     agents = build_agents(model)
     user_proxy, writer, critic = (
         agents[AutogenAgentType.USER],
@@ -140,25 +193,6 @@ def build_social_media_text(
         trigger=writer,
     )
 
-    learnings = ""
-    if long_term_memory:
-        memories = long_term_memory.search(from_=memories_since)
-        simple_memories = [
-            SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
-        ]
-        # We want memories only from the bets to add relevant learnings
-        questions_from_bets = set([b.market_question for b in bets])
-        filtered_memories = [
-            m for m in simple_memories if m.metadata.question in questions_from_bets
-        ]
-        if filtered_memories:
-            learnings = memories_to_learnings(memories=filtered_memories, model=model)
-
-    task = Template(INFLUENCER_PROMPT).substitute(
-        BETS=[BetInputPrompt.from_bet(bet) for bet in bets],
-        SUMMARY_OF_REASONING=learnings,
-    )
-
     # in case we trigger repeated runs, Cache makes it faster.
     with Cache.disk(cache_seed=42) as cache:
         # max_turns = the maximum number of turns for the chat between the two agents. One turn means one conversation round trip.
@@ -170,7 +204,8 @@ def build_social_media_text(
             cache=cache,
         )
 
-    tweet = res.summary
+    reply_tweet = res.summary
+
     return str(
-        tweet
+        reply_tweet
     )  # Casting needed as summary is of type any and no Pydantic support

@@ -3,12 +3,17 @@ INFLUENCER_PROMPT = """You are an AI agent that places bets on future events. Yo
 [BETS]
 $BETS
 
-You can also find a summary of the reasoning that led to the bets being placed: 
+Write a tweet, using an analytical tone, that describes the recent bets that the AI agent has placed, in order to inform your audience of your latest betting activity. Include include the outcome that the AI agent has placed a bet on. Pick a single topic for the tweet. You must not add any reasoning or additional explanation, simply output the tweet."""
 
-[SUMMARY OF REASONING]
-$SUMMARY_OF_REASONING
+REASONING_PROMPT = """You are an AI agent that places bets on future events. You are given a TWEET that you already produced and a REASONING explaining why you placed the bet referenced by the TWEET.
+Write a new tweet, using an analytical tone, summarizing the reasoning behind the bet you placed, in order to allow your audience to understand the rationale behind your betting activities. You must not add any reasoning or additional explanation, simply output the tweet. Do not use hashtags and do not include questions. Start the tweet with "Our rationale for the bet was "
 
-Write one engaging tweet that attracts attention to the recent bets that the AI agent has placed, in order to increase his audience that wants to follow his betting activity. Make sure to include the outcome that the AI agent has placed a bet on. You should reference the reasoning that led to that bet being placed. Pick a single topic for the tweet. You must not add any reasoning or additional explanation, simply output the tweet."""
+[TWEET]
+$TWEET
+
+[REASONING]
+$REASONING"""
+
 
 CRITIC_PROMPT = """Reflect and provide critique on the following tweet. 
 
