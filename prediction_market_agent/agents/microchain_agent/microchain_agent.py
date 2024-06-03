@@ -14,7 +14,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    RememberPastLearnings,
+    RememberPastActions,
 )
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
@@ -63,7 +63,7 @@ def build_agent_functions(
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:
         functions.append(
-            RememberPastLearnings(long_term_memory=long_term_memory, model=model)
+            RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
     return functions
 

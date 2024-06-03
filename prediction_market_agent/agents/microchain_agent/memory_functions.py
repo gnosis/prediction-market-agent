@@ -10,7 +10,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 from prediction_market_agent.agents.utils import memories_to_learnings
 
 
-class RememberPastLearnings(Function):
+class RememberPastActions(Function):
     def __init__(self, long_term_memory: LongTermMemory, model: str) -> None:
         self.long_term_memory = long_term_memory
         self.model = model

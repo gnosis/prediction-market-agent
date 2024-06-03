@@ -22,7 +22,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    RememberPastLearnings,
+    RememberPastActions,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
@@ -191,7 +191,7 @@ def test_remember_past_learnings(long_term_memory: LongTermMemory) -> None:
     )
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemory(task_description="microchain-streamlit-app")
-    remember_past_learnings = RememberPastLearnings(
+    remember_past_learnings = RememberPastActions(
         long_term_memory=long_term_memory,
         model="gpt-4o-2024-05-13",
     )
