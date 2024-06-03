@@ -19,8 +19,8 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     SimpleMemoryThinkThoroughly,
 )
 from prediction_market_agent.agents.utils import (
-    memories_to_learnings,
     extract_reasonings_to_learnings,
+    memories_to_learnings,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -138,6 +138,10 @@ def extract_reasoning_behind_tweet(
     long_term_memory: LongTermMemory,
     memories_since: datetime | None = None,
 ) -> str:
+    """
+    Fetches memories from the DB that are most closely related to bets.
+    Returns a summary of the reasoning value from the metadata of those memories.
+    """
     memories = long_term_memory.search(from_=memories_since)
     simple_memories = [
         SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
@@ -147,7 +151,6 @@ def extract_reasoning_behind_tweet(
     filtered_memories = [
         m for m in simple_memories if m.metadata.question in questions_from_bets
     ]
-    # ToDo - reply_tweet too long
     return extract_reasonings_to_learnings(filtered_memories, tweet)
 
 

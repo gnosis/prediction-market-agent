@@ -7,8 +7,8 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.autogen_general_agent.social_agent import (
-    build_social_media_text,
     build_reply_tweet,
+    build_social_media_text,
 )
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
@@ -20,9 +20,7 @@ from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_h
     TwitterHandler,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
-from prediction_market_agent.agents.utils import (
-    LongTermMemoryTaskIdentifier,
-)
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
 
 

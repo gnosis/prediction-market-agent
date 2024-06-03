@@ -16,12 +16,10 @@ class FarcasterHandler(AbstractSocialMediaHandler):
         )
 
     def post(self, text: str, reasoning_reply_tweet: str) -> None:
-        # ToDo - Make sure cast is < 320 chars
         cast = self.client.post_cast(text=text)
         logger.info(f"Posted cast {cast.cast.text} - hash {cast.cast.hash}")
-        p = Parent(fid=1, hash=cast.cast.hash)
-        # ToDo - Check if new round agent-critic needed for crafting a tweet
-        reply_cast = self.client.post_cast(reasoning_reply_tweet, parent=p)
+        parent_cast = Parent(fid=1, hash=cast.cast.hash)
+        reply_cast = self.client.post_cast(reasoning_reply_tweet, parent=parent_cast)
         logger.info(
             f"Posted reply cast {reply_cast.cast.text} - hash {reply_cast.cast.hash}"
         )
