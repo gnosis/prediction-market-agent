@@ -124,13 +124,14 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
-def maybe_initialize_agent(model: str, system_prompt: str) -> None:
+def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
             system_prompt=system_prompt,
+            bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
         )
@@ -193,7 +194,7 @@ with st.sidebar:
         if model is None:
             st.error("Please select a model.")
         st.session_state.system_prompt_select = st.selectbox(
-            "Initial system prompt",
+            "Initial memory",
             [p.value for p in SystemPromptChoice],
             index=0,
         )
@@ -205,13 +206,13 @@ with st.sidebar:
             disabled=True,
         )
         st.selectbox(
-            "Initial system prompt",
+            "Initial memory",
             [st.session_state.system_prompt_select],
             index=0,
             disabled=True,
         )
     model = check_not_none(model)
-    system_prompt = SYSTEM_PROMPTS[
+    system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
 
@@ -275,7 +276,7 @@ with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
     if user_reasoning:
-        maybe_initialize_agent(model, system_prompt)
+        maybe_initialize_agent(model, system_prompt, bootstrap)
         execute_reasoning(
             agent=st.session_state.agent,
             reasoning=user_reasoning,
@@ -289,7 +290,7 @@ with history_container:
             model=model,
         )
     if run_agent_button:
-        maybe_initialize_agent(model, system_prompt)
+        maybe_initialize_agent(model, system_prompt, bootstrap)
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),

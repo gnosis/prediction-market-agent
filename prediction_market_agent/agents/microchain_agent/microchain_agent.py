@@ -20,7 +20,7 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    BOOTSTRAP,
+    TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
@@ -72,6 +72,7 @@ def build_agent(
     market_type: MarketType,
     model: str,
     system_prompt: str,
+    bootstrap: str,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemory | None = None,
     allow_stop: bool = True,
@@ -95,8 +96,9 @@ def build_agent(
         engine.register(f)
 
     agent.max_tries = 3
+    print(system_prompt)
     agent.prompt = system_prompt.format(engine_help=engine.help)
-    agent.bootstrap = [BOOTSTRAP]
+    agent.bootstrap = [bootstrap]
     return agent
 
 
@@ -119,6 +121,7 @@ def main(
         api_base=api_base,
         model=model,
         system_prompt=TRADING_AGENT_SYSTEM_PROMPT,  # Use pre-learned system prompt until the prompt-fetching from DB is implemented.
+        bootstrap=TRADING_AGENT_BOOTSTRAP,  # Same here.
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
     )

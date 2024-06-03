@@ -26,6 +26,12 @@ You know everything needed and now just trade on the markets.
 Only output valid Python function calls.
 Make 'Reasoning' calls frequently - at least every other call.
 """
+TRADING_AGENT_BOOTSTRAP = (
+    'Reasoning("I need to reason step by step. Start by assessing my '
+    "current positions and balance. Do I have any positions in the markets "
+    "returned from GetMarkets? Consider selling overvalued tokens AND "
+    'buying undervalued tokens.")'
+)
 
 
 class SystemPromptChoice(str, Enum):
@@ -33,7 +39,10 @@ class SystemPromptChoice(str, Enum):
     TRADING_AGENT = "trading_agent"
 
 
-SYSTEM_PROMPTS: dict[SystemPromptChoice, str] = {
-    SystemPromptChoice.JUST_BORN: SYSTEM_PROMPT,
-    SystemPromptChoice.TRADING_AGENT: TRADING_AGENT_SYSTEM_PROMPT,
+SYSTEM_PROMPTS: dict[SystemPromptChoice, tuple[str, str]] = {
+    SystemPromptChoice.JUST_BORN: (SYSTEM_PROMPT, BOOTSTRAP),
+    SystemPromptChoice.TRADING_AGENT: (
+        TRADING_AGENT_SYSTEM_PROMPT,
+        TRADING_AGENT_BOOTSTRAP,
+    ),
 }
