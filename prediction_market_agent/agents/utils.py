@@ -92,7 +92,6 @@ def extract_reasonings_to_learnings(
     return _summarize_learnings(
         memories,
         PromptTemplate.from_template(prompt_with_tweet),
-        model="gpt-4o-2024-05-13",
     )
 
 
