@@ -7,6 +7,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.autogen_general_agent.social_agent import (
+    build_reply_tweet,
     build_social_media_text,
 )
 from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
@@ -46,9 +47,16 @@ class DeployableSocialMediaAgent(DeployableAgent):
             return
 
         long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
-        tweet = build_social_media_text(self.model, bets, long_term_memory, one_day_ago)
+        tweet = build_social_media_text(self.model, bets)
+        reasoning_reply_tweet = build_reply_tweet(
+            model=self.model,
+            tweet=tweet,
+            bets=bets,
+            long_term_memory=long_term_memory,
+            memories_since=one_day_ago,
+        )
 
-        # self.post(tweet)
+        self.post(tweet, reasoning_reply_tweet)
 
     def get_unique_bets_for_market(
         self, market_type: MarketType, start_time: datetime
@@ -65,13 +73,13 @@ class DeployableSocialMediaAgent(DeployableAgent):
         filtered_bets = list(seen_titles.values())
         return filtered_bets
 
-    def post(self, tweet: str | None) -> None:
-        if not tweet:
+    def post(self, tweet: str | None, reasoning_reply_tweet: str | None) -> None:
+        if not tweet or not reasoning_reply_tweet:
             logger.info("No tweet was produced. Exiting.")
             return
 
         for handler in self.social_media_handlers:
-            handler.post(tweet)
+            handler.post(tweet, reasoning_reply_tweet)
 
 
 if __name__ == "__main__":

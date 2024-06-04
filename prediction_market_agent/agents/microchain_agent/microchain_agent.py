@@ -94,7 +94,9 @@ def main(
 ) -> None:
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
-    unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(market_type)
+    unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
+        market_type
+    )
     long_term_memory = LongTermMemory(unique_task_description)
 
     agent = build_agent(

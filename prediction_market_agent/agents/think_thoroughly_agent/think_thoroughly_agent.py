@@ -23,6 +23,10 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from requests import HTTPError
 
+from prediction_market_agent.agents.microchain_agent.memory import (
+    AnswerWithScenario,
+    LongTermMemory,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
 )
@@ -86,13 +90,28 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 
 class CrewAIAgentSubquestions:
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, memory: bool = True) -> None:
         self.model = model
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
+        self.memory = memory
+        self._long_term_memory = (
+            LongTermMemory("think-thoroughly-agent") if self.memory else None
+        )
 
     def _get_current_date(self) -> str:
         return utcnow().strftime("%Y-%m-%d")
+
+    def save_answer_to_long_term_memory(
+        self, answer_with_scenario: AnswerWithScenario
+    ) -> None:
+        if not self._long_term_memory:
+            logger.info(
+                "Did not save answer to long term memory since it was not initialized."
+            )
+            return
+
+        self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
     def _get_researcher(self) -> Agent:
         return Agent(
@@ -149,10 +168,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_required_conditions],
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -169,10 +185,7 @@ class CrewAIAgentSubquestions:
             agent=researcher,
         )
 
-        report_crew = Crew(
-            agents=[researcher],
-            tasks=[create_scenarios_task],
-        )
+        report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
         result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
         scenarios = Scenarios.model_validate_json(result)
 
@@ -186,6 +199,7 @@ class CrewAIAgentSubquestions:
     def generate_prediction_for_one_outcome(
         self,
         sentence: str,
+        question: str,
         previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
     ) -> Answer | None:
         researcher = self._get_researcher()
@@ -240,6 +254,10 @@ class CrewAIAgentSubquestions:
 
         try:
             output = Answer.model_validate(result)
+            answer_with_scenario = AnswerWithScenario.build_from_answer(
+                output, scenario=sentence, question=question
+            )
+            self.save_answer_to_long_term_memory(answer_with_scenario)
             return output
         except ValueError as e:
             logger.error(
@@ -274,11 +292,7 @@ class CrewAIAgentSubquestions:
             output_json=Answer,
         )
 
-        crew = Crew(
-            agents=[predictor],
-            tasks=[task_final_decision],
-            verbose=2,
-        )
+        crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
 
         correlated_markets = self.get_correlated_markets(question)
 
@@ -298,6 +312,10 @@ class CrewAIAgentSubquestions:
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
+        answer_with_scenario = AnswerWithScenario.build_from_answer(
+            output, scenario=question, question=question
+        )
+        self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
             f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
@@ -319,10 +337,11 @@ class CrewAIAgentSubquestions:
                 hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
                 lambda x: (
                     x,
-                    self.generate_prediction_for_one_outcome(x, scenarios_with_probs),
+                    self.generate_prediction_for_one_outcome(
+                        x, question, scenarios_with_probs
+                    ),
                 ),
             )
-
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:

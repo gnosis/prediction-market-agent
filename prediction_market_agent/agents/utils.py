@@ -1,4 +1,6 @@
+import typing as t
 from enum import Enum
+from string import Template
 
 from langchain.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
@@ -7,9 +9,7 @@ from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    MemoryContainer,
-)
+from prediction_market_agent.agents.microchain_agent.memory import MemoryContainer
 from prediction_market_agent.utils import APIKeys
 
 
@@ -19,7 +19,9 @@ class LongTermMemoryTaskIdentifier(str, Enum):
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
 
     @staticmethod
-    def microchain_task_from_market(market_type: MarketType):
+    def microchain_task_from_market(
+        market_type: MarketType,
+    ) -> "LongTermMemoryTaskIdentifier":
         if market_type == MarketType.OMEN:
             return LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_OMEN
         else:
@@ -43,16 +45,28 @@ MEMORIES:
 {memories}
 """
 
+EXTRACT_REASONINGS_TEMPLATE = """
+You are an agent that trades in prediction markets. You have a collection of memories that record your
+actions, and your reasoning behind them.
+
+Below you can find a TWEET related to previous trades that you placed. Produce a summary of the reasonings, extracted from the memories, that can explain why the trade was placed.
+
+TWEET: $TWEET
+
+MEMORIES:
+{memories}
+"""
+
 
 def market_is_saturated(market: AgentMarket) -> bool:
     return market.current_p_yes > 0.95 or market.current_p_no > 0.95
 
 
-def memories_to_learnings(memories: list[MemoryContainer], model: str) -> str:
-    """
-    Synthesize the memories into an intelligible summary that represents the
-    past learnings.
-    """
+def _summarize_learnings(
+    memories: t.Sequence[MemoryContainer],
+    prompt_template: PromptTemplate,
+    model: str = "gpt-4o-2024-05-13",
+) -> str:
     llm = ChatOpenAI(
         temperature=0,
         model=model,
@@ -60,7 +74,7 @@ def memories_to_learnings(memories: list[MemoryContainer], model: str) -> str:
     )
     summary_chain = load_summarize_chain(
         llm=llm,
-        prompt=PromptTemplate.from_template(MEMORIES_TO_LEARNINGS_TEMPLATE),
+        prompt=prompt_template,
         document_variable_name="memories",
         chain_type="stuff",
         verbose=False,
@@ -69,3 +83,22 @@ def memories_to_learnings(memories: list[MemoryContainer], model: str) -> str:
     memory_docs = [Document(page_content=str(m)) for m in memories]
     summary: str = summary_chain.run(input_documents=memory_docs)
     return summary
+
+
+def extract_reasonings_to_learnings(
+    memories: t.Sequence[MemoryContainer], tweet: str
+) -> str:
+    prompt_with_tweet = Template(EXTRACT_REASONINGS_TEMPLATE).substitute(TWEET=tweet)
+    return _summarize_learnings(
+        memories,
+        PromptTemplate.from_template(prompt_with_tweet),
+    )
+
+
+def memories_to_learnings(memories: t.Sequence[MemoryContainer], model: str) -> str:
+    """
+    Synthesize the memories into an intelligible summary that represents the
+    past learnings.
+    """
+    prompt = PromptTemplate.from_template(MEMORIES_TO_LEARNINGS_TEMPLATE)
+    return _summarize_learnings(memories, prompt, model)

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, Sequence
 
+from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
@@ -38,17 +39,28 @@ class SimpleMemoryMicrochain(MemoryContainer):
         return f"{self.datetime_}: {self.content}"
 
 
+class AnswerWithScenario(Answer):
+    scenario: str
+    question: str
+
+    @staticmethod
+    def build_from_answer(
+        answer: Answer, scenario: str, question: str
+    ) -> "AnswerWithScenario":
+        return AnswerWithScenario(scenario=scenario, question=question, **answer.dict())
+
+
 class SimpleMemoryThinkThoroughly(MemoryContainer):
-    reasoning: str
+    metadata: AnswerWithScenario
 
     @staticmethod
     def from_long_term_memory(
         long_term_memory: LongTermMemories,
     ) -> "SimpleMemoryThinkThoroughly":
         return SimpleMemoryThinkThoroughly(
-            reasoning=json.loads(check_not_none(long_term_memory.metadata_))[
-                "reasoning"
-            ],
+            metadata=AnswerWithScenario.model_validate_json(
+                check_not_none(long_term_memory.metadata_)
+            ),
             datetime_=long_term_memory.datetime_,
         )
 
@@ -63,6 +75,14 @@ class LongTermMemory:
         self.storage.save_multiple(
             task_description=self.task_description,
             history=history,
+        )
+
+    def save_answer_with_scenario(
+        self, answer_with_scenario: AnswerWithScenario
+    ) -> None:
+        self.storage.save_multiple(
+            task_description=self.task_description,
+            history=[answer_with_scenario.dict()],
         )
 
     def search(

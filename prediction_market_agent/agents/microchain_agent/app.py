@@ -1,8 +1,14 @@
+"""
+PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.py
+
+Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
+"""
+
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
-from prediction_market_agent.streamlit_utils import (  # isort:skip
+from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
 
@@ -18,6 +24,7 @@ import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
@@ -30,7 +37,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
     has_been_run_past_initialization,
 )
-from prediction_market_agent.streamlit_utils import check_required_api_keys
+from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
 MARKET_TYPE = MarketType.OMEN
@@ -142,6 +149,8 @@ st.set_page_config(
     page_icon=":owl:",
 )
 st.title("Prediction Market Trader Agent")
+with st.sidebar:
+    streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 keys = APIKeys()
 maybe_initialize_long_term_memory()

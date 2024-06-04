@@ -1,7 +1,7 @@
 """
 PYTHONPATH=. streamlit run scripts/agent_app.py
 
-Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, isntead of just this one.
+Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 
 import streamlit as st
@@ -19,6 +19,7 @@ from prediction_market_agent_tooling.markets.markets import (
     get_binary_markets,
 )
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -38,6 +39,9 @@ AGENTS: list[
 add_sink_to_logger()
 
 st.title("Agent's decision-making process")
+
+with st.sidebar:
+    streamlit_login()
 
 # Fetch markets from the selected market type.
 market_source = MarketType(
