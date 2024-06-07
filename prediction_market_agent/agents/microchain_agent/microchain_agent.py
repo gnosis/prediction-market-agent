@@ -27,22 +27,6 @@ from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
-class CustomizedAgent(Agent):
-    """
-    Subclass microchain's agent for any customizations that are needed right away.
-    Anything generally useful should be moved upstream to the microchain repository.
-    """
-
-    def build_initial_messages(self) -> None:
-        # Use self.prompt in the system prompt instead of the user prompt.
-        # TODO: This should be moved upstream to the microchain repository, there should be both "prompt" and "system_prompt" argument in __init__.
-        self.history = [
-            dict(role="system", content=self.prompt),
-        ]
-        for command in self.bootstrap:
-            self.execute_command(command)
-
-
 def build_agent_functions(
     agent: Agent,
     market_type: MarketType,
@@ -84,7 +68,7 @@ def build_agent(
         api_base=api_base,
         temperature=0.7,
     )
-    agent = CustomizedAgent(llm=LLM(generator=generator), engine=engine)
+    agent = Agent(llm=LLM(generator=generator), engine=engine)
 
     for f in build_agent_functions(
         agent=agent,
@@ -97,7 +81,7 @@ def build_agent(
 
     agent.max_tries = 3
     print(system_prompt)
-    agent.prompt = system_prompt.format(engine_help=engine.help)
+    agent.system_prompt = system_prompt.format(engine_help=engine.help)
     agent.bootstrap = [bootstrap]
     return agent
 

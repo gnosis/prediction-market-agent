@@ -64,7 +64,7 @@ def test_get_probability(
     engine.register(GetMarketProbability(market_type=market_type))
     engine.register(Jsonify())
     agent = Agent(llm=LLM(generator=generator), engine=engine)
-    agent.prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.
+    agent.system_prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.
     
     You can use the following functions:
 

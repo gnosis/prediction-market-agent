@@ -245,7 +245,7 @@ with st.expander(
 
 with st.expander("Agent's current system prompt"):
     if agent_is_initialized():
-        st.markdown(st.session_state.agent.prompt)
+        st.markdown(st.session_state.agent.system_prompt)
     else:
         st.markdown("The agent is not initialized yet.")
 

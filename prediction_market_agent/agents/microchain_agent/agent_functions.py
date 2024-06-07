@@ -24,7 +24,7 @@ class GetMyCurrentSystemPrompt(AgentAction):
         return []
 
     def __call__(self) -> str:
-        return str(self.agent.prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
+        return str(self.agent.system_prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
 
 
 class UpdateMySystemPrompt(AgentAction):
@@ -43,10 +43,11 @@ class UpdateMySystemPrompt(AgentAction):
             + NON_UPDATABLE_DIVIDOR
             + SYSTEM_PROMPT.split(NON_UPDATABLE_DIVIDOR)[1]
         )
-        # TODO: This should use `system_prompt` after https://github.com/galatolofederico/microchain/pull/11 is merged.
-        self.agent.prompt = prompt_template.format(engine_help=self.agent.engine.help)
+        self.agent.system_prompt = prompt_template.format(
+            engine_help=self.agent.engine.help
+        )
         # History needs to be updated manually, because it's constructed only once in the agent initialization.
-        self.agent.history[0] = dict(role="system", content=self.agent.prompt)
+        self.agent.history[0] = dict(role="system", content=self.agent.system_prompt)
         return "The prompt has been updated"
 
 
