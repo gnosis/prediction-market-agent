@@ -235,10 +235,9 @@ class SellTokens(MarketFunction):
         return (
             f"Use this function to sell {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
-            f"second parameter specifies the VALUE of tokens to sell in "
-            f"{self.currency}. This is NOT the same as the number of outcome "
-            f"tokens. If this fails, try selling a smaller {self.currency} "
-            f"amount."
+            f"second parameter specifies the (float) number of tokens to sell. "
+            f"You can use `GetLiquidPositions` to see your current token "
+            f"holdings."
         )
 
     @property

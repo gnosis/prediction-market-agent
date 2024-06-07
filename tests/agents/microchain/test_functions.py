@@ -115,7 +115,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
 
     # Needs to be big enough below for fees to be relatively small enough
     # for checks to pass
-    buy_sell_amount = 0.1
+    buy_amount = 0.1
 
     def get_balances() -> tuple[float, float]:
         wallet_balance = get_balance(market_type=market_type).amount
@@ -129,32 +129,32 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
         buy_tokens, sell_tokens = functions
 
         before_wallet_balance, before_tokens = get_balances()
-        buy_tokens(market.id, buy_sell_amount)
+        buy_tokens(market.id, buy_amount)
         after_wallet_balance, after_tokens = get_balances()
 
         # Check that the wallet balance has decreased by the amount bought
         assert np.isclose(
             before_wallet_balance - after_wallet_balance,
-            buy_sell_amount,
+            buy_amount,
             rtol=0.01,
         )
 
-        # Can't sell the exact amount bought due to fees
-        buy_sell_amount *= 0.96
-        sell_tokens(market.id, buy_sell_amount)
+        # Sell all the tokens you just bought
+        sell_token_amount = after_tokens - before_tokens
+        sell_tokens(market.id, sell_token_amount)
         final_wallet_balance, final_tokens = get_balances()
 
         # Check that the wallet balance has increased by the amount sold
+        # Can't sell the exact amount bought due to fees
+        new_buy_amount = buy_amount * 0.96
         assert np.isclose(
-            final_wallet_balance - after_wallet_balance,
-            buy_sell_amount,
-            rtol=0.01,
+            final_wallet_balance - after_wallet_balance, new_buy_amount, rtol=0.01
         )
 
         # Check that the number of tokens bought and sold is approximately equal
         n_tokens_bought = after_tokens - before_tokens
         n_tokens_sold = after_tokens - final_tokens
-        assert np.isclose(n_tokens_bought, n_tokens_sold, rtol=0.02)
+        assert np.isclose(n_tokens_bought, n_tokens_sold, rtol=0.01)
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
