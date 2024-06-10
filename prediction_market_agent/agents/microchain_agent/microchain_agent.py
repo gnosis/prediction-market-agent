@@ -84,6 +84,8 @@ def build_agent(
     print(system_prompt)
     # if {engine_help} not in prompt, we expect the functions to have been already loaded,
     # thus no need to load them again. Otherwise we can simply not use the historical prompt.
+    # ToDo - Add historical prompt fetching here (also add flag passed from streamlit, default False)
+    # ToDo - Debug streamlit, error occuring (empty reply, aborting)
     agent.system_prompt = system_prompt
     if "{engine_help}" not in system_prompt:
         logger.info("Agent's functions were not loaded into prompt")
