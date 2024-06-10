@@ -5,6 +5,7 @@ import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.db.db_storage import DBStorage
+from prediction_market_agent.db.models import LongTermMemories
 
 
 @pytest.fixture(scope="session")
@@ -24,21 +25,34 @@ def test_db_storage_connects(db_storage_test: DBStorage) -> None:
 def test_save_load_long_term_memory_item(db_storage_test: DBStorage) -> None:
     task_description = "test"
     first_item = {"a1": "b"}
-    db_storage_test.save_multiple(task_description, [first_item])
-    results = db_storage_test.load(task_description)
+    long_term_memory = LongTermMemories(
+        task_description=task_description,
+        metadata_=json.dumps(first_item),
+        datetime_=utcnow(),
+    )
+
+    db_storage_test.save_multiple([long_term_memory])
+    results = db_storage_test.load_long_term_memories(task_description)
     assert len(results) == 1
 
     # Now test filtering based on datetime
     timestamp = utcnow()
     second_item = {"a2": "c"}
-    db_storage_test.save_multiple(task_description, [second_item])
+    db_storage_test.save_multiple_long_term_memories(task_description, [second_item])
 
-    results = db_storage_test.load(task_description=task_description, to=timestamp)
+    results = db_storage_test.load_long_term_memories(
+        task_description=task_description, to=timestamp
+    )
     assert len(results) == 1
     assert json.loads(str(results[0].metadata_)) == first_item
 
-    results = db_storage_test.load(task_description=task_description, from_=timestamp)
+    results = db_storage_test.load_long_term_memories(
+        task_description=task_description, from_=timestamp
+    )
     assert len(results) == 1
     assert json.loads(str(results[0].metadata_)) == second_item
 
-    assert len(db_storage_test.load(task_description=task_description)) == 2
+    assert (
+        len(db_storage_test.load_long_term_memories(task_description=task_description))
+        == 2
+    )

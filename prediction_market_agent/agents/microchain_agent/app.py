@@ -6,6 +6,7 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
     SystemPromptChoice,
@@ -107,12 +108,21 @@ def long_term_memory_is_initialized() -> bool:
     return "long_term_memory" in st.session_state
 
 
+def prompt_handler_is_initialized() -> bool:
+    return "prompt_handler" in st.session_state
+
+
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
         st.session_state.long_term_memory = LongTermMemory(
             LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
+
+
+def maybe_initialize_prompt_handler() -> None:
+    if not prompt_handler_is_initialized():
+        st.session_state.prompt_handler = PromptHandler()
 
 
 def agent_is_initialized() -> bool:
@@ -124,9 +134,21 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
+def fetch_latest_prompt():
+    if st.session_state.get("load_historical_prompt"):
+        prompt_handler: PromptHandler = st.session_state.prompt_handler
+        historical_prompt = prompt_handler.fetch_latest_prompt()
+        return historical_prompt
+
+
 def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
+        historical_prompt = fetch_latest_prompt()
+        system_prompt = (
+            historical_prompt.prompt if historical_prompt is not None else system_prompt
+        )
+
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
@@ -162,11 +184,12 @@ st.set_page_config(
     page_icon=":owl:",
 )
 st.title("Prediction Market Trader Agent")
-with st.sidebar:
-    streamlit_login()
+# with st.sidebar:
+#    streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 keys = APIKeys()
 maybe_initialize_long_term_memory()
+maybe_initialize_prompt_handler()
 
 with st.sidebar:
     st.subheader("Agent Info:")
@@ -198,6 +221,8 @@ with st.sidebar:
             [p.value for p in SystemPromptChoice],
             index=0,
         )
+        st.session_state.load_historical_prompt = st.toggle("Load historical prompt")
+
     else:
         model = st.selectbox(
             "Model",
@@ -211,7 +236,9 @@ with st.sidebar:
             index=0,
             disabled=True,
         )
+
     model = check_not_none(model)
+
     system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
@@ -242,10 +269,15 @@ with st.expander(
         )
     else:
         st.markdown("The agent is not initialized yet.")
-
+# ToDo - This system prompt must be stored and should be able to be loaded from DB
 with st.expander("Agent's current system prompt"):
     if agent_is_initialized():
         st.markdown(st.session_state.agent.system_prompt)
+        prompt = st.session_state.agent.system_prompt
+        if prompt:
+            prompt_handler: PromptHandler = st.session_state.prompt_handler
+            # prompt_handler.save_prompt(prompt)
+
     else:
         st.markdown("The agent is not initialized yet.")
 

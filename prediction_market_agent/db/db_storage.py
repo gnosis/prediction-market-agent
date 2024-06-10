@@ -4,12 +4,18 @@ from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from sqlalchemy import Table
 from sqlmodel import Session, SQLModel, create_engine, desc, select
 
-from prediction_market_agent.db.models import LongTermMemories
+from prediction_market_agent.db.models import (
+    LongTermMemories,
+    Prompt,
+    PROMPT_DEFAULT_SESSION_IDENTIFIER,
+)
 from prediction_market_agent.utils import DBKeys
 
 
+# ToDo - Split this into base class and table specific classes
 class DBStorage:
     def __init__(self, sqlalchemy_db_url: str | None = None):
         self.engine = create_engine(
@@ -24,27 +30,50 @@ class DBStorage:
         """
 
         # trick for making models import mandatory - models must be imported for metadata.create_all to work
-        logger.debug(f"tables being added {LongTermMemories}")
+        logger.debug(f"tables being added {LongTermMemories} {Prompt}")
         SQLModel.metadata.create_all(self.engine)
 
-    def save_multiple(
+    def save_multiple(self, items: list[Any]):
+        with Session(self.engine) as session:
+            session.add_all(items)
+            session.commit()
+
+    def save_multiple_long_term_memories(
         self,
         task_description: str,
         history: list[Dict[str, Any]],
     ) -> None:
         """Saves data to the LTM table with error handling."""
 
-        with Session(self.engine) as session:
-            for history_item in history:
-                long_term_memory_item = LongTermMemories(
-                    task_description=task_description,
-                    metadata_=json.dumps(history_item),
-                    datetime_=utcnow(),
-                )
-                session.add(long_term_memory_item)
-            session.commit()
+        history_items = [
+            LongTermMemories(
+                task_description=task_description,
+                metadata_=json.dumps(history_item),
+                datetime_=utcnow(),
+            )
+            for history_item in history
+        ]
 
-    def load(
+        self.save_multiple(history_items)
+
+    def load_latest_prompt(
+        self, session_identifier: str | None = None
+    ) -> Prompt | None:
+        """
+        Queries the prompts table by session identifier with error handling
+        """
+        if not session_identifier:
+            session_identifier = PROMPT_DEFAULT_SESSION_IDENTIFIER
+        with Session(self.engine) as session:
+            query = (
+                select(Prompt)
+                .where(Prompt.session_identifier == session_identifier)
+                .order_by(desc(Prompt.datetime_))
+            )
+            result = session.exec(query).first()
+            return result
+
+    def load_long_term_memories(
         self,
         task_description: str,
         from_: datetime | None = None,
@@ -63,5 +92,4 @@ class DBStorage:
             if to is not None:
                 query = query.where(LongTermMemories.datetime_ <= to)
 
-            items = session.exec(query.order_by(desc(LongTermMemories.datetime_))).all()
-            return items
+            return session.exec(query.order_by(desc(LongTermMemories.datetime_))).all()

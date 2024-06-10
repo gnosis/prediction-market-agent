@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.deploy.agent import Answer
-from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.db.db_storage import DBStorage
@@ -72,25 +72,29 @@ class LongTermMemory:
 
     def save_history(self, history: list[Dict[str, Any]]) -> None:
         """Save item to storage. Note that score allows many types for easier handling by agent."""
-        self.storage.save_multiple(
-            task_description=self.task_description,
-            history=history,
-        )
+
+        history_items = [
+            LongTermMemories(
+                task_description=self.task_description,
+                metadata_=json.dumps(history_item),
+                datetime_=utcnow(),
+            )
+            for history_item in history
+        ]
+
+        self.storage.save_multiple(history_items)
 
     def save_answer_with_scenario(
         self, answer_with_scenario: AnswerWithScenario
     ) -> None:
-        self.storage.save_multiple(
-            task_description=self.task_description,
-            history=[answer_with_scenario.dict()],
-        )
+        return self.save_history([answer_with_scenario.dict()])
 
     def search(
         self,
         from_: datetime | None = None,
         to: datetime | None = None,
     ) -> Sequence[LongTermMemories]:
-        return self.storage.load(
+        return self.storage.load_long_term_memories(
             task_description=self.task_description,
             from_=from_,
             to=to,

@@ -1,4 +1,5 @@
 import typer
+from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -81,7 +82,15 @@ def build_agent(
 
     agent.max_tries = 3
     print(system_prompt)
-    agent.system_prompt = system_prompt.format(engine_help=engine.help)
+    # if {engine_help} not in prompt, we expect the functions to have been already loaded,
+    # thus no need to load them again. Otherwise we can simply not use the historical prompt.
+    agent.system_prompt = system_prompt
+    if "{engine_help}" not in system_prompt:
+        logger.info("Agent's functions were not loaded into prompt")
+        # We simply call help here otherwise microchain throws exception if not called.
+        engine.help
+    else:
+        agent.system_prompt = system_prompt.format(engine_help=engine.help)
     agent.bootstrap = [bootstrap]
     return agent
 
