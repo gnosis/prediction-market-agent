@@ -6,6 +6,10 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    SYSTEM_PROMPTS,
+    SystemPromptChoice,
+)
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
@@ -59,6 +63,12 @@ def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
         st.session_state.running_cost += costs.cost
 
 
+def chat_message(role: str, content: str) -> None:
+    # Return of functions is stringified, so we need to check for "None" string.
+    if content != "None":
+        st.chat_message(role).write(content)
+
+
 def display_all_history(agent: Agent) -> None:
     """
     Display the agent's history in the Streamlit app.
@@ -67,7 +77,7 @@ def display_all_history(agent: Agent) -> None:
     history = agent.history[get_initial_history_length(agent) :]
 
     for h in history:
-        st.chat_message(h["role"]).write(h["content"])
+        chat_message(h["role"], h["content"])
 
 
 def get_history_from_last_turn(agent: Agent) -> list[dict[str, str]]:
@@ -90,7 +100,7 @@ def display_new_history_callback(agent: Agent) -> None:
     with a single interation.
     """
     for h in get_history_from_last_turn(agent):
-        st.chat_message(h["role"]).write(h["content"])
+        chat_message(h["role"], h["content"])
 
 
 def long_term_memory_is_initialized() -> bool:
@@ -114,12 +124,14 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
-def maybe_initialize_agent(model: str) -> None:
+def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
+            system_prompt=system_prompt,
+            bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
         )
@@ -131,9 +143,10 @@ def maybe_initialize_agent(model: str) -> None:
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
-def get_function_bullet_point_list(model: str) -> str:
+def get_function_bullet_point_list(agent: Agent, model: str) -> str:
     bullet_points = ""
     for function in build_agent_functions(
+        agent=agent,
         market_type=MARKET_TYPE,
         long_term_memory=st.session_state.long_term_memory,
         allow_stop=ALLOW_STOP,
@@ -171,11 +184,20 @@ with st.sidebar:
     if not agent_is_initialized():
         model = st.selectbox(
             "Model",
-            ["gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"],
+            [
+                "gpt-4-turbo",
+                "gpt-3.5-turbo-0125",
+                "gpt-4o-2024-05-13",
+            ],
             index=0,
         )
         if model is None:
             st.error("Please select a model.")
+        st.session_state.system_prompt_select = st.selectbox(
+            "Initial memory",
+            [p.value for p in SystemPromptChoice],
+            index=0,
+        )
     else:
         model = st.selectbox(
             "Model",
@@ -183,7 +205,16 @@ with st.sidebar:
             index=0,
             disabled=True,
         )
+        st.selectbox(
+            "Initial memory",
+            [st.session_state.system_prompt_select],
+            index=0,
+            disabled=True,
+        )
     model = check_not_none(model)
+    system_prompt, bootstrap = SYSTEM_PROMPTS[
+        SystemPromptChoice(st.session_state.system_prompt_select)
+    ]
 
     st.divider()
     st.subheader("Built by Gnosis AI")
@@ -204,12 +235,25 @@ with st.expander(
         "To start, click 'Run' to see the agent in action, or bootstrap the "
         "agent with your own reasoning."
     )
-    st.markdown(
-        f"It is equipped with the following tools to access the "
-        f"[{MARKET_TYPE}]({MARKET_TYPE.market_class.base_url}) prediction "
-        f"market APIs:"
-    )
-    st.markdown(get_function_bullet_point_list(model=model))
+    st.markdown(f"It is equipped with the following tools:")
+    if agent_is_initialized():
+        st.markdown(
+            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
+        )
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with st.expander("Agent's current system prompt"):
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.system_prompt)
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with st.expander("Agent's current bootstrap"):
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.bootstrap)
+    else:
+        st.markdown("The agent is not initialized yet.")
 
 # Placeholder for the agent's history
 history_container = st.container()
@@ -238,7 +282,7 @@ with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
     if user_reasoning:
-        maybe_initialize_agent(model)
+        maybe_initialize_agent(model, system_prompt, bootstrap)
         execute_reasoning(
             agent=st.session_state.agent,
             reasoning=user_reasoning,
@@ -252,7 +296,7 @@ with history_container:
             model=model,
         )
     if run_agent_button:
-        maybe_initialize_agent(model)
+        maybe_initialize_agent(model, system_prompt, bootstrap)
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
