@@ -186,7 +186,7 @@ class BuyTokens(MarketFunction):
         if account_balance < amount:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
-                f"large enough to buy {amount} tokens."
+                f"large enough to buy {amount} {self.currency} worth of tokens."
             )
 
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
