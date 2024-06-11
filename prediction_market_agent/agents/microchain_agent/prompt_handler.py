@@ -21,12 +21,12 @@ class PromptHandler:
         if not prompt:
             logger.info("No prompt to save")
             return
-        prompt = Prompt(
+        prompt_to_save = Prompt(
             prompt=prompt,
             datetime_=utcnow(),
             session_identifier=self.session_identifier,
         )
-        self.storage.save_multiple([prompt])
+        self.storage.save_multiple([prompt_to_save])
 
     def fetch_latest_prompt(
         self, session_identifier: str | None = None

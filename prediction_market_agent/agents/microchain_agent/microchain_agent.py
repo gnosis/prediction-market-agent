@@ -86,8 +86,8 @@ def build_agent(
 
     # We restore the prompt from a historical session.
     if prompt_handler:
-        historical_prompt = prompt_handler.fetch_latest_prompt()
-        system_prompt = historical_prompt.prompt
+        if historical_prompt := prompt_handler.fetch_latest_prompt():
+            system_prompt = historical_prompt.prompt
 
     print(system_prompt)
     # if {engine_help} not in prompt, we expect the functions to have been already loaded,

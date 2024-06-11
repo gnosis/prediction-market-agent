@@ -59,7 +59,7 @@ def test_save_load_long_term_memory_item(db_storage_test: DBStorage) -> None:
     )
 
 
-def test_save_prompt(db_storage_test: DBStorage):
+def test_save_prompt(db_storage_test: DBStorage) -> None:
     prompt_text = "abc"
     prompt = Prompt(prompt=prompt_text, datetime_=utcnow())
     db_storage_test.save_multiple([prompt])
@@ -69,7 +69,7 @@ def test_save_prompt(db_storage_test: DBStorage):
     assert result.prompt == prompt_text
 
 
-def test_load_latest_prompt(db_storage_test: DBStorage):
+def test_load_latest_prompt(db_storage_test: DBStorage) -> None:
     prompt_text = "abc"
     # We ignore the timezone for testing purposes
     older_timestamp = datetime.datetime.now()

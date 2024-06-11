@@ -59,6 +59,7 @@ def run_agent(agent: Agent, iterations: int, model: str) -> None:
 
 
 def on_click_user_reasoning() -> None:
+    model = check_not_none(model)
     maybe_initialize_agent(model, system_prompt, bootstrap)
 
     with openai_costs(model) as costs:
@@ -175,7 +176,7 @@ with st.sidebar:
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 
 
-def maybe_init():
+def maybe_init() -> None:
     maybe_initialize_long_term_memory()
 
 
@@ -269,10 +270,9 @@ with st.expander("Agent's current bootstrap"):
         st.markdown("The agent is not initialized yet.")
 
 
-def on_click_run_agent():
-    # st.session_state.system_prompt_test = random.randint(1000, 2000)
+def on_click_run_agent() -> None:
+    model = check_not_none(model)
     maybe_initialize_agent(model, system_prompt, bootstrap)
-
     run_agent(
         agent=st.session_state.agent,
         iterations=int(iterations),
