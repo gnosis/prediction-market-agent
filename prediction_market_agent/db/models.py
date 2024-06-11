@@ -25,5 +25,7 @@ class Prompt(SQLModel, table=True):
     }  # required if initializing an existing table
     id: Optional[int] = Field(default=None, primary_key=True)
     prompt: str
+    # This allows for future distinction between user sessions, if prompts from a specific
+    # user (or app) should be persisted.
     session_identifier: str = Field(default=PROMPT_DEFAULT_SESSION_IDENTIFIER)
     datetime_: datetime

@@ -1,3 +1,4 @@
+from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -6,6 +7,7 @@ from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import Prompt
 
 
+# ToDo - Unify PromptHandler, db_storage and LongTermMemory into 2 classes, one per table.
 class PromptHandler:
     def __init__(
         self,
@@ -18,6 +20,9 @@ class PromptHandler:
 
     def save_prompt(self, prompt: str) -> None:
         """Save item to storage. Note that score allows many types for easier handling by agent."""
+        if not prompt:
+            logger.info("No prompt to save")
+            return
         prompt = Prompt(
             prompt=prompt,
             datetime_=utcnow(),
