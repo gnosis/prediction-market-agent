@@ -235,7 +235,7 @@ with st.expander(
         "To start, click 'Run' to see the agent in action, or bootstrap the "
         "agent with your own reasoning."
     )
-    st.markdown(f"It is equipped with the following tools:")
+    st.markdown("It is equipped with the following tools:")
     if agent_is_initialized():
         st.markdown(
             get_function_bullet_point_list(agent=st.session_state.agent, model=model)
