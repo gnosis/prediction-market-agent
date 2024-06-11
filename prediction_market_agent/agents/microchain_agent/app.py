@@ -3,8 +3,6 @@ PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.p
 
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
-import random
-from streamlit.delta_generator import DeltaGenerator
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
@@ -30,6 +28,7 @@ import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
@@ -55,7 +54,6 @@ def run_agent(agent: Agent, iterations: int, model: str) -> None:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
-                st.session_state.system_prompt_test = random.randint(0, 100)
         st.session_state.running_cost += costs.cost
 
 
@@ -77,7 +75,6 @@ def on_click_user_reasoning() -> None:
 
 def chat_message(role: str, content: str) -> None:
     # Return of functions is stringified, so we need to check for "None" string.
-
     if content != "None":
         st.chat_message(role).write(content)
 
@@ -114,7 +111,6 @@ def display_new_history_callback(agent: Agent) -> None:
     """
     for h in get_history_from_last_turn(agent):
         chat_message(h["role"], h["content"])
-        chat_message(h["role"], h["content"])
 
 
 def maybe_initialize_long_term_memory() -> None:
@@ -123,11 +119,6 @@ def maybe_initialize_long_term_memory() -> None:
         st.session_state.long_term_memory = LongTermMemory(
             LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
-
-
-def maybe_initialize_prompt_handler() -> None:
-    if not "prompt_handler" in st.session_state:
-        st.session_state.prompt_handler = PromptHandler()
 
 
 def agent_is_initialized() -> bool:
@@ -139,22 +130,10 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
-def fetch_latest_prompt():
-    if st.session_state.get("load_historical_prompt"):
-        prompt_handler: PromptHandler = st.session_state.prompt_handler
-        historical_prompt = prompt_handler.fetch_latest_prompt()
-        return historical_prompt
-
-
 def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
     maybe_init()
     if not agent_is_initialized():
-        historical_prompt = fetch_latest_prompt()
-        system_prompt = (
-            historical_prompt.prompt if historical_prompt is not None else system_prompt
-        )
-
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
@@ -162,14 +141,13 @@ def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> No
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
-            load_historical_prompt=st.session_state.get("load_historical_prompt"),
+            prompt_handler=PromptHandler()
+            if st.session_state.get("load_historical_prompt")
+            else None,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
         st.session_state.running_cost = 0.0
-
-        # Add a callback to display the agent's history after each run
-        # st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
 def get_function_bullet_point_list(agent: Agent, model: str) -> str:
@@ -191,8 +169,8 @@ st.set_page_config(
     page_icon=":owl:",
 )
 st.title("Prediction Market Trader Agent")
-# with st.sidebar:
-#    streamlit_login()
+with st.sidebar:
+    streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 
 
@@ -245,9 +223,7 @@ with st.sidebar:
             index=0,
             disabled=True,
         )
-
     model = check_not_none(model)
-
     system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
@@ -271,7 +247,7 @@ with st.expander(
         "To start, click 'Run' to see the agent in action, or bootstrap the "
         "agent with your own reasoning."
     )
-    st.markdown(f"It is equipped with the following tools:")
+    st.markdown("It is equipped with the following tools:")
     if agent_is_initialized():
         st.markdown(
             get_function_bullet_point_list(agent=st.session_state.agent, model=model)
@@ -284,8 +260,6 @@ with st.expander("Agent's current system prompt"):
         st.markdown(st.session_state.agent.system_prompt)
     else:
         st.markdown("The agent is not initialized yet.")
-
-    st.markdown(f"check {st.session_state.get('system_prompt_test')}")
 
 with st.expander("Agent's current bootstrap"):
     if agent_is_initialized():
