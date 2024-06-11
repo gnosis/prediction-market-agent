@@ -8,7 +8,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.microchain_agent.functions import (
+from prediction_market_agent.agents.microchain_agent.market_functions import (
     GetMarketProbability,
     GetMarkets,
 )
@@ -64,7 +64,7 @@ def test_get_probability(
     engine.register(GetMarketProbability(market_type=market_type))
     engine.register(Jsonify())
     agent = Agent(llm=LLM(generator=generator), engine=engine)
-    agent.prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.
+    agent.system_prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.
     
     You can use the following functions:
 
