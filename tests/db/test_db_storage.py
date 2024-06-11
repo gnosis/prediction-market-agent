@@ -1,14 +1,17 @@
+import datetime
 import json
 from typing import Generator
 
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
+from sqlalchemy import Table
+from sqlmodel import SQLModel
 
 from prediction_market_agent.db.db_storage import DBStorage
-from prediction_market_agent.db.models import LongTermMemories
+from prediction_market_agent.db.models import LongTermMemories, Prompt
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db_storage_test() -> Generator[DBStorage, None, None]:
     """Creates a in-memory SQLite DB for testing"""
     db_storage = DBStorage(sqlalchemy_db_url="sqlite://")
@@ -56,3 +59,29 @@ def test_save_load_long_term_memory_item(db_storage_test: DBStorage) -> None:
         len(db_storage_test.load_long_term_memories(task_description=task_description))
         == 2
     )
+
+
+def test_save_prompt(db_storage_test: DBStorage):
+    prompt_text = "abc"
+    prompt = Prompt(prompt=prompt_text, datetime_=utcnow())
+    db_storage_test.save_multiple([prompt])
+    # assert prompt is there
+    result = db_storage_test.load_latest_prompt()
+    assert result
+    assert result.prompt == prompt_text
+
+
+def test_load_latest_prompt(db_storage_test: DBStorage):
+    prompt_text = "abc"
+    # We ignore the timezone for testing purposes
+    older_timestamp = datetime.datetime.now()
+    newer_timestamp = datetime.datetime.now()
+    prompt = Prompt(prompt=prompt_text, datetime_=older_timestamp)
+    db_storage_test.save_multiple([prompt])
+    prompt = Prompt(prompt=prompt_text, datetime_=newer_timestamp)
+    db_storage_test.save_multiple([prompt])
+    # assert latest prompt is there
+    result = db_storage_test.load_latest_prompt()
+    assert result
+    # ignore timezone
+    assert result.datetime_ == newer_timestamp
