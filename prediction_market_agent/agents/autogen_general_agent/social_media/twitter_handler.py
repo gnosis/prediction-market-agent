@@ -21,6 +21,10 @@ class TwitterHandler(AbstractSocialMediaHandler):
             keys.twitter_access_token_secret.get_secret_value(),
         )
 
-    def post(self, text: str) -> None:
-        response = self.client.create_tweet(text=text)
-        logger.info(f"Posted tweet {text} - response {response}")
+    def post(self, text: str, reasoning_reply_tweet: str) -> None:
+        first_tweet = self.client.create_tweet(text=text)
+        logger.debug(f"Posted tweet {text} - {first_tweet}")
+        reply_tweet = self.client.create_tweet(
+            text=reasoning_reply_tweet, quote_tweet_id=first_tweet.data["id"]
+        )
+        logger.debug(f"Posted quote tweet {reasoning_reply_tweet} - {reply_tweet}")
