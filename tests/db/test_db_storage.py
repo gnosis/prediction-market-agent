@@ -4,8 +4,6 @@ from typing import Generator
 
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlalchemy import Table
-from sqlmodel import SQLModel
 
 from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import LongTermMemories, Prompt
