@@ -20,6 +20,7 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
@@ -61,6 +62,7 @@ def build_agent(
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemory | None = None,
     allow_stop: bool = True,
+    prompt_handler: PromptHandler | None = None,
 ) -> Agent:
     engine = Engine()
     generator = OpenAIChatGenerator(
@@ -81,11 +83,15 @@ def build_agent(
         engine.register(f)
 
     agent.max_tries = 3
+
+    # We restore the prompt from a historical session.
+    if prompt_handler:
+        historical_prompt = prompt_handler.fetch_latest_prompt()
+        system_prompt = historical_prompt.prompt
+
     print(system_prompt)
     # if {engine_help} not in prompt, we expect the functions to have been already loaded,
     # thus no need to load them again. Otherwise we can simply not use the historical prompt.
-    # ToDo - Add historical prompt fetching here (also add flag passed from streamlit, default False)
-    # ToDo - Debug streamlit, error occuring (empty reply, aborting)
     agent.system_prompt = system_prompt
     if "{engine_help}" not in system_prompt:
         logger.info("Agent's functions were not loaded into prompt")
@@ -103,6 +109,7 @@ def main(
     model: str = "gpt-4-turbo-preview",
     iterations: int = 10,
     seed_prompt: str | None = None,
+    load_historical_prompt: bool = False,
 ) -> None:
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
@@ -110,6 +117,7 @@ def main(
         market_type
     )
     long_term_memory = LongTermMemory(unique_task_description)
+    prompt_handler = PromptHandler()
 
     agent = build_agent(
         market_type=market_type,
@@ -119,12 +127,14 @@ def main(
         bootstrap=TRADING_AGENT_BOOTSTRAP,  # Same here.
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
+        prompt_handler=prompt_handler if load_historical_prompt else None,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']
     agent.run(iterations=iterations)
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
+    prompt_handler.save_prompt(agent.system_prompt)
 
 
 if __name__ == "__main__":

@@ -162,6 +162,7 @@ def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> No
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
+            load_historical_prompt=st.session_state.get("load_historical_prompt"),
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -197,7 +198,6 @@ check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 
 def maybe_init():
     maybe_initialize_long_term_memory()
-    maybe_initialize_prompt_handler()
 
 
 with st.sidebar:
@@ -282,11 +282,6 @@ with st.expander(
 with st.expander("Agent's current system prompt"):
     if agent_is_initialized():
         st.markdown(st.session_state.agent.system_prompt)
-        prompt = st.session_state.agent.system_prompt
-        if prompt:
-            prompt_handler: PromptHandler = st.session_state.prompt_handler
-            # prompt_handler.save_prompt(prompt)
-
     else:
         st.markdown("The agent is not initialized yet.")
 
