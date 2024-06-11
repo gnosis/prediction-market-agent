@@ -4,10 +4,6 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
-from prediction_market_agent.agents.microchain_agent.prompts import (
-    TRADING_AGENT_BOOTSTRAP,
-    TRADING_AGENT_SYSTEM_PROMPT,
-)
 from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_BOOTSTRAP,

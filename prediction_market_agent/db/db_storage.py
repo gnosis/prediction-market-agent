@@ -4,13 +4,12 @@ from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
-from sqlalchemy import Table
 from sqlmodel import Session, SQLModel, create_engine, desc, select
 
 from prediction_market_agent.db.models import (
+    PROMPT_DEFAULT_SESSION_IDENTIFIER,
     LongTermMemories,
     Prompt,
-    PROMPT_DEFAULT_SESSION_IDENTIFIER,
 )
 from prediction_market_agent.utils import DBKeys
 

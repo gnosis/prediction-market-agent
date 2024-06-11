@@ -1,8 +1,6 @@
 from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent_tooling.tools.utils import utcnow
-
 from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import Prompt
 

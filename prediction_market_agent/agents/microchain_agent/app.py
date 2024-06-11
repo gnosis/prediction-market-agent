@@ -12,6 +12,7 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     SystemPromptChoice,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )

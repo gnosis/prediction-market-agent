@@ -25,10 +25,6 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
-from prediction_market_agent.agents.microchain_agent.prompts import (
-    TRADING_AGENT_BOOTSTRAP,
-    TRADING_AGENT_SYSTEM_PROMPT,
-)
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
 
