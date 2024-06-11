@@ -308,7 +308,7 @@ def on_click_run_agent():
 
 # Placeholder for the agent's history
 with st.container() as history_container:
-    if "agent" in st.session_state:
+    if agent_is_initialized():
         display_all_history(st.session_state.agent)
 
     # costs
