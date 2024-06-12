@@ -10,7 +10,7 @@ from prediction_market_agent.agents.microchain_agent.learning_functions import (
     LEARNING_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.market_functions import (
-    MARKET_FUNCTIONS,
+    build_market_functions,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
@@ -42,7 +42,7 @@ def build_agent_functions(
 
     functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
-    functions.extend([f(market_type=market_type) for f in MARKET_FUNCTIONS])
+    functions.extend(build_market_functions(market_type))
     if market_type == MarketType.OMEN:
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:

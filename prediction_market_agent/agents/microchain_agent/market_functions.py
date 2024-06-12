@@ -1,14 +1,16 @@
 import typing as t
 
+from langchain.tools import BaseTool
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.functions_from_tools import (
+    microchain_function_from_tool,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
-    MicroMarket,
     get_balance,
-    get_binary_markets,
     get_boolean_outcome,
     get_example_market_id,
     get_no_outcome,
@@ -20,6 +22,7 @@ from prediction_market_agent.tools.mech.utils import (
     mech_request,
     mech_request_local,
 )
+from prediction_market_agent.tools.prediction_market import GetMarkets
 from prediction_market_agent.utils import APIKeys
 
 
@@ -31,25 +34,6 @@ class MarketFunction(Function):
     @property
     def currency(self) -> Currency:
         return self.market_type.market_class.currency
-
-
-class GetMarkets(MarketFunction):
-    @property
-    def description(self) -> str:
-        return (
-            "Use this function to get a list of predction market questions, "
-            "and the corresponding market IDs"
-        )
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> list[str]:
-        return [
-            str(MicroMarket.from_agent_market(m))
-            for m in get_binary_markets(market_type=self.market_type)
-        ]
 
 
 class GetMarketProbability(MarketFunction):
@@ -311,16 +295,25 @@ class GetLiquidPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
-# Functions that interact with the prediction markets
-MARKET_FUNCTIONS: list[type[MarketFunction]] = [
-    GetMarkets,
-    GetMarketProbability,
-    # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
-    PredictProbabilityForQuestionLocal,
-    GetBalance,
-    BuyYes,
-    BuyNo,
-    SellYes,
-    SellNo,
-    GetLiquidPositions,
-]
+def build_market_functions(market_type: MarketType) -> list[MarketFunction]:
+    # Functions that interact with the prediction markets
+    market_functions: list[type[MarketFunction]] = [
+        GetMarketProbability,
+        # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
+        PredictProbabilityForQuestionLocal,
+        GetBalance,
+        BuyYes,
+        BuyNo,
+        SellYes,
+        SellNo,
+        GetLiquidPositions,
+    ]
+    fs = [F(market_type=market_type) for F in market_functions]
+
+    general_tools: list[tuple[BaseTool, list[str]]] = [
+        (GetMarkets(market_type=market_type), []),
+    ]
+    for tool, example_args in general_tools:
+        fs.append(microchain_function_from_tool(tool, example_args=example_args))
+
+    return fs

@@ -2,23 +2,26 @@ from typing import Generator
 
 import numpy as np
 import pytest
+from langchain.tools import StructuredTool
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.microchain_agent.functions_from_tools import (
+    microchain_function_from_tool,
+)
 from prediction_market_agent.agents.microchain_agent.market_functions import (
-    MARKET_FUNCTIONS,
     BuyNo,
     BuyYes,
     GetBalance,
     GetMarketProbability,
-    GetMarkets,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
     SellNo,
     SellYes,
+    build_market_functions,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
@@ -45,13 +48,6 @@ def long_term_memory() -> Generator[LongTermMemory, None, None]:
     )
     long_term_memory.storage._initialize_db()
     yield long_term_memory
-
-
-# TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
-@pytest.mark.parametrize("market_type", [MarketType.OMEN, MarketType.MANIFOLD])
-def test_get_markets(market_type: MarketType) -> None:
-    get_markets = GetMarkets(market_type=market_type)
-    assert len(get_markets()) > 0
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
@@ -81,8 +77,8 @@ def test_engine_help(market_type: MarketType) -> None:
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
-    for function in MARKET_FUNCTIONS:
-        engine.register(function(market_type=market_type))
+    for function in build_market_functions(market_type=market_type):
+        engine.register(function)
 
     print(engine.help)
 
@@ -196,3 +192,34 @@ def test_remember_past_learnings(long_term_memory: LongTermMemory) -> None:
         model="gpt-4o-2024-05-13",
     )
     print(remember_past_learnings())
+
+
+def test_build_market_functions() -> None:
+    functions = build_market_functions(market_type=MarketType.OMEN)
+    assert len(functions) > 0
+
+
+def test_microchain_function_from_tool() -> None:
+    # @tool
+    def add(a: int, b: int) -> int:
+        """
+        Add two numbers
+        """
+        return a + b
+
+    add_tool = StructuredTool.from_function(
+        func=add,
+        name="AddTool",
+        description="For adding two numbers",
+    )
+    microchain_add = microchain_function_from_tool(
+        tool=add_tool, example_args=["1", "2"]
+    )
+
+    # Check microchain function has inherited the expected properties
+    assert microchain_add.example_args == ["1", "2"]
+    assert microchain_add.description == add_tool.description
+    assert microchain_add.name == add_tool.name
+
+    # Run both and check they return the same value
+    assert microchain_add(1, 2) == add_tool._run(1, 2)
