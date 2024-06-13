@@ -54,6 +54,18 @@ def build_agent_functions(
     return functions
 
 
+def maybe_append_function_definitions_into_prompt(agent: Agent, system_prompt: str):
+    """
+    Updates the system prompt of the agent based on the availability of engine help.
+    """
+    # If {engine_help} not in prompt, we expect the functions to have been already loaded,
+    # thus no need to load them again. Otherwise, we can simply not use the historical prompt.
+    if "{engine_help}" in system_prompt:
+        system_prompt.format(engine_help=agent.engine.help)
+    agent.engine.help_called = True
+    agent.system_prompt = system_prompt
+
+
 def build_agent(
     market_type: MarketType,
     model: str,
@@ -89,15 +101,7 @@ def build_agent(
         if historical_prompt := prompt_handler.fetch_latest_prompt():
             system_prompt = historical_prompt.prompt
 
-    # if {engine_help} not in prompt, we expect the functions to have been already loaded,
-    # thus no need to load them again. Otherwise we can simply not use the historical prompt.
-    agent.system_prompt = system_prompt
-    if "{engine_help}" not in system_prompt:
-        logger.info("Agent's functions were not loaded into prompt")
-        # We simply call help here otherwise microchain throws exception if not called.
-        engine.help
-    else:
-        agent.system_prompt = system_prompt.format(engine_help=engine.help)
+    maybe_append_function_definitions_into_prompt(agent, system_prompt)
     agent.bootstrap = [bootstrap]
     return agent
 
