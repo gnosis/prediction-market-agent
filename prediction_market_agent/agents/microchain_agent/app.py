@@ -49,9 +49,9 @@ MARKET_TYPE = MarketType.OMEN
 ALLOW_STOP = False
 
 
-def run_agent(agent: Agent, iterations: int, model: str) -> None:
-    maybe_initialize_long_term_memory()()
-    with openai_costs(model) as costs:
+def run_agent(agent: Agent, iterations: int) -> None:
+    maybe_initialize_long_term_memory()
+    with openai_costs(st.session_state.model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
@@ -59,21 +59,18 @@ def run_agent(agent: Agent, iterations: int, model: str) -> None:
 
 
 def on_click_run_agent() -> None:
-    model = check_not_none(model)
-    maybe_initialize_agent(model, system_prompt, bootstrap)
+    maybe_initialize_agent(system_prompt, bootstrap)
     run_agent(
         agent=st.session_state.agent,
         iterations=int(iterations),
-        model=model,
     )
     save_last_turn_history_to_memory(st.session_state.agent)
 
 
 def on_click_user_reasoning() -> None:
-    model = check_not_none(model)
-    maybe_initialize_agent(model, system_prompt, bootstrap)
+    maybe_initialize_agent(system_prompt, bootstrap)
 
-    with openai_costs(model) as costs:
+    with openai_costs(st.session_state.model) as costs:
         st.session_state.agent.execute_command(f'Reasoning("{user_reasoning}")')
         st.session_state.running_cost += costs.cost
 
@@ -82,7 +79,6 @@ def on_click_user_reasoning() -> None:
     run_agent(
         agent=st.session_state.agent,
         iterations=int(iterations),
-        model=model,
     )
 
 
@@ -143,13 +139,13 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
-def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
+def maybe_initialize_agent(system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
-    maybe_initialize_long_term_memory()()
+    maybe_initialize_long_term_memory()
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
-            model=model,
+            model=st.session_state.model,
             system_prompt=system_prompt,
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
@@ -161,19 +157,21 @@ def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> No
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
         st.session_state.running_cost = 0.0
+        store_function_bullet_point_list_into_st_storage()
 
 
-def get_function_bullet_point_list(agent: Agent, model: str) -> str:
-    bullet_points = ""
-    for function in build_agent_functions(
-        agent=agent,
-        market_type=MARKET_TYPE,
-        long_term_memory=st.session_state.long_term_memory,
-        allow_stop=ALLOW_STOP,
-        model=model,
-    ):
-        bullet_points += f"  - {function.__class__.__name__}\n"
-    return bullet_points
+def store_function_bullet_point_list_into_st_storage() -> None:
+    if agent_is_initialized():
+        bullet_points = ""
+        for function in build_agent_functions(
+            agent=st.session_state.agent,
+            market_type=MARKET_TYPE,
+            long_term_memory=st.session_state.long_term_memory,
+            allow_stop=ALLOW_STOP,
+            model=st.session_state.model,
+        ):
+            bullet_points += f"  - {function.__class__.__name__}\n"
+        st.session_state["function_bullet_point_list"] = bullet_points
 
 
 st.set_page_config(
@@ -200,39 +198,33 @@ with st.sidebar:
 
     st.divider()
     st.subheader("Configure:")
-    if not agent_is_initialized():
-        model = st.selectbox(
-            "Model",
-            [
-                "gpt-4-turbo",
-                "gpt-3.5-turbo-0125",
-                "gpt-4o-2024-05-13",
-            ],
-            index=0,
-        )
-        if model is None:
-            st.error("Please select a model.")
-        st.session_state.system_prompt_select = st.selectbox(
-            "Initial memory",
-            [p.value for p in SystemPromptChoice],
-            index=0,
-        )
-        st.session_state.load_historical_prompt = st.toggle("Load historical prompt")
 
-    else:
-        model = st.selectbox(
-            "Model",
-            [st.session_state.agent.llm.generator.model],
-            index=0,
-            disabled=True,
-        )
-        st.selectbox(
-            "Initial memory",
-            [st.session_state.system_prompt_select],
-            index=0,
-            disabled=True,
-        )
-    model = check_not_none(model)
+    st.selectbox(
+        "Model",
+        [
+            "gpt-4-turbo",
+            "gpt-3.5-turbo-0125",
+            "gpt-4o-2024-05-13",
+        ],
+        index=0,
+        disabled=agent_is_initialized(),
+        key="model",
+    )
+
+    st.selectbox(
+        "Initial memory",
+        [p.value for p in SystemPromptChoice],
+        index=0,
+        key="system_prompt_select",
+        disabled=agent_is_initialized(),
+    )
+    st.toggle(
+        "Load historical prompt",
+        key="load_historical_prompt",
+        disabled=agent_is_initialized(),
+    )
+
+    # model = check_not_none(model)
     system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
@@ -258,9 +250,7 @@ with st.expander(
     )
     st.markdown("It is equipped with the following tools:")
     if agent_is_initialized():
-        st.markdown(
-            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
-        )
+        st.markdown(st.session_state.function_bullet_point_list)
     else:
         st.markdown("The agent is not initialized yet.")
 
