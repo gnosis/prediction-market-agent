@@ -50,12 +50,23 @@ ALLOW_STOP = False
 
 
 def run_agent(agent: Agent, iterations: int, model: str) -> None:
-    maybe_init()
+    maybe_initialize_long_term_memory()()
     with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
         st.session_state.running_cost += costs.cost
+
+
+def on_click_run_agent() -> None:
+    model = check_not_none(model)
+    maybe_initialize_agent(model, system_prompt, bootstrap)
+    run_agent(
+        agent=st.session_state.agent,
+        iterations=int(iterations),
+        model=model,
+    )
+    save_last_turn_history_to_memory(st.session_state.agent)
 
 
 def on_click_user_reasoning() -> None:
@@ -134,7 +145,7 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
 
 def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
-    maybe_init()
+    maybe_initialize_long_term_memory()()
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
@@ -174,10 +185,6 @@ st.title("Prediction Market Trader Agent")
 with st.sidebar:
     streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
-
-
-def maybe_init() -> None:
-    maybe_initialize_long_term_memory()
 
 
 with st.sidebar:
@@ -268,17 +275,6 @@ with st.expander("Agent's current bootstrap"):
         st.markdown(st.session_state.agent.bootstrap)
     else:
         st.markdown("The agent is not initialized yet.")
-
-
-def on_click_run_agent() -> None:
-    model = check_not_none(model)
-    maybe_initialize_agent(model, system_prompt, bootstrap)
-    run_agent(
-        agent=st.session_state.agent,
-        iterations=int(iterations),
-        model=model,
-    )
-    save_last_turn_history_to_memory(st.session_state.agent)
 
 
 # Placeholder for the agent's history

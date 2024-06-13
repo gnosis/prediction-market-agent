@@ -89,7 +89,6 @@ def build_agent(
         if historical_prompt := prompt_handler.fetch_latest_prompt():
             system_prompt = historical_prompt.prompt
 
-    print(system_prompt)
     # if {engine_help} not in prompt, we expect the functions to have been already loaded,
     # thus no need to load them again. Otherwise we can simply not use the historical prompt.
     agent.system_prompt = system_prompt

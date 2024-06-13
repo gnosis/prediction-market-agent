@@ -14,7 +14,6 @@ from prediction_market_agent.db.models import (
 from prediction_market_agent.utils import DBKeys
 
 
-# ToDo - Split this into base class and table specific classes
 class DBStorage:
     def __init__(self, sqlalchemy_db_url: str | None = None):
         self.engine = create_engine(
