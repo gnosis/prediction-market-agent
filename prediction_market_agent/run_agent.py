@@ -11,7 +11,7 @@ from enum import Enum
 import typer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.autogen_general_agent.deploy import (
+from prediction_market_agent.agents.social_media_agent.deploy import (
     DeployableSocialMediaAgent,
 )
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent

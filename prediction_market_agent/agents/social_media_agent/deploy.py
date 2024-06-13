@@ -6,17 +6,17 @@ from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.autogen_general_agent.social_agent import (
+from prediction_market_agent.agents.social_media_agent.social_agent import (
     build_reply_tweet,
     build_social_media_text,
 )
-from prediction_market_agent.agents.autogen_general_agent.social_media.abstract_handler import (
+from prediction_market_agent.agents.social_media_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
 )
-from prediction_market_agent.agents.autogen_general_agent.social_media.farcaster_handler import (
+from prediction_market_agent.agents.social_media_agent.social_media.farcaster_handler import (
     FarcasterHandler,
 )
-from prediction_market_agent.agents.autogen_general_agent.social_media.twitter_handler import (
+from prediction_market_agent.agents.social_media_agent.social_media.twitter_handler import (
     TwitterHandler,
 )
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
