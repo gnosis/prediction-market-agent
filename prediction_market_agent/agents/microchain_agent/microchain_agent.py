@@ -1,5 +1,4 @@
 import typer
-from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -54,7 +53,9 @@ def build_agent_functions(
     return functions
 
 
-def maybe_append_function_definitions_into_prompt(agent: Agent, system_prompt: str):
+def maybe_append_function_definitions_into_prompt(
+    agent: Agent, system_prompt: str
+) -> None:
     """
     Updates the system prompt of the agent based on the availability of engine help.
     """
