@@ -22,7 +22,10 @@ from prediction_market_agent.tools.mech.utils import (
     mech_request,
     mech_request_local,
 )
-from prediction_market_agent.tools.prediction_market import GetMarkets
+from prediction_market_agent.tools.prediction_market import (
+    GetMarketProbability,
+    GetMarkets,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -34,30 +37,6 @@ class MarketFunction(Function):
     @property
     def currency(self) -> Currency:
         return self.market_type.market_class.currency
-
-
-class GetMarketProbability(MarketFunction):
-    @property
-    def description(self) -> str:
-        return (
-            f"Use this function to get the probability of a 'Yes' outcome for "
-            f"a binary prediction market. This is equivalent to the price of "
-            f"the 'Yes' token in {self.currency}. Pass in the market id as a "
-            f"string."
-        )
-
-    @property
-    def example_args(self) -> list[str]:
-        return [get_example_market_id(self.market_type)]
-
-    def __call__(self, market_id: str) -> list[str]:
-        return [
-            str(
-                self.market_type.market_class.get_binary_market(
-                    id=market_id
-                ).current_p_yes
-            )
-        ]
 
 
 class PredictProbabilityForQuestionBase(MarketFunction):
@@ -298,7 +277,6 @@ class GetLiquidPositions(MarketFunction):
 def build_market_functions(market_type: MarketType) -> list[MarketFunction]:
     # Functions that interact with the prediction markets
     market_functions: list[type[MarketFunction]] = [
-        GetMarketProbability,
         # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
         PredictProbabilityForQuestionLocal,
         GetBalance,
@@ -312,6 +290,10 @@ def build_market_functions(market_type: MarketType) -> list[MarketFunction]:
 
     general_tools: list[tuple[BaseTool, list[str]]] = [
         (GetMarkets(market_type=market_type), []),
+        (
+            GetMarketProbability(market_type=market_type),
+            [get_example_market_id(market_type)],
+        ),
     ]
     for tool, example_args in general_tools:
         fs.append(microchain_function_from_tool(tool, example_args=example_args))

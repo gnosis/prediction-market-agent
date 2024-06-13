@@ -11,10 +11,11 @@ from pydantic import BaseModel
 from prediction_market_agent.agents.microchain_agent.functions_from_tools import (
     microchain_function_from_tool,
 )
-from prediction_market_agent.agents.microchain_agent.market_functions import (
+from prediction_market_agent.agents.microchain_agent.utils import get_example_market_id
+from prediction_market_agent.tools.prediction_market import (
     GetMarketProbability,
+    GetMarkets,
 )
-from prediction_market_agent.tools.prediction_market import GetMarkets
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
@@ -64,10 +65,15 @@ def test_get_probability(
     engine.register(Reasoning())
     engine.register(Stop())
     get_markets = microchain_function_from_tool(
-        GetMarkets(market_type=market_type), example_args=[]
+        GetMarkets(market_type=market_type),
+        example_args=[],
     )
     engine.register(get_markets)
-    engine.register(GetMarketProbability(market_type=market_type))
+    get_market_probability = microchain_function_from_tool(
+        GetMarketProbability(market_type=market_type),
+        example_args=[get_example_market_id(market_type)],
+    )
+    engine.register(get_market_probability)
     engine.register(Jsonify())
     agent = Agent(llm=LLM(generator=generator), engine=engine)
     agent.system_prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.

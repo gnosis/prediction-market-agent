@@ -5,7 +5,6 @@ import pytest
 from langchain.tools import StructuredTool
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.functions_from_tools import (
@@ -15,7 +14,6 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     BuyNo,
     BuyYes,
     GetBalance,
-    GetMarketProbability,
     MarketFunction,
     PredictProbabilityForQuestionLocal,
     PredictProbabilityForQuestionRemote,
@@ -81,15 +79,6 @@ def test_engine_help(market_type: MarketType) -> None:
         engine.register(function)
 
     print(engine.help)
-
-
-@pytest.mark.parametrize("market_type", [MarketType.OMEN])
-def test_get_probability(market_type: MarketType) -> None:
-    market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
-    get_market_probability = GetMarketProbability(market_type=market_type)
-    assert float(get_market_probability(market_id)[0]) == 0.0
-    market: AgentMarket = market_type.market_class.get_binary_market(market_id)
-    assert market.is_resolved()  # Probability wont change after resolution
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
