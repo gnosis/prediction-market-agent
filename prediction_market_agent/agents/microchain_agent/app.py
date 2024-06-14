@@ -156,6 +156,10 @@ def get_function_bullet_point_list(agent: Agent, model: str) -> str:
     return bullet_points
 
 
+##########
+# Layout #
+##########
+
 st.set_page_config(
     layout="wide",
     page_title="Gnosis AI: Prediction Market Trader Agent",
@@ -171,10 +175,8 @@ maybe_initialize_long_term_memory()
 with st.sidebar:
     st.subheader("Agent Info:")
     with st.container(border=True):
-        st.metric(
-            label=f"Current balance ({MARKET_TYPE.market_class.currency})",
-            value=f"{get_balance(MARKET_TYPE).amount:.2f}",
-        )
+        # Placeholder for the agent's balance
+        balance_container = st.container()
     st.write(
         f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=keys)})."
     )
@@ -277,7 +279,10 @@ with bottom():
         with col4:
             user_reasoning = st.chat_input("Add reasoning...")
 
-# Execution
+#############
+# Execution #
+#############
+
 with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
@@ -311,3 +316,10 @@ with history_container:
             st.info(
                 f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
             )  # TODO debug why always == 0.0
+
+# Once the agent has run, update its balance
+with balance_container:
+    st.metric(
+        label=f"Current balance ({MARKET_TYPE.market_class.currency})",
+        value=f"{get_balance(MARKET_TYPE).amount:.2f}",
+    )
