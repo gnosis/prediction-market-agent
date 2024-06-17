@@ -27,5 +27,5 @@ class Prompt(SQLModel, table=True):
     prompt: str
     # This allows for future distinction between user sessions, if prompts from a specific
     # user (or app) should be persisted.
-    session_identifier: Optional[str] = Field(default=PROMPT_DEFAULT_SESSION_IDENTIFIER)
+    session_identifier: str
     datetime_: datetime

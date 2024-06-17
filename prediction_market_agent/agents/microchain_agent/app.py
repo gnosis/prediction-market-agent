@@ -274,14 +274,14 @@ with history_container:
         # Run the agent after the user's reasoning
         run_agent(
             agent=st.session_state.agent,
-            iterations=int(iterations),
+            iterations=iterations,
             model=st.session_state.model,
         )
     if run_agent_button:
         maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         run_agent(
             agent=st.session_state.agent,
-            iterations=int(iterations),
+            iterations=iterations,
             model=st.session_state.model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)

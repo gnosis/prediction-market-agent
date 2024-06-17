@@ -55,13 +55,11 @@ class DBStorage:
         self.save_multiple(history_items)
 
     def load_latest_prompt(
-        self, session_identifier: str | None = None
+        self, session_identifier: str = PROMPT_DEFAULT_SESSION_IDENTIFIER
     ) -> Prompt | None:
         """
         Queries the prompts table by session identifier with error handling
         """
-        if not session_identifier:
-            session_identifier = PROMPT_DEFAULT_SESSION_IDENTIFIER
         with Session(self.engine) as session:
             query = (
                 select(Prompt)
