@@ -16,8 +16,8 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 from prediction_market_agent.agents.social_media_agent.prompts import (
     CRITIC_PROMPT,
     INFLUENCER_PROMPT,
-    REASONING_PROMPT,
     POST_MAX_LENGTH,
+    REASONING_PROMPT,
 )
 from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
 from prediction_market_agent.utils import APIKeys
