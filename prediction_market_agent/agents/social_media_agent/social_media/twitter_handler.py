@@ -29,7 +29,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         return len(tweet) > POST_MAX_LENGTH
 
     def post(self, text: str, reasoning_reply_tweet: str) -> None:
-        if not self.does_post_length_exceed_max_length(text):
+        if self.does_post_length_exceed_max_length(text):
             logger.warning(
                 f"Tweet too long. Length: {len(text)}, max length: {POST_MAX_LENGTH}"
             )
@@ -37,7 +37,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         first_tweet = self.client.create_tweet(text=text)
         logger.debug(f"Posted tweet {text} - {first_tweet}")
 
-        if not self.does_post_length_exceed_max_length(reasoning_reply_tweet):
+        if self.does_post_length_exceed_max_length(reasoning_reply_tweet):
             logger.warning(
                 f"Retweet too long. Length: {len(reasoning_reply_tweet)}, max length: {POST_MAX_LENGTH}"
             )
