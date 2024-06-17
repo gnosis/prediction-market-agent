@@ -5,13 +5,6 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 """
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
-from prediction_market_agent.agents.microchain_agent.prompts import (
-    SYSTEM_PROMPTS,
-    SystemPromptChoice,
-)
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
-
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
@@ -32,15 +25,21 @@ from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
+)
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    SYSTEM_PROMPTS,
+    SystemPromptChoice,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_initial_history_length,
     has_been_run_past_initialization,
 )
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
