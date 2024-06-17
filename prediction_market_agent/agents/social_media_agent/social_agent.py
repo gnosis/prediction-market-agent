@@ -9,14 +9,15 @@ from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.microchain_agent.memory import (
+    LongTermMemory,
+    SimpleMemoryThinkThoroughly,
+)
 from prediction_market_agent.agents.social_media_agent.prompts import (
     CRITIC_PROMPT,
     INFLUENCER_PROMPT,
     REASONING_PROMPT,
-)
-from prediction_market_agent.agents.microchain_agent.memory import (
-    LongTermMemory,
-    SimpleMemoryThinkThoroughly,
+    POST_MAX_LENGTH,
 )
 from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
 from prediction_market_agent.utils import APIKeys
@@ -26,9 +27,6 @@ from prediction_market_agent.utils import APIKeys
 class SummaryMethod(str, Enum):
     LAST_MSG = "last_msg"
     REFLECTION_WITH_LLM = "reflection_with_llm"
-
-
-POST_MAX_LENGTH = 280
 
 
 class BetInputPrompt(BaseModel):

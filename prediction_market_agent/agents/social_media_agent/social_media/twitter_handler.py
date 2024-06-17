@@ -1,9 +1,7 @@
 import tweepy
 from prediction_market_agent_tooling.loggers import logger
 
-from prediction_market_agent.agents.social_media_agent.social_agent import (
-    POST_MAX_LENGTH,
-)
+from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
 from prediction_market_agent.agents.social_media_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
 )

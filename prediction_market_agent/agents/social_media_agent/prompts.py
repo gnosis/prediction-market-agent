@@ -1,6 +1,4 @@
-from prediction_market_agent.agents.social_media_agent.social_agent import (
-    POST_MAX_LENGTH,
-)
+POST_MAX_LENGTH = 280
 
 INFLUENCER_PROMPT = f"""You are an AI agent that places bets on future events. You can find below a list of recent BETS that you have placed.
 
