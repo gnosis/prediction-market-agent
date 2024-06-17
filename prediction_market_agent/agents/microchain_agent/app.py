@@ -13,6 +13,7 @@ streamlit_asyncio_event_loop_hack()
 
 # Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
 from prediction_market_agent.utils import patch_sqlite3  # isort:skip
+from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 
 patch_sqlite3()
 
@@ -263,25 +264,25 @@ with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
     if user_reasoning:
-        maybe_initialize_agent(model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         execute_reasoning(
             agent=st.session_state.agent,
             reasoning=user_reasoning,
-            model=model,
+            model=st.session_state.model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)
         # Run the agent after the user's reasoning
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
-            model=model,
+            model=st.session_state.model,
         )
     if run_agent_button:
-        maybe_initialize_agent(model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
-            model=model,
+            model=st.session_state.model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)
     if agent_is_initialized() and has_been_run_past_initialization(
@@ -311,7 +312,9 @@ with intro_expander:
     st.markdown("It is equipped with the following tools:")
 
     st.markdown(
-        get_function_bullet_point_list(agent=st.session_state.agent, model=model)
+        get_function_bullet_point_list(
+            agent=st.session_state.agent, model=st.session_state.model
+        )
         if agent_is_initialized()
         else "The agent is not initialized yet."
     )
