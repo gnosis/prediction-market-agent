@@ -5,14 +5,6 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 """
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
-from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
-from prediction_market_agent.agents.microchain_agent.prompts import (
-    SYSTEM_PROMPTS,
-    SystemPromptChoice,
-)
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
-
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
@@ -30,17 +22,24 @@ from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
+from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
+)
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    SYSTEM_PROMPTS,
+    SystemPromptChoice,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
     get_initial_history_length,
     has_been_run_past_initialization,
 )
+from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
@@ -48,37 +47,19 @@ MARKET_TYPE = MarketType.OMEN
 ALLOW_STOP = False
 
 
-def run_agent(agent: Agent, iterations: int) -> None:
-    maybe_initialize_long_term_memory()
-    with openai_costs(st.session_state.model) as costs:
+def run_agent(agent: Agent, iterations: int, model: str) -> None:
+    with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
         st.session_state.running_cost += costs.cost
 
 
-def on_click_run_agent() -> None:
-    maybe_initialize_agent(system_prompt, bootstrap)
-    run_agent(
-        agent=st.session_state.agent,
-        iterations=int(iterations),
-    )
-    save_last_turn_history_to_memory(st.session_state.agent)
-
-
-def on_click_user_reasoning() -> None:
-    maybe_initialize_agent(system_prompt, bootstrap)
-
-    with openai_costs(st.session_state.model) as costs:
-        st.session_state.agent.execute_command(f'Reasoning("{user_reasoning}")')
+def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
+    with openai_costs(model) as costs:
+        agent.execute_command(f'Reasoning("{reasoning}")')
+        display_new_history_callback(agent)  # Run manually after `execute_command`
         st.session_state.running_cost += costs.cost
-
-    save_last_turn_history_to_memory(st.session_state.agent)
-    # Run the agent after the user's reasoning
-    run_agent(
-        agent=st.session_state.agent,
-        iterations=int(iterations),
-    )
 
 
 def chat_message(role: str, content: str) -> None:
@@ -121,9 +102,13 @@ def display_new_history_callback(agent: Agent) -> None:
         chat_message(h["role"], h["content"])
 
 
+def long_term_memory_is_initialized() -> bool:
+    return "long_term_memory" in st.session_state
+
+
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
-    if not "long_term_memory" in st.session_state:
+    if not long_term_memory_is_initialized():
         st.session_state.long_term_memory = LongTermMemory(
             LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
@@ -138,40 +123,41 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     st.session_state.long_term_memory.save_history(last_turn_history)
 
 
-def maybe_initialize_agent(system_prompt: str, bootstrap: str) -> None:
+def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
     # Initialize the agent
-    maybe_initialize_long_term_memory()
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
-            model=st.session_state.model,
+            model=model,
             system_prompt=system_prompt,
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
-            prompt_handler=PromptHandler()
-            if st.session_state.get("load_historical_prompt")
-            else None,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
         st.session_state.running_cost = 0.0
-        store_function_bullet_point_list_into_st_storage()
+
+        # Add a callback to display the agent's history after each run
+        st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
-def store_function_bullet_point_list_into_st_storage() -> None:
-    if agent_is_initialized():
-        bullet_points = ""
-        for function in build_agent_functions(
-            agent=st.session_state.agent,
-            market_type=MARKET_TYPE,
-            long_term_memory=st.session_state.long_term_memory,
-            allow_stop=ALLOW_STOP,
-            model=st.session_state.model,
-        ):
-            bullet_points += f"  - {function.__class__.__name__}\n"
-        st.session_state["function_bullet_point_list"] = bullet_points
+def get_function_bullet_point_list(agent: Agent, model: str) -> str:
+    bullet_points = ""
+    for function in build_agent_functions(
+        agent=agent,
+        market_type=MARKET_TYPE,
+        long_term_memory=st.session_state.long_term_memory,
+        allow_stop=ALLOW_STOP,
+        model=model,
+    ):
+        bullet_points += f"  - {function.__class__.__name__}\n"
+    return bullet_points
 
+
+##########
+# Layout #
+##########
 
 st.set_page_config(
     layout="wide",
@@ -182,48 +168,51 @@ st.title("Prediction Market Trader Agent")
 with st.sidebar:
     streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
-
+keys = APIKeys()
+maybe_initialize_long_term_memory()
 
 with st.sidebar:
     st.subheader("Agent Info:")
     with st.container(border=True):
-        st.metric(
-            label=f"Current balance ({MARKET_TYPE.market_class.currency})",
-            value=f"{get_balance(MARKET_TYPE).amount:.2f}",
-        )
+        # Placeholder for the agent's balance
+        balance_container = st.container()
     st.write(
-        f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=APIKeys())})."
+        f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=keys)})."
     )
 
     st.divider()
     st.subheader("Configure:")
-
-    st.selectbox(
-        "Model",
-        [
-            "gpt-4-turbo",
-            "gpt-3.5-turbo-0125",
-            "gpt-4o-2024-05-13",
-        ],
-        index=0,
-        disabled=agent_is_initialized(),
-        key="model",
-    )
-
-    st.selectbox(
-        "Initial memory",
-        [p.value for p in SystemPromptChoice],
-        index=0,
-        key="system_prompt_select",
-        disabled=agent_is_initialized(),
-    )
-    st.toggle(
-        "Load historical prompt",
-        key="load_historical_prompt",
-        disabled=agent_is_initialized(),
-    )
-
-    # model = check_not_none(model)
+    if not agent_is_initialized():
+        model = st.selectbox(
+            "Model",
+            [
+                "gpt-4-turbo",
+                "gpt-3.5-turbo-0125",
+                "gpt-4o-2024-05-13",
+            ],
+            index=0,
+        )
+        if model is None:
+            st.error("Please select a model.")
+        st.session_state.system_prompt_select = st.selectbox(
+            "Initial memory",
+            [p.value for p in SystemPromptChoice],
+            index=0,
+        )
+    else:
+        model = st.selectbox(
+            "Model",
+            [st.session_state.agent.llm.generator.model],
+            index=0,
+            disabled=True,
+        )
+        st.selectbox(
+            "Initial memory",
+            [st.session_state.system_prompt_select],
+            index=0,
+            disabled=True,
+        )
+    model = check_not_none(model)
     system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
@@ -239,54 +228,22 @@ with st.sidebar:
         "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/prediction_market_agent/agents/microchain_agent)"
     )
 
-with st.expander(
+intro_expander = st.expander(
     "Interact with an autonomous agent that uses its own balance to "
     "participate in prediction markets. More info..."
-):
-    st.markdown(
-        "To start, click 'Run' to see the agent in action, or bootstrap the "
-        "agent with your own reasoning."
-    )
-    st.markdown("It is equipped with the following tools:")
-    if agent_is_initialized():
-        st.markdown(st.session_state.function_bullet_point_list)
-    else:
-        st.markdown("The agent is not initialized yet.")
-
-with st.expander("Agent's current system prompt"):
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.system_prompt)
-    else:
-        st.markdown("The agent is not initialized yet.")
-
-with st.expander("Agent's current bootstrap"):
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.bootstrap)
-    else:
-        st.markdown("The agent is not initialized yet.")
-
+)
+system_prompt_expander = st.expander("Agent's current system prompt")
+bootstrap_expander = st.expander("Agent's current bootstrap")
 
 # Placeholder for the agent's history
-with st.container() as history_container:
-    if agent_is_initialized():
-        display_all_history(st.session_state.agent)
-
-    # costs
-    if agent_is_initialized() and has_been_run_past_initialization(
-        st.session_state.agent
-    ):
-        # Display running cost
-        if st.session_state.running_cost > 0.0:
-            st.info(
-                f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
-            )  # TODO debug why always == 0.0
+history_container = st.container()
 
 # Interactive elements
 with bottom():
     with st.container(border=True):
         col1, col2, col3, col4 = st.columns([1, 1, 1, 8])
         with col1:
-            st.button("Run the agent", on_click=on_click_run_agent)
+            run_agent_button = st.button("Run the agent")
         with col2:
             iterations = st.number_input(
                 "Iterations",
@@ -298,6 +255,78 @@ with bottom():
         with col3:
             st.caption(" \- OR -")
         with col4:
-            user_reasoning = st.chat_input(
-                "Add reasoning...", on_submit=on_click_user_reasoning
-            )
+            user_reasoning = st.chat_input("Add reasoning...")
+
+#############
+# Execution #
+#############
+
+# Run the agent and display its history
+with history_container:
+    if agent_is_initialized():
+        display_all_history(st.session_state.agent)
+    if user_reasoning:
+        maybe_initialize_agent(model, system_prompt, bootstrap)
+        execute_reasoning(
+            agent=st.session_state.agent,
+            reasoning=user_reasoning,
+            model=model,
+        )
+        save_last_turn_history_to_memory(st.session_state.agent)
+        # Run the agent after the user's reasoning
+        run_agent(
+            agent=st.session_state.agent,
+            iterations=int(iterations),
+            model=model,
+        )
+    if run_agent_button:
+        maybe_initialize_agent(model, system_prompt, bootstrap)
+        run_agent(
+            agent=st.session_state.agent,
+            iterations=int(iterations),
+            model=model,
+        )
+        save_last_turn_history_to_memory(st.session_state.agent)
+    if agent_is_initialized() and has_been_run_past_initialization(
+        st.session_state.agent
+    ):
+        # Display running cost
+        if st.session_state.running_cost > 0.0:
+            st.info(
+                f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
+            )  # TODO debug why always == 0.0
+
+# Once the agent has run...
+
+# Display its updated balance
+with balance_container:
+    st.metric(
+        label=f"Current balance ({MARKET_TYPE.market_class.currency})",
+        value=f"{get_balance(MARKET_TYPE).amount:.2f}",
+    )
+
+# Display its updated function list, system prompt and bootstrap
+with intro_expander:
+    st.markdown(
+        "To start, click 'Run' to see the agent in action, or bootstrap the "
+        "agent with your own reasoning."
+    )
+    st.markdown("It is equipped with the following tools:")
+    if agent_is_initialized():
+        st.markdown(
+            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
+        )
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with system_prompt_expander:
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.system_prompt)
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with bootstrap_expander:
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.bootstrap)
+    else:
+        st.markdown("The agent is not initialized yet.")
