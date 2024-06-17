@@ -229,33 +229,12 @@ with st.sidebar:
         "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/prediction_market_agent/agents/microchain_agent)"
     )
 
-with st.expander(
+intro_expander = st.expander(
     "Interact with an autonomous agent that uses its own balance to "
     "participate in prediction markets. More info..."
-):
-    st.markdown(
-        "To start, click 'Run' to see the agent in action, or bootstrap the "
-        "agent with your own reasoning."
-    )
-    st.markdown("It is equipped with the following tools:")
-    if agent_is_initialized():
-        st.markdown(
-            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
-        )
-    else:
-        st.markdown("The agent is not initialized yet.")
-
-with st.expander("Agent's current system prompt"):
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.system_prompt)
-    else:
-        st.markdown("The agent is not initialized yet.")
-
-with st.expander("Agent's current bootstrap"):
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.bootstrap)
-    else:
-        st.markdown("The agent is not initialized yet.")
+)
+system_prompt_expander = st.expander("Agent's current system prompt")
+bootstrap_expander = st.expander("Agent's current bootstrap")
 
 # Placeholder for the agent's history
 history_container = st.container()
@@ -283,6 +262,7 @@ with bottom():
 # Execution #
 #############
 
+# Run the agent and display its history
 with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
@@ -317,9 +297,37 @@ with history_container:
                 f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
             )  # TODO debug why always == 0.0
 
-# Once the agent has run, update its balance
+# Once the agent has run...
+
+# Display its updated balance
 with balance_container:
     st.metric(
         label=f"Current balance ({MARKET_TYPE.market_class.currency})",
         value=f"{get_balance(MARKET_TYPE).amount:.2f}",
     )
+
+# Display its updated function list, system prompt and bootstrap
+with intro_expander:
+    st.markdown(
+        "To start, click 'Run' to see the agent in action, or bootstrap the "
+        "agent with your own reasoning."
+    )
+    st.markdown("It is equipped with the following tools:")
+    if agent_is_initialized():
+        st.markdown(
+            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
+        )
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with system_prompt_expander:
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.system_prompt)
+    else:
+        st.markdown("The agent is not initialized yet.")
+
+with bootstrap_expander:
+    if agent_is_initialized():
+        st.markdown(st.session_state.agent.bootstrap)
+    else:
+        st.markdown("The agent is not initialized yet.")
