@@ -23,6 +23,7 @@ from prediction_market_agent.agents.microchain_agent.prompt_handler import Promp
 from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
+    NON_UPDATABLE_DIVIDOR,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys
@@ -51,20 +52,6 @@ def build_agent_functions(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
     return functions
-
-
-def maybe_append_function_definitions_into_prompt(
-    agent: Agent, system_prompt: str
-) -> None:
-    """
-    Updates the system prompt of the agent based on the availability of engine help.
-    """
-    # If {engine_help} not in prompt, we expect the functions to have been already loaded,
-    # thus no need to load them again. Otherwise, we can simply not use the historical prompt.
-    if "{engine_help}" in system_prompt:
-        system_prompt = system_prompt.format(engine_help=agent.engine.help)
-    agent.engine.help_called = True
-    agent.system_prompt = system_prompt
 
 
 def build_agent(
@@ -97,12 +84,17 @@ def build_agent(
 
     agent.max_tries = 3
 
-    # We restore the prompt from a historical session.
+    # Restore the prompt from a historical session, replacing the editable part with it.
     if prompt_handler:
         if historical_prompt := prompt_handler.fetch_latest_prompt():
-            system_prompt = historical_prompt.prompt
+            system_prompt = (
+                historical_prompt.prompt
+                + "\n\n"
+                + NON_UPDATABLE_DIVIDOR
+                + system_prompt.split(NON_UPDATABLE_DIVIDOR)[1]
+            )
 
-    maybe_append_function_definitions_into_prompt(agent, system_prompt)
+    agent.system_prompt = system_prompt.format(engine_help=agent.engine.help)
     agent.bootstrap = [bootstrap]
     return agent
 
@@ -138,7 +130,14 @@ def main(
     agent.run(iterations=iterations)
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
-    prompt_handler.save_prompt(agent.system_prompt)
+    editable_prompt = get_editable_prompt_from_agent(agent)
+    prompt_handler.save_prompt(editable_prompt)
+
+
+def get_editable_prompt_from_agent(agent: Agent) -> str:
+    # Split prompt into editable, non-editable
+    editable_prompt = str(agent.system_prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
+    return editable_prompt
 
 
 if __name__ == "__main__":
