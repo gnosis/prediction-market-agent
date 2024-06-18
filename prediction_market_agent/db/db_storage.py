@@ -17,6 +17,8 @@ class DBStorage:
             if sqlalchemy_db_url
             else check_not_none(DBKeys().SQLALCHEMY_DB_URL)
         )
+        # table = SQLModel.metadata.tables["a"]
+        # table.create(self.engine)
 
     def _initialize_db(self) -> None:
         """
