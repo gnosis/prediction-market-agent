@@ -6,13 +6,19 @@ import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.db.db_storage import DBStorage
-from prediction_market_agent.db.models import LongTermMemories, Prompt
+from prediction_market_agent.db.models import (
+    LongTermMemories,
+    Prompt,
+    PROMPT_DEFAULT_SESSION_IDENTIFIER,
+)
+
+SQLITE_DB_URL = "sqlite://"
 
 
 @pytest.fixture(scope="function")
 def db_storage_test() -> Generator[DBStorage, None, None]:
     """Creates a in-memory SQLite DB for testing"""
-    db_storage = DBStorage(sqlalchemy_db_url="sqlite://")
+    db_storage = DBStorage(sqlalchemy_db_url=SQLITE_DB_URL)
     db_storage._initialize_db()
     yield db_storage
 
@@ -61,7 +67,11 @@ def test_save_load_long_term_memory_item(db_storage_test: DBStorage) -> None:
 
 def test_save_prompt(db_storage_test: DBStorage) -> None:
     prompt_text = "abc"
-    prompt = Prompt(prompt=prompt_text, datetime_=utcnow())
+    prompt = Prompt(
+        prompt=prompt_text,
+        session_identifier=PROMPT_DEFAULT_SESSION_IDENTIFIER,
+        datetime_=utcnow(),
+    )
     db_storage_test.save_multiple([prompt])
     # assert prompt is there
     result = db_storage_test.load_latest_prompt()
