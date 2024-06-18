@@ -253,7 +253,7 @@ with bottom():
         with col3:
             st.caption(" \- OR -")
         with col4:
-            user_reasoning = st.chat_input("Add reasoning...")
+            user_reasoning = st.chat_input("Add reasoning and run the agent")
 
 #############
 # Execution #
@@ -270,13 +270,13 @@ with history_container:
             reasoning=user_reasoning,
             model=st.session_state.model,
         )
-        save_last_turn_history_to_memory(st.session_state.agent)
         # Run the agent after the user's reasoning
         run_agent(
             agent=st.session_state.agent,
             iterations=iterations,
             model=st.session_state.model,
         )
+        save_last_turn_history_to_memory(st.session_state.agent)
     if run_agent_button:
         maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         run_agent(
@@ -285,14 +285,15 @@ with history_container:
             model=st.session_state.model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)
-    if agent_is_initialized() and has_been_run_past_initialization(
-        st.session_state.agent
+    if (
+        agent_is_initialized()
+        and has_been_run_past_initialization(st.session_state.agent)
+        and st.session_state.running_cost > 0.0
     ):
         # Display running cost
-        if st.session_state.running_cost > 0.0:
-            st.info(
-                f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
-            )  # TODO debug why always == 0.0
+        st.info(
+            f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
+        )  # TODO debug why always == 0.0
 
 # Once the agent has run...
 
@@ -322,10 +323,14 @@ with intro_expander:
 with system_prompt_expander:
     st.markdown(
         st.session_state.agent.system_prompt
-    ) if agent_is_initialized() else "The agent is not initialized yet."
+        if agent_is_initialized()
+        else "The agent is not initialized yet."
+    )
 
 
 with bootstrap_expander:
     st.markdown(
         st.session_state.agent.bootstrap
-    ) if agent_is_initialized() else "The agent is not initialized yet."
+        if agent_is_initialized()
+        else "The agent is not initialized yet."
+    )

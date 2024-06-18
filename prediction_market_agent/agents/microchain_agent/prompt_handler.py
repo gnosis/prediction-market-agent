@@ -18,9 +18,6 @@ class PromptHandler:
 
     def save_prompt(self, prompt: str) -> None:
         """Save item to storage."""
-        if not prompt:
-            logger.info("No prompt to save")
-            return
         prompt_to_save = Prompt(
             prompt=prompt,
             datetime_=utcnow(),
