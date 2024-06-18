@@ -62,7 +62,7 @@ def maybe_append_function_definitions_into_prompt(
     # If {engine_help} not in prompt, we expect the functions to have been already loaded,
     # thus no need to load them again. Otherwise, we can simply not use the historical prompt.
     if "{engine_help}" in system_prompt:
-        system_prompt.format(engine_help=agent.engine.help)
+        system_prompt = system_prompt.format(engine_help=agent.engine.help)
     agent.engine.help_called = True
     agent.system_prompt = system_prompt
 
