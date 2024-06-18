@@ -7,9 +7,9 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import (
+    PROMPT_DEFAULT_SESSION_IDENTIFIER,
     LongTermMemories,
     Prompt,
-    PROMPT_DEFAULT_SESSION_IDENTIFIER,
 )
 
 SQLITE_DB_URL = "sqlite://"
@@ -74,7 +74,9 @@ def test_save_prompt(db_storage_test: DBStorage) -> None:
     )
     db_storage_test.save_multiple([prompt])
     # assert prompt is there
-    result = db_storage_test.load_latest_prompt()
+    result = db_storage_test.load_latest_prompt(
+        session_identifier=PROMPT_DEFAULT_SESSION_IDENTIFIER
+    )
     assert result
     assert result.prompt == prompt_text
 
@@ -84,12 +86,21 @@ def test_load_latest_prompt(db_storage_test: DBStorage) -> None:
     # We ignore the timezone for testing purposes
     older_timestamp = datetime.datetime.now()
     newer_timestamp = datetime.datetime.now()
-    prompt = Prompt(prompt=prompt_text, datetime_=older_timestamp)
+    session_identifier = "whatever"
+    prompt = Prompt(
+        prompt=prompt_text,
+        session_identifier=session_identifier,
+        datetime_=older_timestamp,
+    )
     db_storage_test.save_multiple([prompt])
-    prompt = Prompt(prompt=prompt_text, datetime_=newer_timestamp)
+    prompt = Prompt(
+        prompt=prompt_text,
+        session_identifier=session_identifier,
+        datetime_=newer_timestamp,
+    )
     db_storage_test.save_multiple([prompt])
     # assert latest prompt is there
-    result = db_storage_test.load_latest_prompt()
+    result = db_storage_test.load_latest_prompt(session_identifier=session_identifier)
     assert result
     # ignore timezone
     assert result.datetime_ == newer_timestamp

@@ -21,9 +21,9 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
+    NON_UPDATABLE_DIVIDOR,
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
-    NON_UPDATABLE_DIVIDOR,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.utils import APIKeys

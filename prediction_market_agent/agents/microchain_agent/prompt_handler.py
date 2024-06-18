@@ -1,8 +1,7 @@
-from loguru import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.db.db_storage import DBStorage
-from prediction_market_agent.db.models import Prompt, PROMPT_DEFAULT_SESSION_IDENTIFIER
+from prediction_market_agent.db.models import PROMPT_DEFAULT_SESSION_IDENTIFIER, Prompt
 
 
 # ToDo - Unify PromptHandler, db_storage and LongTermMemory into 2 classes, one per table.
@@ -28,6 +27,6 @@ class PromptHandler:
         self.storage.save_multiple([prompt_to_save])
 
     def fetch_latest_prompt(
-        self, session_identifier: str | None = None
+        self, session_identifier: str = PROMPT_DEFAULT_SESSION_IDENTIFIER
     ) -> Prompt | None:
         return self.storage.load_latest_prompt(session_identifier=session_identifier)
