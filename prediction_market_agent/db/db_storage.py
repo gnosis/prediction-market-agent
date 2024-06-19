@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Sequence, TypeVar
 
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
@@ -8,6 +8,8 @@ from sqlmodel import Session, SQLModel, create_engine, desc, select
 
 from prediction_market_agent.db.models import LongTermMemories, Prompt
 from prediction_market_agent.utils import DBKeys
+
+SQLModelType = TypeVar("SQLModelType", bound=SQLModel)
 
 
 class DBStorage:
@@ -27,7 +29,7 @@ class DBStorage:
         logger.debug(f"tables being added {LongTermMemories} {Prompt}")
         SQLModel.metadata.create_all(self.engine)
 
-    def save_multiple(self, items: list[SQLModel]) -> None:
+    def save_multiple(self, items: list[SQLModelType]) -> None:
         with Session(self.engine) as session:
             session.add_all(items)
             session.commit()
