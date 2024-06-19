@@ -1,7 +1,7 @@
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import PROMPT_DEFAULT_SESSION_IDENTIFIER, Prompt
+from prediction_market_agent.db.sql_handler import SqlHandler
 
 
 # ToDo - Unify PromptHandler, db_storage and LongTermMemory into 2 classes, one per table.
@@ -12,8 +12,9 @@ class PromptHandler:
         sqlalchemy_db_url: str | None = None,
     ):
         self.session_identifier = session_identifier
-        self.storage = DBStorage(sqlalchemy_db_url=sqlalchemy_db_url)
-        self.storage._initialize_db()
+        self.sql_handler = SqlHandler[Prompt](
+            model=Prompt, sqlalchemy_db_url=sqlalchemy_db_url
+        )
 
     def save_prompt(self, prompt: str) -> None:
         """Save item to storage."""
@@ -24,9 +25,17 @@ class PromptHandler:
             if self.session_identifier
             else PROMPT_DEFAULT_SESSION_IDENTIFIER,
         )
-        self.storage.save_multiple([prompt_to_save])
+        self.sql_handler.save_multiple([prompt_to_save])
 
     def fetch_latest_prompt(
         self, session_identifier: str = PROMPT_DEFAULT_SESSION_IDENTIFIER
     ) -> Prompt | None:
-        return self.storage.load_latest_prompt(session_identifier=session_identifier)
+        # We ignore since mypy doesn't play well with SQLModel class attributes.
+        column_to_order: str = Prompt.datetime_.key  # type: ignore
+        items = self.sql_handler.get_with_filter_and_order(
+            query_filters={Prompt.session_identifier: session_identifier},
+            order_by_column_name=column_to_order,
+            order_desc=True,
+            limit=1,
+        )
+        return items[0] if items else None
