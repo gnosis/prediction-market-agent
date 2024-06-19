@@ -30,13 +30,14 @@ class PromptTableHandler:
     def fetch_latest_prompt(self) -> Prompt | None:
         # We ignore since mypy doesn't play well with SQLModel class attributes.
         column_to_order: str = Prompt.datetime_.key  # type: ignore
-        query_filter = [
-            col(Prompt.session_identifier) == self.session_identifier
+        session_identifier = (
+            self.session_identifier
             if self.session_identifier
             else PROMPT_DEFAULT_SESSION_IDENTIFIER
-        ]
+        )
+        query_filters = [col(Prompt.session_identifier) == session_identifier]
         items: t.Sequence[Prompt] = self.sql_handler.get_with_filter_and_order(
-            query_filters=[query_filter],
+            query_filters=query_filters,
             order_by_column_name=column_to_order,
             order_desc=True,
             limit=1,

@@ -25,10 +25,6 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from streamlit_extras.bottom_container import bottom
 
-
-from prediction_market_agent.db.long_term_memory_table_handler import (
-    LongTermMemoryTableHandler,
-)
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
@@ -43,6 +39,9 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     has_been_run_past_initialization,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 

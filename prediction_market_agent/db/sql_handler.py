@@ -1,10 +1,9 @@
-from loguru import logger
-from prediction_market_agent_tooling.tools.utils import check_not_none
-from sqlalchemy import Table, ColumnElement, Column, BinaryExpression
-from sqlmodel import create_engine, SQLModel, Session, select, desc, col, asc
-
-# from prediction_market_agent.db.models import LongTermMemories, Prompt
 import typing as t
+
+from prediction_market_agent_tooling.tools.utils import check_not_none
+from sqlalchemy import BinaryExpression, ColumnElement
+from sqlmodel import Session, SQLModel, asc, create_engine, desc
+
 from prediction_market_agent.utils import DBKeys
 
 TypeTable = t.TypeVar("TypeTable", bound=SQLModel)
