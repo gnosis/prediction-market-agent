@@ -26,7 +26,9 @@ class PromptHandler:
         )
         self.storage.save_multiple([prompt_to_save])
 
-    def fetch_latest_prompt(
-        self, session_identifier: str = PROMPT_DEFAULT_SESSION_IDENTIFIER
-    ) -> Prompt | None:
-        return self.storage.load_latest_prompt(session_identifier=session_identifier)
+    def fetch_latest_prompt(self) -> Prompt | None:
+        return self.storage.load_latest_prompt(
+            session_identifier=self.session_identifier
+            if self.session_identifier
+            else PROMPT_DEFAULT_SESSION_IDENTIFIER
+        )
