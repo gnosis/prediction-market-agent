@@ -27,7 +27,7 @@ class DBStorage:
         logger.debug(f"tables being added {LongTermMemories} {Prompt}")
         SQLModel.metadata.create_all(self.engine)
 
-    def save_multiple(self, items: list[Any]) -> None:
+    def save_multiple(self, items: list[SQLModel]) -> None:
         with Session(self.engine) as session:
             session.add_all(items)
             session.commit()
