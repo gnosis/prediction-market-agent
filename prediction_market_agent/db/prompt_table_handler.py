@@ -37,3 +37,11 @@ class PromptTableHandler:
             limit=1,
         )
         return items[0] if items else None
+
+    def fetch_latest_prompt123(self) -> Prompt | None:
+        aaa
+        return self.storage.load_latest_prompt(
+            session_identifier=self.session_identifier
+            if self.session_identifier
+            else PROMPT_DEFAULT_SESSION_IDENTIFIER
+        )
