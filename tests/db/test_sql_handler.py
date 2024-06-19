@@ -38,6 +38,13 @@ def test_get_all(prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]) 
     assert len(prompt_sql_handler.get_all()) == 1
 
 
+def get_first(sql_handler: SQLHandler, order_by_column_name: str, order_desc: bool):
+    items: t.Sequence[Prompt] = sql_handler.get_with_filter_and_order(
+        order_by_column_name=order_by_column_name, order_desc=order_desc, limit=1
+    )
+    return items[0] if items else None
+
+
 def test_get_first(
     prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]
 ) -> None:
@@ -48,14 +55,14 @@ def test_get_first(
     prompt_sql_handler.save_multiple(example_prompts)
 
     # Fetch latest prompt (desc)
-    last_prompt = prompt_sql_handler.get_first(column_to_order, order_desc=True)
+    last_prompt = get_first(prompt_sql_handler, column_to_order, True)
     assert last_prompt is not None
     # We assert on prompt str instead of referencing prompt object directly due to errors related to DetachedInstance
     # (see https://stackoverflow.com/questions/15397680/detaching-sqlalchemy-instance-so-no-refresh-happens)
     assert last_prompt.prompt == prompt_later_date
 
     # Fetch earliest prompt (asc)
-    last_prompt = prompt_sql_handler.get_first(column_to_order, order_desc=False)
+    last_prompt = get_first(prompt_sql_handler, column_to_order, False)
     assert last_prompt is not None
     assert last_prompt.prompt == prompt_earlier_date
 

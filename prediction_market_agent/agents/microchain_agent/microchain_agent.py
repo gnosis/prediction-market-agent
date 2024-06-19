@@ -12,7 +12,6 @@ from prediction_market_agent.agents.microchain_agent.learning_functions import (
 from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     RememberPastActions,
 )

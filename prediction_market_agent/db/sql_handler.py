@@ -54,13 +54,3 @@ class SQLHandler:
                 query = query.limit(limit)
             results = query.all()
         return results
-
-    def get_first(
-        self,
-        order_by_column_name: str,
-        order_desc: bool = True,
-    ) -> TypeTable | None:
-        items: t.Sequence[TypeTable] = self.get_with_filter_and_order(
-            order_by_column_name=order_by_column_name, order_desc=order_desc, limit=1
-        )
-        return items[0] if items else None
