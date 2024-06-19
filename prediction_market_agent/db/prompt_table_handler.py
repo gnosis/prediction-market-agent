@@ -1,20 +1,18 @@
 from prediction_market_agent_tooling.tools.utils import utcnow
-
+from sqlmodel import col
+import typing as t
 from prediction_market_agent.db.models import PROMPT_DEFAULT_SESSION_IDENTIFIER, Prompt
-from prediction_market_agent.db.sql_handler import SqlHandler
+from prediction_market_agent.db.sql_handler import SQLHandler
 
 
-# ToDo - Unify PromptHandler, db_storage and LongTermMemory into 2 classes, one per table.
-class PromptHandler:
+class PromptTableHandler:
     def __init__(
         self,
         session_identifier: str | None = None,
         sqlalchemy_db_url: str | None = None,
     ):
         self.session_identifier = session_identifier
-        self.sql_handler = SqlHandler[Prompt](
-            model=Prompt, sqlalchemy_db_url=sqlalchemy_db_url
-        )
+        self.sql_handler = SQLHandler(model=Prompt, sqlalchemy_db_url=sqlalchemy_db_url)
 
     def save_prompt(self, prompt: str) -> None:
         """Save item to storage."""
@@ -32,8 +30,8 @@ class PromptHandler:
     ) -> Prompt | None:
         # We ignore since mypy doesn't play well with SQLModel class attributes.
         column_to_order: str = Prompt.datetime_.key  # type: ignore
-        items = self.sql_handler.get_with_filter_and_order(
-            query_filters={Prompt.session_identifier: session_identifier},
+        items: t.Sequence[Prompt] = self.sql_handler.get_with_filter_and_order(
+            query_filters=[col(Prompt.session_identifier) == session_identifier],
             order_by_column_name=column_to_order,
             order_desc=True,
             limit=1,

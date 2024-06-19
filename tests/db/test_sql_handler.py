@@ -1,17 +1,18 @@
 import datetime
+import typing as t
 from typing import Generator
 
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlmodel import Session
+from sqlmodel import Session, col
 
 from prediction_market_agent.db.models import Prompt
-from prediction_market_agent.db.sql_handler import SqlHandler
+from prediction_market_agent.db.sql_handler import SQLHandler
 
 
 @pytest.fixture(scope="function")
-def prompt_sql_handler() -> Generator[SqlHandler[Prompt], None, None]:
-    sql_handler = SqlHandler[Prompt](model=Prompt, sqlalchemy_db_url="sqlite://")
+def prompt_sql_handler() -> Generator[SQLHandler, None, None]:
+    sql_handler = SQLHandler(model=Prompt, sqlalchemy_db_url="sqlite://")
     sql_handler._init_table_if_not_exists()
     yield sql_handler
 
@@ -28,9 +29,7 @@ def example_prompts() -> list[Prompt]:
     ]
 
 
-def test_get_all(
-    prompt_sql_handler: SqlHandler[Prompt], example_prompts: list[Prompt]
-) -> None:
+def test_get_all(prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]) -> None:
     assert len(prompt_sql_handler.get_all()) == 0
     p = example_prompts[0].model_copy()
     with Session(prompt_sql_handler.engine) as session:
@@ -40,7 +39,7 @@ def test_get_all(
 
 
 def test_get_first(
-    prompt_sql_handler: SqlHandler[Prompt], example_prompts: list[Prompt]
+    prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]
 ) -> None:
     prompt_earlier_date = example_prompts[0].prompt
     prompt_later_date = example_prompts[1].prompt
@@ -62,12 +61,12 @@ def test_get_first(
 
 
 def test_get_with_filter(
-    prompt_sql_handler: SqlHandler[Prompt], example_prompts: list[Prompt]
+    prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]
 ) -> None:
     session_identifier = example_prompts[0].session_identifier
     prompt_sql_handler.save_multiple(example_prompts)
-    results = prompt_sql_handler.get_with_filter_and_order(
-        {Prompt.session_identifier: session_identifier}
+    results: t.Sequence[Prompt] = prompt_sql_handler.get_with_filter_and_order(
+        query_filters=[col(Prompt.session_identifier) == session_identifier]
     )
     assert len(results) == 1
     assert results[0].session_identifier == session_identifier

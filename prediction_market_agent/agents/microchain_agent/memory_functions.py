@@ -4,14 +4,18 @@ from microchain import Function
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import (
-    LongTermMemory,
     SimpleMemoryMicrochain,
 )
 from prediction_market_agent.agents.utils import memories_to_learnings
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 
 
 class RememberPastActions(Function):
-    def __init__(self, long_term_memory: LongTermMemory, model: str) -> None:
+    def __init__(
+        self, long_term_memory: LongTermMemoryTableHandler, model: str
+    ) -> None:
         self.long_term_memory = long_term_memory
         self.model = model
         super().__init__()

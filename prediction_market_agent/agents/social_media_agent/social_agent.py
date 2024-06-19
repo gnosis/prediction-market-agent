@@ -10,7 +10,6 @@ from prediction_market_agent_tooling.markets.data_models import Bet
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.memory import (
-    LongTermMemory,
     SimpleMemoryThinkThoroughly,
 )
 from prediction_market_agent.agents.social_media_agent.prompts import (
@@ -20,6 +19,9 @@ from prediction_market_agent.agents.social_media_agent.prompts import (
     REASONING_PROMPT,
 )
 from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -134,7 +136,7 @@ def build_social_media_text(
 def extract_reasoning_behind_tweet(
     tweet: str,
     bets: list[Bet],
-    long_term_memory: LongTermMemory,
+    long_term_memory: LongTermMemoryTableHandler,
     memories_since: datetime | None = None,
 ) -> str:
     """
@@ -157,7 +159,7 @@ def build_reply_tweet(
     model: str,
     tweet: str,
     bets: list[Bet],
-    long_term_memory: LongTermMemory,
+    long_term_memory: LongTermMemoryTableHandler,
     memories_since: datetime | None = None,
 ) -> str:
     reasoning = extract_reasoning_behind_tweet(

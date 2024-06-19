@@ -6,7 +6,6 @@ from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.social_media_agent.social_agent import (
     build_reply_tweet,
     build_social_media_text,
@@ -21,6 +20,9 @@ from prediction_market_agent.agents.social_media_agent.social_media.twitter_hand
     TwitterHandler,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -46,7 +48,9 @@ class DeployableSocialMediaAgent(DeployableAgent):
             logger.info("No bets available from last day. No post will be created.")
             return
 
-        long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
+        long_term_memory = LongTermMemoryTableHandler(
+            LongTermMemoryTaskIdentifier.THINK_THOROUGHLY
+        )
         tweet = build_social_media_text(self.model, bets)
         reasoning_reply_tweet = build_reply_tweet(
             model=self.model,

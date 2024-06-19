@@ -2,13 +2,11 @@
 import json
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Sequence
 
 from prediction_market_agent_tooling.deploy.agent import Answer
-from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
-from prediction_market_agent.db.db_storage import DBStorage
 from prediction_market_agent.db.models import LongTermMemories
 
 
@@ -62,40 +60,4 @@ class SimpleMemoryThinkThoroughly(MemoryContainer):
                 check_not_none(long_term_memory.metadata_)
             ),
             datetime_=long_term_memory.datetime_,
-        )
-
-
-class LongTermMemory:
-    def __init__(self, task_description: str, sqlalchemy_db_url: str | None = None):
-        self.task_description = task_description
-        self.storage = DBStorage(sqlalchemy_db_url=sqlalchemy_db_url)
-
-    def save_history(self, history: list[Dict[str, Any]]) -> None:
-        """Save item to storage. Note that score allows many types for easier handling by agent."""
-
-        history_items = [
-            LongTermMemories(
-                task_description=self.task_description,
-                metadata_=json.dumps(history_item),
-                datetime_=utcnow(),
-            )
-            for history_item in history
-        ]
-
-        self.storage.save_multiple(history_items)
-
-    def save_answer_with_scenario(
-        self, answer_with_scenario: AnswerWithScenario
-    ) -> None:
-        return self.save_history([answer_with_scenario.dict()])
-
-    def search(
-        self,
-        from_: datetime | None = None,
-        to: datetime | None = None,
-    ) -> Sequence[LongTermMemories]:
-        return self.storage.load_long_term_memories(
-            task_description=self.task_description,
-            from_=from_,
-            to=to,
         )

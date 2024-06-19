@@ -19,13 +19,16 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     NON_UPDATABLE_DIVIDOR,
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
 from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
+from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
 
@@ -33,7 +36,7 @@ def build_agent_functions(
     agent: Agent,
     market_type: MarketType,
     allow_stop: bool,
-    long_term_memory: LongTermMemory | None,
+    long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
     functions = []
@@ -60,9 +63,9 @@ def build_agent(
     system_prompt: str,
     bootstrap: str,
     api_base: str = "https://api.openai.com/v1",
-    long_term_memory: LongTermMemory | None = None,
+    long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
-    prompt_handler: PromptHandler | None = None,
+    prompt_handler: PromptTableHandler | None = None,
 ) -> Agent:
     engine = Engine()
     generator = OpenAIChatGenerator(
@@ -112,8 +115,8 @@ def main(
     unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
         market_type
     )
-    long_term_memory = LongTermMemory(unique_task_description)
-    prompt_handler = PromptHandler()
+    long_term_memory = LongTermMemoryTableHandler(unique_task_description)
+    prompt_handler = PromptTableHandler()
 
     agent = build_agent(
         market_type=market_type,
