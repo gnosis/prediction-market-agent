@@ -9,10 +9,12 @@ from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
 
+
 streamlit_asyncio_event_loop_hack()
 
 # Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
 from prediction_market_agent.utils import patch_sqlite3  # isort:skip
+from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 
 patch_sqlite3()
 
@@ -22,7 +24,6 @@ from microchain import Agent
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
-from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.bottom_container import bottom
 
 from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
@@ -39,7 +40,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
     has_been_run_past_initialization,
 )
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
@@ -48,6 +49,7 @@ ALLOW_STOP = False
 
 
 def run_agent(agent: Agent, iterations: int, model: str) -> None:
+    maybe_initialize_long_term_memory()
     with openai_costs(model) as costs:
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
@@ -110,7 +112,7 @@ def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
         st.session_state.long_term_memory = LongTermMemory(
-            LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
+            AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
 
 
@@ -133,6 +135,11 @@ def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> No
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
+            prompt_handler=PromptHandler(
+                session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
+            )
+            if st.session_state.get("load_historical_prompt")
+            else None,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -182,37 +189,31 @@ with st.sidebar:
 
     st.divider()
     st.subheader("Configure:")
-    if not agent_is_initialized():
-        model = st.selectbox(
-            "Model",
-            [
-                "gpt-4-turbo",
-                "gpt-3.5-turbo-0125",
-                "gpt-4o-2024-05-13",
-            ],
-            index=0,
-        )
-        if model is None:
-            st.error("Please select a model.")
-        st.session_state.system_prompt_select = st.selectbox(
-            "Initial memory",
-            [p.value for p in SystemPromptChoice],
-            index=0,
-        )
-    else:
-        model = st.selectbox(
-            "Model",
-            [st.session_state.agent.llm.generator.model],
-            index=0,
-            disabled=True,
-        )
-        st.selectbox(
-            "Initial memory",
-            [st.session_state.system_prompt_select],
-            index=0,
-            disabled=True,
-        )
-    model = check_not_none(model)
+    st.selectbox(
+        "Model",
+        [
+            "gpt-4-turbo",
+            "gpt-3.5-turbo-0125",
+            "gpt-4o-2024-05-13",
+        ],
+        index=0,
+        disabled=agent_is_initialized(),
+        key="model",
+    )
+
+    st.selectbox(
+        "Initial memory",
+        [p.value for p in SystemPromptChoice],
+        index=0,
+        key="system_prompt_select",
+        disabled=agent_is_initialized(),
+    )
+    st.toggle(
+        "Load historical prompt",
+        key="load_historical_prompt",
+        disabled=agent_is_initialized(),
+    )
+
     system_prompt, bootstrap = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
@@ -255,7 +256,7 @@ with bottom():
         with col3:
             st.caption(" \- OR -")
         with col4:
-            user_reasoning = st.chat_input("Add reasoning...")
+            user_reasoning = st.chat_input("Add reasoning and run the agent")
 
 #############
 # Execution #
@@ -266,35 +267,36 @@ with history_container:
     if agent_is_initialized():
         display_all_history(st.session_state.agent)
     if user_reasoning:
-        maybe_initialize_agent(model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         execute_reasoning(
             agent=st.session_state.agent,
             reasoning=user_reasoning,
-            model=model,
+            model=st.session_state.model,
         )
-        save_last_turn_history_to_memory(st.session_state.agent)
         # Run the agent after the user's reasoning
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
-            model=model,
+            model=st.session_state.model,
         )
+        save_last_turn_history_to_memory(st.session_state.agent)
     if run_agent_button:
-        maybe_initialize_agent(model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
-            model=model,
+            model=st.session_state.model,
         )
         save_last_turn_history_to_memory(st.session_state.agent)
-    if agent_is_initialized() and has_been_run_past_initialization(
-        st.session_state.agent
+    if (
+        agent_is_initialized()
+        and has_been_run_past_initialization(st.session_state.agent)
+        and st.session_state.running_cost > 0.0
     ):
         # Display running cost
-        if st.session_state.running_cost > 0.0:
-            st.info(
-                f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
-            )  # TODO debug why always == 0.0
+        st.info(
+            f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
+        )  # TODO debug why always == 0.0
 
 # Once the agent has run...
 
@@ -312,21 +314,26 @@ with intro_expander:
         "agent with your own reasoning."
     )
     st.markdown("It is equipped with the following tools:")
-    if agent_is_initialized():
-        st.markdown(
-            get_function_bullet_point_list(agent=st.session_state.agent, model=model)
+
+    st.markdown(
+        get_function_bullet_point_list(
+            agent=st.session_state.agent, model=st.session_state.model
         )
-    else:
-        st.markdown("The agent is not initialized yet.")
+        if agent_is_initialized()
+        else "The agent is not initialized yet."
+    )
 
 with system_prompt_expander:
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.system_prompt)
-    else:
-        st.markdown("The agent is not initialized yet.")
+    st.markdown(
+        st.session_state.agent.system_prompt
+        if agent_is_initialized()
+        else "The agent is not initialized yet."
+    )
+
 
 with bootstrap_expander:
-    if agent_is_initialized():
-        st.markdown(st.session_state.agent.bootstrap)
-    else:
-        st.markdown("The agent is not initialized yet.")
+    st.markdown(
+        st.session_state.agent.bootstrap
+        if agent_is_initialized()
+        else "The agent is not initialized yet."
+    )
