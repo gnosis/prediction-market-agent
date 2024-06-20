@@ -6,7 +6,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 )
 
 
-def test_chat_history() -> None:
+def test_chat_history_clustering() -> None:
     chat_messages = [
         DatedChatMessage(
             content="foo", role="user", datetime_=datetime(2022, 1, 1, 0, 0)

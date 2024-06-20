@@ -161,12 +161,12 @@ class DatedChatHistory(ChatHistory):
         chat_messages = list(self.chat_messages).copy()
         while chat_messages:
             current_datetime = chat_messages[0].datetime_
-            current_cluster = DatedChatHistory(chat_messages=[])
+            current_cluster: list[DatedChatMessage] = []
             while chat_messages and chat_messages[
                 0
             ].datetime_ < current_datetime + timedelta(
                 minutes=max_minutes_between_messages
             ):
-                current_cluster.add_message(chat_messages.pop(0))
-            clusters.append(current_cluster)
+                current_cluster.append(chat_messages.pop(0))
+            clusters.append(DatedChatHistory(chat_messages=current_cluster))
         return clusters
