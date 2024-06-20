@@ -20,7 +20,7 @@ from prediction_market_agent.agents.social_media_agent.social_media.farcaster_ha
 from prediction_market_agent.agents.social_media_agent.social_media.twitter_handler import (
     TwitterHandler,
 )
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
@@ -46,7 +46,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             logger.info("No bets available from last day. No post will be created.")
             return
 
-        long_term_memory = LongTermMemory(LongTermMemoryTaskIdentifier.THINK_THOROUGHLY)
+        long_term_memory = LongTermMemory(AgentIdentifier.THINK_THOROUGHLY)
         tweet = build_social_media_text(self.model, bets)
         reasoning_reply_tweet = build_reply_tweet(
             model=self.model,

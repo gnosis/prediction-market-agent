@@ -9,6 +9,7 @@ from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     streamlit_asyncio_event_loop_hack,
 )
 
+
 streamlit_asyncio_event_loop_hack()
 
 # Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
@@ -39,7 +40,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
     has_been_run_past_initialization,
 )
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
@@ -111,7 +112,7 @@ def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
         st.session_state.long_term_memory = LongTermMemory(
-            LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_STREAMLIT
+            AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
 
 
@@ -134,7 +135,9 @@ def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> No
             bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
-            prompt_handler=PromptHandler()
+            prompt_handler=PromptHandler(
+                session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
+            )
             if st.session_state.get("load_historical_prompt")
             else None,
         )
