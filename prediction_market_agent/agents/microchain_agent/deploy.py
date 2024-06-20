@@ -15,7 +15,7 @@ from prediction_market_agent.agents.utils import AgentIdentifier
 class DeployableMicrochainAgent(DeployableAgent):
     model = "gpt-4o-2024-05-13"
     n_iterations = 50
-    load_historical_prompt: bool = False  # only set this once we can differentiate between session_identifiers and no conflicts with streamlit prompts are created
+    load_historical_prompt: bool = False
 
     def run(self, market_type: MarketType) -> None:
         """
