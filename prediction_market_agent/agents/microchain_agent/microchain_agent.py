@@ -18,6 +18,7 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     NON_UPDATABLE_DIVIDOR,
     TRADING_AGENT_BOOTSTRAP,
@@ -28,6 +29,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
@@ -111,21 +113,26 @@ def main(
 ) -> None:
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
-    unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
-        market_type
-    )
+    unique_task_description = AgentIdentifier.microchain_task_from_market(market_type)
     long_term_memory = LongTermMemoryTableHandler(unique_task_description)
-    prompt_handler = PromptTableHandler()
+
+
+    # We only use microchain on Omen currently, hence no need for prompt handler for other markets.
+    prompt_handler = (
+        PromptTableHandler(session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN)
+        if market_type == MarketType.OMEN and load_historical_prompt
+        else None
+    )
 
     agent = build_agent(
         market_type=market_type,
         api_base=api_base,
         model=model,
-        system_prompt=TRADING_AGENT_SYSTEM_PROMPT,  # Use pre-learned system prompt until the prompt-fetching from DB is implemented.
-        bootstrap=TRADING_AGENT_BOOTSTRAP,  # Same here.
+        system_prompt=TRADING_AGENT_SYSTEM_PROMPT,
+        bootstrap=TRADING_AGENT_BOOTSTRAP,
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
-        prompt_handler=prompt_handler if load_historical_prompt else None,
+        prompt_handler=prompt_handler,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']
@@ -133,7 +140,8 @@ def main(
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
     editable_prompt = get_editable_prompt_from_agent(agent)
-    prompt_handler.save_prompt(editable_prompt)
+    if prompt_handler:
+        prompt_handler.save_prompt(editable_prompt)
 
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:

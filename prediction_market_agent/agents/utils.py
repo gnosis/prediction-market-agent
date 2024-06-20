@@ -13,7 +13,7 @@ from prediction_market_agent.agents.microchain_agent.memory import MemoryContain
 from prediction_market_agent.utils import APIKeys
 
 
-class LongTermMemoryTaskIdentifier(str, Enum):
+class AgentIdentifier(str, Enum):
     THINK_THOROUGHLY = "think-thoroughly-agent"
     MICROCHAIN_AGENT_OMEN = "microchain-agent-deployment-omen"
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
@@ -21,9 +21,9 @@ class LongTermMemoryTaskIdentifier(str, Enum):
     @staticmethod
     def microchain_task_from_market(
         market_type: MarketType,
-    ) -> "LongTermMemoryTaskIdentifier":
+    ) -> "AgentIdentifier":
         if market_type == MarketType.OMEN:
-            return LongTermMemoryTaskIdentifier.MICROCHAIN_AGENT_OMEN
+            return AgentIdentifier.MICROCHAIN_AGENT_OMEN
         else:
             raise ValueError(f"Market {market_type} not supported.")
 

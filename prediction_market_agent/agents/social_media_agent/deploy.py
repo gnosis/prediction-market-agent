@@ -23,6 +23,7 @@ from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
@@ -49,7 +50,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             return
 
         long_term_memory = LongTermMemoryTableHandler(
-            LongTermMemoryTaskIdentifier.THINK_THOROUGHLY
+            AgentIdentifier.THINK_THOROUGHLY
         )
         tweet = build_social_media_text(self.model, bets)
         reasoning_reply_tweet = build_reply_tweet(
