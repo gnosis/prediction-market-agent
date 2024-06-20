@@ -135,7 +135,8 @@ def main(
     # generator.print_usage() # Waiting for microchain release
     long_term_memory.save_history(agent.history)
     editable_prompt = get_editable_prompt_from_agent(agent)
-    prompt_handler.save_prompt(editable_prompt)
+    if prompt_handler:
+        prompt_handler.save_prompt(editable_prompt)
 
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:
