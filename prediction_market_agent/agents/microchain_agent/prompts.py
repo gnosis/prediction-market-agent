@@ -49,7 +49,7 @@ def build_full_system_prompt(system_prompt: str) -> str:
         system_prompt
         + "\n\n"
         + NON_UPDATABLE_DIVIDOR
-        + system_prompt.split(NON_UPDATABLE_DIVIDOR)[1]
+        + SYSTEM_PROMPT.split(NON_UPDATABLE_DIVIDOR)[1]
     )
 
 
