@@ -108,12 +108,14 @@ class ChatHistory(BaseModel):
     def add_message(self, chat_message: ChatMessage) -> None:
         list(self.chat_messages).append(chat_message)
 
+    def save_to(self, long_term_memory: LongTermMemory) -> None:
+        long_term_memory.save_history([m.model_dump() for m in self.chat_messages])
+
     @staticmethod
     def from_list_of_dicts(list_of_dicts: list[Dict[str, str]]) -> "ChatHistory":
         chat_messages = [
-            ChatMessage(role=str(h["role"]), content=str(h["value"]))
-            for h in list_of_dicts
-        ]  # Enforce string typing
+            ChatMessage(role=h["role"], content=h["content"]) for h in list_of_dicts
+        ]
         return ChatHistory(chat_messages=chat_messages)
 
     @property

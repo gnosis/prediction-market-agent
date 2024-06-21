@@ -113,8 +113,7 @@ def agent_is_initialized() -> bool:
 
 
 def save_last_turn_history_to_memory(agent: Agent) -> None:
-    last_turn_history = get_history_from_last_turn(agent)
-    st.session_state.long_term_memory.save_history(last_turn_history)
+    get_history_from_last_turn(agent).save_to(st.session_state.long_term_memory)
 
 
 def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
