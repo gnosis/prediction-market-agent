@@ -1,4 +1,3 @@
-import typing as t
 from enum import Enum
 from string import Template
 
@@ -9,7 +8,10 @@ from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.memory import MemoryContainer
+from prediction_market_agent.agents.microchain_agent.memory import (
+    DatedChatMessage,
+    SimpleMemoryThinkThoroughly,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -63,7 +65,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 
 
 def _summarize_learnings(
-    memories: t.Sequence[MemoryContainer],
+    memories: list[str],
     prompt_template: PromptTemplate,
     model: str = "gpt-4o-2024-05-13",
 ) -> str:
@@ -80,25 +82,29 @@ def _summarize_learnings(
         verbose=False,
     )
 
-    memory_docs = [Document(page_content=str(m)) for m in memories]
+    memory_docs = [Document(page_content=m) for m in memories]
     summary: str = summary_chain.run(input_documents=memory_docs)
     return summary
 
 
 def extract_reasonings_to_learnings(
-    memories: t.Sequence[MemoryContainer], tweet: str
+    memories: list[SimpleMemoryThinkThoroughly], tweet: str
 ) -> str:
     prompt_with_tweet = Template(EXTRACT_REASONINGS_TEMPLATE).substitute(TWEET=tweet)
     return _summarize_learnings(
-        memories,
+        [str(m) for m in memories],
         PromptTemplate.from_template(prompt_with_tweet),
     )
 
 
-def memories_to_learnings(memories: t.Sequence[MemoryContainer], model: str) -> str:
+def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
     past learnings.
     """
     prompt = PromptTemplate.from_template(MEMORIES_TO_LEARNINGS_TEMPLATE)
-    return _summarize_learnings(memories, prompt, model)
+    return _summarize_learnings(
+        memories=[str(m) for m in memories],
+        prompt_template=prompt,
+        model=model,
+    )

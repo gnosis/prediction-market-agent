@@ -4,8 +4,8 @@ from microchain import Function
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import (
+    DatedChatMessage,
     LongTermMemory,
-    SimpleMemoryMicrochain,
 )
 from prediction_market_agent.agents.utils import memories_to_learnings
 
@@ -37,6 +37,6 @@ class RememberPastActions(Function):
         # its run doesn't miss anything from the previous day.
         memories = self.long_term_memory.search(from_=utcnow() - timedelta(hours=25))
         simple_memories = [
-            SimpleMemoryMicrochain.from_long_term_memory(ltm) for ltm in memories
+            DatedChatMessage.from_long_term_memory(ltm) for ltm in memories
         ]
         return memories_to_learnings(memories=simple_memories, model=self.model)

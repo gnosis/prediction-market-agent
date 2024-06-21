@@ -6,6 +6,7 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
+    display_chat_history,
     streamlit_asyncio_event_loop_hack,
 )
 
@@ -26,7 +27,10 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from streamlit_extras.bottom_container import bottom
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.memory import (
+    ChatHistory,
+    LongTermMemory,
+)
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
@@ -64,24 +68,16 @@ def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
         st.session_state.running_cost += costs.cost
 
 
-def chat_message(role: str, content: str) -> None:
-    # Return of functions is stringified, so we need to check for "None" string.
-    if content != "None":
-        st.chat_message(role).write(content)
-
-
-def display_all_history(agent: Agent) -> None:
+def display_agent_history(agent: Agent) -> None:
     """
     Display the agent's history in the Streamlit app.
     """
     # Skip the initial messages
     history = agent.history[get_initial_history_length(agent) :]
-
-    for h in history:
-        chat_message(h["role"], h["content"])
+    display_chat_history(ChatHistory.from_list_of_dicts(history))
 
 
-def get_history_from_last_turn(agent: Agent) -> list[dict[str, str]]:
+def get_history_from_last_turn(agent: Agent) -> ChatHistory:
     if len(agent.history) < 2:
         raise ValueError(
             "Agent history is too short. You must call `agent.run` before calling this function."
@@ -89,10 +85,7 @@ def get_history_from_last_turn(agent: Agent) -> list[dict[str, str]]:
 
     history_depth = 2  # One for the user input, one for the agent's reply
     history = agent.history[-history_depth:]
-    str_history: list[dict[str, str]] = [
-        {str(key): str(value) for key, value in h.items()} for h in history
-    ]  # Enforce string typing
-    return str_history
+    return ChatHistory.from_list_of_dicts(history)
 
 
 def display_new_history_callback(agent: Agent) -> None:
@@ -100,8 +93,7 @@ def display_new_history_callback(agent: Agent) -> None:
     A callback to display the agent's history in the Streamlit app after a run
     with a single interation.
     """
-    for h in get_history_from_last_turn(agent):
-        chat_message(h["role"], h["content"])
+    display_chat_history(chat_history=get_history_from_last_turn(agent))
 
 
 def long_term_memory_is_initialized() -> bool:
@@ -121,8 +113,7 @@ def agent_is_initialized() -> bool:
 
 
 def save_last_turn_history_to_memory(agent: Agent) -> None:
-    last_turn_history = get_history_from_last_turn(agent)
-    st.session_state.long_term_memory.save_history(last_turn_history)
+    get_history_from_last_turn(agent).save_to(st.session_state.long_term_memory)
 
 
 def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
@@ -265,7 +256,7 @@ with bottom():
 # Run the agent and display its history
 with history_container:
     if agent_is_initialized():
-        display_all_history(st.session_state.agent)
+        display_agent_history(st.session_state.agent)
     if user_reasoning:
         maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
         execute_reasoning(
