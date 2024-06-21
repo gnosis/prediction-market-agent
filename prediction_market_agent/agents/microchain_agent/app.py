@@ -116,21 +116,22 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     get_history_from_last_turn(agent).save_to(st.session_state.long_term_memory)
 
 
-def maybe_initialize_agent(model: str, system_prompt: str, bootstrap: str) -> None:
+def maybe_initialize_agent(model: str, system_prompt: str) -> None:
     # Initialize the agent
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
             system_prompt=system_prompt,
-            bootstrap=bootstrap,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
-            prompt_handler=PromptHandler(
-                session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
-            )
-            if st.session_state.get("load_historical_prompt")
-            else None,
+            prompt_handler=(
+                PromptHandler(
+                    session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
+                )
+                if st.session_state.get("load_historical_prompt")
+                else None
+            ),
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -205,7 +206,7 @@ with st.sidebar:
         disabled=agent_is_initialized(),
     )
 
-    system_prompt, bootstrap = SYSTEM_PROMPTS[
+    system_prompt = SYSTEM_PROMPTS[
         SystemPromptChoice(st.session_state.system_prompt_select)
     ]
 
@@ -225,7 +226,6 @@ intro_expander = st.expander(
     "participate in prediction markets. More info..."
 )
 system_prompt_expander = st.expander("Agent's current system prompt")
-bootstrap_expander = st.expander("Agent's current bootstrap")
 
 # Placeholder for the agent's history
 history_container = st.container()
@@ -258,7 +258,7 @@ with history_container:
     if agent_is_initialized():
         display_agent_history(st.session_state.agent)
     if user_reasoning:
-        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt)
         execute_reasoning(
             agent=st.session_state.agent,
             reasoning=user_reasoning,
@@ -272,7 +272,7 @@ with history_container:
         )
         save_last_turn_history_to_memory(st.session_state.agent)
     if run_agent_button:
-        maybe_initialize_agent(st.session_state.model, system_prompt, bootstrap)
+        maybe_initialize_agent(st.session_state.model, system_prompt)
         run_agent(
             agent=st.session_state.agent,
             iterations=int(iterations),
@@ -298,10 +298,10 @@ with balance_container:
         value=f"{get_balance(MARKET_TYPE).amount:.2f}",
     )
 
-# Display its updated function list, system prompt and bootstrap
+# Display its updated function list, system prompt
 with intro_expander:
     st.markdown(
-        "To start, click 'Run' to see the agent in action, or bootstrap the "
+        "To start, click 'Run' to see the agent in action, or execute the "
         "agent with your own reasoning."
     )
     st.markdown("It is equipped with the following tools:")
@@ -317,14 +317,6 @@ with intro_expander:
 with system_prompt_expander:
     st.markdown(
         st.session_state.agent.system_prompt
-        if agent_is_initialized()
-        else "The agent is not initialized yet."
-    )
-
-
-with bootstrap_expander:
-    st.markdown(
-        st.session_state.agent.bootstrap
         if agent_is_initialized()
         else "The agent is not initialized yet."
     )
