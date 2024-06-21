@@ -3,8 +3,8 @@ import typing as t
 from microchain import Agent, Function
 
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    NON_UPDATABLE_DIVIDOR,
-    SYSTEM_PROMPT,
+    build_full_system_prompt,
+    extract_updatable_system_prompt,
 )
 
 
@@ -24,7 +24,7 @@ class GetMyCurrentSystemPrompt(AgentAction):
         return []
 
     def __call__(self) -> str:
-        return str(self.agent.system_prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
+        return extract_updatable_system_prompt(self.agent.system_prompt)
 
 
 class UpdateMySystemPrompt(AgentAction):
@@ -37,13 +37,7 @@ class UpdateMySystemPrompt(AgentAction):
         return ["This will be my new prompt."]
 
     def __call__(self, new_prompt: str) -> str:
-        prompt_template = (
-            new_prompt
-            + "\n\n"
-            + NON_UPDATABLE_DIVIDOR
-            + SYSTEM_PROMPT.split(NON_UPDATABLE_DIVIDOR)[1]
-        )
-        self.agent.system_prompt = prompt_template.format(
+        self.agent.system_prompt = build_full_system_prompt(new_prompt).format(
             engine_help=self.agent.engine.help
         )
         # History needs to be updated manually, because it's constructed only once in the agent initialization.

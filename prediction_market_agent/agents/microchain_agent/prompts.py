@@ -34,6 +34,25 @@ TRADING_AGENT_BOOTSTRAP = (
 )
 
 
+def extract_updatable_system_prompt(system_prompt: str) -> str:
+    if NON_UPDATABLE_DIVIDOR not in system_prompt:
+        raise ValueError("The system prompt doesn't contain the non-updatable part.")
+
+    return system_prompt.split(NON_UPDATABLE_DIVIDOR)[0]
+
+
+def build_full_system_prompt(system_prompt: str) -> str:
+    if NON_UPDATABLE_DIVIDOR in system_prompt:
+        raise ValueError("The system prompt already contains the non-updatable part.")
+
+    return (
+        system_prompt
+        + "\n\n"
+        + NON_UPDATABLE_DIVIDOR
+        + system_prompt.split(NON_UPDATABLE_DIVIDOR)[1]
+    )
+
+
 class SystemPromptChoice(str, Enum):
     JUST_BORN = "just_born"
     TRADING_AGENT = "trading_agent"
