@@ -105,6 +105,9 @@ class ChatHistory(BaseModel):
 
     chat_messages: Sequence[ChatMessage]
 
+    def add_message(self, chat_message: ChatMessage) -> None:
+        list(self.chat_messages).append(chat_message)
+
     def save_to(self, long_term_memory: LongTermMemory) -> None:
         long_term_memory.save_history([m.model_dump() for m in self.chat_messages])
 
@@ -169,3 +172,13 @@ class DatedChatHistory(ChatHistory):
                 current_cluster.append(chat_messages.pop(0))
             clusters.append(DatedChatHistory(chat_messages=current_cluster))
         return clusters
+
+    def to_undated_chat_history(self) -> ChatHistory:
+        # Convert DatedChatMessages to ChatMessages
+        chat_messages = [
+            ChatMessage(content=m.content, role=m.role) for m in self.chat_messages
+        ]
+        return ChatHistory(chat_messages=chat_messages)
+
+    def save_to(self, long_term_memory: LongTermMemory) -> None:
+        self.to_undated_chat_history().save_to(long_term_memory)

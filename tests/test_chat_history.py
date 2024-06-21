@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Generator
 
 import pytest
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatHistory,
@@ -52,10 +53,16 @@ def test_chat_history_clustering(chat_history: DatedChatHistory) -> None:
     assert chat_history.num_messages == 3
 
 
-def test_save_to_memory(
+def test_save_to_and_load_from_memory(
     long_term_memory: LongTermMemory, chat_history: DatedChatHistory
 ) -> None:
-    datetime_now = datetime.now()
+    datetime_now = utcnow()
     chat_history.save_to(long_term_memory)
-    breakpoint()
-    assert long_term_memory.search(from_=datetime_now)
+    new_chat_history = DatedChatHistory.from_long_term_memory(
+        long_term_memory=long_term_memory,
+        from_=datetime_now,
+    )
+    assert (
+        new_chat_history.to_undated_chat_history()
+        == chat_history.to_undated_chat_history()
+    )
