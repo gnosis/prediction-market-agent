@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from prediction_market_agent_tooling.deploy.agent import Answer
-from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
 from prediction_market_agent.db.models import LongTermMemories

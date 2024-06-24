@@ -18,18 +18,16 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     NON_UPDATABLE_DIVIDOR,
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
-from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.utils import APIKeys
 
 
@@ -115,7 +113,6 @@ def main(
     # unique across instances (i.e. markets).
     unique_task_description = AgentIdentifier.microchain_task_from_market(market_type)
     long_term_memory = LongTermMemoryTableHandler(unique_task_description)
-
 
     # We only use microchain on Omen currently, hence no need for prompt handler for other markets.
     prompt_handler = (

@@ -15,7 +15,6 @@ streamlit_asyncio_event_loop_hack()
 # Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
 from prediction_market_agent.utils import patch_sqlite3  # isort:skip
 from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
-from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 
 patch_sqlite3()
 
@@ -41,7 +40,6 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     has_been_run_past_initialization,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
