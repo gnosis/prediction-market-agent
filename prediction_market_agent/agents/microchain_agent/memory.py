@@ -63,8 +63,6 @@ class SimpleMemoryThinkThoroughly(BaseModel):
         )
 
 
-
-
 class ChatHistory(BaseModel):
     """
     A collection of chat messages. Assumes that the chat messages are ordered by

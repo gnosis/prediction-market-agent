@@ -10,7 +10,9 @@ SQLModelType = t.TypeVar("SQLModelType", bound=SQLModel)
 
 
 class SQLHandler:
-    def __init__(self, model: t.Type[SQLModelType], sqlalchemy_db_url: str | None = None):
+    def __init__(
+        self, model: t.Type[SQLModelType], sqlalchemy_db_url: str | None = None
+    ):
         self.engine = create_engine(
             sqlalchemy_db_url
             if sqlalchemy_db_url
