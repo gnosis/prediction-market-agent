@@ -6,11 +6,11 @@ from sqlmodel import Session, SQLModel, asc, create_engine, desc
 
 from prediction_market_agent.utils import DBKeys
 
-TypeTable = t.TypeVar("TypeTable", bound=SQLModel)
+SQLModelType = t.TypeVar("SQLModelType", bound=SQLModel)
 
 
 class SQLHandler:
-    def __init__(self, model: t.Type[TypeTable], sqlalchemy_db_url: str | None = None):
+    def __init__(self, model: t.Type[SQLModelType], sqlalchemy_db_url: str | None = None):
         self.engine = create_engine(
             sqlalchemy_db_url
             if sqlalchemy_db_url
@@ -23,10 +23,10 @@ class SQLHandler:
         table = SQLModel.metadata.tables[str(self.table.__tablename__)]
         SQLModel.metadata.create_all(self.engine, tables=[table])
 
-    def get_all(self) -> t.Sequence[TypeTable]:
+    def get_all(self) -> t.Sequence[SQLModelType]:
         return Session(self.engine).query(self.table).all()
 
-    def save_multiple(self, items: t.Sequence[TypeTable]) -> None:
+    def save_multiple(self, items: t.Sequence[SQLModelType]) -> None:
         with Session(self.engine) as session:
             session.add_all(items)
             session.commit()
@@ -37,7 +37,7 @@ class SQLHandler:
         order_by_column_name: str | None = None,
         order_desc: bool = True,
         limit: int | None = None,
-    ) -> t.Sequence[TypeTable]:
+    ) -> t.Sequence[SQLModelType]:
         with Session(self.engine) as session:
             query = session.query(self.table)
             for exp in query_filters:

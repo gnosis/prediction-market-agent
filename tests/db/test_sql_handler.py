@@ -38,7 +38,7 @@ def test_get_all(prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]) 
     assert len(prompt_sql_handler.get_all()) == 1
 
 
-def get_first(sql_handler: SQLHandler, order_by_column_name: str, order_desc: bool):
+def get_first(sql_handler: SQLHandler, order_by_column_name: str, order_desc: bool) -> Prompt|None:
     items: t.Sequence[Prompt] = sql_handler.get_with_filter_and_order(
         order_by_column_name=order_by_column_name, order_desc=order_desc, limit=1
     )

@@ -22,9 +22,7 @@ def test_save_prompt(memory_prompt_handler: PromptTableHandler) -> None:
 
     memory_prompt_handler.save_prompt(prompt_text)
     # assert prompt is there
-    result = memory_prompt_handler.fetch_latest_prompt(
-        session_identifier=TEST_SESSION_IDENTIFIER
-    )
+    result = memory_prompt_handler.fetch_latest_prompt()
     assert result
     assert result.prompt == prompt_text
 
@@ -37,7 +35,7 @@ def test_load_latest_prompt(memory_prompt_handler: PromptTableHandler) -> None:
     memory_prompt_handler.save_prompt(prompt_text_second)
 
     # assert latest prompt is there
-    result = memory_prompt_handler.fetch_latest_prompt(TEST_SESSION_IDENTIFIER)
+    result = memory_prompt_handler.fetch_latest_prompt()
     assert result
     # ignore timezone
     assert result.prompt == prompt_text_second

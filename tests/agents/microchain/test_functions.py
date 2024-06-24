@@ -45,7 +45,6 @@ def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
     long_term_memory = LongTermMemoryTableHandler(
         task_description="test", sqlalchemy_db_url="sqlite://"
     )
-    long_term_memory.storage._init_table_if_not_exists()
     yield long_term_memory
 
 

@@ -4,20 +4,16 @@ from typing import Generator
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    DatedChatHistory,
-    DatedChatMessage,
-    LongTermMemory,
-)
+from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory, DatedChatMessage
+from prediction_market_agent.db.long_term_memory_table_handler import LongTermMemoryTableHandler
 
 
 @pytest.fixture(scope="session")
-def long_term_memory() -> Generator[LongTermMemory, None, None]:
+def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
     """Creates a in-memory SQLite DB for testing"""
-    long_term_memory = LongTermMemory(
+    long_term_memory = LongTermMemoryTableHandler(
         task_description="test", sqlalchemy_db_url="sqlite://"
     )
-    long_term_memory.storage._initialize_db()
     yield long_term_memory
 
 
@@ -54,7 +50,7 @@ def test_chat_history_clustering(chat_history: DatedChatHistory) -> None:
 
 
 def test_save_to_and_load_from_memory(
-    long_term_memory: LongTermMemory, chat_history: DatedChatHistory
+    long_term_memory: LongTermMemoryTableHandler, chat_history: DatedChatHistory
 ) -> None:
     datetime_now = utcnow()
     chat_history.save_to(long_term_memory)
