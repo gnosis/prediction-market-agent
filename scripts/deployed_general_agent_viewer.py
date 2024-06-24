@@ -24,12 +24,12 @@ from datetime import datetime
 import streamlit as st
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    DatedChatHistory,
-    LongTermMemory,
-)
+from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory
 from prediction_market_agent.agents.microchain_agent.utils import get_total_asset_value
 from prediction_market_agent.agents.utils import AgentIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
@@ -91,7 +91,7 @@ with st.sidebar:
 
 
 task_description = AgentIdentifier.microchain_task_from_market(MARKET_TYPE)
-long_term_memory = LongTermMemory(task_description=task_description)
+long_term_memory = LongTermMemoryTableHandler(task_description=task_description)
 chat_history = DatedChatHistory.from_long_term_memory(
     long_term_memory=long_term_memory,
     from_=start_time,

@@ -59,9 +59,9 @@ def test_save_to_and_load_from_memory(
 ) -> None:
     datetime_now = utcnow()
     chat_history.save_to(long_term_memory)
-    memories = long_term_memory.search(from_=datetime_now)
     new_chat_history = DatedChatHistory.from_long_term_memory(
-        memories=memories,
+        long_term_memory=long_term_memory,
+        from_=datetime_now,
     )
     assert (
         new_chat_history.to_undated_chat_history()
