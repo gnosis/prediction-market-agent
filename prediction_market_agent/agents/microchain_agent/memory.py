@@ -1,13 +1,17 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
 import json
 from datetime import datetime, timedelta
-from typing import Any, Dict, Sequence
+from typing import Dict, Sequence
 
-from prediction_market_agent_tooling.deploy.agent import Answer
-from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
-from prediction_market_agent.db.db_storage import DBStorage
+from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
+    AnswerWithScenario,
+)
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.db.models import LongTermMemories
 
 
@@ -34,17 +38,6 @@ class DatedChatMessage(ChatMessage):
         return f"{self.datetime_}: {self.content}"
 
 
-class AnswerWithScenario(Answer):
-    scenario: str
-    question: str
-
-    @staticmethod
-    def build_from_answer(
-        answer: Answer, scenario: str, question: str
-    ) -> "AnswerWithScenario":
-        return AnswerWithScenario(scenario=scenario, question=question, **answer.dict())
-
-
 class SimpleMemoryThinkThoroughly(BaseModel):
     metadata: AnswerWithScenario
     datetime_: datetime
@@ -61,42 +54,6 @@ class SimpleMemoryThinkThoroughly(BaseModel):
         )
 
 
-class LongTermMemory:
-    def __init__(self, task_description: str, sqlalchemy_db_url: str | None = None):
-        self.task_description = task_description
-        self.storage = DBStorage(sqlalchemy_db_url=sqlalchemy_db_url)
-
-    def save_history(self, history: list[Dict[str, Any]]) -> None:
-        """Save item to storage. Note that score allows many types for easier handling by agent."""
-
-        history_items = [
-            LongTermMemories(
-                task_description=self.task_description,
-                metadata_=json.dumps(history_item),
-                datetime_=utcnow(),
-            )
-            for history_item in history
-        ]
-
-        self.storage.save_multiple(history_items)
-
-    def save_answer_with_scenario(
-        self, answer_with_scenario: AnswerWithScenario
-    ) -> None:
-        return self.save_history([answer_with_scenario.dict()])
-
-    def search(
-        self,
-        from_: datetime | None = None,
-        to: datetime | None = None,
-    ) -> Sequence[LongTermMemories]:
-        return self.storage.load_long_term_memories(
-            task_description=self.task_description,
-            from_=from_,
-            to=to,
-        )
-
-
 class ChatHistory(BaseModel):
     """
     A collection of chat messages. Assumes that the chat messages are ordered by
@@ -108,7 +65,7 @@ class ChatHistory(BaseModel):
     def add_message(self, chat_message: ChatMessage) -> None:
         list(self.chat_messages).append(chat_message)
 
-    def save_to(self, long_term_memory: LongTermMemory) -> None:
+    def save_to(self, long_term_memory: LongTermMemoryTableHandler) -> None:
         long_term_memory.save_history([m.model_dump() for m in self.chat_messages])
 
     @staticmethod
@@ -141,12 +98,8 @@ class DatedChatHistory(ChatHistory):
     @classmethod
     def from_long_term_memory(
         cls,
-        long_term_memory: LongTermMemory,
-        from_: datetime | None = None,
-        to: datetime | None = None,
+        memories: Sequence[LongTermMemories],
     ) -> "DatedChatHistory":
-        memories = long_term_memory.search(from_=from_, to=to)
-
         # Sort memories by datetime
         memories = sorted(memories, key=lambda m: m.datetime_)
         chat_messages = [DatedChatMessage.from_long_term_memory(m) for m in memories]
@@ -180,5 +133,5 @@ class DatedChatHistory(ChatHistory):
         ]
         return ChatHistory(chat_messages=chat_messages)
 
-    def save_to(self, long_term_memory: LongTermMemory) -> None:
+    def save_to(self, long_term_memory: LongTermMemoryTableHandler) -> None:
         self.to_undated_chat_history().save_to(long_term_memory)
