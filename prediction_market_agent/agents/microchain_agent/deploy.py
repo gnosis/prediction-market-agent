@@ -2,14 +2,16 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
-from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
+from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 
 
 class DeployableMicrochainAgent(DeployableAgent):
@@ -23,8 +25,8 @@ class DeployableMicrochainAgent(DeployableAgent):
         is handed over to the agent.
         """
         task_description = AgentIdentifier.microchain_task_from_market(market_type)
-        long_term_memory = LongTermMemory(task_description=task_description)
-        prompt_handler = PromptHandler(
+        long_term_memory = LongTermMemoryTableHandler(task_description=task_description)
+        prompt_handler = PromptTableHandler(
             session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN
         )
         agent: Agent = build_agent(
