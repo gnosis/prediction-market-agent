@@ -6,8 +6,6 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
-from datetime import datetime
-
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
     streamlit_asyncio_event_loop_hack,
@@ -20,6 +18,8 @@ from prediction_market_agent.utils import patch_sqlite3  # isort:skip
 
 patch_sqlite3()
 
+
+from datetime import datetime
 
 import streamlit as st
 from prediction_market_agent_tooling.markets.markets import MarketType
