@@ -72,7 +72,7 @@ with st.sidebar:
     with st.container(border=True):
         st.metric(
             label=f"Agent Wallet Address",
-            value=f"{keys.bet_from_address}",
+            value=keys.bet_from_address,
         )
     st.write(
         f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=keys)})."
@@ -86,7 +86,7 @@ with st.sidebar:
     )
 
     st.caption(
-        "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/scrips/deployed_agent_viewer.py)."
+        "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/scripts/deployed_agent_viewer.py)."
     )
 
 
