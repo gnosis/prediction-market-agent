@@ -3,9 +3,7 @@ from datetime import timedelta
 from microchain import Function
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    DatedChatMessage,
-)
+from prediction_market_agent.agents.microchain_agent.memory import DatedChatMessage
 from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,

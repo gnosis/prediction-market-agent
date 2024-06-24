@@ -27,10 +27,7 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from streamlit_extras.bottom_container import bottom
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    ChatHistory,
-    LongTermMemory,
-)
+from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
