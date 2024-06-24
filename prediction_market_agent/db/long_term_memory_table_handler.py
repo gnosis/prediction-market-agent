@@ -5,7 +5,9 @@ from datetime import datetime
 from prediction_market_agent_tooling.tools.utils import utcnow
 from sqlmodel import col
 
-from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
+from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
+    AnswerWithScenario,
+)
 from prediction_market_agent.db.models import LongTermMemories
 from prediction_market_agent.db.sql_handler import SQLHandler
 

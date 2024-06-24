@@ -3,10 +3,12 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, Sequence
 
-from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
+    AnswerWithScenario,
+)
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -34,17 +36,6 @@ class DatedChatMessage(ChatMessage):
 
     def __str__(self) -> str:
         return f"{self.datetime_}: {self.content}"
-
-
-class AnswerWithScenario(Answer):
-    scenario: str
-    question: str
-
-    @staticmethod
-    def build_from_answer(
-        answer: Answer, scenario: str, question: str
-    ) -> "AnswerWithScenario":
-        return AnswerWithScenario(scenario=scenario, question=question, **answer.dict())
 
 
 class SimpleMemoryThinkThoroughly(BaseModel):
@@ -107,12 +98,8 @@ class DatedChatHistory(ChatHistory):
     @classmethod
     def from_long_term_memory(
         cls,
-        long_term_memory: LongTermMemoryTableHandler,
-        from_: datetime | None = None,
-        to: datetime | None = None,
+        memories: Sequence[LongTermMemories],
     ) -> "DatedChatHistory":
-        memories = long_term_memory.search(from_=from_, to_=to)
-
         # Sort memories by datetime
         memories = sorted(memories, key=lambda m: m.datetime_)
         chat_messages = [DatedChatMessage.from_long_term_memory(m) for m in memories]
