@@ -18,7 +18,9 @@ class DeployableMicrochainAgent(DeployableAgent):
     load_historical_prompt: bool = False
 
     def run(
-        self, market_type: MarketType, system_prompt_choice: SystemPromptChoice
+        self,
+        market_type: MarketType,
+        system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN,
     ) -> None:
         """
         Override main 'run' method, as the all logic from the helper methods
