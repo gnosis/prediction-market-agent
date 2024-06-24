@@ -4,8 +4,13 @@ from typing import Generator
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
 
-from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory, DatedChatMessage
-from prediction_market_agent.db.long_term_memory_table_handler import LongTermMemoryTableHandler
+from prediction_market_agent.agents.microchain_agent.memory import (
+    DatedChatHistory,
+    DatedChatMessage,
+)
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 
 
 @pytest.fixture(scope="session")

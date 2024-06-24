@@ -8,7 +8,9 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     TRADING_AGENT_SYSTEM_PROMPT,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
-from prediction_market_agent.db.long_term_memory_table_handler import LongTermMemoryTableHandler
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 
 

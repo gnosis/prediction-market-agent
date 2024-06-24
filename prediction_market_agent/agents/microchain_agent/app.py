@@ -4,6 +4,7 @@ PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.p
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,

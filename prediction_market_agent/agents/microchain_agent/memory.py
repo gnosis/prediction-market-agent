@@ -1,13 +1,15 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
 import json
 from datetime import datetime, timedelta
-from typing import Sequence, Dict
+from typing import Dict, Sequence
 
 from prediction_market_agent_tooling.deploy.agent import Answer
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
-from prediction_market_agent.db.long_term_memory_table_handler import LongTermMemoryTableHandler
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.db.models import LongTermMemories
 
 
