@@ -33,8 +33,20 @@ from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
-START_TIME = datetime(2024, 5, 29, 14, 8, 45)  # TODO make configurable
-STARTING_BALANCE = 5  # xDai # TODO make configurable
+
+class DeployedGeneralAgentKeys(APIKeys):
+    START_TIME: str
+    STARTING_BALANCE: float
+
+    @property
+    def start_time(self) -> datetime:
+        return datetime.fromisoformat(self.START_TIME)
+
+    @property
+    def starting_balance(self) -> float:
+        return self.STARTING_BALANCE
+
+
 MARKET_TYPE = MarketType.OMEN
 currency = MARKET_TYPE.market_class.currency
 
@@ -46,7 +58,9 @@ st.set_page_config(
 st.title("Deployed Trader Agent Viewer")
 
 check_required_api_keys(["BET_FROM_PRIVATE_KEY"])
-keys = APIKeys()
+keys = DeployedGeneralAgentKeys()
+starting_balance = keys.starting_balance
+start_time = keys.start_time
 
 with st.sidebar:
     st.subheader("App info:")
@@ -80,19 +94,19 @@ task_description = AgentIdentifier.microchain_task_from_market(MARKET_TYPE)
 long_term_memory = LongTermMemory(task_description=task_description)
 chat_history = DatedChatHistory.from_long_term_memory(
     long_term_memory=long_term_memory,
-    from_=START_TIME,
+    from_=start_time,
 )
 sessions = chat_history.cluster_by_datetime(max_minutes_between_messages=30)
 
 total_asset_value = get_total_asset_value(MARKET_TYPE).amount
-roi = (total_asset_value - STARTING_BALANCE) * 100 / STARTING_BALANCE
+roi = (total_asset_value - starting_balance) * 100 / starting_balance
 
 with st.container(border=True):
     col1, col2 = st.columns(2)
     col3, col4 = st.columns(2)
-    col1.metric("Starting Time", START_TIME.strftime("%Y-%m-%d %H:%M:%S"))
+    col1.metric("Starting Time", start_time.strftime("%Y-%m-%d %H:%M:%S"))
     col2.metric("Number of iterations", len(chat_history.chat_messages))
-    col3.metric("Starting Balance", f"{STARTING_BALANCE:.2f} {currency}")
+    col3.metric("Starting Balance", f"{starting_balance:.2f} {currency}")
     col4.metric(
         "Total Asset Value",
         f"{total_asset_value:.2f} {currency}",
@@ -103,5 +117,3 @@ st.subheader("Agent Logs")
 for session in sessions:
     with st.expander(f"{session.start_time} - {session.end_time}"):
         display_chat_history(session)
-
-# TODO add tool call frequency stats
