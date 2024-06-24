@@ -1,6 +1,5 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
 import json
-from abc import ABC, abstractmethod
 from datetime import datetime
 
 from prediction_market_agent_tooling.deploy.agent import Answer
@@ -10,26 +9,22 @@ from pydantic import BaseModel
 from prediction_market_agent.db.models import LongTermMemories
 
 
-class MemoryContainer(BaseModel, ABC):
+class ChatMessage(BaseModel):
+    content: str
+    role: str
+
+
+class DatedChatMessage(ChatMessage):
     datetime_: datetime
 
     @staticmethod
-    @abstractmethod
     def from_long_term_memory(
         long_term_memory: LongTermMemories,
-    ) -> "MemoryContainer":
-        pass
-
-
-class SimpleMemoryMicrochain(MemoryContainer):
-    content: str
-
-    @staticmethod
-    def from_long_term_memory(
-        long_term_memory: LongTermMemories,
-    ) -> "SimpleMemoryMicrochain":
-        return SimpleMemoryMicrochain(
-            content=json.loads(check_not_none(long_term_memory.metadata_))["content"],
+    ) -> "DatedChatMessage":
+        metadata = json.loads(check_not_none(long_term_memory.metadata_))
+        return DatedChatMessage(
+            content=metadata["content"],
+            role=metadata["role"],
             datetime_=long_term_memory.datetime_,
         )
 
@@ -48,8 +43,9 @@ class AnswerWithScenario(Answer):
         return AnswerWithScenario(scenario=scenario, question=question, **answer.dict())
 
 
-class SimpleMemoryThinkThoroughly(MemoryContainer):
+class SimpleMemoryThinkThoroughly(BaseModel):
     metadata: AnswerWithScenario
+    datetime_: datetime
 
     @staticmethod
     def from_long_term_memory(
