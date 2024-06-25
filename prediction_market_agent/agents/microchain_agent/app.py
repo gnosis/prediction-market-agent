@@ -36,6 +36,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
     SystemPromptChoice,
+    extract_updatable_system_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
@@ -317,7 +318,7 @@ with intro_expander:
 
 with system_prompt_expander:
     st.markdown(
-        st.session_state.agent.system_prompt
+        extract_updatable_system_prompt(st.session_state.agent.system_prompt)
         if agent_is_initialized()
         else "The agent is not initialized yet."
     )
