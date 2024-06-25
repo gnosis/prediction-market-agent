@@ -17,6 +17,7 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 )
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
+    DeployableMicrochainModifiableSystemPromptAgent,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
@@ -35,6 +36,7 @@ class RunnableAgent(str, Enum):
     think_thoroughly = "think_thoroughly"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
+    microchain_modifiable_system_prompt = "microchain_modifiable_system_prompt"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
 
@@ -45,6 +47,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
     RunnableAgent.microchain: DeployableMicrochainAgent,
+    RunnableAgent.microchain_modifiable_system_prompt: DeployableMicrochainModifiableSystemPromptAgent,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
 }
 

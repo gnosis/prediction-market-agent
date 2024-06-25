@@ -18,11 +18,11 @@ class DeployableMicrochainAgent(DeployableAgent):
     model = "gpt-4o-2024-05-13"
     n_iterations = 50
     load_historical_prompt: bool = False
+    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
 
     def run(
         self,
         market_type: MarketType,
-        system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN,
     ) -> None:
         """
         Override main 'run' method, as the all logic from the helper methods
@@ -33,7 +33,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         prompt_handler = PromptTableHandler(
             session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN
         )
-        system_prompt = SYSTEM_PROMPTS[system_prompt_choice]
+        system_prompt = SYSTEM_PROMPTS[self.system_prompt_choice]
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
@@ -45,3 +45,8 @@ class DeployableMicrochainAgent(DeployableAgent):
         agent.run(self.n_iterations)
         long_term_memory.save_history(agent.history)
         prompt_handler.save_prompt(agent.system_prompt)
+
+
+class DeployableMicrochainModifiableSystemPromptAgent(DeployableMicrochainAgent):
+    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
+    load_historical_prompt: bool = True
