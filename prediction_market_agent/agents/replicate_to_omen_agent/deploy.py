@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
@@ -18,6 +17,7 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 class ReplicateSettings(BaseSettings):

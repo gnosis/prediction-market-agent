@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, wei_type, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
@@ -24,6 +23,11 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.is_predictable import is_predictable_binary
 from prediction_market_agent_tooling.tools.utils import utcnow
+
+from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
+    generate_and_set_image_for_market,
+)
+from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
 # That is because at the closing time, the question will open on Realitio, and we don't want it to be resolved as unknown/invalid.
@@ -128,6 +132,15 @@ def omen_replicate_from_tx(
         logger.info(
             f"Created `https://aiomen.eth.limo/#/{market_address}` for `{market.question}` in category {category} out of {market.url}."
         )
+
+        omen_agent_market = OmenAgentMarket.from_data_model(
+            OmenSubgraphHandler().get_omen_market_by_market_id(market_address)
+        )
+
+        if generate_and_set_image_for_market(omen_agent_market, api_keys) is not None:
+            logger.info(f"Generated and set image for `{market.question}`.")
+        else:
+            logger.warning(f"Failed to generate and set image for `{market.question}`.")
 
         if len(created_addresses) >= n_to_replicate:
             logger.info(
