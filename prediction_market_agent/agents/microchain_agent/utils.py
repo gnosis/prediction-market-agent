@@ -64,6 +64,17 @@ def get_balance(market_type: MarketType) -> BetAmount:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
+def get_total_asset_value(market_type: MarketType) -> BetAmount:
+    balance = get_balance(market_type)
+    positions = market_type.market_class.get_positions(APIKeys().bet_from_address)
+    positions_value = market_type.market_class.get_positions_value(positions)
+
+    return BetAmount(
+        amount=balance.amount + positions_value.amount,
+        currency=market_type.market_class.currency,
+    )
+
+
 def get_boolean_outcome(market_type: MarketType, outcome: str) -> bool:
     if market_type == MarketType.OMEN:
         return get_omen_boolean_outcome(outcome)
