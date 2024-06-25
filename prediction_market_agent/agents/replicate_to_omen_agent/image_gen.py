@@ -27,6 +27,7 @@ def generate_and_set_image_for_market(
     try:
         generated_image = generate_image_for_market(question=market.question)
     except Exception as e:
+        # Roughly one every 30 markets triggers OpenAI's content policy violation, because of the prompt content. We can just skip those.
         if "content_policy_violation" in str(e):
             logger.warning(
                 f"Content policy violation for {market.url}: {market.question}"
