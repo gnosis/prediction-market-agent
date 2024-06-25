@@ -34,7 +34,7 @@ Agent should keep a track record of what it has learned in the past, to not repe
 
 class LearnAboutTheNextRun(LearningFunction):
     title = "the next run"
-    knowledge = """The next run is the next time the agent will be executed. Agent can save what it wants to do the next time in the bootstrap"""
+    knowledge = """The next run is the next time the agent will be executed. Agent can also save what it wants to do the next time in the system prompt."""
 
 
 class LearnAboutWhatMakesAGoodPrompt(LearningFunction):

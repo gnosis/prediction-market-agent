@@ -33,12 +33,11 @@ class DeployableMicrochainAgent(DeployableAgent):
         prompt_handler = PromptTableHandler(
             session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN
         )
-        system_prompt, bootstrap = SYSTEM_PROMPTS[system_prompt_choice]
+        system_prompt = SYSTEM_PROMPTS[system_prompt_choice]
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
             system_prompt=system_prompt,
-            bootstrap=bootstrap,
             allow_stop=True,
             long_term_memory=long_term_memory,
             prompt_handler=prompt_handler if self.load_historical_prompt else None,

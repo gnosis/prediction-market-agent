@@ -98,8 +98,12 @@ class DatedChatHistory(ChatHistory):
     @classmethod
     def from_long_term_memory(
         cls,
-        memories: Sequence[LongTermMemories],
+        long_term_memory: LongTermMemoryTableHandler,
+        from_: datetime | None = None,
+        to: datetime | None = None,
     ) -> "DatedChatHistory":
+        memories = long_term_memory.search(from_=from_, to_=to)
+
         # Sort memories by datetime
         memories = sorted(memories, key=lambda m: m.datetime_)
         chat_messages = [DatedChatMessage.from_long_term_memory(m) for m in memories]
