@@ -20,7 +20,6 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     NON_UPDATABLE_DIVIDOR,
-    TRADING_AGENT_BOOTSTRAP,
     TRADING_AGENT_SYSTEM_PROMPT,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
@@ -60,10 +59,10 @@ def build_agent(
     market_type: MarketType,
     model: str,
     system_prompt: str,
-    bootstrap: str,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
+    bootstrap: str | None = None,
     prompt_handler: PromptTableHandler | None = None,
 ) -> Agent:
     engine = Engine()
@@ -97,7 +96,8 @@ def build_agent(
             )
 
     agent.system_prompt = system_prompt.format(engine_help=agent.engine.help)
-    agent.bootstrap = [bootstrap]
+    if bootstrap:
+        agent.bootstrap = [bootstrap]
     return agent
 
 
@@ -126,7 +126,6 @@ def main(
         api_base=api_base,
         model=model,
         system_prompt=TRADING_AGENT_SYSTEM_PROMPT,
-        bootstrap=TRADING_AGENT_BOOTSTRAP,
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
         prompt_handler=prompt_handler,
