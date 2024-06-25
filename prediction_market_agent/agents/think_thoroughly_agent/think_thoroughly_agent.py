@@ -23,10 +23,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from requests import HTTPError
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    AnswerWithScenario,
-    LongTermMemory,
-)
+from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
 )
@@ -40,6 +37,9 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     RESEARCH_OUTCOME_OUTPUT,
     RESEARCH_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
+)
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
@@ -96,7 +96,9 @@ class CrewAIAgentSubquestions:
         self.pinecone_handler = PineconeHandler()
         self.memory = memory
         self._long_term_memory = (
-            LongTermMemory("think-thoroughly-agent") if self.memory else None
+            LongTermMemoryTableHandler("think-thoroughly-agent")
+            if self.memory
+            else None
         )
 
     def _get_current_date(self) -> str:
