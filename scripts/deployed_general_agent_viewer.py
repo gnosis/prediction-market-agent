@@ -35,12 +35,12 @@ from prediction_market_agent.utils import APIKeys
 
 
 class DeployedGeneralAgentKeys(APIKeys):
-    START_TIME: str
+    START_TIME: datetime
     STARTING_BALANCE: float
 
     @property
     def start_time(self) -> datetime:
-        return datetime.fromisoformat(self.START_TIME)
+        return self.START_TIME
 
     @property
     def starting_balance(self) -> float:
