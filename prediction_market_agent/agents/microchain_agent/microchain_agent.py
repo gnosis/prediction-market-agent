@@ -19,8 +19,9 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    NON_UPDATABLE_DIVIDOR,
     TRADING_AGENT_SYSTEM_PROMPT,
+    build_full_system_prompt,
+    extract_updatable_system_prompt,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -88,12 +89,7 @@ def build_agent(
     # Restore the prompt from a historical session, replacing the editable part with it.
     if prompt_handler:
         if historical_prompt := prompt_handler.fetch_latest_prompt():
-            system_prompt = (
-                historical_prompt.prompt
-                + "\n\n"
-                + NON_UPDATABLE_DIVIDOR
-                + system_prompt.split(NON_UPDATABLE_DIVIDOR)[1]
-            )
+            system_prompt = build_full_system_prompt(historical_prompt.prompt)
 
     agent.system_prompt = system_prompt.format(engine_help=agent.engine.help)
     if bootstrap:
@@ -141,9 +137,7 @@ def main(
 
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:
-    # Split prompt into editable, non-editable
-    editable_prompt = str(agent.system_prompt).split(NON_UPDATABLE_DIVIDOR)[0].strip()
-    return editable_prompt
+    return extract_updatable_system_prompt(str(agent.system_prompt))
 
 
 if __name__ == "__main__":
