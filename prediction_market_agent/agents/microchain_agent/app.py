@@ -4,6 +4,8 @@ PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.p
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 
+from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
@@ -15,7 +17,6 @@ streamlit_asyncio_event_loop_hack()
 
 # Fix "Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0" error
 from prediction_market_agent.utils import patch_sqlite3  # isort:skip
-from prediction_market_agent.agents.microchain_agent.prompt_handler import PromptHandler
 
 patch_sqlite3()
 
@@ -27,10 +28,7 @@ from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from streamlit_extras.bottom_container import bottom
 
-from prediction_market_agent.agents.microchain_agent.memory import (
-    ChatHistory,
-    LongTermMemory,
-)
+from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
@@ -45,6 +43,9 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     has_been_run_past_initialization,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
@@ -103,7 +104,7 @@ def long_term_memory_is_initialized() -> bool:
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
-        st.session_state.long_term_memory = LongTermMemory(
+        st.session_state.long_term_memory = LongTermMemoryTableHandler(
             AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
         )
 
@@ -126,7 +127,7 @@ def maybe_initialize_agent(model: str, system_prompt: str) -> None:
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             prompt_handler=(
-                PromptHandler(
+                PromptTableHandler(
                     session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
                 )
                 if st.session_state.get("load_historical_prompt")
