@@ -76,7 +76,6 @@ def test_get_probability(
     Once you have output the valid json, then stop.
     """
 
-    agent.bootstrap = ['Reasoning("I need to reason step-by-step")']
     agent.run(iterations=5)
 
     # history[-1] is 'user' stop message
