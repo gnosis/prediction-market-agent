@@ -1,3 +1,4 @@
+import typer
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -139,3 +140,7 @@ def main(
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:
     return extract_updatable_system_prompt(str(agent.system_prompt))
+
+
+if __name__ == "__main__":
+    typer.run(main)
