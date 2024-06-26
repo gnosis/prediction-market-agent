@@ -8,10 +8,13 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.microchain_agent.functions_from_tools import (
+    microchain_function_from_tool,
+)
 from prediction_market_agent.agents.microchain_agent.market_functions import (
     GetMarketProbability,
-    GetMarkets,
 )
+from prediction_market_agent.tools.prediction_market import GetMarkets
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
@@ -60,7 +63,10 @@ def test_get_probability(
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
-    engine.register(GetMarkets(market_type=market_type))
+    get_markets = microchain_function_from_tool(
+        GetMarkets(market_type=market_type), example_args=[]
+    )
+    engine.register(get_markets)
     engine.register(GetMarketProbability(market_type=market_type))
     engine.register(Jsonify())
     agent = Agent(llm=LLM(generator=generator), engine=engine)
