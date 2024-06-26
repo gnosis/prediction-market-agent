@@ -11,7 +11,7 @@ def main(
     session_id: AgentIdentifier,
     delete_memories: bool = True,
     delete_prompts: bool = True,
-):
+) -> None:
     """
     Delete all memories and prompts for a given agent, defined by the session_id.
     """
