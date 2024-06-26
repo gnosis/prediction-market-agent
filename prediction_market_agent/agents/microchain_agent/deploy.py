@@ -48,8 +48,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         agent.run(self.n_iterations)
         long_term_memory.save_history(agent.history)
         editable_prompt = get_editable_prompt_from_agent(agent)
-        if prompt_handler:
-            prompt_handler.save_prompt(editable_prompt)
+        prompt_handler.save_prompt(editable_prompt)
 
 
 class DeployableMicrochainModifiableSystemPromptAgent(DeployableMicrochainAgent):
