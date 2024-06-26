@@ -1,6 +1,6 @@
 import typing as t
 
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from sqlmodel import col
 
 from prediction_market_agent.db.models import PROMPT_DEFAULT_SESSION_IDENTIFIER, Prompt
@@ -44,3 +44,12 @@ class PromptTableHandler:
         )
 
         return items[0] if items else None
+
+    def delete_all_prompts(self) -> None:
+        """
+        Delete all prompts with `session_identifier`
+        """
+        self.sql_handler.delete_all_entries(
+            col_name=Prompt.session_identifier.key,  # type: ignore
+            col_value=check_not_none(self.session_identifier),
+        )
