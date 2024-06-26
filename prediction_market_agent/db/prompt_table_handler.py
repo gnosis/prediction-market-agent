@@ -44,3 +44,12 @@ class PromptTableHandler:
         )
 
         return items[0] if items else None
+
+    def delete_all_prompts(self) -> None:
+        """
+        Delete all prompts with `session_identifier`
+        """
+        self.sql_handler.delete_all_entries(
+            col_name=Prompt.session_identifier.key,  # type: ignore
+            col_value=self.session_identifier,
+        )

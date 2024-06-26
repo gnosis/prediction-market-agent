@@ -2,7 +2,10 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
-from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import (
+    build_agent,
+    get_editable_prompt_from_agent,
+)
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
     SystemPromptChoice,
@@ -44,9 +47,12 @@ class DeployableMicrochainAgent(DeployableAgent):
         )
         agent.run(self.n_iterations)
         long_term_memory.save_history(agent.history)
-        prompt_handler.save_prompt(agent.system_prompt)
+        editable_prompt = get_editable_prompt_from_agent(agent)
+        if prompt_handler:
+            prompt_handler.save_prompt(editable_prompt)
 
 
 class DeployableMicrochainModifiableSystemPromptAgent(DeployableMicrochainAgent):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
     load_historical_prompt: bool = True
+    n_iterations = 20
