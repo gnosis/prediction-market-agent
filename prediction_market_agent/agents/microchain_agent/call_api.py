@@ -47,4 +47,4 @@ class CallAPI:
             response.raise_for_status()
             return response.text
         except requests.exceptions.RequestException as e:
-            return str(e)
+            return {"success": False, "error": str(e)}
