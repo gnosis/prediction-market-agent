@@ -55,4 +55,3 @@ class DeployableMicrochainAgent(DeployableAgent):
 class DeployableMicrochainModifiableSystemPromptAgent(DeployableMicrochainAgent):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
     load_historical_prompt: bool = True
-    n_iterations = 20
