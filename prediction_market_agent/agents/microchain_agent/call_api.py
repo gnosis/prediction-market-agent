@@ -26,7 +26,7 @@ class CallAPI:
         """
         return ["method", "url", "params", "data", "headers"]
 
-    def __call__(self, method: str, url: str, params: dict = None, data: dict = None, headers: dict = None) -> str:
+    def __call__(self, method: str, url: str, params: dict[str, Any] | None = None, data: dict[str, Any] | None = None, headers: dict[str, Any] | None = None) -> str:
         """
         Sends an HTTP request using the specified method to the given URL with optional parameters, data, and headers.
 
