@@ -13,7 +13,7 @@ class CallAPI:
         A property method that returns a description of the function, which can be used to make arbitrary API calls to any endpoint with any parameters. It supports different HTTP methods (GET, POST, etc.) and can include headers, query parameters, and request bodies.
         """
         return (
-            "We can use this function to make arbitrary API calls to any endpoint with any parameters. "
+            "Use this function to make arbitrary API calls to any endpoint with any parameters. "
             "It supports different HTTP methods (GET, POST, etc.) and can include headers, "
             "query parameters, and request bodies."
         )
