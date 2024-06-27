@@ -1,12 +1,7 @@
 import requests
-
-class CallAPI:
-    def __init__(self) -> None:
-        """
-        Initializes the class instance.
-        """
-        super().__init__()
-
+from microchain import Function
+from typing import Any
+class CallAPI(Function):
     @property
     def description(self) -> str:
         """
@@ -40,9 +35,6 @@ class CallAPI:
         Returns:
             str: The response string if the request was successful, or the error message if an exception occurred.
         """
-        try:
-            response = requests.request(method, url, params=params, data=data, headers=headers)
-            response.raise_for_status()
-            return response.text
-        except requests.exceptions.RequestException as e:
-            return {"success": False, "error": str(e)}
+        response = requests.request(method, url, params=params, data=data, headers=headers)
+        response.raise_for_status()
+        return response.text
