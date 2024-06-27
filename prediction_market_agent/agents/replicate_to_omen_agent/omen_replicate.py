@@ -133,11 +133,10 @@ def omen_replicate_from_tx(
             f"Created `https://aiomen.eth.limo/#/{market_address}` for `{market.question}` in category {category} out of {market.url}."
         )
 
-        omen_agent_market = OmenAgentMarket.from_data_model(
-            OmenSubgraphHandler().get_omen_market_by_market_id(market_address)
-        )
-
-        if generate_and_set_image_for_market(omen_agent_market, api_keys) is not None:
+        if (
+            generate_and_set_image_for_market(market_address, market.question, api_keys)
+            is not None
+        ):
             logger.info(f"Generated and set image for `{market.question}`.")
         else:
             logger.warning(f"Failed to generate and set image for `{market.question}`.")

@@ -40,7 +40,12 @@ def main(creator: str) -> None:
             )
             continue
 
-        if generate_and_set_image_for_market(market, keys) is None:
+        if (
+            generate_and_set_image_for_market(
+                market.market_maker_contract_address_checksummed, market.question, keys
+            )
+            is None
+        ):
             print(
                 f"[{idx + 1} / {len(markets)}] Skipping {market.url} because of failed generation."
             )
