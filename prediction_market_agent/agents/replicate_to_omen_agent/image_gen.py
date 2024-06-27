@@ -21,7 +21,12 @@ def generate_and_set_image_for_market(
     market_contract = OmenFixedProductMarketMakerContract(address=market_address)
     # Test that the market actually exists.
     # TODO: How can we get the question from the market contract (without using the graph)? (to check that `market_question` is correct)
-    market_contract.totalSupply()
+    try:
+        market_contract.totalSupply()
+    except Exception as e:
+        raise ValueError(
+            f"Unable to verify contract exists for market address {market_address}."
+        ) from e
 
     image_mapping_contract = OmenThumbnailMapping()
     pinata = PinataPy(
