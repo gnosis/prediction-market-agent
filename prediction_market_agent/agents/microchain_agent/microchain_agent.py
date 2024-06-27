@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
     LEARNING_FUNCTIONS,
 )
@@ -44,6 +45,7 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
+    functions.extend([f() for f in API_FUNCTIONS])
     functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
     functions.extend([f(market_type=market_type) for f in MARKET_FUNCTIONS])

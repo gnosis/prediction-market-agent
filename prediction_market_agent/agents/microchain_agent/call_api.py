@@ -1,6 +1,10 @@
+import json
+from typing import Optional
+
 import requests
 from microchain import Function
-from typing import Any
+
+
 class CallAPI(Function):
     @property
     def description(self) -> str:
@@ -10,31 +14,47 @@ class CallAPI(Function):
         return (
             "Use this function to make arbitrary API calls to any endpoint with any parameters. "
             "It supports different HTTP methods (GET, POST, etc.) and can include headers, "
-            "query parameters, and request bodies."
+            "query parameters, and request bodies. "
+            "Params, data and headers needs to be passed as JSON strings."
         )
 
     @property
     def example_args(self) -> list[str]:
         """
         Returns a list of strings representing the example arguments for the API call.
-
         """
         return ["method", "url", "params", "data", "headers"]
 
-    def __call__(self, method: str, url: str, params: dict[str, Any] | None = None, data: dict[str, Any] | None = None, headers: dict[str, Any] | None = None) -> str:
+    def __call__(
+        self,
+        method: str,
+        url: str,
+        params: Optional[str] = None,
+        data: Optional[str] = None,
+        headers: Optional[str] = None,
+    ) -> str:
         """
         Sends an HTTP request using the specified method to the given URL with optional parameters, data, and headers.
 
         Args:
             method (str): The HTTP method to use for the request.
             url (str): The URL to send the request to.
-            params (dict, optional): Query parameters to include in the request. Defaults to None.
-            data (dict, optional): Request body to include in the request. Defaults to None.
-            headers (dict, optional): Headers to include in the request. Defaults to None.
+            params (str, optional): Query parameters to include in the request. Defaults to None. If provided, needs to be in JSON string format.
+            data (str, optional): Request body to include in the request. Defaults to None. If provided, needs to be in JSON string format.
+            headers (str, optional): Headers to include in the request. Defaults to None. If provided, needs to be in JSON string format.
 
         Returns:
-            str: The response string if the request was successful, or the error message if an exception occurred.
+            str: The response string if the request was successful.
         """
-        response = requests.request(method, url, params=params, data=data, headers=headers)
+        response = requests.request(
+            method,
+            url,
+            params=json.loads(params) if params else None,
+            data=json.loads(data) if data else None,
+            headers=json.loads(headers) if headers else None,
+        )
         response.raise_for_status()
         return response.text
+
+
+API_FUNCTIONS: list[type[Function]] = [CallAPI]
