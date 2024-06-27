@@ -307,6 +307,7 @@ class GetLiquidPositions(MarketFunction):
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address,
             liquid_only=True,
+            larger_than=1e-4,  # Ignore very small positions
         )
         return [str(position) for position in positions]
 

@@ -58,3 +58,12 @@ class LongTermMemoryTableHandler:
             order_by_column_name=LongTermMemories.datetime_.key,  # type: ignore
             order_desc=True,
         )
+
+    def delete_all_memories(self) -> None:
+        """
+        Delete all memories with `task_description`
+        """
+        self.sql_handler.delete_all_entries(
+            col_name=LongTermMemories.task_description.key,  # type: ignore
+            col_value=self.task_description,
+        )

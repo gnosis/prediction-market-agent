@@ -5,3 +5,4 @@
 kubectl rollout restart deploy pma-agent -n agents
 kubectl rollout restart deploy pma-agent-monitoring  -n agents
 kubectl rollout restart deploy autonomous-trader-agent -n agents
+kubectl rollout restart deploy deployed-general-agent-viewer -n agents
