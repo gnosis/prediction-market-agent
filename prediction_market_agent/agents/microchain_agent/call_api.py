@@ -23,7 +23,6 @@ class CallAPI:
         """
         Returns a list of strings representing the example arguments for the API call.
 
-        :rtype: list[str]
         """
         return ["method", "url", "params", "data", "headers"]
 
