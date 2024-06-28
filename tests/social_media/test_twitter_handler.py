@@ -4,15 +4,20 @@ from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_L
 from prediction_market_agent.agents.social_media_agent.social_media.twitter_handler import (
     TwitterHandler,
 )
+from prediction_market_agent.utils import SocialMediaAPIKeys
 
 
 @pytest.fixture(scope="module")
 def twitter_handler_obj() -> TwitterHandler:
-    from prediction_market_agent.agents.social_media_agent.social_media.twitter_handler import (
-        TwitterHandler,
+    mock_keys = SocialMediaAPIKeys(
+        FARCASTER_PRIVATE_KEY="test",
+        TWITTER_BEARER_TOKEN="test",
+        TWITTER_ACCESS_TOKEN="test",
+        TWITTER_ACCESS_TOKEN_SECRET="test",
+        TWITTER_API_KEY="test",
+        TWITTER_API_KEY_SECRET="test",
     )
-
-    yield TwitterHandler()
+    yield TwitterHandler(keys=mock_keys)
 
 
 def test_dummy(twitter_handler_obj: TwitterHandler):

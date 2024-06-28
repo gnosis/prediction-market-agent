@@ -1,9 +1,9 @@
-import tweepy
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
+from tweepy import Client
 
 from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
 from prediction_market_agent.agents.social_media_agent.social_media.abstract_handler import (
@@ -13,19 +13,20 @@ from prediction_market_agent.utils import SocialMediaAPIKeys, APIKeys
 
 
 class TwitterHandler(AbstractSocialMediaHandler):
-    client: tweepy.Client
+    client: Client
     llm: BaseChatModel
 
-    def __init__(self, model="gpt-4") -> None:
-        keys = SocialMediaAPIKeys()
-
-        self.client = tweepy.Client(
+    def __init__(
+        self, model="gpt-4", keys: SocialMediaAPIKeys = SocialMediaAPIKeys()
+    ) -> None:
+        self.client = Client(
             keys.twitter_bearer_token.get_secret_value(),
             keys.twitter_api_key.get_secret_value(),
             keys.twitter_api_key_secret.get_secret_value(),
             keys.twitter_access_token.get_secret_value(),
             keys.twitter_access_token_secret.get_secret_value(),
         )
+
         self.llm = ChatOpenAI(
             temperature=0,
             model=model,
