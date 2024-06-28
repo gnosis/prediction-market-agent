@@ -16,7 +16,9 @@ class TwitterHandler(AbstractSocialMediaHandler):
     client: Client
     llm: BaseChatModel
 
-    def __init__(self, model: str = "gpt-4", keys: SocialMediaAPIKeys = None) -> None:
+    def __init__(
+        self, model: str = "gpt-4", keys: SocialMediaAPIKeys | None = None
+    ) -> None:
         if keys is None:
             keys = SocialMediaAPIKeys()
         self.client = Client(
@@ -72,9 +74,9 @@ class TwitterHandler(AbstractSocialMediaHandler):
         posted_tweet = self.client.create_tweet(
             text=text, quote_tweet_id=quote_tweet_id
         )
-        logger.debug(f"Tweeted {text} - {posted_tweet}")
+        logger.info(f"Tweeted {text} - {posted_tweet}")
         try:
             return str(posted_tweet.data["id"])
         except Exception as e:
-            logger.debug("Could not extract tweet ID. Exception: ", e)
+            logger.exception("Could not extract tweet ID. Exception: ", e)
             return None
