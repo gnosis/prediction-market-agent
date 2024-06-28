@@ -35,9 +35,6 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
-REPLICATOR_ADDRESS = "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
-AGENT_0_ADDRESS = "0x2DD9f5678484C1F59F97eD334725858b938B4102"
-
 
 @pytest.fixture(scope="session")
 def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
