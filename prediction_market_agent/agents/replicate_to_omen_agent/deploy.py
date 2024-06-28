@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from web3 import Web3
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
@@ -18,6 +19,10 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replica
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
 from prediction_market_agent.utils import APIKeys
+
+REPLICATOR_ADDRESS = Web3.to_checksum_address(
+    "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
+)
 
 
 class ReplicateSettings(BaseSettings):
