@@ -1,4 +1,7 @@
+from typing import Generator
+
 import pytest
+from pydantic import SecretStr
 
 from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
 from prediction_market_agent.agents.social_media_agent.social_media.twitter_handler import (
@@ -8,19 +11,20 @@ from prediction_market_agent.utils import SocialMediaAPIKeys
 
 
 @pytest.fixture(scope="module")
-def twitter_handler_obj() -> TwitterHandler:
+def twitter_handler_obj() -> Generator[TwitterHandler, None, None]:
+    secret_str = SecretStr("test")
     mock_keys = SocialMediaAPIKeys(
-        FARCASTER_PRIVATE_KEY="test",
-        TWITTER_BEARER_TOKEN="test",
-        TWITTER_ACCESS_TOKEN="test",
-        TWITTER_ACCESS_TOKEN_SECRET="test",
-        TWITTER_API_KEY="test",
-        TWITTER_API_KEY_SECRET="test",
+        FARCASTER_PRIVATE_KEY=secret_str,
+        TWITTER_BEARER_TOKEN=secret_str,
+        TWITTER_ACCESS_TOKEN=secret_str,
+        TWITTER_ACCESS_TOKEN_SECRET=secret_str,
+        TWITTER_API_KEY=secret_str,
+        TWITTER_API_KEY_SECRET=secret_str,
     )
     yield TwitterHandler(keys=mock_keys)
 
 
-def test_dummy(twitter_handler_obj: TwitterHandler):
+def test_make_tweet_more_concise(twitter_handler_obj: TwitterHandler) -> None:
     long_tweet = (
         "Account recovery is the most requested use for ZK Email, as losing your wallet hampers crypto "
         "adoption. To solve this, we are open sourcing a generic zk email-based account recovery module for "
