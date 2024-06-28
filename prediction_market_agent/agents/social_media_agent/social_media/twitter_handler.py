@@ -16,9 +16,9 @@ class TwitterHandler(AbstractSocialMediaHandler):
     client: Client
     llm: BaseChatModel
 
-    def __init__(
-        self, model: str = "gpt-4", keys: SocialMediaAPIKeys = SocialMediaAPIKeys()
-    ) -> None:
+    def __init__(self, model: str = "gpt-4", keys: SocialMediaAPIKeys = None) -> None:
+        if keys is None:
+            keys = SocialMediaAPIKeys()
         self.client = Client(
             keys.twitter_bearer_token.get_secret_value(),
             keys.twitter_api_key.get_secret_value(),
