@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from string import Template
 
@@ -5,6 +6,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -108,3 +110,26 @@ def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
         prompt_template=prompt,
         model=model,
     )
+
+
+def get_event_date_from_question(question: str) -> datetime | None:
+    llm = ChatOpenAI(
+        model="gpt-4-turbo",
+        temperature=0.0,
+        api_key=APIKeys().openai_api_key.get_secret_value(),
+    )
+    event_date_str = str(
+        llm.invoke(
+            f"Extract the event date in the format `%m-%d-%Y` from the following question, don't write anything else, only the event date in the given format: `{question}`"
+        ).content
+    ).strip("'`\"")
+
+    try:
+        event_date = datetime.strptime(event_date_str, "%m-%d-%Y")
+    except ValueError:
+        logger.error(
+            f"Could not extract event date from question `{question}`, got `{event_date_str}`."
+        )
+        return None
+
+    return event_date
