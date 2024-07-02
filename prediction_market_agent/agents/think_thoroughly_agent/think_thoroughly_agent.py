@@ -19,7 +19,10 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.parallelism import par_generator
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import (
+    add_utc_timezone_validator,
+    utcnow,
+)
 from pydantic import BaseModel
 from requests import HTTPError
 
@@ -38,6 +41,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     RESEARCH_OUTCOME_PROMPT,
     RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT,
 )
+from prediction_market_agent.agents.utils import get_event_date_from_question
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -283,7 +287,10 @@ class CrewAIAgentSubquestions:
         return [CorrelatedMarketInput.from_omen_market(market) for market in markets]
 
     def generate_final_decision(
-        self, question: str, scenarios_with_probabilities: list[t.Tuple[str, Answer]]
+        self,
+        question: str,
+        scenarios_with_probabilities: list[t.Tuple[str, Answer]],
+        created_time: datetime.datetime | None,
     ) -> Answer:
         predictor = self._get_predictor()
 
@@ -298,6 +305,17 @@ class CrewAIAgentSubquestions:
 
         correlated_markets = self.get_correlated_markets(question)
 
+        event_date = add_utc_timezone_validator(get_event_date_from_question(question))
+        n_remaining_days = (event_date - utcnow()).days if event_date else "Unknown"
+        n_market_open_days = (
+            (utcnow() - add_utc_timezone_validator(created_time)).days
+            if created_time
+            else "Unknown"
+        )
+        logger.info(
+            f"Event date is {event_date} and {n_remaining_days} days remaining. Market is already open for {n_market_open_days} days."
+        )
+
         logger.info(f"Starting to generate final decision for '{question}'.")
         crew.kickoff(
             inputs={
@@ -311,6 +329,8 @@ class CrewAIAgentSubquestions:
                     f"- Market '{m.question_title}' has {m.current_p_yes * 100:.2f}% probability of happening"
                     for m in correlated_markets
                 ),
+                "n_remaining_days": n_remaining_days,
+                "n_market_open_days": n_market_open_days,
             }
         )
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
@@ -324,7 +344,10 @@ class CrewAIAgentSubquestions:
         return output
 
     def answer_binary_market(
-        self, question: str, n_iterations: int = 1
+        self,
+        question: str,
+        n_iterations: int = 1,
+        created_time: datetime.datetime | None = None,
     ) -> Answer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
@@ -355,7 +378,9 @@ class CrewAIAgentSubquestions:
                 )
 
         final_answer = (
-            self.generate_final_decision(question, scenarios_with_probs)
+            self.generate_final_decision(
+                question, scenarios_with_probs, created_time=created_time
+            )
             if scenarios_with_probs
             else None
         )

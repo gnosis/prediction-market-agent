@@ -15,7 +15,9 @@ class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
         self.agent = CrewAIAgentSubquestions(model=self.model)
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        return self.agent.answer_binary_market(market.question)
+        return self.agent.answer_binary_market(
+            market.question, created_time=market.created_time
+        )
 
     def before(self, market_type: MarketType) -> None:
         self.agent.update_markets()
