@@ -6187,13 +6187,13 @@ test = ["coverage", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.39.5"
+version = "0.40.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.12,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.39.5-py3-none-any.whl", hash = "sha256:acd0d43de0c59a6000622e97cf3e0ceccb818bc7506b6ccc2ad7110563bb3fcb"},
-    {file = "prediction_market_agent_tooling-0.39.5.tar.gz", hash = "sha256:b9e019b7cd0a5edda9d3b402d11e5f4817b5f3aeffedbe961411416f8826692a"},
+    {file = "prediction_market_agent_tooling-0.40.0-py3-none-any.whl", hash = "sha256:f707067de1ea1c27e11eca292d625597616b65f1f3257f4a2d54ef32f4406c76"},
+    {file = "prediction_market_agent_tooling-0.40.0.tar.gz", hash = "sha256:a92e1cfc25cd078c273435e0b93c083cac6fe1b7e75ff54aacf6fdf2769ff935"},
 ]
 
 [package.dependencies]
@@ -9889,4 +9889,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "611a7f74675a5e6915106fa283d125a5540cc81e0d4e6423833bb99696853ac4"
+content-hash = "2ab9629e65ae404efea4ddbb3694d99032e27eae4a840f27226bf7b999a54a8e"
