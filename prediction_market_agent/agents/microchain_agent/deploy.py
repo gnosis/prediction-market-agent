@@ -15,6 +15,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+from prediction_market_agent.utils import APIKeys
 
 
 class DeployableMicrochainAgent(DeployableAgent):
@@ -44,6 +45,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             allow_stop=True,
             long_term_memory=long_term_memory,
             prompt_handler=prompt_handler if self.load_historical_prompt else None,
+            openai_api_key=APIKeys().openai_api_key,
         )
         agent.run(self.n_iterations)
         long_term_memory.save_history(agent.history)

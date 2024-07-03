@@ -6,6 +6,8 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
+from pydantic import SecretStr
+
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
     streamlit_asyncio_event_loop_hack,
@@ -129,6 +131,7 @@ agent = build_agent(
     market_type=MARKET_TYPE,
     model="foo",  # placeholder, not used
     system_prompt="foo",  # placeholder, not used
+    openai_api_key=SecretStr("foo"),  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
     prompt_handler=None,
