@@ -23,17 +23,6 @@ class AgentIdentifier(str, Enum):
     MICROCHAIN_AGENT_OMEN_LEARNING_2 = "general-agent-2"
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
 
-    @staticmethod
-    def general_agent_identifiers() -> list["AgentIdentifier"]:
-        return [
-            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0,
-            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1,
-            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2,
-            AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT,
-            AgentIdentifier.MICROCHAIN_AGENT_OMEN,
-            AgentIdentifier.MICROCHAIN_AGENT_OMEN_TEST,
-        ]
-
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """
 You are an agent that trades in prediction markets. You are aiming to improve

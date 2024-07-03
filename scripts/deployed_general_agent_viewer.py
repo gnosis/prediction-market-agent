@@ -48,6 +48,10 @@ class DeployedGeneralAgentSettings(BaseSettings):
     def agent_identifier_to_private_key(self) -> dict[AgentIdentifier, PrivateKey]:
         return self.AGENT_IDENTIFIER_TO_PRIVATE_KEY
 
+    @property
+    def available_agents(self) -> list[AgentIdentifier]:
+        return list(self.agent_identifier_to_private_key.keys())
+
     def to_api_keys(self, identifier: AgentIdentifier) -> APIKeys:
         return APIKeys(
             BET_FROM_PRIVATE_KEY=self.agent_identifier_to_private_key[identifier]
@@ -64,11 +68,13 @@ st.set_page_config(
 )
 st.title("Deployed Trader Agent Viewer")
 
+settings = DeployedGeneralAgentSettings()
+
 with st.sidebar:
     task_description = AgentIdentifier(
         st.selectbox(
             label="Select the agent",
-            options=[x.value for x in AgentIdentifier.general_agent_identifiers()],
+            options=[x.value for x in settings.available_agents],
             index=0,
         )
     )
@@ -76,7 +82,6 @@ with st.sidebar:
         st.error("Please select an agent.")
         st.stop()
 
-settings = DeployedGeneralAgentSettings()
 keys = settings.to_api_keys(task_description)
 starting_balance = settings.starting_balance
 
