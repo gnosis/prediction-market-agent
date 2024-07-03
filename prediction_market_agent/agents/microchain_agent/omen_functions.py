@@ -18,9 +18,10 @@ class RedeemWinningBets(Function):
         return []
 
     def __call__(self) -> str:
-        prev_balance = get_balance(market_type=MarketType.OMEN)
-        redeem_from_all_user_positions(APIKeys())
-        new_balance = get_balance(market_type=MarketType.OMEN)
+        keys = APIKeys()
+        prev_balance = get_balance(keys, market_type=MarketType.OMEN)
+        redeem_from_all_user_positions(keys)
+        new_balance = get_balance(keys, market_type=MarketType.OMEN)
         currency = new_balance.currency.value
         if redeemed_amount := new_balance.amount - prev_balance.amount > 0:
             return (

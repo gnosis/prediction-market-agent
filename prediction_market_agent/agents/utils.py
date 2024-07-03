@@ -6,7 +6,6 @@ from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -18,16 +17,22 @@ from prediction_market_agent.utils import APIKeys
 class AgentIdentifier(str, Enum):
     THINK_THOROUGHLY = "think-thoroughly-agent"
     MICROCHAIN_AGENT_OMEN = "microchain-agent-deployment-omen"
+    MICROCHAIN_AGENT_OMEN_TEST = "microchain-agent-deployment-omen_test"
+    MICROCHAIN_AGENT_OMEN_LEARNING_0 = "general-agent-0"
+    MICROCHAIN_AGENT_OMEN_LEARNING_1 = "general-agent-1"
+    MICROCHAIN_AGENT_OMEN_LEARNING_2 = "general-agent-2"
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
 
     @staticmethod
-    def microchain_task_from_market(
-        market_type: MarketType,
-    ) -> "AgentIdentifier":
-        if market_type == MarketType.OMEN:
-            return AgentIdentifier.MICROCHAIN_AGENT_OMEN
-        else:
-            raise ValueError(f"Market {market_type} not supported.")
+    def general_agent_identifiers() -> list["AgentIdentifier"]:
+        return [
+            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0,
+            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1,
+            AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2,
+            AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT,
+            AgentIdentifier.MICROCHAIN_AGENT_OMEN,
+            AgentIdentifier.MICROCHAIN_AGENT_OMEN_TEST,
+        ]
 
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """

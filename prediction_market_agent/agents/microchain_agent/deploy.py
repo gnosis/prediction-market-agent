@@ -22,6 +22,7 @@ class DeployableMicrochainAgent(DeployableAgent):
     n_iterations = 50
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN
 
     def run(
         self,
@@ -31,11 +32,10 @@ class DeployableMicrochainAgent(DeployableAgent):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
-        task_description = AgentIdentifier.microchain_task_from_market(market_type)
-        long_term_memory = LongTermMemoryTableHandler(task_description=task_description)
-        prompt_handler = PromptTableHandler(
-            session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN
+        long_term_memory = LongTermMemoryTableHandler(
+            task_description=self.task_description
         )
+        prompt_handler = PromptTableHandler(session_identifier=self.task_description)
         system_prompt = SYSTEM_PROMPTS[self.system_prompt_choice]
         agent: Agent = build_agent(
             market_type=market_type,
@@ -51,6 +51,19 @@ class DeployableMicrochainAgent(DeployableAgent):
         prompt_handler.save_prompt(editable_prompt)
 
 
-class DeployableMicrochainModifiableSystemPromptAgent(DeployableMicrochainAgent):
+class DeployableMicrochainModifiableSystemPromptAgent0(DeployableMicrochainAgent):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
     load_historical_prompt: bool = True
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
+
+
+class DeployableMicrochainModifiableSystemPromptAgent1(DeployableMicrochainAgent):
+    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
+    load_historical_prompt: bool = True
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
+
+
+class DeployableMicrochainModifiableSystemPromptAgent2(DeployableMicrochainAgent):
+    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
+    load_historical_prompt: bool = True
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2

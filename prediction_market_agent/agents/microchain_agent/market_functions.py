@@ -119,9 +119,10 @@ class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
         return self._description + " Note, this costs money to run."
 
     def __call__(self, market_id: str) -> str:
+        keys = APIKeys()
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
-        account_balance = float(get_balance(market_type=self.market_type).amount)
+        account_balance = float(get_balance(keys, market_type=self.market_type).amount)
         if account_balance < MECH_CALL_XDAI_LIMIT:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
@@ -175,7 +176,8 @@ class BuyTokens(MarketFunction):
         if amount > self.MAX_AMOUNT:
             return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
 
-        account_balance = float(get_balance(market_type=self.market_type).amount)
+        keys = APIKeys()
+        account_balance = float(get_balance(keys, market_type=self.market_type).amount)
         if account_balance < amount:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
@@ -283,7 +285,8 @@ class GetBalance(MarketFunction):
         return []
 
     def __call__(self) -> float:
-        return get_balance(market_type=self.market_type).amount
+        keys = APIKeys()
+        return get_balance(keys, market_type=self.market_type).amount
 
 
 class GetLiquidPositions(MarketFunction):
