@@ -358,4 +358,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     SellYes,
     SellNo,
     GetLiquidPositions,
+    GetResolvedBetsWithOutcomes,
 ]
