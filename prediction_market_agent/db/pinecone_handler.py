@@ -4,7 +4,6 @@ import typing as t
 from datetime import datetime
 from typing import Optional
 
-from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from loguru import logger
@@ -20,13 +19,15 @@ from prediction_market_agent.agents.think_thoroughly_agent.models import (
 )
 from prediction_market_agent.utils import APIKeys
 
-INDEX_NAME = "omen-markets"
+# INDEX_NAME = "omen-markets"
+INDEX_NAME = "omen-index-text-embeddings-3-large"
 T = t.TypeVar("T")
 
 
 class PineconeHandler:
-    def __init__(self) -> None:
+    def __init__(self, model: str = "text-embedding-3-large") -> None:
         keys = APIKeys()
+        self.model = model
         self.pc = Pinecone(api_key=keys.pinecone_api_key.get_secret_value())
         self.index = self.pc.Index(INDEX_NAME)
         self.embeddings = OpenAIEmbeddings(
@@ -55,6 +56,8 @@ class PineconeHandler:
     def insert_texts_if_not_exists(
         self, texts: list[str], metadatas: Optional[list[dict[str, t.Any]]] = None
     ) -> None:
+        # ToDo - Check metadatas (question_title) not matching text (question_title is correct)
+        # ToDo - find_texts_not_in_vec_db should also filter metadatas
         ids_to_texts = self.find_texts_not_in_vec_db(texts)
         ids, missing_texts = ids_to_texts.keys(), ids_to_texts.values()
         self.vectorstore.add_texts(
@@ -98,15 +101,12 @@ class PineconeHandler:
     ) -> list[PineconeMetadata]:
         # Note that pagination is not implemented in the Pinecone client.
         # Hence we set a large limit and hope we get enough results that satisfy the threshold.
-        documents_and_scores = self.vectorstore.similarity_search_with_score(
-            query=text, k=int(limit * 5)
+        documents_and_scores = self.vectorstore.similarity_search_with_relevance_scores(
+            query=text, k=int(limit * 5), score_threshold=threshold
         )
-        all_documents: list[Document] = []
-        for doc, score in documents_and_scores:
-            if len(all_documents) >= limit:
-                break
-            if score >= threshold:
-                all_documents.append(doc)
 
-        logger.debug(f"Found {len(all_documents)} relevant documents.")
-        return [PineconeMetadata.model_validate(doc.metadata) for doc in all_documents]
+        logger.debug(f"Found {len(documents_and_scores)} relevant documents.")
+        return [
+            PineconeMetadata.model_validate(doc.metadata)
+            for doc, score in documents_and_scores
+        ]
