@@ -329,13 +329,13 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
         )
 
     @property
-    def example_args(self) -> list[str]:
-        return []
+    def example_args(self) -> list[int]:
+        return [7]
 
-    def __call__(self) -> list[dict[str, t.Any]]:
+    def __call__(self, n_days: int = 7) -> list[dict[str, t.Any]]:
         subgraph_handler = OmenSubgraphHandler()
         # We look back a standard interval as a rule-of-thumb for now.
-        start_time = utcnow() - timedelta(days=7)
+        start_time = utcnow() - timedelta(days=n_days)
         bets = subgraph_handler.get_resolved_bets_with_valid_answer(
             better_address=self.user_address,
             start_time=start_time,
