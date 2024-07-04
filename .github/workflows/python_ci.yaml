@@ -12,7 +12,7 @@ env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   BET_FROM_PRIVATE_KEY: ${{ secrets.BET_FROM_PRIVATE_KEY }}
   GRAPH_API_KEY: ${{ secrets.GRAPH_API_KEY }}
-  PINECONE_API_KEY: ${{ secrets.GRAPH_API_KEY }}
+  PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
 
 jobs:
   mypy:
