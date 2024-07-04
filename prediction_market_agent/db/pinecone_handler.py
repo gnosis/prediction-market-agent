@@ -4,11 +4,13 @@ import typing as t
 from datetime import datetime
 from typing import Optional
 
+from langchain_core.vectorstores import VectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from loguru import logger
-from pinecone import Pinecone
+from pinecone import Pinecone, Index
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -25,16 +27,26 @@ T = t.TypeVar("T")
 
 
 class PineconeHandler:
+    vectorstore: VectorStore
+    pc: Pinecone
+    index: Index
+
     def __init__(self, model: str = "text-embedding-3-large") -> None:
-        keys = APIKeys()
+        self.keys = APIKeys()
         self.model = model
-        self.pc = Pinecone(api_key=keys.pinecone_api_key.get_secret_value())
-        self.index = self.pc.Index(INDEX_NAME)
         self.embeddings = OpenAIEmbeddings(
-            api_key=keys.openai_api_key.get_secret_value()
+            api_key=self.keys.openai_api_key.get_secret_value(), model=model
         )
+        self.build_pinecone()
+        self.build_vectorstore()
+
+    def build_pinecone(self):
+        self.pc = Pinecone(api_key=self.keys.pinecone_api_key.get_secret_value())
+        self.index = self.pc.Index(INDEX_NAME)
+
+    def build_vectorstore(self):
         self.vectorstore = PineconeVectorStore(
-            pinecone_api_key=keys.pinecone_api_key.get_secret_value(),
+            pinecone_api_key=self.keys.pinecone_api_key.get_secret_value(),
             embedding=self.embeddings,
             index_name=INDEX_NAME,
         )
@@ -46,22 +58,28 @@ class PineconeHandler:
     def decode_id(self, id: str) -> str:
         return base64.b64decode(id).decode("utf-8")
 
-    def find_texts_not_in_vec_db(self, texts: list[str]) -> dict[str, str]:
-        ids_from_texts = [self.encode_text(text) for text in texts]
+    def filter_markets_already_in_index(
+        self, markets: list[OmenMarket]
+    ) -> list[OmenMarket]:
+        ids_market_map = {self.encode_text(m.question_title): m for m in markets}
+
+        all_ids = list(ids_market_map.keys())
         # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
         ids_in_vec_db = [y for x in self.index.list() for y in x]
-        missing_ids = set(ids_from_texts).difference(ids_in_vec_db)
-        return {id: self.decode_id(id) for id in missing_ids}
+        missing_ids = set(all_ids).difference(ids_in_vec_db)
+        filtered_markets = [ids_market_map[id] for id in missing_ids]
+        return filtered_markets
 
-    def insert_texts_if_not_exists(
-        self, texts: list[str], metadatas: Optional[list[dict[str, t.Any]]] = None
+    def insert_texts(
+        self,
+        ids: list[str],
+        texts: list[str],
+        metadatas: Optional[list[dict[str, t.Any]]] = None,
     ) -> None:
-        # ToDo - Check metadatas (question_title) not matching text (question_title is correct)
-        # ToDo - find_texts_not_in_vec_db should also filter metadatas
-        ids_to_texts = self.find_texts_not_in_vec_db(texts)
-        ids, missing_texts = ids_to_texts.keys(), ids_to_texts.values()
         self.vectorstore.add_texts(
-            texts=missing_texts, ids=list(ids), metadatas=metadatas
+            texts=texts,
+            ids=ids,
+            metadatas=metadatas,
         )
 
     @staticmethod
@@ -80,10 +98,14 @@ class PineconeHandler:
             sort_by=SortBy.NEWEST,
             created_after=created_after,
         )
-        texts = [m.question_title for m in markets]
-        metadatas = [
-            PineconeMetadata.from_omen_market(market).model_dump() for market in markets
-        ]
+        missing_markets = self.filter_markets_already_in_index(markets=markets)
+
+        texts = []
+        metadatas = []
+        for m in missing_markets:
+            texts.append(m.question_title)
+            metadatas.append(PineconeMetadata.from_omen_market(m).model_dump())
+
         if texts:
             n_elements = 100
             chunked_texts = list(self.chunks(texts, n_elements))
@@ -91,18 +113,19 @@ class PineconeHandler:
             for text_chunk, metadata_chunk in tqdm(
                 zip(chunked_texts, chunked_metadatas), total=len(chunked_texts)
             ):
+                ids_chunk = [self.encode_text(text) for text in text_chunk]
                 logger.debug(f"Inserting {len(text_chunk)} into the vector database.")
-                self.insert_texts_if_not_exists(
-                    texts=text_chunk, metadatas=metadata_chunk
+                self.insert_texts(
+                    ids=ids_chunk, texts=text_chunk, metadatas=metadata_chunk
                 )
 
     def find_nearest_questions_with_threshold(
-        self, limit: int, text: str, threshold: float = 0.7
+        self, limit: int, text: str, threshold: float = 0.25
     ) -> list[PineconeMetadata]:
         # Note that pagination is not implemented in the Pinecone client.
         # Hence we set a large limit and hope we get enough results that satisfy the threshold.
         documents_and_scores = self.vectorstore.similarity_search_with_relevance_scores(
-            query=text, k=int(limit * 5), score_threshold=threshold
+            query=text, k=limit, score_threshold=threshold
         )
 
         logger.debug(f"Found {len(documents_and_scores)} relevant documents.")

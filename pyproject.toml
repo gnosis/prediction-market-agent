@@ -66,6 +66,9 @@ plotly = "^5.22.0"
 
 
 
+[tool.poetry.group.dev.dependencies]
+langchain-chroma = "^0.1.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

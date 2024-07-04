@@ -4301,6 +4301,23 @@ SQLAlchemy = ">=1.4,<3"
 tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<9.0.0"
 
 [[package]]
+name = "langchain-chroma"
+version = "0.1.2"
+description = "An integration package connecting Chroma and LangChain"
+optional = false
+python-versions = "<4,>=3.8.1"
+files = [
+    {file = "langchain_chroma-0.1.2-py3-none-any.whl", hash = "sha256:0948f2975091dfef685a7981c140b8fd8a3b0f0602abba61abbcac7959beee4c"},
+    {file = "langchain_chroma-0.1.2.tar.gz", hash = "sha256:745a53b93e7ae058f9666a48e15ff211122656032ed0e8ffb7291b402f5bf23b"},
+]
+
+[package.dependencies]
+chromadb = ">=0.4.0,<0.6.0"
+fastapi = ">=0.95.2,<1"
+langchain-core = ">=0.1.40,<0.3"
+numpy = {version = ">=1,<2", markers = "python_version < \"3.12\""}
+
+[[package]]
 name = "langchain-cohere"
 version = "0.1.8"
 description = "An integration package connecting Cohere and LangChain"
@@ -10633,4 +10650,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "c17ba7fa448f7abe622953659248d1a9bacaebdea2de96d7e34e17d14a2ea3f3"
+content-hash = "73c2a23e152837737733eff0dad87d06bcc08c2e66a78512d9e2dd9902e63045"
