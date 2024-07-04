@@ -4,6 +4,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
+from pydantic.v1.types import SecretStr as SecretStrV1
 
 from prediction_market_agent.utils import APIKeys
 
@@ -14,7 +15,7 @@ def _summary(
     llm = ChatOpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0125",
-        api_key=APIKeys().openai_api_key,
+        api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
     )
     text_splitter = RecursiveCharacterTextSplitter(
         separators=separators, chunk_size=10000, chunk_overlap=500

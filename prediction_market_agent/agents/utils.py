@@ -9,6 +9,7 @@ from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
+from pydantic.v1.types import SecretStr as SecretStrV1
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -74,7 +75,7 @@ def _summarize_learnings(
     llm = ChatOpenAI(
         temperature=0,
         model=model,
-        api_key=APIKeys().openai_api_key,
+        api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
     )
     summary_chain = load_summarize_chain(
         llm=llm,
@@ -116,7 +117,7 @@ def get_event_date_from_question(question: str) -> datetime | None:
     llm = ChatOpenAI(
         model="gpt-4-turbo",
         temperature=0.0,
-        api_key=APIKeys().openai_api_key,
+        api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
     )
     event_date_str = str(
         llm.invoke(

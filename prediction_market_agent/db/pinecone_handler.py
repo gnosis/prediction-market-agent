@@ -8,7 +8,7 @@ from langchain_core.vectorstores import VectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from loguru import logger
-from pinecone import Pinecone, Index
+from pinecone import Index, Pinecone
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
