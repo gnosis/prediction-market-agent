@@ -2,6 +2,7 @@ from typing import Generator
 from unittest.mock import Mock, patch
 
 import pytest
+from eth_typing import HexAddress, HexStr
 from langchain_chroma import Chroma
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -34,9 +35,10 @@ def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
 
     p.vectorstore = Chroma(embedding_function=p.embeddings)
     texts = TRUMP_MARKETS + BIDEN_MARKETS + UNRELATED_MARKETS
-    # Pydantic model requires metadata
     metadatas = [
-        PineconeMetadata(question_title=text, market_address="").model_dump()
+        PineconeMetadata(
+            question_title=text, market_address=HexAddress(HexStr(""))
+        ).model_dump()
         for text in texts
     ]
     p.insert_texts(
@@ -45,7 +47,7 @@ def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
     yield p
 
 
-def test_search_similarity(test_pinecone_handler: PineconeHandler):
+def test_search_similarity(test_pinecone_handler: PineconeHandler) -> None:
     limit = len(TRUMP_MARKETS) + len(BIDEN_MARKETS)
     # We aim to find all presidential-related questions - we add 1 to test the threshold effectiveness
     questions = test_pinecone_handler.find_nearest_questions_with_threshold(

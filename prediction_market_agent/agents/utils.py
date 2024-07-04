@@ -74,7 +74,7 @@ def _summarize_learnings(
     llm = ChatOpenAI(
         temperature=0,
         model=model,
-        api_key=APIKeys().openai_api_key.get_secret_value(),
+        api_key=APIKeys().openai_api_key,
     )
     summary_chain = load_summarize_chain(
         llm=llm,
@@ -116,7 +116,7 @@ def get_event_date_from_question(question: str) -> datetime | None:
     llm = ChatOpenAI(
         model="gpt-4-turbo",
         temperature=0.0,
-        api_key=APIKeys().openai_api_key.get_secret_value(),
+        api_key=APIKeys().openai_api_key,
     )
     event_date_str = str(
         llm.invoke(
