@@ -14,6 +14,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
+from pydantic.v1.types import SecretStr as SecretStrV1
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -35,16 +36,17 @@ class PineconeHandler:
         self.keys = APIKeys()
         self.model = model
         self.embeddings = OpenAIEmbeddings(
-            api_key=self.keys.openai_api_key.get_secret_value(), model=model
+            api_key=SecretStrV1(self.keys.openai_api_key.get_secret_value()),
+            model=model,
         )
         self.build_pinecone()
         self.build_vectorstore()
 
-    def build_pinecone(self):
+    def build_pinecone(self) -> None:
         self.pc = Pinecone(api_key=self.keys.pinecone_api_key.get_secret_value())
         self.index = self.pc.Index(INDEX_NAME)
 
-    def build_vectorstore(self):
+    def build_vectorstore(self) -> None:
         self.vectorstore = PineconeVectorStore(
             pinecone_api_key=self.keys.pinecone_api_key.get_secret_value(),
             embedding=self.embeddings,
@@ -61,6 +63,14 @@ class PineconeHandler:
     def filter_markets_already_in_index(
         self, markets: list[OmenMarket]
     ) -> list[OmenMarket]:
+        """
+        This function filters out markets based on the market_title attribute of each market.
+        It derives the ID of each market by encoding the market_title using base64 and
+        then checks for the existence of these IDs in the index.
+
+        The function then returns a list of markets that are not present in the index.
+
+        """
         ids_market_map = {self.encode_text(m.question_title): m for m in markets}
 
         all_ids = list(ids_market_map.keys())

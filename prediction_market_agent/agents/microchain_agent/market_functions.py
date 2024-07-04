@@ -1,14 +1,9 @@
 import typing as t
-from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
-from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -317,35 +312,6 @@ class GetLiquidPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
-class GetResolvedBetsWithOutcomes(MarketFunction):
-    def __init__(self, market_type: MarketType) -> None:
-        self.user_address = APIKeys().bet_from_address
-        super().__init__(market_type=market_type)
-
-    @property
-    def description(self) -> str:
-        return (
-            "Use this function to fetch the outcomes of previous bets you have placed."
-        )
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> list[dict[str, t.Any]]:
-        subgraph_handler = OmenSubgraphHandler()
-        # We look back a standard interval as a rule-of-thumb for now.
-        start_time = utcnow() - timedelta(days=7)
-        bets = subgraph_handler.get_resolved_bets_with_valid_answer(
-            better_address=self.user_address,
-            start_time=start_time,
-            end_time=None,
-            market_id=None,
-        )
-        generic_bets = [b.to_generic_resolved_bet() for b in bets]
-        return [b.model_dump() for b in generic_bets]
-
-
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
@@ -358,5 +324,4 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     SellYes,
     SellNo,
     GetLiquidPositions,
-    GetResolvedBetsWithOutcomes,
 ]
