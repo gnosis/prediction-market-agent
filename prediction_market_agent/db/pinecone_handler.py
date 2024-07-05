@@ -14,7 +14,6 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from pydantic.v1.types import SecretStr as SecretStrV1
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -36,7 +35,7 @@ class PineconeHandler:
         self.keys = APIKeys()
         self.model = model
         self.embeddings = OpenAIEmbeddings(
-            api_key=SecretStrV1(self.keys.openai_api_key.get_secret_value()),
+            api_key=self.keys.openai_api_key,
             model=model,
         )
         self.build_pinecone()

@@ -8,7 +8,6 @@ from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
-from pydantic.v1.types import SecretStr as SecretStrV1
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
@@ -172,7 +171,7 @@ def has_question_event_happened_in_the_past(
     llm = ChatOpenAI(
         model=model,
         temperature=0.0,
-        api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
+        api_key=APIKeys().openai_api_key,
         callbacks=callbacks,
     )
     prompt = ChatPromptTemplate.from_template(
@@ -208,7 +207,7 @@ def get_known_outcome(
     llm = ChatOpenAI(
         model=model,
         temperature=0.0,
-        api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
+        api_key=APIKeys().openai_api_key,
         callbacks=callbacks,
     )
     while tries < max_tries:

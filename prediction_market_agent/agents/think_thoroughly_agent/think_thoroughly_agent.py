@@ -24,7 +24,6 @@ from prediction_market_agent_tooling.tools.utils import (
     utcnow,
 )
 from pydantic import BaseModel
-from pydantic.v1.types import SecretStr as SecretStrV1
 from requests import HTTPError
 
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
@@ -152,7 +151,7 @@ class CrewAIAgentSubquestions:
         #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = ChatOpenAI(
             model=self.model,
-            api_key=SecretStrV1(keys.openai_api_key.get_secret_value()),
+            api_key=keys.openai_api_key,
             temperature=0.0,
         )
         return llm

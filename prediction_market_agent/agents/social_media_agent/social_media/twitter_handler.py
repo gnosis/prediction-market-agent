@@ -3,7 +3,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
-from pydantic.v1.types import SecretStr as SecretStrV1
 from tweepy import Client
 
 from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
@@ -33,7 +32,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         self.llm = ChatOpenAI(
             temperature=0,
             model=model,
-            api_key=SecretStrV1(APIKeys().openai_api_key.get_secret_value()),
+            api_key=APIKeys().openai_api_key,
         )
 
     def make_tweet_more_concise(self, tweet: str) -> str:
