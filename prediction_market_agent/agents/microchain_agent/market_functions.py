@@ -1,14 +1,9 @@
 import typing as t
-from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
-    OmenSubgraphHandler,
-)
-from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -333,17 +328,9 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
         return [7]
 
     def __call__(self, n_days: int = 7) -> list[dict[str, t.Any]]:
-        subgraph_handler = OmenSubgraphHandler()
         # We look back a standard interval as a rule-of-thumb for now.
-        start_time = utcnow() - timedelta(days=n_days)
-        bets = subgraph_handler.get_resolved_bets_with_valid_answer(
-            better_address=self.user_address,
-            start_time=start_time,
-            end_time=None,
-            market_id=None,
-        )
-        generic_bets = [b.to_generic_resolved_bet() for b in bets]
-        return [b.model_dump() for b in generic_bets]
+        # ToDo - call positions = self.market_type.market_class.get_resolved_bets_made_since
+        return []
 
 
 # Functions that interact with the prediction markets
