@@ -98,6 +98,19 @@ class PineconeHandler:
         for i in range(0, len(array), n_elements):
             yield array[i : i + n_elements]
 
+    @staticmethod
+    def deduplicate_markets(markets: list[OmenMarket]) -> list[OmenMarket]:
+        unique_market_titles = {}
+        for market in markets:
+            if (
+                market.title not in unique_market_titles
+                or unique_market_titles[market.title].collateralVolume
+                < market.collateralVolume
+            ):
+                unique_market_titles[market.question_title] = market
+
+        return list(unique_market_titles.values())
+
     def insert_all_omen_markets_if_not_exists(
         self, created_after: datetime | None = None
     ) -> None:
@@ -108,7 +121,11 @@ class PineconeHandler:
             sort_by=SortBy.NEWEST,
             created_after=created_after,
         )
-        missing_markets = self.filter_markets_already_in_index(markets=markets)
+
+        markets_without_duplicates = self.deduplicate_markets(markets)
+        missing_markets = self.filter_markets_already_in_index(
+            markets=markets_without_duplicates
+        )
 
         texts = []
         metadatas = []
