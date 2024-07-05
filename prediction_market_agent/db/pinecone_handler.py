@@ -21,7 +21,6 @@ from prediction_market_agent.agents.think_thoroughly_agent.models import (
 )
 from prediction_market_agent.utils import APIKeys
 
-# INDEX_NAME = "omen-markets"
 INDEX_NAME = "omen-index-text-embeddings-3-large"
 T = t.TypeVar("T")
 
