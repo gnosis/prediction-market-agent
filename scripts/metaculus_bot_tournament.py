@@ -1,12 +1,15 @@
 import sys
+from typing import Sequence
 
 import typer
 from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.metaculus.metaculus import (
     MetaculusAgentMarket,
 )
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     CrewAIAgentSubquestions,
@@ -22,7 +25,7 @@ def main(
     dummy_prediction: bool = False,
     repeat_predictions: bool = False,
     tournament_id: int = WARMUP_TOURNAMENT_ID,
-):
+) -> None:
     """
     Submit predictions to Metaculus markets using the Think Thoroughly agent.
 
@@ -31,7 +34,7 @@ def main(
 
     model: str = "gpt-4-turbo-2024-04-09"
     agent = CrewAIAgentSubquestions(model=model, memory=False)
-    markets: list[MetaculusAgentMarket] = MetaculusAgentMarket.get_binary_markets(
+    markets: Sequence[MetaculusAgentMarket] = MetaculusAgentMarket.get_binary_markets(
         limit=sys.maxsize,
         tournament_id=tournament_id,
         filter_by=FilterBy.OPEN,
@@ -48,23 +51,27 @@ def main(
 
     for market in markets:
         logger.info(f"Answering market {market.id}, question: {market.question}")
-        if dummy_prediction:
-            answer: Answer = Answer(
-                p_yes=0.5,
-                decision=True,
-                reasoning="Just a test.",
-                confidence=0.5,
-            )
-        else:
+        if not dummy_prediction:
             # TODO incorporate 'Resolution criteria', 'Fine print', and
             # 'Background info' into the prompt given to the agent.
             answer = agent.answer_binary_market(
                 market.question, created_time=market.created_time
             )
-            if answer is None:
-                logger.info("No answer was given. Skipping")
+        else:
+            answer = Answer(
+                p_yes=Probability(0.5),
+                decision=True,
+                reasoning="Just a test.",
+                confidence=0.5,
+            )
 
-        market.submit_prediction(p_yes=answer.p_yes, reasoning=answer.reasoning)
+        if answer is None:
+            logger.info("No answer was given. Skipping")
+        else:
+            market.submit_prediction(
+                p_yes=answer.p_yes,
+                reasoning=check_not_none(answer.reasoning),
+            )
 
 
 if __name__ == "__main__":
