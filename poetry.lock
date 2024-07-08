@@ -2152,22 +2152,27 @@ description = "A library for efficient similarity search and clustering of dense
 optional = false
 python-versions = ">=3.8"
 files = [
+    {file = "faiss_cpu-1.8.0.post1-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:fd84721eb599aa1da19b1b36345bb8705a60bb1d2887bbbc395a29e3d36a1a62"},
     {file = "faiss_cpu-1.8.0.post1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:b78ff9079d15fd0f156bf5dd8a2975a8abffac1854a86ece263eec1500a2e836"},
     {file = "faiss_cpu-1.8.0.post1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9de25c943d1789e35fe06a20884c88cd32aedbb1a33bb8da2238cdea7bd9633f"},
     {file = "faiss_cpu-1.8.0.post1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:adae0f1b144e7216da696f14bc4991ca4300c94baaa59247c3d322588e661c95"},
     {file = "faiss_cpu-1.8.0.post1-cp310-cp310-win_amd64.whl", hash = "sha256:00345290680a444a4b4cb2d98a3844bb5c401a2160fee547c7631d759fd2ec3e"},
+    {file = "faiss_cpu-1.8.0.post1-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:8d4bade10cb63e9f9ff261751edd7eb097b1f4bf30be4d0d25d6f688559d795e"},
     {file = "faiss_cpu-1.8.0.post1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:20bd43eca3b7d77e71ea56b7a558cc28e900d8abff417eb285e2d92e95d934d4"},
     {file = "faiss_cpu-1.8.0.post1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8542a87743a7f94ac656fd3e9592ad57e58b04d961ad2fe654a22a8ca59defdb"},
     {file = "faiss_cpu-1.8.0.post1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ed46928de3dc20170b10fec89c54075a11383c2aaf4f119c63e0f6ae5a507d74"},
     {file = "faiss_cpu-1.8.0.post1-cp311-cp311-win_amd64.whl", hash = "sha256:4fa5fc8ea210b919aa469e27d6687e50052db906e7fec3f2257178b1384fa18b"},
+    {file = "faiss_cpu-1.8.0.post1-cp312-cp312-macosx_10_14_x86_64.whl", hash = "sha256:96aec0d08a3099883af3a9b6356cfe736e8bd879318a940a27e9d1ae6f33d788"},
     {file = "faiss_cpu-1.8.0.post1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:92b06147fa84732ecdc965922e8ef50dc7011ef8be65821ff4abb2118cb5dce0"},
     {file = "faiss_cpu-1.8.0.post1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:709ef9394d1148aef70dbe890edbde8c282a4a2e06a8b69ab64f65e90f5ba572"},
     {file = "faiss_cpu-1.8.0.post1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:327a9c30971bf72cd8392b15eb4aff5d898c453212eae656dfaa3ba555b9ca0c"},
     {file = "faiss_cpu-1.8.0.post1-cp312-cp312-win_amd64.whl", hash = "sha256:8756f1d93faba56349883fa2f5d47fe36bb2f11f789200c6b1c691ef805485f2"},
+    {file = "faiss_cpu-1.8.0.post1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:f4a3045909c447bf1955b70083891e80f2c87c5427f20cae25245e08ec5c9e52"},
     {file = "faiss_cpu-1.8.0.post1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:8842b7fc921ca1fafdb0845f2ba029e79df04eebae72ab135239f93478a9b7a2"},
     {file = "faiss_cpu-1.8.0.post1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9d5a9799634e32c3862d5436d1e78112ed9a38f319e4523f5916e55d86adda8f"},
     {file = "faiss_cpu-1.8.0.post1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2a70923b0fbbb40f647e20bcbcbfd472277e6d84bb23ff12d2a94b6841806b55"},
     {file = "faiss_cpu-1.8.0.post1-cp38-cp38-win_amd64.whl", hash = "sha256:ce652df3c4dd50c88ac9235d072f30ce60694dc422c5f523bbbcab320e8f3097"},
+    {file = "faiss_cpu-1.8.0.post1-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:83ef04b17b19189dd6601a941bdf4bfa9de0740dbcd80305aeba51a1b1955f80"},
     {file = "faiss_cpu-1.8.0.post1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:c50c8697077470ede7f1939ef8dc8a846ec19cf1893b543f6b67f9af03b0a122"},
     {file = "faiss_cpu-1.8.0.post1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:98ce428a7a67fe5c64047280e5e12a8dbdecf7002f9d127b26cf1db354e9fe76"},
     {file = "faiss_cpu-1.8.0.post1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5f3b36b80380bae523e3198cfb4a137867055945ce7bf10d18fe9f0284f2fb47"},
@@ -4038,13 +4043,13 @@ openai = ["openai (>=0.27.8)"]
 
 [[package]]
 name = "langsmith"
-version = "0.1.83"
+version = "0.1.84"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langsmith-0.1.83-py3-none-any.whl", hash = "sha256:f54d8cd8479b648b6339f3f735d19292c3516d080f680933ecdca3eab4b67ed3"},
-    {file = "langsmith-0.1.83.tar.gz", hash = "sha256:5cdd947212c8ad19adb992c06471c860185a777daa6859bb47150f90daf64bf3"},
+    {file = "langsmith-0.1.84-py3-none-any.whl", hash = "sha256:01f3c6390dba26c583bac8dd0e551ce3d0509c7f55cad714db0b5c8d36e4c7ff"},
+    {file = "langsmith-0.1.84.tar.gz", hash = "sha256:5220c0439838b9a5bd320fd3686be505c5083dcee22d2452006c23891153bea1"},
 ]
 
 [package.dependencies]
@@ -4302,9 +4307,13 @@ files = [
     {file = "lxml-5.2.2-cp36-cp36m-win_amd64.whl", hash = "sha256:edcfa83e03370032a489430215c1e7783128808fd3e2e0a3225deee278585196"},
     {file = "lxml-5.2.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:28bf95177400066596cdbcfc933312493799382879da504633d16cf60bba735b"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a745cc98d504d5bd2c19b10c79c61c7c3df9222629f1b6210c0368177589fb8"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b590b39ef90c6b22ec0be925b211298e810b4856909c8ca60d27ffbca6c12e6"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b336b0416828022bfd5a2e3083e7f5ba54b96242159f83c7e3eebaec752f1716"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:c2faf60c583af0d135e853c86ac2735ce178f0e338a3c7f9ae8f622fd2eb788c"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:4bc6cb140a7a0ad1f7bc37e018d0ed690b7b6520ade518285dc3171f7a117905"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:7ff762670cada8e05b32bf1e4dc50b140790909caa8303cfddc4d702b71ea184"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:57f0a0bbc9868e10ebe874e9f129d2917750adf008fe7b9c1598c0fbbfdde6a6"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_aarch64.whl", hash = "sha256:a6d2092797b388342c1bc932077ad232f914351932353e2e8706851c870bca1f"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:60499fe961b21264e17a471ec296dcbf4365fbea611bf9e303ab69db7159ce61"},
     {file = "lxml-5.2.2-cp37-cp37m-win32.whl", hash = "sha256:d9b342c76003c6b9336a80efcc766748a333573abf9350f4094ee46b006ec18f"},
     {file = "lxml-5.2.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b16db2770517b8799c79aa80f4053cd6f8b716f21f8aca962725a9565ce3ee40"},
@@ -6201,53 +6210,49 @@ name = "prediction-market-agent-tooling"
 version = "0.41.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = ">=3.10,<3.12"
-files = []
-develop = false
+python-versions = "<3.12,>=3.10"
+files = [
+    {file = "prediction_market_agent_tooling-0.41.0-py3-none-any.whl", hash = "sha256:b7ad378c67acdd71240a00cbe93519e085de6d8d17a4be1294e04a21a3a1e44a"},
+    {file = "prediction_market_agent_tooling-0.41.0.tar.gz", hash = "sha256:fd73039e4a11efce27f22696aed6b0f0a572295d95a7b0f6040ca079f2df7bc8"},
+]
 
 [package.dependencies]
-autoflake = "^2.2.1"
-base58 = "^2.1.1"
-cron-validator = "^1.0.8"
-eth-account = "^0.8.0"
-eth-typing = "^3.0.0"
-functions-framework = "^3.5.0"
-google-api-python-client = {version = "2.95.0", optional = true}
-google-cloud-functions = "^1.16.0"
-google-cloud-resource-manager = "^1.12.0"
-google-cloud-secret-manager = "^2.18.2"
-isort = "^5.13.2"
-langchain = {version = "^0.1.9", optional = true}
+autoflake = ">=2.2.1,<3.0.0"
+base58 = ">=2.1.1,<3.0.0"
+cron-validator = ">=1.0.8,<2.0.0"
+eth-account = ">=0.8.0,<0.9.0"
+eth-typing = ">=3.0.0,<4.0.0"
+functions-framework = ">=3.5.0,<4.0.0"
+google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
+google-cloud-functions = ">=1.16.0,<2.0.0"
+google-cloud-resource-manager = ">=1.12.0,<2.0.0"
+google-cloud-secret-manager = ">=2.18.2,<3.0.0"
+isort = ">=5.13.2,<6.0.0"
+langchain = {version = ">=0.1.9,<0.2.0", optional = true, markers = "extra == \"langchain\""}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = "^0.0.5", optional = true}
-langfuse = "^2.27.1"
-loguru = "^0.7.2"
-numpy = "^1.26.4"
-prompt-toolkit = "^3.0.43"
-pydantic = "^2.6.1"
-pydantic-settings = "^2.1.0"
-safe-cli = "^1.0.0"
-safe-eth-py = "^6.0.0b14"
-scikit-learn = "^1.3.1"
-streamlit = "^1.31.0"
-subgrounds = "^1.9.1"
-tabulate = "^0.9.0"
-tqdm = "^4.66.2"
+langchain-openai = {version = ">=0.0.5,<0.0.6", optional = true, markers = "extra == \"langchain\""}
+langfuse = ">=2.27.1,<3.0.0"
+loguru = ">=0.7.2,<0.8.0"
+numpy = ">=1.26.4,<2.0.0"
+prompt-toolkit = ">=3.0.43,<4.0.0"
+pydantic = ">=2.6.1,<3.0.0"
+pydantic-settings = ">=2.1.0,<3.0.0"
+safe-cli = ">=1.0.0,<2.0.0"
+safe-eth-py = ">=6.0.0b14,<7.0.0"
+scikit-learn = ">=1.3.1,<2.0.0"
+streamlit = ">=1.31.0,<2.0.0"
+subgrounds = ">=1.9.1,<2.0.0"
+tabulate = ">=0.9.0,<0.10.0"
+tqdm = ">=4.66.2,<5.0.0"
 typer = ">=0.9.0,<1.0.0"
-types-pytz = "^2024.1.0.20240203"
-types-requests = "^2.31.0.0"
-web3 = "^6.15.1"
+types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
+types-requests = ">=2.31.0.0,<3.0.0.0"
+web3 = ">=6.15.1,<7.0.0"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.1.9,<0.2.0)", "langchain-openai (>=0.0.5,<0.0.6)"]
 openai = ["openai (>=1.0.0,<2.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
-reference = "evan/metaculus"
-resolved_reference = "ba248b25acee1e3e687cfc319d517041397d7f8a"
 
 [[package]]
 name = "preshed"
@@ -9904,4 +9909,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "9468b5a9f82a895df7a018b6c1ce2e77849d8adfa1b2cd3c7de3474399d4a46e"
+content-hash = "ebdd486f2ea75e15a6852c117755936bf6857cce500c65827f8c267d0bba5fd2"
