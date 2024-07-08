@@ -5,6 +5,8 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 """
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
+from pydantic import SecretStr
+
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
     streamlit_asyncio_event_loop_hack,
@@ -18,13 +20,21 @@ from prediction_market_agent.utils import patch_sqlite3  # isort:skip
 patch_sqlite3()
 
 
+from datetime import datetime
+
+import pandas as pd
+import plotly.express as px
 import streamlit as st
 from prediction_market_agent_tooling.gtypes import PrivateKey
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory
-from prediction_market_agent.agents.microchain_agent.utils import get_total_asset_value
+from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.utils import (
+    get_function_useage_from_history,
+    get_total_asset_value,
+)
 from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -132,3 +142,56 @@ st.subheader("Agent Logs")
 for session in sessions:
     with st.expander(f"{session.start_time} - {session.end_time}"):
         display_chat_history(session)
+
+st.subheader("Tool Usage")
+agent = build_agent(
+    market_type=MARKET_TYPE,
+    model="foo",  # placeholder, not used
+    system_prompt="foo",  # placeholder, not used
+    openai_api_key=SecretStr("foo"),  # placeholder, not used
+    allow_stop=True,
+    long_term_memory=long_term_memory,
+    prompt_handler=None,
+)
+tab1, tab2 = st.tabs(["Overall", "Per-Session"])
+usage_count_col_name = "Usage Count"
+tool_name_col_name = "Tool Name"
+with tab1:
+    function_use = get_function_useage_from_history(
+        chat_history=chat_history.to_undated_chat_history(),
+        agent=agent,
+    )
+    st.bar_chart(
+        function_use,
+        horizontal=True,
+        y_label=tool_name_col_name,
+        x_label=usage_count_col_name,
+    )
+with tab2:
+    session_start_times = [session.start_time for session in sessions]
+    session_function_use: dict[datetime, pd.DataFrame] = {}
+    for session in sessions:
+        session_function_use[session.start_time] = get_function_useage_from_history(
+            chat_history=session,
+            agent=agent,
+        )
+
+    # Concatenate the per-session DataFrames by date for displaying in a heatmap
+    heatmap_data = {}
+    for date, df in session_function_use.items():
+        date_str = date.strftime("%Y-%m-%d %H:%M:%S")
+        heatmap_data[date_str] = df[usage_count_col_name]
+    heatmap_df = pd.DataFrame(heatmap_data)
+    heatmap_df.index.name = tool_name_col_name
+    dates = heatmap_df.columns.tolist()
+    tool_names = heatmap_df.index.tolist()
+    fig = px.imshow(
+        heatmap_df.values.tolist(),
+        labels=dict(x="Session", y=tool_name_col_name, color=usage_count_col_name),
+        x=dates,
+        y=tool_names,
+        aspect="auto",
+    )
+    fig.update_xaxes(side="top")
+    fig.update_yaxes(tickvals=list(range(len(tool_names))), ticktext=tool_names)
+    st.plotly_chart(fig, theme="streamlit")

@@ -100,6 +100,8 @@ CORRELATED_MARKETS:
  
 - You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, considering the probabilities of the other related SCENARIOs.
 
+- Your answer should reflect the time sensitivity of the scenario - the market closes in {n_remaining_days} days and the market was already open for {n_market_open_days} days.
+
 SCENARIO_TO_ASSESS: {scenario_to_assess}"""
 
 PROBABILITY_CLASS_OUTPUT = """

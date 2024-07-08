@@ -2,6 +2,7 @@ import typer
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
+from pydantic import SecretStr
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -62,6 +63,7 @@ def build_agent(
     market_type: MarketType,
     model: str,
     system_prompt: str,
+    openai_api_key: SecretStr,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
@@ -71,7 +73,7 @@ def build_agent(
     engine = Engine()
     generator = OpenAIChatGenerator(
         model=model,
-        api_key=APIKeys().openai_api_key.get_secret_value(),
+        api_key=openai_api_key.get_secret_value(),
         api_base=api_base,
         temperature=0.7,
     )
@@ -127,6 +129,7 @@ def main(
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
         prompt_handler=prompt_handler,
+        openai_api_key=APIKeys().openai_api_key,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']

@@ -1,5 +1,6 @@
 import typing as t
 
+import pandas as pd
 from microchain import Agent
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
@@ -18,6 +19,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
 from prediction_market_agent_tooling.tools.balances import get_balances
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.utils import APIKeys
 
 
@@ -115,3 +117,26 @@ def has_been_run_past_initialization(agent: Agent) -> bool:
         return False
 
     return len(agent.history) > get_initial_history_length(agent)
+
+
+def get_function_useage_from_history(
+    chat_history: ChatHistory, agent: Agent
+) -> pd.DataFrame:
+    """
+    Get the number of times each function is used in the chat history.
+
+    Returns a DataFrame, indexed by the function names, with a column for the
+    usage count.
+    """
+    function_names = [function for function in agent.engine.functions]
+    function_useage = {function: 0 for function in function_names}
+    for message in chat_history.chat_messages:
+        for function in function_names:
+            if message.content.startswith(f"{function}("):
+                function_useage[function] += 1
+                break
+
+    return pd.DataFrame(
+        data={"Usage Count": list(function_useage.values())},
+        index=function_names,
+    )

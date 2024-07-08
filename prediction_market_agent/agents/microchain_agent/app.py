@@ -131,6 +131,7 @@ def maybe_initialize_agent(model: str, system_prompt: str) -> None:
                 if st.session_state.get("load_historical_prompt")
                 else None
             ),
+            openai_api_key=APIKeys().openai_api_key,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
