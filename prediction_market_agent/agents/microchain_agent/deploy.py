@@ -51,19 +51,27 @@ class DeployableMicrochainAgent(DeployableAgent):
         prompt_handler.save_prompt(editable_prompt)
 
 
-class DeployableMicrochainModifiableSystemPromptAgent0(DeployableMicrochainAgent):
+class DeployableMicrochainModifiableSystemPromptAgentAbstract(
+    DeployableMicrochainAgent
+):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
     load_historical_prompt: bool = True
+    task_description: AgentIdentifier
+
+
+class DeployableMicrochainModifiableSystemPromptAgent0(
+    DeployableMicrochainModifiableSystemPromptAgentAbstract
+):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
 
 
-class DeployableMicrochainModifiableSystemPromptAgent1(DeployableMicrochainAgent):
-    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
-    load_historical_prompt: bool = True
+class DeployableMicrochainModifiableSystemPromptAgent1(
+    DeployableMicrochainModifiableSystemPromptAgentAbstract
+):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
 
 
-class DeployableMicrochainModifiableSystemPromptAgent2(DeployableMicrochainAgent):
-    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
-    load_historical_prompt: bool = True
+class DeployableMicrochainModifiableSystemPromptAgent2(
+    DeployableMicrochainModifiableSystemPromptAgentAbstract
+):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
