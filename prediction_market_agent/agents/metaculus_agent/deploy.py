@@ -56,7 +56,7 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
                 f"Found {len(markets)} unanswered markets to submit predictions for."
             )
 
-        for market in markets[:1]:
+        for market in markets:
             logger.info(f"Answering market {market.id}, question: {market.question}")
             if not self.dummy_prediction:
                 # TODO incorporate 'Resolution criteria', 'Fine print', and
