@@ -56,7 +56,7 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
                 f"Found {len(markets)} unanswered markets to submit predictions for."
             )
 
-        for market in markets:
+        for market in markets[:1]:
             logger.info(f"Answering market {market.id}, question: {market.question}")
             if not self.dummy_prediction:
                 # TODO incorporate 'Resolution criteria', 'Fine print', and
@@ -73,7 +73,7 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
                 )
 
             if answer is None:
-                logger.info("No answer was given. Skipping")
+                logger.error("No answer was given. Skipping")
             else:
                 market.submit_prediction(
                     p_yes=answer.p_yes,
