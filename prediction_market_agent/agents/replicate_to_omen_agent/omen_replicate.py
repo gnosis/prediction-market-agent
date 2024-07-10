@@ -1,5 +1,7 @@
+import typing as t
 from datetime import datetime, timedelta
 
+import requests
 from prediction_market_agent_tooling.gtypes import (
     ChecksumAddress,
     HexAddress,
@@ -9,7 +11,11 @@ from prediction_market_agent_tooling.gtypes import (
     xDai,
 )
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.agent_market import (
+    AgentMarket,
+    FilterBy,
+    SortBy,
+)
 from prediction_market_agent_tooling.markets.categorize import infer_category
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
@@ -40,6 +46,8 @@ from prediction_market_agent.utils import APIKeys
 # That is because at the closing time, the question will open on Realitio, and we don't want it to be resolved as unknown/invalid.
 # All replicated markets that close at N, needs to have closing time on Realition N + `EXTEND_CLOSING_TIME_DELTA`.
 EXTEND_CLOSING_TIME_DELTA = timedelta(days=6)
+# Banned categories are not allowed to be used for new markets on Omen.
+BANNED_CATEGORIES = ["Manifold Business Future"]
 
 
 def omen_replicate_from_tx(
@@ -55,7 +63,7 @@ def omen_replicate_from_tx(
 ) -> list[ChecksumAddress]:
     existing_markets = OmenSubgraphHandler().get_omen_binary_markets(limit=None)
 
-    markets = get_binary_markets(
+    all_markets = get_binary_markets(
         # Polymarket is slow to get, so take only 10 candidates for him.
         10 if market_type == MarketType.POLYMARKET else 1000,
         market_type,
@@ -63,8 +71,11 @@ def omen_replicate_from_tx(
         sort_by=sort_by,
         excluded_questions=set(m.question_title for m in existing_markets),
     )
+    markets_without_banned_categories = filter_out_markets_with_banned_categories(
+        all_markets
+    )
     markets_sorted = sorted(
-        markets,
+        markets_without_banned_categories,
         key=lambda m: m.volume or 0,
         reverse=True,
     )
@@ -212,3 +223,24 @@ def omen_unfund_replicated_known_markets_tx(
             market=OmenAgentMarket.from_data_model(market),
             shares=None,
         )
+
+
+def filter_out_markets_with_banned_categories(
+    markets: t.Sequence[AgentMarket],
+) -> t.Sequence[AgentMarket]:
+    filtered_markets: list[AgentMarket] = []
+
+    for market in markets:
+        # Neither Manifold or Polymarket returns categories in their API, so this is a hacky way to check out if the market is banned.
+        market_url_content = requests.get(market.url).text
+
+        if any(
+            banned_category in market_url_content
+            for banned_category in BANNED_CATEGORIES
+        ):
+            logger.info(f"Skipping banned category market: {market.url}")
+            continue
+
+        filtered_markets.append(market)
+
+    return filtered_markets
