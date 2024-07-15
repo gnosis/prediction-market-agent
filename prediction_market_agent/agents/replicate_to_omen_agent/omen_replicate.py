@@ -43,8 +43,6 @@ from prediction_market_agent.utils import APIKeys
 # That is because at the closing time, the question will open on Realitio, and we don't want it to be resolved as unknown/invalid.
 # All replicated markets that close at N, needs to have closing time on Realition N + `EXTEND_CLOSING_TIME_DELTA`.
 EXTEND_CLOSING_TIME_DELTA = timedelta(days=6)
-# Banned categories are not allowed to be used for new markets on Omen.
-BANNED_CATEGORIES = ["Manifold Business Future"]
 
 
 def omen_replicate_from_tx(
