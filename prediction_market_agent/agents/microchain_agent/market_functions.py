@@ -5,8 +5,8 @@ from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     Currency,
-    TokenAmount,
     ResolvedBet,
+    TokenAmount,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
