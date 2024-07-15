@@ -1,9 +1,15 @@
 import typing as t
+from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
+from prediction_market_agent_tooling.markets.data_models import (
+    Currency,
+    TokenAmount,
+    ResolvedBet,
+)
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -327,10 +333,12 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
     def example_args(self) -> list[int]:
         return [7]
 
-    def __call__(self, n_days: int = 7) -> list[dict[str, t.Any]]:
+    def __call__(self, n_days: int = 7) -> list[ResolvedBet]:
         # We look back a standard interval as a rule-of-thumb for now.
-        # ToDo - call positions = self.market_type.market_class.get_resolved_bets_made_since
-        return []
+        start_time = utcnow() - timedelta(days=n_days)
+        return self.market_type.market_class.get_resolved_bets_made_since(
+            better_address=self.user_address, start_time=start_time, end_time=None
+        )
 
 
 # Functions that interact with the prediction markets
