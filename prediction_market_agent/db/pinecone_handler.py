@@ -29,9 +29,7 @@ class PineconeHandler:
         keys = APIKeys()
         self.pc = Pinecone(api_key=keys.pinecone_api_key.get_secret_value())
         self.index = self.pc.Index(INDEX_NAME)
-        self.embeddings = OpenAIEmbeddings(
-            api_key=keys.openai_api_key.get_secret_value()
-        )
+        self.embeddings = OpenAIEmbeddings(api_key=keys.openai_api_key_secretstr_v1)
         self.vectorstore = PineconeVectorStore(
             pinecone_api_key=keys.pinecone_api_key.get_secret_value(),
             embedding=self.embeddings,
