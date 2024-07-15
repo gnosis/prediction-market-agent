@@ -98,7 +98,7 @@ class PineconeHandler:
 
     @staticmethod
     def deduplicate_markets(markets: list[OmenMarket]) -> list[OmenMarket]:
-        unique_market_titles = {}
+        unique_market_titles: dict[str, OmenMarket] = {}
         for market in markets:
             if (
                 market.title not in unique_market_titles

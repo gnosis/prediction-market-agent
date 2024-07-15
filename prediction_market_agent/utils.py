@@ -8,7 +8,6 @@ from prediction_market_agent_tooling.tools.utils import (
     should_not_happen,
 )
 from pydantic import SecretStr
-from pydantic.v1.types import SecretStr as SecretStrV1
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,7 +20,7 @@ class DBKeys(BaseSettings):
 
 class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
-    OPENAI_API_KEY: t.Optional[SecretStrV1] = None
+    OPENAI_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     PINECONE_API_KEY: t.Optional[SecretStr] = None
     PINATA_API_KEY: t.Optional[SecretStr] = None
@@ -34,7 +33,7 @@ class APIKeys(APIKeysBase):
         )
 
     @property
-    def openai_api_key(self) -> SecretStrV1:
+    def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
         )
