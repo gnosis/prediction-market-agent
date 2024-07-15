@@ -61,10 +61,6 @@ langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
 
-
-
-
-
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
 
