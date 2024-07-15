@@ -121,7 +121,7 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # Do as the last stesp, becuase it calls OpenAI (costly & slow).
+        # Do as the last steps, becuase it calls OpenAI (costly & slow).
         if not is_predictable_binary(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable."
