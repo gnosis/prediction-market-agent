@@ -14,7 +14,7 @@ def _summary(
     llm = ChatOpenAI(
         temperature=0,
         model="gpt-3.5-turbo-0125",
-        api_key=APIKeys().openai_api_key,
+        api_key=APIKeys().openai_api_key_secretstr_v1,
     )
     text_splitter = RecursiveCharacterTextSplitter(
         separators=separators, chunk_size=10000, chunk_overlap=500

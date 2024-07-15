@@ -32,7 +32,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         self.llm = ChatOpenAI(
             temperature=0,
             model=model,
-            api_key=APIKeys().openai_api_key,
+            api_key=APIKeys().openai_api_key_secretstr_v1,
         )
 
     def make_tweet_more_concise(self, tweet: str) -> str:

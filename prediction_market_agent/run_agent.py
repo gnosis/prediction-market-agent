@@ -15,6 +15,9 @@ from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinF
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.metaculus_agent.deploy import (
+    DeployableMetaculusBotTournamentAgent,
+)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
     DeployableMicrochainModifiableSystemPromptAgent,
@@ -37,6 +40,7 @@ class RunnableAgent(str, Enum):
     knownoutcome = "knownoutcome"
     microchain = "microchain"
     microchain_modifiable_system_prompt = "microchain_modifiable_system_prompt"
+    metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
 
@@ -49,6 +53,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.microchain: DeployableMicrochainAgent,
     RunnableAgent.microchain_modifiable_system_prompt: DeployableMicrochainModifiableSystemPromptAgent,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
+    RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

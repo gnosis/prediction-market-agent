@@ -34,7 +34,7 @@ class PineconeHandler:
         self.keys = APIKeys()
         self.model = model
         self.embeddings = OpenAIEmbeddings(
-            api_key=self.keys.openai_api_key,
+            api_key=self.keys.openai_api_key_secretstr_v1,
             model=model,
         )
         self.build_pinecone()

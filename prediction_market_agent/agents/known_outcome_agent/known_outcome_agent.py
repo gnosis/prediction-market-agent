@@ -171,7 +171,7 @@ def has_question_event_happened_in_the_past(
     llm = ChatOpenAI(
         model=model,
         temperature=0.0,
-        api_key=APIKeys().openai_api_key,
+        api_key=APIKeys().openai_api_key_secretstr_v1,
         callbacks=callbacks,
     )
     prompt = ChatPromptTemplate.from_template(
@@ -207,7 +207,7 @@ def get_known_outcome(
     llm = ChatOpenAI(
         model=model,
         temperature=0.0,
-        api_key=APIKeys().openai_api_key,
+        api_key=APIKeys().openai_api_key_secretstr_v1,
         callbacks=callbacks,
     )
     while tries < max_tries:
