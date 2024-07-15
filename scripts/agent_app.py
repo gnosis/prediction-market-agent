@@ -12,7 +12,6 @@ from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
 
-import typing as t
 
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
@@ -26,6 +25,7 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 )
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
+    DeployableThinkThoroughlyProphetResearchAgent,
 )
 from prediction_market_agent.tools.streamlit_utils import (
     add_sink_to_logger,
@@ -33,8 +33,14 @@ from prediction_market_agent.tools.streamlit_utils import (
 )
 
 AGENTS: list[
-    t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
-] = [DeployableKnownOutcomeAgent, DeployableThinkThoroughlyAgent]
+    type[DeployableKnownOutcomeAgent]
+    | type[DeployableThinkThoroughlyAgent]
+    | type[DeployableThinkThoroughlyProphetResearchAgent]
+] = [
+    DeployableKnownOutcomeAgent,
+    DeployableThinkThoroughlyAgent,
+    DeployableThinkThoroughlyProphetResearchAgent,
+]
 
 add_sink_to_logger()
 
@@ -61,7 +67,9 @@ if not agent_class_names:
 
 # Get the agent classes from the names.
 agent_classes: list[
-    t.Type[DeployableKnownOutcomeAgent] | t.Type[DeployableThinkThoroughlyAgent]
+    type[DeployableKnownOutcomeAgent]
+    | type[DeployableThinkThoroughlyAgent]
+    | type[DeployableThinkThoroughlyProphetResearchAgent]
 ] = []
 for AgentClass in AGENTS:
     if AgentClass.__name__ in agent_class_names:

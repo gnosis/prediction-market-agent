@@ -1,5 +1,6 @@
 import datetime
 import typing as t
+from abc import ABC
 
 import tenacity
 from crewai import Agent, Crew, Process, Task
@@ -20,9 +21,14 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import (
+    LLM_SUPER_LOW_TEMPERATURE,
     add_utc_timezone_validator,
     utcnow,
 )
+from prediction_prophet.benchmark.agents import (
+    _make_prediction as prophet_make_prediction,
+)
+from prediction_prophet.functions.research import research as prophet_research
 from pydantic import BaseModel
 from requests import HTTPError
 
@@ -34,6 +40,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
     CREATE_REQUIRED_CONDITIONS_PROMPT,
     FINAL_DECISION_PROMPT,
+    FINAL_DECISION_WITH_RESEARCH_PROMPT,
     LIST_OF_SCENARIOS_OUTPUT,
     PROBABILITY_CLASS_OUTPUT,
     PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
@@ -93,16 +100,16 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
         )
 
 
-class CrewAIAgentSubquestions:
+class ThinkThoroughlyBase(ABC):
+    identifier: str
+
     def __init__(self, model: str, memory: bool = True) -> None:
         self.model = model
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
         self.memory = memory
         self._long_term_memory = (
-            LongTermMemoryTableHandler("think-thoroughly-agent")
-            if self.memory
-            else None
+            LongTermMemoryTableHandler(self.identifier) if self.memory else None
         )
 
     def _get_current_date(self) -> str:
@@ -204,72 +211,11 @@ class CrewAIAgentSubquestions:
 
     def generate_prediction_for_one_outcome(
         self,
-        sentence: str,
-        question: str,
+        scenario: str,
+        original_question: str,
         previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
     ) -> Answer | None:
-        researcher = self._get_researcher()
-        predictor = self._get_predictor()
-
-        task_research_one_outcome = Task(
-            description=(
-                RESEARCH_OUTCOME_PROMPT
-                if not previous_scenarios_and_answers
-                else RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT
-            ),
-            agent=researcher,
-            expected_output=RESEARCH_OUTCOME_OUTPUT,
-        )
-        task_create_probability_for_one_outcome = Task(
-            description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
-            expected_output=PROBABILITY_CLASS_OUTPUT,
-            agent=predictor,
-            output_json=Answer,
-            context=[task_research_one_outcome],
-        )
-        crew = Crew(
-            agents=[researcher, predictor],
-            tasks=[task_research_one_outcome, task_create_probability_for_one_outcome],
-            verbose=2,
-            process=Process.sequential,
-        )
-
-        inputs = {"sentence": sentence}
-        if previous_scenarios_and_answers:
-            inputs["previous_scenarios_with_probabilities"] = "\n".join(
-                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
-                for s, a in previous_scenarios_and_answers
-            )
-
-        try:
-            result = crew.kickoff(inputs=inputs)
-        except (APIError, HTTPError) as e:
-            logger.error(
-                f"Could not retrieve response from the model provider because of {e}"
-            )
-            return None
-
-        if (
-            task_research_one_outcome.tools_errors > 0
-            or task_create_probability_for_one_outcome.tools_errors > 0
-        ):
-            logger.error(
-                f"Could not retrieve reasonable prediction for '{sentence}' because of errors in the tools"
-            )
-            return None
-
-        try:
-            output = Answer.model_validate(result)
-            answer_with_scenario = AnswerWithScenario.build_from_answer(
-                output, scenario=sentence, question=question
-            )
-            self.save_answer_to_long_term_memory(answer_with_scenario)
-            return output
-        except ValueError as e:
-            logger.error(
-                f"Could not parse the result ('{result}') as Answer because of {e}"
-            )
-            return None
+        raise NotImplementedError("This method should be implemented in the subclass.")
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
         nearest_questions = self.pinecone_handler.find_nearest_questions_with_threshold(
@@ -291,11 +237,16 @@ class CrewAIAgentSubquestions:
         question: str,
         scenarios_with_probabilities: list[t.Tuple[str, Answer]],
         created_time: datetime.datetime | None,
+        research_report: str | None = None,
     ) -> Answer:
         predictor = self._get_predictor()
 
         task_final_decision = Task(
-            description=FINAL_DECISION_PROMPT,
+            description=(
+                FINAL_DECISION_PROMPT
+                if not research_report
+                else FINAL_DECISION_WITH_RESEARCH_PROMPT
+            ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             output_json=Answer,
@@ -317,22 +268,23 @@ class CrewAIAgentSubquestions:
         )
 
         logger.info(f"Starting to generate final decision for '{question}'.")
-        crew.kickoff(
-            inputs={
-                "scenarios_with_probabilities": "\n".join(
-                    f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
-                    for s, a in scenarios_with_probabilities
-                ),
-                "number_of_scenarios": len(scenarios_with_probabilities),
-                "scenario_to_assess": question,
-                "correlated_markets": "\n".join(
-                    f"- Market '{m.question_title}' has {m.current_p_yes * 100:.2f}% probability of happening"
-                    for m in correlated_markets
-                ),
-                "n_remaining_days": n_remaining_days,
-                "n_market_open_days": n_market_open_days,
-            }
-        )
+        inputs = {
+            "scenarios_with_probabilities": "\n".join(
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                for s, a in scenarios_with_probabilities
+            ),
+            "number_of_scenarios": len(scenarios_with_probabilities),
+            "scenario_to_assess": question,
+            "correlated_markets": "\n".join(
+                f"- Market '{m.question_title}' has {m.current_p_yes * 100:.2f}% probability of happening"
+                for m in correlated_markets
+            ),
+            "n_remaining_days": n_remaining_days,
+            "n_market_open_days": n_market_open_days,
+        }
+        if research_report:
+            inputs["research_report"] = research_report
+        crew.kickoff(inputs=inputs)
         output = Answer.model_validate_json(task_final_decision.output.raw_output)
         answer_with_scenario = AnswerWithScenario.build_from_answer(
             output, scenario=question, question=question
@@ -389,3 +341,146 @@ class CrewAIAgentSubquestions:
                 f"Could not generate final decision for '{question}' with {n_iterations} iterations."
             )
         return final_answer
+
+
+class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
+    identifier = "think-thoroughly-agent"
+
+    def generate_prediction_for_one_outcome(
+        self,
+        scenario: str,
+        original_question: str,
+        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
+    ) -> Answer | None:
+        researcher = self._get_researcher()
+        predictor = self._get_predictor()
+
+        task_research_one_outcome = Task(
+            description=(
+                RESEARCH_OUTCOME_PROMPT
+                if not previous_scenarios_and_answers
+                else RESEARCH_OUTCOME_WITH_PREVIOUS_OUTPUTS_PROMPT
+            ),
+            agent=researcher,
+            expected_output=RESEARCH_OUTCOME_OUTPUT,
+        )
+        task_create_probability_for_one_outcome = Task(
+            description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
+            expected_output=PROBABILITY_CLASS_OUTPUT,
+            agent=predictor,
+            output_json=Answer,
+            context=[task_research_one_outcome],
+        )
+        crew = Crew(
+            agents=[researcher, predictor],
+            tasks=[task_research_one_outcome, task_create_probability_for_one_outcome],
+            verbose=2,
+            process=Process.sequential,
+        )
+
+        inputs = {"sentence": scenario}
+        if previous_scenarios_and_answers:
+            inputs["previous_scenarios_with_probabilities"] = "\n".join(
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                for s, a in previous_scenarios_and_answers
+            )
+
+        try:
+            result = crew.kickoff(inputs=inputs)
+        except (APIError, HTTPError) as e:
+            logger.error(
+                f"Could not retrieve response from the model provider because of {e}"
+            )
+            return None
+
+        if (
+            task_research_one_outcome.tools_errors > 0
+            or task_create_probability_for_one_outcome.tools_errors > 0
+        ):
+            logger.error(
+                f"Could not retrieve reasonable prediction for '{scenario}' because of errors in the tools"
+            )
+            return None
+
+        try:
+            output = Answer.model_validate(result)
+            answer_with_scenario = AnswerWithScenario.build_from_answer(
+                output, scenario=scenario, question=original_question
+            )
+            self.save_answer_to_long_term_memory(answer_with_scenario)
+            return output
+        except ValueError as e:
+            logger.error(
+                f"Could not parse the result ('{result}') as Answer because of {e}"
+            )
+            return None
+
+
+class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
+    identifier = "think-thoroughly-prophet-research-agent"
+
+    def generate_prediction_for_one_outcome(
+        self,
+        scenario: str,
+        original_question: str,
+        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
+    ) -> Answer | None:
+        if previous_scenarios_and_answers:
+            raise ValueError(
+                "This agent does not support generating predictions with previous scenarios and answers in mind."
+            )
+
+        api_keys = APIKeys()
+        research = prophet_research(
+            goal=scenario,
+            use_summaries=False,
+            model=self.model,
+            openai_api_key=api_keys.openai_api_key,
+            tavily_api_key=api_keys.tavily_api_key,
+            logger=logger,
+        )
+        prediction = prophet_make_prediction(
+            market_question=scenario,
+            additional_information=research,
+            engine=self.model,
+            temperature=LLM_SUPER_LOW_TEMPERATURE,
+            api_key=api_keys.openai_api_key,
+        )
+
+        if prediction.outcome_prediction is None:
+            logger.error(
+                f"ThinkThoroughlyWithPredictionProhpetResearch didn't generate prediction for '{scenario}'."
+            )
+            return None
+
+        return AnswerWithScenario(
+            scenario=scenario,
+            original_question=original_question,
+            decision=prediction.outcome_prediction.decision,
+            p_yes=prediction.outcome_prediction.p_yes,
+            confidence=prediction.outcome_prediction.confidence,
+            reasoning=prediction.outcome_prediction.reasoning,
+        )
+
+    def generate_final_decision(
+        self,
+        question: str,
+        scenarios_with_probabilities: list[t.Tuple[str, Answer]],
+        created_time: datetime.datetime | None,
+        research_report: str | None = None,
+    ) -> Answer:
+        api_keys = APIKeys()
+        research = research_report or prophet_research(
+            goal=question,
+            use_summaries=False,
+            model=self.model,
+            openai_api_key=api_keys.openai_api_key,
+            tavily_api_key=api_keys.tavily_api_key,
+            logger=logger,
+        )
+        return super().generate_final_decision(
+            question=question,
+            scenarios_with_probabilities=scenarios_with_probabilities,
+            created_time=created_time,
+            research_report=research,
+        )

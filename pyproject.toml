@@ -60,6 +60,7 @@ tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "a5fb60cbcbc735dbd61bbdd7917545b9d1b55313" }
 
 [build-system]
 requires = ["poetry-core"]

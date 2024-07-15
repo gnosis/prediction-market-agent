@@ -104,6 +104,32 @@ CORRELATED_MARKETS:
 
 SCENARIO_TO_ASSESS: {scenario_to_assess}"""
 
+FINAL_DECISION_WITH_RESEARCH_PROMPT = """
+- Your task is to determine the probability of a SCENARIO being answered 'Yes' or 'No'.
+- SCENARIOS_WITH_PROBABILITIES is provided, which contains a set of {number_of_scenarios} SCENARIOs. 
+
+- The object SCENARIOS_WITH_PROBABILITIES is a list containing multiple bullet points. Each item describes a scenario, beginning with the probability of it happening, the confidence for that prediction and the reasoning carried out for that prediction.
+
+SCENARIOS_WITH_PROBABILITIES: 
+{scenarios_with_probabilities}
+
+- CORRELATED_MARKETS is also provided, which contains a list of bullet points, which are semantically similar to SCENARIO_TO_ASSESS.
+- The object CORRELATED_MARKETS is a list of bullet points, where each item has the properties question_title and current_p_yes (probability that the scenario is true).
+
+CORRELATED_MARKETS: 
+{correlated_markets}
+
+- RESEARCH_REPORT is also provided, which contain a report of the research done for the SCENARIO_TO_ASSESS.
+
+RESEARCH_REPORT:
+{research_report}
+ 
+- You should determine the probability of the SCENARIO SCENARIO_TO_ASSESS being true, considering the probabilities of the other related SCENARIOs.
+
+- Your answer should reflect the time sensitivity of the scenario - the market closes in {n_remaining_days} days and the market was already open for {n_market_open_days} days.
+
+SCENARIO_TO_ASSESS: {scenario_to_assess}"""
+
 PROBABILITY_CLASS_OUTPUT = """
 Your response should be a JSON string containing the following keys:
 - "reasoning": A free text field that contains a well though out justification for the prediction.
