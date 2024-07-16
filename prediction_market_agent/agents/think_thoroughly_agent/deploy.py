@@ -11,7 +11,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
 
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
-    model: str = "gpt-4-turbo-2024-04-09"
+    model: str
     bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
@@ -29,10 +29,12 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
 
 class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithItsOwnResearch
+    model: str = "gpt-4-turbo-2024-04-09"
 
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProhpetResearch
+    model: str = "gpt-3.5-turbo-0125"
 
 
 if __name__ == "__main__":

@@ -19,7 +19,11 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.parallelism import par_generator
+from prediction_market_agent_tooling.tools.parallelism import (
+    DEFAULT_PROCESSPOOL_EXECUTOR,
+    par_generator,
+    par_map,
+)
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     add_utc_timezone_validator,
@@ -112,7 +116,8 @@ class ThinkThoroughlyBase(ABC):
             LongTermMemoryTableHandler(self.identifier) if self.memory else None
         )
 
-    def _get_current_date(self) -> str:
+    @staticmethod
+    def _get_current_date() -> str:
         return utcnow().strftime("%Y-%m-%d")
 
     def save_answer_to_long_term_memory(
@@ -126,38 +131,42 @@ class ThinkThoroughlyBase(ABC):
 
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
-    def _get_researcher(self) -> Agent:
+    @staticmethod
+    def _get_researcher(model: str) -> Agent:
         return Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
-            backstory=f"Current date is {self._get_current_date()}. You are a senior research analyst who is adept at researching and reporting on future events.",
+            backstory=f"Current date is {ThinkThoroughlyBase._get_current_date()}. You are a senior research analyst who is adept at researching and reporting on future events.",
             verbose=True,
             allow_delegation=False,
-            tools=[self._build_tavily_search()],
-            llm=self._build_llm(),
+            tools=[ThinkThoroughlyBase._build_tavily_search()],
+            llm=ThinkThoroughlyBase._build_llm(model),
         )
 
-    def _get_predictor(self) -> Agent:
+    @staticmethod
+    def _get_predictor(model: str) -> Agent:
         return Agent(
             role="Professional Gambler",
             goal="Predict, based on some research you are presented with, whether or not a given event will occur",
-            backstory=f"Current date is {self._get_current_date()}. You are a professional gambler who is adept at predicting and betting on the outcomes of future events.",
+            backstory=f"Current date is {ThinkThoroughlyBase._get_current_date()}. You are a professional gambler who is adept at predicting and betting on the outcomes of future events.",
             verbose=True,
             allow_delegation=False,
-            llm=self._build_llm(),
+            llm=ThinkThoroughlyBase._build_llm(model),
         )
 
-    def _build_tavily_search(self) -> TavilySearchResultsThatWillThrow:
+    @staticmethod
+    def _build_tavily_search() -> TavilySearchResultsThatWillThrow:
         api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
         api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
         return TavilySearchResultsThatWillThrow(api_wrapper=api_wrapper)
 
-    def _build_llm(self) -> BaseChatModel:
+    @staticmethod
+    def _build_llm(model: str) -> BaseChatModel:
         keys = APIKeys()
         # ToDo - Add Langfuse callback handler here once integration becomes clear (see
         #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = ChatOpenAI(
-            model=self.model,
+            model=model,
             api_key=keys.openai_api_key_secretstr_v1,
             temperature=0.0,
         )
@@ -172,7 +181,7 @@ class ThinkThoroughlyBase(ABC):
         )
 
     def get_required_conditions(self, question: str) -> Scenarios:
-        researcher = self._get_researcher()
+        researcher = self._get_researcher(self.model)
 
         create_required_conditions = Task(
             description=CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -189,7 +198,7 @@ class ThinkThoroughlyBase(ABC):
         return scenarios
 
     def get_hypohetical_scenarios(self, question: str) -> Scenarios:
-        researcher = self._get_researcher()
+        researcher = self._get_researcher(self.model)
 
         create_scenarios_task = Task(
             description=CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -209,12 +218,15 @@ class ThinkThoroughlyBase(ABC):
         logger.info(f"Created possible hypothetical scenarios: {scenarios.scenarios}")
         return scenarios
 
+    @staticmethod
     def generate_prediction_for_one_outcome(
-        self,
+        model: str,
         scenario: str,
         original_question: str,
-        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
-    ) -> Answer | None:
+        previous_scenarios_and_answers: (
+            list[tuple[str, AnswerWithScenario]] | None
+        ) = None,
+    ) -> AnswerWithScenario | None:
         raise NotImplementedError("This method should be implemented in the subclass.")
 
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
@@ -222,24 +234,22 @@ class ThinkThoroughlyBase(ABC):
             5, text=question
         )
 
-        markets = list(
-            par_generator(
-                [q.market_address for q in nearest_questions],
-                lambda market_address: self.subgraph_handler.get_omen_market_by_market_id(
-                    market_id=market_address
-                ),
-            )
+        markets = par_map(
+            items=[q.market_address for q in nearest_questions],
+            func=lambda market_address: self.subgraph_handler.get_omen_market_by_market_id(
+                market_id=market_address
+            ),
         )
         return [CorrelatedMarketInput.from_omen_market(market) for market in markets]
 
     def generate_final_decision(
         self,
         question: str,
-        scenarios_with_probabilities: list[t.Tuple[str, Answer]],
+        scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
         created_time: datetime.datetime | None,
         research_report: str | None = None,
     ) -> Answer:
-        predictor = self._get_predictor()
+        predictor = self._get_predictor(self.model)
 
         task_final_decision = Task(
             description=(
@@ -304,21 +314,30 @@ class ThinkThoroughlyBase(ABC):
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 
-        scenarios_with_probs: list[tuple[str, Answer]] = []
+        scenarios_with_probs: list[tuple[str, AnswerWithScenario]] = []
         for iteration in range(n_iterations):
             logger.info(
                 f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
             sub_predictions = par_generator(
-                hypothetical_scenarios.scenarios + conditional_scenarios.scenarios,
-                lambda x: (
-                    x,
-                    self.generate_prediction_for_one_outcome(
-                        x, question, scenarios_with_probs
-                    ),
-                ),
+                items=[
+                    (
+                        self.model,
+                        scenario,
+                        question,
+                        scenarios_with_probs,
+                        self.generate_prediction_for_one_outcome,
+                    )
+                    for scenario in (
+                        hypothetical_scenarios.scenarios
+                        + conditional_scenarios.scenarios
+                    )
+                ],
+                func=process_scenarios,
+                executor=DEFAULT_PROCESSPOOL_EXECUTOR,
             )
+
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
@@ -328,6 +347,7 @@ class ThinkThoroughlyBase(ABC):
                 logger.info(
                     f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
                 )
+                self.save_answer_to_long_term_memory(prediction)
 
         final_answer = (
             self.generate_final_decision(
@@ -346,14 +366,17 @@ class ThinkThoroughlyBase(ABC):
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
     identifier = "think-thoroughly-agent"
 
+    @staticmethod
     def generate_prediction_for_one_outcome(
-        self,
+        model: str,
         scenario: str,
         original_question: str,
-        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
-    ) -> Answer | None:
-        researcher = self._get_researcher()
-        predictor = self._get_predictor()
+        previous_scenarios_and_answers: (
+            list[tuple[str, AnswerWithScenario]] | None
+        ) = None,
+    ) -> AnswerWithScenario | None:
+        researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(model)
+        predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(model)
 
         task_research_one_outcome = Task(
             description=(
@@ -407,8 +430,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             answer_with_scenario = AnswerWithScenario.build_from_answer(
                 output, scenario=scenario, question=original_question
             )
-            self.save_answer_to_long_term_memory(answer_with_scenario)
-            return output
+            return answer_with_scenario
         except ValueError as e:
             logger.error(
                 f"Could not parse the result ('{result}') as Answer because of {e}"
@@ -419,12 +441,15 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
     identifier = "think-thoroughly-prophet-research-agent"
 
+    @staticmethod
     def generate_prediction_for_one_outcome(
-        self,
+        model: str,
         scenario: str,
         original_question: str,
-        previous_scenarios_and_answers: list[tuple[str, Answer]] | None = None,
-    ) -> Answer | None:
+        previous_scenarios_and_answers: (
+            list[tuple[str, AnswerWithScenario]] | None
+        ) = None,
+    ) -> AnswerWithScenario | None:
         if previous_scenarios_and_answers:
             raise ValueError(
                 "This agent does not support generating predictions with previous scenarios and answers in mind."
@@ -434,15 +459,14 @@ class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
         research = prophet_research(
             goal=scenario,
             use_summaries=False,
-            model=self.model,
+            model=model,
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
-            logger=logger,
         )
         prediction = prophet_make_prediction(
             market_question=scenario,
             additional_information=research,
-            engine=self.model,
+            engine=model,
             temperature=LLM_SUPER_LOW_TEMPERATURE,
             api_key=api_keys.openai_api_key,
         )
@@ -459,13 +483,13 @@ class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
             decision=prediction.outcome_prediction.decision,
             p_yes=prediction.outcome_prediction.p_yes,
             confidence=prediction.outcome_prediction.confidence,
-            reasoning=prediction.outcome_prediction.reasoning,
+            reasoning=prediction.outcome_prediction.reasoning,  # TODO: Possible improvement: Prophet currently doesn't return reasoning of its prediction, so it's just None all the time.
         )
 
     def generate_final_decision(
         self,
         question: str,
-        scenarios_with_probabilities: list[t.Tuple[str, Answer]],
+        scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
         created_time: datetime.datetime | None,
         research_report: str | None = None,
     ) -> Answer:
@@ -476,7 +500,6 @@ class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
             model=self.model,
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
-            logger=logger,
         )
         return super().generate_final_decision(
             question=question,
@@ -484,3 +507,25 @@ class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
             created_time=created_time,
             research_report=research,
         )
+
+
+def process_scenarios(
+    inputs: tuple[
+        str,
+        str,
+        str,
+        list[tuple[str, AnswerWithScenario]] | None,
+        t.Callable[
+            [str, str, str, list[tuple[str, AnswerWithScenario]] | None],
+            AnswerWithScenario | None,
+        ],
+    ],
+) -> tuple[str, AnswerWithScenario | None]:
+    # Needs to be a normal function outside of class, because `lambda` and `self` aren't pickable for processpool executor,
+    # and process pool executor is required, because ChromaDB isn't thread-safe.
+    # Input arguments needs to be as a single tuple, because par_generator requires a single argument.
+    model, scenario, original_question, scenarios_with_probs, process_function = inputs
+    return (
+        scenario,
+        process_function(model, scenario, original_question, scenarios_with_probs),
+    )

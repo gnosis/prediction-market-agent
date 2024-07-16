@@ -36,7 +36,7 @@ class LongTermMemoryTableHandler:
     def save_answer_with_scenario(
         self, answer_with_scenario: AnswerWithScenario
     ) -> None:
-        return self.save_history([answer_with_scenario.dict()])
+        return self.save_history([answer_with_scenario.model_dump()])
 
     def search(
         self,
