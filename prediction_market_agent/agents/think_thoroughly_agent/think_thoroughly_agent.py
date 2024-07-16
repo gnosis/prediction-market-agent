@@ -456,20 +456,27 @@ class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
             )
 
         api_keys = APIKeys()
-        research = prophet_research(
-            goal=scenario,
-            use_summaries=False,
-            model=model,
-            openai_api_key=api_keys.openai_api_key,
-            tavily_api_key=api_keys.tavily_api_key,
-        )
-        prediction = prophet_make_prediction(
-            market_question=scenario,
-            additional_information=research,
-            engine=model,
-            temperature=LLM_SUPER_LOW_TEMPERATURE,
-            api_key=api_keys.openai_api_key,
-        )
+
+        try:
+            research = prophet_research(
+                goal=scenario,
+                use_summaries=False,
+                model=model,
+                openai_api_key=api_keys.openai_api_key,
+                tavily_api_key=api_keys.tavily_api_key,
+            )
+            prediction = prophet_make_prediction(
+                market_question=scenario,
+                additional_information=research,
+                engine=model,
+                temperature=LLM_SUPER_LOW_TEMPERATURE,
+                api_key=api_keys.openai_api_key,
+            )
+        except Exception as e:
+            logger.error(
+                f"Could not generate prediction for '{scenario}' because of {e}"
+            )
+            return None
 
         if prediction.outcome_prediction is None:
             logger.error(
