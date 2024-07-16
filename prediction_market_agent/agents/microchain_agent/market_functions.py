@@ -327,6 +327,7 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
     def description(self) -> str:
         return (
             "Use this function to fetch the outcomes of previous bets you have placed."
+            f"Pass in the number of days (as an integer) in the past you want to look back from the current start date `{utcnow()}`."
         )
 
     @property
