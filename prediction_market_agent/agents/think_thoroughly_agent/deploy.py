@@ -34,7 +34,7 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
-    model: str = "gpt-3.5-turbo-0125"
+    model: str = "gpt-4-turbo-2024-04-09"
 
 
 if __name__ == "__main__":
