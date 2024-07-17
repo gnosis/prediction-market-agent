@@ -60,8 +60,8 @@ def test_get_probability(
     engine = Engine()
     engine.register(Reasoning())
     engine.register(Stop())
-    engine.register(GetMarkets(market_type=market_type))
-    engine.register(GetMarketProbability(market_type=market_type))
+    engine.register(GetMarkets(market_type=market_type, keys=APIKeys()))
+    engine.register(GetMarketProbability(market_type=market_type, keys=APIKeys()))
     engine.register(Jsonify())
     agent = Agent(llm=LLM(generator=generator), engine=engine)
     agent.system_prompt = f"""Act as a agent to find any market and its probability, and return it in valid json format.

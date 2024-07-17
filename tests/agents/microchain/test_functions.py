@@ -48,7 +48,7 @@ def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
 # TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
 @pytest.mark.parametrize("market_type", [MarketType.OMEN, MarketType.MANIFOLD])
 def test_get_markets(market_type: MarketType) -> None:
-    get_markets = GetMarkets(market_type=market_type)
+    get_markets = GetMarkets(market_type=market_type, keys=APIKeys())
     assert len(get_markets()) > 0
 
 
@@ -56,7 +56,7 @@ def test_get_markets(market_type: MarketType) -> None:
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_buy_yes(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
-    buy_yes = BuyYes(market_type=market_type)
+    buy_yes = BuyYes(market_type=market_type, keys=APIKeys())
     print(buy_yes(market.question, 0.0001))
 
 
@@ -64,13 +64,13 @@ def test_buy_yes(market_type: MarketType) -> None:
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_buy_no(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
-    buy_yes = BuyNo(market_type=market_type)
+    buy_yes = BuyNo(market_type=market_type, keys=APIKeys())
     print(buy_yes(market.question, 0.0001))
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_replicator_has_balance_gt_0(market_type: MarketType) -> None:
-    balance = GetBalance(market_type=market_type)()
+    balance = GetBalance(market_type=market_type, keys=APIKeys())()
     assert balance > 0
 
 
@@ -80,7 +80,7 @@ def test_engine_help(market_type: MarketType) -> None:
     engine.register(Reasoning())
     engine.register(Stop())
     for function in MARKET_FUNCTIONS:
-        engine.register(function(market_type=market_type))
+        engine.register(function(market_type=market_type, keys=APIKeys()))
 
     print(engine.help)
 
@@ -88,7 +88,9 @@ def test_engine_help(market_type: MarketType) -> None:
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_get_probability(market_type: MarketType) -> None:
     market_id = "0x0020d13c89140b47e10db54cbd53852b90bc1391"
-    get_market_probability = GetMarketProbability(market_type=market_type)
+    get_market_probability = GetMarketProbability(
+        market_type=market_type, keys=APIKeys()
+    )
     assert float(get_market_probability(market_id)[0]) == 0.0
     market: AgentMarket = market_type.market_class.get_binary_market(market_id)
     assert market.is_resolved()  # Probability wont change after resolution
@@ -105,12 +107,12 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     from_address = keys.bet_from_address
     outcomes_functions = {
         get_yes_outcome(market_type=market_type): [
-            BuyYes(market_type=market_type),
-            SellYes(market_type=market_type),
+            BuyYes(market_type=market_type, keys=APIKeys()),
+            SellYes(market_type=market_type, keys=APIKeys()),
         ],
         get_no_outcome(market_type=market_type): [
-            BuyNo(market_type=market_type),
-            SellNo(market_type=market_type),
+            BuyNo(market_type=market_type, keys=APIKeys()),
+            SellNo(market_type=market_type, keys=APIKeys()),
         ],
     }
 
@@ -173,7 +175,7 @@ def test_predict_probability(
     """
     Test calling a mech to predict the probability of a market
     """
-    predict_probability = prediction_method(market_type=market_type)
+    predict_probability = prediction_method(market_type=market_type, keys=APIKeys())
     market = get_binary_markets(market_type=market_type)[0]
     p_yes = predict_probability(market.id)
     assert 0.0 <= float(p_yes) <= 1.0

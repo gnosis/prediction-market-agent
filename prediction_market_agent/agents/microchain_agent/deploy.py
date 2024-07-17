@@ -45,7 +45,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             allow_stop=True,
             long_term_memory=long_term_memory,
             prompt_handler=prompt_handler if self.load_historical_prompt else None,
-            openai_api_key=APIKeys().openai_api_key,
+            keys=APIKeys(),
         )
         agent.run(self.n_iterations)
         long_term_memory.save_history(agent.history)
