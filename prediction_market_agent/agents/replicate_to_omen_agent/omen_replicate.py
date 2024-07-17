@@ -28,7 +28,10 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.is_predictable import is_predictable_binary
+from prediction_market_agent_tooling.tools.is_predictable import (
+    is_predictable_binary,
+    is_predictable_without_description,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
@@ -118,10 +121,18 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # Do as the last step, becuase it calls OpenAI (costly & slow).
+        # Do as the last steps, becuase it calls OpenAI (costly & slow).
         if not is_predictable_binary(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable."
+            )
+            continue
+
+        if market.description and not is_predictable_without_description(
+            market.question, market.description
+        ):
+            logger.info(
+                f"Skipping `{market.question}` because it seems to not be predictable without the description `{market.description}`."
             )
             continue
 

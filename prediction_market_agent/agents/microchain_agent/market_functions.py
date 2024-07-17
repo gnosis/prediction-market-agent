@@ -1,9 +1,15 @@
 import typing as t
+from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
+from prediction_market_agent_tooling.markets.data_models import (
+    Currency,
+    ResolvedBet,
+    TokenAmount,
+)
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -315,6 +321,30 @@ class GetLiquidPositions(MarketFunction):
         return [str(position) for position in positions]
 
 
+class GetResolvedBetsWithOutcomes(MarketFunction):
+    def __init__(self, market_type: MarketType) -> None:
+        self.user_address = APIKeys().bet_from_address
+        super().__init__(market_type=market_type)
+
+    @property
+    def description(self) -> str:
+        return (
+            "Use this function to fetch the outcomes of previous bets you have placed."
+            f"Pass in the number of days (as an integer) in the past you want to look back from the current start date `{utcnow()}`."
+        )
+
+    @property
+    def example_args(self) -> list[int]:
+        return [7]
+
+    def __call__(self, n_days: int = 7) -> list[ResolvedBet]:
+        # We look back a standard interval as a rule-of-thumb for now.
+        start_time = utcnow() - timedelta(days=n_days)
+        return self.market_type.market_class.get_resolved_bets_made_since(
+            better_address=self.user_address, start_time=start_time, end_time=None
+        )
+
+
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
@@ -327,4 +357,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     SellYes,
     SellNo,
     GetLiquidPositions,
+    GetResolvedBetsWithOutcomes,
 ]

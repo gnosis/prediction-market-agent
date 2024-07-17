@@ -32,6 +32,7 @@ from prediction_market_agent.agents.social_media_agent.deploy import (
 )
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
+    DeployableThinkThoroughlyProphetResearchAgent,
 )
 
 
@@ -39,6 +40,7 @@ class RunnableAgent(str, Enum):
     coinflip = "coinflip"
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
+    think_thoroughly_prophet = "think_thoroughly_prophet"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
     microchain_modifiable_system_prompt_0 = "microchain_modifiable_system_prompt_0"
@@ -53,6 +55,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
+    RunnableAgent.think_thoroughly_prophet: DeployableThinkThoroughlyProphetResearchAgent,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
     RunnableAgent.microchain: DeployableMicrochainAgent,
     RunnableAgent.microchain_modifiable_system_prompt_0: DeployableMicrochainModifiableSystemPromptAgent0,
