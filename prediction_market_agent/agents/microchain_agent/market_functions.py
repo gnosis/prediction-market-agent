@@ -30,7 +30,8 @@ from prediction_market_agent.utils import APIKeys
 
 
 class MarketFunction(Function):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        self.keys = keys
         self.market_type = market_type
         super().__init__()
 
@@ -87,8 +88,10 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         self,
         mech_request: t.Callable[[str, MechTool], MechResponse],
         market_type: MarketType,
+        keys: APIKeys,
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
+        super().__init__(market_type=market_type, keys=keys)
         self.mech_tool = mech_tool
         self.mech_request = mech_request
         self._description = (
@@ -97,7 +100,6 @@ class PredictProbabilityForQuestionBase(MarketFunction):
             "one parameter is the market id of the prediction market you want "
             "to predict the probability of."
         )
-        super().__init__(market_type=market_type)
 
     @property
     def example_args(self) -> list[str]:
@@ -115,20 +117,22 @@ class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
+        keys: APIKeys,
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
         self.mech_tool = mech_tool
-        super().__init__(market_type=market_type, mech_request=mech_request)
+        super().__init__(market_type=market_type, keys=keys, mech_request=mech_request)
 
     @property
     def description(self) -> str:
         return self._description + " Note, this costs money to run."
 
     def __call__(self, market_id: str) -> str:
-        keys = APIKeys()
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
-        account_balance = float(get_balance(keys, market_type=self.market_type).amount)
+        account_balance = float(
+            get_balance(self.keys, market_type=self.market_type).amount
+        )
         if account_balance < MECH_CALL_XDAI_LIMIT:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
@@ -142,10 +146,13 @@ class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
+        keys: APIKeys,
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
         self.mech_tool = mech_tool
-        super().__init__(market_type=market_type, mech_request=mech_request_local)
+        super().__init__(
+            market_type=market_type, keys=keys, mech_request=mech_request_local
+        )
 
     @property
     def description(self) -> str:
@@ -153,17 +160,16 @@ class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
 
 
 class BuyTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str):
+    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+        super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = APIKeys().bet_from_address
+        self.user_address = self.keys.bet_from_address
 
         # Prevent the agent from spending recklessly!
         self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
-
-        super().__init__(market_type=market_type)
 
     @property
     def description(self) -> str:
@@ -182,8 +188,9 @@ class BuyTokens(MarketFunction):
         if amount > self.MAX_AMOUNT:
             return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
 
-        keys = APIKeys()
-        account_balance = float(get_balance(keys, market_type=self.market_type).amount)
+        account_balance = float(
+            get_balance(self.keys, market_type=self.market_type).amount
+        )
         if account_balance < amount:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
@@ -208,28 +215,32 @@ class BuyTokens(MarketFunction):
 
 
 class BuyYes(BuyTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_yes_outcome(market_type=market_type),
         )
 
 
 class BuyNo(BuyTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_no_outcome(market_type=market_type),
         )
 
 
 class SellTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str):
+    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+        super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = APIKeys().bet_from_address
-        super().__init__(market_type=market_type)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:
@@ -266,20 +277,27 @@ class SellTokens(MarketFunction):
 
 
 class SellYes(SellTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_yes_outcome(market_type=market_type),
         )
 
 
 class SellNo(SellTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_no_outcome(market_type=market_type),
         )
 
 
 class GetBalance(MarketFunction):
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+
     @property
     def description(self) -> str:
         return (
@@ -291,14 +309,13 @@ class GetBalance(MarketFunction):
         return []
 
     def __call__(self) -> float:
-        keys = APIKeys()
-        return get_balance(keys, market_type=self.market_type).amount
+        return get_balance(self.keys, market_type=self.market_type).amount
 
 
 class GetLiquidPositions(MarketFunction):
-    def __init__(self, market_type: MarketType) -> None:
-        self.user_address = APIKeys().bet_from_address
-        super().__init__(market_type=market_type)
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:
@@ -312,7 +329,7 @@ class GetLiquidPositions(MarketFunction):
         return []
 
     def __call__(self) -> list[str]:
-        self.user_address = APIKeys().bet_from_address
+        self.user_address = self.keys.bet_from_address
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address,
             liquid_only=True,
@@ -322,9 +339,9 @@ class GetLiquidPositions(MarketFunction):
 
 
 class GetResolvedBetsWithOutcomes(MarketFunction):
-    def __init__(self, market_type: MarketType) -> None:
-        self.user_address = APIKeys().bet_from_address
-        super().__init__(market_type=market_type)
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:

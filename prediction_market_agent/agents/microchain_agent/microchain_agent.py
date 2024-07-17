@@ -2,7 +2,6 @@ import typer
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from pydantic import SecretStr
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -36,6 +35,7 @@ from prediction_market_agent.utils import APIKeys
 def build_agent_functions(
     agent: Agent,
     market_type: MarketType,
+    keys: APIKeys,
     allow_stop: bool,
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
@@ -49,7 +49,7 @@ def build_agent_functions(
     functions.extend([f() for f in API_FUNCTIONS])
     functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
-    functions.extend([f(market_type=market_type) for f in MARKET_FUNCTIONS])
+    functions.extend([f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS])
     if market_type == MarketType.OMEN:
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:
@@ -60,10 +60,10 @@ def build_agent_functions(
 
 
 def build_agent(
+    keys: APIKeys,
     market_type: MarketType,
     model: str,
     system_prompt: str,
-    openai_api_key: SecretStr,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
@@ -73,7 +73,7 @@ def build_agent(
     engine = Engine()
     generator = OpenAIChatGenerator(
         model=model,
-        api_key=openai_api_key.get_secret_value(),
+        api_key=keys.openai_api_key.get_secret_value(),
         api_base=api_base,
         temperature=0.7,
     )
@@ -82,6 +82,7 @@ def build_agent(
     for f in build_agent_functions(
         agent=agent,
         market_type=market_type,
+        keys=keys,
         allow_stop=allow_stop,
         long_term_memory=long_term_memory,
         model=model,
@@ -109,6 +110,7 @@ def main(
     seed_prompt: str | None = None,
     load_historical_prompt: bool = False,
 ) -> None:
+    keys = APIKeys()
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
     unique_task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_TEST
@@ -122,6 +124,7 @@ def main(
     )
 
     agent = build_agent(
+        keys=keys,
         market_type=market_type,
         api_base=api_base,
         model=model,
@@ -129,7 +132,6 @@ def main(
         long_term_memory=long_term_memory,
         allow_stop=False,  # Prevent the agent from stopping itself
         prompt_handler=prompt_handler,
-        openai_api_key=APIKeys().openai_api_key,
     )
     if seed_prompt:
         agent.bootstrap = [f'Reasoning("{seed_prompt}")']

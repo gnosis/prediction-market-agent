@@ -131,7 +131,7 @@ def maybe_initialize_agent(model: str, system_prompt: str) -> None:
                 if st.session_state.get("load_historical_prompt")
                 else None
             ),
-            openai_api_key=APIKeys().openai_api_key,
+            keys=KEYS,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -146,6 +146,7 @@ def get_function_bullet_point_list(agent: Agent, model: str) -> str:
     for function in build_agent_functions(
         agent=agent,
         market_type=MARKET_TYPE,
+        keys=KEYS,
         long_term_memory=st.session_state.long_term_memory,
         allow_stop=ALLOW_STOP,
         model=model,
@@ -167,7 +168,7 @@ st.title("Prediction Market Trader Agent")
 with st.sidebar:
     streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
-keys = APIKeys()
+KEYS = APIKeys()
 maybe_initialize_long_term_memory()
 
 with st.sidebar:
@@ -176,7 +177,7 @@ with st.sidebar:
         # Placeholder for the agent's balance
         balance_container = st.container()
     st.write(
-        f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=keys)})."
+        f"To see the agent's transaction history, click [here]({MARKET_TYPE.market_class.get_user_url(keys=KEYS)})."
     )
 
     st.divider()
@@ -295,7 +296,7 @@ with history_container:
 with balance_container:
     st.metric(
         label=f"Current balance ({MARKET_TYPE.market_class.currency})",
-        value=f"{get_balance(keys, MARKET_TYPE).amount:.2f}",
+        value=f"{get_balance(KEYS, MARKET_TYPE).amount:.2f}",
     )
 
 # Display its updated function list, system prompt
