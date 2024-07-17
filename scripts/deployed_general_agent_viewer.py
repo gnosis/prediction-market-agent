@@ -146,11 +146,10 @@ st.subheader("Tool Usage")
 agent = build_agent(
     market_type=MARKET_TYPE,
     model="foo",  # placeholder, not used
-    system_prompt="foo",  # placeholder, not used
     keys=keys,  # placeholder, not used
+    unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
-    prompt_handler=None,
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
 usage_count_col_name = "Usage Count"

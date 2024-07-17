@@ -4,11 +4,13 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
-    get_editable_prompt_from_agent,
+    get_unformatted_system_prompt,
+    save_agent_history,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
     SystemPromptChoice,
+    extract_updatable_system_prompt,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -37,20 +39,33 @@ class DeployableMicrochainAgent(DeployableAgent):
             task_description=self.task_description
         )
         prompt_handler = PromptTableHandler(session_identifier=self.task_description)
-        system_prompt = SYSTEM_PROMPTS[self.system_prompt_choice]
+        unformatted_system_prompt = get_unformatted_system_prompt(
+            unformatted_prompt=SYSTEM_PROMPTS[self.system_prompt_choice],
+            prompt_table_handler=prompt_handler
+            if self.load_historical_prompt
+            else None,
+        )
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
-            system_prompt=system_prompt,
+            unformatted_system_prompt=unformatted_system_prompt,
             allow_stop=True,
             long_term_memory=long_term_memory,
-            prompt_handler=prompt_handler if self.load_historical_prompt else None,
             keys=APIKeys(),
         )
+
+        # Save formatted system prompt
+        initial_formatted_system_prompt = agent.system_prompt
         agent.run(self.n_iterations)
-        long_term_memory.save_history(agent.history)
-        editable_prompt = get_editable_prompt_from_agent(agent)
-        prompt_handler.save_prompt(editable_prompt)
+
+        save_agent_history(
+            agent=agent,
+            long_term_memory=long_term_memory,
+            initial_system_prompt=initial_formatted_system_prompt,
+        )
+        prompt_handler.save_prompt(
+            prompt=extract_updatable_system_prompt(initial_formatted_system_prompt)
+        )
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(

@@ -32,6 +32,7 @@ from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
     build_agent_functions,
+    get_unformatted_system_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
@@ -117,20 +118,28 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     get_history_from_last_turn(agent).save_to(st.session_state.long_term_memory)
 
 
-def maybe_initialize_agent(model: str, system_prompt: str) -> None:
+def maybe_initialize_agent(model: str, unformatted_system_prompt: str) -> None:
+    # Set the unformatted system prompt
+    prompt_table_handler = (
+        PromptTableHandler(
+            session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
+        )
+        if st.session_state.get("load_historical_prompt")
+        else None
+    )
+    unformatted_system_prompt = get_unformatted_system_prompt(
+        unformatted_prompt=unformatted_system_prompt,
+        prompt_table_handler=prompt_table_handler,
+    )
+
     # Initialize the agent
     if not agent_is_initialized():
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
-            system_prompt=system_prompt,
+            unformatted_system_prompt=unformatted_system_prompt,
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
-            prompt_handler=(
-                PromptTableHandler(session_identifier=AGENT_IDENTIFIER)
-                if st.session_state.get("load_historical_prompt")
-                else None
-            ),
             keys=KEYS,
         )
         st.session_state.agent.reset()
