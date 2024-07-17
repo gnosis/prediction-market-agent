@@ -438,7 +438,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             return None
 
 
-class ThinkThoroughlyWithPredictionProhpetResearch(ThinkThoroughlyBase):
+class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     identifier = "think-thoroughly-prophet-research-agent"
 
     @staticmethod

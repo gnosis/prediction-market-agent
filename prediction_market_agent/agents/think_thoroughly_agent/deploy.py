@@ -5,7 +5,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     ThinkThoroughlyBase,
     ThinkThoroughlyWithItsOwnResearch,
-    ThinkThoroughlyWithPredictionProhpetResearch,
+    ThinkThoroughlyWithPredictionProphetResearch,
 )
 
 
@@ -33,7 +33,7 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
-    agent_class = ThinkThoroughlyWithPredictionProhpetResearch
+    agent_class = ThinkThoroughlyWithPredictionProphetResearch
     model: str = "gpt-3.5-turbo-0125"
 
 
