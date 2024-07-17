@@ -84,6 +84,10 @@ class DatedChatHistory(ChatHistory):
     chat_messages: Sequence[DatedChatMessage]
 
     @property
+    def is_empty(self) -> bool:
+        return len(self.chat_messages) == 0
+
+    @property
     def start_time(self) -> datetime:
         return self.chat_messages[0].datetime_
 

@@ -128,7 +128,13 @@ roi = (total_asset_value - starting_balance) * 100 / starting_balance
 with st.container(border=True):
     col1, col2 = st.columns(2)
     col3, col4 = st.columns(2)
-    col1.metric("Starting Time", chat_history.start_time.strftime("%Y-%m-%d %H:%M:%S"))
+
+    col1.metric(
+        "Starting Time",
+        "N/A"
+        if chat_history.is_empty
+        else chat_history.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+    )
     col2.metric("Number of iterations", len(chat_history.chat_messages))
     col3.metric("Starting Balance", f"{starting_balance:.2f} {currency}")
     col4.metric(
@@ -183,13 +189,14 @@ with tab2:
     heatmap_df.index.name = tool_name_col_name
     dates = heatmap_df.columns.tolist()
     tool_names = heatmap_df.index.tolist()
-    fig = px.imshow(
-        heatmap_df.values.tolist(),
-        labels=dict(x="Session", y=tool_name_col_name, color=usage_count_col_name),
-        x=dates,
-        y=tool_names,
-        aspect="auto",
-    )
-    fig.update_xaxes(side="top")
-    fig.update_yaxes(tickvals=list(range(len(tool_names))), ticktext=tool_names)
-    st.plotly_chart(fig, theme="streamlit")
+    if not heatmap_df.empty:
+        fig = px.imshow(
+            heatmap_df.values.tolist(),
+            labels=dict(x="Session", y=tool_name_col_name, color=usage_count_col_name),
+            x=dates,
+            y=tool_names,
+            aspect="auto",
+        )
+        fig.update_xaxes(side="top")
+        fig.update_yaxes(tickvals=list(range(len(tool_names))), ticktext=tool_names)
+        st.plotly_chart(fig, theme="streamlit")
