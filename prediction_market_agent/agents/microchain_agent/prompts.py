@@ -38,7 +38,7 @@ def extract_updatable_system_prompt(system_prompt: str) -> str:
     return system_prompt.split(NON_UPDATABLE_DIVIDOR)[0]
 
 
-def build_full_system_prompt(system_prompt: str) -> str:
+def build_full_unformatted_system_prompt(system_prompt: str) -> str:
     if NON_UPDATABLE_DIVIDOR in system_prompt:
         raise ValueError("The system prompt already contains the non-updatable part.")
 
