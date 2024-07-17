@@ -20,6 +20,7 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     build_full_unformatted_system_prompt,
+    extract_updatable_system_prompt,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -116,5 +117,16 @@ def save_agent_history(
     system prompt to its initial state. This is necessary because the some
     functions may have changed the system prompt during the agent's run.
     """
+    # Save off the most up-to-date, or 'head' system prompt
+    head_system_prompt = agent.history[0]
+
+    # Restore the system prompt to its initial state
     agent.history[0] = dict(role="system", content=initial_system_prompt)
     long_term_memory.save_history(agent.history)
+
+    # Restore the head system prompt
+    agent.history[0] = head_system_prompt
+
+
+def get_editable_prompt_from_agent(agent: Agent) -> str:
+    return extract_updatable_system_prompt(str(agent.system_prompt))

@@ -121,9 +121,7 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
 def maybe_initialize_agent(model: str, unformatted_system_prompt: str) -> None:
     # Set the unformatted system prompt
     prompt_table_handler = (
-        PromptTableHandler(
-            session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
-        )
+        PromptTableHandler(session_identifier=AGENT_IDENTIFIER)
         if st.session_state.get("load_historical_prompt")
         else None
     )
