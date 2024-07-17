@@ -35,7 +35,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.43.0", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.43.1", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -60,6 +60,7 @@ tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "ba98871b7fc25519784ce580d901a4d6e17e2ecd" }
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"

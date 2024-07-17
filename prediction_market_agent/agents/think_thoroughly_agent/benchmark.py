@@ -27,6 +27,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
+    DeployableThinkThoroughlyProphetResearchAgent,
 )
 
 
@@ -45,13 +46,38 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
     )
 
 
-class CrewAIAgentSubquestionsBenchmark(AbstractBenchmarkedAgent):
+class ThinkThoroughlyBenchmark(AbstractBenchmarkedAgent):
     def __init__(
         self,
         max_workers: int,
         agent_name: str,
     ) -> None:
         self.agent = DeployableThinkThoroughlyAgent().agent
+        super().__init__(agent_name=agent_name, max_workers=max_workers)
+
+    def predict(self, market_question: str) -> Prediction:
+        result = self.agent.answer_binary_market(market_question)
+        return Prediction(
+            outcome_prediction=(
+                OutcomePrediction(
+                    decision=result.decision,
+                    p_yes=result.p_yes,
+                    confidence=result.confidence,
+                    info_utility=None,
+                )
+                if result
+                else None
+            )
+        )
+
+
+class ThinkThoroughlyProphetResearchBenchmark(AbstractBenchmarkedAgent):
+    def __init__(
+        self,
+        max_workers: int,
+        agent_name: str,
+    ) -> None:
+        self.agent = DeployableThinkThoroughlyProphetResearchAgent().agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
     def predict(self, market_question: str) -> Prediction:
@@ -96,8 +122,12 @@ def main(
     benchmarker = Benchmarker(
         markets=markets_deduplicated,
         agents=[
-            CrewAIAgentSubquestionsBenchmark(
-                agent_name="subsequential-questions-crewai",
+            ThinkThoroughlyBenchmark(
+                agent_name="think-thoroughly",
+                max_workers=max_workers,
+            ),
+            ThinkThoroughlyProphetResearchBenchmark(
+                agent_name="think-thoroughly-prophet-research",
                 max_workers=max_workers,
             ),
             RandomAgent(agent_name="random", max_workers=max_workers),

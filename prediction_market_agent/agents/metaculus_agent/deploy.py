@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.markets.metaculus.metaculus import (
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
-    CrewAIAgentSubquestions,
+    ThinkThoroughlyWithItsOwnResearch,
 )
 
 WARMUP_TOURNAMENT_ID = 3294
@@ -38,7 +38,7 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
         if market_type != MarketType.METACULUS:
             raise ValueError("Only Metaculus markets are supported for this agent")
 
-        agent = CrewAIAgentSubquestions(model=self.model, memory=False)
+        agent = ThinkThoroughlyWithItsOwnResearch(model=self.model, memory=False)
         markets: Sequence[
             MetaculusAgentMarket
         ] = MetaculusAgentMarket.get_binary_markets(

@@ -150,7 +150,9 @@ def extract_reasoning_behind_tweet(
     # We want memories only from the bets to add relevant learnings
     questions_from_bets = set([b.market_question for b in bets])
     filtered_memories = [
-        m for m in simple_memories if m.metadata.question in questions_from_bets
+        m
+        for m in simple_memories
+        if m.metadata.original_question in questions_from_bets
     ]
     return extract_reasonings_to_learnings(filtered_memories, tweet)
 
