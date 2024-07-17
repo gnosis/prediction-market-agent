@@ -51,6 +51,7 @@ from prediction_market_agent.tools.streamlit_utils import check_required_api_key
 from prediction_market_agent.utils import APIKeys
 
 MARKET_TYPE = MarketType.OMEN
+AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
 
 
@@ -105,9 +106,7 @@ def long_term_memory_is_initialized() -> bool:
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
-        st.session_state.long_term_memory = LongTermMemoryTableHandler(
-            AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
-        )
+        st.session_state.long_term_memory = LongTermMemoryTableHandler(AGENT_IDENTIFIER)
 
 
 def agent_is_initialized() -> bool:
@@ -128,9 +127,7 @@ def maybe_initialize_agent(model: str, system_prompt: str) -> None:
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             prompt_handler=(
-                PromptTableHandler(
-                    session_identifier=AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
-                )
+                PromptTableHandler(session_identifier=AGENT_IDENTIFIER)
                 if st.session_state.get("load_historical_prompt")
                 else None
             ),
@@ -298,7 +295,7 @@ with history_container:
 with balance_container:
     st.metric(
         label=f"Current balance ({MARKET_TYPE.market_class.currency})",
-        value=f"{get_balance(MARKET_TYPE).amount:.2f}",
+        value=f"{get_balance(keys, MARKET_TYPE).amount:.2f}",
     )
 
 # Display its updated function list, system prompt

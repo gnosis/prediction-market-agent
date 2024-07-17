@@ -53,10 +53,10 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
     return list(markets)
 
 
-def get_balance(market_type: MarketType) -> BetAmount:
+def get_balance(api_keys: APIKeys, market_type: MarketType) -> BetAmount:
     currency = market_type.market_class.currency
     if market_type == MarketType.OMEN:
-        balances = get_balances(APIKeys().bet_from_address)
+        balances = get_balances(api_keys.bet_from_address)
         total_balance = balances.xdai + balances.wxdai
         return BetAmount(
             amount=total_balance,
@@ -66,9 +66,9 @@ def get_balance(market_type: MarketType) -> BetAmount:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
-def get_total_asset_value(market_type: MarketType) -> BetAmount:
-    balance = get_balance(market_type)
-    positions = market_type.market_class.get_positions(APIKeys().bet_from_address)
+def get_total_asset_value(api_keys: APIKeys, market_type: MarketType) -> BetAmount:
+    balance = get_balance(api_keys, market_type)
+    positions = market_type.market_class.get_positions(api_keys.bet_from_address)
     positions_value = market_type.market_class.get_positions_value(positions)
 
     return BetAmount(

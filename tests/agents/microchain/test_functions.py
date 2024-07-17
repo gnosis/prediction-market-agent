@@ -100,8 +100,9 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     """
     Test buying and selling tokens for a market
     """
+    keys = APIKeys()
     market = get_binary_markets(market_type=market_type)[0]
-    from_address = APIKeys().bet_from_address
+    from_address = keys.bet_from_address
     outcomes_functions = {
         get_yes_outcome(market_type=market_type): [
             BuyYes(market_type=market_type),
@@ -118,7 +119,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     buy_amount = 0.1
 
     def get_balances() -> tuple[float, float]:
-        wallet_balance = get_balance(market_type=market_type).amount
+        wallet_balance = get_balance(keys, market_type=market_type).amount
         token_balance = market.get_token_balance(
             user_id=from_address,
             outcome=outcome,

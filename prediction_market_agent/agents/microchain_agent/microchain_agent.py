@@ -111,14 +111,12 @@ def main(
 ) -> None:
     # This description below serves to unique identify agent entries on the LTM, and should be
     # unique across instances (i.e. markets).
-    unique_task_description = (
-        AgentIdentifier.microchain_task_from_market(market_type) + "_test"
-    )
+    unique_task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_TEST
     long_term_memory = LongTermMemoryTableHandler(unique_task_description)
 
     # We only use microchain on Omen currently, hence no need for prompt handler for other markets.
     prompt_handler = (
-        PromptTableHandler(session_identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN)
+        PromptTableHandler(session_identifier=unique_task_description)
         if market_type == MarketType.OMEN and load_historical_prompt
         else None
     )
