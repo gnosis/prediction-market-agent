@@ -10,6 +10,9 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
 )
+from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
+    omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -20,6 +23,7 @@ def main(
     test: bool = True,  # Test is on by default, so we don't accidentaly create the markets.
     n_to_replicate: int = 50,
     initial_funds_xdai: float = 0.1,  # Just a small amount to make the markets bettable, probably no need for more in hackathon.
+    resolve: bool = False,
 ) -> None:
     keys = APIKeys(
         BET_FROM_PRIVATE_KEY=(
@@ -31,6 +35,10 @@ def main(
         raise ValueError(
             "You need to provide private key for the real replication, based on the address promised at the hackathon."
         )
+
+    if resolve:
+        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(keys)
+        return
 
     # Get participants at least 2 weeks to make the bets.
     close_time_after = utcnow() + timedelta(days=14)
