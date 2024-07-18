@@ -102,6 +102,10 @@ class PredictProbabilityForQuestionBase(MarketFunction):
 
 
 class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
+    """
+    Uses the prediction_prophet library to make a prediction.
+    """
+
     def __init__(
         self,
         market_type: MarketType,
@@ -140,6 +144,11 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
 
 
 class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
+    """
+    Uses the mech-client to make a prediction. Useability issues:
+    https://github.com/gnosis/prediction-market-agent/issues/327
+    """
+
     def __init__(
         self,
         market_type: MarketType,
