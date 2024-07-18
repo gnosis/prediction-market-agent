@@ -1,4 +1,3 @@
-import typer
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -20,11 +19,9 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    TRADING_AGENT_SYSTEM_PROMPT,
-    build_full_system_prompt,
+    build_full_unformatted_system_prompt,
     extract_updatable_system_prompt,
 )
-from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -63,12 +60,11 @@ def build_agent(
     keys: APIKeys,
     market_type: MarketType,
     model: str,
-    system_prompt: str,
+    unformatted_system_prompt: str,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
     bootstrap: str | None = None,
-    prompt_handler: PromptTableHandler | None = None,
 ) -> Agent:
     engine = Engine()
     generator = OpenAIChatGenerator(
@@ -91,61 +87,46 @@ def build_agent(
 
     agent.max_tries = 3
 
-    # Restore the prompt from a historical session, replacing the editable part with it.
-    if prompt_handler:
-        if historical_prompt := prompt_handler.fetch_latest_prompt():
-            system_prompt = build_full_system_prompt(historical_prompt.prompt)
-
-    agent.system_prompt = system_prompt.format(engine_help=agent.engine.help)
+    agent.system_prompt = unformatted_system_prompt.format(
+        engine_help=agent.engine.help
+    )
     if bootstrap:
         agent.bootstrap = [bootstrap]
     return agent
 
 
-def main(
-    market_type: MarketType = MarketType.OMEN,
-    api_base: str = "https://api.openai.com/v1",
-    model: str = "gpt-4-turbo-preview",
-    iterations: int = 10,
-    seed_prompt: str | None = None,
-    load_historical_prompt: bool = False,
+def get_unformatted_system_prompt(
+    unformatted_prompt: str, prompt_table_handler: PromptTableHandler | None
+) -> str:
+    # Restore the prompt from a historical session, replacing the editable part with it.
+    if prompt_table_handler:
+        if historical_prompt := prompt_table_handler.fetch_latest_prompt():
+            return build_full_unformatted_system_prompt(historical_prompt.prompt)
+
+    # If no historical prompt is found, return the original prompt.
+    return unformatted_prompt
+
+
+def save_agent_history(
+    long_term_memory: LongTermMemoryTableHandler,
+    agent: Agent,
+    initial_system_prompt: str,
 ) -> None:
-    keys = APIKeys()
-    # This description below serves to unique identify agent entries on the LTM, and should be
-    # unique across instances (i.e. markets).
-    unique_task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_TEST
-    long_term_memory = LongTermMemoryTableHandler(unique_task_description)
+    """
+    Save the agent's history to the long-term memory. But first, restore the
+    system prompt to its initial state. This is necessary because the some
+    functions may have changed the system prompt during the agent's run.
+    """
+    # Save off the most up-to-date, or 'head' system prompt
+    head_system_prompt = agent.history[0]
 
-    # We only use microchain on Omen currently, hence no need for prompt handler for other markets.
-    prompt_handler = (
-        PromptTableHandler(session_identifier=unique_task_description)
-        if market_type == MarketType.OMEN and load_historical_prompt
-        else None
-    )
-
-    agent = build_agent(
-        keys=keys,
-        market_type=market_type,
-        api_base=api_base,
-        model=model,
-        system_prompt=TRADING_AGENT_SYSTEM_PROMPT,
-        long_term_memory=long_term_memory,
-        allow_stop=False,  # Prevent the agent from stopping itself
-        prompt_handler=prompt_handler,
-    )
-    if seed_prompt:
-        agent.bootstrap = [f'Reasoning("{seed_prompt}")']
-    agent.run(iterations=iterations)
-    # generator.print_usage() # Waiting for microchain release
+    # Restore the system prompt to its initial state
+    agent.history[0] = dict(role="system", content=initial_system_prompt)
     long_term_memory.save_history(agent.history)
-    editable_prompt = get_editable_prompt_from_agent(agent)
-    if prompt_handler:
-        prompt_handler.save_prompt(editable_prompt)
+
+    # Restore the head system prompt
+    agent.history[0] = head_system_prompt
 
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:
     return extract_updatable_system_prompt(str(agent.system_prompt))
-
-
-if __name__ == "__main__":
-    typer.run(main)

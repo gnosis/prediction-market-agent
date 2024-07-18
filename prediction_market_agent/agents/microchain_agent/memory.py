@@ -79,6 +79,18 @@ class ChatHistory(BaseModel):
     def num_messages(self) -> int:
         return len(self.chat_messages)
 
+    @property
+    def is_empty(self) -> bool:
+        return self.num_messages == 0
+
+    @property
+    def iterations(self) -> int:
+        # Number of messages:
+        #   -1 (for sys prompt)
+        #   divide by 2 (for user and assistant messages)
+        #   round down to nearest integer (in case the session ended with a failed function call)
+        return (self.num_messages - 1) // 2
+
 
 class DatedChatHistory(ChatHistory):
     chat_messages: Sequence[DatedChatMessage]
