@@ -26,32 +26,38 @@ def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
 def chat_history() -> DatedChatHistory:
     chat_messages = [
         DatedChatMessage(
-            content="foo", role="user", datetime_=datetime(2022, 1, 1, 0, 0)
+            content="foo", role="system", datetime_=datetime(2022, 1, 1, 0, 0)
         ),
         DatedChatMessage(
-            content="bar", role="agent", datetime_=datetime(2022, 1, 1, 0, 20)
+            content="bar", role="assistant", datetime_=datetime(2022, 1, 1, 0, 20)
         ),
         DatedChatMessage(
             content="baz", role="user", datetime_=datetime(2022, 1, 1, 0, 25)
+        ),
+        DatedChatMessage(
+            content="qux", role="system", datetime_=datetime(2022, 1, 1, 0, 30)
+        ),
+        DatedChatMessage(
+            content="quux", role="assistant", datetime_=datetime(2022, 1, 1, 0, 35)
         ),
     ]
     return DatedChatHistory(chat_messages=chat_messages)
 
 
 def test_chat_history_clustering(chat_history: DatedChatHistory) -> None:
-    assert chat_history.num_messages == 3
+    assert chat_history.num_messages == 5
 
-    clusters0 = chat_history.cluster_by_datetime(max_minutes_between_messages=10)
-    assert len(clusters0) == 2
-    assert clusters0[0].num_messages == 1
-    assert clusters0[1].num_messages == 2
+    clusters = chat_history.cluster_by_session()
+    assert len(clusters) == 2
+    assert clusters[0].num_messages == 3
+    assert clusters[1].num_messages == 2
 
-    clusters1 = chat_history.cluster_by_datetime(max_minutes_between_messages=30)
-    assert len(clusters1) == 1
-    assert clusters1[0].num_messages == 3
+    # Check that each cluster starts with a system message
+    for cluster in clusters:
+        assert cluster.chat_messages[0].is_system_message
 
     # Check that chat_history is still the same length after clustering
-    assert chat_history.num_messages == 3
+    assert chat_history.num_messages == 5
 
 
 def test_save_to_and_load_from_memory(

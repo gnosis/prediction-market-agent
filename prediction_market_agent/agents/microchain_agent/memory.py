@@ -19,6 +19,10 @@ class ChatMessage(BaseModel):
     content: str
     role: str
 
+    @property
+    def is_system_message(self) -> bool:
+        return self.role == "system"
+
 
 class DatedChatMessage(ChatMessage):
     datetime_: datetime
@@ -121,25 +125,24 @@ class DatedChatHistory(ChatHistory):
         chat_messages = [DatedChatMessage.from_long_term_memory(m) for m in memories]
         return cls(chat_messages=chat_messages)
 
-    def cluster_by_datetime(
-        self, max_minutes_between_messages: int
-    ) -> list["DatedChatHistory"]:
+    def cluster_by_session(self) -> list["DatedChatHistory"]:
         """
-        Cluster chat messages by datetime. Each cluster will have messages that
-        are within `minutes` of each other.
+        Cluster chat messages by session, where a new session starts with a
+        system prompt message.
         """
         clusters: list[DatedChatHistory] = []
         chat_messages = list(self.chat_messages).copy()
+
+        # Check that the first message is a system message
+        if not chat_messages[0].is_system_message:
+            raise ValueError("First message must be a system message")
+
         while chat_messages:
-            current_datetime = chat_messages[0].datetime_
-            current_cluster: list[DatedChatMessage] = []
-            while chat_messages and chat_messages[
-                0
-            ].datetime_ < current_datetime + timedelta(
-                minutes=max_minutes_between_messages
-            ):
-                current_cluster.append(chat_messages.pop(0))
-            clusters.append(DatedChatHistory(chat_messages=current_cluster))
+            if chat_messages[0].is_system_message:
+                clusters.append(DatedChatHistory(chat_messages=[chat_messages.pop(0)]))
+            else:
+                clusters[-1].chat_messages.append(chat_messages.pop(0))
+
         return clusters
 
     def to_undated_chat_history(self) -> ChatHistory:
