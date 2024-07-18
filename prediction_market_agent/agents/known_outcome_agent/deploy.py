@@ -5,6 +5,7 @@ from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTrade
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import BetAmount
+from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
@@ -22,7 +23,9 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
 
-    def pick_markets(self, markets: t.Sequence[AgentMarket]) -> list[AgentMarket]:
+    def pick_markets(
+        self, market_type: MarketType, markets: t.Sequence[AgentMarket]
+    ) -> list[AgentMarket]:
         picked_markets: list[AgentMarket] = []
         for market in markets:
             if not isinstance(market, OmenAgentMarket):
