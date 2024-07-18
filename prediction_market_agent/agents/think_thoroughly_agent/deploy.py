@@ -3,19 +3,38 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
-    CrewAIAgentSubquestions,
+    ThinkThoroughlyBase,
+    ThinkThoroughlyWithItsOwnResearch,
+    ThinkThoroughlyWithPredictionProphetResearch,
 )
 
 
-class DeployableThinkThoroughlyAgent(DeployableTraderAgent):
-    model: str = "gpt-4-turbo-2024-04-09"
+class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
+    agent_class: type[ThinkThoroughlyBase]
+    model: str
     bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
-        self.agent = CrewAIAgentSubquestions(model=self.model)
+        self.agent = self.agent_class(model=self.model)
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        return self.agent.answer_binary_market(market.question)
+        return self.agent.answer_binary_market(
+            market.question, created_time=market.created_time
+        )
+
+    def before(self, market_type: MarketType) -> None:
+        self.agent.update_markets()
+        super().before(market_type=market_type)
+
+
+class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
+    agent_class = ThinkThoroughlyWithItsOwnResearch
+    model: str = "gpt-4-turbo-2024-04-09"
+
+
+class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
+    agent_class = ThinkThoroughlyWithPredictionProphetResearch
+    model: str = "gpt-4-turbo-2024-04-09"
 
 
 if __name__ == "__main__":

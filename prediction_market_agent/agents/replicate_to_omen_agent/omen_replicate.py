@@ -1,7 +1,13 @@
 from datetime import datetime, timedelta
 
-from prediction_market_agent_tooling.config import PrivateCredentials
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, wei_type, xDai
+from prediction_market_agent_tooling.gtypes import (
+    ChecksumAddress,
+    HexAddress,
+    HexStr,
+    int_to_hexbytes,
+    wei_type,
+    xDai,
+)
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
 from prediction_market_agent_tooling.markets.categorize import infer_category
@@ -22,8 +28,16 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.is_predictable import is_predictable_binary
+from prediction_market_agent_tooling.tools.is_predictable import (
+    is_predictable_binary,
+    is_predictable_without_description,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
+
+from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
+    generate_and_set_image_for_market,
+)
+from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
 # That is because at the closing time, the question will open on Realitio, and we don't want it to be resolved as unknown/invalid.
@@ -32,26 +46,25 @@ EXTEND_CLOSING_TIME_DELTA = timedelta(days=6)
 
 
 def omen_replicate_from_tx(
-    private_credentials: PrivateCredentials,
+    api_keys: APIKeys,
     market_type: MarketType,
     n_to_replicate: int,
     initial_funds: xDai,
+    sort_by: SortBy = SortBy.NONE,
     close_time_before: datetime | None = None,
+    close_time_after: datetime | None = None,
     auto_deposit: bool = False,
+    test: bool = False,
 ) -> list[ChecksumAddress]:
-    from_address = private_credentials.public_key
-    already_created_markets = OmenSubgraphHandler().get_omen_binary_markets(
-        limit=None,
-        creator=from_address,
-    )
+    existing_markets = OmenSubgraphHandler().get_omen_binary_markets(limit=None)
 
     markets = get_binary_markets(
         # Polymarket is slow to get, so take only 10 candidates for him.
-        10 if market_type == MarketType.POLYMARKET else 100,
+        10 if market_type == MarketType.POLYMARKET else 1000,
         market_type,
         filter_by=FilterBy.OPEN,
-        sort_by=SortBy.NONE,
-        excluded_questions=set(m.question_title for m in already_created_markets),
+        sort_by=sort_by,
+        excluded_questions=set(m.question_title for m in existing_markets),
     )
     markets_sorted = sorted(
         markets,
@@ -83,6 +96,12 @@ def omen_replicate_from_tx(
     created_addresses: list[ChecksumAddress] = []
 
     for market in markets_to_replicate:
+        if len(created_addresses) > n_to_replicate:
+            logger.info(
+                f"Replicated {len(created_addresses)} from {market_type}, breaking."
+            )
+            break
+
         if market.close_time is None:
             logger.info(
                 f"Skipping `{market.question}` because it's missing the closing time."
@@ -90,18 +109,30 @@ def omen_replicate_from_tx(
             continue
 
         safe_closing_time = market.close_time + EXTEND_CLOSING_TIME_DELTA
-        # Force at least 48 hours of time where the resolution is unknown.
-        soonest_allowed_resolution_known_time = utcnow() + timedelta(hours=48)
+        # If `close_time_after` isn't provided, force at least 48 hours of time where the resolution is unknown.
+        soonest_allowed_resolution_known_time = (
+            close_time_after
+            if close_time_after is not None
+            else utcnow() + timedelta(hours=48)
+        )
         if market.close_time <= soonest_allowed_resolution_known_time:
             logger.info(
                 f"Skipping `{market.question}` because it closes sooner than {soonest_allowed_resolution_known_time}."
             )
             continue
 
-        # Do as the last step, becuase it calls OpenAI (costly & slow).
+        # Do as the last steps, becuase it calls OpenAI (costly & slow).
         if not is_predictable_binary(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable."
+            )
+            continue
+
+        if market.description and not is_predictable_without_description(
+            market.question, market.description
+        ):
+            logger.info(
+                f"Skipping `{market.question}` because it seems to not be predictable without the description `{market.description}`."
             )
             continue
 
@@ -113,8 +144,17 @@ def omen_replicate_from_tx(
             )
             continue
 
+        if test:
+            logger.info(
+                f"Test mode: Would create `{market.question}` in category {category} out of {market.url}."
+            )
+            created_addresses.append(
+                ChecksumAddress(HexAddress(HexStr(int_to_hexbytes(0).hex())))
+            )
+            continue
+
         market_address = omen_create_market_tx(
-            private_credentials=private_credentials,
+            api_keys=api_keys,
             initial_funds=initial_funds,
             fee=OMEN_DEFAULT_MARKET_FEE,
             question=market.question,
@@ -129,20 +169,22 @@ def omen_replicate_from_tx(
             f"Created `https://aiomen.eth.limo/#/{market_address}` for `{market.question}` in category {category} out of {market.url}."
         )
 
-        if len(created_addresses) >= n_to_replicate:
-            logger.info(
-                f"Replicated {len(created_addresses)} from {market_type}, breaking."
-            )
-            break
+        if (
+            generate_and_set_image_for_market(market_address, market.question, api_keys)
+            is not None
+        ):
+            logger.info(f"Generated and set image for `{market.question}`.")
+        else:
+            logger.warning(f"Failed to generate and set image for `{market.question}`.")
 
     return created_addresses
 
 
 def omen_unfund_replicated_known_markets_tx(
-    private_credentials: PrivateCredentials,
+    api_keys: APIKeys,
     saturation_above_threshold: float | None = None,
 ) -> None:
-    from_address = private_credentials.public_key
+    from_address = api_keys.bet_from_address
 
     now = utcnow()
     # We want to unfund markets ~1 day before the resolution should be known.
@@ -177,7 +219,7 @@ def omen_unfund_replicated_known_markets_tx(
             f"[{idx+1}/{len(markets)}] Unfunding market `{market.liquidityParameter=} {market.question=} {market.url=}`."
         )
         omen_remove_fund_market_tx(
-            private_credentials=private_credentials,
+            api_keys=api_keys,
             market=OmenAgentMarket.from_data_model(market),
             shares=None,
         )

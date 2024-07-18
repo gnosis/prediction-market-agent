@@ -32,6 +32,7 @@ class QuestionWithKnownOutcome(BaseModel):
             url=self.url if self.url else "",
             id=self.question,
             question=self.question,
+            description=None,
             current_p_yes=Probability(
                 self.result.to_p_yes()
                 if self.result != Result.KNOWN_UNKNOWABLE

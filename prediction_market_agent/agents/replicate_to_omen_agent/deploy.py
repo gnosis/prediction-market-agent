@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from prediction_market_agent_tooling.config import APIKeys, PrivateCredentials
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
@@ -9,7 +8,9 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     redeem_from_all_user_positions,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from web3 import Web3
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
@@ -18,6 +19,20 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
+from prediction_market_agent.utils import APIKeys
+
+REPLICATOR_ADDRESS = Web3.to_checksum_address(
+    "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
+)
+
+
+class ReplicateConfig(BaseModel):
+    n: int  # How many markets of this configuration to replicate.
+    close_time_up_to_n_days: (
+        int  # Consider only markets closing in less than N days for this configuration.
+    )
+    every_n_days: int  # This configuration should execute every N days.
+    source: MarketType
 
 
 class ReplicateSettings(BaseSettings):
@@ -25,9 +40,8 @@ class ReplicateSettings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    N_TO_REPLICATE: int
+    REPLICATE: list[ReplicateConfig]
     INITIAL_FUNDS: str
-    CLOSE_TIME_UP_TO_N_DAYS: list[int]
 
 
 class DeployableReplicateToOmenAgent(DeployableAgent):
@@ -36,51 +50,44 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             raise RuntimeError("Can replicate only into Omen.")
 
         keys = APIKeys()
-        credentials = PrivateCredentials.from_api_keys(keys)
         settings = ReplicateSettings()
+        now = utcnow()
 
         logger.info(
-            f"Finalising, resolving and claiming back xDai from existing markets replicated by {credentials.public_key}."
+            f"Finalising, resolving and claiming back xDai from existing markets replicated by {keys.bet_from_address}."
         )
-        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
-            credentials
-        )
+        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(keys)
 
         logger.info(
-            f"Unfunding soon to be known markets replicated by {credentials.public_key}."
+            f"Unfunding soon to be known markets replicated by {keys.bet_from_address}."
         )
-        omen_unfund_replicated_known_markets_tx(
-            credentials, saturation_above_threshold=0.9
-        )
+        omen_unfund_replicated_known_markets_tx(keys, saturation_above_threshold=0.9)
 
         logger.info("Redeeming funds from previously unfunded markets.")
-        redeem_from_all_user_positions(credentials)
+        redeem_from_all_user_positions(keys)
 
-        for close_time_days in settings.CLOSE_TIME_UP_TO_N_DAYS:
-            close_time_before = utcnow() + timedelta(days=close_time_days)
+        for replicate_config in settings.REPLICATE:
+            if now.timetuple().tm_yday % replicate_config.every_n_days:
+                logger.info(f"Skipping {replicate_config}, because it's not his day.")
+                continue
+
+            close_time_before = now + timedelta(
+                days=replicate_config.close_time_up_to_n_days
+            )
             initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
 
             logger.info(
-                f"Replicating from {MarketType.MANIFOLD} markets closing in {close_time_days} days."
+                f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
             )
             omen_replicate_from_tx(
-                market_type=MarketType.MANIFOLD,
-                n_to_replicate=settings.N_TO_REPLICATE,
+                market_type=replicate_config.source,
+                n_to_replicate=replicate_config.n,
                 initial_funds=initial_funds_per_market,
-                private_credentials=credentials,
-                close_time_before=close_time_before,
-                auto_deposit=True,
-            )
-            logger.info(
-                f"Replicating from {MarketType.POLYMARKET} markets closing in {close_time_days} days."
-            )
-            omen_replicate_from_tx(
-                market_type=MarketType.POLYMARKET,
-                n_to_replicate=settings.N_TO_REPLICATE,
-                initial_funds=initial_funds_per_market,
-                private_credentials=credentials,
+                api_keys=keys,
                 close_time_before=close_time_before,
                 auto_deposit=True,
             )
 
-        logger.debug("Done.")
+            logger.info(f"Replication from {replicate_config.source} done.")
+
+        logger.info("All done.")

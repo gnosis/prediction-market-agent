@@ -9,11 +9,26 @@ from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.autogen_general_agent.prompts import (
+from prediction_market_agent.agents.microchain_agent.memory import (
+    SimpleMemoryThinkThoroughly,
+)
+from prediction_market_agent.agents.social_media_agent.prompts import (
     CRITIC_PROMPT,
     INFLUENCER_PROMPT,
+    POST_MAX_LENGTH,
+    REASONING_PROMPT,
+)
+from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
 )
 from prediction_market_agent.utils import APIKeys
+
+
+# Options from https://microsoft.github.io/autogen/docs/reference/agentchat/conversable_agent/#initiate_chat
+class SummaryMethod(str, Enum):
+    LAST_MSG = "last_msg"
+    REFLECTION_WITH_LLM = "reflection_with_llm"
 
 
 class BetInputPrompt(BaseModel):
@@ -76,23 +91,18 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     writer = autogen.AssistantAgent(
         name="Writer",
         llm_config=llm_config,
-        system_message="""
-        You are a professional influencer, known for your insightful and engaging tweets.
-        You transform complex concepts into compelling narratives.
-        You should improve the quality of the content based on the feedback from the user.
-        You must always return only the tweet.
-        """,
+        system_message="""You are a professional influencer, known for your insightful and engaging tweets. You 
+        transform complex concepts into compelling narratives. You should improve the quality of the content based on 
+        the feedback from the user. You must always return only the tweet. """,
     )
 
     critic = autogen.AssistantAgent(
         name="Critic",
         llm_config=llm_config,
-        system_message="""
-            You are a critic, known for your thoroughness and commitment to standards.
-            Your task is to scrutinize content for any harmful elements or regulatory violations, ensuring
-            all materials align with required guidelines.
-            References to betting and gambling are allowed.
-            """,
+        system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is 
+        to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with 
+        required guidelines. You should also always remind everyone that the limit for any posts being created is 
+{POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
     )
 
     return {
@@ -102,7 +112,10 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
-def build_social_media_text(model: str, bets: list[Bet]) -> str:
+def build_social_media_text(
+    model: str,
+    bets: list[Bet],
+) -> str:
     """
     Builds a tweet based on past betting activity from a given participant.
 
@@ -112,6 +125,62 @@ def build_social_media_text(model: str, bets: list[Bet]) -> str:
     The tweet content is generated using a template that includes questions about each market's title and likelihood.
     """
 
+    task = Template(INFLUENCER_PROMPT).substitute(
+        BETS=[BetInputPrompt.from_bet(bet) for bet in bets],
+    )
+
+    tweet = build_tweet(model=model, task=task)
+    return tweet
+
+
+def extract_reasoning_behind_tweet(
+    tweet: str,
+    bets: list[Bet],
+    long_term_memory: LongTermMemoryTableHandler,
+    memories_since: datetime | None = None,
+) -> str:
+    """
+    Fetches memories from the DB that are most closely related to bets.
+    Returns a summary of the reasoning value from the metadata of those memories.
+    """
+    memories = long_term_memory.search(from_=memories_since)
+    simple_memories = [
+        SimpleMemoryThinkThoroughly.from_long_term_memory(ltm) for ltm in memories
+    ]
+    # We want memories only from the bets to add relevant learnings
+    questions_from_bets = set([b.market_question for b in bets])
+    filtered_memories = [
+        m
+        for m in simple_memories
+        if m.metadata.original_question in questions_from_bets
+    ]
+    return extract_reasonings_to_learnings(filtered_memories, tweet)
+
+
+def build_reply_tweet(
+    model: str,
+    tweet: str,
+    bets: list[Bet],
+    long_term_memory: LongTermMemoryTableHandler,
+    memories_since: datetime | None = None,
+) -> str:
+    reasoning = extract_reasoning_behind_tweet(
+        tweet=tweet,
+        bets=bets,
+        long_term_memory=long_term_memory,
+        memories_since=memories_since,
+    )
+
+    task = Template(REASONING_PROMPT).substitute(
+        TWEET=tweet,
+        REASONING=reasoning,
+    )
+
+    tweet = build_tweet(model=model, task=task)
+    return tweet
+
+
+def build_tweet(model: str, task: str) -> str:
     agents = build_agents(model)
     user_proxy, writer, critic = (
         agents[AutogenAgentType.USER],
@@ -130,13 +199,6 @@ def build_social_media_text(model: str, bets: list[Bet]) -> str:
         trigger=writer,
     )
 
-    # ToDO - fetch agent reasoning from DB and construct better tweets
-    #  See https://github.com/gnosis/prediction-market-agent/issues/150
-
-    task = Template(INFLUENCER_PROMPT).substitute(
-        BETS=[BetInputPrompt.from_bet(bet) for bet in bets]
-    )
-
     # in case we trigger repeated runs, Cache makes it faster.
     with Cache.disk(cache_seed=42) as cache:
         # max_turns = the maximum number of turns for the chat between the two agents. One turn means one conversation round trip.
@@ -144,11 +206,13 @@ def build_social_media_text(model: str, bets: list[Bet]) -> str:
             recipient=writer,
             message=task,
             max_turns=2,
-            summary_method="last_msg",
+            summary_method=SummaryMethod.REFLECTION_WITH_LLM,
             cache=cache,
         )
+    # We extract the last message since the revised tweet is contained in the last response
+    # from the writer.
+    reply_tweet = res.chat_history[-1]["content"]
 
-    tweet = res.summary
     return str(
-        tweet
+        reply_tweet
     )  # Casting needed as summary is of type any and no Pydantic support

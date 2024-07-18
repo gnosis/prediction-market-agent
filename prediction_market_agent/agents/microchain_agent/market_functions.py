@@ -1,12 +1,20 @@
 import typing as t
+from datetime import timedelta
 
 from microchain import Function
-from prediction_market_agent_tooling.config import PrivateCredentials
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import Currency, TokenAmount
+from prediction_market_agent_tooling.markets.data_models import (
+    Currency,
+    ResolvedBet,
+    TokenAmount,
+)
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_prophet.benchmark.agents import (
+    _make_prediction as prophet_make_prediction,
+)
+from prediction_prophet.functions.research import research as prophet_research
 
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
     get_balance,
@@ -16,43 +24,13 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
-from prediction_market_agent.db.models import LongTermMemories
-from prediction_market_agent.tools.mech.utils import (
-    MechResponse,
-    MechTool,
-    mech_request,
-)
+from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
 from prediction_market_agent.utils import APIKeys
 
 
-class Sum(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to compute the sum of two numbers"
-
-    @property
-    def example_args(self) -> list[float]:
-        return [2, 2]
-
-    def __call__(self, a: float, b: float) -> float:
-        return a + b
-
-
-class Product(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to compute the product of two numbers"
-
-    @property
-    def example_args(self) -> list[float]:
-        return [2, 2]
-
-    def __call__(self, a: float, b: float) -> float:
-        return a * b
-
-
 class MarketFunction(Function):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        self.keys = keys
         self.market_type = market_type
         super().__init__()
 
@@ -107,40 +85,69 @@ class GetMarketProbability(MarketFunction):
 class PredictProbabilityForQuestionBase(MarketFunction):
     def __init__(
         self,
-        mech_request: t.Callable[[str, MechTool], MechResponse],
         market_type: MarketType,
-        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
+        keys: APIKeys,
     ) -> None:
-        self.mech_tool = mech_tool
-        self.mech_request = mech_request
+        super().__init__(market_type=market_type, keys=keys)
         self._description = (
             "Use this function to research perform research and predict the "
             "probability of an event occuring. Returns the probability. The "
             "one parameter is the market id of the prediction market you want "
             "to predict the probability of."
         )
-        super().__init__(market_type=market_type)
 
     @property
     def example_args(self) -> list[str]:
         return [get_example_market_id(self.market_type)]
-
-    def __call__(self, market_id: str) -> str:
-        question = self.market_type.market_class.get_binary_market(
-            id=market_id
-        ).question
-        response: MechResponse = self.mech_request(question, self.mech_tool)
-        return str(response.p_yes)
 
 
 class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def __init__(
         self,
         market_type: MarketType,
+        keys: APIKeys,
+        model: str = "gpt-3.5-turbo",
+    ) -> None:
+        self.model = model
+        super().__init__(market_type=market_type, keys=keys)
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    def __call__(self, market_id: str) -> str:
+        question = self.market_type.market_class.get_binary_market(
+            id=market_id
+        ).question
+        research = prophet_research(
+            goal=question,
+            use_summaries=False,
+            model=self.model,
+            openai_api_key=self.keys.openai_api_key,
+            tavily_api_key=self.keys.tavily_api_key,
+        )
+        prediction = prophet_make_prediction(
+            market_question=question,
+            additional_information=research,
+            engine=self.model,
+            temperature=0,
+            api_key=self.keys.openai_api_key,
+        )
+        if prediction.outcome_prediction is None:
+            return "Failed to make a prediction."
+
+        return str(prediction.outcome_prediction.p_yes)
+
+
+class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
+    def __init__(
+        self,
+        market_type: MarketType,
+        keys: APIKeys,
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
         self.mech_tool = mech_tool
-        super().__init__(market_type=market_type, mech_request=mech_request)
+        super().__init__(market_type=market_type, keys=keys)
 
     @property
     def description(self) -> str:
@@ -149,28 +156,34 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011
-        account_balance = float(get_balance(market_type=self.market_type).amount)
+        account_balance = float(
+            get_balance(self.keys, market_type=self.market_type).amount
+        )
         if account_balance < MECH_CALL_XDAI_LIMIT:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
                 f"large enough to make a mech call (min required "
                 f"{MECH_CALL_XDAI_LIMIT})."
             )
-        return super().__call__(market_id)
+
+        question = self.market_type.market_class.get_binary_market(
+            id=market_id
+        ).question
+        response: MechResponse = self.mech_request(question, self.mech_tool)
+        return str(response.p_yes)
 
 
 class BuyTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str):
+    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+        super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome, market_type=market_type
         )
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = self.keys.bet_from_address
 
         # Prevent the agent from spending recklessly!
         self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
-
-        super().__init__(market_type=market_type)
 
     @property
     def description(self) -> str:
@@ -189,11 +202,13 @@ class BuyTokens(MarketFunction):
         if amount > self.MAX_AMOUNT:
             return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
 
-        account_balance = float(get_balance(market_type=self.market_type).amount)
+        account_balance = float(
+            get_balance(self.keys, market_type=self.market_type).amount
+        )
         if account_balance < amount:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
-                f"large enough to buy {amount} tokens."
+                f"large enough to buy {amount} {self.currency} worth of tokens."
             )
 
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
@@ -214,36 +229,41 @@ class BuyTokens(MarketFunction):
 
 
 class BuyYes(BuyTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_yes_outcome(market_type=market_type),
         )
 
 
 class BuyNo(BuyTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_no_outcome(market_type=market_type),
         )
 
 
 class SellTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str):
+    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+        super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(
             outcome=self.outcome,
             market_type=market_type,
         )
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
-        super().__init__(market_type=market_type)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:
         return (
             f"Use this function to sell {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
-            f"second parameter specifies the value of tokens to sell in "
-            f"{self.currency}."
+            f"second parameter specifies the (float) number of tokens to sell. "
+            f"You can use `GetLiquidPositions` to see your current token "
+            f"holdings."
         )
 
     @property
@@ -271,20 +291,27 @@ class SellTokens(MarketFunction):
 
 
 class SellYes(SellTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_yes_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_yes_outcome(market_type=market_type),
         )
 
 
 class SellNo(SellTokens):
-    def __init__(self, market_type: MarketType) -> None:
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
         super().__init__(
-            market_type=market_type, outcome=get_no_outcome(market_type=market_type)
+            market_type=market_type,
+            keys=keys,
+            outcome=get_no_outcome(market_type=market_type),
         )
 
 
 class GetBalance(MarketFunction):
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+
     @property
     def description(self) -> str:
         return (
@@ -296,13 +323,13 @@ class GetBalance(MarketFunction):
         return []
 
     def __call__(self) -> float:
-        return get_balance(market_type=self.market_type).amount
+        return get_balance(self.keys, market_type=self.market_type).amount
 
 
-class GetPositions(MarketFunction):
-    def __init__(self, market_type: MarketType) -> None:
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
-        super().__init__(market_type=market_type)
+class GetLiquidPositions(MarketFunction):
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:
@@ -316,38 +343,38 @@ class GetPositions(MarketFunction):
         return []
 
     def __call__(self) -> list[str]:
-        self.user_address = PrivateCredentials.from_api_keys(APIKeys()).public_key
+        self.user_address = self.keys.bet_from_address
         positions = self.market_type.market_class.get_positions(
-            user_id=self.user_address
+            user_id=self.user_address,
+            liquid_only=True,
+            larger_than=1e-4,  # Ignore very small positions
         )
         return [str(position) for position in positions]
 
 
-class RememberPastLearnings(Function):
-    def __init__(self, long_term_memory: LongTermMemory) -> None:
-        self.long_term_memory = long_term_memory
-        super().__init__()
+class GetResolvedBetsWithOutcomes(MarketFunction):
+    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
+        super().__init__(market_type=market_type, keys=keys)
+        self.user_address = self.keys.bet_from_address
 
     @property
     def description(self) -> str:
-        return """Use this function to fetch information about the previous actions you executed. Examples of past 
-        activities include previous bets you placed, previous markets you redeemed from, balances you requested, 
-        market positions you requested, markets you fetched, tokens you bought, tokens you sold, probabilities for 
-        markets you requested, among others.
-        """
+        return (
+            "Use this function to fetch the outcomes of previous bets you have placed."
+            f"Pass in the number of days (as an integer) in the past you want to look back from the current start date `{utcnow()}`."
+        )
 
     @property
-    def example_args(self) -> list[str]:
-        return []
+    def example_args(self) -> list[int]:
+        return [7]
 
-    def __call__(self) -> t.Sequence[LongTermMemories]:
-        return self.long_term_memory.search()
+    def __call__(self, n_days: int = 7) -> list[ResolvedBet]:
+        # We look back a standard interval as a rule-of-thumb for now.
+        start_time = utcnow() - timedelta(days=n_days)
+        return self.market_type.market_class.get_resolved_bets_made_since(
+            better_address=self.user_address, start_time=start_time, end_time=None
+        )
 
-
-MISC_FUNCTIONS = [
-    Sum,
-    Product,
-]
 
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
@@ -359,5 +386,6 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     BuyNo,
     SellYes,
     SellNo,
-    GetPositions,
+    GetLiquidPositions,
+    GetResolvedBetsWithOutcomes,
 ]
