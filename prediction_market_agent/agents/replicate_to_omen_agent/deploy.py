@@ -32,7 +32,7 @@ class ReplicateConfig(BaseModel):
         int  # Consider only markets closing in less than N days for this configuration.
     )
     every_n_days: int  # This configuration should execute every N days.
-    sources: list[MarketType] = [MarketType.MANIFOLD, MarketType.POLYMARKET]
+    source: MarketType
 
 
 class ReplicateSettings(BaseSettings):
@@ -71,30 +71,23 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 logger.info(f"Skipping {replicate_config}, because it's not his day.")
                 continue
 
-            to_replicate = replicate_config.n
+            close_time_before = now + timedelta(
+                days=replicate_config.close_time_up_to_n_days
+            )
+            initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
 
-            for replicate_from_market_type in replicate_config.sources:
-                close_time_before = now + timedelta(
-                    days=replicate_config.close_time_up_to_n_days
-                )
-                initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
+            logger.info(
+                f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
+            )
+            omen_replicate_from_tx(
+                market_type=replicate_config.source,
+                n_to_replicate=replicate_config.n,
+                initial_funds=initial_funds_per_market,
+                api_keys=keys,
+                close_time_before=close_time_before,
+                auto_deposit=True,
+            )
 
-                logger.info(
-                    f"Replicating {to_replicate} from {replicate_from_market_type} markets closing in {replicate_config.close_time_up_to_n_days} days."
-                )
-                replicated = omen_replicate_from_tx(
-                    market_type=replicate_from_market_type,
-                    n_to_replicate=to_replicate,
-                    initial_funds=initial_funds_per_market,
-                    api_keys=keys,
-                    close_time_before=close_time_before,
-                    auto_deposit=True,
-                )
-                to_replicate -= len(replicated)
-
-                if to_replicate <= 0:
-                    break
-
-            logger.info(f"Replication from {replicate_from_market_type} done.")
+            logger.info(f"Replication from {replicate_config.source} done.")
 
         logger.info("All done.")
