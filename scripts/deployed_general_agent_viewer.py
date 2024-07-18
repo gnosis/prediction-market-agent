@@ -135,7 +135,7 @@ with st.container(border=True):
         if chat_history.is_empty
         else chat_history.start_time.strftime("%Y-%m-%d %H:%M:%S"),
     )
-    col2.metric("Number of iterations", len(chat_history.chat_messages))
+    col2.metric("Number of iterations", chat_history.iterations)
     col3.metric("Starting Balance", f"{starting_balance:.2f} {currency}")
     col4.metric(
         "Total Asset Value",
