@@ -120,7 +120,7 @@ with st.sidebar:
 
 long_term_memory = LongTermMemoryTableHandler(task_description=task_description)
 chat_history = DatedChatHistory.from_long_term_memory(long_term_memory=long_term_memory)
-sessions = chat_history.cluster_by_datetime(max_minutes_between_messages=30)
+sessions = chat_history.cluster_by_session()
 
 total_asset_value = get_total_asset_value(keys, MARKET_TYPE).amount
 roi = (total_asset_value - starting_balance) * 100 / starting_balance
