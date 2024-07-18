@@ -74,15 +74,23 @@ def main() -> None:
                 if m.opening_datetime > datetime.now() + timedelta(days=180)
             ]
         ),
-        "avg bets per market closing in less than 30 days": sum(
-            len(bets_for_market[m.id])
-            for m in open_markets_closing_in_less_than_30_days
-        )
-        / len(open_markets_closing_in_less_than_30_days),
-        "avg bets per market closing in more than 30 days": sum(
-            len(bets_for_market[m.id]) for m in markets_closing_in_more_than_30_days
-        )
-        / len(markets_closing_in_more_than_30_days),
+        "avg bets per market closing in less than 30 days": (
+            sum(
+                len(bets_for_market[m.id])
+                for m in open_markets_closing_in_less_than_30_days
+            )
+            / len(open_markets_closing_in_less_than_30_days)
+            if len(open_markets_closing_in_less_than_30_days)
+            else None
+        ),
+        "avg bets per market closing in more than 30 days": (
+            sum(
+                len(bets_for_market[m.id]) for m in markets_closing_in_more_than_30_days
+            )
+            / len(markets_closing_in_more_than_30_days)
+            if len(markets_closing_in_more_than_30_days)
+            else None
+        ),
     }
     pprint(stats)
 
