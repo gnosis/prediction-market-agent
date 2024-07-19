@@ -103,11 +103,7 @@ def test_get_decimals(
     for clz in classes:
         engine.register(clz())
 
-    # ToDo - register function smart contract
-
     agent = Agent(llm=LLM(generator=generator), engine=engine)
-    # ToDo - Improve description of function - fetch source code
-    # from blockscout, ask LLM to generate description
     agent.system_prompt = f"""Act as a agent to query the number of decimals from a smart contract.
 
         You can use the following functions:
