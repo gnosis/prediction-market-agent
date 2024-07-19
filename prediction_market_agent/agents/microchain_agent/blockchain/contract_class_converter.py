@@ -16,9 +16,9 @@ from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter
     Summaries,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.models import (
+    AbiItemStateMutabilityEnum,
     AbiItemTypeEnum,
     ABIMetadata,
-    AbiItemStateMutabilityEnum,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -161,7 +161,7 @@ class ContractClassConverter:
 
     def create_classes_from_smart_contract(
         self,
-    ) -> dict[AbiItemStateMutabilityEnum, list[type]]:
+    ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type]]:
         # Get ABI from contract
         abi_items = self.get_abi()
         source_code = self.get_source_code()
