@@ -9,8 +9,8 @@ from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_c
 def test_generate_summaries(
     wxdai_contract_class_converter: ContractClassConverter,
 ) -> None:
-    abi_items = wxdai_contract_mocked_rag.get_abi()
-    source_code = wxdai_contract_mocked_rag.get_source_code()
+    abi_items = wxdai_contract_class_converter.get_abi()
+    source_code = wxdai_contract_class_converter.get_source_code()
 
     code_interpreter = CodeInterpreter(source_code=source_code)
     summaries = code_interpreter.generate_summary(

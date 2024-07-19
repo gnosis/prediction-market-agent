@@ -5,12 +5,14 @@ import requests
 from eth_typing import ChecksumAddress
 from loguru import logger
 from microchain import Function
+from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
     Summaries,
+    FunctionSummary,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
@@ -18,7 +20,7 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
 )
 from prediction_market_agent.utils import APIKeys
 
-TYPE_MAPPING: dict[str, (str, Any)] = {
+TYPE_MAPPING: dict[str, Tuple[str, Any]] = {
     "address": (
         "str",
         Web3.to_checksum_address("0xe91d153e0b41518a2ce8dd3d7944fa863463a97d"),
@@ -41,7 +43,11 @@ class FunctionWithKeys(Function):
 
 class ClassFactory:
     @staticmethod
-    def create_class(class_name, base_classes: Tuple[type] = (), attributes=None):
+    def create_class(
+        class_name: str,
+        base_classes: Tuple[type],
+        attributes: dict[str, Any] | None = None,
+    ) -> type:
         if attributes is None:
             attributes = {}
 
@@ -84,7 +90,7 @@ class ContractClassConverter:
         abi_item: ABIMetadata,
         contract: ContractOnGnosisChain,
         summaries: Summaries,
-    ):
+    ) -> type | None:
         if abi_item.type != AbiItemTypeEnum.function:
             return None
 
@@ -133,7 +139,8 @@ class ContractClassConverter:
         example_args = [TYPE_MAPPING[i.type][1] for i in abi_item.inputs]
 
         summary = next(
-            (s for s in summaries.summaries if s.function_name == abi_item.name), ""
+            (s for s in summaries.summaries if s.function_name == abi_item.name),
+            FunctionSummary(function_name="", summary=""),
         )
 
         attributes = {
@@ -147,14 +154,16 @@ class ContractClassConverter:
         )
         return dynamic_class
 
-    def create_classes_from_smart_contract(self):
+    def create_classes_from_smart_contract(self) -> list[type]:
         # Get ABI from contract
         abi_items = self.get_abi()
         source_code = self.get_source_code()
         # For each method, generate 1 class
         classes = []
         abi_str = json.dumps([i.model_dump() for i in abi_items])
-        contract = ContractOnGnosisChain(abi=abi_str, address=self.contract_address)
+        contract = ContractOnGnosisChain(
+            abi=ABI(abi_str), address=self.contract_address
+        )
         code_interpreter = CodeInterpreter(source_code=source_code)
         summaries = code_interpreter.generate_summary(
             function_names=[i.name for i in abi_items]

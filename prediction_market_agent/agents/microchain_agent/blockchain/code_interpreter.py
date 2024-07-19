@@ -1,4 +1,7 @@
+from typing import Any
+
 from langchain_chroma import Chroma
+from langchain_core.documents import Document
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableSerializable
@@ -26,7 +29,7 @@ class CodeInterpreter:
     source_code: str
     keys: APIKeys
     retriever: VectorStoreRetriever
-    rag_chain: RunnableSerializable
+    rag_chain: RunnableSerializable[Any, Any]
 
     def __init__(self, source_code: str, summarization_model: str = "gpt-4") -> None:
         self.summarization_model = summarization_model
@@ -50,9 +53,6 @@ class CodeInterpreter:
         )
 
     def build_rag_chain(self) -> None:
-        def format_docs(docs):
-            return "\n\n".join(doc.page_content for doc in docs)
-
         if not self.retriever:
             self.build_retriever()
 
@@ -67,7 +67,7 @@ class CodeInterpreter:
         """
         prompt = ChatPromptTemplate.from_template(template)
 
-        def format_docs(docs):
+        def format_docs(docs: list[Document]) -> str:
             return "\n\n".join(doc.page_content for doc in docs)
 
         self.rag_chain = (
