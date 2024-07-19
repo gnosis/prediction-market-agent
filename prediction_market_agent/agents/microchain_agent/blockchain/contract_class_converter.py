@@ -10,6 +10,7 @@ from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
+    Summaries,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
@@ -83,7 +84,7 @@ class ContractClassConverter:
         self,
         abi_item: ABIMetadata,
         contract: ContractOnGnosisChain,
-        code_interpreter: CodeInterpreter,
+        summaries: Summaries,
     ):
         if abi_item.type != AbiItemTypeEnum.function:
             return None
@@ -131,13 +132,14 @@ class ContractClassConverter:
 
         # Microchain specific attributes
         example_args = [TYPE_MAPPING[i.type][1] for i in abi_item.inputs]
-        # ToDo - Call generate_summary once instead of per function.
-        # summary = code_interpreter.generate_summary(function_name=abi_item.name)
-        summary = ""
+
+        summary = next(
+            (s for s in summaries.summaries if s.function_name == abi_item.name), ""
+        )
 
         attributes = {
             "__call__": dynamic_function,
-            "description": summary,
+            "description": summary.summary,
             "example_args": example_args,
         }
 
@@ -155,9 +157,12 @@ class ContractClassConverter:
         abi_str = json.dumps([i.model_dump() for i in abi_items])
         contract = ContractOnGnosisChain(abi=abi_str, address=self.contract_address)
         code_interpreter = CodeInterpreter(source_code=source_code)
+        summaries = code_interpreter.generate_summary(
+            function_names=[i.name for i in abi_items]
+        )
         for abi_item in abi_items:
             generated_class = self.generate_microchain_class_from_abi_item(
-                abi_item, contract, code_interpreter
+                abi_item, contract, summaries
             )
             if generated_class:
                 classes.append(generated_class)

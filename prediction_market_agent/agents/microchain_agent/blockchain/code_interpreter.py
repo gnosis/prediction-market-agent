@@ -1,7 +1,7 @@
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough, RunnableSequence
+from langchain_core.runnables import RunnablePassthrough, RunnableSerializable
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import (
@@ -29,7 +29,7 @@ class CodeInterpreter:
     source_code: str
     keys: APIKeys
     retriever: VectorStoreRetriever
-    rag_chain: RunnableSequence
+    rag_chain: RunnableSerializable
 
     def __init__(self, source_code: str, summarization_model: str = "gpt-4") -> None:
         self.summarization_model = summarization_model
@@ -49,7 +49,7 @@ class CodeInterpreter:
         )
         db = Chroma.from_documents(docs, embeddings)
         self.retriever = db.as_retriever(
-            search_kwargs={"k": 5},
+            search_kwargs={"k": 20},
         )
 
     def build_rag_chain(self) -> None:
@@ -73,12 +73,12 @@ class CodeInterpreter:
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
 
-        rag_chain = (
+        self.rag_chain = (
             {
                 "context": self.retriever | format_docs,
                 "format_instructions": lambda x: parser_sol.get_format_instructions(),
                 "question": RunnablePassthrough(),
-            }  # "format_instructions": parser_sol.get_format_instructions()}
+            }
             | prompt
             | ChatOpenAI(
                 model=self.summarization_model,
@@ -89,7 +89,10 @@ class CodeInterpreter:
         )
 
     def generate_summary(self, function_names: list[str]) -> Summaries:
+        function_names_formatted = "\n".join(
+            ["- " + substr for substr in function_names]
+        )
         result: Summaries = self.rag_chain.invoke(
-            f"Create a summary for the functions: {','.join(function_names)}."
+            f"Create a summary for the function names listed below. Summarize, for each function, its purpose and what it does. You must produce a summary for all the functions listed below. \n  {function_names_formatted}."
         )
         return result
