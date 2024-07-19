@@ -138,7 +138,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
             api_key=self.keys.openai_api_key,
         )
         if prediction.outcome_prediction is None:
-            return "Failed to make a prediction."
+            raise ValueError("Failed to make a prediction.")
 
         return str(prediction.outcome_prediction.p_yes)
 
