@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from typing import Any, Tuple
 
 import requests
@@ -17,6 +18,7 @@ from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter
 from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
     ABIMetadata,
+    AbiItemStateMutabilityEnum,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -90,9 +92,9 @@ class ContractClassConverter:
         abi_item: ABIMetadata,
         contract: ContractOnGnosisChain,
         summaries: Summaries,
-    ) -> type | None:
+    ) -> Tuple[AbiItemStateMutabilityEnum | None, type | None]:
         if abi_item.type != AbiItemTypeEnum.function:
-            return None
+            return None, None
 
         # If type mapping fails, we log and fail gracefully. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
@@ -125,10 +127,13 @@ class ContractClassConverter:
         namespace = {"contract": contract}
 
         base = Function
-        if abi_item.stateMutability == "view":
+        if abi_item.stateMutability == AbiItemStateMutabilityEnum.VIEW:
             function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.call('{abi_item.name}', [{input_as_list}])"
 
-        elif abi_item.stateMutability in ["payable", "nonpayable"]:
+        elif abi_item.stateMutability in [
+            AbiItemStateMutabilityEnum.PAYABLE,
+            AbiItemStateMutabilityEnum.NON_PAYABLE,
+        ]:
             function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.send(self.keys,'{abi_item.name}', [{input_as_list}])"
             base = FunctionWithKeys
 
@@ -152,14 +157,14 @@ class ContractClassConverter:
         dynamic_class = ClassFactory().create_class(
             abi_item.name.title(), (base,), attributes
         )
-        return dynamic_class
+        return abi_item.stateMutability, dynamic_class
 
-    def create_classes_from_smart_contract(self) -> list[type]:
+    def create_classes_from_smart_contract(
+        self,
+    ) -> dict[AbiItemStateMutabilityEnum, list[type]]:
         # Get ABI from contract
         abi_items = self.get_abi()
         source_code = self.get_source_code()
-        # For each method, generate 1 class
-        classes = []
         abi_str = json.dumps([i.model_dump() for i in abi_items])
         contract = ContractOnGnosisChain(
             abi=ABI(abi_str), address=self.contract_address
@@ -168,11 +173,12 @@ class ContractClassConverter:
         summaries = code_interpreter.generate_summary(
             function_names=[i.name for i in abi_items]
         )
+        function_types_to_classes = defaultdict(list)
         for abi_item in abi_items:
-            generated_class = self.generate_microchain_class_from_abi_item(
+            class_type, generated_class = self.generate_microchain_class_from_abi_item(
                 abi_item, contract, summaries
             )
             if generated_class:
-                classes.append(generated_class)
+                function_types_to_classes[class_type].append(generated_class)
 
-        return classes
+        return function_types_to_classes

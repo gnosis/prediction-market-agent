@@ -14,9 +14,9 @@ class AbiItemTypeEnum(str, Enum):
 
 
 class AbiItemStateMutabilityEnum(str, Enum):
-    view = "view"
-    nonpayable = "nonpayable"
-    payable = "payable"
+    VIEW = "view"
+    NON_PAYABLE = "nonpayable"
+    PAYABLE = "payable"
 
 
 class ABIMetadata(BaseModel):

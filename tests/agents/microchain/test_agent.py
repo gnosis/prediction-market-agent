@@ -11,6 +11,9 @@ from pydantic import BaseModel
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,
 )
+from prediction_market_agent.agents.microchain_agent.blockchain.models import (
+    AbiItemStateMutabilityEnum,
+)
 from prediction_market_agent.agents.microchain_agent.market_functions import (
     GetMarketProbability,
     GetMarkets,
@@ -91,6 +94,7 @@ def test_get_probability(
     assert market.current_p_yes == m.probability
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_get_decimals(
     generator: OpenAIChatGenerator,
     wxdai_contract_class_converter: ContractClassConverter,
@@ -99,8 +103,12 @@ def test_get_decimals(
     engine.register(Reasoning())
     engine.register(Stop())
 
-    classes = wxdai_contract_class_converter.create_classes_from_smart_contract()
-    for clz in classes:
+    function_types_to_classes = (
+        wxdai_contract_class_converter.create_classes_from_smart_contract()
+    )
+
+    view_classes = function_types_to_classes[AbiItemStateMutabilityEnum.VIEW]
+    for clz in view_classes:
         engine.register(clz())
 
     agent = Agent(llm=LLM(generator=generator), engine=engine)
