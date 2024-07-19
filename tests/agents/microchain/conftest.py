@@ -1,5 +1,5 @@
 from typing import Generator
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
@@ -8,8 +8,8 @@ from prediction_market_agent_tooling.markets.omen.omen_contracts import (
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
-    Summaries,
     FunctionSummary,
+    Summaries,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,

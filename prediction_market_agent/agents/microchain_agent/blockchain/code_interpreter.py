@@ -3,11 +3,8 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableSerializable
 from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_text_splitters import (
-    Language,
-    RecursiveCharacterTextSplitter,
-)
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 from pydantic import BaseModel, Field
 
 from prediction_market_agent.utils import APIKeys
