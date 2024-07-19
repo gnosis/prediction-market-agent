@@ -1,8 +1,9 @@
 import json
-from typing import Any
+from typing import Any, Tuple
 
 import requests_cache
 from eth_typing import ChecksumAddress
+from loguru import logger
 from microchain import Function
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from web3 import Web3
@@ -14,6 +15,7 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
     ABIMetadata,
 )
+from prediction_market_agent.utils import APIKeys
 
 TYPE_MAPPING: dict[str, (str, Any)] = {
     "address": (
@@ -30,8 +32,15 @@ TYPE_MAPPING: dict[str, (str, Any)] = {
 }
 
 
+class FunctionWithKeys(Function):
+    def __init__(self, keys: APIKeys) -> None:
+        self.keys = keys
+        super().__init__()
+
+
 class ClassFactory:
-    def create_class(self, class_name, base_classes=(), attributes=None):
+    @staticmethod
+    def create_class(class_name, base_classes: Tuple[type] = (), attributes=None):
         if attributes is None:
             attributes = {}
 
@@ -79,17 +88,27 @@ class ContractClassConverter:
         if abi_item.type != AbiItemTypeEnum.function:
             return None
 
-        input_args = ","
+        # If type mapping fails, we log and fail gracefully. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
-            # add type mapping
-            input_args += f", {input.name}: {TYPE_MAPPING[input.type][0]}"
+            if not TYPE_MAPPING.get(input.type, None):
+                logger.info(f"Type mapping has failed. Check inputs {abi_item.inputs}")
+
+        for output in abi_item.outputs:
+            if not TYPE_MAPPING.get(output.type, None):
+                logger.info(
+                    f"Type mapping has failed. Check outputs {abi_item.outputs}"
+                )
+
+        input_to_types = {}
+        for idx, input in enumerate(abi_item.inputs):
+            input_name = input.name if input.name else f"idx_{idx}"
+            input_to_types[input_name] = TYPE_MAPPING[input.type][0]
 
         all_input_args = [
-            f"{i.name}: {TYPE_MAPPING[i.type][0]}" for i in abi_item.inputs
+            f"{input_name}: {v}" for input_name, v in input_to_types.items()
         ]
         input_args = f"{','.join(all_input_args)}"
-
-        input_as_list = f"{','.join([i.name for i in abi_item.inputs])}"
+        input_as_list = ",".join(input_to_types.keys())
 
         # add output
         all_args = [TYPE_MAPPING[i.type][0] for i in abi_item.outputs]
@@ -97,21 +116,24 @@ class ContractClassConverter:
         if not output_args:
             output_args = "None"
 
-        # ToDo - process case mapping (name == "") - dict
-        if abi_item.inputs and abi_item.inputs[0].name == "":
-            return
-        # ToDo - separate in case payable, nonpayable
-
-        function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.call('{abi_item.name}', [{input_as_list}])"
-
         namespace = {"contract": contract}
+
+        base = Function
+        if abi_item.stateMutability == "view":
+            function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.call('{abi_item.name}', [{input_as_list}])"
+
+        elif abi_item.stateMutability in ["payable", "nonpayable"]:
+            function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.send(self.keys,'{abi_item.name}', [{input_as_list}])"
+            base = FunctionWithKeys
+
         exec(function_code, namespace)
         dynamic_function = namespace[abi_item.name]
 
         # Microchain specific attributes
         example_args = [TYPE_MAPPING[i.type][1] for i in abi_item.inputs]
         # ToDo - Call generate_summary once instead of per function.
-        summary = code_interpreter.generate_summary(function_name=abi_item.name)
+        # summary = code_interpreter.generate_summary(function_name=abi_item.name)
+        summary = ""
 
         attributes = {
             "__call__": dynamic_function,
@@ -120,7 +142,7 @@ class ContractClassConverter:
         }
 
         dynamic_class = ClassFactory().create_class(
-            abi_item.name.title(), (Function,), attributes
+            abi_item.name.title(), (base,), attributes
         )
         return dynamic_class
 
