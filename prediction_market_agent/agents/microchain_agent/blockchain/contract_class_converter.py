@@ -1,7 +1,7 @@
 import json
 from typing import Any, Tuple
 
-import requests_cache
+import requests
 from eth_typing import ChecksumAddress
 from loguru import logger
 from microchain import Function
@@ -54,11 +54,10 @@ class ContractClassConverter:
 
     def __init__(self, contract_address: ChecksumAddress):
         # For caching requests of the same contract
-        self.session = requests_cache.CachedSession(backend="sqlite")
         self.contract_address = contract_address
 
     def fetch_from_blockscout(self) -> dict[str, Any]:
-        r = self.session.get(
+        r = requests.get(
             f"https://gnosis.blockscout.com/api/v2/smart-contracts/{self.contract_address}"
         )
         r.raise_for_status()
