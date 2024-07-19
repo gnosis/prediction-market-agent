@@ -43,14 +43,6 @@ markdownify = "^0.11.6"
 tavily-python = "^0.3.1"
 microchain-python = "^0.3.9"
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
-setuptools = "^69.5.1" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-jsonschema = "^4.3.3" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-chromadb = "^0.4.24" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-spacy = "^3.7.4" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-readability-lxml = "^0.8.1" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-lxml = {extras = ["html-clean"], version = "^5.2.1"} # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-pypdf2 = "^3.0.1" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
-faiss-cpu = "^1.8.0" # TODO remove with https://github.com/gnosis/prediction-market-agent/issues/97
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.18"
 farcaster = "^0.7.11"

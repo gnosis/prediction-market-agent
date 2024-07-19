@@ -10,6 +10,10 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_prophet.benchmark.agents import (
+    _make_prediction as prophet_make_prediction,
+)
+from prediction_prophet.functions.research import research as prophet_research
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -20,12 +24,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_no_outcome,
     get_yes_outcome,
 )
-from prediction_market_agent.tools.mech.utils import (
-    MechResponse,
-    MechTool,
-    mech_request,
-    mech_request_local,
-)
+from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
 from prediction_market_agent.utils import APIKeys
 
 
@@ -86,14 +85,10 @@ class GetMarketProbability(MarketFunction):
 class PredictProbabilityForQuestionBase(MarketFunction):
     def __init__(
         self,
-        mech_request: t.Callable[[str, MechTool], MechResponse],
         market_type: MarketType,
         keys: APIKeys,
-        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
         super().__init__(market_type=market_type, keys=keys)
-        self.mech_tool = mech_tool
-        self.mech_request = mech_request
         self._description = (
             "Use this function to research perform research and predict the "
             "probability of an event occuring. Returns the probability. The "
@@ -105,15 +100,55 @@ class PredictProbabilityForQuestionBase(MarketFunction):
     def example_args(self) -> list[str]:
         return [get_example_market_id(self.market_type)]
 
+
+class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
+    """
+    Uses the prediction_prophet library to make a prediction.
+    """
+
+    def __init__(
+        self,
+        market_type: MarketType,
+        keys: APIKeys,
+        model: str = "gpt-3.5-turbo",
+    ) -> None:
+        self.model = model
+        super().__init__(market_type=market_type, keys=keys)
+
+    @property
+    def description(self) -> str:
+        return self._description
+
     def __call__(self, market_id: str) -> str:
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        response: MechResponse = self.mech_request(question, self.mech_tool)
-        return str(response.p_yes)
+        research = prophet_research(
+            goal=question,
+            use_summaries=False,
+            model=self.model,
+            openai_api_key=self.keys.openai_api_key,
+            tavily_api_key=self.keys.tavily_api_key,
+        )
+        prediction = prophet_make_prediction(
+            market_question=question,
+            additional_information=research,
+            engine=self.model,
+            temperature=0,
+            api_key=self.keys.openai_api_key,
+        )
+        if prediction.outcome_prediction is None:
+            raise ValueError("Failed to make a prediction.")
+
+        return str(prediction.outcome_prediction.p_yes)
 
 
-class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
+class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
+    """
+    Uses the mech-client to make a prediction. Useability issues:
+    https://github.com/gnosis/prediction-market-agent/issues/327
+    """
+
     def __init__(
         self,
         market_type: MarketType,
@@ -121,7 +156,7 @@ class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
         mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
     ) -> None:
         self.mech_tool = mech_tool
-        super().__init__(market_type=market_type, keys=keys, mech_request=mech_request)
+        super().__init__(market_type=market_type, keys=keys)
 
     @property
     def description(self) -> str:
@@ -139,24 +174,12 @@ class PredictProbabilityForQuestionRemote(PredictProbabilityForQuestionBase):
                 f"large enough to make a mech call (min required "
                 f"{MECH_CALL_XDAI_LIMIT})."
             )
-        return super().__call__(market_id)
 
-
-class PredictProbabilityForQuestionLocal(PredictProbabilityForQuestionBase):
-    def __init__(
-        self,
-        market_type: MarketType,
-        keys: APIKeys,
-        mech_tool: MechTool = MechTool.PREDICTION_ONLINE,
-    ) -> None:
-        self.mech_tool = mech_tool
-        super().__init__(
-            market_type=market_type, keys=keys, mech_request=mech_request_local
-        )
-
-    @property
-    def description(self) -> str:
-        return self._description
+        question = self.market_type.market_class.get_binary_market(
+            id=market_id
+        ).question
+        response: MechResponse = self.mech_request(question, self.mech_tool)
+        return str(response.p_yes)
 
 
 class BuyTokens(MarketFunction):
@@ -366,8 +389,7 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
     GetMarketProbability,
-    # PredictProbabilityForQuestionRemote, # Quite slow, use local version for now
-    PredictProbabilityForQuestionLocal,
+    PredictProbabilityForQuestion,
     GetBalance,
     BuyYes,
     BuyNo,
