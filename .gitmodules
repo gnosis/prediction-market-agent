@@ -1,3 +1,0 @@
-[submodule "prediction_market_agent/tools/mech/mech"]
-	path = prediction_market_agent/tools/mech/mech
-	url = https://github.com/valory-xyz/mech.git

@@ -111,7 +111,7 @@ def agent_app() -> None:
 
                 # Simulate deployable agent logic.
                 with st.spinner("Agent is verifying the market..."):
-                    if not agent.pick_markets([market]):
+                    if not agent.pick_markets(market_source, [market]):
                         st.warning("Agent wouldn't pick this market to bet on.")
                         if not st.checkbox(
                             "Continue with the prediction anyway",
