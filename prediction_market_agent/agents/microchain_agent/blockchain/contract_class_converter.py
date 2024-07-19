@@ -11,8 +11,8 @@ from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
-    Summaries,
     FunctionSummary,
+    Summaries,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
