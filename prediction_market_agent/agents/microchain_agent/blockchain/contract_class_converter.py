@@ -47,7 +47,7 @@ class ClassFactory:
     @staticmethod
     def create_class(
         class_name: str,
-        base_classes: Tuple[type],
+        base_classes: Tuple[type, ...],
         attributes: dict[str, Any] | None = None,
     ) -> type:
         if attributes is None:
