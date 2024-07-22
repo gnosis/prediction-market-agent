@@ -95,7 +95,14 @@ class CodeInterpreter:
         summaries = par_map(function_names, lambda x: self.try_summary_else_default(x))
         return Summaries(summaries=summaries)
 
-    def try_summary_else_default(self, f_name: str) -> FunctionSummary:
+    def try_summary_else_default(
+        self, f_name: str, default_summary: str = ""
+    ) -> FunctionSummary:
+        """
+        Tries generating a summary for the given function, else generates default description.
+        Note that try-except needed because LLM fails (sometimes) for a few functions. Alternate approaches
+        (e.g. pass in entire source code or a cleaned version) can also be explored.
+        """
         try:
             summary: FunctionSummary = self.rag_chain.invoke(
                 f"Create a summary for the function {f_name}."
@@ -103,4 +110,4 @@ class CodeInterpreter:
             return summary
         except:
             logger.info(f"Could not generate summary for function {f_name}")
-            return FunctionSummary(function_name=f_name, summary="")
+            return FunctionSummary(function_name=f_name, summary=default_summary)
