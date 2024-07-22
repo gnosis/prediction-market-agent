@@ -8,6 +8,8 @@ from langchain_core.runnables import RunnablePassthrough, RunnableSerializable
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
+from loguru import logger
+from prediction_market_agent_tooling.tools.parallelism import par_map
 from pydantic import BaseModel, Field
 
 from prediction_market_agent.utils import APIKeys
@@ -39,8 +41,12 @@ class CodeInterpreter:
         self.build_rag_chain()
 
     def build_retriever(self) -> None:
+        # 1 call per function
+        # no RAG - entire source code
+        # ChatOpenAI -> first call, here is the source code, 2nd call (with memory) give me a summary
+        # / of function a, 3rd call summary of function b, ...
         sol_splitter = RecursiveCharacterTextSplitter.from_language(
-            language=Language.SOL, chunk_size=128, chunk_overlap=0
+            language=Language.SOL, chunk_size=500, chunk_overlap=0
         )
         docs = sol_splitter.create_documents([self.source_code])
         embeddings = OpenAIEmbeddings(
@@ -49,14 +55,14 @@ class CodeInterpreter:
         )
         db = Chroma.from_documents(docs, embeddings)
         self.retriever = db.as_retriever(
-            search_kwargs={"k": 20},
+            search_kwargs={"k": 10},
         )
 
     def build_rag_chain(self) -> None:
         if not self.retriever:
             self.build_retriever()
 
-        parser_sol = PydanticOutputParser(pydantic_object=Summaries)
+        parser_sol = PydanticOutputParser(pydantic_object=FunctionSummary)
         template = """Answer the question based only on the following context:
 
         {context}
@@ -86,10 +92,24 @@ class CodeInterpreter:
         )
 
     def generate_summary(self, function_names: list[str]) -> Summaries:
-        function_names_formatted = "\n".join(
-            ["- " + substr for substr in function_names]
-        )
-        result: Summaries = self.rag_chain.invoke(
-            f"Create a summary for the function names listed below. Summarize, for each function, its purpose and what it does. You must produce a summary for all the functions listed below. \n  {function_names_formatted}."
-        )
-        return result
+        summaries = par_map(function_names, lambda x: self.try_summary_else_default(x))
+
+        # function_summaries = []
+        # for f_name in function_names:
+        #     print(f"function name {f_name}")
+        #     summary = self.rag_chain.invoke(
+        #         f"Create a summary for the function {f_name}."
+        #     )
+        #     function_summaries.append(summary)
+
+        return Summaries(summaries=summaries)
+
+    def try_summary_else_default(self, f_name: str) -> FunctionSummary:
+        try:
+            summary = self.rag_chain.invoke(
+                f"Create a summary for the function {f_name}."
+            )
+            return summary
+        except:
+            logger.info(f"Could not generate summary for function {f_name}")
+            return FunctionSummary(function_name=f_name, summary="")

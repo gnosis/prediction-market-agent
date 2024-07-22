@@ -42,8 +42,11 @@ from prediction_market_agent.utils import APIKeys
 def build_wxdai_functions(keys: APIKeys) -> list[Function]:
     functions = []
 
-    contract_address = Web3.to_checksum_address(WrappedxDaiContract().address)
-    contract_class_converter = ContractClassConverter(contract_address)
+    wrapped_xdai = WrappedxDaiContract()
+    contract_address = Web3.to_checksum_address(wrapped_xdai.address)
+    contract_class_converter = ContractClassConverter(
+        contract_address, wrapped_xdai.__class__.__name__
+    )
     function_types_to_classes = (
         contract_class_converter.create_classes_from_smart_contract()
     )

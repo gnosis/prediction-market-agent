@@ -50,9 +50,13 @@ class ClassFactory:
 class ContractClassConverter:
     """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python classes."""
 
-    def __init__(self, contract_address: ChecksumAddress):
+    contract_address: ChecksumAddress
+    contract_name: str
+
+    def __init__(self, contract_address: ChecksumAddress, contract_name: str):
         # For caching requests of the same contract
         self.contract_address = contract_address
+        self.contract_name = contract_name
 
     def fetch_from_blockscout(self) -> dict[str, Any]:
         r = requests.get(
@@ -150,10 +154,12 @@ class ContractClassConverter:
             "example_args": example_args,
         }
 
-        dynamic_class = ClassFactory().create_class(
-            abi_item.name.title(), (base,), attributes
-        )
+        class_name = self.build_class_name(abi_item)
+        dynamic_class = ClassFactory().create_class(class_name, (base,), attributes)
         return abi_item.stateMutability, dynamic_class
+
+    def build_class_name(self, abi_item: ABIMetadata) -> str:
+        return f"{self.contract_name.title()}_{abi_item.name.title()}"
 
     def create_classes_from_smart_contract(
         self,
