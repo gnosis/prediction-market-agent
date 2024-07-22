@@ -154,12 +154,12 @@ class ContractClassConverter:
             "example_args": example_args,
         }
 
-        class_name = self.build_class_name(abi_item)
+        class_name = self.build_class_name(abi_item.name)
         dynamic_class = ClassFactory().create_class(class_name, (base,), attributes)
         return abi_item.stateMutability, dynamic_class
 
-    def build_class_name(self, abi_item: ABIMetadata) -> str:
-        return f"{self.contract_name.title()}_{abi_item.name.title()}"
+    def build_class_name(self, abi_item_name: str) -> str:
+        return f"{self.contract_name.title()}_{abi_item_name.title()}"
 
     def create_classes_from_smart_contract(
         self,

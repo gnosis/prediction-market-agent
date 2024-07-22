@@ -93,20 +93,11 @@ class CodeInterpreter:
 
     def generate_summary(self, function_names: list[str]) -> Summaries:
         summaries = par_map(function_names, lambda x: self.try_summary_else_default(x))
-
-        # function_summaries = []
-        # for f_name in function_names:
-        #     print(f"function name {f_name}")
-        #     summary = self.rag_chain.invoke(
-        #         f"Create a summary for the function {f_name}."
-        #     )
-        #     function_summaries.append(summary)
-
         return Summaries(summaries=summaries)
 
     def try_summary_else_default(self, f_name: str) -> FunctionSummary:
         try:
-            summary = self.rag_chain.invoke(
+            summary: FunctionSummary = self.rag_chain.invoke(
                 f"Create a summary for the function {f_name}."
             )
             return summary
