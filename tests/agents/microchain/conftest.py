@@ -27,7 +27,7 @@ def wxdai_contract_mocked_rag() -> Generator[ContractClassConverter, None, None]
     with patch(
         "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.generate_summary",
         Mock(side_effect=mock_summaries),
-    ) as a1, patch(
+    ), patch(
         "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_retriever",
         Mock(return_value=None),
     ), patch(

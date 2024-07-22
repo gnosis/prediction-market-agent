@@ -21,8 +21,8 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.type_mapping import (
     TYPE_MAPPING,
-    get_python_type_from_solidity_type,
     get_example_args_from_solidity_type,
+    get_python_type_from_solidity_type,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -86,7 +86,7 @@ class ContractClassConverter:
         if abi_item.type != AbiItemTypeEnum.function:
             return None, None
 
-        # If type mapping fails, we log and fail gracefully. Note that structs as input- or output args are not supported.
+        # If type mapping fails, we exit. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
             if not TYPE_MAPPING.get(input.type, None):
                 logger.info(f"Type mapping has failed. Check inputs {abi_item.inputs}")

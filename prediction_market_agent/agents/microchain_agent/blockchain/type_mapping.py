@@ -1,6 +1,7 @@
 from typing import Any, Type, TypeAlias
 
 from pydantic import BaseModel, model_validator
+from typing_extensions import Self
 from web3 import Web3
 
 
@@ -9,12 +10,10 @@ class PythonType(BaseModel):
     example_value: Any
 
     @model_validator(mode="after")
-    def validate_example_value(cls, python_type: "PythonType"):
-        if not isinstance(python_type.example_value, python_type.type):
-            raise ValueError(
-                f"The example_value must be of type {python_type.type.__name__}"
-            )
-        return python_type
+    def validate_example_value(self) -> Self:
+        if not isinstance(self.example_value, self.type):
+            raise ValueError(f"The example_value must be of type {self.type.__name__}")
+        return self
 
 
 SolidityType: TypeAlias = str
@@ -37,9 +36,18 @@ TYPE_MAPPING: dict[SolidityType, PythonType] = {
 }
 
 
+def raise_if_unknown_type(solidity_type: str) -> PythonType:
+    python_type = TYPE_MAPPING.get(solidity_type, None)
+    if python_type is None:
+        raise ValueError(f"Unknown solidity type: {solidity_type}")
+    return python_type
+
+
 def get_python_type_from_solidity_type(solidity_type: str) -> str:
-    return TYPE_MAPPING.get(solidity_type).type.__name__
+    python_type = raise_if_unknown_type(solidity_type)
+    return python_type.type.__name__
 
 
 def get_example_args_from_solidity_type(solidity_type: str) -> Any:
-    return TYPE_MAPPING.get(solidity_type).example_value
+    python_type = raise_if_unknown_type(solidity_type)
+    return python_type.example_value
