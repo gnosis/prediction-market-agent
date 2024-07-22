@@ -8,7 +8,6 @@ from loguru import logger
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
@@ -20,21 +19,12 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemTypeEnum,
     ABIMetadata,
 )
+from prediction_market_agent.agents.microchain_agent.blockchain.type_mapping import (
+    TYPE_MAPPING,
+    get_python_type_from_solidity_type,
+    get_example_args_from_solidity_type,
+)
 from prediction_market_agent.utils import APIKeys
-
-TYPE_MAPPING: dict[str, Tuple[str, Any]] = {
-    "address": (
-        "str",
-        Web3.to_checksum_address("0xe91d153e0b41518a2ce8dd3d7944fa863463a97d"),
-    ),  # Solidity address to Python string
-    "uint": ("int", 1),  # Solidity unsigned integer to Python int
-    "uint8": ("int", 1),  # Solidity unsigned integer to Python int
-    "uint256": ("int", 1),  # Solidity unsigned integer (256-bit) to Python int
-    "int": ("int", 1),  # Solidity integer to Python int
-    "bool": ("bool", True),  # Solidity boolean to Python bool
-    "string": ("str", "test string"),
-    # Add more mappings as needed
-}
 
 
 class FunctionWithKeys(Function):
@@ -100,17 +90,19 @@ class ContractClassConverter:
         for input in abi_item.inputs:
             if not TYPE_MAPPING.get(input.type, None):
                 logger.info(f"Type mapping has failed. Check inputs {abi_item.inputs}")
+                return None, None
 
         for output in abi_item.outputs:
             if not TYPE_MAPPING.get(output.type, None):
                 logger.info(
                     f"Type mapping has failed. Check outputs {abi_item.outputs}"
                 )
+                return None, None
 
         input_to_types = {}
         for idx, input in enumerate(abi_item.inputs):
             input_name = input.name if input.name else f"idx_{idx}"
-            input_to_types[input_name] = TYPE_MAPPING[input.type][0]
+            input_to_types[input_name] = get_python_type_from_solidity_type(input.type)
 
         all_input_args = [
             f"{input_name}: {v}" for input_name, v in input_to_types.items()
@@ -119,7 +111,9 @@ class ContractClassConverter:
         input_as_list = ",".join(input_to_types.keys())
 
         # add output
-        all_args = [TYPE_MAPPING[i.type][0] for i in abi_item.outputs]
+        all_args = [
+            get_python_type_from_solidity_type(i.type) for i in abi_item.outputs
+        ]
         output_args = f"{','.join(all_args)}"
         if not output_args:
             output_args = "None"
@@ -141,7 +135,9 @@ class ContractClassConverter:
         dynamic_function = namespace[abi_item.name]
 
         # Microchain specific attributes
-        example_args = [TYPE_MAPPING[i.type][1] for i in abi_item.inputs]
+        example_args = [
+            get_example_args_from_solidity_type(i.type) for i in abi_item.inputs
+        ]
 
         summary = next(
             (s for s in summaries.summaries if s.function_name == abi_item.name),
