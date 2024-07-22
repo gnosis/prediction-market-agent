@@ -1,9 +1,19 @@
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen_contracts import (
+    WrappedxDaiContract,
+)
+from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
+    ContractClassConverter,
+)
+from prediction_market_agent.agents.microchain_agent.blockchain.models import (
+    AbiItemStateMutabilityEnum,
 )
 from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
@@ -27,6 +37,28 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
+
+
+def build_wxdai_functions(keys: APIKeys) -> list[Function]:
+    functions = []
+
+    contract_address = Web3.to_checksum_address(WrappedxDaiContract().address)
+    contract_class_converter = ContractClassConverter(contract_address)
+    function_types_to_classes = (
+        contract_class_converter.create_classes_from_smart_contract()
+    )
+
+    view_classes = function_types_to_classes[AbiItemStateMutabilityEnum.VIEW]
+    functions.extend([clz() for clz in view_classes])
+
+    payable_classes = function_types_to_classes[AbiItemStateMutabilityEnum.PAYABLE]
+    non_payable_classes = function_types_to_classes[
+        AbiItemStateMutabilityEnum.NON_PAYABLE
+    ]
+    for clz in payable_classes + non_payable_classes:
+        functions.append(clz(keys=keys))
+
+    return functions
 
 
 def build_agent_functions(
@@ -53,6 +85,10 @@ def build_agent_functions(
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
+
+    wxdai_functions = build_wxdai_functions(keys=keys)
+    functions.extend(wxdai_functions)
+
     return functions
 
 
