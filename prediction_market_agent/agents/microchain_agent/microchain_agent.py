@@ -1,3 +1,4 @@
+from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -72,6 +73,7 @@ def build_agent_functions(
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
+    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
@@ -105,6 +107,7 @@ def build_agent(
     allow_stop: bool = True,
     bootstrap: str | None = None,
 ) -> Agent:
+    logger.error("entered build agent")
     engine = Engine()
     generator = OpenAIChatGenerator(
         model=model,

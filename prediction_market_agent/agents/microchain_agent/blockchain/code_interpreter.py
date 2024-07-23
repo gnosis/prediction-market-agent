@@ -33,7 +33,9 @@ class CodeInterpreter:
     retriever: VectorStoreRetriever
     rag_chain: RunnableSerializable[Any, Any]
 
-    def __init__(self, source_code: str, summarization_model: str = "gpt-4") -> None:
+    def __init__(
+        self, source_code: str, summarization_model: str = "gpt-4-turbo"
+    ) -> None:
         self.summarization_model = summarization_model
         self.source_code = source_code
         self.keys = APIKeys()
@@ -41,10 +43,6 @@ class CodeInterpreter:
         self.build_rag_chain()
 
     def build_retriever(self) -> None:
-        # 1 call per function
-        # no RAG - entire source code
-        # ChatOpenAI -> first call, here is the source code, 2nd call (with memory) give me a summary
-        # / of function a, 3rd call summary of function b, ...
         sol_splitter = RecursiveCharacterTextSplitter.from_language(
             language=Language.SOL, chunk_size=500, chunk_overlap=0
         )
@@ -105,8 +103,10 @@ class CodeInterpreter:
         """
         try:
             summary: FunctionSummary = self.rag_chain.invoke(
-                f"Create a summary for the function {f_name}."
+                f"Create a summary for the function {f_name} approve, decimals, supply, ...."
             )
+            # new model, forget RAG, put source_code in context and be happy.
+            # ask for all functions at once.
             return summary
         except:
             logger.info(f"Could not generate summary for function {f_name}")
