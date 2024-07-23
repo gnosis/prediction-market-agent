@@ -8,6 +8,7 @@ from loguru import logger
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
+from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
@@ -47,16 +48,12 @@ class ClassFactory:
         return new_class
 
 
-class ContractClassConverter:
-    """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python classes."""
+class ContractClassConverter(BaseModel):
+    """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python
+    classes."""
 
     contract_address: ChecksumAddress
     contract_name: str
-
-    def __init__(self, contract_address: ChecksumAddress, contract_name: str):
-        # For caching requests of the same contract
-        self.contract_address = contract_address
-        self.contract_name = contract_name
 
     def fetch_from_blockscout(self) -> dict[str, Any]:
         r = requests.get(
@@ -93,13 +90,15 @@ class ContractClassConverter:
         # If type mapping fails, we exit. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
             if not TYPE_MAPPING.get(input.type, None):
-                logger.info(f"Type mapping has failed. Check inputs {abi_item.inputs}")
+                logger.info(
+                    f"Type mapping for {abi_item.name} has failed. Check inputs {abi_item.inputs}"
+                )
                 return None, None
 
         for output in abi_item.outputs:
             if not TYPE_MAPPING.get(output.type, None):
                 logger.info(
-                    f"Type mapping has failed. Check outputs {abi_item.outputs}"
+                    f"Type mapping for {abi_item.name} has failed. Check outputs {abi_item.outputs}"
                 )
                 return None, None
 
@@ -135,6 +134,12 @@ class ContractClassConverter:
             function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.send(self.keys,'{abi_item.name}', [{input_as_list}])"
             base = FunctionWithKeys
 
+        if "transferFrom" in function_code:
+            pass
+
+        # We fix "from" as argument since it's a reserved keyword in Python
+        if "from" in function_code:
+            function_code = function_code.replace("from", "sender")
         exec(function_code, namespace)
         dynamic_function = namespace[abi_item.name]
 

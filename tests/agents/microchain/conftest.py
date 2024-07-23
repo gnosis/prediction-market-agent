@@ -23,25 +23,67 @@ def mock_summaries(function_names: list[str]) -> Summaries:
 
 
 @pytest.fixture(scope="module")
-def wxdai_contract_mocked_rag() -> Generator[ContractClassConverter, None, None]:
-    with patch(
-        "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.generate_summary",
-        Mock(side_effect=mock_summaries),
-    ), patch(
-        "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_retriever",
-        Mock(return_value=None),
-    ), patch(
-        "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_rag_chain",
-        Mock(return_value=None),
-    ):
-        wxdai = WrappedxDaiContract()
-        contract_address = Web3.to_checksum_address(wxdai.address)
-        c = ContractClassConverter(contract_address, wxdai.__class__.__name__)
-        yield c
-
-
-@pytest.fixture(scope="module")
 def wxdai_contract_class_converter() -> Generator[ContractClassConverter, None, None]:
     wxdai = WrappedxDaiContract()
     contract_address = Web3.to_checksum_address(wxdai.address)
-    yield ContractClassConverter(contract_address, wxdai.__class__.__name__)
+    yield ContractClassConverter(
+        contract_address=contract_address, contract_name=wxdai.__class__.__name__
+    )
+
+
+class RAGPatcherManager:
+    """Class for patching R"""
+
+    def __init__(self) -> None:
+        self.patchers = [
+            patch(
+                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.generate_summary",
+                Mock(side_effect=mock_summaries),
+            ),
+            patch(
+                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_retriever",
+                Mock(return_value=None),
+            ),
+            patch(
+                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_rag_chain",
+                Mock(return_value=None),
+            ),
+        ]
+
+    def start(self) -> None:
+        for i in self.patchers:
+            i.start()
+
+    def stop(self) -> None:
+        for i in self.patchers:
+            i.stop()
+
+
+@pytest.fixture(scope="module")
+def rag_patcher_manager() -> Generator[RAGPatcherManager, None, None]:
+    pm = RAGPatcherManager()
+    pm.start()
+    yield pm
+    pm.stop()
+
+
+@pytest.fixture(scope="module")
+def sdai_contract_mocked_rag(
+    rag_patcher_manager: RAGPatcherManager,
+) -> Generator[ContractClassConverter, None, None]:
+    contract_address = Web3.to_checksum_address(
+        "0xaf204776c7245bF4147c2612BF6e5972Ee483701"
+    )
+    c = ContractClassConverter(contract_address=contract_address, contract_name="sDAI")
+    yield c
+
+
+@pytest.fixture(scope="module")
+def wxdai_contract_mocked_rag(
+    rag_patcher_manager: RAGPatcherManager,
+) -> Generator[ContractClassConverter, None, None]:
+    wxdai = WrappedxDaiContract()
+    contract_address = Web3.to_checksum_address(wxdai.address)
+    yield ContractClassConverter(
+        contract_address=contract_address, contract_name=wxdai.__class__.__name__
+    )

@@ -28,3 +28,8 @@ def test_balance_of(wxdai_contract_mocked_rag: ContractClassConverter) -> None:
     assert balance_of
     result_balance_of = balance_of().__call__(web3.constants.ADDRESS_ZERO)
     assert result_balance_of > 0
+
+
+def test_sdai(sdai_contract_mocked_rag: ContractClassConverter) -> None:
+    classes = sdai_contract_mocked_rag.create_classes_from_smart_contract()
+    assert classes
