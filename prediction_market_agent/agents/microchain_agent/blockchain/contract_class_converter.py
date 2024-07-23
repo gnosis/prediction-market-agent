@@ -71,7 +71,7 @@ class ContractClassConverter:
         contract_abi = data["abi"]
         # We extract only functions, not events
         return [
-            ABIMetadata.parse_obj(abi_item)
+            ABIMetadata.model_validate(abi_item)
             for abi_item in contract_abi
             if abi_item["type"] == "function"
         ]
@@ -86,7 +86,7 @@ class ContractClassConverter:
         abi_item: ABIMetadata,
         contract: ContractOnGnosisChain,
         summaries: Summaries,
-    ) -> Tuple[AbiItemStateMutabilityEnum | None, type | None]:
+    ) -> Tuple[AbiItemStateMutabilityEnum | None, type[Function] | None]:
         if abi_item.type != AbiItemTypeEnum.function:
             return None, None
 
@@ -148,13 +148,14 @@ class ContractClassConverter:
             FunctionSummary(function_name="", summary=""),
         )
 
+        class_name = self.build_class_name(abi_item.name)
         attributes = {
+            "__name__": class_name,
             "__call__": dynamic_function,
             "description": summary.summary,
             "example_args": example_args,
         }
 
-        class_name = self.build_class_name(abi_item.name)
         dynamic_class = ClassFactory().create_class(class_name, (base,), attributes)
         return abi_item.stateMutability, dynamic_class
 
@@ -163,7 +164,7 @@ class ContractClassConverter:
 
     def create_classes_from_smart_contract(
         self,
-    ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type]]:
+    ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type[Function]]]:
         # Get ABI from contract
         abi_items = self.get_abi()
         source_code = self.get_source_code()
