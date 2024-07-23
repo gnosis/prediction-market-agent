@@ -72,6 +72,7 @@ def build_agent_functions(
     allow_stop: bool,
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
+    build_dynamic_contract_functions: bool = False,
 ) -> list[Function]:
     logger.error("entered build agent functions")
     functions = []
@@ -91,8 +92,9 @@ def build_agent_functions(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
 
-    wxdai_functions = build_wxdai_functions(keys=keys)
-    functions.extend(wxdai_functions)
+    if build_dynamic_contract_functions:
+        wxdai_functions = build_wxdai_functions(keys=keys)
+        functions.extend(wxdai_functions)
 
     return functions
 

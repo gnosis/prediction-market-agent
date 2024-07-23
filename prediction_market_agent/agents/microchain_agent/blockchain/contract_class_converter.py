@@ -169,8 +169,7 @@ class ContractClassConverter(BaseModel):
     def create_classes_from_smart_contract(
         self,
     ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type]]:
-        # Get ABI from contract
-        abi_items = self.get_abi()
+        Ïabi_items = self.get_abi()
         source_code = self.get_source_code()
         abi_str = json.dumps([i.model_dump() for i in abi_items])
         contract = ContractOnGnosisChain(
