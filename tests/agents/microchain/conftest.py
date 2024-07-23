@@ -41,11 +41,7 @@ class RAGPatcherManager:
                 Mock(side_effect=mock_summaries),
             ),
             patch(
-                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_retriever",
-                Mock(return_value=None),
-            ),
-            patch(
-                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_rag_chain",
+                "prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter.CodeInterpreter.build_chain",
                 Mock(return_value=None),
             ),
         ]

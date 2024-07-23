@@ -1,15 +1,9 @@
 from typing import Any
 
-from langchain_chroma import Chroma
-from langchain_core.documents import Document
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough, RunnableSerializable
-from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
-from loguru import logger
-from prediction_market_agent_tooling.tools.parallelism import par_map
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableSerializable
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 from prediction_market_agent.utils import APIKeys
@@ -27,87 +21,48 @@ class Summaries(BaseModel):
 
 
 class CodeInterpreter:
-    summarization_model: str
-    source_code: str
-    keys: APIKeys
-    retriever: VectorStoreRetriever
-    rag_chain: RunnableSerializable[Any, Any]
+    prompt_and_model: RunnableSerializable[dict, Any]
 
     def __init__(
         self, source_code: str, summarization_model: str = "gpt-4-turbo"
     ) -> None:
+        self.prompt_and_model = None
         self.summarization_model = summarization_model
         self.source_code = source_code
         self.keys = APIKeys()
-        self.build_retriever()
-        self.build_rag_chain()
+        self.build_chain()
 
-    def build_retriever(self) -> None:
-        sol_splitter = RecursiveCharacterTextSplitter.from_language(
-            language=Language.SOL, chunk_size=500, chunk_overlap=0
+    def build_chain(self) -> None:
+        parser = PydanticOutputParser(pydantic_object=Summaries)
+
+        prompt = PromptTemplate(
+            template="""Generate summaries of the functions given by FUNCTION_NAMES. The function definitions can be found
+            in the SOURCE_CODE, which contains lines of codes written in Solidity.
+
+            [FUNCTION_NAMES]
+            {function_names}
+
+            [SOURCE_CODE]
+            {source_code}
+
+            {format_instructions}
+            """,
+            input_variables=["function_names", "source_code"],
+            partial_variables={"format_instructions": parser.get_format_instructions()},
         )
-        docs = sol_splitter.create_documents([self.source_code])
-        embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-large",
-            api_key=self.keys.openai_api_key_secretstr_v1,
-        )
-        db = Chroma.from_documents(docs, embeddings)
-        self.retriever = db.as_retriever(
-            search_kwargs={"k": 10},
+        llm = ChatOpenAI(
+            temperature=0,
+            model=self.summarization_model,
+            api_key=APIKeys().openai_api_key_secretstr_v1,
         )
 
-    def build_rag_chain(self) -> None:
-        if not self.retriever:
-            self.build_retriever()
-
-        parser_sol = PydanticOutputParser(pydantic_object=FunctionSummary)
-        template = """Answer the question based only on the following context:
-
-        {context}
-
-        Question: {question}
-
-        {format_instructions}
-        """
-        prompt = ChatPromptTemplate.from_template(template)
-
-        def format_docs(docs: list[Document]) -> str:
-            return "\n\n".join(doc.page_content for doc in docs)
-
-        self.rag_chain = (
-            {
-                "context": self.retriever | format_docs,
-                "format_instructions": lambda x: parser_sol.get_format_instructions(),
-                "question": RunnablePassthrough(),
-            }
-            | prompt
-            | ChatOpenAI(
-                model=self.summarization_model,
-                temperature=0.0,
-                api_key=APIKeys().openai_api_key_secretstr_v1,
-            )
-            | parser_sol
-        )
+        self.prompt_and_model = prompt | llm | parser
 
     def generate_summary(self, function_names: list[str]) -> Summaries:
-        summaries = par_map(function_names, lambda x: self.try_summary_else_default(x))
-        return Summaries(summaries=summaries)
-
-    def try_summary_else_default(
-        self, f_name: str, default_summary: str = ""
-    ) -> FunctionSummary:
-        """
-        Tries generating a summary for the given function, else generates default description.
-        Note that try-except needed because LLM fails (sometimes) for a few functions. Alternate approaches
-        (e.g. pass in entire source code or a cleaned version) can also be explored.
-        """
-        try:
-            summary: FunctionSummary = self.rag_chain.invoke(
-                f"Create a summary for the function {f_name} approve, decimals, supply, ...."
-            )
-            # new model, forget RAG, put source_code in context and be happy.
-            # ask for all functions at once.
-            return summary
-        except:
-            logger.info(f"Could not generate summary for function {f_name}")
-            return FunctionSummary(function_name=f_name, summary=default_summary)
+        summaries = self.prompt_and_model.invoke(
+            {
+                "function_names": function_names,
+                "source_code": self.source_code,
+            }
+        )
+        return summaries
