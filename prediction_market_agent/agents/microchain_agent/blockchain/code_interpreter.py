@@ -21,12 +21,11 @@ class Summaries(BaseModel):
 
 
 class CodeInterpreter:
-    prompt_and_model: RunnableSerializable[dict, Any]
+    prompt_and_model: RunnableSerializable[dict[Any, Any], Any]
 
     def __init__(
         self, source_code: str, summarization_model: str = "gpt-4-turbo"
     ) -> None:
-        self.prompt_and_model = None
         self.summarization_model = summarization_model
         self.source_code = source_code
         self.keys = APIKeys()
@@ -59,7 +58,7 @@ class CodeInterpreter:
         self.prompt_and_model = prompt | llm | parser
 
     def generate_summary(self, function_names: list[str]) -> Summaries:
-        summaries = self.prompt_and_model.invoke(
+        summaries: Summaries = self.prompt_and_model.invoke(
             {
                 "function_names": function_names,
                 "source_code": self.source_code,

@@ -8,7 +8,6 @@ from loguru import logger
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
-from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
@@ -48,12 +47,13 @@ class ClassFactory:
         return new_class
 
 
-class ContractClassConverter(BaseModel):
+class ContractClassConverter:
     """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python
     classes."""
 
-    contract_address: ChecksumAddress
-    contract_name: str
+    def __init__(self, contract_address: ChecksumAddress, contract_name: str):
+        self.contract_address = contract_address
+        self.contract_name = contract_name
 
     def fetch_from_blockscout(self) -> dict[str, Any]:
         r = requests.get(
@@ -169,7 +169,7 @@ class ContractClassConverter(BaseModel):
     def create_classes_from_smart_contract(
         self,
     ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type]]:
-        Ïabi_items = self.get_abi()
+        abi_items = self.get_abi()
         source_code = self.get_source_code()
         abi_str = json.dumps([i.model_dump() for i in abi_items])
         contract = ContractOnGnosisChain(
