@@ -1,3 +1,4 @@
+from eth_typing import ChecksumAddress
 from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
@@ -5,7 +6,6 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     WrappedxDaiContract,
 )
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -40,13 +40,13 @@ from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
 
-def build_wxdai_functions(keys: APIKeys) -> list[Function]:
+def build_functions_from_smart_contract(
+    keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
+) -> list[Function]:
     functions = []
 
-    wrapped_xdai = WrappedxDaiContract()
-    contract_address = Web3.to_checksum_address(wrapped_xdai.address)
     contract_class_converter = ContractClassConverter(
-        contract_address=contract_address, contract_name=wrapped_xdai.__class__.__name__
+        contract_address=contract_address, contract_name=contract_name
     )
     function_types_to_classes = (
         contract_class_converter.create_classes_from_smart_contract()
@@ -93,7 +93,13 @@ def build_agent_functions(
         )
 
     if build_dynamic_contract_functions:
-        wxdai_functions = build_wxdai_functions(keys=keys)
+        # We start with wxDAI as a first example now.
+        wxdai = WrappedxDaiContract()
+        wxdai_functions = build_functions_from_smart_contract(
+            keys=keys,
+            contract_address=wxdai.address,
+            contract_name=wxdai.__class__.__name__,
+        )
         functions.extend(wxdai_functions)
 
     return functions
@@ -109,7 +115,6 @@ def build_agent(
     allow_stop: bool = True,
     bootstrap: str | None = None,
 ) -> Agent:
-    logger.error("entered build agent")
     engine = Engine()
     generator = OpenAIChatGenerator(
         model=model,

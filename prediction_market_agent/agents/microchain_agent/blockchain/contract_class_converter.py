@@ -90,14 +90,14 @@ class ContractClassConverter:
         # If type mapping fails, we exit. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
             if not TYPE_MAPPING.get(input.type, None):
-                logger.info(
+                logger.warning(
                     f"Type mapping for {abi_item.name} has failed. Check inputs {abi_item.inputs}"
                 )
                 return None, None
 
         for output in abi_item.outputs:
             if not TYPE_MAPPING.get(output.type, None):
-                logger.info(
+                logger.warning(
                     f"Type mapping for {abi_item.name} has failed. Check outputs {abi_item.outputs}"
                 )
                 return None, None
@@ -133,9 +133,6 @@ class ContractClassConverter:
         ]:
             function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.send(self.keys,'{abi_item.name}', [{input_as_list}])"
             base = FunctionWithKeys
-
-        if "transferFrom" in function_code:
-            pass
 
         # We fix "from" as argument since it's a reserved keyword in Python
         if "from" in function_code:
