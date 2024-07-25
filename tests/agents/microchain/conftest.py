@@ -31,7 +31,7 @@ def wxdai_contract_class_converter() -> Generator[ContractClassConverter, None, 
     )
 
 
-class RAGPatcherManager:
+class PatcherManager:
     """Class for patching R"""
 
     def __init__(self) -> None:
@@ -56,8 +56,8 @@ class RAGPatcherManager:
 
 
 @pytest.fixture(scope="module")
-def rag_patcher_manager() -> Generator[RAGPatcherManager, None, None]:
-    pm = RAGPatcherManager()
+def patcher_manager() -> Generator[PatcherManager, None, None]:
+    pm = PatcherManager()
     pm.start()
     yield pm
     pm.stop()
@@ -65,7 +65,7 @@ def rag_patcher_manager() -> Generator[RAGPatcherManager, None, None]:
 
 @pytest.fixture(scope="module")
 def sdai_contract_mocked_rag(
-    rag_patcher_manager: RAGPatcherManager,
+    patcher_manager: PatcherManager,
 ) -> Generator[ContractClassConverter, None, None]:
     contract_address = Web3.to_checksum_address(
         "0xaf204776c7245bF4147c2612BF6e5972Ee483701"
@@ -76,7 +76,7 @@ def sdai_contract_mocked_rag(
 
 @pytest.fixture(scope="module")
 def wxdai_contract_mocked_rag(
-    rag_patcher_manager: RAGPatcherManager,
+    patcher_manager: PatcherManager,
 ) -> Generator[ContractClassConverter, None, None]:
     wxdai = WrappedxDaiContract()
     contract_address = Web3.to_checksum_address(wxdai.address)

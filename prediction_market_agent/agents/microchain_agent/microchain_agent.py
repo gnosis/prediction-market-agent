@@ -3,9 +3,6 @@ from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    WrappedxDaiContract,
-)
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -72,7 +69,6 @@ def build_agent_functions(
     allow_stop: bool,
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
-    build_dynamic_contract_functions: bool = False,
 ) -> list[Function]:
     logger.error("entered build agent functions")
     functions = []
@@ -91,16 +87,6 @@ def build_agent_functions(
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
-
-    if build_dynamic_contract_functions:
-        # We start with wxDAI as a first example now.
-        wxdai = WrappedxDaiContract()
-        wxdai_functions = build_functions_from_smart_contract(
-            keys=keys,
-            contract_address=wxdai.address,
-            contract_name=wxdai.__class__.__name__,
-        )
-        functions.extend(wxdai_functions)
 
     return functions
 
