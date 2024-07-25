@@ -1,9 +1,17 @@
+from eth_typing import ChecksumAddress
+from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
+    ContractClassConverter,
+)
+from prediction_market_agent.agents.microchain_agent.blockchain.models import (
+    AbiItemStateMutabilityEnum,
 )
 from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
@@ -29,6 +37,31 @@ from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
 
+def build_functions_from_smart_contract(
+    keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
+) -> list[Function]:
+    functions = []
+
+    contract_class_converter = ContractClassConverter(
+        contract_address=contract_address, contract_name=contract_name
+    )
+    function_types_to_classes = (
+        contract_class_converter.create_classes_from_smart_contract()
+    )
+
+    view_classes = function_types_to_classes[AbiItemStateMutabilityEnum.VIEW]
+    functions.extend([clz() for clz in view_classes])
+
+    payable_classes = function_types_to_classes[AbiItemStateMutabilityEnum.PAYABLE]
+    non_payable_classes = function_types_to_classes[
+        AbiItemStateMutabilityEnum.NON_PAYABLE
+    ]
+    for clz in payable_classes + non_payable_classes:
+        functions.append(clz(keys=keys))
+
+    return functions
+
+
 def build_agent_functions(
     agent: Agent,
     market_type: MarketType,
@@ -37,6 +70,7 @@ def build_agent_functions(
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
+    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
@@ -53,6 +87,7 @@ def build_agent_functions(
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
+
     return functions
 
 
