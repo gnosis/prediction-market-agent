@@ -31,7 +31,6 @@ from streamlit_extras.bottom_container import bottom
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     build_agent,
-    build_agent_functions,
     get_unformatted_system_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
@@ -148,17 +147,12 @@ def maybe_initialize_agent(model: str, unformatted_system_prompt: str) -> None:
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
 
-def get_function_bullet_point_list(agent: Agent, model: str) -> str:
+def get_function_bullet_point_list(agent: Agent) -> str:
+    if len(agent.engine.functions) == 0:
+        raise ValueError("Agent must be initialized with registered functions.")
     bullet_points = ""
-    for function in build_agent_functions(
-        agent=agent,
-        market_type=MARKET_TYPE,
-        keys=KEYS,
-        long_term_memory=st.session_state.long_term_memory,
-        allow_stop=ALLOW_STOP,
-        model=model,
-    ):
-        bullet_points += f"  - {function.__class__.__name__}\n"
+    for function in agent.engine.functions:
+        bullet_points += f"  - {function}\n"
     return bullet_points
 
 
@@ -315,9 +309,7 @@ with intro_expander:
     st.markdown("It is equipped with the following tools:")
 
     st.markdown(
-        get_function_bullet_point_list(
-            agent=st.session_state.agent, model=st.session_state.model
-        )
+        get_function_bullet_point_list(agent=st.session_state.agent)
         if agent_is_initialized()
         else "The agent is not initialized yet."
     )
