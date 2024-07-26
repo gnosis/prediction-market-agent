@@ -54,6 +54,8 @@ langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
 prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "ba98871b7fc25519784ce580d901a4d6e17e2ecd" }
+modal = "^0.63.89"
+payments-py = "^0.2.4"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"

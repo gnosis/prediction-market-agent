@@ -1,7 +1,9 @@
 import typing as t
 from datetime import timedelta
 
+import requests
 from microchain import Function
+from payments_py import Environment, Payments
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     Currency,
@@ -10,10 +12,6 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_prophet.benchmark.agents import (
-    _make_prediction as prophet_make_prediction,
-)
-from prediction_prophet.functions.research import research as prophet_research
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -23,6 +21,17 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_example_market_id,
     get_no_outcome,
     get_yes_outcome,
+)
+from prediction_market_agent.tools.endpoints.nevermined_utils import (
+    NeverminedSettings,
+    get_endpoint_and_headers,
+    topup_if_required,
+)
+from prediction_market_agent.tools.endpoints.prediction_prophet.deployment import (
+    PredictionProphetResponse,
+)
+from prediction_market_agent.tools.endpoints.prediction_prophet.nevermined import (
+    MAX_SERVICE_CHARGE,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
 from prediction_market_agent.utils import APIKeys
@@ -89,11 +98,14 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         keys: APIKeys,
     ) -> None:
         super().__init__(market_type=market_type, keys=keys)
-        self._description = (
+
+    @property
+    def description(self) -> str:
+        return (
             "Use this function to research perform research and predict the "
             "probability of an event occuring. Returns the probability. The "
             "one parameter is the market id of the prediction market you want "
-            "to predict the probability of."
+            "to predict the probability of. Note, this costs money to run."
         )
 
     @property
@@ -110,37 +122,49 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         self,
         market_type: MarketType,
         keys: APIKeys,
-        model: str = "gpt-3.5-turbo",
     ) -> None:
-        self.model = model
         super().__init__(market_type=market_type, keys=keys)
-
-    @property
-    def description(self) -> str:
-        return self._description
+        self.subscription_id = (
+            "did:nv:808e3d22052f6b324831c6b27c0a8ec56cc5a4675ee5fb5cd0ad178f36806b61"
+        )
+        self.service_id = (
+            "did:nv:44cc09d68cb0b7376e566d374ec2646f519f19d6dd1cb20ad0032be0e56e41fc"
+        )
 
     def __call__(self, market_id: str) -> str:
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        research = prophet_research(
-            goal=question,
-            use_summaries=False,
-            model=self.model,
-            openai_api_key=self.keys.openai_api_key,
-            tavily_api_key=self.keys.tavily_api_key,
-        )
-        prediction = prophet_make_prediction(
-            market_question=question,
-            additional_information=research,
-            engine=self.model,
-            temperature=0,
-            api_key=self.keys.openai_api_key,
-        )
-        if prediction.outcome_prediction is None:
-            raise ValueError("Failed to make a prediction.")
 
-        return str(prediction.outcome_prediction.p_yes)
+        settings = NeverminedSettings()
+
+        payments = Payments(
+            nvm_api_key=settings.CONSUMER_API_KEY,
+            environment=Environment.appTesting,
+        )
+
+        topup_if_required(
+            payments=payments,
+            account_address=settings.CONSUMER_ADDRESS,
+            subscription_did=self.subscription_id,
+            min_credits=MAX_SERVICE_CHARGE,
+        )
+
+        endpoint, headers = get_endpoint_and_headers(
+            payments=payments,
+            service_did=self.service_id,
+        )
+        response = requests.get(
+            endpoint, headers=headers, params={"question": question}
+        )
+        response.raise_for_status()
+        prophet_response = PredictionProphetResponse.model_validate_json(
+            response.content
+        )
+        return (
+            f"Predicted probability of 'Yes' outcome: {prophet_response.p_yes}."
+            f"\n\nNote: the cost of this prediction was {prophet_response.cost_usd} USD."
+        )
 
 
 class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
@@ -157,10 +181,6 @@ class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
     ) -> None:
         self.mech_tool = mech_tool
         super().__init__(market_type=market_type, keys=keys)
-
-    @property
-    def description(self) -> str:
-        return self._description + " Note, this costs money to run."
 
     def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
