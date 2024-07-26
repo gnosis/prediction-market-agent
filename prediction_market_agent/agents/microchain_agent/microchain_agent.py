@@ -61,7 +61,7 @@ class SupportedModel(str, Enum):
     def is_replicate(self) -> bool:
         return self in [SupportedModel.llama_31_instruct]
 
-      
+
 def build_functions_from_smart_contract(
     keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
 ) -> list[Function]:
