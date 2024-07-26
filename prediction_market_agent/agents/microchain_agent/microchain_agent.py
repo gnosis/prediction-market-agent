@@ -51,11 +51,7 @@ class SupportedModel(str, Enum):
 
     @property
     def is_openai(self) -> bool:
-        return self in [
-            SupportedModel.gpt_4_turbo,
-            SupportedModel.gpt_35_turbo,
-            SupportedModel.gpt_4o,
-        ]
+        return "gpt-" in self.value
 
     @property
     def is_replicate(self) -> bool:
