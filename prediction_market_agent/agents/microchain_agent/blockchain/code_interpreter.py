@@ -31,7 +31,7 @@ class CodeInterpreter:
         self.keys = APIKeys()
         self.build_chain()
 
-def build_chain(self) -> None:
+    def build_chain(self) -> None:
         parser = PydanticOutputParser(pydantic_object=Summaries)
 
         prompt = PromptTemplate(

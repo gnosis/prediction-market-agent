@@ -80,7 +80,6 @@ def wxdai_contract_mocked_rag(
 ) -> Generator[ContractClassConverter, None, None]:
     wxdai = WrappedxDaiContract()
     contract_address = Web3.to_checksum_address(wxdai.address)
-    yield ContractClassConverter(contract_address, wxdai.__class__.__name__)
     yield ContractClassConverter(
         contract_address=contract_address, contract_name=wxdai.__class__.__name__
     )

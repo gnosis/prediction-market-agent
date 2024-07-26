@@ -3,10 +3,6 @@ from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    WrappedxDaiContract,
-)
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
