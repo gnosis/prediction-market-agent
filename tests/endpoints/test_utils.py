@@ -8,7 +8,7 @@ def hello_world(name: str = "World") -> Response:
     return Response(content=f"Hello {name}")
 
 
-def test_hello_world():
+def test_hello_world() -> None:
     with UvicornServer(to_fastapi_app(hello_world)) as server:
         for name in ["foo", None]:
             response = requests.get(server.url, params={"name": name})

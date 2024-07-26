@@ -41,7 +41,7 @@ def service_did_from_subscription(payments: Payments, subscription_did: str) -> 
     response_json = response.json()
     if len(response_json) != 1:
         raise ValueError(f"Expected 1 service, got {len(response_json)}")
-    return response.json()[0]
+    return str(response.json()[0])
 
 
 def get_endpoint_and_headers(
@@ -75,7 +75,7 @@ def create_subscription(
         tags=tags,
     )
     subscription_response.raise_for_status()
-    return subscription_response.json()["did"]
+    return str(subscription_response.json()["did"])
 
 
 def create_service(
@@ -105,7 +105,7 @@ def create_service(
         amount_of_credits=0,  # Placeholder, unused TODO
     )
     service_response.raise_for_status()
-    return service_response.json()["did"]
+    return str(service_response.json()["did"])
 
 
 def topup_if_required(

@@ -10,7 +10,7 @@ from tests.utils import RUN_PAID_TESTS
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
-def test_predict():
+def test_predict() -> None:
     app = to_fastapi_app(predict)
     with UvicornServer(app) as server:
         response = requests.get(

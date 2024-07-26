@@ -82,6 +82,6 @@ app = App(image=MODAL_IMAGE)
 
 @app.function(secrets=[Secret.from_name("prophet")])
 @web_endpoint(docs=True)
-def predict_wrapper(request: Request):
+def predict_wrapper(request: Request) -> Response:
     query_params = dict(request.query_params)
     return predict(**query_params)
