@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -20,7 +21,7 @@ class AbiItemStateMutabilityEnum(str, Enum):
 
 
 class ABIMetadata(BaseModel):
-    constant: bool
+    constant: Optional[bool] = None
     inputs: list[ArgMetadata]
     name: str
     outputs: list[ArgMetadata]
