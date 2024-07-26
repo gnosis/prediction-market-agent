@@ -35,7 +35,8 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.43.2", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.43.4", extras = ["langchain", "google"] }
+# prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", rev = "5b6ee13110b337a4c57fd716b16d6a3eccd42a5b", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
