@@ -14,7 +14,7 @@ def test_decimals(wxdai_contract_mocked_rag: ContractClassConverter) -> None:
     class_name = wxdai_contract_mocked_rag.build_class_name("decimals")
     decimals = next((clz for clz in classes if clz.__name__ == class_name), None)
     assert decimals
-    result_decimals = decimals().__call__()
+    result_decimals = decimals()()
     assert result_decimals == 18
 
 
@@ -26,5 +26,10 @@ def test_balance_of(wxdai_contract_mocked_rag: ContractClassConverter) -> None:
     class_name = wxdai_contract_mocked_rag.build_class_name("balanceOf")
     balance_of = next((clz for clz in classes if clz.__name__ == class_name), None)
     assert balance_of
-    result_balance_of = balance_of().__call__(web3.constants.ADDRESS_ZERO)
+    result_balance_of = balance_of()(web3.constants.ADDRESS_ZERO)
     assert result_balance_of > 0
+
+
+def test_sdai(sdai_contract_mocked_rag: ContractClassConverter) -> None:
+    classes = sdai_contract_mocked_rag.create_classes_from_smart_contract()
+    assert classes

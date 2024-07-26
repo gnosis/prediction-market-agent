@@ -1,3 +1,5 @@
+from eth_typing import ChecksumAddress
+from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -39,13 +41,13 @@ from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
 
-def build_wxdai_functions(keys: APIKeys) -> list[Function]:
+def build_functions_from_smart_contract(
+    keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
+) -> list[Function]:
     functions = []
 
-    wrapped_xdai = WrappedxDaiContract()
-    contract_address = Web3.to_checksum_address(wrapped_xdai.address)
     contract_class_converter = ContractClassConverter(
-        contract_address, wrapped_xdai.__class__.__name__
+        contract_address=contract_address, contract_name=contract_name
     )
     function_types_to_classes = (
         contract_class_converter.create_classes_from_smart_contract()
@@ -72,6 +74,7 @@ def build_agent_functions(
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
+    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
@@ -88,9 +91,6 @@ def build_agent_functions(
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
-
-    wxdai_functions = build_wxdai_functions(keys=keys)
-    functions.extend(wxdai_functions)
 
     return functions
 

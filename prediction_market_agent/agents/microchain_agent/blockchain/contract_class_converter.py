@@ -48,13 +48,10 @@ class ClassFactory:
 
 
 class ContractClassConverter:
-    """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python classes."""
-
-    contract_address: ChecksumAddress
-    contract_name: str
+    """Class responsible for reading a smart contract on Gnosis Chain and converting its functionalities into Python
+    classes."""
 
     def __init__(self, contract_address: ChecksumAddress, contract_name: str):
-        # For caching requests of the same contract
         self.contract_address = contract_address
         self.contract_name = contract_name
 
@@ -93,13 +90,15 @@ class ContractClassConverter:
         # If type mapping fails, we exit. Note that structs as input- or output args are not supported.
         for input in abi_item.inputs:
             if not TYPE_MAPPING.get(input.type, None):
-                logger.info(f"Type mapping has failed. Check inputs {abi_item.inputs}")
+                logger.warning(
+                    f"Type mapping for {abi_item.name} has failed. Check inputs {abi_item.inputs}"
+                )
                 return None, None
 
         for output in abi_item.outputs:
             if not TYPE_MAPPING.get(output.type, None):
-                logger.info(
-                    f"Type mapping has failed. Check outputs {abi_item.outputs}"
+                logger.warning(
+                    f"Type mapping for {abi_item.name} has failed. Check outputs {abi_item.outputs}"
                 )
                 return None, None
 
@@ -135,6 +134,9 @@ class ContractClassConverter:
             function_code = f"def {abi_item.name}(self, {input_args}) -> {output_args}: return contract.send(self.keys,'{abi_item.name}', [{input_as_list}])"
             base = FunctionWithKeys
 
+        # We fix "from" as argument since it's a reserved keyword in Python
+        if "from" in function_code:
+            function_code = function_code.replace("from", "sender")
         exec(function_code, namespace)
         dynamic_function = namespace[abi_item.name]
 
@@ -165,7 +167,6 @@ class ContractClassConverter:
     def create_classes_from_smart_contract(
         self,
     ) -> defaultdict[AbiItemStateMutabilityEnum | None, list[type[Function]]]:
-        # Get ABI from contract
         abi_items = self.get_abi()
         source_code = self.get_source_code()
         abi_str = json.dumps([i.model_dump() for i in abi_items])
