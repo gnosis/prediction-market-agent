@@ -21,6 +21,7 @@ class DBKeys(BaseSettings):
 class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
+    REPLICATE_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     PINECONE_API_KEY: t.Optional[SecretStr] = None
     PINATA_API_KEY: t.Optional[SecretStr] = None
@@ -36,6 +37,12 @@ class APIKeys(APIKeysBase):
     def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def replicate_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.REPLICATE_API_KEY, "REPLICATE_API_KEY missing in the environment."
         )
 
     @property

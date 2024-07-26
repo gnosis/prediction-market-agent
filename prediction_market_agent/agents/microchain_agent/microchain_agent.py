@@ -1,6 +1,9 @@
+from enum import Enum
+
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -15,6 +18,9 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     RememberPastActions,
 )
+from prediction_market_agent.agents.microchain_agent.microchain_generators import (
+    ReplicateLlama31,
+)
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -27,6 +33,25 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
+
+
+class SupportedModel(str, Enum):
+    gpt_4_turbo = "gpt-4-turbo"
+    gpt_35_turbo = "gpt-3.5-turbo-0125"
+    gpt_4o = "gpt-4o-2024-05-13"
+    llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
+
+    @property
+    def is_openai(self) -> bool:
+        return self in [
+            SupportedModel.gpt_4_turbo,
+            SupportedModel.gpt_35_turbo,
+            SupportedModel.gpt_4o,
+        ]
+
+    @property
+    def is_replicate(self) -> bool:
+        return self in [SupportedModel.llama_31_instruct]
 
 
 def build_agent_functions(
@@ -59,7 +84,7 @@ def build_agent_functions(
 def build_agent(
     keys: APIKeys,
     market_type: MarketType,
-    model: str,
+    model: SupportedModel,
     unformatted_system_prompt: str,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
@@ -67,11 +92,22 @@ def build_agent(
     bootstrap: str | None = None,
 ) -> Agent:
     engine = Engine()
-    generator = OpenAIChatGenerator(
-        model=model,
-        api_key=keys.openai_api_key.get_secret_value(),
-        api_base=api_base,
-        temperature=0.7,
+    generator = (
+        OpenAIChatGenerator(
+            model=model.value,
+            api_key=keys.openai_api_key.get_secret_value(),
+            api_base=api_base,
+            temperature=0.7,
+        )
+        if model.is_openai
+        else (
+            ReplicateLlama31(
+                model=model.value,
+                api_key=keys.replicate_api_key.get_secret_value(),
+            )
+            if model.is_replicate
+            else should_not_happen()
+        )
     )
     agent = Agent(llm=LLM(generator=generator), engine=engine)
 
