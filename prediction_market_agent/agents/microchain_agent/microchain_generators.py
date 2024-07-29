@@ -47,22 +47,6 @@ def format_llama31_prompt(messages: list[Llama31Message]) -> str:
     return prompt
 
 
-def limit_messages(
-    messages: list[Llama31Message], max_messages: int
-) -> list[Llama31Message]:
-    """
-    Limit the number of messages in the conversation to `max_messages` and the system message, if included.
-    """
-    verify_system_message_is_first(messages)
-    if messages and messages[0]["role"] == Llama31SupportedRole.system:
-        system_message = [messages[0]]
-        messages = messages[1:]
-    else:
-        system_message = []
-
-    return system_message + messages[-max_messages:]
-
-
 class ReplicateLlama31:
     def __init__(
         self,
