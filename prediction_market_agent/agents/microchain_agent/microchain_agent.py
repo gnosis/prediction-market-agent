@@ -2,7 +2,14 @@ from enum import Enum
 
 from eth_typing import ChecksumAddress
 from loguru import logger
-from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
+from microchain import (
+    LLM,
+    Agent,
+    Engine,
+    Function,
+    OpenAIChatGenerator,
+    ReplicateLlama31ChatGenerator,
+)
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import should_not_happen
@@ -25,9 +32,6 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     RememberPastActions,
-)
-from prediction_market_agent.agents.microchain_agent.microchain_generators import (
-    ReplicateLlama31,
 )
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
@@ -132,7 +136,7 @@ def build_agent(
         )
         if model.is_openai
         else (
-            ReplicateLlama31(
+            ReplicateLlama31ChatGenerator(
                 model=model.value,
                 api_key=keys.replicate_api_key.get_secret_value(),
             )

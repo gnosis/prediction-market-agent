@@ -4264,13 +4264,13 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "langfuse"
-version = "2.39.3"
+version = "2.40.0"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langfuse-2.39.3-py3-none-any.whl", hash = "sha256:24b12cbb23f866b22706c1ea9631781f99fe37b0b15889d241198c4d1c07516b"},
-    {file = "langfuse-2.39.3.tar.gz", hash = "sha256:4d2df8f9344572370703db103ddf97176df518699593254e6d6c2b8ca3bf2f12"},
+    {file = "langfuse-2.40.0-py3-none-any.whl", hash = "sha256:2aaebc179ec2edf7645805f680bf81affcb375d9cf33d0ba0e51ac3f8686000a"},
+    {file = "langfuse-2.40.0.tar.gz", hash = "sha256:5b16c8b2ded418119212a295309300fd253dd80fd49f9713b4516067d499bf85"},
 ]
 
 [package.dependencies]
@@ -5030,17 +5030,22 @@ psutil = "*"
 
 [[package]]
 name = "microchain-python"
-version = "0.3.9.post1"
+version = "0.3.9"
 description = ""
 optional = false
 python-versions = "*"
-files = [
-    {file = "microchain_python-0.3.9.post1-py3-none-any.whl", hash = "sha256:203dfed5b6d1fddc4920e5018d950303cb34abd31168ce1b996a06e7dc65341e"},
-    {file = "microchain_python-0.3.9.post1.tar.gz", hash = "sha256:6d01bf43d2cca69a4f155123b65230346d156b0e2d09f12e10ff9ef57b831af0"},
-]
+files = []
+develop = false
 
 [package.dependencies]
+pydantic = ">=2,<3"
 termcolor = "2.4.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/kongzii/microchain.git"
+reference = "f4300415255ab17bbda52794b5a5654e6f23f593"
+resolved_reference = "f4300415255ab17bbda52794b5a5654e6f23f593"
 
 [[package]]
 name = "mmh3"
@@ -10436,4 +10441,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "8de7cf9fb4f849ab6fd21c71b517374c3b1fccc2db5559899993dd16fa74d1c7"
+content-hash = "e6727f6153b20b0c26e0e4d671e039fa6d7115a3c04a12f58ba0fdfbe585ed8b"
