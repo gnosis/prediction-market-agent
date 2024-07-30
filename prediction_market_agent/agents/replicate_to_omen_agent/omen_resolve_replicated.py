@@ -79,6 +79,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
         api_keys,
         created_not_claimed_questions,
         auto_withdraw=True,
+        silent_errors=True,
     )
     balances_after_claiming = get_balances(public_key)
     logger.info(f"{balances_after_claiming=}")
