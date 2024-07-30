@@ -19,7 +19,7 @@ class ExecuteCodeFunction(Function):
     @property
     def example_args(self) -> list[str]:
         return [
-            '[{"language":"bash","code":"pip install pmat"},{"language":"python","code":"print(\'Hello, World!\')"}]'
+            '[{"language":"bash","code":"pip install prediction-market-agent-tooling"},{"language":"python","code":"print(\'Hello, World!\')"}]'
         ]
 
     def __call__(self, code_blocks: str) -> str:
