@@ -2,6 +2,8 @@ import typing as t
 from enum import Enum
 
 from microchain.models.generators import TokenTracker
+from pydantic import BaseModel
+from transformers import AutoTokenizer
 
 
 class Llama31SupportedRole(str, Enum):
@@ -16,35 +18,9 @@ class Llama31Message(t.TypedDict):
     content: str
 
 
-MESSAGE_BLOCK_TEMPLATE = """<|start_header_id|>{role}<|end_header_id|>
-
-{content}
-
-You are a helpful assistant<|eot_id|>"""
-
-
-def verify_system_message_is_first(messages: list[Llama31Message]) -> None:
-    if any(message["role"] == Llama31SupportedRole.system for message in messages[1:]):
-        raise ValueError(
-            f"System message should be the first message in the conversation."
-        )
-
-
-def format_llama31_prompt(messages: list[Llama31Message]) -> str:
-    """
-    Format the messages into a prompt for the Llama 3.1 model,
-    based on https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1.
-    """
-    verify_system_message_is_first(messages)
-
-    prompt = """<|begin_of_text|>"""
-
-    for message in messages:
-        prompt += MESSAGE_BLOCK_TEMPLATE.format(**message)
-
-    prompt += "<|start_header_id|>assistant<|end_header_id|>"
-
-    return prompt
+class Usage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
 
 
 class ReplicateLlama31:
@@ -58,7 +34,8 @@ class ReplicateLlama31:
         top_p: float = 0.9,
         top_k: int = 50,
         max_tokens: int = 1024,
-        token_tracker: TokenTracker | None = None,
+        token_tracker: TokenTracker | None = TokenTracker(),
+        tokenizer_pretrained_model_name_or_path: str = "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4",
     ) -> None:
         try:
             from replicate.client import Client
@@ -72,14 +49,14 @@ class ReplicateLlama31:
         self.top_k = top_k
         self.max_tokens = max_tokens
         self.token_tracker = token_tracker
-        assert (
-            self.token_tracker is None
-        ), "Token tracker not supported for Replicate yet."
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer_pretrained_model_name_or_path
+        )
 
     def __call__(
         self, messages: list[Llama31Message], stop: list[str] | None = None
     ) -> str:
-        prompt = format_llama31_prompt(messages)
+        prompt = self.tokenizer.apply_chat_template(messages, tokenize=False)
         completion = self.client.predictions.create(
             model=self.model,
             input={
@@ -96,7 +73,12 @@ class ReplicateLlama31:
         output = "".join(str(event) for event in completion.stream()).strip()
 
         if self.token_tracker:
-            raise NotImplementedError("Token tracker not supported for Replicate yet.")
+            self.token_tracker.update_from_usage(
+                Usage(
+                    prompt_tokens=len(self.tokenizer.apply_chat_template(messages)),
+                    completion_tokens=len(self.tokenizer.encode(output)),
+                )
+            )
 
         return output
 
