@@ -29,7 +29,10 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory
-from prediction_market_agent.agents.microchain_agent.microchain_agent import build_agent
+from prediction_market_agent.agents.microchain_agent.microchain_agent import (
+    SupportedModel,
+    build_agent,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_function_useage_from_history,
     get_total_asset_value,
@@ -131,9 +134,11 @@ with st.container(border=True):
 
     col1.metric(
         "Starting Time",
-        "N/A"
-        if chat_history.is_empty
-        else chat_history.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+        (
+            "N/A"
+            if chat_history.is_empty
+            else chat_history.start_time.strftime("%Y-%m-%d %H:%M:%S")
+        ),
     )
     col2.metric("Number of iterations", chat_history.iterations)
     col3.metric("Starting Balance", f"{starting_balance:.2f} {currency}")
@@ -151,7 +156,7 @@ for session in sessions:
 st.subheader("Tool Usage")
 agent = build_agent(
     market_type=MARKET_TYPE,
-    model="foo",  # placeholder, not used
+    model=SupportedModel.gpt_35_turbo,  # placeholder, not used
     keys=keys,  # placeholder, not used
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,

@@ -3,6 +3,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
+    SupportedModel,
     build_agent,
     get_editable_prompt_from_agent,
     get_unformatted_system_prompt,
@@ -21,7 +22,7 @@ from prediction_market_agent.utils import APIKeys
 
 
 class DeployableMicrochainAgent(DeployableAgent):
-    model = "gpt-4o-2024-05-13"
+    model = SupportedModel.gpt_4o
     n_iterations = 50
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
@@ -41,9 +42,9 @@ class DeployableMicrochainAgent(DeployableAgent):
         prompt_handler = PromptTableHandler(session_identifier=self.task_description)
         unformatted_system_prompt = get_unformatted_system_prompt(
             unformatted_prompt=SYSTEM_PROMPTS[self.system_prompt_choice],
-            prompt_table_handler=prompt_handler
-            if self.load_historical_prompt
-            else None,
+            prompt_table_handler=(
+                prompt_handler if self.load_historical_prompt else None
+            ),
         )
         agent: Agent = build_agent(
             market_type=market_type,
@@ -90,3 +91,9 @@ class DeployableMicrochainModifiableSystemPromptAgent2(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
+
+
+class DeployableMicrochainModifiableSystemPromptAgent3(
+    DeployableMicrochainModifiableSystemPromptAgentAbstract
+):
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3

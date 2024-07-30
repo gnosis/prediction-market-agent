@@ -30,6 +30,7 @@ from streamlit_extras.bottom_container import bottom
 
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
+    SupportedModel,
     build_agent,
     get_unformatted_system_prompt,
 )
@@ -55,17 +56,19 @@ AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
 
 
-def run_agent(agent: Agent, iterations: int, model: str) -> None:
+def run_agent(agent: Agent, iterations: int, model: SupportedModel) -> None:
     maybe_initialize_long_term_memory()
-    with openai_costs(model) as costs:
+    with openai_costs(
+        model.value if model.is_openai else None
+    ) as costs:  # TODO: Support for Replicate costs (below as well).
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
                 agent.run(iterations=1, resume=True)
         st.session_state.running_cost += costs.cost
 
 
-def execute_reasoning(agent: Agent, reasoning: str, model: str) -> None:
-    with openai_costs(model) as costs:
+def execute_reasoning(agent: Agent, reasoning: str, model: SupportedModel) -> None:
+    with openai_costs(model.value if model.is_openai else None) as costs:
         agent.execute_command(f'Reasoning("{reasoning}")')
         display_new_history_callback(agent)  # Run manually after `execute_command`
         st.session_state.running_cost += costs.cost
@@ -117,7 +120,9 @@ def save_last_turn_history_to_memory(agent: Agent) -> None:
     get_history_from_last_turn(agent).save_to(st.session_state.long_term_memory)
 
 
-def maybe_initialize_agent(model: str, unformatted_system_prompt: str) -> None:
+def maybe_initialize_agent(
+    model: SupportedModel, unformatted_system_prompt: str
+) -> None:
     # Set the unformatted system prompt
     prompt_table_handler = (
         PromptTableHandler(session_identifier=AGENT_IDENTIFIER)
@@ -183,16 +188,13 @@ with st.sidebar:
 
     st.divider()
     st.subheader("Configure:")
-    st.selectbox(
-        "Model",
-        [
-            "gpt-4-turbo",
-            "gpt-3.5-turbo-0125",
-            "gpt-4o-2024-05-13",
-        ],
-        index=0,
-        disabled=agent_is_initialized(),
-        key="model",
+    st.session_state.model = SupportedModel(
+        st.selectbox(
+            "Model",
+            [m.value for m in SupportedModel],
+            index=0,
+            disabled=agent_is_initialized(),
+        )
     )
 
     st.selectbox(

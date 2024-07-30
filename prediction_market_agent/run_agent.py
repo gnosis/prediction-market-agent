@@ -23,6 +23,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainModifiableSystemPromptAgent0,
     DeployableMicrochainModifiableSystemPromptAgent1,
     DeployableMicrochainModifiableSystemPromptAgent2,
+    DeployableMicrochainModifiableSystemPromptAgent3,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
@@ -46,6 +47,7 @@ class RunnableAgent(str, Enum):
     microchain_modifiable_system_prompt_0 = "microchain_modifiable_system_prompt_0"
     microchain_modifiable_system_prompt_1 = "microchain_modifiable_system_prompt_1"
     microchain_modifiable_system_prompt_2 = "microchain_modifiable_system_prompt_2"
+    microchain_modifiable_system_prompt_3 = "microchain_modifiable_system_prompt_3"
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
@@ -61,6 +63,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.microchain_modifiable_system_prompt_0: DeployableMicrochainModifiableSystemPromptAgent0,
     RunnableAgent.microchain_modifiable_system_prompt_1: DeployableMicrochainModifiableSystemPromptAgent1,
     RunnableAgent.microchain_modifiable_system_prompt_2: DeployableMicrochainModifiableSystemPromptAgent2,
+    RunnableAgent.microchain_modifiable_system_prompt_3: DeployableMicrochainModifiableSystemPromptAgent3,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
 }

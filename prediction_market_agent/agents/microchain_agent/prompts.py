@@ -7,7 +7,8 @@ SYSTEM_PROMPT = f"""Act as an autonomous agent with a goal to learn, survive and
 
 {{engine_help}}
 
-Only output valid Python function calls, without code formatting characters.
+Only output valid Python function calls, without code formatting characters, without any other text.
+Only output a single function call per message.
 """
 # This is the original system prompt of the microchain agent, users on Streamlit can select this,
 # instead of always waiting for the agent to learn trading.
@@ -26,7 +27,8 @@ You know everything needed and now just trade on the markets.
 
 {{engine_help}}
 
-Only output valid Python function calls, without code formatting characters.
+Only output valid Python function calls, without code formatting characters, without any other text.
+Only output a single function call per message.
 Make 'Reasoning' calls frequently - at least every other call.
 """
 
