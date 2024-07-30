@@ -1,117 +1,203 @@
-import typer
+from enum import Enum
+
+from eth_typing import ChecksumAddress
+from loguru import logger
 from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 
-from prediction_market_agent.agents.microchain_agent.functions import (
-    MARKET_FUNCTIONS,
-    RememberPastLearnings,
+from prediction_market_agent.agents.microchain_agent.agent_functions import (
+    AGENT_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.memory import LongTermMemory
+from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
+    ContractClassConverter,
+)
+from prediction_market_agent.agents.microchain_agent.blockchain.models import (
+    AbiItemStateMutabilityEnum,
+)
+from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
+from prediction_market_agent.agents.microchain_agent.code_functions import (
+    CODE_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.learning_functions import (
+    LEARNING_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.market_functions import (
+    MARKET_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.memory_functions import (
+    RememberPastActions,
+)
+from prediction_market_agent.agents.microchain_agent.microchain_generators import (
+    ReplicateLlama31,
+)
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
-from prediction_market_agent.agents.utils import LongTermMemoryTaskIdentifier
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    build_full_unformatted_system_prompt,
+    extract_updatable_system_prompt,
+)
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
+from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
-SYSTEM_PROMPT = """
-Act as a trader agent in prediction markets to maximise your profit.
 
-Research markets, buy tokens you consider undervalued, and sell tokens that you
-hold and consider overvalued.
+class SupportedModel(str, Enum):
+    gpt_4_turbo = "gpt-4-turbo"
+    gpt_35_turbo = "gpt-3.5-turbo-0125"
+    gpt_4o = "gpt-4o-2024-05-13"
+    llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
 
-You can use the following functions:
+    @property
+    def is_openai(self) -> bool:
+        return "gpt-" in self.value
 
-{engine_help}
+    @property
+    def is_replicate(self) -> bool:
+        return self in [SupportedModel.llama_31_instruct]
 
-Only output valid Python function calls.
-Make 'Reasoning' calls frequently - at least every other call.
-"""
+
+def build_functions_from_smart_contract(
+    keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
+) -> list[Function]:
+    functions = []
+
+    contract_class_converter = ContractClassConverter(
+        contract_address=contract_address, contract_name=contract_name
+    )
+    function_types_to_classes = (
+        contract_class_converter.create_classes_from_smart_contract()
+    )
+
+    view_classes = function_types_to_classes[AbiItemStateMutabilityEnum.VIEW]
+    functions.extend([clz() for clz in view_classes])
+
+    payable_classes = function_types_to_classes[AbiItemStateMutabilityEnum.PAYABLE]
+    non_payable_classes = function_types_to_classes[
+        AbiItemStateMutabilityEnum.NON_PAYABLE
+    ]
+    for clz in payable_classes + non_payable_classes:
+        functions.append(clz(keys=keys))
+
+    return functions
 
 
 def build_agent_functions(
+    agent: Agent,
     market_type: MarketType,
+    keys: APIKeys,
     allow_stop: bool,
-    long_term_memory: LongTermMemory | None,
+    long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
+    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
     if allow_stop:
         functions.append(Stop())
 
-    functions.extend([f(market_type=market_type) for f in MARKET_FUNCTIONS])
+    functions.extend([f() for f in API_FUNCTIONS])
+    functions.extend([f() for f in LEARNING_FUNCTIONS])
+    functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
+    functions.extend([f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS])
+    functions.extend([f() for f in CODE_FUNCTIONS])
     if market_type == MarketType.OMEN:
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:
         functions.append(
-            RememberPastLearnings(long_term_memory=long_term_memory, model=model)
+            RememberPastActions(long_term_memory=long_term_memory, model=model)
         )
+
     return functions
 
 
 def build_agent(
+    keys: APIKeys,
     market_type: MarketType,
-    model: str,
+    model: SupportedModel,
+    unformatted_system_prompt: str,
     api_base: str = "https://api.openai.com/v1",
-    long_term_memory: LongTermMemory | None = None,
+    long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
+    bootstrap: str | None = None,
 ) -> Agent:
     engine = Engine()
+    generator = (
+        OpenAIChatGenerator(
+            model=model.value,
+            api_key=keys.openai_api_key.get_secret_value(),
+            api_base=api_base,
+            temperature=0.7,
+        )
+        if model.is_openai
+        else (
+            ReplicateLlama31(
+                model=model.value,
+                api_key=keys.replicate_api_key.get_secret_value(),
+            )
+            if model.is_replicate
+            else should_not_happen()
+        )
+    )
+    agent = Agent(llm=LLM(generator=generator), engine=engine)
+
     for f in build_agent_functions(
+        agent=agent,
         market_type=market_type,
+        keys=keys,
         allow_stop=allow_stop,
         long_term_memory=long_term_memory,
         model=model,
     ):
         engine.register(f)
 
-    generator = OpenAIChatGenerator(
-        model=model,
-        api_key=APIKeys().openai_api_key.get_secret_value(),
-        api_base=api_base,
-        temperature=0.7,
-    )
-    agent = Agent(llm=LLM(generator=generator), engine=engine)
     agent.max_tries = 3
-    agent.prompt = SYSTEM_PROMPT.format(engine_help=engine.help)
-    agent.bootstrap = [
-        'Reasoning("I need to reason step by step. Start by assessing my '
-        "current positions and balance. Do I have any positions in the markets "
-        "returned from GetMarkets? Consider selling overvalued tokens AND "
-        'buying undervalued tokens.")'
-    ]
+
+    agent.system_prompt = unformatted_system_prompt.format(
+        engine_help=agent.engine.help
+    )
+    if bootstrap:
+        agent.bootstrap = [bootstrap]
     return agent
 
 
-def main(
-    market_type: MarketType = MarketType.OMEN,
-    api_base: str = "https://api.openai.com/v1",
-    model: str = "gpt-4-turbo-preview",
-    iterations: int = 10,
-    seed_prompt: str | None = None,
-) -> None:
-    # This description below serves to unique identify agent entries on the LTM, and should be
-    # unique across instances (i.e. markets).
-    unique_task_description = LongTermMemoryTaskIdentifier.microchain_task_from_market(
-        market_type
-    )
-    long_term_memory = LongTermMemory(unique_task_description)
+def get_unformatted_system_prompt(
+    unformatted_prompt: str, prompt_table_handler: PromptTableHandler | None
+) -> str:
+    # Restore the prompt from a historical session, replacing the editable part with it.
+    if prompt_table_handler:
+        if historical_prompt := prompt_table_handler.fetch_latest_prompt():
+            return build_full_unformatted_system_prompt(historical_prompt.prompt)
 
-    agent = build_agent(
-        market_type=market_type,
-        api_base=api_base,
-        model=model,
-        long_term_memory=long_term_memory,
-        allow_stop=False,  # Prevent the agent from stopping itself
-    )
-    if seed_prompt:
-        agent.bootstrap = [f'Reasoning("{seed_prompt}")']
-    agent.run(iterations=iterations)
-    # generator.print_usage() # Waiting for microchain release
+    # If no historical prompt is found, return the original prompt.
+    return unformatted_prompt
+
+
+def save_agent_history(
+    long_term_memory: LongTermMemoryTableHandler,
+    agent: Agent,
+    initial_system_prompt: str,
+) -> None:
+    """
+    Save the agent's history to the long-term memory. But first, restore the
+    system prompt to its initial state. This is necessary because the some
+    functions may have changed the system prompt during the agent's run.
+    """
+    # Save off the most up-to-date, or 'head' system prompt
+    head_system_prompt = agent.history[0]
+
+    # Restore the system prompt to its initial state
+    agent.history[0] = dict(role="system", content=initial_system_prompt)
     long_term_memory.save_history(agent.history)
 
+    # Restore the head system prompt
+    agent.history[0] = head_system_prompt
 
-if __name__ == "__main__":
-    typer.run(main)
+
+def get_editable_prompt_from_agent(agent: Agent) -> str:
+    return extract_updatable_system_prompt(str(agent.system_prompt))

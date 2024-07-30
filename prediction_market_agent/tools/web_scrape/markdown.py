@@ -21,9 +21,9 @@ def fetch_html(url: str, timeout: int) -> Response:
 
 def web_scrape(url: str, timeout: int = 10) -> str:
     """
-    Taken from polywrap/predictionprophet
+    Taken from agentcoinorg/predictionprophet
 
-    https://github.com/polywrap/predictionprophet/blob/97aeea8f87e9b42da242d00d93ed5754bd64f21e/prediction_prophet/functions/web_scrape.py
+    https://github.com/agentcoinorg/predictionprophet/blob/97aeea8f87e9b42da242d00d93ed5754bd64f21e/prediction_prophet/functions/web_scrape.py
     """
     try:
         response = fetch_html(url=url, timeout=timeout)

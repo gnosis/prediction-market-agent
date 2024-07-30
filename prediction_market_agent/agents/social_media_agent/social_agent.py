@@ -9,17 +9,26 @@ from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.autogen_general_agent.prompts import (
-    CRITIC_PROMPT,
-    INFLUENCER_PROMPT,
-    REASONING_PROMPT,
-)
 from prediction_market_agent.agents.microchain_agent.memory import (
-    LongTermMemory,
     SimpleMemoryThinkThoroughly,
 )
+from prediction_market_agent.agents.social_media_agent.prompts import (
+    CRITIC_PROMPT,
+    INFLUENCER_PROMPT,
+    POST_MAX_LENGTH,
+    REASONING_PROMPT,
+)
 from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
+from prediction_market_agent.db.long_term_memory_table_handler import (
+    LongTermMemoryTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
+
+
+# Options from https://microsoft.github.io/autogen/docs/reference/agentchat/conversable_agent/#initiate_chat
+class SummaryMethod(str, Enum):
+    LAST_MSG = "last_msg"
+    REFLECTION_WITH_LLM = "reflection_with_llm"
 
 
 class BetInputPrompt(BaseModel):
@@ -82,23 +91,18 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     writer = autogen.AssistantAgent(
         name="Writer",
         llm_config=llm_config,
-        system_message="""
-        You are a professional influencer, known for your insightful and engaging tweets.
-        You transform complex concepts into compelling narratives.
-        You should improve the quality of the content based on the feedback from the user.
-        You must always return only the tweet.
-        """,
+        system_message="""You are a professional influencer, known for your insightful and engaging tweets. You 
+        transform complex concepts into compelling narratives. You should improve the quality of the content based on 
+        the feedback from the user. You must always return only the tweet. """,
     )
 
     critic = autogen.AssistantAgent(
         name="Critic",
         llm_config=llm_config,
-        system_message="""
-            You are a critic, known for your thoroughness and commitment to standards.
-            Your task is to scrutinize content for any harmful elements or regulatory violations, ensuring
-            all materials align with required guidelines.
-            References to betting and gambling are allowed.
-            """,
+        system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is 
+        to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with 
+        required guidelines. You should also always remind everyone that the limit for any posts being created is 
+{POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
     )
 
     return {
@@ -132,7 +136,7 @@ def build_social_media_text(
 def extract_reasoning_behind_tweet(
     tweet: str,
     bets: list[Bet],
-    long_term_memory: LongTermMemory,
+    long_term_memory: LongTermMemoryTableHandler,
     memories_since: datetime | None = None,
 ) -> str:
     """
@@ -146,7 +150,9 @@ def extract_reasoning_behind_tweet(
     # We want memories only from the bets to add relevant learnings
     questions_from_bets = set([b.market_question for b in bets])
     filtered_memories = [
-        m for m in simple_memories if m.metadata.question in questions_from_bets
+        m
+        for m in simple_memories
+        if m.metadata.original_question in questions_from_bets
     ]
     return extract_reasonings_to_learnings(filtered_memories, tweet)
 
@@ -155,7 +161,7 @@ def build_reply_tweet(
     model: str,
     tweet: str,
     bets: list[Bet],
-    long_term_memory: LongTermMemory,
+    long_term_memory: LongTermMemoryTableHandler,
     memories_since: datetime | None = None,
 ) -> str:
     reasoning = extract_reasoning_behind_tweet(
@@ -200,11 +206,12 @@ def build_tweet(model: str, task: str) -> str:
             recipient=writer,
             message=task,
             max_turns=2,
-            summary_method="last_msg",
+            summary_method=SummaryMethod.REFLECTION_WITH_LLM,
             cache=cache,
         )
-
-    reply_tweet = res.summary
+    # We extract the last message since the revised tweet is contained in the last response
+    # from the writer.
+    reply_tweet = res.chat_history[-1]["content"]
 
     return str(
         reply_tweet

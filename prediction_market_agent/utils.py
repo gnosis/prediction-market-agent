@@ -21,8 +21,11 @@ class DBKeys(BaseSettings):
 class APIKeys(APIKeysBase):
     SERP_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
+    REPLICATE_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     PINECONE_API_KEY: t.Optional[SecretStr] = None
+    PINATA_API_KEY: t.Optional[SecretStr] = None
+    PINATA_API_SECRET: t.Optional[SecretStr] = None
 
     @property
     def serp_api_key(self) -> SecretStr:
@@ -37,6 +40,12 @@ class APIKeys(APIKeysBase):
         )
 
     @property
+    def replicate_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.REPLICATE_API_KEY, "REPLICATE_API_KEY missing in the environment."
+        )
+
+    @property
     def tavily_api_key(self) -> SecretStr:
         return check_not_none(
             self.TAVILY_API_KEY, "TAVILY_API_KEY missing in the environment."
@@ -46,6 +55,18 @@ class APIKeys(APIKeysBase):
     def pinecone_api_key(self) -> SecretStr:
         return check_not_none(
             self.PINECONE_API_KEY, "PINECONE_API_KEY missing in the environment."
+        )
+
+    @property
+    def pinata_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.PINATA_API_KEY, "PINATA_API_KEY missing in the environment."
+        )
+
+    @property
+    def pinata_api_secret(self) -> SecretStr:
+        return check_not_none(
+            self.PINATA_API_SECRET, "PINATA_API_SECRET missing in the environment."
         )
 
 
