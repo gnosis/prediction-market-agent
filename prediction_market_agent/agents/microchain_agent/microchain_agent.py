@@ -1,8 +1,14 @@
 from enum import Enum
 
 from eth_typing import ChecksumAddress
-from loguru import logger
-from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
+from microchain import (
+    LLM,
+    Agent,
+    Engine,
+    Function,
+    OpenAIChatGenerator,
+    ReplicateLlama31ChatGenerator,
+)
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import should_not_happen
@@ -28,9 +34,6 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     RememberPastActions,
-)
-from prediction_market_agent.agents.microchain_agent.microchain_generators import (
-    ReplicateLlama31,
 )
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
@@ -59,6 +62,13 @@ class SupportedModel(str, Enum):
     @property
     def is_replicate(self) -> bool:
         return self in [SupportedModel.llama_31_instruct]
+
+
+def replicate_model_to_tokenizer(model: SupportedModel) -> str:
+    if model == SupportedModel.llama_31_instruct:
+        return "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
+    else:
+        raise ValueError(f"Unsupported model: {model}")
 
 
 def build_functions_from_smart_contract(
@@ -94,7 +104,6 @@ def build_agent_functions(
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
-    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
@@ -136,8 +145,11 @@ def build_agent(
         )
         if model.is_openai
         else (
-            ReplicateLlama31(
+            ReplicateLlama31ChatGenerator(
                 model=model.value,
+                tokenizer_pretrained_model_name_or_path=replicate_model_to_tokenizer(
+                    model
+                ),
                 api_key=keys.replicate_api_key.get_secret_value(),
             )
             if model.is_replicate
