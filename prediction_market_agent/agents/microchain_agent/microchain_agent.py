@@ -62,6 +62,13 @@ class SupportedModel(str, Enum):
         return self in [SupportedModel.llama_31_instruct]
 
 
+def replicate_model_to_tokenizer(model: SupportedModel) -> str:
+    if model == SupportedModel.llama_31_instruct:
+        return "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
+    else:
+        raise ValueError(f"Unsupported model: {model}")
+
+
 def build_functions_from_smart_contract(
     keys: APIKeys, contract_address: ChecksumAddress, contract_name: str
 ) -> list[Function]:
@@ -95,7 +102,6 @@ def build_agent_functions(
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
 ) -> list[Function]:
-    logger.error("entered build agent functions")
     functions = []
 
     functions.append(Reasoning())
@@ -138,6 +144,9 @@ def build_agent(
         else (
             ReplicateLlama31ChatGenerator(
                 model=model.value,
+                tokenizer_pretrained_model_name_or_path=replicate_model_to_tokenizer(
+                    model
+                ),
                 api_key=keys.replicate_api_key.get_secret_value(),
             )
             if model.is_replicate
