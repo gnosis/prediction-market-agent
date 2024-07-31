@@ -12,6 +12,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     BuyNo,
     BuyYes,
     GetBalance,
+    GetKellyBet,
     GetMarketProbability,
     GetMarkets,
     PredictProbabilityForQuestion,
@@ -188,3 +189,10 @@ def test_remember_past_learnings(long_term_memory: LongTermMemoryTableHandler) -
         model="gpt-4o-2024-05-13",
     )
     print(remember_past_learnings())
+
+
+@pytest.mark.parametrize("market_type", [MarketType.OMEN])
+def test_kelly_bet(market_type: MarketType) -> None:
+    get_kelly_bet = GetKellyBet(market_type=market_type, keys=APIKeys())
+    bet = get_kelly_bet(market_p_yes=0.1, estimated_p_yes=0.1)
+    assert "Bet size: 0.0" in bet  # No 'edge', so no bet size

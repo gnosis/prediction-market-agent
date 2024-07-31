@@ -10,8 +10,8 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
-    BetOutcome,
-    get_kelly_bet_simplified,
+    KellyBet,
+    get_kelly_bet,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_prophet.benchmark.agents import (
@@ -383,29 +383,31 @@ class GetKellyBet(MarketFunction):
     @property
     def description(self) -> str:
         return (
-            f"Use the Kelly Criterion to calculate the optimal bet size for a "
-            f"binary market. Pass in the bet outcome ('{BetOutcome.YES}' or "
-            f"'{BetOutcome.NO}'), the market p_yes and your estimated p_yes "
+            "Use the Kelly Criterion to calculate the optimal bet size and "
+            "direction for a binary market. Pass in the market p_yes and your "
+            "estimated p_yes."
         )
 
     @property
-    def example_args(self) -> list[str]:
-        return ["Yes", "0.6", "0.5"]
+    def example_args(self) -> list[float]:
+        return [0.6, 0.5]
 
     def __call__(
         self,
-        bet_outcome: str,
         market_p_yes: float,
         estimated_p_yes: float,
     ) -> float:
         confidence = 0.5  # Until confidence score is available, be conservative
         max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
-        return get_kelly_bet_simplified(
-            confidence=confidence,
-            bet_outcome=BetOutcome(bet_outcome),
+        kelly_bet: KellyBet = get_kelly_bet(
             market_p_yes=market_p_yes,
             estimated_p_yes=estimated_p_yes,
             max_bet=max_bet,
+            confidence=confidence,
+        )
+        return (
+            f"Bet size: {kelly_bet.size:.2f}{self.currency}, "
+            f"Bet direction: {kelly_bet.direction}"
         )
 
 
