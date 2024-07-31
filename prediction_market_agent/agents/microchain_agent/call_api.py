@@ -75,5 +75,5 @@ class SendTelegramMessage(Function):
 
 API_FUNCTIONS: list[type[Function]] = [
     CallAPI,
-    SendTelegramMessage,
+    # SendTelegramMessage, # TODO: https://github.com/gnosis/prediction-market-agent/issues/350
 ]
