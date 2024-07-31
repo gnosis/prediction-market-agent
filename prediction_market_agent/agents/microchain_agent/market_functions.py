@@ -315,9 +315,6 @@ class SellNo(SellTokens):
 
 
 class GetBalance(MarketFunction):
-    def __init__(self, market_type: MarketType, keys: APIKeys) -> None:
-        super().__init__(market_type=market_type, keys=keys)
-
     @property
     def description(self) -> str:
         return (
