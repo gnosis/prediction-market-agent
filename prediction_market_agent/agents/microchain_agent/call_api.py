@@ -50,7 +50,7 @@ class CallAPI(Function):
             headers=json.loads(headers) if headers else None,
         )
         response.raise_for_status()
-        return response.text
+        return "Message sent"
 
 
 class SendTelegramMessage(Function):
