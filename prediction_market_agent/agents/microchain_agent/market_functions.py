@@ -397,7 +397,7 @@ class GetKellyBet(MarketFunction):
         bet_outcome: str,
         market_p_yes: float,
         estimated_p_yes: float,
-    ) -> str:
+    ) -> float:
         confidence = 0.5  # Until confidence score is available, be conservative
         max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
         return get_kelly_bet_simplified(
