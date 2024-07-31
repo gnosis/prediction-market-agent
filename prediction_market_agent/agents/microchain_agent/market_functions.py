@@ -9,6 +9,10 @@ from prediction_market_agent_tooling.markets.data_models import (
     TokenAmount,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
+    KellyBet,
+    get_kelly_bet,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_prophet.benchmark.agents import (
     _make_prediction as prophet_make_prediction,
@@ -191,16 +195,12 @@ class BuyTokens(MarketFunction):
         )
         self.user_address = self.keys.bet_from_address
 
-        # Prevent the agent from spending recklessly!
-        self.MAX_AMOUNT = 0.1 if market_type == MarketType.OMEN else 1.0
-
     @property
     def description(self) -> str:
         return (
             f"Use this function to buy {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
             f"second parameter specifies how much {self.currency} you spend."
-            f"This is capped at {self.MAX_AMOUNT}{self.currency}."
         )
 
     @property
@@ -208,9 +208,6 @@ class BuyTokens(MarketFunction):
         return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
-        if amount > self.MAX_AMOUNT:
-            return f"Failed. Bet amount {amount} cannot exceed {self.MAX_AMOUNT} {self.currency}."
-
         account_balance = float(
             get_balance(self.keys, market_type=self.market_type).amount
         )
@@ -382,6 +379,38 @@ class GetResolvedBetsWithOutcomes(MarketFunction):
         )
 
 
+class GetKellyBet(MarketFunction):
+    @property
+    def description(self) -> str:
+        return (
+            "Use the Kelly Criterion to calculate the optimal bet size and "
+            "direction for a binary market. Pass in the market p_yes and your "
+            "estimated p_yes."
+        )
+
+    @property
+    def example_args(self) -> list[float]:
+        return [0.6, 0.5]
+
+    def __call__(
+        self,
+        market_p_yes: float,
+        estimated_p_yes: float,
+    ) -> str:
+        confidence = 0.5  # Until confidence score is available, be conservative
+        max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
+        kelly_bet: KellyBet = get_kelly_bet(
+            market_p_yes=market_p_yes,
+            estimated_p_yes=estimated_p_yes,
+            max_bet=max_bet,
+            confidence=confidence,
+        )
+        return (
+            f"Bet size: {kelly_bet.size:.2f}{self.currency}, "
+            f"Bet direction: {kelly_bet.direction}"
+        )
+
+
 # Functions that interact with the prediction markets
 MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     GetMarkets,
@@ -394,4 +423,5 @@ MARKET_FUNCTIONS: list[type[MarketFunction]] = [
     SellNo,
     GetLiquidPositions,
     GetResolvedBetsWithOutcomes,
+    GetKellyBet,
 ]
