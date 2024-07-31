@@ -24,6 +24,9 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
     AbiItemStateMutabilityEnum,
 )
 from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
+from prediction_market_agent.agents.microchain_agent.code_functions import (
+    CODE_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
     LEARNING_FUNCTIONS,
 )
@@ -112,6 +115,7 @@ def build_agent_functions(
     functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
     functions.extend([f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS])
+    functions.extend([f() for f in CODE_FUNCTIONS])
     if market_type == MarketType.OMEN:
         functions.extend([f() for f in OMEN_FUNCTIONS])
     if long_term_memory:
