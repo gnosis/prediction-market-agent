@@ -50,7 +50,7 @@ class CallAPI(Function):
             headers=json.loads(headers) if headers else None,
         )
         response.raise_for_status()
-        return "Message sent"
+        return response.text
 
 
 class SendTelegramMessage(Function):
@@ -70,7 +70,7 @@ class SendTelegramMessage(Function):
         url = f"https://api.telegram.org/bot{APIKeys().telegram_bot_key.get_secret_value()}/sendMessage?chat_id={chat_id}&text={message}"
         response = requests.get(url)
         response.raise_for_status()
-        return response.text
+        return "Message sent"
 
 
 API_FUNCTIONS: list[type[Function]] = [
