@@ -4565,9 +4565,13 @@ files = [
     {file = "lxml-5.2.2-cp36-cp36m-win_amd64.whl", hash = "sha256:edcfa83e03370032a489430215c1e7783128808fd3e2e0a3225deee278585196"},
     {file = "lxml-5.2.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:28bf95177400066596cdbcfc933312493799382879da504633d16cf60bba735b"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3a745cc98d504d5bd2c19b10c79c61c7c3df9222629f1b6210c0368177589fb8"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b590b39ef90c6b22ec0be925b211298e810b4856909c8ca60d27ffbca6c12e6"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b336b0416828022bfd5a2e3083e7f5ba54b96242159f83c7e3eebaec752f1716"},
+    {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:c2faf60c583af0d135e853c86ac2735ce178f0e338a3c7f9ae8f622fd2eb788c"},
     {file = "lxml-5.2.2-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:4bc6cb140a7a0ad1f7bc37e018d0ed690b7b6520ade518285dc3171f7a117905"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:7ff762670cada8e05b32bf1e4dc50b140790909caa8303cfddc4d702b71ea184"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:57f0a0bbc9868e10ebe874e9f129d2917750adf008fe7b9c1598c0fbbfdde6a6"},
+    {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_aarch64.whl", hash = "sha256:a6d2092797b388342c1bc932077ad232f914351932353e2e8706851c870bca1f"},
     {file = "lxml-5.2.2-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:60499fe961b21264e17a471ec296dcbf4365fbea611bf9e303ab69db7159ce61"},
     {file = "lxml-5.2.2-cp37-cp37m-win32.whl", hash = "sha256:d9b342c76003c6b9336a80efcc766748a333573abf9350f4094ee46b006ec18f"},
     {file = "lxml-5.2.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b16db2770517b8799c79aa80f4053cd6f8b716f21f8aca962725a9565ce3ee40"},
@@ -6514,56 +6518,52 @@ test = ["coverage", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.43.4"
+version = "0.45.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = ">=3.10,<3.12"
-files = []
-develop = false
+python-versions = "<3.12,>=3.10"
+files = [
+    {file = "prediction_market_agent_tooling-0.45.0-py3-none-any.whl", hash = "sha256:3531f51284d5239e072af9c46e9d8dd797df48f6525379c83f53b4c8984ab63e"},
+    {file = "prediction_market_agent_tooling-0.45.0.tar.gz", hash = "sha256:2a757f9250133281514f93f25539d23046cf5164b10b471820941caa1ce73c8c"},
+]
 
 [package.dependencies]
-autoflake = "^2.2.1"
-base58 = "^2.1.1"
-cron-validator = "^1.0.8"
-eth-account = "^0.8.0"
-eth-typing = "^3.0.0"
-functions-framework = "^3.5.0"
-google-api-python-client = {version = "2.95.0", optional = true}
-google-cloud-functions = "^1.16.0"
-google-cloud-resource-manager = "^1.12.0"
-google-cloud-secret-manager = "^2.18.2"
-isort = "^5.13.2"
-langchain = {version = "^0.2.6", optional = true}
+autoflake = ">=2.2.1,<3.0.0"
+base58 = ">=2.1.1,<3.0.0"
+cron-validator = ">=1.0.8,<2.0.0"
+eth-account = ">=0.8.0,<0.9.0"
+eth-typing = ">=3.0.0,<4.0.0"
+functions-framework = ">=3.5.0,<4.0.0"
+google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
+google-cloud-functions = ">=1.16.0,<2.0.0"
+google-cloud-resource-manager = ">=1.12.0,<2.0.0"
+google-cloud-secret-manager = ">=2.18.2,<3.0.0"
+isort = ">=5.13.2,<6.0.0"
+langchain = {version = ">=0.2.6,<0.3.0", optional = true, markers = "extra == \"langchain\""}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = "^0.1.0", optional = true}
-langfuse = "^2.27.1"
-loguru = "^0.7.2"
-numpy = "^1.26.4"
-prompt-toolkit = "^3.0.43"
-pydantic = "^2.6.1"
-pydantic-settings = "^2.1.0"
-safe-cli = "^1.0.0"
-safe-eth-py = "^6.0.0b14"
-scikit-learn = "^1.3.1"
-streamlit = "^1.31.0"
-subgrounds = "^1.9.1"
-tabulate = "^0.9.0"
-tqdm = "^4.66.2"
+langchain-openai = {version = ">=0.1.0,<0.2.0", optional = true, markers = "extra == \"langchain\""}
+langfuse = ">=2.27.1,<3.0.0"
+loguru = ">=0.7.2,<0.8.0"
+numpy = ">=1.26.4,<2.0.0"
+prompt-toolkit = ">=3.0.43,<4.0.0"
+pydantic = ">=2.6.1,<3.0.0"
+pydantic-settings = ">=2.1.0,<3.0.0"
+safe-cli = ">=1.0.0,<2.0.0"
+safe-eth-py = ">=6.0.0b14,<7.0.0"
+scikit-learn = ">=1.3.1,<2.0.0"
+streamlit = ">=1.31.0,<2.0.0"
+subgrounds = ">=1.9.1,<2.0.0"
+tabulate = ">=0.9.0,<0.10.0"
+tqdm = ">=4.66.2,<5.0.0"
 typer = ">=0.9.0,<1.0.0"
-types-pytz = "^2024.1.0.20240203"
-types-requests = "^2.31.0.0"
-web3 = "^6.15.1"
+types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
+types-requests = ">=2.31.0.0,<3.0.0.0"
+web3 = ">=6.15.1,<7.0.0"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.2.6,<0.3.0)", "langchain-openai (>=0.1.0,<0.2.0)"]
 openai = ["openai (>=1.0.0,<2.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
-reference = "evan/add-kelly-bet-simplified"
-resolved_reference = "82c9ff712179c01f3a9de43146171cd7cc0c59c9"
 
 [[package]]
 name = "prediction-prophet"
@@ -10463,4 +10463,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "9ffa725d745a48c47b6f1dfe692d64af51149abf7403351d9e15a3679094950b"
+content-hash = "25fc0746561a16ab5b33eb254ad2af68435d750a8e1cc77b06824d59233f258d"
