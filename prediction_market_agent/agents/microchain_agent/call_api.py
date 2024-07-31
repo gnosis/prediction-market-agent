@@ -4,13 +4,12 @@ from typing import Optional
 import requests
 from microchain import Function
 
+from prediction_market_agent.utils import APIKeys
+
 
 class CallAPI(Function):
     @property
     def description(self) -> str:
-        """
-        A property method that returns a description of the function, which can be used to make arbitrary API calls to any endpoint with any parameters. It supports different HTTP methods (GET, POST, etc.) and can include headers, query parameters, and request bodies.
-        """
         return (
             "Use this function to make arbitrary API calls to any endpoint with any parameters. "
             "It supports different HTTP methods (GET, POST, etc.) and can include headers, "
@@ -20,9 +19,6 @@ class CallAPI(Function):
 
     @property
     def example_args(self) -> list[str]:
-        """
-        Returns a list of strings representing the example arguments for the API call.
-        """
         return ["method", "url", "params", "data", "headers"]
 
     def __call__(
@@ -57,4 +53,27 @@ class CallAPI(Function):
         return response.text
 
 
-API_FUNCTIONS: list[type[Function]] = [CallAPI]
+class SendTelegramMessage(Function):
+    @property
+    def description(self) -> str:
+        return "Use this function to send message on Telegram."
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["123", "Hello from your telegram bot!"]
+
+    def __call__(
+        self,
+        chat_id: str,
+        message: str,
+    ) -> str:
+        url = f"https://api.telegram.org/bot{APIKeys().telegram_bot_key.get_secret_value()}/sendMessage?chat_id={chat_id}&text={message}"
+        response = requests.get(url)
+        response.raise_for_status()
+        return "Message sent"
+
+
+API_FUNCTIONS: list[type[Function]] = [
+    CallAPI,
+    # SendTelegramMessage, # TODO: https://github.com/gnosis/prediction-market-agent/issues/350
+]

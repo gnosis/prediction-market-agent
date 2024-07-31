@@ -5042,16 +5042,17 @@ psutil = "*"
 
 [[package]]
 name = "microchain-python"
-version = "0.3.9.post1"
+version = "0.4.3"
 description = ""
 optional = false
 python-versions = "*"
 files = [
-    {file = "microchain_python-0.3.9.post1-py3-none-any.whl", hash = "sha256:203dfed5b6d1fddc4920e5018d950303cb34abd31168ce1b996a06e7dc65341e"},
-    {file = "microchain_python-0.3.9.post1.tar.gz", hash = "sha256:6d01bf43d2cca69a4f155123b65230346d156b0e2d09f12e10ff9ef57b831af0"},
+    {file = "microchain_python-0.4.3-py3-none-any.whl", hash = "sha256:ba2e57491976fcc7f274ab246e2be50feff84f0dc61768fe957205e79edb4046"},
+    {file = "microchain_python-0.4.3.tar.gz", hash = "sha256:ac5f37c9c7a6ff633fc7da9b917d5c48732531223a04945669e84f0d6e752820"},
 ]
 
 [package.dependencies]
+pydantic = ">=2,<3"
 termcolor = "2.4.0"
 
 [[package]]
@@ -10463,4 +10464,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "25fc0746561a16ab5b33eb254ad2af68435d750a8e1cc77b06824d59233f258d"
+content-hash = "a0814a4d729f1bda0feef1726bb6f71eeb6d33dccabcb03914a15290769e8886"
