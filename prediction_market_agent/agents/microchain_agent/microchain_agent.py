@@ -1,7 +1,6 @@
 from enum import Enum
 
 from eth_typing import ChecksumAddress
-from loguru import logger
 from microchain import (
     LLM,
     Agent,
