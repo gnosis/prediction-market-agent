@@ -93,7 +93,10 @@ class ChatHistory(BaseModel):
         #   -1 (for sys prompt)
         #   divide by 2 (for user and assistant messages)
         #   round down to nearest integer (in case the session ended with a failed function call)
-        return (self.num_messages - 1) // 2
+        if self.is_empty:
+            return 0
+        else:
+            return (self.num_messages - 1) // 2
 
 
 class DatedChatHistory(ChatHistory):
@@ -130,6 +133,9 @@ class DatedChatHistory(ChatHistory):
         Cluster chat messages by session, where a new session starts with a
         system prompt message.
         """
+        if self.is_empty:
+            return []
+
         clusters: list[DatedChatHistory] = []
         chat_messages = list(self.chat_messages).copy()
 
