@@ -461,6 +461,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             research = prophet_research(
                 goal=scenario,
                 use_summaries=False,
+                initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
