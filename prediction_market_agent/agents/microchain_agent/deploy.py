@@ -97,3 +97,4 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
+    model = SupportedModel.llama_31_instruct
