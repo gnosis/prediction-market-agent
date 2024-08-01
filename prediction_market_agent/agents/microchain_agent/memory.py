@@ -133,7 +133,7 @@ class DatedChatHistory(ChatHistory):
         Cluster chat messages by session, where a new session starts with a
         system prompt message.
         """
-        if not self.chat_messages:
+        if self.is_empty:
             return []
 
         clusters: list[DatedChatHistory] = []
