@@ -103,6 +103,10 @@ def build_agent_functions(
     allow_stop: bool,
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
+    # TODO: We need better logic here: https://github.com/gnosis/prediction-market-agent/issues/350
+    inc_trading_functions: bool,
+    inc_learning_functions: bool,
+    inc_universal_functions: bool,
 ) -> list[Function]:
     functions = []
 
@@ -110,13 +114,22 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
-    functions.extend([f() for f in API_FUNCTIONS])
-    functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
-    functions.extend([f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS])
-    functions.extend([f() for f in CODE_FUNCTIONS])
-    if market_type == MarketType.OMEN:
-        functions.extend([f() for f in OMEN_FUNCTIONS])
+
+    if inc_universal_functions:
+        functions.extend([f() for f in API_FUNCTIONS])
+        functions.extend([f() for f in CODE_FUNCTIONS])
+
+    if inc_learning_functions:
+        functions.extend([f() for f in LEARNING_FUNCTIONS])
+
+    if inc_trading_functions:
+        functions.extend(
+            [f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS]
+        )
+        if market_type == MarketType.OMEN:
+            functions.extend([f() for f in OMEN_FUNCTIONS])
+
     if long_term_memory:
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
@@ -130,6 +143,9 @@ def build_agent(
     market_type: MarketType,
     model: SupportedModel,
     unformatted_system_prompt: str,
+    inc_trading_functions: bool,
+    inc_learning_functions: bool,
+    inc_universal_functions: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
@@ -165,6 +181,9 @@ def build_agent(
         allow_stop=allow_stop,
         long_term_memory=long_term_memory,
         model=model,
+        inc_trading_functions=inc_trading_functions,
+        inc_learning_functions=inc_learning_functions,
+        inc_universal_functions=inc_universal_functions,
     ):
         engine.register(f)
 

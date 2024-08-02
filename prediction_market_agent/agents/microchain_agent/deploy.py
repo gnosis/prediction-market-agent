@@ -53,6 +53,9 @@ class DeployableMicrochainAgent(DeployableAgent):
             allow_stop=True,
             long_term_memory=long_term_memory,
             keys=APIKeys(),
+            inc_learning_functions=self.system_prompt_choice.inc_learning_functions,
+            inc_trading_functions=self.system_prompt_choice.inc_trading_functions,
+            inc_universal_functions=self.system_prompt_choice.inc_universal_functions,
         )
 
         # Save formatted system prompt

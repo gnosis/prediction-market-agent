@@ -161,6 +161,9 @@ agent = build_agent(
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
+    inc_trading_functions=True,  # placeholder, not used
+    inc_learning_functions=True,  # placeholder, not used
+    inc_universal_functions=True,  # placeholder, not used
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
 usage_count_col_name = "Usage Count"

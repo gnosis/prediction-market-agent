@@ -143,6 +143,9 @@ def maybe_initialize_agent(
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             keys=KEYS,
+            inc_learning_functions=st.session_state.system_prompt_select.inc_learning_functions,
+            inc_trading_functions=st.session_state.system_prompt_select.inc_trading_functions,
+            inc_universal_functions=st.session_state.system_prompt_select.inc_universal_functions,
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -197,12 +200,13 @@ with st.sidebar:
         )
     )
 
-    st.selectbox(
-        "Initial memory",
-        [p.value for p in SystemPromptChoice],
-        index=0,
-        key="system_prompt_select",
-        disabled=agent_is_initialized(),
+    st.session_state.system_prompt_select = SystemPromptChoice(
+        st.selectbox(
+            "Initial memory",
+            [p.value for p in SystemPromptChoice],
+            index=0,
+            disabled=agent_is_initialized(),
+        )
     )
     st.toggle(
         "Load historical prompt",
