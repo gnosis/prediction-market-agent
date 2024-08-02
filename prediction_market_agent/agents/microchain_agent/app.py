@@ -36,6 +36,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
+    FunctionsConfig,
     SystemPromptChoice,
     extract_updatable_system_prompt,
 )
@@ -143,9 +144,9 @@ def maybe_initialize_agent(
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             keys=KEYS,
-            inc_learning_functions=st.session_state.system_prompt_select.inc_learning_functions,
-            inc_trading_functions=st.session_state.system_prompt_select.inc_trading_functions,
-            inc_universal_functions=st.session_state.system_prompt_select.inc_universal_functions,
+            functions_config=FunctionsConfig.from_system_prompt_choice(
+                st.session_state.system_prompt_select
+            ),
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()

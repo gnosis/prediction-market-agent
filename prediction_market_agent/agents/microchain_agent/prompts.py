@@ -1,5 +1,7 @@
 from enum import Enum
 
+from pydantic import BaseModel
+
 NON_UPDATABLE_DIVIDOR = "You can use the following functions:"  # Agent can update only part of the prompt before this string.
 SYSTEM_PROMPT = f"""Act as an autonomous agent with a goal to learn, survive and evolve.
 
@@ -74,17 +76,37 @@ class SystemPromptChoice(str, Enum):
     TRADING_AGENT = "trading_agent"
     TASK_AGENT = "task_agent"
 
-    @property
-    def inc_learning_functions(self) -> bool:
-        return self in [SystemPromptChoice.JUST_BORN]
 
-    @property
-    def inc_trading_functions(self) -> bool:
-        return True
+class FunctionsConfig(BaseModel):
+    # TODO: We need better logic here: https://github.com/gnosis/prediction-market-agent/issues/350
+    include_learning_functions: bool
+    include_trading_functions: bool
+    include_universal_functions: bool
 
-    @property
-    def inc_universal_functions(self) -> bool:
-        return self in [SystemPromptChoice.TASK_AGENT]
+    @staticmethod
+    def from_system_prompt_choice(
+        system_prompt_choice: SystemPromptChoice,
+    ) -> "FunctionsConfig":
+        include_trading_functions = False
+        include_learning_functions = False
+        include_universal_functions = False
+
+        if system_prompt_choice == SystemPromptChoice.JUST_BORN:
+            include_learning_functions = True
+            include_trading_functions = True
+
+        elif system_prompt_choice == SystemPromptChoice.TRADING_AGENT:
+            include_trading_functions = True
+
+        elif system_prompt_choice == SystemPromptChoice.TASK_AGENT:
+            include_universal_functions = True
+            include_trading_functions = True
+
+        return FunctionsConfig(
+            include_trading_functions=include_trading_functions,
+            include_learning_functions=include_learning_functions,
+            include_universal_functions=include_universal_functions,
+        )
 
 
 SYSTEM_PROMPTS: dict[SystemPromptChoice, str] = {
