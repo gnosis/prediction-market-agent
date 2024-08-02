@@ -316,6 +316,9 @@ class ThinkThoroughlyBase(ABC):
 
         scenarios_with_probs: list[tuple[str, AnswerWithScenario]] = []
         for iteration in range(n_iterations):
+            # If n_ierations is > 1, the agent will generate predictions for
+            # each scenario multiple times, taking into account the previous
+            # predictions. i.e. the probabilities are adjusted iteratively.
             logger.info(
                 f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
@@ -338,6 +341,7 @@ class ThinkThoroughlyBase(ABC):
                 executor=DEFAULT_PROCESSPOOL_EXECUTOR,
             )
 
+            scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
                     logger.warning(f"Could not generate prediction for '{scenario}'.")
