@@ -11,6 +11,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
+    FunctionsConfig,
     SystemPromptChoice,
 )
 from prediction_market_agent.agents.utils import AgentIdentifier
@@ -53,6 +54,9 @@ class DeployableMicrochainAgent(DeployableAgent):
             allow_stop=True,
             long_term_memory=long_term_memory,
             keys=APIKeys(),
+            functions_config=FunctionsConfig.from_system_prompt_choice(
+                self.system_prompt_choice
+            ),
         )
 
         # Save formatted system prompt

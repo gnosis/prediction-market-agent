@@ -36,6 +36,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
     SYSTEM_PROMPTS,
+    FunctionsConfig,
     SystemPromptChoice,
     extract_updatable_system_prompt,
 )
@@ -143,6 +144,9 @@ def maybe_initialize_agent(
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             keys=KEYS,
+            functions_config=FunctionsConfig.from_system_prompt_choice(
+                st.session_state.system_prompt_select
+            ),
         )
         st.session_state.agent.reset()
         st.session_state.agent.build_initial_messages()
@@ -197,12 +201,13 @@ with st.sidebar:
         )
     )
 
-    st.selectbox(
-        "Initial memory",
-        [p.value for p in SystemPromptChoice],
-        index=0,
-        key="system_prompt_select",
-        disabled=agent_is_initialized(),
+    st.session_state.system_prompt_select = SystemPromptChoice(
+        st.selectbox(
+            "Initial memory",
+            [p.value for p in SystemPromptChoice],
+            index=0,
+            disabled=agent_is_initialized(),
+        )
     )
     st.toggle(
         "Load historical prompt",

@@ -33,6 +33,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
 )
+from prediction_market_agent.agents.microchain_agent.prompts import FunctionsConfig
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_function_useage_from_history,
     get_total_asset_value,
@@ -161,6 +162,11 @@ agent = build_agent(
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
+    functions_config=FunctionsConfig(
+        include_trading_functions=True,  # placeholder, not used
+        include_learning_functions=True,  # placeholder, not used
+        include_universal_functions=True,  # placeholder, not used
+    ),
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
 usage_count_col_name = "Usage Count"

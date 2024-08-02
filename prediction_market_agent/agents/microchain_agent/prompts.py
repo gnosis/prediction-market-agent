@@ -1,5 +1,7 @@
 from enum import Enum
 
+from pydantic import BaseModel
+
 NON_UPDATABLE_DIVIDOR = "You can use the following functions:"  # Agent can update only part of the prompt before this string.
 SYSTEM_PROMPT = f"""Act as an autonomous agent with a goal to learn, survive and evolve.
 
@@ -22,6 +24,23 @@ Do you have any positions in the markets returned from GetMarkets?
 Consider selling overvalued tokens AND buying undervalued tokens.
 
 You know everything needed and now just trade on the markets.
+
+{NON_UPDATABLE_DIVIDOR}
+
+{{engine_help}}
+
+Only output valid Python function calls, without code formatting characters, without any other text.
+Only output a single function call per message.
+Make 'Reasoning' calls frequently - at least every other call.
+"""
+# Experimental system prompt for task-solving agent.
+TASK_AGENT_SYSTEM_PROMPT = f"""Act as a task-solving agents that picks up available tasks and solves them for getting rewards.
+
+Pick up available task that's returned from GetTasks and pick one that you can solve and it's worth solving.
+
+While solving a task, reason step by step and write down thoroughly the process. You can use the 'Reasoning' function for that.
+
+Don't do anything else, just solve the task, and then pick up another one.
 
 {NON_UPDATABLE_DIVIDOR}
 
@@ -55,9 +74,43 @@ def build_full_unformatted_system_prompt(system_prompt: str) -> str:
 class SystemPromptChoice(str, Enum):
     JUST_BORN = "just_born"
     TRADING_AGENT = "trading_agent"
+    TASK_AGENT = "task_agent"
+
+
+class FunctionsConfig(BaseModel):
+    # TODO: We need better logic here: https://github.com/gnosis/prediction-market-agent/issues/350
+    include_learning_functions: bool
+    include_trading_functions: bool
+    include_universal_functions: bool
+
+    @staticmethod
+    def from_system_prompt_choice(
+        system_prompt_choice: SystemPromptChoice,
+    ) -> "FunctionsConfig":
+        include_trading_functions = False
+        include_learning_functions = False
+        include_universal_functions = False
+
+        if system_prompt_choice == SystemPromptChoice.JUST_BORN:
+            include_learning_functions = True
+            include_trading_functions = True
+
+        elif system_prompt_choice == SystemPromptChoice.TRADING_AGENT:
+            include_trading_functions = True
+
+        elif system_prompt_choice == SystemPromptChoice.TASK_AGENT:
+            include_universal_functions = True
+            include_trading_functions = True
+
+        return FunctionsConfig(
+            include_trading_functions=include_trading_functions,
+            include_learning_functions=include_learning_functions,
+            include_universal_functions=include_universal_functions,
+        )
 
 
 SYSTEM_PROMPTS: dict[SystemPromptChoice, str] = {
     SystemPromptChoice.JUST_BORN: SYSTEM_PROMPT,
     SystemPromptChoice.TRADING_AGENT: TRADING_AGENT_SYSTEM_PROMPT,
+    SystemPromptChoice.TASK_AGENT: TASK_AGENT_SYSTEM_PROMPT,
 }

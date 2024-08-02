@@ -39,6 +39,7 @@ from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
+    FunctionsConfig,
     build_full_unformatted_system_prompt,
     extract_updatable_system_prompt,
 )
@@ -103,6 +104,7 @@ def build_agent_functions(
     allow_stop: bool,
     long_term_memory: LongTermMemoryTableHandler | None,
     model: str,
+    functions_config: FunctionsConfig,
 ) -> list[Function]:
     functions = []
 
@@ -110,13 +112,22 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
-    functions.extend([f() for f in API_FUNCTIONS])
-    functions.extend([f() for f in LEARNING_FUNCTIONS])
     functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
-    functions.extend([f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS])
-    functions.extend([f() for f in CODE_FUNCTIONS])
-    if market_type == MarketType.OMEN:
-        functions.extend([f() for f in OMEN_FUNCTIONS])
+
+    if functions_config.include_universal_functions:
+        functions.extend([f() for f in API_FUNCTIONS])
+        functions.extend([f() for f in CODE_FUNCTIONS])
+
+    if functions_config.include_learning_functions:
+        functions.extend([f() for f in LEARNING_FUNCTIONS])
+
+    if functions_config.include_trading_functions:
+        functions.extend(
+            [f(market_type=market_type, keys=keys) for f in MARKET_FUNCTIONS]
+        )
+        if market_type == MarketType.OMEN:
+            functions.extend([f() for f in OMEN_FUNCTIONS])
+
     if long_term_memory:
         functions.append(
             RememberPastActions(long_term_memory=long_term_memory, model=model)
@@ -130,6 +141,7 @@ def build_agent(
     market_type: MarketType,
     model: SupportedModel,
     unformatted_system_prompt: str,
+    functions_config: FunctionsConfig,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
@@ -165,6 +177,7 @@ def build_agent(
         allow_stop=allow_stop,
         long_term_memory=long_term_memory,
         model=model,
+        functions_config=functions_config,
     ):
         engine.register(f)
 
