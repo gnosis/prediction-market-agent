@@ -338,7 +338,6 @@ class ThinkThoroughlyBase(ABC):
                 executor=DEFAULT_PROCESSPOOL_EXECUTOR,
             )
 
-            scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
                 if prediction is None:
                     logger.warning(f"Could not generate prediction for '{scenario}'.")
