@@ -77,7 +77,7 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
     ) -> tuple[list[dict[str, str]] | str, dict[t.Hashable, t.Any]]:
         """
         Use the tool.
-        Throws adictn exception if it occurs, instead stringifying it.
+        Throws an exception if it occurs, instead stringifying it.
         """
         raw_results = self.api_wrapper.raw_results(
             query,
