@@ -74,15 +74,16 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
         self,
         query: str,
         run_manager: CallbackManagerForToolRun | None = None,
-    ) -> list[dict[t.Hashable, t.Any]] | str:
+    ) -> tuple[list[dict[str, str]] | str, dict[t.Hashable, t.Any]]:
         """
         Use the tool.
-        Throws an exception if it occurs, instead stringifying it.
+        Throws adictn exception if it occurs, instead stringifying it.
         """
-        return self.api_wrapper.results(
+        raw_results = self.api_wrapper.raw_results(
             query,
             self.max_results,
         )
+        return self.api_wrapper.clean_results(raw_results["results"]), raw_results
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(3),
@@ -93,15 +94,16 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
         self,
         query: str,
         run_manager: AsyncCallbackManagerForToolRun | None = None,
-    ) -> list[dict[t.Hashable, t.Any]] | str:
+    ) -> tuple[list[dict[str, str]] | str, dict[t.Hashable, t.Any]]:
         """
         Use the tool asynchronously.
         Throws an exception if it occurs, instead stringifying it.
         """
-        return await self.api_wrapper.results_async(
+        raw_results = await self.api_wrapper.raw_results_async(
             query,
             self.max_results,
         )
+        return self.api_wrapper.clean_results(raw_results["results"]), raw_results
 
 
 class ThinkThoroughlyBase(ABC):
