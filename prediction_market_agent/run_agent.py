@@ -25,6 +25,12 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainModifiableSystemPromptAgent2,
     DeployableMicrochainModifiableSystemPromptAgent3,
 )
+from prediction_market_agent.agents.prophet_agent.deploy import (
+    DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT3Agent,
+    DeployablePredictionProphetGPT4TurboFinalAgent,
+    DeployablePredictionProphetGPT4TurboPreviewAgent,
+)
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
@@ -49,6 +55,10 @@ class RunnableAgent(str, Enum):
     microchain_modifiable_system_prompt_2 = "microchain_modifiable_system_prompt_2"
     microchain_modifiable_system_prompt_3 = "microchain_modifiable_system_prompt_3"
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
+    prophet_gpt3 = "prophet_gpt3"
+    prophet_gpt4 = "prophet_gpt4"
+    prophet_gpt4_final = "prophet_gpt4_final"
+    olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
 
@@ -66,6 +76,10 @@ RUNNABLE_AGENTS = {
     RunnableAgent.microchain_modifiable_system_prompt_3: DeployableMicrochainModifiableSystemPromptAgent3,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
+    RunnableAgent.prophet_gpt3: DeployablePredictionProphetGPT3Agent,
+    RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
+    RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
+    RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
