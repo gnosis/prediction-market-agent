@@ -29,5 +29,9 @@ COPY scripts ./scripts
 
 ENV PYTHONPATH=/app
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+# Disable warning on imorting `transformers`, as we don't use torch in this
+# project and only intend to use it for tokenization. See:
+# https://github.com/huggingface/transformers/issues/27214#issuecomment-1983731040
+ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
 CMD ["bash", "-c", "python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]
