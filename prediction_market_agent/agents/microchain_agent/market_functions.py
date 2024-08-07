@@ -2,7 +2,6 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
-from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     Currency,
@@ -18,7 +17,6 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_prophet.benchmark.agents import (
     _make_prediction as prophet_make_prediction,
 )
-from prediction_prophet.functions.research import research as prophet_research
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -30,6 +28,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
+from prediction_market_agent.tools.prediction_prophet.research import prophet_research
 from prediction_market_agent.utils import APIKeys
 
 
@@ -130,11 +129,9 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         ).question
         research = prophet_research(
             goal=question,
-            use_summaries=False,
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
-            logger=logger,
         )
         prediction = prophet_make_prediction(
             market_question=question,

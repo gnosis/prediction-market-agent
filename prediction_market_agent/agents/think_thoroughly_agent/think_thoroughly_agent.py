@@ -32,7 +32,6 @@ from prediction_market_agent_tooling.tools.utils import (
 from prediction_prophet.benchmark.agents import (
     _make_prediction as prophet_make_prediction,
 )
-from prediction_prophet.functions.research import research as prophet_research
 from pydantic import BaseModel
 from requests import HTTPError
 
@@ -57,6 +56,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
+from prediction_market_agent.tools.prediction_prophet.research import prophet_research
 from prediction_market_agent.utils import APIKeys
 
 
@@ -465,12 +465,12 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         try:
             research = prophet_research(
                 goal=scenario,
-                use_summaries=False,
                 initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
+                max_results_per_search=5,
+                min_scraped_sites=3,
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
-                logger=logger,
             )
             prediction = prophet_make_prediction(
                 market_question=scenario,
@@ -510,7 +510,6 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         api_keys = APIKeys()
         research = research_report or prophet_research(
             goal=question,
-            use_summaries=False,
             model=self.model,
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
