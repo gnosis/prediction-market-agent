@@ -2,6 +2,7 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     Currency,
@@ -133,6 +134,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
+            logger=logger,
         )
         prediction = prophet_make_prediction(
             market_question=question,

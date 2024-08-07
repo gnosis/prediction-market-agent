@@ -470,6 +470,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
+                logger=logger,
             )
             prediction = prophet_make_prediction(
                 market_question=scenario,
