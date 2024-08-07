@@ -14,6 +14,9 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.betting_strategies.stretch_bet_between import (
     stretch_bet_between,
 )
+from prediction_market_agent_tooling.tools.tavily_cached.tavily_models import (
+    TavilyResponseCache,
+)
 from prediction_market_agent_tooling.tools.utils import (
     prob_uncertainty,
     should_not_happen,
@@ -77,17 +80,32 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT3Agent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-3.5-turbo-0125")
+    agent = PredictionProphetAgent(
+        model="gpt-3.5-turbo-0125",
+        tavily_cache=TavilyResponseCache(
+            agent_id="DeployablePredictionProphetGPT3Agent"
+        ),
+    )
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-0125-preview")
+    agent = PredictionProphetAgent(
+        model="gpt-4-0125-preview",
+        tavily_cache=TavilyResponseCache(
+            agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
+        ),
+    )
     # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
     bet_on_n_markets_per_run = 1
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09")
+    agent = PredictionProphetAgent(
+        model="gpt-4-turbo-2024-04-09",
+        tavily_cache=TavilyResponseCache(
+            agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
+        ),
+    )
     # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
     bet_on_n_markets_per_run = 1
 
