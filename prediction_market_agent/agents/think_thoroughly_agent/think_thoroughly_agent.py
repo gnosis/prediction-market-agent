@@ -211,7 +211,9 @@ class ThinkThoroughlyBase(ABC):
         )
 
         report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
-        scenarios = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
+        scenarios: Scenarios = report_crew.kickoff(
+            inputs={"scenario": question, "n_scenarios": 5}
+        )
 
         # Add the original question if it wasn't included by the LLM.
         if question not in scenarios.scenarios:
