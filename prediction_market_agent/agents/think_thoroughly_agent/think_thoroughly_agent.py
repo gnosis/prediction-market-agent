@@ -263,7 +263,7 @@ class ThinkThoroughlyBase(ABC):
             ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_pydantic=Answer,
+            output_json=Answer,
         )
 
         crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
