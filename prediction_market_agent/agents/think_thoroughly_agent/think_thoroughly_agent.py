@@ -188,13 +188,14 @@ class ThinkThoroughlyBase(ABC):
         create_required_conditions = Task(
             description=CREATE_REQUIRED_CONDITIONS_PROMPT,
             expected_output=LIST_OF_SCENARIOS_OUTPUT,
-            output_json=Scenarios,
+            output_pydantic=Scenarios,
             agent=researcher,
         )
 
         report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
-        result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
-        scenarios = Scenarios.model_validate_json(result)
+        scenarios: Scenarios = report_crew.kickoff(
+            inputs={"scenario": question, "n_scenarios": 3}
+        )
 
         logger.info(f"Created conditional scenarios: {scenarios.scenarios}")
         return scenarios
@@ -205,13 +206,12 @@ class ThinkThoroughlyBase(ABC):
         create_scenarios_task = Task(
             description=CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
             expected_output=LIST_OF_SCENARIOS_OUTPUT,
-            output_json=Scenarios,
+            output_pydantic=Scenarios,
             agent=researcher,
         )
 
         report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
-        result = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
-        scenarios = Scenarios.model_validate_json(result)
+        scenarios = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
 
         # Add the original question if it wasn't included by the LLM.
         if question not in scenarios.scenarios:
@@ -261,7 +261,7 @@ class ThinkThoroughlyBase(ABC):
             ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_json=Answer,
+            output_pydantic=Answer,
         )
 
         crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
@@ -296,8 +296,7 @@ class ThinkThoroughlyBase(ABC):
         }
         if research_report:
             inputs["research_report"] = research_report
-        crew.kickoff(inputs=inputs)
-        output = Answer.model_validate_json(task_final_decision.output.raw_output)
+        output: Answer = crew.kickoff(inputs=inputs)
         answer_with_scenario = AnswerWithScenario.build_from_answer(
             output, scenario=question, question=question
         )
@@ -396,7 +395,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=predictor,
-            output_json=Answer,
+            output_pydantic=Answer,
             context=[task_research_one_outcome],
         )
         crew = Crew(
@@ -414,7 +413,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
 
         try:
-            result = crew.kickoff(inputs=inputs)
+            output: Answer = crew.kickoff(inputs=inputs)
         except (APIError, HTTPError) as e:
             logger.error(
                 f"Could not retrieve response from the model provider because of {e}"
@@ -430,17 +429,10 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
             return None
 
-        try:
-            output = Answer.model_validate(result)
-            answer_with_scenario = AnswerWithScenario.build_from_answer(
-                output, scenario=scenario, question=original_question
-            )
-            return answer_with_scenario
-        except ValueError as e:
-            logger.error(
-                f"Could not parse the result ('{result}') as Answer because of {e}"
-            )
-            return None
+        answer_with_scenario = AnswerWithScenario.build_from_answer(
+            output, scenario=scenario, question=original_question
+        )
+        return answer_with_scenario
 
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
