@@ -29,6 +29,10 @@ class DeployableTraderAgentER(DeployableTraderAgent):
     agent: AbstractBenchmarkedAgent
     bet_on_n_markets_per_run = 5
 
+    @property
+    def model(self) -> str | None:
+        return self.agent.model
+
     def calculate_bet_amount(self, answer: Answer, market: AgentMarket) -> BetAmount:
         amount: float
         max_bet_amount: float
