@@ -3,7 +3,7 @@ from crewai import Task
 from prediction_market_agent.utils import disable_crewai_telemetry
 
 
-def test_disable_crewai_telemetry():
+def test_disable_crewai_telemetry() -> None:
     disable_crewai_telemetry()
     t = Task(
         description="foo",

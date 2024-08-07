@@ -192,7 +192,7 @@ def patch_sqlite3() -> None:
         logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
 
 
-def disable_crewai_telemetry():
+def disable_crewai_telemetry() -> None:
     """
     Crewai telemetry is enabled by default, and there is no built-in way to
     disable it. Our deployments have (undiagnosed) connection issues with
