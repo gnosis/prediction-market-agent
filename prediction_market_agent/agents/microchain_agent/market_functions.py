@@ -13,6 +13,9 @@ from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion im
     KellyBet,
     get_kelly_bet,
 )
+from prediction_market_agent_tooling.tools.tavily_cached.tavily_models import (
+    TavilyResponseCache,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_prophet.benchmark.agents import (
     _make_prediction as prophet_make_prediction,
@@ -133,6 +136,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
+            tavily_cache=TavilyResponseCache(agent_id=self.__class__.__name__),
         )
         prediction = prophet_make_prediction(
             market_question=question,
