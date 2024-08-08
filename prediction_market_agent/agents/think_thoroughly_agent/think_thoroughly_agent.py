@@ -57,7 +57,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import APIKeys, disable_crewai_telemetry
 
 
 class Scenarios(BaseModel):
@@ -117,6 +117,8 @@ class ThinkThoroughlyBase(ABC):
         self._long_term_memory = (
             LongTermMemoryTableHandler(self.identifier) if self.memory else None
         )
+
+        disable_crewai_telemetry()  # To prevent telemetry from being sent to CrewAI
 
     @staticmethod
     def _get_current_date() -> str:

@@ -190,3 +190,19 @@ def patch_sqlite3() -> None:
         sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
     except ImportError:
         logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
+
+
+def disable_crewai_telemetry() -> None:
+    """
+    Crewai telemetry is enabled by default, and there is no built-in way to
+    disable it. Our deployments have (undiagnosed) connection issues with
+    crewai's telemetry server, which results in errors in the logs.
+
+    Solution taken from github issue comment:
+    https://github.com/crewAIInc/crewAI/issues/254#issuecomment-1973042953
+    """
+    from crewai.telemetry import Telemetry
+
+    for attr in dir(Telemetry):
+        if callable(getattr(Telemetry, attr)) and not attr.startswith("__"):
+            setattr(Telemetry, attr, lambda *args, **kwargs: None)
