@@ -13,7 +13,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
     SimpleMemoryThinkThoroughly,
 )
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 
 class AgentIdentifier(str, Enum):
@@ -64,7 +64,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 def _summarize_learnings(
     memories: list[str],
     prompt_template: PromptTemplate,
-    model: str = "gpt-4o-2024-05-13",
+    model: str = DEFAULT_OPENAI_MODEL,
 ) -> str:
     llm = ChatOpenAI(
         temperature=0,

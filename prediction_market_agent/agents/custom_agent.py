@@ -157,10 +157,7 @@ If you want to answer, return a completion in form of a dictionary with a single
 class CustomAgentOpenAi(CustomAgent):
     def __init__(self, verbose: bool = True, max_cycles: int = 10):
         super().__init__(
-            model=ChatOpenAIModel(
-                model="gpt-4",  # I tried gpt-3.5-turbo, but it fails at providing correct inputs to the tools.
-                system_prompt=CustomAgent.SYSTEM_PROMPT,
-            ),
+            model=ChatOpenAIModel(system_prompt=CustomAgent.SYSTEM_PROMPT),
             verbose=verbose,
             max_cycles=max_cycles,
         )
