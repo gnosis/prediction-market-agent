@@ -76,7 +76,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.microchain_modifiable_system_prompt_3: DeployableMicrochainModifiableSystemPromptAgent3,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
-    RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4oAgent,
+    RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
     RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
