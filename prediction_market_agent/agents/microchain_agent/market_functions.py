@@ -29,7 +29,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
 from prediction_market_agent.tools.prediction_prophet.research import prophet_research
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 
 class MarketFunction(Function):
@@ -114,7 +114,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         self,
         market_type: MarketType,
         keys: APIKeys,
-        model: str = "gpt-3.5-turbo",
+        model: str = DEFAULT_OPENAI_MODEL,
     ) -> None:
         self.model = model
         super().__init__(market_type=market_type, keys=keys)

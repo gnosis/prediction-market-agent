@@ -146,9 +146,7 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
     """
     If the content is too long to fit in the model's context, summarize it.
     """
-    if model == "gpt-3.5-turbo-0125":  # 16k context length
-        max_length = 10000
-    elif model == "gpt-4-1106-preview":  # 128k context length
+    if model == "gpt-4-1106-preview":  # 128k context length
         max_length = 100000
     else:
         raise ValueError(

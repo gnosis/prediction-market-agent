@@ -24,6 +24,8 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
+
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: AbstractBenchmarkedAgent
@@ -80,8 +82,8 @@ class DeployableTraderAgentER(DeployableTraderAgent):
         return prediciton.outcome_prediction
 
 
-class DeployablePredictionProphetGPT3Agent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-3.5-turbo-0125")
+class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
+    agent = PredictionProphetAgent(model="gpt-4o-2024-08-06")
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
@@ -97,4 +99,4 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgent(model="gpt-3.5-turbo-0125", embedding_model=EmbeddingModel.openai)
+    agent = OlasAgent(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)
