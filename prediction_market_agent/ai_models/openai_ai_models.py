@@ -28,6 +28,7 @@ class ChatOpenAIModel(AbstractAiChatModel):
     def __init__(
         self,
         model: Literal[
+            "gpt-4o-2024-08-06",
             "gpt-4-1106-preview",
             "gpt-4-vision-preview",
             "gpt-4",
