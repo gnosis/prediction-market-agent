@@ -56,15 +56,15 @@ def test_get_markets(market_type: MarketType) -> None:
 def test_buy_yes(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
     buy_yes = BuyYes(market_type=market_type, keys=APIKeys())
-    print(buy_yes(market.question, 0.0001))
+    print(buy_yes(market.id, 0.0001))
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_buy_no(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
-    buy_yes = BuyNo(market_type=market_type, keys=APIKeys())
-    print(buy_yes(market.question, 0.0001))
+    buy_no = BuyNo(market_type=market_type, keys=APIKeys())
+    print(buy_no(market.id, 0.0001))
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
@@ -177,9 +177,9 @@ def test_predict_probability(market_type: MarketType) -> None:
 def test_remember_past_learnings(long_term_memory: LongTermMemoryTableHandler) -> None:
     long_term_memory.save_history(
         history=[
-            {"content": "I went to the park and saw a dog."},
-            {"content": "I went to the park and saw a cat."},
-            {"content": "I went to the park and saw a bird."},
+            {"role": "user", "content": "I went to the park and saw a dog."},
+            {"role": "user", "content": "I went to the park and saw a cat."},
+            {"role": "user", "content": "I went to the park and saw a bird."},
         ]
     )
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
