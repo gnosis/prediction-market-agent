@@ -13,7 +13,7 @@ class LlamaIndexAgent(AbstractAgent):
     def __init__(self) -> None:
         google_search_tool = FunctionTool.from_defaults(fn=google_search)
         web_scraping_tool = FunctionTool.from_defaults(fn=web_scrape)
-        llm = OpenAI(model="gpt-3.5-turbo-0613")
+        llm = OpenAI(model=utils.DEFAULT_OPENAI_MODEL)
         self._agent = OpenAIAgent.from_tools(
             tools=[google_search_tool, web_scraping_tool],
             llm=llm,

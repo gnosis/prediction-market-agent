@@ -51,9 +51,8 @@ from prediction_market_agent.utils import APIKeys
 
 
 class SupportedModel(str, Enum):
-    gpt_4_turbo = "gpt-4-turbo"
-    gpt_35_turbo = "gpt-3.5-turbo-0125"
     gpt_4o = "gpt-4o-2024-08-06"
+    gpt_4_turbo = "gpt-4-turbo"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
 
     @property
