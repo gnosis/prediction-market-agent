@@ -10,6 +10,7 @@ from prediction_market_agent_tooling.tools.utils import (
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Do not update to a worse or more expensive model
 DEFAULT_OPENAI_MODEL = "gpt-4o-2024-08-06"
 
 
