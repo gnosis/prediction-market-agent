@@ -14,13 +14,14 @@ from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     ThinkThoroughlyWithItsOwnResearch,
 )
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 WARMUP_TOURNAMENT_ID = 3294
 TOURNAMENT_ID = 3349
 
 
 class DeployableMetaculusBotTournamentAgent(DeployableAgent):
-    model: str = "gpt-4-turbo-2024-04-09"
+    model: str = DEFAULT_OPENAI_MODEL
     dummy_prediction: bool = False
     repeat_predictions: bool = False
     tournament_id: int = TOURNAMENT_ID

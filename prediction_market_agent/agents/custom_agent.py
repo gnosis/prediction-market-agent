@@ -158,7 +158,7 @@ class CustomAgentOpenAi(CustomAgent):
     def __init__(self, verbose: bool = True, max_cycles: int = 10):
         super().__init__(
             model=ChatOpenAIModel(
-                model="gpt-4",  # I tried gpt-3.5-turbo, but it fails at providing correct inputs to the tools.
+                model=utils.DEFAULT_OPENAI_MODEL,
                 system_prompt=CustomAgent.SYSTEM_PROMPT,
             ),
             verbose=verbose,
