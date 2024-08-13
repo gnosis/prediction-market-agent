@@ -2,7 +2,15 @@ import json
 import typing as t
 
 import pytest
-from microchain import LLM, Agent, Engine, Function, OpenAIChatGenerator
+from microchain import (
+    LLM,
+    Agent,
+    Engine,
+    Function,
+    FunctionResult,
+    OpenAIChatGenerator,
+    StepOutput,
+)
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -127,3 +135,43 @@ def test_get_decimals(
     # history[-2] is 'assistant' stop function call
     result = agent.history[-3]["content"]
     assert int(result) == 18
+
+
+def test_run_error() -> None:
+    """
+    Test the interface of Agent.run when an error occurs.
+    """
+
+    class Sum(Function):
+        """A function that sums two numbers. But it raises an error!"""
+
+        @property
+        def example_args(self) -> list[int]:
+            return [22, -9]
+
+        def __call__(self, a: int, b: int) -> int:
+            raise ValueError("This function raises an error!")
+
+    class DummyLLM(LLM):
+        def __call__(self, prompt, stop=None):
+            return "Sum(1, 2)"
+
+    engine = Engine()
+    engine.register(Sum())
+    engine.help_called = True  # Allow the engine to run without calling engine.help
+    dummy_llm = DummyLLM(generator=None)
+
+    context = {"callback_has_been_called": False}
+
+    def step_end_callback(agent: Agent, output: StepOutput):
+        assert output.abort is True
+        assert output.reply == dummy_llm(prompt=None)
+        assert output.result == FunctionResult.ERROR
+        assert "ValueError: This function raises an error!" in output.output
+        context["callback_has_been_called"] = True
+
+    agent = Agent(llm=dummy_llm, engine=engine, on_iteration_step=step_end_callback)
+    agent.max_tries = 1  # Deterministic, so no need for multiple tries
+    agent.system_prompt = "Foo"  # Required but not used
+    agent.run(iterations=1)
+    assert context["callback_has_been_called"] is True
