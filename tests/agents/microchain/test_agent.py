@@ -153,7 +153,7 @@ def test_run_error() -> None:
             raise ValueError("This function raises an error!")
 
     class DummyLLM(LLM):
-        def __call__(self, prompt, stop=None):
+        def __call__(self, prompt: str | None, stop: str | None = None) -> str:
             return "Sum(1, 2)"
 
     engine = Engine()
@@ -163,7 +163,7 @@ def test_run_error() -> None:
 
     context = {"callback_has_been_called": False}
 
-    def step_end_callback(agent: Agent, output: StepOutput):
+    def step_end_callback(agent: Agent, output: StepOutput) -> None:
         assert output.abort is True
         assert output.reply == dummy_llm(prompt=None)
         assert output.result == FunctionResult.ERROR
