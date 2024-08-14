@@ -6,8 +6,10 @@ from microchain import (
     Agent,
     Engine,
     Function,
+    FunctionResult,
     OpenAIChatGenerator,
     ReplicateLlama31ChatGenerator,
+    StepOutput,
 )
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -145,6 +147,7 @@ def build_agent(
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
     bootstrap: str | None = None,
+    raise_on_error: bool = True,
 ) -> Agent:
     engine = Engine()
     generator = (
@@ -167,7 +170,22 @@ def build_agent(
             else should_not_happen()
         )
     )
-    agent = Agent(llm=LLM(generator=generator), engine=engine)
+
+    if raise_on_error:
+        # Define a callback that raises an if an iteration of `agent.run` fails
+        def step_end_callback(agent: Agent, step_output: StepOutput) -> None:
+            if step_output.result == FunctionResult.ERROR:
+                raise Exception(step_output.output)
+
+        on_iteration_step = step_end_callback
+    else:
+        on_iteration_step = None
+
+    agent = Agent(
+        llm=LLM(generator=generator),
+        engine=engine,
+        on_iteration_step=on_iteration_step,
+    )
 
     for f in build_agent_functions(
         agent=agent,
