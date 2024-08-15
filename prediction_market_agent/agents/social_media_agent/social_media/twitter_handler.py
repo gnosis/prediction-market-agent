@@ -3,6 +3,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from tweepy import Client
 
 from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
@@ -35,6 +36,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
             api_key=APIKeys().openai_api_key_secretstr_v1,
         )
 
+    @observe()
     def make_tweet_more_concise(self, tweet: str) -> str:
         system_template = f"Make this tweet more concise while keeping an analytical tone. You are forbidden of using more than {POST_MAX_LENGTH} characters."
         prompt_template = ChatPromptTemplate.from_messages(
@@ -42,7 +44,10 @@ class TwitterHandler(AbstractSocialMediaHandler):
         )
 
         chain = prompt_template | self.llm | StrOutputParser()
-        result = chain.invoke({"text": tweet})
+        result = chain.invoke(
+            {"text": tweet},
+            config={"callbacks": [langfuse_context.get_current_langchain_handler()]},
+        )
         return result
 
     @staticmethod

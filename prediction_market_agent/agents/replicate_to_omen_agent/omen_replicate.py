@@ -10,7 +10,7 @@ from prediction_market_agent_tooling.gtypes import (
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
-from prediction_market_agent_tooling.markets.categorize import infer_category
+from prediction_market_agent_tooling.markets.categorize import infer_category_observed
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -138,7 +138,7 @@ def omen_replicate_from_tx(
             )
             continue
 
-        category = infer_category(market.question, existing_categories)
+        category = infer_category_observed(market.question, existing_categories)
         # Realitio will allow new categories or misformated categories, so double check that the LLM got it right.
         if category not in existing_categories:
             logger.info(

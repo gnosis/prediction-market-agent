@@ -204,7 +204,6 @@ def get_known_outcome(
     question: str,
     max_tries: int,
     callbacks: Callbacks = None,
-    enable_langfuse: bool = False,
 ) -> KnownOutcomeOutput:
     """
     In a loop, perform web search and scrape to find if the answer to the
@@ -225,10 +224,14 @@ def get_known_outcome(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
         logger.debug(f"Invoking LLM for the prompt '{search_prompt[0]}'")
-        config: RunnableConfig = {}
-        if enable_langfuse:
-            config["callbacks"] = [langfuse_context.get_current_langchain_handler()]
-        search_query = str(llm.invoke(search_prompt, config=config).content).strip('"')
+        search_query = str(
+            llm.invoke(
+                search_prompt,
+                config={
+                    "callbacks": [langfuse_context.get_current_langchain_handler()]
+                },
+            ).content
+        ).strip('"')
         logger.debug(f"Searching web for the search query '{search_query}'")
         search_results = web_search_observed(query=search_query, max_results=5)
         if not search_results:
@@ -253,7 +256,14 @@ def get_known_outcome(
                 question=question,
                 scraped_content=scraped_content,
             )
-            answer = str(llm.invoke(prompt).content)
+            answer = str(
+                llm.invoke(
+                    prompt,
+                    config={
+                        "callbacks": [langfuse_context.get_current_langchain_handler()]
+                    },
+                ).content
+            )
             parsed_answer = KnownOutcomeOutput.model_validate(
                 completion_str_to_json(answer)
             )

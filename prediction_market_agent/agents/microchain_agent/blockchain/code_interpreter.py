@@ -4,6 +4,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from langchain_openai import ChatOpenAI
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from pydantic import BaseModel, Field
 
 from prediction_market_agent.utils import APIKeys
@@ -57,11 +58,13 @@ class CodeInterpreter:
 
         self.prompt_and_model = prompt | llm | parser
 
+    @observe()
     def generate_summary(self, function_names: list[str]) -> Summaries:
         summaries: Summaries = self.prompt_and_model.invoke(
             {
                 "function_names": function_names,
                 "source_code": self.source_code,
-            }
+            },
+            config={"callbacks": [langfuse_context.get_current_langchain_handler()]},
         )
         return summaries
