@@ -146,4 +146,6 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgentObserved(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)
+    agent = OlasAgentObserved(
+        model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
+    )
