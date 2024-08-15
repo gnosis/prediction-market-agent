@@ -13,10 +13,8 @@ from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion im
     KellyBet,
     get_kelly_bet,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_prophet.benchmark.agents import (
-    _make_prediction as prophet_make_prediction,
-)
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -28,7 +26,10 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
-from prediction_market_agent.tools.prediction_prophet.research import prophet_research
+from prediction_market_agent.tools.prediction_prophet.research import (
+    prophet_make_prediction_observed,
+    prophet_research_observed,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -123,19 +124,20 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def description(self) -> str:
         return self._description
 
+    @observe(name="PredictProbabilityForQuestion")
     def __call__(self, market_id: str) -> str:
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        research = prophet_research(
+        research = prophet_research_observed(
             goal=question,
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
         )
-        prediction = prophet_make_prediction(
+        prediction = prophet_make_prediction_observed(
             market_question=question,
-            additional_information=research,
+            additional_information=research.report,
             engine=self.model,
             temperature=0,
             api_key=self.keys.openai_api_key,
@@ -165,6 +167,7 @@ class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
     def description(self) -> str:
         return self._description + " Note, this costs money to run."
 
+    @observe(name="PredictProbabilityForQuestionMech")
     def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011

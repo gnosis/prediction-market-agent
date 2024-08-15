@@ -22,9 +22,9 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
             market.question, created_time=market.created_time
         )
 
-    def before(self, market_type: MarketType) -> None:
+    def before_process_markets(self, market_type: MarketType) -> None:
         self.agent.update_markets()
-        super().before(market_type=market_type)
+        super().before_process_markets(market_type=market_type)
 
 
 class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):

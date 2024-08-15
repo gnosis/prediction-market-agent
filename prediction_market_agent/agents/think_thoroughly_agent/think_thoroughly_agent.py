@@ -19,6 +19,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.parallelism import (
     DEFAULT_PROCESSPOOL_EXECUTOR,
     par_generator,
@@ -28,9 +29,6 @@ from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     add_utc_timezone_validator,
     utcnow,
-)
-from prediction_prophet.benchmark.agents import (
-    _make_prediction as prophet_make_prediction,
 )
 from pydantic import BaseModel
 from requests import HTTPError
@@ -56,7 +54,11 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
-from prediction_market_agent.tools.prediction_prophet.research import prophet_research
+from prediction_market_agent.tools.prediction_prophet.research import (
+    prophet_make_prediction,
+    prophet_research,
+    prophet_research_observed,
+)
 from prediction_market_agent.utils import APIKeys, disable_crewai_telemetry
 
 
@@ -184,6 +186,7 @@ class ThinkThoroughlyBase(ABC):
             created_after=created_after
         )
 
+    @observe()
     def get_required_conditions(self, question: str) -> Scenarios:
         researcher = self._get_researcher(self.model)
 
@@ -202,6 +205,7 @@ class ThinkThoroughlyBase(ABC):
         logger.info(f"Created conditional scenarios: {scenarios.scenarios}")
         return scenarios
 
+    @observe()
     def get_hypohetical_scenarios(self, question: str) -> Scenarios:
         researcher = self._get_researcher(self.model)
 
@@ -235,6 +239,7 @@ class ThinkThoroughlyBase(ABC):
     ) -> AnswerWithScenario | None:
         raise NotImplementedError("This method should be implemented in the subclass.")
 
+    @observe()
     def get_correlated_markets(self, question: str) -> list[CorrelatedMarketInput]:
         nearest_questions = self.pinecone_handler.find_nearest_questions_with_threshold(
             5, text=question
@@ -248,6 +253,7 @@ class ThinkThoroughlyBase(ABC):
         )
         return [CorrelatedMarketInput.from_omen_market(market) for market in markets]
 
+    @observe()
     def generate_final_decision(
         self,
         question: str,
@@ -310,6 +316,7 @@ class ThinkThoroughlyBase(ABC):
         )
         return output
 
+    @observe()
     def answer_binary_market(
         self,
         question: str,
@@ -459,6 +466,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         api_keys = APIKeys()
 
         try:
+            # Don't use observed versions of these functions, because it's running in parallel and Langfuse isn't thread-safe neither process-safe.
             research = prophet_research(
                 goal=scenario,
                 initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
@@ -470,7 +478,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             )
             prediction = prophet_make_prediction(
                 market_question=scenario,
-                additional_information=research,
+                additional_information=research.report,
                 engine=model,
                 temperature=LLM_SUPER_LOW_TEMPERATURE,
                 api_key=api_keys.openai_api_key,
@@ -504,17 +512,20 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         research_report: str | None = None,
     ) -> Answer:
         api_keys = APIKeys()
-        research = research_report or prophet_research(
-            goal=question,
-            model=self.model,
-            openai_api_key=api_keys.openai_api_key,
-            tavily_api_key=api_keys.tavily_api_key,
+        report = (
+            research_report
+            or prophet_research_observed(
+                goal=question,
+                model=self.model,
+                openai_api_key=api_keys.openai_api_key,
+                tavily_api_key=api_keys.tavily_api_key,
+            ).report
         )
         return super().generate_final_decision(
             question=question,
             scenarios_with_probabilities=scenarios_with_probabilities,
             created_time=created_time,
-            research_report=research,
+            research_report=report,
         )
 
 

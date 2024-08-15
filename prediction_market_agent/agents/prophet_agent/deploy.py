@@ -1,4 +1,3 @@
-from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.deploy.agent import (
     Answer,
     BetAmount,
@@ -14,6 +13,7 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.betting_strategies.stretch_bet_between import (
     stretch_bet_between,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import (
     prob_uncertainty,
     should_not_happen,
@@ -21,13 +21,63 @@ from prediction_market_agent_tooling.tools.utils import (
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
+    Prediction,
     PredictionProphetAgent,
+    Research,
 )
 
 
+class PredictionProphetAgentObserved(PredictionProphetAgent):
+    @observe()
+    def research(
+        self, market_question: str, add_langfuse_callback: bool = False
+    ) -> Research:
+        return super().research(
+            market_question=market_question,
+            add_langfuse_callback=add_langfuse_callback,
+        )
+
+    @observe()
+    def make_prediction(
+        self,
+        market_question: str,
+        additional_information: str,
+        add_langfuse_callback: bool = False,
+    ) -> Prediction:
+        return super().make_prediction(
+            market_question=market_question,
+            additional_information=additional_information,
+            add_langfuse_callback=add_langfuse_callback,
+        )
+
+
+class OlasAgentObserved(OlasAgent):
+    @observe()
+    def research(
+        self, market_question: str, add_langfuse_callback: bool = False
+    ) -> str:
+        return super().research(
+            market_question=market_question,
+            add_langfuse_callback=add_langfuse_callback,
+        )
+
+    @observe()
+    def make_prediction(
+        self,
+        market_question: str,
+        additional_information: str,
+        add_langfuse_callback: bool = False,
+    ) -> Prediction:
+        return super().make_prediction(
+            market_question=market_question,
+            additional_information=additional_information,
+            add_langfuse_callback=add_langfuse_callback,
+        )
+
+
 class DeployableTraderAgentER(DeployableTraderAgent):
-    agent: AbstractBenchmarkedAgent
-    bet_on_n_markets_per_run = 5
+    agent: PredictionProphetAgentObserved | OlasAgentObserved
+    bet_on_n_markets_per_run = 1
 
     @property
     def model(self) -> str | None:
@@ -69,8 +119,9 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         prediciton = self.agent.predict(
-            market.question
-        )  # Already checked in the `pick_markets`.
+            market.question,
+            add_langfuse_callback=self.enable_langfuse,
+        )
         if prediciton.outcome_prediction is None:
             logger.error(f"Prediction failed for {market.question}.")
             return None
@@ -81,20 +132,18 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT3Agent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-3.5-turbo-0125")
+    agent = PredictionProphetAgentObserved(model="gpt-3.5-turbo-0125")
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-0125-preview")
-    # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
-    bet_on_n_markets_per_run = 1
+    agent = PredictionProphetAgentObserved(model="gpt-4-0125-preview")
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09")
-    # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
-    bet_on_n_markets_per_run = 1
+    agent = PredictionProphetAgentObserved(model="gpt-4-turbo-2024-04-09")
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgent(model="gpt-3.5-turbo-0125", embedding_model=EmbeddingModel.openai)
+    agent = OlasAgentObserved(
+        model="gpt-3.5-turbo-0125", embedding_model=EmbeddingModel.openai
+    )

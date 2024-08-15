@@ -3,15 +3,17 @@ from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.callbacks import Callbacks
+from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
-from prediction_market_agent.tools.web_scrape.markdown import web_scrape
-from prediction_market_agent.tools.web_search.tavily import web_search
+from prediction_market_agent.tools.web_scrape.markdown import web_scrape_observed
+from prediction_market_agent.tools.web_search.tavily import web_search_observed
 from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
@@ -142,6 +144,7 @@ be as follows:
 """
 
 
+@observe()
 def summarize_if_required(content: str, model: str, question: str) -> str:
     """
     If the content is too long to fit in the model's context, summarize it.
@@ -161,6 +164,7 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
         return content
 
 
+@observe()
 def has_question_event_happened_in_the_past(
     model: str, question: str, callbacks: Callbacks
 ) -> bool:
@@ -180,7 +184,10 @@ def has_question_event_happened_in_the_past(
         date_str=date_str,
         question=question,
     )
-    answer = str(llm.invoke(prompt).content)
+    config: RunnableConfig = {
+        "callbacks": [langfuse_context.get_current_langchain_handler()]
+    }
+    answer = str(llm.invoke(prompt, config=config).content)
     try:
         parsed_answer = int(answer)
         if parsed_answer == 1:
@@ -193,8 +200,13 @@ def has_question_event_happened_in_the_past(
     return False
 
 
+@observe()
 def get_known_outcome(
-    model: str, question: str, max_tries: int, callbacks: Callbacks = None
+    model: str,
+    question: str,
+    max_tries: int,
+    callbacks: Callbacks = None,
+    enable_langfuse: bool = False,
 ) -> KnownOutcomeOutput:
     """
     In a loop, perform web search and scrape to find if the answer to the
@@ -215,9 +227,12 @@ def get_known_outcome(
             template=GENERATE_SEARCH_QUERY_PROMPT
         ).format_messages(date_str=date_str, question=question)
         logger.debug(f"Invoking LLM for the prompt '{search_prompt[0]}'")
-        search_query = str(llm.invoke(search_prompt).content).strip('"')
+        config: RunnableConfig = {}
+        if enable_langfuse:
+            config["callbacks"] = [langfuse_context.get_current_langchain_handler()]
+        search_query = str(llm.invoke(search_prompt, config=config).content).strip('"')
         logger.debug(f"Searching web for the search query '{search_query}'")
-        search_results = web_search(query=search_query, max_results=5)
+        search_results = web_search_observed(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")
 
@@ -226,7 +241,7 @@ def get_known_outcome(
                 continue
             previous_urls.append(result.url)
 
-            scraped_content = web_scrape(url=result.url)
+            scraped_content = web_scrape_observed(url=result.url)
             scraped_content = summarize_if_required(
                 content=scraped_content, model=model, question=question
             )

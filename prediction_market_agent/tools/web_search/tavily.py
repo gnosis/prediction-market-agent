@@ -1,5 +1,6 @@
 import tenacity
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic import BaseModel
 from tavily import TavilyClient
 
@@ -36,3 +37,8 @@ def web_search(query: str, max_results: int) -> list[WebSearchResult]:
     ]
 
     return results
+
+
+@observe()
+def web_search_observed(query: str, max_results: int) -> list[WebSearchResult]:
+    return observe()(web_search)(query=query, max_results=max_results)

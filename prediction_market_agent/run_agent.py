@@ -86,8 +86,8 @@ APP = typer.Typer(pretty_exceptions_enable=False)
 
 
 @APP.command()
-def main(agent: RunnableAgent, market_type: MarketType) -> None:
-    RUNNABLE_AGENTS[agent]().run(market_type)
+def main(agent: RunnableAgent, market_type: MarketType, place_bet: bool = True) -> None:
+    RUNNABLE_AGENTS[agent](place_bet=place_bet).run(market_type)
 
 
 if __name__ == "__main__":

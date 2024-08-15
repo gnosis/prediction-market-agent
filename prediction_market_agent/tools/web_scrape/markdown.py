@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from requests import Response
 
 
@@ -52,3 +53,8 @@ def web_scrape(url: str, timeout: int = 10) -> str:
     except requests.RequestException as e:
         logger.error(f"HTTP request failed: {e}")
         return ""
+
+
+@observe()
+def web_scrape_observed(url: str, timeout: int = 10) -> str:
+    return web_scrape(url=url, timeout=timeout)

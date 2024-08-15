@@ -9,14 +9,18 @@ from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     OmenThumbnailMapping,
 )
 from prediction_market_agent_tooling.tools.image_gen.market_thumbnail_gen import (
-    generate_image_for_market,
+    generate_image_for_market_observed,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 
 from prediction_market_agent.utils import APIKeys
 
 
+@observe()
 def generate_and_set_image_for_market(
-    market_address: ChecksumAddress, market_question: str, api_keys: APIKeys
+    market_address: ChecksumAddress,
+    market_question: str,
+    api_keys: APIKeys,
 ) -> IPFSCIDVersion0 | None:
     market_contract = OmenFixedProductMarketMakerContract(address=market_address)
     # Test that the market actually exists.
@@ -35,7 +39,7 @@ def generate_and_set_image_for_market(
     )
 
     try:
-        generated_image = generate_image_for_market(question=market_question)
+        generated_image = generate_image_for_market_observed(question=market_question)
     except Exception as e:
         # Roughly one every 30 markets triggers OpenAI's content policy violation, because of the prompt content. We can just skip those.
         if "content_policy_violation" in str(e):
