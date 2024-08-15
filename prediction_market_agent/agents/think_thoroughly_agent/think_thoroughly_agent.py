@@ -10,6 +10,7 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe, langfuse_context
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
@@ -138,7 +139,7 @@ class ThinkThoroughlyBase(ABC):
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
     @staticmethod
-    def _get_researcher(model: str) -> Agent:
+    def _get_researcher(model: str, add_langfuse_callback: bool) -> Agent:
         return Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -147,10 +148,15 @@ class ThinkThoroughlyBase(ABC):
             allow_delegation=False,
             tools=[ThinkThoroughlyBase._build_tavily_search()],
             llm=ThinkThoroughlyBase._build_llm(model),
+            callbacks=(
+                [langfuse_context.get_current_langchain_handler()]
+                if add_langfuse_callback
+                else None
+            ),
         )
 
     @staticmethod
-    def _get_predictor(model: str) -> Agent:
+    def _get_predictor(model: str, add_langfuse_callback: bool) -> Agent:
         return Agent(
             role="Professional Gambler",
             goal="Predict, based on some research you are presented with, whether or not a given event will occur",
@@ -158,6 +164,11 @@ class ThinkThoroughlyBase(ABC):
             verbose=True,
             allow_delegation=False,
             llm=ThinkThoroughlyBase._build_llm(model),
+            callbacks=(
+                [langfuse_context.get_current_langchain_handler()]
+                if add_langfuse_callback
+                else None
+            ),
         )
 
     @staticmethod
@@ -188,7 +199,7 @@ class ThinkThoroughlyBase(ABC):
 
     @observe()
     def get_required_conditions(self, question: str) -> Scenarios:
-        researcher = self._get_researcher(self.model)
+        researcher = self._get_researcher(self.model, add_langfuse_callback=True)
 
         create_required_conditions = Task(
             description=CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -207,7 +218,7 @@ class ThinkThoroughlyBase(ABC):
 
     @observe()
     def get_hypohetical_scenarios(self, question: str) -> Scenarios:
-        researcher = self._get_researcher(self.model)
+        researcher = self._get_researcher(self.model, add_langfuse_callback=True)
 
         create_scenarios_task = Task(
             description=CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -261,7 +272,7 @@ class ThinkThoroughlyBase(ABC):
         created_time: datetime.datetime | None,
         research_report: str | None = None,
     ) -> Answer:
-        predictor = self._get_predictor(self.model)
+        predictor = self._get_predictor(self.model, add_langfuse_callback=True)
 
         task_final_decision = Task(
             description=(
@@ -390,8 +401,13 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             list[tuple[str, AnswerWithScenario]] | None
         ) = None,
     ) -> AnswerWithScenario | None:
-        researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(model)
-        predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(model)
+        # Do not enable add_langfuse_callback, because it's not thread-safe.
+        researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(
+            model, add_langfuse_callback=False
+        )
+        predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(
+            model, add_langfuse_callback=False
+        )
 
         task_research_one_outcome = Task(
             description=(
