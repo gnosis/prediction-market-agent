@@ -1,5 +1,4 @@
 import random
-import typing as t
 
 from prediction_market_agent_tooling.deploy.agent import (
     Answer,
