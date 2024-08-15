@@ -10,7 +10,6 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe, langfuse_context
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
@@ -20,7 +19,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.parallelism import (
     DEFAULT_PROCESSPOOL_EXECUTOR,
     par_generator,
