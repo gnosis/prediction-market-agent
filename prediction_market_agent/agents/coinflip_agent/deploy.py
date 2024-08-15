@@ -11,9 +11,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 
 class DeployableCoinFlipAgent(DeployableTraderAgent):
-    def verify_market(
-        self, market_type: MarketType, market: AgentMarket
-    ) -> t.Sequence[AgentMarket]:
+    def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
         return True
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
