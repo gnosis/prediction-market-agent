@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
-from prediction_market_agent.tools.web_scrape.markdown import web_scrape_observed
+from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.tools.web_search.tavily import web_search_observed
 from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
@@ -234,12 +234,14 @@ def get_known_outcome(
         if not search_results:
             raise ValueError("No search results found.")
 
-        for result in search_results:
+        for result_idx, result in enumerate(search_results):
             if result.url in previous_urls:
                 continue
             previous_urls.append(result.url)
 
-            scraped_content = web_scrape_observed(url=result.url)
+            scraped_content = observe(name=f"web_scrape_{result_idx}")(web_scrape)(
+                url=result.url
+            )
             scraped_content = summarize_if_required(
                 content=scraped_content, model=model, question=question
             )
