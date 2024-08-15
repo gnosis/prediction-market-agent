@@ -26,7 +26,7 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 )
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
-    DeployablePredictionProphetGPT3Agent,
+    DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
 )
@@ -43,7 +43,7 @@ SupportedAgentType: t.TypeAlias = (
     type[DeployableKnownOutcomeAgent]
     | type[DeployableThinkThoroughlyAgent]
     | type[DeployableThinkThoroughlyProphetResearchAgent]
-    | type[DeployablePredictionProphetGPT3Agent]
+    | type[DeployablePredictionProphetGPT4oAgent]
     | type[DeployablePredictionProphetGPT4TurboPreviewAgent]
     | type[DeployablePredictionProphetGPT4TurboFinalAgent]
     | type[DeployableOlasEmbeddingOAAgent]
@@ -53,7 +53,7 @@ AGENTS: list[SupportedAgentType] = [
     DeployableKnownOutcomeAgent,
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
-    DeployablePredictionProphetGPT3Agent,
+    DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployableOlasEmbeddingOAAgent,

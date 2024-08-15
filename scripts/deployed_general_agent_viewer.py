@@ -157,7 +157,7 @@ for session in sessions:
 st.subheader("Tool Usage")
 agent = build_agent(
     market_type=MARKET_TYPE,
-    model=SupportedModel.gpt_35_turbo,  # placeholder, not used
+    model=SupportedModel.gpt_4o,  # placeholder, not used
     keys=keys,  # placeholder, not used
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,

@@ -31,7 +31,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 from tests.utils import RUN_PAID_TESTS
 
 
@@ -56,15 +56,15 @@ def test_get_markets(market_type: MarketType) -> None:
 def test_buy_yes(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
     buy_yes = BuyYes(market_type=market_type, keys=APIKeys())
-    print(buy_yes(market.question, 0.0001))
+    print(buy_yes(market.id, 0.0001))
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_buy_no(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
-    buy_yes = BuyNo(market_type=market_type, keys=APIKeys())
-    print(buy_yes(market.question, 0.0001))
+    buy_no = BuyNo(market_type=market_type, keys=APIKeys())
+    print(buy_no(market.id, 0.0001))
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
@@ -177,16 +177,16 @@ def test_predict_probability(market_type: MarketType) -> None:
 def test_remember_past_learnings(long_term_memory: LongTermMemoryTableHandler) -> None:
     long_term_memory.save_history(
         history=[
-            {"content": "I went to the park and saw a dog."},
-            {"content": "I went to the park and saw a cat."},
-            {"content": "I went to the park and saw a bird."},
+            {"role": "user", "content": "I went to the park and saw a dog."},
+            {"role": "user", "content": "I went to the park and saw a cat."},
+            {"role": "user", "content": "I went to the park and saw a bird."},
         ]
     )
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemoryTableHandler(task_description="microchain-streamlit-app")
     remember_past_learnings = RememberPastActions(
         long_term_memory=long_term_memory,
-        model="gpt-4o-2024-05-13",
+        model=DEFAULT_OPENAI_MODEL,
     )
     print(remember_past_learnings())
 
