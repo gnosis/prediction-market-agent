@@ -11,10 +11,10 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 
 class DeployableCoinFlipAgent(DeployableTraderAgent):
-    def pick_markets(
-        self, market_type: MarketType, markets: t.Sequence[AgentMarket]
+    def verify_market(
+        self, market_type: MarketType, market: AgentMarket
     ) -> t.Sequence[AgentMarket]:
-        return random.sample(markets, 1)
+        return True
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         decision = random.choice([True, False])
