@@ -473,7 +473,6 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         api_keys = APIKeys()
 
         try:
-            # Don't use observed versions of these functions, because it's running in parallel and Langfuse isn't thread-safe neither process-safe.
             research = prophet_research(
                 goal=scenario,
                 initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
