@@ -397,7 +397,6 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             list[tuple[str, AnswerWithScenario]] | None
         ) = None,
     ) -> AnswerWithScenario | None:
-        # Do not enable add_langfuse_callback, because it's not thread-safe.
         researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(model)
         predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(model)
 
