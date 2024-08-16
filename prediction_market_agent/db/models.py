@@ -29,3 +29,22 @@ class Prompt(SQLModel, table=True):
     # user (or app) should be persisted.
     session_identifier: str
     datetime_: datetime
+
+
+class EvaluatedGoalModel(SQLModel, table=True):
+    """
+    Checkpoint for general agent's goals. Used to store the agent's progress
+    towards a goal, and to restore it in future sessions.
+    """
+
+    __tablename__ = "evaluated_goals"
+    __table_args__ = {"extend_existing": True}
+    id: Optional[int] = Field(default=None, primary_key=True)
+    agent_id: str  # Per-agent identifier
+    prompt: str
+    motivation: str
+    completion_criteria: str
+    is_complete: bool
+    reasoning: str
+    output: str | None  # TODO or 'learning'?
+    datetime_: datetime

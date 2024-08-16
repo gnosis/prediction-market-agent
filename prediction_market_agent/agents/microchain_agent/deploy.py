@@ -122,9 +122,7 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
     model = SupportedModel.llama_31_instruct
 
 
-class DeployableMicrochainModifiableSystemPromptAgent3(
-    DeployableMicrochainModifiableSystemPromptAgentAbstract
-):
+class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     goal_manager: GoalManager = GoalManager(agent_id=task_description)
     model = SupportedModel.gpt_4o
