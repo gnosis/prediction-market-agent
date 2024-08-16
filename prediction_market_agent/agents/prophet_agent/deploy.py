@@ -13,7 +13,6 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.betting_strategies.stretch_bet_between import (
     stretch_bet_between,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import (
     prob_uncertainty,
     should_not_happen,
@@ -21,64 +20,14 @@ from prediction_market_agent_tooling.tools.utils import (
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
-    Prediction,
     PredictionProphetAgent,
-    Research,
 )
 
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 
-class PredictionProphetAgentObserved(PredictionProphetAgent):
-    @observe()
-    def research(
-        self, market_question: str, add_langfuse_callback: bool = False
-    ) -> Research:
-        return super().research(
-            market_question=market_question,
-            add_langfuse_callback=add_langfuse_callback,
-        )
-
-    @observe()
-    def make_prediction(
-        self,
-        market_question: str,
-        additional_information: str,
-        add_langfuse_callback: bool = False,
-    ) -> Prediction:
-        return super().make_prediction(
-            market_question=market_question,
-            additional_information=additional_information,
-            add_langfuse_callback=add_langfuse_callback,
-        )
-
-
-class OlasAgentObserved(OlasAgent):
-    @observe()
-    def research(
-        self, market_question: str, add_langfuse_callback: bool = False
-    ) -> str:
-        return super().research(
-            market_question=market_question,
-            add_langfuse_callback=add_langfuse_callback,
-        )
-
-    @observe()
-    def make_prediction(
-        self,
-        market_question: str,
-        additional_information: str,
-        add_langfuse_callback: bool = False,
-    ) -> Prediction:
-        return super().make_prediction(
-            market_question=market_question,
-            additional_information=additional_information,
-            add_langfuse_callback=add_langfuse_callback,
-        )
-
-
 class DeployableTraderAgentER(DeployableTraderAgent):
-    agent: PredictionProphetAgentObserved | OlasAgentObserved
+    agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
 
     @property
@@ -120,10 +69,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
         return BetAmount(amount=amount, currency=market.currency)
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        prediciton = self.agent.predict(
-            market.question,
-            add_langfuse_callback=self.enable_langfuse,
-        )
+        prediciton = self.agent.predict(market.question)
         if prediciton.outcome_prediction is None:
             logger.error(f"Prediction failed for {market.question}.")
             return None
@@ -134,18 +80,16 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgentObserved(model="gpt-4o-2024-08-06")
+    agent = PredictionProphetAgent(model="gpt-4o-2024-08-06")
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgentObserved(model="gpt-4-0125-preview")
+    agent = PredictionProphetAgent(model="gpt-4-0125-preview")
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgentObserved(model="gpt-4-turbo-2024-04-09")
+    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09")
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgentObserved(
-        model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
-    )
+    agent = OlasAgent(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)

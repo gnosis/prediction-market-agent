@@ -4,7 +4,10 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from langchain_openai import ChatOpenAI
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 from pydantic import BaseModel, Field
 
 from prediction_market_agent.utils import APIKeys
@@ -65,6 +68,6 @@ class CodeInterpreter:
                 "function_names": function_names,
                 "source_code": self.source_code,
             },
-            config={"callbacks": [langfuse_context.get_current_langchain_handler()]},
+            config=get_langfuse_langchain_config(),
         )
         return summaries

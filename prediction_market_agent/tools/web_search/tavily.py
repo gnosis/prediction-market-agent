@@ -16,6 +16,7 @@ class WebSearchResult(BaseModel):
     stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1), reraise=True
 )
 @persistent_inmemory_cache
+@observe()
 def web_search(query: str, max_results: int) -> list[WebSearchResult]:
     """
     Web search using Tavily API.
@@ -37,8 +38,3 @@ def web_search(query: str, max_results: int) -> list[WebSearchResult]:
     ]
 
     return results
-
-
-@observe()
-def web_search_observed(query: str, max_results: int) -> list[WebSearchResult]:
-    return web_search(query=query, max_results=max_results)

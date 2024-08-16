@@ -10,7 +10,7 @@ from prediction_market_agent_tooling.gtypes import (
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
-from prediction_market_agent_tooling.markets.categorize import infer_category_observed
+from prediction_market_agent_tooling.markets.categorize import infer_category
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -29,8 +29,8 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.is_predictable import (
-    is_predictable_binary_observed,
-    is_predictable_without_description_observed,
+    is_predictable_binary,
+    is_predictable_without_description,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -124,13 +124,13 @@ def omen_replicate_from_tx(
             continue
 
         # Do as the last steps, becuase it calls OpenAI (costly & slow).
-        if not is_predictable_binary_observed(market.question):
+        if not is_predictable_binary(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable."
             )
             continue
 
-        if market.description and not is_predictable_without_description_observed(
+        if market.description and not is_predictable_without_description(
             market.question, market.description
         ):
             logger.info(
@@ -138,7 +138,7 @@ def omen_replicate_from_tx(
             )
             continue
 
-        category = infer_category_observed(market.question, existing_categories)
+        category = infer_category(market.question, existing_categories)
         # Realitio will allow new categories or misformated categories, so double check that the LLM got it right.
         if category not in existing_categories:
             logger.info(

@@ -3,7 +3,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 from tweepy import Client
 
 from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_LENGTH
@@ -46,7 +49,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         chain = prompt_template | self.llm | StrOutputParser()
         result = chain.invoke(
             {"text": tweet},
-            config={"callbacks": [langfuse_context.get_current_langchain_handler()]},
+            config=get_langfuse_langchain_config(),
         )
         return result
 

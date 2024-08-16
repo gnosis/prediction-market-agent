@@ -57,9 +57,12 @@ from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
-    prophet_research_observed,
 )
-from prediction_market_agent.utils import APIKeys, disable_crewai_telemetry
+from prediction_market_agent.utils import (
+    APIKeys,
+    disable_crewai_telemetry,
+    temporary_disable_langfuse,
+)
 
 
 class Scenarios(BaseModel):
@@ -138,7 +141,7 @@ class ThinkThoroughlyBase(ABC):
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
     @staticmethod
-    def _get_researcher(model: str, add_langfuse_callback: bool) -> Agent:
+    def _get_researcher(model: str) -> Agent:
         return Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -147,15 +150,11 @@ class ThinkThoroughlyBase(ABC):
             allow_delegation=False,
             tools=[ThinkThoroughlyBase._build_tavily_search()],
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=(
-                [langfuse_context.get_current_langchain_handler()]
-                if add_langfuse_callback
-                else None
-            ),
+            callbacks=[langfuse_context.get_current_langchain_handler()],
         )
 
     @staticmethod
-    def _get_predictor(model: str, add_langfuse_callback: bool) -> Agent:
+    def _get_predictor(model: str) -> Agent:
         return Agent(
             role="Professional Gambler",
             goal="Predict, based on some research you are presented with, whether or not a given event will occur",
@@ -163,11 +162,7 @@ class ThinkThoroughlyBase(ABC):
             verbose=True,
             allow_delegation=False,
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=(
-                [langfuse_context.get_current_langchain_handler()]
-                if add_langfuse_callback
-                else None
-            ),
+            callbacks=[langfuse_context.get_current_langchain_handler()],
         )
 
     @staticmethod
@@ -198,7 +193,7 @@ class ThinkThoroughlyBase(ABC):
 
     @observe()
     def get_required_conditions(self, question: str) -> Scenarios:
-        researcher = self._get_researcher(self.model, add_langfuse_callback=True)
+        researcher = self._get_researcher(self.model)
 
         create_required_conditions = Task(
             description=CREATE_REQUIRED_CONDITIONS_PROMPT,
@@ -217,7 +212,7 @@ class ThinkThoroughlyBase(ABC):
 
     @observe()
     def get_hypohetical_scenarios(self, question: str) -> Scenarios:
-        researcher = self._get_researcher(self.model, add_langfuse_callback=True)
+        researcher = self._get_researcher(self.model)
 
         create_scenarios_task = Task(
             description=CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -271,7 +266,7 @@ class ThinkThoroughlyBase(ABC):
         created_time: datetime.datetime | None,
         research_report: str | None = None,
     ) -> Answer:
-        predictor = self._get_predictor(self.model, add_langfuse_callback=True)
+        predictor = self._get_predictor(self.model)
 
         task_final_decision = Task(
             description=(
@@ -345,23 +340,25 @@ class ThinkThoroughlyBase(ABC):
                 f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
-            sub_predictions = par_generator(
-                items=[
-                    (
-                        self.model,
-                        scenario,
-                        question,
-                        scenarios_with_probs,
-                        self.generate_prediction_for_one_outcome,
-                    )
-                    for scenario in (
-                        hypothetical_scenarios.scenarios
-                        + conditional_scenarios.scenarios
-                    )
-                ],
-                func=process_scenarios,
-                executor=DEFAULT_PROCESSPOOL_EXECUTOR,
-            )
+            with temporary_disable_langfuse():
+                # Disable langfuse for this part, because it's not thread-safe.
+                sub_predictions = par_generator(
+                    items=[
+                        (
+                            self.model,
+                            scenario,
+                            question,
+                            scenarios_with_probs,
+                            self.generate_prediction_for_one_outcome,
+                        )
+                        for scenario in (
+                            hypothetical_scenarios.scenarios
+                            + conditional_scenarios.scenarios
+                        )
+                    ],
+                    func=process_scenarios,
+                    executor=DEFAULT_PROCESSPOOL_EXECUTOR,
+                )
 
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
@@ -401,12 +398,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
         ) = None,
     ) -> AnswerWithScenario | None:
         # Do not enable add_langfuse_callback, because it's not thread-safe.
-        researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(
-            model, add_langfuse_callback=False
-        )
-        predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(
-            model, add_langfuse_callback=False
-        )
+        researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(model)
+        predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(model)
 
         task_research_one_outcome = Task(
             description=(
@@ -529,7 +522,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         api_keys = APIKeys()
         report = (
             research_report
-            or prophet_research_observed(
+            or prophet_research(
                 goal=question,
                 model=self.model,
                 openai_api_key=api_keys.openai_api_key,

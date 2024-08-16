@@ -5,11 +5,13 @@ from string import Template
 from langchain.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -116,13 +118,10 @@ def get_event_date_from_question(question: str) -> datetime | None:
         temperature=0.0,
         api_key=APIKeys().openai_api_key_secretstr_v1,
     )
-    config: RunnableConfig = {
-        "callbacks": [langfuse_context.get_current_langchain_handler()]
-    }
     event_date_str = str(
         llm.invoke(
             f"Extract the event date in the format `%m-%d-%Y` from the following question, don't write anything else, only the event date in the given format: `{question}`",
-            config=config,
+            config=get_langfuse_langchain_config(),
         ).content
     ).strip("'`\"")
 

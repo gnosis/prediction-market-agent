@@ -20,6 +20,7 @@ def fetch_html(url: str, timeout: int) -> Response:
     return response
 
 
+@observe()
 def web_scrape(url: str, timeout: int = 10) -> str:
     """
     Taken from agentcoinorg/predictionprophet
@@ -53,8 +54,3 @@ def web_scrape(url: str, timeout: int = 10) -> str:
     except requests.RequestException as e:
         logger.error(f"HTTP request failed: {e}")
         return ""
-
-
-@observe()
-def web_scrape_observed(url: str, timeout: int = 10) -> str:
-    return web_scrape(url=url, timeout=timeout)

@@ -27,8 +27,8 @@ from prediction_market_agent.agents.microchain_agent.utils import (
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
 from prediction_market_agent.tools.prediction_prophet.research import (
-    prophet_make_prediction_observed,
-    prophet_research_observed,
+    prophet_make_prediction,
+    prophet_research,
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
@@ -129,13 +129,13 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         question = self.market_type.market_class.get_binary_market(
             id=market_id
         ).question
-        research = prophet_research_observed(
+        research = prophet_research(
             goal=question,
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
         )
-        prediction = prophet_make_prediction_observed(
+        prediction = prophet_make_prediction(
             market_question=question,
             additional_information=research.report,
             engine=self.model,

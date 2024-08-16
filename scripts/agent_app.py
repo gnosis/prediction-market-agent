@@ -135,7 +135,7 @@ def agent_app() -> None:
             )
 
             with st.spinner("Agent is processing the market..."):
-                processed_market = agent.process_market_observed(
+                processed_market = agent.process_market(
                     market_source, market, verify_market=not skip_market_verification
                 )
 

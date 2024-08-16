@@ -2,18 +2,19 @@ from datetime import datetime
 from enum import Enum
 
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.callbacks import Callbacks
-from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
-from prediction_market_agent.tools.web_search.tavily import web_search_observed
+from prediction_market_agent.tools.web_search.tavily import web_search
 from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
@@ -163,9 +164,7 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
 
 
 @observe()
-def has_question_event_happened_in_the_past(
-    model: str, question: str, callbacks: Callbacks
-) -> bool:
+def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
     """Asks the model if the event referenced by the question has finished (given the
     current date) (returning 1), if the event has not yet finished (returning 0) or
      if it cannot be sure (returning -1)."""
@@ -174,7 +173,6 @@ def has_question_event_happened_in_the_past(
         model=model,
         temperature=0.0,
         api_key=APIKeys().openai_api_key_secretstr_v1,
-        callbacks=callbacks,
     )
     prompt = ChatPromptTemplate.from_template(
         template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
@@ -182,10 +180,7 @@ def has_question_event_happened_in_the_past(
         date_str=date_str,
         question=question,
     )
-    config: RunnableConfig = {
-        "callbacks": [langfuse_context.get_current_langchain_handler()]
-    }
-    answer = str(llm.invoke(prompt, config=config).content)
+    answer = str(llm.invoke(prompt, config=get_langfuse_langchain_config()).content)
     try:
         parsed_answer = int(answer)
         if parsed_answer == 1:
@@ -199,12 +194,7 @@ def has_question_event_happened_in_the_past(
 
 
 @observe()
-def get_known_outcome(
-    model: str,
-    question: str,
-    max_tries: int,
-    callbacks: Callbacks = None,
-) -> KnownOutcomeOutput:
+def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcomeOutput:
     """
     In a loop, perform web search and scrape to find if the answer to the
     question is known. Break if the answer is found, or after a certain number
@@ -217,7 +207,6 @@ def get_known_outcome(
         model=model,
         temperature=0.0,
         api_key=APIKeys().openai_api_key_secretstr_v1,
-        callbacks=callbacks,
     )
     while tries < max_tries:
         search_prompt = ChatPromptTemplate.from_template(
@@ -227,24 +216,20 @@ def get_known_outcome(
         search_query = str(
             llm.invoke(
                 search_prompt,
-                config={
-                    "callbacks": [langfuse_context.get_current_langchain_handler()]
-                },
+                config=get_langfuse_langchain_config(),
             ).content
         ).strip('"')
         logger.debug(f"Searching web for the search query '{search_query}'")
-        search_results = web_search_observed(query=search_query, max_results=5)
+        search_results = web_search(query=search_query, max_results=5)
         if not search_results:
             raise ValueError("No search results found.")
 
-        for result_idx, result in enumerate(search_results):
+        for result in enumerate(search_results):
             if result.url in previous_urls:
                 continue
             previous_urls.append(result.url)
 
-            scraped_content = observe(name=f"web_scrape_{result_idx}")(web_scrape)(
-                url=result.url
-            )
+            scraped_content = web_scrape(url=result.url)
             scraped_content = summarize_if_required(
                 content=scraped_content, model=model, question=question
             )
@@ -259,9 +244,7 @@ def get_known_outcome(
             answer = str(
                 llm.invoke(
                     prompt,
-                    config={
-                        "callbacks": [langfuse_context.get_current_langchain_handler()]
-                    },
+                    config=get_langfuse_langchain_config(),
                 ).content
             )
             parsed_answer = KnownOutcomeOutput.model_validate(

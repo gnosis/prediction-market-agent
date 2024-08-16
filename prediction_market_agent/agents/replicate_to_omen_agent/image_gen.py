@@ -9,7 +9,7 @@ from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     OmenThumbnailMapping,
 )
 from prediction_market_agent_tooling.tools.image_gen.market_thumbnail_gen import (
-    generate_image_for_market_observed,
+    generate_image_for_market,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 
@@ -39,7 +39,7 @@ def generate_and_set_image_for_market(
     )
 
     try:
-        generated_image = generate_image_for_market_observed(question=market_question)
+        generated_image = generate_image_for_market(question=market_question)
     except Exception as e:
         # Roughly one every 30 markets triggers OpenAI's content policy violation, because of the prompt content. We can just skip those.
         if "content_policy_violation" in str(e):
