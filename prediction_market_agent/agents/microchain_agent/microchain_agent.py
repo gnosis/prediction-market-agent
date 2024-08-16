@@ -147,6 +147,7 @@ def build_agent(
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
     bootstrap: str | None = None,
+    prompt: str | None = None,
     raise_on_error: bool = True,
 ) -> Agent:
     engine = Engine()
@@ -185,6 +186,7 @@ def build_agent(
         llm=LLM(generator=generator),
         engine=engine,
         on_iteration_step=on_iteration_step,
+        prompt=prompt,
     )
 
     for f in build_agent_functions(

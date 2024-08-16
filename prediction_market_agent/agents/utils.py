@@ -25,6 +25,9 @@ class AgentIdentifier(str, Enum):
     MICROCHAIN_AGENT_OMEN_LEARNING_2 = "general-agent-2"
     MICROCHAIN_AGENT_OMEN_LEARNING_3 = "general-agent-3"
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
+    MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER = (
+        "microchain-agent-deployment-omen_with_goal_manager"
+    )
 
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """

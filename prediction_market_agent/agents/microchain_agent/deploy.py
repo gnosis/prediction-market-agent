@@ -2,6 +2,7 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.goal_manager import GoalManager
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
@@ -28,6 +29,7 @@ class DeployableMicrochainAgent(DeployableAgent):
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN
+    goal_manager: GoalManager | None = None
 
     def run(
         self,
@@ -47,6 +49,13 @@ class DeployableMicrochainAgent(DeployableAgent):
                 prompt_handler if self.load_historical_prompt else None
             ),
         )
+
+        if self.goal_manager:
+            goal = self.goal_manager.get_goal()
+            prompt = goal.prompt
+        else:
+            prompt = None
+
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
@@ -57,6 +66,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             functions_config=FunctionsConfig.from_system_prompt_choice(
                 self.system_prompt_choice
             ),
+            prompt=prompt,
         )
 
         # Save formatted system prompt
@@ -69,6 +79,12 @@ class DeployableMicrochainAgent(DeployableAgent):
             initial_system_prompt=initial_formatted_system_prompt,
         )
         prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+
+        if self.goal_manager:
+            evaluated_goal = self.goal_manager.evaluate_goal_progress(
+                goal=goal, chat_history=agent.history
+            )
+            self.goal_manager.save_evaluated_goal(evaluated_goal)
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
@@ -102,3 +118,11 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
+
+
+class DeployableMicrochainModifiableSystemPromptAgent3(
+    DeployableMicrochainModifiableSystemPromptAgentAbstract
+):
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
+    goal_manager: GoalManager = GoalManager(agent_id=task_description)
+    model = SupportedModel.gpt_4o
