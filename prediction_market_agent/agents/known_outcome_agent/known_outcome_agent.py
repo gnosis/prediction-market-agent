@@ -224,7 +224,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcome
         if not search_results:
             raise ValueError("No search results found.")
 
-        for result in enumerate(search_results):
+        for result in search_results:
             if result.url in previous_urls:
                 continue
             previous_urls.append(result.url)
