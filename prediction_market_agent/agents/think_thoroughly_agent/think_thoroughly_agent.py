@@ -1,6 +1,7 @@
 import datetime
 import typing as t
 from abc import ABC
+from uuid import UUID, uuid4
 
 import tenacity
 from crewai import Agent, Crew, Process, Task
@@ -14,7 +15,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from openai import APIError
-from prediction_market_agent_tooling.deploy.agent import Answer
+from prediction_market_agent_tooling.deploy.agent import Answer, initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
@@ -58,11 +59,7 @@ from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
 )
-from prediction_market_agent.utils import (
-    APIKeys,
-    disable_crewai_telemetry,
-    temporary_disable_langfuse,
-)
+from prediction_market_agent.utils import APIKeys, disable_crewai_telemetry
 
 
 class Scenarios(BaseModel):
@@ -114,8 +111,9 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 class ThinkThoroughlyBase(ABC):
     identifier: str
 
-    def __init__(self, model: str, memory: bool = True) -> None:
+    def __init__(self, model: str, enable_langfuse: bool, memory: bool = True) -> None:
         self.model = model
+        self.enable_langfuse = enable_langfuse
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
         self.memory = memory
@@ -142,6 +140,7 @@ class ThinkThoroughlyBase(ABC):
 
     @staticmethod
     def _get_researcher(model: str) -> Agent:
+        langfuse_callback = langfuse_context.get_current_langchain_handler()
         return Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -150,11 +149,12 @@ class ThinkThoroughlyBase(ABC):
             allow_delegation=False,
             tools=[ThinkThoroughlyBase._build_tavily_search()],
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=[langfuse_context.get_current_langchain_handler()],
+            callbacks=[langfuse_callback] if langfuse_callback else None,
         )
 
     @staticmethod
     def _get_predictor(model: str) -> Agent:
+        langfuse_callback = langfuse_context.get_current_langchain_handler()
         return Agent(
             role="Professional Gambler",
             goal="Predict, based on some research you are presented with, whether or not a given event will occur",
@@ -162,7 +162,7 @@ class ThinkThoroughlyBase(ABC):
             verbose=True,
             allow_delegation=False,
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=[langfuse_context.get_current_langchain_handler()],
+            callbacks=[langfuse_callback] if langfuse_callback else None,
         )
 
     @staticmethod
@@ -235,6 +235,7 @@ class ThinkThoroughlyBase(ABC):
 
     @staticmethod
     def generate_prediction_for_one_outcome(
+        unique_id: UUID,
         model: str,
         scenario: str,
         original_question: str,
@@ -331,6 +332,9 @@ class ThinkThoroughlyBase(ABC):
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 
+        unique_id = uuid4()
+        observe_unique_id(unique_id)
+
         scenarios_with_probs: list[tuple[str, AnswerWithScenario]] = []
         for iteration in range(n_iterations):
             # If n_ierations is > 1, the agent will generate predictions for
@@ -340,25 +344,25 @@ class ThinkThoroughlyBase(ABC):
                 f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
-            with temporary_disable_langfuse():
-                # Disable langfuse for this part, because it's not thread-safe.
-                sub_predictions = par_generator(
-                    items=[
-                        (
-                            self.model,
-                            scenario,
-                            question,
-                            scenarios_with_probs,
-                            self.generate_prediction_for_one_outcome,
-                        )
-                        for scenario in (
-                            hypothetical_scenarios.scenarios
-                            + conditional_scenarios.scenarios
-                        )
-                    ],
-                    func=process_scenarios,
-                    executor=DEFAULT_PROCESSPOOL_EXECUTOR,
-                )
+            sub_predictions = par_generator(
+                items=[
+                    (
+                        self.enable_langfuse,
+                        unique_id,
+                        self.model,
+                        scenario,
+                        question,
+                        scenarios_with_probs,
+                        self.generate_prediction_for_one_outcome,
+                    )
+                    for scenario in (
+                        hypothetical_scenarios.scenarios
+                        + conditional_scenarios.scenarios
+                    )
+                ],
+                func=process_scenarios,
+                executor=DEFAULT_PROCESSPOOL_EXECUTOR,
+            )
 
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
@@ -390,6 +394,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
     @staticmethod
     def generate_prediction_for_one_outcome(
+        unique_id: UUID,
         model: str,
         scenario: str,
         original_question: str,
@@ -397,6 +402,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             list[tuple[str, AnswerWithScenario]] | None
         ) = None,
     ) -> AnswerWithScenario | None:
+        observe_unique_id(unique_id)
+
         researcher = ThinkThoroughlyWithItsOwnResearch._get_researcher(model)
         predictor = ThinkThoroughlyWithItsOwnResearch._get_predictor(model)
 
@@ -458,6 +465,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
 
     @staticmethod
     def generate_prediction_for_one_outcome(
+        unique_id: UUID,
         model: str,
         scenario: str,
         original_question: str,
@@ -465,6 +473,8 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             list[tuple[str, AnswerWithScenario]] | None
         ) = None,
     ) -> AnswerWithScenario | None:
+        observe_unique_id(unique_id)
+
         if previous_scenarios_and_answers:
             raise ValueError(
                 "This agent does not support generating predictions with previous scenarios and answers in mind."
@@ -535,14 +545,25 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         )
 
 
+def observe_unique_id(unique_id: UUID) -> None:
+    # Used to mark the parent procses and its children with the same unique_id, so that we can link them together in Langfuse.
+    langfuse_context.update_current_observation(
+        metadata={
+            "unique_id": str(unique_id),
+        }
+    )
+
+
 def process_scenarios(
     inputs: tuple[
+        bool,
+        UUID,
         str,
         str,
         str,
         list[tuple[str, AnswerWithScenario]] | None,
         t.Callable[
-            [str, str, str, list[tuple[str, AnswerWithScenario]] | None],
+            [UUID, str, str, str, list[tuple[str, AnswerWithScenario]] | None],
             AnswerWithScenario | None,
         ],
     ],
@@ -550,8 +571,20 @@ def process_scenarios(
     # Needs to be a normal function outside of class, because `lambda` and `self` aren't pickable for processpool executor,
     # and process pool executor is required, because ChromaDB isn't thread-safe.
     # Input arguments needs to be as a single tuple, because par_generator requires a single argument.
-    model, scenario, original_question, scenarios_with_probs, process_function = inputs
+    (
+        enable_langfuse,
+        unique_id,
+        model,
+        scenario,
+        original_question,
+        scenarios_with_probs,
+        process_function,
+    ) = inputs
+    # Reset Langfuse, as this is executed as a separate process and Langfuse isn't thread-safe.
+    initialize_langfuse(enable_langfuse)
     return (
         scenario,
-        process_function(model, scenario, original_question, scenarios_with_probs),
+        observe(name="process_scenario")(process_function)(
+            unique_id, model, scenario, original_question, scenarios_with_probs
+        ),
     )

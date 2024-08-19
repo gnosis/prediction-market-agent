@@ -15,7 +15,9 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
-        self.agent = self.agent_class(model=self.model)
+        self.agent = self.agent_class(
+            model=self.model, enable_langfuse=self.enable_langfuse
+        )
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         return self.agent.answer_binary_market(

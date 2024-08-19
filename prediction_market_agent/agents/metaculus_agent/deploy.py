@@ -39,7 +39,9 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
         if market_type != MarketType.METACULUS:
             raise ValueError("Only Metaculus markets are supported for this agent")
 
-        agent = ThinkThoroughlyWithItsOwnResearch(model=self.model, memory=False)
+        agent = ThinkThoroughlyWithItsOwnResearch(
+            model=self.model, enable_langfuse=self.enable_langfuse, memory=False
+        )
         markets: Sequence[
             MetaculusAgentMarket
         ] = MetaculusAgentMarket.get_binary_markets(

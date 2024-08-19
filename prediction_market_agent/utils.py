@@ -1,8 +1,6 @@
 import json
 import typing as t
-from contextlib import contextmanager
 
-from langfuse.decorators import langfuse_context
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import (
@@ -211,10 +209,3 @@ def disable_crewai_telemetry() -> None:
     for attr in dir(Telemetry):
         if callable(getattr(Telemetry, attr)) and not attr.startswith("__"):
             setattr(Telemetry, attr, lambda *args, **kwargs: None)
-
-
-@contextmanager
-def temporary_disable_langfuse() -> t.Generator[None, None, None]:
-    langfuse_context._get_langfuse().enabled = False
-    yield
-    langfuse_context._get_langfuse().enabled = True
