@@ -1,4 +1,5 @@
 from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.betting_strategy import KellyBettingStrategy
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -35,6 +36,14 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
     model: str = "gpt-4-turbo-2024-04-09"
+
+
+class DeployableThinkThoroughlyProphetResearchAgentKelly(
+    DeployableThinkThoroughlyAgentBase
+):
+    agent_class = ThinkThoroughlyWithPredictionProphetResearch
+    model: str = "gpt-4-turbo-2024-04-09"
+    strategy = KellyBettingStrategy()
 
 
 if __name__ == "__main__":
