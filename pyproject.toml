@@ -34,8 +34,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-#prediction-market-agent-tooling = { version = "^0.48.0", extras = ["langchain", "google"] }
-prediction-market-agent-tooling = { git="https://github.com/gnosis/prediction-market-agent-tooling.git", branch="338-change-default-betting-strategy-from-amount-==-tiny_bet-direction-==-yes-if-p_yes-05-to-use-kelly-bet"}
+prediction-market-agent-tooling = { version = "^0.48.2", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -46,14 +45,13 @@ pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.21"
 farcaster = "^0.7.11"
-#farcaster = {git = "https://github.com/gabrielfior/farcaster-py.git", branch="update-eth-account"}
 mech-client = "^0.2.15"
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "ce01d01181f8271518afdebeaf98057164bd1c86" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "92eed91e4e02fa689cf3c5247d9b0f33dab123ea" }
 transformers = "^4.43.3"
 
 [tool.poetry.group.dev.dependencies]
