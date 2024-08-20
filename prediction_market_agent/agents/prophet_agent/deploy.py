@@ -89,9 +89,9 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     agent = PredictionProphetAgent(
         model="ggpt-4o-2024-08-06",
         tavily_cache=TavilyResponseCache(
-            agent_id="DeployablePredictionProphetGPT3Agent"
+            agent_id="DeployablePredictionProphetGPT4oAgent"
         ),
-      logger=logger,
+        logger=logger,
     )
 
 
@@ -101,15 +101,18 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
         tavily_cache=TavilyResponseCache(
             agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
         ),
-      logger=logger,
+        logger=logger,
     )
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09", logger=logger, tavily_cache=TavilyResponseCache(
+    agent = PredictionProphetAgent(
+        model="gpt-4-turbo-2024-04-09",
+        tavily_cache=TavilyResponseCache(
             agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
-        ),)
-    # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
+        ),
+        logger=logger,
+    )
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
