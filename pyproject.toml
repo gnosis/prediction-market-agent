@@ -43,7 +43,7 @@ tavily-python = "^0.3.1"
 microchain-python = "^0.4.4"
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
-sqlmodel = "^0.0.18"
+sqlmodel = "^0.0.21"
 farcaster = "^0.7.11"
 mech-client = "^0.2.15"
 streamlit-extras = "^0.4.2"
@@ -51,7 +51,7 @@ tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "0d20f79c2c0f148d7dd4867c4b4f84289deac4d6" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "92eed91e4e02fa689cf3c5247d9b0f33dab123ea" }
 transformers = "^4.43.3"
 
 [tool.poetry.group.dev.dependencies]
