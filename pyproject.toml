@@ -40,7 +40,7 @@ autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
 tavily-python = "^0.3.9"
-microchain-python = "^0.4.4"
+microchain-python = { path = "../microchain", develop = true }
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.21"
