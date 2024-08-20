@@ -87,7 +87,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     agent = PredictionProphetAgent(
-        model="ggpt-4o-2024-08-06",
+        model="gpt-4o-2024-08-06",
         tavily_storage=TavilyStorage(agent_id="DeployablePredictionProphetGPT4oAgent"),
         logger=logger,
     )
