@@ -7,12 +7,13 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.abstract import AbstractAgent
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 
 class MetaGPTAgent(AbstractAgent):
     def __init__(self, cheap: bool = True) -> None:
         dotenv.load_dotenv()
-        os.environ["OPENAI_API_MODEL"] = "gpt-4-1106-preview"
+        os.environ["OPENAI_API_MODEL"] = DEFAULT_OPENAI_MODEL
         os.environ["SERPAPI_API_KEY"] = check_not_none(
             os.getenv("SERP_API_KEY"), "SERPAPI_API_KEY must be set in .env"
         )

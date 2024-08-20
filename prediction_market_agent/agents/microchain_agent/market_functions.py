@@ -20,7 +20,6 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_prophet.benchmark.agents import (
     _make_prediction as prophet_make_prediction,
 )
-from prediction_prophet.functions.research import research as prophet_research
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -32,7 +31,8 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.tools.prediction_prophet.research import prophet_research
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 
 class MarketFunction(Function):
@@ -117,7 +117,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         self,
         market_type: MarketType,
         keys: APIKeys,
-        model: str = "gpt-3.5-turbo",
+        model: str = DEFAULT_OPENAI_MODEL,
     ) -> None:
         self.model = model
         super().__init__(market_type=market_type, keys=keys)
@@ -132,7 +132,6 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         ).question
         research = prophet_research(
             goal=question,
-            use_summaries=False,
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,

@@ -5,7 +5,7 @@ from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
 
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 
 def _summary(
@@ -13,7 +13,7 @@ def _summary(
 ) -> str:
     llm = ChatOpenAI(
         temperature=0,
-        model="gpt-3.5-turbo-0125",
+        model=DEFAULT_OPENAI_MODEL,
         api_key=APIKeys().openai_api_key_secretstr_v1,
     )
     text_splitter = RecursiveCharacterTextSplitter(

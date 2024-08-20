@@ -17,7 +17,7 @@ class AutoGenAgent(AbstractAgent):
         return {
             "config_list": [
                 {
-                    "model": "gpt-4",
+                    "model": utils.DEFAULT_OPENAI_MODEL,
                     "api_key": keys.openai_api_key.get_secret_value(),
                 }
             ],

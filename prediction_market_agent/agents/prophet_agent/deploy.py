@@ -27,10 +27,16 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
+
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: AbstractBenchmarkedAgent
-    bet_on_n_markets_per_run = 5
+    bet_on_n_markets_per_run = 1
+
+    @property
+    def model(self) -> str | None:
+        return self.agent.model
 
     def calculate_bet_amount(self, answer: Answer, market: AgentMarket) -> BetAmount:
         amount: float
@@ -79,12 +85,13 @@ class DeployableTraderAgentER(DeployableTraderAgent):
         return prediciton.outcome_prediction
 
 
-class DeployablePredictionProphetGPT3Agent(DeployableTraderAgentER):
+class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     agent = PredictionProphetAgent(
-        model="gpt-3.5-turbo-0125",
+        model="ggpt-4o-2024-08-06",
         tavily_cache=TavilyResponseCache(
             agent_id="DeployablePredictionProphetGPT3Agent"
         ),
+      logger=logger,
     )
 
 
@@ -94,21 +101,16 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
         tavily_cache=TavilyResponseCache(
             agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
         ),
+      logger=logger,
     )
-    # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
-    bet_on_n_markets_per_run = 1
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4-turbo-2024-04-09",
-        tavily_cache=TavilyResponseCache(
+    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09", logger=logger, tavily_cache=TavilyResponseCache(
             agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
-        ),
-    )
+        ),)
     # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
-    bet_on_n_markets_per_run = 1
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgent(model="gpt-3.5-turbo-0125", embedding_model=EmbeddingModel.openai)
+    agent = OlasAgent(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)

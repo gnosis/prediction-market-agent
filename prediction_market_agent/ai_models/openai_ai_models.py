@@ -28,6 +28,7 @@ class ChatOpenAIModel(AbstractAiChatModel):
     def __init__(
         self,
         model: Literal[
+            "gpt-4o-2024-08-06",
             "gpt-4-1106-preview",
             "gpt-4-vision-preview",
             "gpt-4",
@@ -42,7 +43,7 @@ class ChatOpenAIModel(AbstractAiChatModel):
             "gpt-3.5-turbo-0613",
             "gpt-3.5-turbo-1106",
             "gpt-3.5-turbo-16k-0613",
-        ] = "gpt-3.5-turbo",
+        ] = "gpt-4o-2024-08-06",
         system_prompt: Optional[str] = None,
         max_tokens: int = 256,
         temperature: float = 0.0,

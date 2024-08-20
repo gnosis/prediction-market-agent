@@ -12,6 +12,7 @@ from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
 
+import typing as t
 
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
@@ -23,6 +24,12 @@ from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.prophet_agent.deploy import (
+    DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT4oAgent,
+    DeployablePredictionProphetGPT4TurboFinalAgent,
+    DeployablePredictionProphetGPT4TurboPreviewAgent,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
@@ -32,14 +39,24 @@ from prediction_market_agent.tools.streamlit_utils import (
     streamlit_escape,
 )
 
-AGENTS: list[
+SupportedAgentType: t.TypeAlias = (
     type[DeployableKnownOutcomeAgent]
     | type[DeployableThinkThoroughlyAgent]
     | type[DeployableThinkThoroughlyProphetResearchAgent]
-] = [
+    | type[DeployablePredictionProphetGPT4oAgent]
+    | type[DeployablePredictionProphetGPT4TurboPreviewAgent]
+    | type[DeployablePredictionProphetGPT4TurboFinalAgent]
+    | type[DeployableOlasEmbeddingOAAgent]
+)
+
+AGENTS: list[SupportedAgentType] = [
     DeployableKnownOutcomeAgent,
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
+    DeployablePredictionProphetGPT4oAgent,
+    DeployablePredictionProphetGPT4TurboPreviewAgent,
+    DeployablePredictionProphetGPT4TurboFinalAgent,
+    DeployableOlasEmbeddingOAAgent,
 ]
 
 add_sink_to_logger()
@@ -69,11 +86,7 @@ def agent_app() -> None:
         st.stop()
 
     # Get the agent classes from the names.
-    agent_classes: list[
-        type[DeployableKnownOutcomeAgent]
-        | type[DeployableThinkThoroughlyAgent]
-        | type[DeployableThinkThoroughlyProphetResearchAgent]
-    ] = []
+    agent_classes: list[SupportedAgentType] = []
     for AgentClass in AGENTS:
         if AgentClass.__name__ in agent_class_names:
             agent_classes.append(AgentClass)
@@ -95,6 +108,11 @@ def agent_app() -> None:
         # If custom question is provided, just take some random market and update its question.
         else markets[0].model_copy(update={"question": question, "current_p_yes": 0.5})
     )
+
+    if not custom_question_input:
+        st.info(
+            f"Current probability {market.current_p_yes * 100:.2f}% at {market.url}."
+        )
 
     for idx, (column, AgentClass) in enumerate(
         zip(st.columns(len(agent_classes)), agent_classes)
