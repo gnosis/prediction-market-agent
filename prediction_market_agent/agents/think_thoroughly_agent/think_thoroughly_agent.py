@@ -24,6 +24,9 @@ from prediction_market_agent_tooling.tools.parallelism import (
     par_generator,
     par_map,
 )
+from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
+    TavilyStorage,
+)
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     add_utc_timezone_validator,
@@ -467,6 +470,9 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
+                tavily_storage=TavilyStorage(
+                    agent_id=ThinkThoroughlyWithPredictionProphetResearch.identifier
+                ),
             )
             prediction = prophet_make_prediction(
                 market_question=scenario,
@@ -509,6 +515,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             model=self.model,
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
+            tavily_storage=TavilyStorage(agent_id=self.identifier),
         )
         return super().generate_final_decision(
             question=question,
