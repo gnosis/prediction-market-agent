@@ -83,17 +83,17 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4o-2024-08-06")
+    agent = PredictionProphetAgent(model="gpt-4o-2024-08-06", logger=logger)
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-0125-preview")
+    agent = PredictionProphetAgent(model="gpt-4-0125-preview", logger=logger)
     # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
     bet_on_n_markets_per_run = 1
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09")
+    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09", logger=logger)
     # Limit to just 1, because so far it seems that 20x higher costs aren't justified by the prediction performance.
     bet_on_n_markets_per_run = 1
 
