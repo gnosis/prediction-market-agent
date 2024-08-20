@@ -1,4 +1,7 @@
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
+    TavilyStorage,
+)
 from prediction_prophet.functions.research import research
 from pydantic.types import SecretStr
 
@@ -8,6 +11,7 @@ def prophet_research(
     model: str,
     openai_api_key: SecretStr,
     tavily_api_key: SecretStr,
+    tavily_storage: TavilyStorage | None,
     initial_subqueries_limit: int = 20,
     subqueries_limit: int = 4,
     max_results_per_search: int = 5,
@@ -35,5 +39,6 @@ def prophet_research(
         min_scraped_sites=min_scraped_sites,
         openai_api_key=openai_api_key,
         tavily_api_key=tavily_api_key,
+        tavily_storage=tavily_storage,
         logger=logger,
     )
