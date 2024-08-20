@@ -9,10 +9,6 @@ Can also be executed locally, simply by running `python prediction_market_agent/
 from enum import Enum
 
 import typer
-from prediction_market_agent_tooling.deploy.betting_strategy import (
-    OmenFixedBetBettingStrategy,
-    ManifoldFixedBetBettingStrategy,
-)
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
@@ -90,11 +86,6 @@ RUNNABLE_AGENTS = {
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
-
-DEFAULT_BETTING_STRATEGIES_TO_MARKET = {
-    MarketType.OMEN: OmenFixedBetBettingStrategy(),
-    MarketType.MANIFOLD: ManifoldFixedBetBettingStrategy(),
-}
 
 
 @APP.command()
