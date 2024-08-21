@@ -7,6 +7,7 @@ import autogen
 from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.memory import (
@@ -112,6 +113,7 @@ def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]
     }
 
 
+@observe()
 def build_social_media_text(
     model: str,
     bets: list[Bet],
@@ -157,6 +159,7 @@ def extract_reasoning_behind_tweet(
     return extract_reasonings_to_learnings(filtered_memories, tweet)
 
 
+@observe()
 def build_reply_tweet(
     model: str,
     tweet: str,

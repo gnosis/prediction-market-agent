@@ -8,6 +8,10 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -110,6 +114,7 @@ def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
     )
 
 
+@observe()
 def get_event_date_from_question(question: str) -> datetime | None:
     llm = ChatOpenAI(
         model="gpt-4-turbo",
@@ -118,7 +123,8 @@ def get_event_date_from_question(question: str) -> datetime | None:
     )
     event_date_str = str(
         llm.invoke(
-            f"Extract the event date in the format `%m-%d-%Y` from the following question, don't write anything else, only the event date in the given format: `{question}`"
+            f"Extract the event date in the format `%m-%d-%Y` from the following question, don't write anything else, only the event date in the given format: `{question}`",
+            config=get_langfuse_langchain_config(),
         ).content
     ).strip("'`\"")
 

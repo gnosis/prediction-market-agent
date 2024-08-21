@@ -15,16 +15,18 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
-        self.agent = self.agent_class(model=self.model)
+        self.agent = self.agent_class(
+            model=self.model, enable_langfuse=self.enable_langfuse
+        )
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
         return self.agent.answer_binary_market(
             market.question, created_time=market.created_time
         )
 
-    def before(self, market_type: MarketType) -> None:
+    def before_process_markets(self, market_type: MarketType) -> None:
         self.agent.update_markets()
-        super().before(market_type=market_type)
+        super().before_process_markets(market_type=market_type)
 
 
 class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):

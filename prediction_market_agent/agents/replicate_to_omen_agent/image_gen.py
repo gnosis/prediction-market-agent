@@ -11,12 +11,16 @@ from prediction_market_agent_tooling.markets.omen.omen_contracts import (
 from prediction_market_agent_tooling.tools.image_gen.market_thumbnail_gen import (
     generate_image_for_market,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 
 from prediction_market_agent.utils import APIKeys
 
 
+@observe()
 def generate_and_set_image_for_market(
-    market_address: ChecksumAddress, market_question: str, api_keys: APIKeys
+    market_address: ChecksumAddress,
+    market_question: str,
+    api_keys: APIKeys,
 ) -> IPFSCIDVersion0 | None:
     market_contract = OmenFixedProductMarketMakerContract(address=market_address)
     # Test that the market actually exists.

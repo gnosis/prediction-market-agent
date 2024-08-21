@@ -9,6 +9,7 @@ Can also be executed locally, simply by running `python prediction_market_agent/
 from enum import Enum
 
 import typer
+from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
@@ -65,7 +66,7 @@ class RunnableAgent(str, Enum):
     social_media = "social_media"
 
 
-RUNNABLE_AGENTS = {
+RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,

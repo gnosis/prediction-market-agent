@@ -1,4 +1,3 @@
-from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.deploy.agent import (
     Answer,
     BetAmount,
@@ -31,7 +30,7 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 
 class DeployableTraderAgentER(DeployableTraderAgent):
-    agent: AbstractBenchmarkedAgent
+    agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
 
     @property
@@ -73,9 +72,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
         return BetAmount(amount=amount, currency=market.currency)
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        prediciton = self.agent.predict(
-            market.question
-        )  # Already checked in the `pick_markets`.
+        prediciton = self.agent.predict(market.question)
         if prediciton.outcome_prediction is None:
             logger.error(f"Prediction failed for {market.question}.")
             return None
@@ -86,32 +83,46 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4o-2024-08-06",
-        tavily_storage=TavilyStorage(agent_id="DeployablePredictionProphetGPT4oAgent"),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4o-2024-08-06",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4-0125-preview",
-        tavily_storage=TavilyStorage(
-            agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
-        ),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4-0125-preview",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4-turbo-2024-04-09",
-        tavily_storage=TavilyStorage(
-            agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
-        ),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4-turbo-2024-04-09",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgent(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)
+    agent: OlasAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = OlasAgent(
+            model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
+        )

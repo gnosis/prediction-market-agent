@@ -34,5 +34,6 @@ ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 # project and only intend to use it for tokenization. See:
 # https://github.com/huggingface/transformers/issues/27214#issuecomment-1983731040
 ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+ENV LANGFUSE_DEPLOYMENT_VERSION=none
 
 CMD ["bash", "-c", "python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]

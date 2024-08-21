@@ -4,6 +4,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.social_media_agent.social_agent import (
@@ -36,6 +37,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             TwitterHandler(),
         ]
 
+    @observe(name="DeployableSocialMediaAgent")
     def run(self, market_type: MarketType) -> None:
         # It should post a message (cast) on each run.
 

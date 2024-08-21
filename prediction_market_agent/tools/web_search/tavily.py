@@ -1,5 +1,6 @@
 import tenacity
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic import BaseModel
 from tavily import TavilyClient
 
@@ -15,6 +16,7 @@ class WebSearchResult(BaseModel):
     stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1), reraise=True
 )
 @persistent_inmemory_cache
+@observe()
 def web_search(query: str, max_results: int) -> list[WebSearchResult]:
     """
     Web search using Tavily API.
