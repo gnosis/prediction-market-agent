@@ -32,6 +32,7 @@ from prediction_market_agent_tooling.tools.is_predictable import (
     is_predictable_binary,
     is_predictable_without_description,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
@@ -45,6 +46,7 @@ from prediction_market_agent.utils import APIKeys
 EXTEND_CLOSING_TIME_DELTA = timedelta(days=6)
 
 
+@observe()
 def omen_replicate_from_tx(
     api_keys: APIKeys,
     market_type: MarketType,
@@ -170,7 +172,11 @@ def omen_replicate_from_tx(
         )
 
         if (
-            generate_and_set_image_for_market(market_address, market.question, api_keys)
+            generate_and_set_image_for_market(
+                market_address,
+                market.question,
+                api_keys,
+            )
             is not None
         ):
             logger.info(f"Generated and set image for `{market.question}`.")

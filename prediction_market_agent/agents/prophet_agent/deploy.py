@@ -1,4 +1,3 @@
-from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.deploy.agent import (
     Answer,
     BetAmount,
@@ -31,7 +30,7 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 
 class DeployableTraderAgentER(DeployableTraderAgent):
-    agent: AbstractBenchmarkedAgent
+    agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
 
     @property
@@ -73,9 +72,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
         return BetAmount(amount=amount, currency=market.currency)
 
     def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        prediciton = self.agent.predict(
-            market.question
-        )  # Already checked in the `pick_markets`.
+        prediciton = self.agent.predict(market.question)
         if prediciton.outcome_prediction is None:
             logger.error(f"Prediction failed for {market.question}.")
             return None
