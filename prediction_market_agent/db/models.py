@@ -41,10 +41,10 @@ class EvaluatedGoalModel(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
     id: Optional[int] = Field(default=None, primary_key=True)
     agent_id: str  # Per-agent identifier
-    prompt: str
+    goal: str
     motivation: str
     completion_criteria: str
     is_complete: bool
     reasoning: str
-    output: str | None  # TODO or 'learning'?
+    output: str | None
     datetime_: datetime

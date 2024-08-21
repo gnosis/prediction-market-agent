@@ -52,7 +52,7 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         if self.goal_manager:
             goal = self.goal_manager.get_goal()
-            prompt = goal.prompt
+            prompt = goal.goal
         else:
             prompt = None
 
@@ -124,5 +124,10 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
-    goal_manager: GoalManager = GoalManager(agent_id=task_description)
+    goal_manager = GoalManager(
+        agent_id=task_description,
+        high_level_description="foo",  # TODO
+        agent_capabilities="bar",  # TODO
+        retry_limit=3,
+    )
     model = SupportedModel.gpt_4o

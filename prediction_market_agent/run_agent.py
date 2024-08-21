@@ -24,6 +24,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainModifiableSystemPromptAgent1,
     DeployableMicrochainModifiableSystemPromptAgent2,
     DeployableMicrochainModifiableSystemPromptAgent3,
+    DeployableMicrochainWithGoalManagerAgent0,
 )
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
@@ -54,6 +55,7 @@ class RunnableAgent(str, Enum):
     microchain_modifiable_system_prompt_1 = "microchain_modifiable_system_prompt_1"
     microchain_modifiable_system_prompt_2 = "microchain_modifiable_system_prompt_2"
     microchain_modifiable_system_prompt_3 = "microchain_modifiable_system_prompt_3"
+    microchain_with_goal_manager_agent0 = "microchain_with_goal_manager_agent0"
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4 = "prophet_gpt4"
@@ -74,6 +76,7 @@ RUNNABLE_AGENTS = {
     RunnableAgent.microchain_modifiable_system_prompt_1: DeployableMicrochainModifiableSystemPromptAgent1,
     RunnableAgent.microchain_modifiable_system_prompt_2: DeployableMicrochainModifiableSystemPromptAgent2,
     RunnableAgent.microchain_modifiable_system_prompt_3: DeployableMicrochainModifiableSystemPromptAgent3,
+    RunnableAgent.microchain_with_goal_manager_agent0: DeployableMicrochainWithGoalManagerAgent0,
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,

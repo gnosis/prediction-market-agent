@@ -21,7 +21,7 @@ class EvaluatedGoalTableHandler:
     def save_evaluated_goal(self, model: EvaluatedGoalModel) -> None:
         self.sql_handler.save_multiple([model])
 
-    def get_latest_evaluated_goal(self) -> EvaluatedGoalModel | None:
+    def get_latest_evaluated_goals(self, limit: int) -> list[EvaluatedGoalModel]:
         column_to_order: str = EvaluatedGoalModel.datetime_.key  # type: ignore
         items: t.Sequence[
             EvaluatedGoalModel
@@ -29,6 +29,6 @@ class EvaluatedGoalTableHandler:
             query_filters=[col(EvaluatedGoalModel.agent_id) == self.agent_id],
             order_by_column_name=column_to_order,
             order_desc=True,
-            limit=1,
+            limit=limit,
         )
-        return items[0] if items else None
+        return list(items)
