@@ -153,7 +153,6 @@ def test_get_chat_history_after_goal_prompt() -> None:
 
 def test_get_chat_history_after_goal_prompt_error() -> None:
     goal = Goal(goal="Foo", motivation="Bar", completion_criteria="Baz")
-    assistant_message = ChatMessage(role="assistant", content="The answer is 42.")
     chat_history = ChatHistory(
         chat_messages=[
             ChatMessage(role="system", content="You are a helpful assistant."),
@@ -207,7 +206,7 @@ def test_evaluate_goal_progress_0() -> None:
         chat_history=chat_history0,
     )
     assert goal_evaluation.is_complete is True
-    assert goal_evaluation.output == None
+    assert goal_evaluation.output is None
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
@@ -282,4 +281,4 @@ def test_evaluate_goal_progress_2() -> None:
         chat_history=chat_history0,
     )
     assert goal_evaluation.is_complete is False
-    assert goal_evaluation.output == None
+    assert goal_evaluation.output is None

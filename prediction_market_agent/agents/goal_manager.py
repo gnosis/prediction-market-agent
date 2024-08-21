@@ -200,15 +200,10 @@ class GoalManager:
             return False
 
         latest_goal = latest_evaluated_goals[0].to_goal()
-        if all(
-            [
-                g.to_goal() == latest_goal
-                for g in latest_evaluated_goals[: self.retry_limit + 1]
-            ]
-        ):
-            return True
-
-        return False
+        return all(
+            g.to_goal() == latest_goal
+            for g in latest_evaluated_goals[: self.retry_limit + 1]
+        )
 
     def get_goal(self) -> Goal:
         """
