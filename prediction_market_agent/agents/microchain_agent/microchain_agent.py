@@ -68,7 +68,7 @@ class SupportedModel(str, Enum):
 
 def replicate_model_to_tokenizer(model: SupportedModel) -> str:
     if model == SupportedModel.llama_31_instruct:
-        return "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"
+        return "tokenizers/replicate_llama_31_405b"
     else:
         raise ValueError(f"Unsupported model: {model}")
 
