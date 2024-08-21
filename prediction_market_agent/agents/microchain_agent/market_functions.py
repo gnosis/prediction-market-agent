@@ -10,7 +10,6 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
-    KellyBet,
     get_kelly_bet,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -405,7 +404,7 @@ class GetKellyBet(MarketFunction):
     ) -> str:
         confidence = 0.5  # Until confidence score is available, be conservative
         max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
-        kelly_bet: KellyBet = get_kelly_bet(
+        kelly_bet = get_kelly_bet(
             market_p_yes=market_p_yes,
             estimated_p_yes=estimated_p_yes,
             max_bet=max_bet,

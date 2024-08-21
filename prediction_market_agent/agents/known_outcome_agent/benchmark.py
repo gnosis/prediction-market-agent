@@ -75,7 +75,6 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
             return Prediction(
                 is_predictable=True,
                 outcome_prediction=OutcomePrediction(
-                    decision=outcome.result.to_boolean(),
                     p_yes=outcome.result.to_p_yes(),
                     confidence=1.0,
                     info_utility=None,

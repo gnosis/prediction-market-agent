@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.deploy.agent import (
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.manifold.manifold import (
     ManifoldAgentMarket,
 )
@@ -71,15 +72,15 @@ class DeployableTraderAgentER(DeployableTraderAgent):
             amount = market.get_tiny_bet_amount().amount
         return BetAmount(amount=amount, currency=market.currency)
 
-    def answer_binary_market(self, market: AgentMarket) -> Answer | None:
-        prediciton = self.agent.predict(market.question)
-        if prediciton.outcome_prediction is None:
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
+        prediction = self.agent.predict(market.question)
+        if prediction.outcome_prediction is None:
             logger.error(f"Prediction failed for {market.question}.")
             return None
         logger.info(
-            f"Answering '{market.question}' with '{prediciton.outcome_prediction.decision}'."
+            f"Answering '{market.question}' with probability '{prediction.outcome_prediction.p_yes}'."
         )
-        return prediciton.outcome_prediction
+        return prediction.outcome_prediction
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
