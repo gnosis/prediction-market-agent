@@ -17,11 +17,12 @@ If applicable, use the agent's previous evaluated goals when considering its new
 
 The goal should satisfy the following:
 - have a narrow focus
+- be completable immediately, within a single session
 - be realistically achievable given the agen't specific capabilities
-- not be contingent on external factors that are out of the agent's control
 - have a clear motivation and completion criteria
 - advance the aims of the agent
 - balance the need for exploration and exploitation
+- not be contingent on external factors that are out of the agent's control
 
 [HIGH LEVEL DESCRIPTION]
 {high_level_description}
@@ -57,10 +58,10 @@ class Goal(BaseModel):
 
     def to_prompt(self) -> str:
         return (
-            f"{self.goal}"
-            f"\n\n"
-            f"## Motivation\n{self.motivation}"
-            f"## Completion Criteria:\n\n{self.completion_criteria}"
+            f"# Goal:\n"
+            f"{self.goal}\n\n"
+            f"## Motivation:\n{self.motivation}\n\n"
+            f"## Completion Criteria:\n{self.completion_criteria}"
         )
 
 
@@ -73,6 +74,13 @@ class GoalEvaluation(BaseModel):
         ...,
         description="If the goal description implied a 'return value', and the goal is complete, this field should contain the output",
     )
+
+    def __str__(self) -> str:
+        return (
+            f"Is Complete: {self.is_complete}\n"
+            f"Reasoning: {self.reasoning}\n"
+            f"Output: {self.output}"
+        )
 
 
 class EvaluatedGoal(Goal):
@@ -244,7 +252,7 @@ class GoalManager:
         self,
         goal: Goal,
         chat_history: ChatHistory,
-    ) -> EvaluatedGoal:
+    ) -> GoalEvaluation:
         relevant_chat_history = self.get_chat_history_after_goal_prompt(
             goal=goal,
             chat_history=chat_history,
@@ -268,17 +276,18 @@ class GoalManager:
                 "chat_history": str(relevant_chat_history),
             }
         )
-        return EvaluatedGoal(
+        return goal_evaluation
+
+    def save_evaluated_goal(self, goal: Goal, evaluation: GoalEvaluation) -> None:
+        evaluated_goal = EvaluatedGoal(
             goal=goal.goal,
             motivation=goal.motivation,
             completion_criteria=goal.completion_criteria,
-            is_complete=goal_evaluation.is_complete,
-            reasoning=goal_evaluation.reasoning,
-            output=goal_evaluation.output,
+            is_complete=evaluation.is_complete,
+            reasoning=evaluation.reasoning,
+            output=evaluation.output,
         )
-
-    def save_evaluated_goal(self, goal: EvaluatedGoal) -> None:
-        model = goal.to_model(agent_id=self.agent_id)
+        model = evaluated_goal.to_model(agent_id=self.agent_id)
         self.table_handler.save_evaluated_goal(model)
 
     @staticmethod

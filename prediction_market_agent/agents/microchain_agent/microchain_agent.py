@@ -186,7 +186,6 @@ def build_agent(
         llm=LLM(generator=generator),
         engine=engine,
         on_iteration_step=on_iteration_step,
-        prompt=prompt,
     )
 
     for f in build_agent_functions(
@@ -205,6 +204,7 @@ def build_agent(
     agent.system_prompt = unformatted_system_prompt.format(
         engine_help=agent.engine.help
     )
+    agent.prompt = prompt
     if bootstrap:
         agent.bootstrap = [bootstrap]
     return agent

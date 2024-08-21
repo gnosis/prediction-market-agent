@@ -197,12 +197,12 @@ def test_evaluate_goal_progress_0() -> None:
             ChatMessage(role="user", content="Bet successfully placed."),
         ]
     )
-    evaluated_goal = goal_manager.evaluate_goal_progress(
+    goal_evaluation = goal_manager.evaluate_goal_progress(
         goal=goal,
         chat_history=chat_history0,
     )
-    assert evaluated_goal.is_complete is True
-    assert evaluated_goal.output == None
+    assert goal_evaluation.is_complete is True
+    assert goal_evaluation.output == None
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
@@ -234,13 +234,14 @@ def test_evaluate_goal_progress_1() -> None:
             ChatMessage(role="user", content="The reasoning has been recorded."),
         ]
     )
-    evaluated_goal = goal_manager.evaluate_goal_progress(
+    goal_evaluation = goal_manager.evaluate_goal_progress(
         goal=goal,
         chat_history=chat_history0,
     )
-    assert evaluated_goal.is_complete is True
-    assert "Tadej Pogacar" in evaluated_goal.output
-    assert "0.27" in evaluated_goal.output
+    assert goal_evaluation.is_complete is True
+    assert goal_evaluation.output is not None
+    assert "Tadej Pogacar" in goal_evaluation.output
+    assert "0.27" in goal_evaluation.output
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
@@ -269,9 +270,9 @@ def test_evaluate_goal_progress_2() -> None:
             ),
         ]
     )
-    evaluated_goal = goal_manager.evaluate_goal_progress(
+    goal_evaluation = goal_manager.evaluate_goal_progress(
         goal=goal,
         chat_history=chat_history0,
     )
-    assert evaluated_goal.is_complete is False
-    assert evaluated_goal.output == None
+    assert goal_evaluation.is_complete is False
+    assert goal_evaluation.output == None

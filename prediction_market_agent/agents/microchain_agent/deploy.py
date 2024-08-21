@@ -3,7 +3,10 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.goal_manager import GoalManager
-from prediction_market_agent.agents.microchain_agent.memory import ChatMessage
+from prediction_market_agent.agents.microchain_agent.memory import (
+    ChatHistory,
+    ChatMessage,
+)
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
@@ -76,14 +79,15 @@ class DeployableMicrochainAgent(DeployableAgent):
         agent.run(self.n_iterations)
 
         if self.goal_manager:
-            evaluated_goal = self.goal_manager.evaluate_goal_progress(
-                goal=goal, chat_history=agent.history
+            goal_evaluation = self.goal_manager.evaluate_goal_progress(
+                goal=goal,
+                chat_history=ChatHistory.from_list_of_dicts(agent.history),
             )
-            self.goal_manager.save_evaluated_goal(evaluated_goal)
+            self.goal_manager.save_evaluated_goal(goal=goal, evaluation=goal_evaluation)
             agent.history.append(
                 ChatMessage(
                     role="user",
-                    content=str(evaluated_goal),
+                    content=str(f"# Goal evaluation\n{goal_evaluation}"),
                 ).model_dump()
             )
 
@@ -127,3 +131,23 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
+
+
+class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
+    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
+    model = SupportedModel.gpt_4o
+    goal_manager = GoalManager(
+        agent_id=task_description,
+        high_level_description="You are a trader agent in prediction markets to maximise your profit.",
+        agent_capabilities=(
+            "You are able to:"
+            "\n- List all binary markets that can be traded."
+            "\n- List the current outcome probabilities for each open market."
+            "\n- Predict the outcome probability for a market."
+            "\n- Buy, sell and hold outcome tokens in a market."
+            "\n- Query your wallet balance, and the positions you hold in open markets."
+            "\n- Query the past bets you've made, and their outcomes."
+        ),
+        retry_limit=3,
+    )
+    n_iterations = 100

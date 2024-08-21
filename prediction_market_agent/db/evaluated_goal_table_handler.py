@@ -32,3 +32,12 @@ class EvaluatedGoalTableHandler:
             limit=limit,
         )
         return list(items)
+
+    def delete_all_evaluated_goals(self) -> None:
+        """
+        Delete all evaluated goals with `agent_id`
+        """
+        self.sql_handler.delete_all_entries(
+            col_name=EvaluatedGoalModel.agent_id.key,  # type: ignore
+            col_value=self.agent_id,
+        )
