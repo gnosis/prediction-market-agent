@@ -8,6 +8,8 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 from tests.utils import RUN_PAID_TESTS
 
+SQLITE_DB_URL = "sqlite://"
+
 
 def test_have_reached_retry_limit() -> None:
     goal_manager = GoalManager(
@@ -111,6 +113,7 @@ def test_generate_goal() -> None:
             "- Accurate predictions of the probability of yes/no outcomes for a given event."
         ),
         model=DEFAULT_OPENAI_MODEL,
+        sqlalchemy_db_url=SQLITE_DB_URL,
     )
     goal0 = goal_manager.generate_goal(latest_evaluated_goals=[])
 
@@ -175,6 +178,7 @@ def test_evaluate_goal_progress_0() -> None:
         high_level_description="",  # Not relevant to test
         agent_capabilities="",  # Not relevant to test
         model=DEFAULT_OPENAI_MODEL,
+        sqlalchemy_db_url=SQLITE_DB_URL,
     )
     goal = Goal(
         goal="If last year's TdF winner is competing this year, place a small bet on them.",
@@ -217,6 +221,7 @@ def test_evaluate_goal_progress_1() -> None:
         high_level_description="",  # Not relevant to test
         agent_capabilities="",  # Not relevant to test
         model=DEFAULT_OPENAI_MODEL,
+        sqlalchemy_db_url=SQLITE_DB_URL,
     )
     goal = Goal(
         goal="If last year's TdF winner is competing this year, get their probability of winning.",
@@ -254,6 +259,7 @@ def test_evaluate_goal_progress_2() -> None:
         high_level_description="",  # Not relevant to test
         agent_capabilities="",  # Not relevant to test
         model=DEFAULT_OPENAI_MODEL,
+        sqlalchemy_db_url=SQLITE_DB_URL,
     )
     goal = Goal(
         goal="If last year's TdF winner is competing this year, get their probability of winning.",
