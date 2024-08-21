@@ -13,6 +13,9 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.betting_strategies.stretch_bet_between import (
     stretch_bet_between,
 )
+from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
+    TavilyStorage,
+)
 from prediction_market_agent_tooling.tools.utils import (
     prob_uncertainty,
     should_not_happen,
@@ -80,15 +83,31 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4o-2024-08-06")
+    agent = PredictionProphetAgent(
+        model="gpt-4o-2024-08-06",
+        tavily_storage=TavilyStorage(agent_id="DeployablePredictionProphetGPT4oAgent"),
+        logger=logger,
+    )
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-0125-preview")
+    agent = PredictionProphetAgent(
+        model="gpt-4-0125-preview",
+        tavily_storage=TavilyStorage(
+            agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
+        ),
+        logger=logger,
+    )
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(model="gpt-4-turbo-2024-04-09")
+    agent = PredictionProphetAgent(
+        model="gpt-4-turbo-2024-04-09",
+        tavily_storage=TavilyStorage(
+            agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
+        ),
+        logger=logger,
+    )
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
