@@ -7,6 +7,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
     redeem_from_all_user_positions,
 )
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,6 +25,7 @@ from prediction_market_agent.utils import APIKeys
 REPLICATOR_ADDRESS = Web3.to_checksum_address(
     "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
 )
+REPLICATOR_TAG = "replicator"
 
 
 class ReplicateConfig(BaseModel):
@@ -49,8 +51,14 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         if market_type != MarketType.OMEN:
             raise RuntimeError("Can replicate only into Omen.")
 
-        keys = APIKeys()
         settings = ReplicateSettings()
+        self.replicate(settings)
+
+    @observe()
+    def replicate(self, settings: ReplicateSettings) -> None:
+        self.langfuse_update_current_trace(tags=[REPLICATOR_TAG])
+
+        keys = APIKeys()
         now = utcnow()
 
         logger.info(

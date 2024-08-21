@@ -11,14 +11,14 @@ st.set_page_config(layout="wide")
 from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
-
+import time
 import typing as t
 
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
-from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
@@ -114,44 +114,41 @@ def agent_app() -> None:
             f"Current probability {market.current_p_yes * 100:.2f}% at {market.url}."
         )
 
+    skip_market_verification = st.checkbox(
+        "Skip market verification", value=False, key="skip_market_verification"
+    )
+
     for idx, (column, AgentClass) in enumerate(
         zip(st.columns(len(agent_classes)), agent_classes)
     ):
         with column:
-            agent = AgentClass()
+            agent = AgentClass(
+                place_bet=False,
+                enable_langfuse=APIKeys().default_enable_langfuse
+                and not custom_question_input  # Don't store custom inputs, as we won't have true data for them.
+                and not skip_market_verification,  # Don't store unverified markets, as they wouldn't be predicted anyway.
+            )
+            start_time = time.time()
 
-            # This needs to be a separate block to measure the time and cost and then write it into the column section.
-            with openai_costs(agent.model) as costs:
-                # Show the agent's title.
-                st.write(
-                    f"## {agent.__class__.__name__.replace('Deployable', '').replace('Agent', '')}"
+            # Show the agent's title.
+            st.write(
+                f"## {agent.__class__.__name__.replace('Deployable', '').replace('Agent', '')}"
+            )
+
+            with st.spinner("Agent is processing the market..."):
+                processed_market = agent.process_market(
+                    market_source, market, verify_market=not skip_market_verification
                 )
 
-                # Simulate deployable agent logic.
-                with st.spinner("Agent is verifying the market..."):
-                    if not agent.pick_markets(market_source, [market]):
-                        st.warning("Agent wouldn't pick this market to bet on.")
-                        if not st.checkbox(
-                            "Continue with the prediction anyway",
-                            value=False,
-                            key=f"continue_{idx}",
-                        ):
-                            continue
+            if processed_market is None:
+                st.error("Agent failed to process this market.")
+                continue
 
-                with st.spinner("Agent is making a decision..."):
-                    answer = agent.answer_binary_market(market)
-
-                if answer is None:
-                    st.error("Agent failed to answer this market.")
-                    continue
-
-                with st.spinner("Agent is calculating the bet amount..."):
-                    bet_amount = agent.calculate_bet_amount(answer, market)
-
-            st.warning(f"Took {costs.time / 60:.2f} minutes and {costs.cost:.2f} USD.")
+            end_time = time.time() - start_time
+            st.warning(f"Took {end_time / 60:.2f} minutes.")
             st.success(
                 streamlit_escape(
-                    f"Would bet {bet_amount.amount} {bet_amount.currency} on {answer}!"
+                    f"Would bet {processed_market.amount.amount} {processed_market.amount.currency} on {processed_market.answer}!"
                 )
             )
 

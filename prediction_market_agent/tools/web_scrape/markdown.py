@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from requests import Response
 
 
@@ -19,6 +20,7 @@ def fetch_html(url: str, timeout: int) -> Response:
     return response
 
 
+@observe()
 def web_scrape(url: str, timeout: int = 10) -> str:
     """
     Taken from agentcoinorg/predictionprophet
