@@ -14,7 +14,6 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     PineconeMetadata,
@@ -135,9 +134,7 @@ class PineconeHandler:
             n_elements = 100
             chunked_texts = list(self.chunks(texts, n_elements))
             chunked_metadatas = list(self.chunks(metadatas, n_elements))
-            for text_chunk, metadata_chunk in tqdm(
-                zip(chunked_texts, chunked_metadatas), total=len(chunked_texts)
-            ):
+            for text_chunk, metadata_chunk in zip(chunked_texts, chunked_metadatas):
                 ids_chunk = [self.encode_text(text) for text in text_chunk]
                 logger.debug(f"Inserting {len(text_chunk)} into the vector database.")
                 self.insert_texts(
