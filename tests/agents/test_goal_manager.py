@@ -17,6 +17,7 @@ def test_have_reached_retry_limit() -> None:
         high_level_description="foo",
         agent_capabilities="bar",
         retry_limit=0,
+        sqlalchemy_db_url=SQLITE_DB_URL,
     )
 
     g0 = EvaluatedGoal(
