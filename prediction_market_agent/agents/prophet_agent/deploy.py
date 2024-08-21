@@ -83,32 +83,46 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4o-2024-08-06",
-        tavily_storage=TavilyStorage(agent_id="DeployablePredictionProphetGPT4oAgent"),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4o-2024-08-06",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4-0125-preview",
-        tavily_storage=TavilyStorage(
-            agent_id="DeployablePredictionProphetGPT4TurboPreviewAgent"
-        ),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4-0125-preview",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
-    agent = PredictionProphetAgent(
-        model="gpt-4-turbo-2024-04-09",
-        tavily_storage=TavilyStorage(
-            agent_id="DeployablePredictionProphetGPT4TurboFinalAgent"
-        ),
-        logger=logger,
-    )
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4-turbo-2024-04-09",
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
-    agent = OlasAgent(model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai)
+    agent: OlasAgent
+
+    def load(self) -> None:
+        super().load()
+        self.agent = OlasAgent(
+            model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
+        )
