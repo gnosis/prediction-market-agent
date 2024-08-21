@@ -52,7 +52,7 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         if self.goal_manager:
             goal = self.goal_manager.get_goal()
-            prompt = goal.goal
+            prompt = goal.to_prompt()
         else:
             prompt = None
 

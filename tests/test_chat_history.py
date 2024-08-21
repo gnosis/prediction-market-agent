@@ -5,6 +5,8 @@ import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import (
+    ChatHistory,
+    ChatMessage,
     DatedChatHistory,
     DatedChatMessage,
 )
@@ -72,4 +74,16 @@ def test_save_to_and_load_from_memory(
     assert (
         new_chat_history.to_undated_chat_history()
         == chat_history.to_undated_chat_history()
+    )
+
+
+def test_stringified_chat_history() -> None:
+    chat_history = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+            ChatMessage(role="user", content="What is the weather like today?"),
+        ]
+    )
+    assert str(chat_history) == (
+        "system: You are a helpful assistant.\nuser: What is the weather like today?"
     )

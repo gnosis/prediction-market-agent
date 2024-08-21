@@ -1,6 +1,11 @@
 import pytest
 
-from prediction_market_agent.agents.goal_manager import EvaluatedGoal, GoalManager
+from prediction_market_agent.agents.goal_manager import EvaluatedGoal, Goal, GoalManager
+from prediction_market_agent.agents.microchain_agent.memory import (
+    ChatHistory,
+    ChatMessage,
+)
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 from tests.utils import RUN_PAID_TESTS
 
 
@@ -105,6 +110,7 @@ def test_generate_goal() -> None:
             "- Web scraping\n"
             "- Accurate predictions of the probability of yes/no outcomes for a given event."
         ),
+        model=DEFAULT_OPENAI_MODEL,
     )
     goal0 = goal_manager.generate_goal(latest_evaluated_goals=[])
 
@@ -126,14 +132,146 @@ def test_generate_goal() -> None:
     assert "Tour de France" not in goal2.goal
 
 
-@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
-def test_evaluate_goal_progress() -> None:
-    goal_manager = GoalManager(
-        agent_id="test_agent",
-        high_level_description="You are a gambler that focuses on cycling races, predominantly the Tour de France.",
-        agent_capabilities=(
-            "- Web search\n"
-            "- Web scraping\n"
-            "- Accurate predictions of the probability of yes/no outcomes for a given event."
-        ),
+def test_get_chat_history_after_goal_prompt() -> None:
+    goal = Goal(goal="Foo", motivation="Bar", completion_criteria="Baz")
+    assistant_message = ChatMessage(role="assistant", content="The answer is 42.")
+    chat_history = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+            ChatMessage(role="user", content=goal.to_prompt()),
+            assistant_message,
+        ]
     )
+    assert GoalManager.get_chat_history_after_goal_prompt(
+        goal=goal, chat_history=chat_history
+    ) == ChatHistory(chat_messages=[assistant_message])
+
+
+def test_get_chat_history_after_goal_prompt_error() -> None:
+    goal = Goal(goal="Foo", motivation="Bar", completion_criteria="Baz")
+    assistant_message = ChatMessage(role="assistant", content="The answer is 42.")
+    chat_history = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+        ]
+    )
+    try:
+        GoalManager.get_chat_history_after_goal_prompt(
+            goal=goal, chat_history=chat_history
+        )
+    except ValueError as e:
+        assert str(e) == "Goal prompt not found in chat history"
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+def test_evaluate_goal_progress_0() -> None:
+    """
+    Test for the case where the evaluated goal:
+    - is completed
+    - should have a 'None' output.
+    """
+    goal_manager = GoalManager(
+        agent_id="",  # Not relevant to test
+        high_level_description="",  # Not relevant to test
+        agent_capabilities="",  # Not relevant to test
+        model=DEFAULT_OPENAI_MODEL,
+    )
+    goal = Goal(
+        goal="If last year's TdF winner is competing this year, place a small bet on them.",
+        motivation="The winner of the last Tour de France is likely to be in good form.",
+        completion_criteria="If the winner is competing, place a small bet, otherwise do nothing.",
+    )
+    chat_history0 = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+            ChatMessage(role="user", content=goal.to_prompt()),
+            ChatMessage(
+                role="assistant",
+                content="Searching the web... Yes the winner, Tadej Pogacar, is competing.",
+            ),
+            ChatMessage(role="user", content="The reasoning has been recorded."),
+            ChatMessage(
+                role="assistant",
+                content="The market id is '0x123' for the TdF winner. Placing bet of 0.01 USD on Tadej Pogacar",
+            ),
+            ChatMessage(role="user", content="Bet successfully placed."),
+        ]
+    )
+    evaluated_goal = goal_manager.evaluate_goal_progress(
+        goal=goal,
+        chat_history=chat_history0,
+    )
+    assert evaluated_goal.is_complete is True
+    assert evaluated_goal.output == None
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+def test_evaluate_goal_progress_1() -> None:
+    """
+    Test for the case where the evaluated goal:
+    - is completed
+    - should have a non-'None' output.
+    """
+    goal_manager = GoalManager(
+        agent_id="",  # Not relevant to test
+        high_level_description="",  # Not relevant to test
+        agent_capabilities="",  # Not relevant to test
+        model=DEFAULT_OPENAI_MODEL,
+    )
+    goal = Goal(
+        goal="If last year's TdF winner is competing this year, get their probability of winning.",
+        motivation="The winner of the last Tour de France is likely to be in good form.",
+        completion_criteria="Return the name and odds of last year's winner for this year's TdF.",
+    )
+    chat_history0 = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+            ChatMessage(role="user", content=goal.to_prompt()),
+            ChatMessage(
+                role="assistant",
+                content="Searching the web... Yes the winner, Tadej Pogacar, is competing. His winning probability: p_yes=0.27",
+            ),
+            ChatMessage(role="user", content="The reasoning has been recorded."),
+        ]
+    )
+    evaluated_goal = goal_manager.evaluate_goal_progress(
+        goal=goal,
+        chat_history=chat_history0,
+    )
+    assert evaluated_goal.is_complete is True
+    assert "Tadej Pogacar" in evaluated_goal.output
+    assert "0.27" in evaluated_goal.output
+
+
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
+def test_evaluate_goal_progress_2() -> None:
+    """
+    Test for the case where the evaluated goal is not completed
+    """
+    goal_manager = GoalManager(
+        agent_id="",  # Not relevant to test
+        high_level_description="",  # Not relevant to test
+        agent_capabilities="",  # Not relevant to test
+        model=DEFAULT_OPENAI_MODEL,
+    )
+    goal = Goal(
+        goal="If last year's TdF winner is competing this year, get their probability of winning.",
+        motivation="The winner of the last Tour de France is likely to be in good form.",
+        completion_criteria="Return the name and odds of last year's winner for this year's TdF.",
+    )
+    chat_history0 = ChatHistory(
+        chat_messages=[
+            ChatMessage(role="system", content="You are a helpful assistant."),
+            ChatMessage(role="user", content=goal.to_prompt()),
+            ChatMessage(
+                role="assistant",
+                content="Uhoh, I've hit some exception and need to quit",
+            ),
+        ]
+    )
+    evaluated_goal = goal_manager.evaluate_goal_progress(
+        goal=goal,
+        chat_history=chat_history0,
+    )
+    assert evaluated_goal.is_complete is False
+    assert evaluated_goal.output == None

@@ -33,6 +33,19 @@ The goal should satisfy the following:
 {format_instructions}
 """
 
+EVALUATE_GOAL_PROGRESS_PROMPT_TEMPLATE = """
+An agent and user are working together to achieve a well defined goal.
+Given their chat history, and the goal definition, evaluate whether the goal has been completed.
+
+[GOAL]
+{goal_prompt}
+
+[CHAT HISTORY]
+{chat_history}
+
+{format_instructions}
+"""
+
 
 class Goal(BaseModel):
     goal: str = Field(..., description="A clear description of the goal")
@@ -42,8 +55,16 @@ class Goal(BaseModel):
         description="The criteria that will be used to evaluate whether the goal has been completed",
     )
 
+    def to_prompt(self) -> str:
+        return (
+            f"{self.goal}"
+            f"\n\n"
+            f"## Motivation\n{self.motivation}"
+            f"## Completion Criteria:\n\n{self.completion_criteria}"
+        )
 
-class EvaluatedGoal(Goal):
+
+class GoalEvaluation(BaseModel):
     reasoning: str = Field(
         ..., description="An explanation of why the goal is deemed completed or not"
     )
@@ -53,7 +74,13 @@ class EvaluatedGoal(Goal):
         description="If the goal description implied a 'return value', and the goal is complete, this field should contain the output",
     )
 
-    def __repr__(self) -> str:
+
+class EvaluatedGoal(Goal):
+    reasoning: str
+    is_complete: bool
+    output: str | None
+
+    def __str__(self) -> str:
         return (
             f"Goal: {self.goal}\n"
             f"Motivation: {self.motivation}\n"
@@ -62,9 +89,6 @@ class EvaluatedGoal(Goal):
             f"Reasoning: {self.reasoning}\n"
             f"Output: {self.output}"
         )
-
-    def __str__(self) -> str:
-        return self.__repr__()
 
     @classmethod
     def from_model(cls, model: EvaluatedGoalModel) -> "EvaluatedGoal":
@@ -203,19 +227,54 @@ class GoalManager:
 
         return self.generate_goal(latest_evaluated_goals=[])
 
+    @classmethod
+    def get_chat_history_after_goal_prompt(
+        cls, goal: Goal, chat_history: ChatHistory
+    ) -> ChatHistory:
+        """
+        Return the chat history after the goal prompt, or None if the goal
+        prompt is not found.
+        """
+        for i, chat_message in enumerate(chat_history.chat_messages):
+            if chat_message.content == goal.to_prompt():
+                return ChatHistory(chat_messages=chat_history.chat_messages[i + 1 :])
+        raise ValueError("Goal prompt not found in chat history")
+
     def evaluate_goal_progress(
         self,
         goal: Goal,
         chat_history: ChatHistory,
     ) -> EvaluatedGoal:
-        # TODO
+        relevant_chat_history = self.get_chat_history_after_goal_prompt(
+            goal=goal,
+            chat_history=chat_history,
+        )
+        parser = PydanticOutputParser(pydantic_object=GoalEvaluation)
+        prompt = PromptTemplate(
+            template=EVALUATE_GOAL_PROGRESS_PROMPT_TEMPLATE,
+            input_variables=["goal_prompt", "chat_history"],
+            partial_variables={"format_instructions": parser.get_format_instructions()},
+        )
+        llm = ChatOpenAI(
+            temperature=0,
+            model=self.model,
+            api_key=APIKeys().openai_api_key_secretstr_v1,
+        )
+        chain = prompt | llm | parser
+
+        goal_evaluation: GoalEvaluation = chain.invoke(
+            {
+                "goal_prompt": goal.to_prompt(),
+                "chat_history": str(relevant_chat_history),
+            }
+        )
         return EvaluatedGoal(
             goal=goal.goal,
             motivation=goal.motivation,
             completion_criteria=goal.completion_criteria,
-            is_complete=False,
-            reasoning="",
-            output="",
+            is_complete=goal_evaluation.is_complete,
+            reasoning=goal_evaluation.reasoning,
+            output=goal_evaluation.output,
         )
 
     def save_evaluated_goal(self, goal: EvaluatedGoal) -> None:
