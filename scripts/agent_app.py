@@ -123,6 +123,7 @@ def agent_app() -> None:
     ):
         with column:
             agent = AgentClass(
+                place_bet=False,
                 enable_langfuse=APIKeys().default_enable_langfuse
                 and not custom_question_input  # Don't store custom inputs, as we won't have true data for them.
                 and not skip_market_verification  # Don't store unverified markets, as they wouldn't be predicted anyway.
