@@ -3,6 +3,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.goal_manager import GoalManager
+from prediction_market_agent.agents.microchain_agent.memory import ChatMessage
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
@@ -74,6 +75,18 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         agent.run(self.n_iterations)
 
+        if self.goal_manager:
+            evaluated_goal = self.goal_manager.evaluate_goal_progress(
+                goal=goal, chat_history=agent.history
+            )
+            self.goal_manager.save_evaluated_goal(evaluated_goal)
+            agent.history.append(
+                ChatMessage(
+                    role="user",
+                    content=str(evaluated_goal),
+                ).model_dump()
+            )
+
         save_agent_history(
             agent=agent,
             long_term_memory=long_term_memory,
@@ -81,12 +94,6 @@ class DeployableMicrochainAgent(DeployableAgent):
         )
         if agent.system_prompt != initial_formatted_system_prompt:
             prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
-
-        if self.goal_manager:
-            evaluated_goal = self.goal_manager.evaluate_goal_progress(
-                goal=goal, chat_history=agent.history
-            )
-            self.goal_manager.save_evaluated_goal(evaluated_goal)
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
@@ -120,14 +127,3 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
-
-
-class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
-    goal_manager = GoalManager(
-        agent_id=task_description,
-        high_level_description="foo",  # TODO
-        agent_capabilities="bar",  # TODO
-        retry_limit=3,
-    )
-    model = SupportedModel.gpt_4o
