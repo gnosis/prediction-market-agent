@@ -150,4 +150,3 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
         ),
         retry_limit=3,
     )
-    n_iterations = 100
