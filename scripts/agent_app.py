@@ -11,10 +11,12 @@ st.set_page_config(layout="wide")
 from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
+import gc
 import time
 import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -62,6 +64,45 @@ AGENTS: list[SupportedAgentType] = [
 add_sink_to_logger()
 
 
+def predict(
+    AgentClass: SupportedAgentType,
+    market_source: MarketType,
+    market: AgentMarket,
+    skip_market_verification: bool,
+    enable_langfuse: bool,
+) -> None:
+    agent = AgentClass(
+        place_bet=False,
+        enable_langfuse=enable_langfuse,
+    )
+
+    start_time = time.time()
+
+    # Show the agent's title.
+    st.write(
+        f"## {agent.__class__.__name__.replace('Deployable', '').replace('Agent', '')}"
+    )
+
+    with st.spinner("Agent is processing the market..."):
+        processed_market = agent.process_market(
+            market_source,
+            market,
+            verify_market=not skip_market_verification,
+        )
+
+    if processed_market is None:
+        st.error("Agent failed to process this market.")
+        return
+
+    end_time = time.time() - start_time
+    st.warning(f"Took {end_time / 60:.2f} minutes.")
+    st.success(
+        streamlit_escape(
+            f"Would bet {processed_market.amount.amount} {processed_market.amount.currency} on {processed_market.answer}!"
+        )
+    )
+
+
 def agent_app() -> None:
     st.title("Agent's decision-making process")
 
@@ -76,20 +117,6 @@ def agent_app() -> None:
         )
     )
     markets = get_binary_markets(42, market_source)
-
-    # Select an agent from the list of available agents.
-    agent_class_names = st.multiselect(
-        "Select agents", [agent_class.__name__ for agent_class in AGENTS]
-    )
-    if not agent_class_names:
-        st.warning("Please select at least one agent.")
-        st.stop()
-
-    # Get the agent classes from the names.
-    agent_classes: list[SupportedAgentType] = []
-    for AgentClass in AGENTS:
-        if AgentClass.__name__ in agent_class_names:
-            agent_classes.append(AgentClass)
 
     # Ask the user to provide a question.
     custom_question_input = st.checkbox("Provide a custom question", value=False)
@@ -118,39 +145,35 @@ def agent_app() -> None:
         "Skip market verification", value=False, key="skip_market_verification"
     )
 
-    for idx, (column, AgentClass) in enumerate(
-        zip(st.columns(len(agent_classes)), agent_classes)
-    ):
+    # Select an agent from the list of available agents.
+    agent_class_names = st.multiselect(
+        "Select agents", [agent_class.__name__ for agent_class in AGENTS]
+    )
+    if not agent_class_names:
+        st.warning("Please select at least one agent.")
+        st.stop()
+
+    # Get the agent classes from the names.
+    agent_classes: list[SupportedAgentType] = []
+    for AgentClass in AGENTS:
+        if AgentClass.__name__ in agent_class_names:
+            agent_classes.append(AgentClass)
+
+    for column, AgentClass in zip(st.columns(len(agent_classes)), agent_classes):
         with column:
-            agent = AgentClass(
-                place_bet=False,
-                enable_langfuse=APIKeys().default_enable_langfuse
-                and not custom_question_input  # Don't store custom inputs, as we won't have true data for them.
-                and not skip_market_verification,  # Don't store unverified markets, as they wouldn't be predicted anyway.
-            )
-            start_time = time.time()
-
-            # Show the agent's title.
-            st.write(
-                f"## {agent.__class__.__name__.replace('Deployable', '').replace('Agent', '')}"
-            )
-
-            with st.spinner("Agent is processing the market..."):
-                processed_market = agent.process_market(
-                    market_source, market, verify_market=not skip_market_verification
+            try:
+                predict(
+                    AgentClass=AgentClass,
+                    market_source=market_source,
+                    market=market,
+                    skip_market_verification=skip_market_verification,
+                    enable_langfuse=APIKeys().default_enable_langfuse
+                    and not custom_question_input  # Don't store custom inputs, as we won't have true data for them.
+                    and not skip_market_verification,  # Don't store unverified markets, as they wouldn't be predicted anyway.
                 )
-
-            if processed_market is None:
-                st.error("Agent failed to process this market.")
-                continue
-
-            end_time = time.time() - start_time
-            st.warning(f"Took {end_time / 60:.2f} minutes.")
-            st.success(
-                streamlit_escape(
-                    f"Would bet {processed_market.amount.amount} {processed_market.amount.currency} on {processed_market.answer}!"
-                )
-            )
+            finally:
+                # Force memory cleanup no matter what.
+                gc.collect()
 
 
 if __name__ == "__main__":
