@@ -1,6 +1,10 @@
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from prediction_market_agent_tooling.tools.langfuse_ import (
+    get_langfuse_langchain_config,
+    observe,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel, Field
 
@@ -155,6 +159,7 @@ class GoalManager:
         )
         return [EvaluatedGoal.from_model(model) for model in evaluated_goal_models]
 
+    @observe()
     def generate_goal(self, latest_evaluated_goals: list[EvaluatedGoal]) -> Goal:
         """
         Generate a new goal based on the high-level description and the latest
@@ -178,6 +183,7 @@ class GoalManager:
             temperature=0,
             model=self.model,
             api_key=APIKeys().openai_api_key_secretstr_v1,
+            config=get_langfuse_langchain_config(),
         )
         chain = prompt | llm | parser
 
@@ -217,8 +223,11 @@ class GoalManager:
             limit=self.retry_limit
         )
         if latest_evaluated_goals:
-            evaluated_goal = latest_evaluated_goals[0]
-            if evaluated_goal.is_complete:
+            # Previous goals have been retrieved from memory. Generate a new
+            # goal based on these, or retry the last on if it did not complete.
+            latest_evaluated_goal = latest_evaluated_goals[0]
+
+            if latest_evaluated_goal.is_complete:
                 # Generate a new goal
                 return self.generate_goal(latest_evaluated_goals)
             else:
@@ -226,8 +235,9 @@ class GoalManager:
                 if self.have_reached_retry_limit(latest_evaluated_goals):
                     return self.generate_goal(latest_evaluated_goals)
                 else:
-                    return evaluated_goal.to_goal()
+                    return latest_evaluated_goal.to_goal()
 
+        # No evaluated goals in memory. Generate a new goal from scratch
         return self.generate_goal(latest_evaluated_goals=[])
 
     @classmethod
@@ -243,6 +253,7 @@ class GoalManager:
                 return ChatHistory(chat_messages=chat_history.chat_messages[i + 1 :])
         raise ValueError("Goal prompt not found in chat history")
 
+    @observe()
     def evaluate_goal_progress(
         self,
         goal: Goal,
@@ -262,6 +273,7 @@ class GoalManager:
             temperature=0,
             model=self.model,
             api_key=APIKeys().openai_api_key_secretstr_v1,
+            config=get_langfuse_langchain_config(),
         )
         chain = prompt | llm | parser
 
