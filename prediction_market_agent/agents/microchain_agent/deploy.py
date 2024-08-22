@@ -1,6 +1,7 @@
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.goal_manager import GoalManager
 from prediction_market_agent.agents.microchain_agent.memory import (
@@ -54,11 +55,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             ),
         )
 
-        if self.goal_manager:
-            goal = self.goal_manager.get_goal()
-            prompt = goal.to_prompt()
-        else:
-            prompt = None
+        goal = self.goal_manager.get_goal() if self.goal_manager else None
 
         agent: Agent = build_agent(
             market_type=market_type,
@@ -70,7 +67,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             functions_config=FunctionsConfig.from_system_prompt_choice(
                 self.system_prompt_choice
             ),
-            prompt=prompt,
+            prompt=goal.to_prompt() if goal else None,
         )
 
         # Save formatted system prompt
@@ -79,6 +76,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         agent.run(self.n_iterations)
 
         if self.goal_manager:
+            goal = check_not_none(goal)
             goal_evaluation = self.goal_manager.evaluate_goal_progress(
                 goal=goal,
                 chat_history=ChatHistory.from_list_of_dicts(agent.history),

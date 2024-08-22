@@ -183,7 +183,6 @@ class GoalManager:
             temperature=0,
             model=self.model,
             api_key=APIKeys().openai_api_key_secretstr_v1,
-            config=get_langfuse_langchain_config(),
         )
         chain = prompt | llm | parser
 
@@ -192,7 +191,8 @@ class GoalManager:
                 "high_level_description": self.high_level_description,
                 "agent_capabilities": self.agent_capabilities,
                 "previous_evaluated_goals": latest_evaluated_goals_str,
-            }
+            },
+            config=get_langfuse_langchain_config(),
         )
         return goal
 
@@ -273,7 +273,6 @@ class GoalManager:
             temperature=0,
             model=self.model,
             api_key=APIKeys().openai_api_key_secretstr_v1,
-            config=get_langfuse_langchain_config(),
         )
         chain = prompt | llm | parser
 
@@ -281,7 +280,8 @@ class GoalManager:
             {
                 "goal_prompt": goal.to_prompt(),
                 "chat_history": str(relevant_chat_history),
-            }
+            },
+            config=get_langfuse_langchain_config(),
         )
         return goal_evaluation
 
