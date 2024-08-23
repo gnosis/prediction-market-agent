@@ -28,6 +28,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
+from prediction_market_agent_tooling.tools.utils import utcnow
 from streamlit_extras.bottom_container import bottom
 
 from prediction_market_agent.agents.microchain_agent.deploy import GENERAL_AGENT_TAG
@@ -59,10 +60,16 @@ MARKET_TYPE = MarketType.OMEN
 AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
 
+st.session_state.session_id = st.session_state.get(
+    "session_id", "StrealitGeneralAgent - " + utcnow().strftime("%Y-%m-%d %H:%M:%S")
+)
+
 
 @observe()
 def run_agent(agent: Agent, iterations: int, model: SupportedModel) -> None:
-    langfuse_context.update_current_trace(tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG])
+    langfuse_context.update_current_trace(
+        tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG], session_id=st.session_state.session_id
+    )
     maybe_initialize_long_term_memory()
     with openai_costs(
         model.value if model.is_openai else None
