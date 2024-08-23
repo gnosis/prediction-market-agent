@@ -62,15 +62,18 @@ class DeployableMicrochainAgent(DeployableAgent):
         # Save formatted system prompt
         initial_formatted_system_prompt = agent.system_prompt
 
-        agent.run(self.n_iterations)
-
-        save_agent_history(
-            agent=agent,
-            long_term_memory=long_term_memory,
-            initial_system_prompt=initial_formatted_system_prompt,
-        )
-        if agent.system_prompt != initial_formatted_system_prompt:
-            prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+        try:
+            agent.run(self.n_iterations)
+        except Exception as e:
+            raise e
+        finally:
+            save_agent_history(
+                agent=agent,
+                long_term_memory=long_term_memory,
+                initial_system_prompt=initial_formatted_system_prompt,
+            )
+            if agent.system_prompt != initial_formatted_system_prompt:
+                prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
