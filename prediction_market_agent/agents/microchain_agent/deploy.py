@@ -136,7 +136,7 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     model = SupportedModel.gpt_4o
     goal_manager = GoalManager(
         agent_id=task_description,
-        high_level_description="You are a trader agent in prediction markets to maximise your profit.",
+        high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
         agent_capabilities=(
             "You are able to:"
             "\n- List all binary markets that can be traded."
