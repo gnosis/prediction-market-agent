@@ -153,7 +153,7 @@ st.subheader("Agent Logs")
 for session in sessions:
     expander_str = (
         f"{session.start_time.strftime('%Y-%m-%d %H:%M:%S')} - "
-        f"{session.end_time.strftime('%Y-%m-%d %H:%M:%S')}    |    "
+        f"{session.end_time.strftime('%Y-%m-%d %H:%M:%S')} | "
         f":blue[Iterations: {session.iterations}]"
     )
     with st.expander(expander_str):
