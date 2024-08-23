@@ -1,5 +1,6 @@
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
@@ -64,6 +65,9 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         try:
             agent.run(self.n_iterations)
+        except Exception as e:
+            logger.error(e)
+            raise e
         finally:
             save_agent_history(
                 agent=agent,
