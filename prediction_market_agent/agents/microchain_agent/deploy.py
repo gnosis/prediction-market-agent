@@ -64,8 +64,6 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         try:
             agent.run(self.n_iterations)
-        except Exception as e:
-            raise e
         finally:
             save_agent_history(
                 agent=agent,
