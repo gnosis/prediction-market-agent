@@ -1,5 +1,6 @@
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
@@ -73,29 +74,36 @@ class DeployableMicrochainAgent(DeployableAgent):
         # Save formatted system prompt
         initial_formatted_system_prompt = agent.system_prompt
 
-        agent.run(self.n_iterations)
+        try:
+            agent.run(self.n_iterations)
+        except Exception as e:
+            logger.error(e)
+            raise e
+        finally:
+            if self.goal_manager:
+                goal = check_not_none(goal)
+                goal_evaluation = self.goal_manager.evaluate_goal_progress(
+                    goal=goal,
+                    chat_history=ChatHistory.from_list_of_dicts(agent.history),
+                )
+                self.goal_manager.save_evaluated_goal(
+                    goal=goal,
+                    evaluation=goal_evaluation,
+                )
+                agent.history.append(
+                    ChatMessage(
+                        role="user",
+                        content=str(f"# Goal evaluation\n{goal_evaluation}"),
+                    ).model_dump()
+                )
 
-        if self.goal_manager:
-            goal = check_not_none(goal)
-            goal_evaluation = self.goal_manager.evaluate_goal_progress(
-                goal=goal,
-                chat_history=ChatHistory.from_list_of_dicts(agent.history),
+            save_agent_history(
+                agent=agent,
+                long_term_memory=long_term_memory,
+                initial_system_prompt=initial_formatted_system_prompt,
             )
-            self.goal_manager.save_evaluated_goal(goal=goal, evaluation=goal_evaluation)
-            agent.history.append(
-                ChatMessage(
-                    role="user",
-                    content=str(f"# Goal evaluation\n{goal_evaluation}"),
-                ).model_dump()
-            )
-
-        save_agent_history(
-            agent=agent,
-            long_term_memory=long_term_memory,
-            initial_system_prompt=initial_formatted_system_prompt,
-        )
-        if agent.system_prompt != initial_formatted_system_prompt:
-            prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+            if agent.system_prompt != initial_formatted_system_prompt:
+                prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(

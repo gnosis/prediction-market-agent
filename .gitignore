@@ -1,4 +1,5 @@
 .env
+.env.monitor
 .agents_workspace
 .cache
 __pycache__
