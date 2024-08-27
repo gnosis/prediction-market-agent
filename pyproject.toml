@@ -36,7 +36,7 @@ functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
 # ToDo - Upgrade to 0.48.3 once PR on PMAT is merged
 #prediction-market-agent-tooling = { version = "^0.48.3", extras = ["langchain", "google"] }
-prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch="338-change-default-betting-strategy-from-amount-==-tiny_bet-direction-==-yes-if-p_yes-05-to-use-kelly-bet" }
+prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch="main" }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"

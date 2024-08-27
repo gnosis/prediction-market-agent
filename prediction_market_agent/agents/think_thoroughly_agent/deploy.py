@@ -42,10 +42,8 @@ class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAge
 
 
 class DeployableThinkThoroughlyProphetResearchAgentKelly(
-    DeployableThinkThoroughlyAgentBase
+    DeployableThinkThoroughlyProphetResearchAgent
 ):
-    agent_class = ThinkThoroughlyWithPredictionProphetResearch
-    model: str = "gpt-4-turbo-2024-04-09"
     strategy = KellyBettingStrategy()
 
 
