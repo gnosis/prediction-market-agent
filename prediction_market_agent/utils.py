@@ -192,7 +192,7 @@ def patch_sqlite3() -> None:
 
         sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
     except ImportError:
-        logger.warning("pysqlite3-binary not found, using sqlite3 instead.")
+        logger.debug("pysqlite3-binary not found, using sqlite3 instead.")
 
 
 def disable_crewai_telemetry() -> None:
