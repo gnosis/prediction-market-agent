@@ -33,6 +33,22 @@ Only output valid Python function calls, without code formatting characters, wit
 Only output a single function call per message.
 Make 'Reasoning' calls frequently - at least every other call.
 """
+
+# This is similar to the TRADING_AGENT_SYSTEM_PROMPT, except that it doesn't
+# contain any specific instructions on what to do. This is appropriate to use
+# for an agent when combined with a user-prompt containing the instructions for
+# the session.
+TRADING_AGENT_SYSTEM_PROMPT_MINIMAL = f"""You are a helpful assistant, who specializes as an expert trader agent in prediction markets.
+
+{NON_UPDATABLE_DIVIDOR}
+
+{{engine_help}}
+
+Only output valid Python function calls, without code formatting characters, without any other text. i.e. it should run if passed to Python's `eval` function.
+Only output a single function call per message.
+Make 'Reasoning' calls frequently - at least every other call. You need to reason step by step.
+"""
+
 # Experimental system prompt for task-solving agent.
 TASK_AGENT_SYSTEM_PROMPT = f"""Act as a task-solving agents that picks up available tasks and solves them for getting rewards.
 
@@ -74,6 +90,7 @@ def build_full_unformatted_system_prompt(system_prompt: str) -> str:
 class SystemPromptChoice(str, Enum):
     JUST_BORN = "just_born"
     TRADING_AGENT = "trading_agent"
+    TRADING_AGENT_MINIMAL = "trading_agent_minimal"
     TASK_AGENT = "task_agent"
 
 
@@ -95,7 +112,10 @@ class FunctionsConfig(BaseModel):
             include_learning_functions = True
             include_trading_functions = True
 
-        elif system_prompt_choice == SystemPromptChoice.TRADING_AGENT:
+        elif system_prompt_choice in [
+            SystemPromptChoice.TRADING_AGENT,
+            SystemPromptChoice.TRADING_AGENT_MINIMAL,
+        ]:
             include_trading_functions = True
 
         elif system_prompt_choice == SystemPromptChoice.TASK_AGENT:
@@ -113,4 +133,5 @@ SYSTEM_PROMPTS: dict[SystemPromptChoice, str] = {
     SystemPromptChoice.JUST_BORN: SYSTEM_PROMPT,
     SystemPromptChoice.TRADING_AGENT: TRADING_AGENT_SYSTEM_PROMPT,
     SystemPromptChoice.TASK_AGENT: TASK_AGENT_SYSTEM_PROMPT,
+    SystemPromptChoice.TRADING_AGENT_MINIMAL: TRADING_AGENT_SYSTEM_PROMPT_MINIMAL,
 }

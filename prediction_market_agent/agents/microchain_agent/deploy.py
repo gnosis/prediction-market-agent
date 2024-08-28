@@ -149,6 +149,7 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
+    system_prompt_choice = SystemPromptChoice.TRADING_AGENT_MINIMAL
 
     def build_goal_manager(
         self,
