@@ -245,5 +245,7 @@ def get_editable_prompt_from_agent(agent: Agent) -> str:
     return extract_updatable_system_prompt(str(agent.system_prompt))
 
 
-def get_functions_summary_list(functions: list[Function]) -> str:
-    return "\n".join([f"- {fname}: {f.description}" for fname, f in functions.items()])
+def get_functions_summary_list(engine: Engine) -> str:
+    return "\n".join(
+        [f"- {fname}: {f.description}" for fname, f in engine.functions.items()]
+    )
