@@ -29,9 +29,10 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
 from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT4KellyAgent,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
-    DeployablePredictionProphetGPT4TurboPreviewAgent, DeployablePredictionProphetGPT4KellyAgent,
+    DeployablePredictionProphetGPT4TurboPreviewAgent,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,

@@ -1,7 +1,7 @@
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount, ProbabilisticAnswer
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
@@ -66,9 +66,3 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
         logger.info(f"No definite answer found for the market {market.url}.")
 
         return None
-
-    def calculate_bet_amount(self, answer: Answer, market: AgentMarket) -> BetAmount:
-        if isinstance(market, OmenAgentMarket):
-            return BetAmount(amount=1.0, currency=market.currency)
-        else:
-            raise NotImplementedError("This agent only supports xDai markets")

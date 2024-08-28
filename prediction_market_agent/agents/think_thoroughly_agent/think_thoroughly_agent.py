@@ -15,7 +15,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from openai import APIError
-from prediction_market_agent_tooling.deploy.agent import Answer, initialize_langfuse
+from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
@@ -281,7 +281,7 @@ class ThinkThoroughlyBase(ABC):
             ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_pydantic=Answer,
+            output_pydantic=ProbabilisticAnswer,
         )
 
         crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
@@ -424,7 +424,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=predictor,
-            output_pydantic=Answer,
+            output_pydantic=ProbabilisticAnswer,
             context=[task_research_one_outcome],
         )
         crew = Crew(
