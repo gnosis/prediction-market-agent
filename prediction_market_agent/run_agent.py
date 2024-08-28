@@ -26,6 +26,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainModifiableSystemPromptAgent2,
     DeployableMicrochainModifiableSystemPromptAgent3,
 )
+from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
     DeployablePredictionProphetGPT4oAgent,
@@ -65,6 +66,7 @@ class RunnableAgent(str, Enum):
     olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
+    omen_cleaner = "omen_cleaner"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -86,6 +88,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
     RunnableAgent.prophet_gpt4_kelly: DeployablePredictionProphetGPT4KellyAgent,
     RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
+    RunnableAgent.omen_cleaner: OmenCleanerAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

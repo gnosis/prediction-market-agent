@@ -82,6 +82,7 @@ class FunctionsConfig(BaseModel):
     include_learning_functions: bool
     include_trading_functions: bool
     include_universal_functions: bool
+    include_agent_functions: bool
 
     @staticmethod
     def from_system_prompt_choice(
@@ -90,9 +91,11 @@ class FunctionsConfig(BaseModel):
         include_trading_functions = False
         include_learning_functions = False
         include_universal_functions = False
+        include_agent_functions = False
 
         if system_prompt_choice == SystemPromptChoice.JUST_BORN:
             include_learning_functions = True
+            include_agent_functions = True
             include_trading_functions = True
 
         elif system_prompt_choice == SystemPromptChoice.TRADING_AGENT:
@@ -100,12 +103,14 @@ class FunctionsConfig(BaseModel):
 
         elif system_prompt_choice == SystemPromptChoice.TASK_AGENT:
             include_universal_functions = True
+            include_agent_functions = True
             include_trading_functions = True
 
         return FunctionsConfig(
             include_trading_functions=include_trading_functions,
             include_learning_functions=include_learning_functions,
             include_universal_functions=include_universal_functions,
+            include_agent_functions=include_agent_functions,
         )
 
 
