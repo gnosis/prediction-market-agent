@@ -13,6 +13,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
     get_editable_prompt_from_agent,
+    get_functions_summary_list,
     get_unformatted_system_prompt,
     save_agent_history,
 )
@@ -35,7 +36,12 @@ class DeployableMicrochainAgent(DeployableAgent):
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN
-    goal_manager: GoalManager | None = None
+
+    def build_goal_manager(
+        self,
+        agent: Agent,
+    ) -> GoalManager | None:
+        return None
 
     def run(
         self,
@@ -56,8 +62,6 @@ class DeployableMicrochainAgent(DeployableAgent):
             ),
         )
 
-        goal = self.goal_manager.get_goal() if self.goal_manager else None
-
         agent: Agent = build_agent(
             market_type=market_type,
             model=self.model,
@@ -68,8 +72,11 @@ class DeployableMicrochainAgent(DeployableAgent):
             functions_config=FunctionsConfig.from_system_prompt_choice(
                 self.system_prompt_choice
             ),
-            prompt=goal.to_prompt() if goal else None,
         )
+
+        if goal_manager := self.build_goal_manager(agent=agent):
+            goal = goal_manager.get_goal()
+        agent.prompt = (goal.to_prompt() if goal else None,)
 
         # Save formatted system prompt
         initial_formatted_system_prompt = agent.system_prompt
@@ -80,13 +87,13 @@ class DeployableMicrochainAgent(DeployableAgent):
             logger.error(e)
             raise e
         finally:
-            if self.goal_manager:
+            if goal_manager:
                 goal = check_not_none(goal)
-                goal_evaluation = self.goal_manager.evaluate_goal_progress(
+                goal_evaluation = goal_manager.evaluate_goal_progress(
                     goal=goal,
                     chat_history=ChatHistory.from_list_of_dicts(agent.history),
                 )
-                self.goal_manager.save_evaluated_goal(
+                goal_manager.save_evaluated_goal(
                     goal=goal,
                     evaluation=goal_evaluation,
                 )
@@ -142,17 +149,14 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
-    goal_manager = GoalManager(
-        agent_id=task_description,
-        high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
-        agent_capabilities=(
-            "You are able to:"
-            "\n- List all binary markets that can be traded."
-            "\n- List the current outcome probabilities for each open market."
-            "\n- Predict the outcome probability for a market."
-            "\n- Buy, sell and hold outcome tokens in a market."
-            "\n- Query your wallet balance, and the positions you hold in open markets."
-            "\n- Query the past bets you've made, and their outcomes."
-        ),
-        retry_limit=3,
-    )
+
+    def build_goal_manager(
+        self,
+        agent: Agent,
+    ) -> GoalManager | None:
+        return GoalManager(
+            agent_id=self.task_description,
+            high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
+            agent_capabilities=f"You have the following capabilities:\n{get_functions_summary_list(agent.engine.functions)}",
+            retry_limit=3,
+        )

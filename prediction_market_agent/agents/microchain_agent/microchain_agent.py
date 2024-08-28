@@ -147,7 +147,6 @@ def build_agent(
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
     bootstrap: str | None = None,
-    prompt: str | None = None,
     raise_on_error: bool = True,
 ) -> Agent:
     engine = Engine()
@@ -204,7 +203,6 @@ def build_agent(
     agent.system_prompt = unformatted_system_prompt.format(
         engine_help=agent.engine.help
     )
-    agent.prompt = prompt
     if bootstrap:
         agent.bootstrap = [bootstrap]
     return agent
@@ -245,3 +243,7 @@ def save_agent_history(
 
 def get_editable_prompt_from_agent(agent: Agent) -> str:
     return extract_updatable_system_prompt(str(agent.system_prompt))
+
+
+def get_functions_summary_list(functions: list[Function]) -> str:
+    return "\n".join([f"- {fname}: {f.description}" for fname, f in functions.items()])
