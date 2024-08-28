@@ -171,6 +171,7 @@ agent = build_agent(
         include_trading_functions=True,  # placeholder, not used
         include_learning_functions=True,  # placeholder, not used
         include_universal_functions=True,  # placeholder, not used
+        include_agent_functions=True,  # placeholder, not used
     ),
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
