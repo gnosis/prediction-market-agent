@@ -29,6 +29,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
 from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT4KellyAgent,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
@@ -42,6 +43,7 @@ from prediction_market_agent.agents.social_media_agent.deploy import (
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
+    DeployableThinkThoroughlyProphetResearchAgentKelly,
 )
 
 
@@ -50,6 +52,7 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     think_thoroughly_prophet = "think_thoroughly_prophet"
+    think_thoroughly_prophet_kelly = "think_thoroughly_prophet_kelly"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
     microchain_modifiable_system_prompt_0 = "microchain_modifiable_system_prompt_0"
@@ -60,6 +63,7 @@ class RunnableAgent(str, Enum):
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
+    prophet_gpt4_kelly = "prophet_gpt4_kelly"
     olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
@@ -71,6 +75,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.think_thoroughly_prophet: DeployableThinkThoroughlyProphetResearchAgent,
+    RunnableAgent.think_thoroughly_prophet_kelly: DeployableThinkThoroughlyProphetResearchAgentKelly,
     RunnableAgent.knownoutcome: DeployableKnownOutcomeAgent,
     RunnableAgent.microchain: DeployableMicrochainAgent,
     RunnableAgent.microchain_modifiable_system_prompt_0: DeployableMicrochainModifiableSystemPromptAgent0,
@@ -82,6 +87,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
+    RunnableAgent.prophet_gpt4_kelly: DeployablePredictionProphetGPT4KellyAgent,
     RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
     RunnableAgent.omen_cleaner: OmenCleanerAgent,
 }
@@ -90,8 +96,11 @@ APP = typer.Typer(pretty_exceptions_enable=False)
 
 
 @APP.command()
-def main(agent: RunnableAgent, market_type: MarketType) -> None:
-    RUNNABLE_AGENTS[agent]().run(market_type)
+def main(
+    agent: RunnableAgent,
+    market_type: MarketType,
+) -> None:
+    RUNNABLE_AGENTS[agent]().run(market_type=market_type)
 
 
 if __name__ == "__main__":

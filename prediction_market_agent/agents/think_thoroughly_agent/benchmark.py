@@ -60,7 +60,6 @@ class ThinkThoroughlyBenchmark(AbstractBenchmarkedAgent):
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(
-                    decision=result.decision,
                     p_yes=result.p_yes,
                     confidence=result.confidence,
                     info_utility=None,
@@ -85,7 +84,6 @@ class ThinkThoroughlyProphetResearchBenchmark(AbstractBenchmarkedAgent):
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(
-                    decision=result.decision,
                     p_yes=result.p_yes,
                     confidence=result.confidence,
                     info_utility=None,

@@ -15,8 +15,9 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from openai import APIError
-from prediction_market_agent_tooling.deploy.agent import Answer, initialize_langfuse
+from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -269,7 +270,7 @@ class ThinkThoroughlyBase(ABC):
         scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
         created_time: datetime.datetime | None,
         research_report: str | None = None,
-    ) -> Answer:
+    ) -> ProbabilisticAnswer:
         predictor = self._get_predictor(self.model)
 
         task_final_decision = Task(
@@ -280,7 +281,7 @@ class ThinkThoroughlyBase(ABC):
             ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_pydantic=Answer,
+            output_pydantic=ProbabilisticAnswer,
         )
 
         crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
@@ -315,13 +316,13 @@ class ThinkThoroughlyBase(ABC):
         }
         if research_report:
             inputs["research_report"] = research_report
-        output: Answer = crew.kickoff(inputs=inputs)
-        answer_with_scenario = AnswerWithScenario.build_from_answer(
+        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
+        answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
             output, scenario=question, question=question
         )
         self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
-            f"The final prediction is '{output.decision}', with p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
+            f"The final prediction has p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
         return output
 
@@ -331,7 +332,7 @@ class ThinkThoroughlyBase(ABC):
         question: str,
         n_iterations: int = 1,
         created_time: datetime.datetime | None = None,
-    ) -> Answer | None:
+    ) -> ProbabilisticAnswer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
 
@@ -423,7 +424,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=predictor,
-            output_pydantic=Answer,
+            output_pydantic=ProbabilisticAnswer,
             context=[task_research_one_outcome],
         )
         crew = Crew(
@@ -441,7 +442,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
 
         try:
-            output: Answer = crew.kickoff(inputs=inputs)
+            output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
         except (APIError, HTTPError) as e:
             logger.error(
                 f"Could not retrieve response from the model provider because of {e}"
@@ -457,7 +458,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
             return None
 
-        answer_with_scenario = AnswerWithScenario.build_from_answer(
+        answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
             output, scenario=scenario, question=original_question
         )
         return answer_with_scenario
@@ -520,7 +521,6 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         return AnswerWithScenario(
             scenario=scenario,
             original_question=original_question,
-            decision=prediction.outcome_prediction.decision,
             p_yes=prediction.outcome_prediction.p_yes,
             confidence=prediction.outcome_prediction.confidence,
             reasoning=prediction.outcome_prediction.reasoning,  # TODO: Possible improvement: Prophet currently doesn't return reasoning of its prediction, so it's just None all the time.
@@ -532,7 +532,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
         created_time: datetime.datetime | None,
         research_report: str | None = None,
-    ) -> Answer:
+    ) -> ProbabilisticAnswer:
         api_keys = APIKeys()
         report = (
             research_report

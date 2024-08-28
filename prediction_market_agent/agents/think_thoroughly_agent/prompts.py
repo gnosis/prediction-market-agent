@@ -133,7 +133,6 @@ SCENARIO_TO_ASSESS: {scenario_to_assess}"""
 PROBABILITY_CLASS_OUTPUT = """
 Your response should be a JSON string containing the following keys:
 - "reasoning": A free text field that contains a well though out justification for the prediction.
-- "decision": The decision you made. Either `y` (for `Yes`) or `n` (for `No`).
 - "p_yes": Probability that the sentence outcome will be `Yes`. Ranging from 0 (lowest probability) to 1 (maximum probability).
 - "p_no": Probability that the sentence outcome will be `No`. Ranging from 0 (lowest probability) to 1 (maximum probability).
 - "confidence": Indicating the confidence in the estimated probabilities you provided ranging from 0 (lowest confidence) to 1 (maximum confidence). Confidence can be calculated based on the quality and quantity of data used for the estimation.
