@@ -1,5 +1,8 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.deploy.betting_strategy import KellyBettingStrategy
+from prediction_market_agent_tooling.deploy.betting_strategy import (
+    KellyBettingStrategy,
+    MaxAccuracyBettingStrategy,
+)
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -15,6 +18,7 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     model: str
     bet_on_n_markets_per_run = 1
+    strategy = MaxAccuracyBettingStrategy(bet_amount=1)
 
     def load(self) -> None:
         self.agent = self.agent_class(
