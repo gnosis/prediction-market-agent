@@ -22,6 +22,8 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
+GENERAL_AGENT_TAG = "general_agent"
+
 
 class DeployableMicrochainAgent(DeployableAgent):
     model = SupportedModel.gpt_4o
@@ -38,6 +40,10 @@ class DeployableMicrochainAgent(DeployableAgent):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
+        self.langfuse_update_current_trace(
+            tags=[GENERAL_AGENT_TAG, self.system_prompt_choice, self.task_description]
+        )
+
         long_term_memory = LongTermMemoryTableHandler(
             task_description=self.task_description
         )
@@ -58,6 +64,7 @@ class DeployableMicrochainAgent(DeployableAgent):
             functions_config=FunctionsConfig.from_system_prompt_choice(
                 self.system_prompt_choice
             ),
+            enable_langfuse=self.enable_langfuse,
         )
 
         # Save formatted system prompt

@@ -143,6 +143,7 @@ def build_agent(
     model: SupportedModel,
     unformatted_system_prompt: str,
     functions_config: FunctionsConfig,
+    enable_langfuse: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     allow_stop: bool = True,
@@ -156,6 +157,7 @@ def build_agent(
             api_key=keys.openai_api_key.get_secret_value(),
             api_base=api_base,
             temperature=0.7,
+            enable_langfuse=enable_langfuse,
         )
         if model.is_openai
         else (
@@ -165,6 +167,7 @@ def build_agent(
                     model
                 ),
                 api_key=keys.replicate_api_key.get_secret_value(),
+                enable_langfuse=enable_langfuse,
             )
             if model.is_replicate
             else should_not_happen()
@@ -185,6 +188,7 @@ def build_agent(
         llm=LLM(generator=generator),
         engine=engine,
         on_iteration_step=on_iteration_step,
+        enable_langfuse=enable_langfuse,
     )
 
     for f in build_agent_functions(

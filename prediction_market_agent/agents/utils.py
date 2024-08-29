@@ -19,6 +19,8 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
+STREAMLIT_TAG = "streamlit"
+
 
 class AgentIdentifier(str, Enum):
     THINK_THOROUGHLY = "think-thoroughly-agent"
