@@ -1,7 +1,5 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
-    BettingStrategy,
-    KellyBettingStrategy,
     MaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.loggers import logger
@@ -22,7 +20,7 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
-    strategy: BettingStrategy = MaxAccuracyBettingStrategy(bet_amount=1)
+    strategy = MaxAccuracyBettingStrategy(bet_amount=1)
 
     @property
     def model(self) -> str | None:
@@ -73,12 +71,6 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
-
-
-class DeployablePredictionProphetGPT4KellyAgent(
-    DeployablePredictionProphetGPT4TurboFinalAgent
-):
-    strategy = KellyBettingStrategy()
 
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
