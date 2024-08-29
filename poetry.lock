@@ -5141,18 +5141,22 @@ psutil = "*"
 
 [[package]]
 name = "microchain-python"
-version = "0.4.4"
+version = "0.4.5"
 description = ""
 optional = false
 python-versions = "*"
-files = [
-    {file = "microchain_python-0.4.4-py3-none-any.whl", hash = "sha256:b27f7ce318a94342b094d49a0509e5c208166fa1fad4b87b69db75a5fe1c4a9e"},
-    {file = "microchain_python-0.4.4.tar.gz", hash = "sha256:33d2f18856988433f17b512ecc217de9d9fdd97ad50adac3f70cfcee7e490d67"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 pydantic = ">=2,<3"
 termcolor = "2.4.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/galatolofederico/microchain.git"
+reference = "98e601f6b7413ea48fb0b099309d686c4b10ff5c"
+resolved_reference = "98e601f6b7413ea48fb0b099309d686c4b10ff5c"
 
 [[package]]
 name = "mmh3"

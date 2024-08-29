@@ -1,6 +1,9 @@
 import typer
 
 from prediction_market_agent.agents.utils import AgentIdentifier
+from prediction_market_agent.db.evaluated_goal_table_handler import (
+    EvaluatedGoalTableHandler,
+)
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -11,6 +14,7 @@ def main(
     session_id: AgentIdentifier,
     delete_memories: bool = True,
     delete_prompts: bool = True,
+    delete_goals: bool = True,
 ) -> None:
     """
     Delete all memories and prompts for a given agent, defined by the session_id.
@@ -30,6 +34,14 @@ def main(
             raise Exception("Memory entries were not deleted.")
         else:
             print("Memory entries successfully deleted.")
+
+    if delete_goals:
+        evaluated_goal_table_handler = EvaluatedGoalTableHandler(agent_id=session_id)
+        evaluated_goal_table_handler.delete_all_evaluated_goals()
+        if len(evaluated_goal_table_handler.get_latest_evaluated_goals(limit=1)) != 0:
+            raise Exception("Evaluated goal entries were not deleted.")
+        else:
+            print("Evaluated goal entries successfully deleted.")
 
 
 if __name__ == "__main__":

@@ -173,6 +173,7 @@ agent = build_agent(
         include_universal_functions=True,  # placeholder, not used
         include_agent_functions=True,  # placeholder, not used
     ),
+    enable_langfuse=False,  # placeholder, not used
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
 usage_count_col_name = "Usage Count"

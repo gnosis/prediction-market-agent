@@ -19,6 +19,8 @@ from prediction_market_agent.agents.microchain_agent.memory import (
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
+STREAMLIT_TAG = "streamlit"
+
 
 class AgentIdentifier(str, Enum):
     THINK_THOROUGHLY = "think-thoroughly-agent"
@@ -29,6 +31,7 @@ class AgentIdentifier(str, Enum):
     MICROCHAIN_AGENT_OMEN_LEARNING_2 = "general-agent-2"
     MICROCHAIN_AGENT_OMEN_LEARNING_3 = "general-agent-3"
     MICROCHAIN_AGENT_STREAMLIT = "microchain-streamlit-app"
+    MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER = "trader-agent-0-with-goal-manager"
 
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """
