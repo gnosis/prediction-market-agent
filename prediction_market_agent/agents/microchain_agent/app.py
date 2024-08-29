@@ -76,7 +76,8 @@ def run_agent(agent: Agent, iterations: int, model: SupportedModel) -> None:
     ) as costs:  # TODO: Support for Replicate costs (below as well).
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
-                agent.run(iterations=1, resume=True)
+                agent.run(iterations=1, resume=st.session_state.total_iterations > 0)
+                st.session_state.total_iterations += 1
         st.session_state.running_cost += costs.cost
 
 
@@ -162,19 +163,8 @@ def maybe_initialize_agent(
             ),
             enable_langfuse=ENABLE_LANGFUSE,
         )
-        # Use the un-observed version of these if Langfuse is enabled, because we don't want to have separate traces for these.
-        (
-            st.session_state.agent.reset()
-            if not ENABLE_LANGFUSE
-            else st.session_state.agent.reset.__wrapped__()
-        )
-        (
-            st.session_state.agent.build_initial_messages()
-            if not ENABLE_LANGFUSE
-            else st.session_state.agent.build_initial_messages.__wrapped__()
-        )
+        st.session_state.total_iterations = 0
         st.session_state.running_cost = 0.0
-
         # Add a callback to display the agent's history after each run
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
