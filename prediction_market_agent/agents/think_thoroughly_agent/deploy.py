@@ -1,5 +1,7 @@
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.betting_strategy import KellyBettingStrategy
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
@@ -19,7 +21,7 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
             model=self.model, enable_langfuse=self.enable_langfuse
         )
 
-    def answer_binary_market(self, market: AgentMarket) -> Answer | None:
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return self.agent.answer_binary_market(
             market.question, created_time=market.created_time
         )
@@ -37,6 +39,12 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
     model: str = "gpt-4-turbo-2024-04-09"
+
+
+class DeployableThinkThoroughlyProphetResearchAgentKelly(
+    DeployableThinkThoroughlyProphetResearchAgent
+):
+    strategy = KellyBettingStrategy()
 
 
 if __name__ == "__main__":

@@ -76,7 +76,7 @@ class DeployableMicrochainAgent(DeployableAgent):
 
         if goal_manager := self.build_goal_manager(agent=agent):
             goal = goal_manager.get_goal()
-        agent.prompt = goal.to_prompt() if goal else None
+            agent.prompt = goal.to_prompt()
 
         # Save formatted system prompt
         initial_formatted_system_prompt = agent.system_prompt
@@ -154,7 +154,7 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     def build_goal_manager(
         self,
         agent: Agent,
-    ) -> GoalManager | None:
+    ) -> GoalManager:
         return GoalManager(
             agent_id=self.task_description,
             high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
