@@ -6747,8 +6747,8 @@ watchdog = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
-reference = "0f2f6356e593a2f59572696b81a993ccad44eed2"
-resolved_reference = "0f2f6356e593a2f59572696b81a993ccad44eed2"
+reference = "69592d0122bff1271d3e5cd6efdf4e1ef240bc06"
+resolved_reference = "69592d0122bff1271d3e5cd6efdf4e1ef240bc06"
 
 [[package]]
 name = "preshed"
@@ -10747,4 +10747,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "9ed52253a73e218a7cedf214bc7c04ca0ee8e9c2cf7add044eac0e4fcf3ef37c"
+content-hash = "a02424a5edc469e757ff964c40ce11243ed3ba902429a875962a5066db472207"
