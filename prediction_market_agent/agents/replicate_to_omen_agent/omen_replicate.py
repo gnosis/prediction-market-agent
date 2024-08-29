@@ -171,17 +171,11 @@ def omen_replicate_from_tx(
             f"Created `https://aiomen.eth.limo/#/{market_address}` for `{market.question}` in category {category} out of {market.url}."
         )
 
-        if (
-            generate_and_set_image_for_market(
-                market_address,
-                market.question,
-                api_keys,
-            )
-            is not None
-        ):
-            logger.info(f"Generated and set image for `{market.question}`.")
-        else:
-            logger.warning(f"Failed to generate and set image for `{market.question}`.")
+        generate_and_set_image_for_market(
+            market_address,
+            market.question,
+            api_keys,
+        )
 
     return created_addresses
 
