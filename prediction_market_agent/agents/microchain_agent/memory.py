@@ -23,6 +23,9 @@ class ChatMessage(BaseModel):
     def is_system_message(self) -> bool:
         return self.role == "system"
 
+    def __str__(self) -> str:
+        return f"{self.role}: {self.content}"
+
 
 class DatedChatMessage(ChatMessage):
     datetime_: datetime
@@ -97,6 +100,9 @@ class ChatHistory(BaseModel):
             return 0
         else:
             return (self.num_messages - 1) // 2
+
+    def __str__(self) -> str:
+        return "\n".join(str(m) for m in self.chat_messages)
 
 
 class DatedChatHistory(ChatHistory):
