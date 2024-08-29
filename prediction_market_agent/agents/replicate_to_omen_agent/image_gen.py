@@ -44,7 +44,7 @@ def generate_and_set_image_for_market(
         # Roughly one every 30 markets triggers OpenAI's content policy violation, because of the prompt content. We can just skip those.
         if "content_policy_violation" in str(e):
             logger.warning(
-                f"Content policy violation for {market_address=}: {market_question}"
+                f"Image not generated, content policy violation for {market_address=}: {market_question}"
             )
             return None
         raise
@@ -57,5 +57,7 @@ def generate_and_set_image_for_market(
         )
 
     image_mapping_contract.set(api_keys, market_address, ipfs_hash)
+
+    logger.info(f"Set image for {market_address=}: {ipfs_hash=}")
 
     return ipfs_hash
