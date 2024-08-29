@@ -151,7 +151,12 @@ with st.container(border=True):
 
 st.subheader("Agent Logs")
 for session in sessions:
-    with st.expander(f"{session.start_time} - {session.end_time}"):
+    expander_str = (
+        f"{session.start_time.strftime('%Y-%m-%d %H:%M:%S')} - "
+        f"{session.end_time.strftime('%Y-%m-%d %H:%M:%S')} | "
+        f":blue[Iterations: {session.iterations}]"
+    )
+    with st.expander(expander_str):
         display_chat_history(session)
 
 st.subheader("Tool Usage")
@@ -166,6 +171,7 @@ agent = build_agent(
         include_trading_functions=True,  # placeholder, not used
         include_learning_functions=True,  # placeholder, not used
         include_universal_functions=True,  # placeholder, not used
+        include_agent_functions=True,  # placeholder, not used
     ),
     enable_langfuse=False,  # placeholder, not used
 )

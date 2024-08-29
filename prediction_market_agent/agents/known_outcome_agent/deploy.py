@@ -1,7 +1,7 @@
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableTraderAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import BetAmount
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
@@ -41,7 +41,7 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
         else:
             return True
 
-    def answer_binary_market(self, market: AgentMarket) -> Answer | None:
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         try:
             outcome = get_known_outcome(
                 model=self.model,
@@ -54,8 +54,7 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
             )
             outcome = None
         if outcome and outcome.has_known_result():
-            answer = Answer(
-                decision=outcome.result.to_boolean(),
+            answer = ProbabilisticAnswer(
                 p_yes=outcome.result.to_p_yes(),
                 confidence=1.0,
             )
@@ -67,9 +66,3 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
         logger.info(f"No definite answer found for the market {market.url}.")
 
         return None
-
-    def calculate_bet_amount(self, answer: Answer, market: AgentMarket) -> BetAmount:
-        if isinstance(market, OmenAgentMarket):
-            return BetAmount(amount=1.0, currency=market.currency)
-        else:
-            raise NotImplementedError("This agent only supports xDai markets")

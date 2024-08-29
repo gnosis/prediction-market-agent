@@ -1,10 +1,11 @@
 import sys
 from typing import Sequence
 
-from prediction_market_agent_tooling.deploy.agent import Answer, DeployableAgent
+from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.metaculus.metaculus import (
     MetaculusAgentMarket,
@@ -68,9 +69,8 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
                     market.question, created_time=market.created_time
                 )
             else:
-                answer = Answer(
+                answer = ProbabilisticAnswer(
                     p_yes=Probability(0.5),
-                    decision=True,
                     reasoning="Just a test.",
                     confidence=0.5,
                 )

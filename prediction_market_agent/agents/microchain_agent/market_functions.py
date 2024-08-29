@@ -2,6 +2,7 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
+from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     Currency,
@@ -9,8 +10,10 @@ from prediction_market_agent_tooling.markets.data_models import (
     TokenAmount,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import (
+    withdraw_wxdai_to_xdai_to_keep_balance,
+)
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
-    KellyBet,
     get_kelly_bet,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -34,6 +37,9 @@ from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_research,
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
+
+OMEN_MIN_FEE_BALANCE = xdai_type(0.01)
+WITHDRAW_MULTIPLIER = 2
 
 
 class MarketFunction(Function):
@@ -223,6 +229,12 @@ class BuyTokens(MarketFunction):
                 f"large enough to buy {amount} {self.currency} worth of tokens."
             )
 
+        # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
+        if self.market_type == MarketType.OMEN:
+            withdraw_wxdai_to_xdai_to_keep_balance(
+                APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
+            )
+
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
         before_balance = market.get_token_balance(
             user_id=self.user_address,
@@ -283,6 +295,12 @@ class SellTokens(MarketFunction):
         return [get_example_market_id(self.market_type), 2.3]
 
     def __call__(self, market_id: str, amount: float) -> str:
+        # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
+        if self.market_type == MarketType.OMEN:
+            withdraw_wxdai_to_xdai_to_keep_balance(
+                APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
+            )
+
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
         before_balance = market.get_token_balance(
             user_id=self.user_address,
@@ -405,7 +423,7 @@ class GetKellyBet(MarketFunction):
     ) -> str:
         confidence = 0.5  # Until confidence score is available, be conservative
         max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
-        kelly_bet: KellyBet = get_kelly_bet(
+        kelly_bet = get_kelly_bet(
             market_p_yes=market_p_yes,
             estimated_p_yes=estimated_p_yes,
             max_bet=max_bet,
