@@ -5,7 +5,6 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 """
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
-
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
     streamlit_asyncio_event_loop_hack,
@@ -28,6 +27,14 @@ from prediction_market_agent_tooling.gtypes import PrivateKey
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from prediction_market_agent.agents.microchain_agent.deploy import (
+    DeployableMicrochainAgent,
+    DeployableMicrochainModifiableSystemPromptAgent0,
+    DeployableMicrochainModifiableSystemPromptAgent1,
+    DeployableMicrochainModifiableSystemPromptAgent2,
+    DeployableMicrochainModifiableSystemPromptAgent3,
+    DeployableMicrochainWithGoalManagerAgent0,
+)
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
@@ -43,6 +50,14 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.utils import APIKeys
+
+AGENT_IDENTIFIER_TO_CLASS: dict[AgentIdentifier, type[DeployableMicrochainAgent]] = {
+    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0: DeployableMicrochainModifiableSystemPromptAgent0,
+    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1: DeployableMicrochainModifiableSystemPromptAgent1,
+    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2: DeployableMicrochainModifiableSystemPromptAgent2,
+    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3: DeployableMicrochainModifiableSystemPromptAgent3,
+    AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER: DeployableMicrochainWithGoalManagerAgent0,
+}
 
 
 class DeployedGeneralAgentSettings(BaseSettings):
@@ -70,6 +85,9 @@ class DeployedGeneralAgentSettings(BaseSettings):
             BET_FROM_PRIVATE_KEY=self.agent_identifier_to_private_key[identifier]
         )
 
+    def to_agent_description(self, identifier: AgentIdentifier) -> str:
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].description
+
 
 MARKET_TYPE = MarketType.OMEN
 currency = MARKET_TYPE.market_class.currency
@@ -94,6 +112,8 @@ with st.sidebar:
     if task_description is None:
         st.error("Please select an agent.")
         st.stop()
+    else:
+        st.info(settings.to_agent_description(task_description))
 
 keys = settings.to_api_keys(task_description)
 starting_balance = settings.starting_balance
