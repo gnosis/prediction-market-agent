@@ -20,7 +20,7 @@ class FactCheckResult(BaseModel):
     claims_details: list[FactCheckClaimDetails] | None
 
 
-class FackCheckAnswer(BaseModel):
+class FactCheckAnswer(BaseModel):
     factuality: Factuality
     chosen_results: list[FactCheckResult]
     all_considered_results: list[FactCheckResult]

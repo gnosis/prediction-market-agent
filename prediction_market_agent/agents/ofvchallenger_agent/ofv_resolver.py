@@ -9,7 +9,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import (
 )
 
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_models import (
-    FackCheckAnswer,
+    FactCheckAnswer,
     FactCheckResult,
     Factuality,
 )
@@ -93,7 +93,7 @@ def ofv_answer_binary_question(
     market_question: str,
     api_keys: APIKeys,
     n_fact_runs: int = 3,
-) -> FackCheckAnswer | None:
+) -> FactCheckAnswer | None:
     """
     Run the prediction market resolver based on Open Fact Verifier.
     """
@@ -123,7 +123,7 @@ def ofv_answer_binary_question(
         f"Fact check result for `{market_sentence}` is `{most_common_factuality}` because {factresults_with_most_common_factuality[0].claims_details}."
     )
 
-    return FackCheckAnswer(
+    return FactCheckAnswer(
         factuality=most_common_factuality,
         chosen_results=factresults_with_most_common_factuality,
         all_considered_results=factresults,
