@@ -23,11 +23,15 @@ patch_sqlite3()
 
 import streamlit as st
 from microchain import Agent
+from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.costs import openai_costs
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
+from prediction_market_agent_tooling.tools.utils import utcnow
 from streamlit_extras.bottom_container import bottom
 
+from prediction_market_agent.agents.microchain_agent.deploy import GENERAL_AGENT_TAG
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
@@ -45,7 +49,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
     has_been_run_past_initialization,
 )
-from prediction_market_agent.agents.utils import AgentIdentifier
+from prediction_market_agent.agents.utils import STREAMLIT_TAG, AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -56,15 +60,24 @@ MARKET_TYPE = MarketType.OMEN
 AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
 
+st.session_state.session_id = st.session_state.get(
+    "session_id", "StrealitGeneralAgent - " + utcnow().strftime("%Y-%m-%d %H:%M:%S")
+)
 
+
+@observe()
 def run_agent(agent: Agent, iterations: int, model: SupportedModel) -> None:
+    langfuse_context.update_current_trace(
+        tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG], session_id=st.session_state.session_id
+    )
     maybe_initialize_long_term_memory()
     with openai_costs(
         model.value if model.is_openai else None
     ) as costs:  # TODO: Support for Replicate costs (below as well).
         with st.spinner("Agent is running..."):
             for _ in range(iterations):
-                agent.run(iterations=1, resume=True)
+                agent.run(iterations=1, resume=st.session_state.total_iterations > 0)
+                st.session_state.total_iterations += 1
         st.session_state.running_cost += costs.cost
 
 
@@ -137,6 +150,7 @@ def maybe_initialize_agent(
 
     # Initialize the agent
     if not agent_is_initialized():
+        initialize_langfuse(ENABLE_LANGFUSE)
         st.session_state.agent = build_agent(
             market_type=MARKET_TYPE,
             model=model,
@@ -147,11 +161,10 @@ def maybe_initialize_agent(
             functions_config=FunctionsConfig.from_system_prompt_choice(
                 st.session_state.system_prompt_select
             ),
+            enable_langfuse=ENABLE_LANGFUSE,
         )
-        st.session_state.agent.reset()
-        st.session_state.agent.build_initial_messages()
+        st.session_state.total_iterations = 0
         st.session_state.running_cost = 0.0
-
         # Add a callback to display the agent's history after each run
         st.session_state.agent.on_iteration_end = display_new_history_callback
 
@@ -179,6 +192,7 @@ with st.sidebar:
     streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 KEYS = APIKeys()
+ENABLE_LANGFUSE = KEYS.default_enable_langfuse
 maybe_initialize_long_term_memory()
 
 with st.sidebar:
