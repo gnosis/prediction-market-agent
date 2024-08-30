@@ -51,7 +51,7 @@ tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "a3a72424ea5e226d79421c6b88961a32900190cd" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "69592d0122bff1271d3e5cd6efdf4e1ef240bc06" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.1.0"
 
