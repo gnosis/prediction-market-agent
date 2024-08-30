@@ -38,6 +38,7 @@ class DeployableMicrochainAgent(DeployableAgent):
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN
+    description: str
 
     def build_goal_manager(
         self,
@@ -132,18 +133,21 @@ class DeployableMicrochainModifiableSystemPromptAgent0(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
+    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 0."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent1(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
+    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 1."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent2(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
+    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 2."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent3(
@@ -151,12 +155,14 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 ):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
+    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 3. Uses Llama 3.1 model."
 
 
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
     system_prompt_choice = SystemPromptChoice.TRADING_AGENT_MINIMAL
+    description = "Microchain agent woth minimal 'trader' system prompt, and GoalManager, version 0"
 
     def build_goal_manager(
         self,
