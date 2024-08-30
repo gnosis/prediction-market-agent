@@ -12,7 +12,8 @@ APP = typer.Typer()
 
 @persistent_inmemory_cache
 def ofv_answer_binary_question_cached(question: str) -> bool | None:
-    return ofv_answer_binary_question(question, APIKeys()).factuality
+    result = ofv_answer_binary_question(question, APIKeys())
+    return result.factuality if result is not None else None
 
 
 @APP.command()

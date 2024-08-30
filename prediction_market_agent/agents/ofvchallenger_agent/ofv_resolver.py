@@ -93,7 +93,7 @@ def ofv_answer_binary_question(
     market_question: str,
     api_keys: APIKeys,
     n_fact_runs: int = 3,
-) -> FackCheckAnswer:
+) -> FackCheckAnswer | None:
     """
     Run the prediction market resolver based on Open Fact Verifier.
     """
@@ -107,9 +107,7 @@ def ofv_answer_binary_question(
         logger.warning(
             f"Question `{market_question}` is not answerable, skipping fact checking."
         )
-        return FackCheckAnswer(
-            factuality=None, chosen_results=None, all_considered_results=None
-        )
+        return None
 
     # Rewrite the question (which was about a future) into a sentence (which is about the past).
     market_sentence = rewrite_as_sentence(market_question, api_keys)

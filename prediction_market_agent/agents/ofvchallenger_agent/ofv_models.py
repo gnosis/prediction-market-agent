@@ -22,5 +22,5 @@ class FactCheckResult(BaseModel):
 
 class FackCheckAnswer(BaseModel):
     factuality: Factuality
-    chosen_results: list[FactCheckResult] | None
-    all_considered_results: list[FactCheckResult] | None
+    chosen_results: list[FactCheckResult]
+    all_considered_results: list[FactCheckResult]
