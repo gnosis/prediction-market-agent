@@ -51,7 +51,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 )
 from prediction_market_agent.utils import APIKeys
 
-AGENT_IDENTIFIER_TO_CLASS: dict[AgentIdentifier, DeployableMicrochainAgent] = {
+AGENT_IDENTIFIER_TO_CLASS: dict[AgentIdentifier, type[DeployableMicrochainAgent]] = {
     AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0: DeployableMicrochainModifiableSystemPromptAgent0,
     AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1: DeployableMicrochainModifiableSystemPromptAgent1,
     AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2: DeployableMicrochainModifiableSystemPromptAgent2,
