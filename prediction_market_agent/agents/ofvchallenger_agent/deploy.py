@@ -77,11 +77,14 @@ class OFVChallengerAgent(DeployableAgent):
         market: OmenMarket,
         api_keys: APIKeys,
         web3: Web3 | None = None,
-    ) -> None:
+    ) -> Resolution | None:
         logger.info(f"Challenging market {market.url=}")
 
         existing_responses = OmenSubgraphHandler().get_responses(
             question_id=market.question.id
+        )
+        logger.info(
+            f"{market.url=}'s responses: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
         )
 
         # Next bond needs to be at least double the previous one.
@@ -103,7 +106,13 @@ class OFVChallengerAgent(DeployableAgent):
             )
             return
 
-        answer = ofv_answer_binary_question(market.question_title, api_keys)
+        try:
+            answer = ofv_answer_binary_question(market.question_title, api_keys)
+        except Exception as e:
+            logger.exception(
+                f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"
+            )
+            return
 
         if answer is None or answer.factuality is None:
             logger.error(
@@ -112,6 +121,7 @@ class OFVChallengerAgent(DeployableAgent):
             return
 
         resolution = Resolution.from_bool(answer.factuality)
+        logger.info(f"Challenging market {market.url=} with resolution {resolution=}")
 
         omen_submit_answer_market_tx(
             api_keys=api_keys,
@@ -120,3 +130,5 @@ class OFVChallengerAgent(DeployableAgent):
             bond=CHALLENGE_BOND,
             web3=web3,
         )
+
+        return resolution
