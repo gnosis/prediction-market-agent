@@ -32,6 +32,7 @@ OFV_CHALLENGER_SAFE_ADDRESS = Web3.to_checksum_address(
     "0x9D0260500ba7b068b5b0f4AfA9F8864eBc0B059a"
 )
 CHALLENGE_BOND = xdai_type(10)
+# We benchmarked OFV only against Olas market-creators.
 MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
     # Olas market-creator 0.
     Web3.to_checksum_address("0x89c5cc945dd550bcffb72fe42bff002429f46fec"),
