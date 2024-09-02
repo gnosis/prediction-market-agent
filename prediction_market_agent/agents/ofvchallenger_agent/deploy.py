@@ -19,9 +19,6 @@ from web3 import Web3
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
     ofv_answer_binary_question,
 )
-from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
-    REPLICATOR_ADDRESS,
-)
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     claim_all_bonds_on_reality,
 )
@@ -84,7 +81,7 @@ class OFVChallengerAgent(DeployableAgent):
             question_id=market.question.id
         )
         logger.info(
-            f"{market.url=}'s responses: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
+            f"{market.url=}'s responses and bonds: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
         )
 
         # Next bond needs to be at least double the previous one.
@@ -94,17 +91,17 @@ class OFVChallengerAgent(DeployableAgent):
             logger.info(
                 f"Market {market.url=} already challenged with bond > {CHALLENGE_BOND} / 2. Skipping."
             )
-            return
+            return None
 
         # We don't plan to re-challenge markets already challenged by the challenger, should we?
         if any(
-            response.user_checksummed == REPLICATOR_ADDRESS
+            response.user_checksummed == OFV_CHALLENGER_SAFE_ADDRESS
             for response in existing_responses
         ):
             logger.info(
                 f"Market {market.url=} already challenged by replicator. Skipping."
             )
-            return
+            return None
 
         try:
             answer = ofv_answer_binary_question(market.question_title, api_keys)
@@ -112,13 +109,13 @@ class OFVChallengerAgent(DeployableAgent):
             logger.exception(
                 f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"
             )
-            return
+            return None
 
         if answer is None or answer.factuality is None:
             logger.error(
                 f"Failed to get factuality for market {market.url=}, question {market.question_title=}. Skipping."
             )
-            return
+            return None
 
         resolution = Resolution.from_bool(answer.factuality)
         logger.info(f"Challenging market {market.url=} with resolution {resolution=}")
