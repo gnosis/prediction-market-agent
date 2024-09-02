@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.markets.omen.omen_resolving import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe
+from prediction_market_agent_tooling.tools.langfuse_ import observe, langfuse_context
 from prediction_market_agent_tooling.tools.utils import utcnow
 from web3 import Web3
 
@@ -28,8 +28,11 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replica
 from prediction_market_agent.utils import APIKeys
 
 OFV_CHALLENGER_TAG = "ofv_challenger"
-OFV_CHALLENGER_ADDRESS = Web3.to_checksum_address(
+OFV_CHALLENGER_EOA_ADDRESS = Web3.to_checksum_address(
     "0x03aEEE267A985ab9835c025377F0D8209901a928"
+)
+OFV_CHALLENGER_SAFE_ADDRESS = Web3.to_checksum_address(
+    "0x9D0260500ba7b068b5b0f4AfA9F8864eBc0B059a"
 )
 CHALLENGE_BOND = xdai_type(10)
 MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
@@ -75,6 +78,8 @@ class OFVChallengerAgent(DeployableAgent):
         api_keys: APIKeys,
         web3: Web3 | None = None,
     ) -> None:
+        logger.info(f"Challenging market {market.url=}")
+
         existing_responses = OmenSubgraphHandler().get_responses(
             question_id=market.question.id
         )

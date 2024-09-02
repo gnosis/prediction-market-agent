@@ -87,6 +87,8 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
 def claim_all_bonds_on_reality(
     api_keys: APIKeys, finalized_before: datetime | None = None
 ) -> ClaimResult:
+    # Just to be friendly with time differences.
+    finalized_before = finalized_before or utcnow() - timedelta(hours=8)
     public_key = api_keys.bet_from_address
 
     balances_before_claiming = get_balances(public_key)
@@ -98,7 +100,7 @@ def claim_all_bonds_on_reality(
     ] = OmenSubgraphHandler().get_questions(
         user=public_key,
         claimed=False,
-        finalized_before=utcnow() if finalized_before is None else finalized_before,
+        finalized_before=finalized_before,
     )
     claimed_question_ids = claim_bonds_on_realitio_questions(
         api_keys,
