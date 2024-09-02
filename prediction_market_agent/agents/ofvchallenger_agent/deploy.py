@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.markets.omen.omen_resolving import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe, langfuse_context
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from web3 import Web3
 
