@@ -53,6 +53,9 @@ class OFVChallengerAgent(DeployableAgent):
     def challenge(self, api_keys: APIKeys) -> None:
         self.langfuse_update_current_trace(tags=[OFV_CHALLENGER_TAG])
 
+        # Claim the bonds as first thing, to have funds for the new challenges.
+        claim_all_bonds_on_reality(api_keys)
+
         markets_open_for_answers = OmenSubgraphHandler().get_omen_binary_markets(
             limit=None,
             creator_in=MARKET_CREATORS_TO_CHALLENGE,
@@ -66,8 +69,6 @@ class OFVChallengerAgent(DeployableAgent):
 
         for market in markets_open_for_answers:
             self.challenge_market(market, api_keys)
-
-        claim_all_bonds_on_reality(api_keys)
 
     @observe()
     def challenge_market(
