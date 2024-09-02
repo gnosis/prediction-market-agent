@@ -40,7 +40,10 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
 )
-from prediction_market_agent.agents.microchain_agent.prompts import FunctionsConfig
+from prediction_market_agent.agents.microchain_agent.prompts import (
+    FunctionsConfig,
+    SystemPromptChoice,
+)
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_function_useage_from_history,
     get_total_asset_value,
@@ -87,6 +90,11 @@ class DeployedGeneralAgentSettings(BaseSettings):
 
     def to_agent_description(self, identifier: AgentIdentifier) -> str:
         return AGENT_IDENTIFIER_TO_CLASS[identifier].description
+
+    def to_system_prompt_choice(
+        self, identifier: AgentIdentifier
+    ) -> SystemPromptChoice:
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].system_prompt_choice
 
 
 MARKET_TYPE = MarketType.OMEN
@@ -187,11 +195,8 @@ agent = build_agent(
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
-    functions_config=FunctionsConfig(
-        include_trading_functions=True,  # placeholder, not used
-        include_learning_functions=True,  # placeholder, not used
-        include_universal_functions=True,  # placeholder, not used
-        include_agent_functions=True,  # placeholder, not used
+    functions_config=FunctionsConfig.from_system_prompt_choice(
+        settings.to_system_prompt_choice(task_description)
     ),
     enable_langfuse=False,  # placeholder, not used
 )
