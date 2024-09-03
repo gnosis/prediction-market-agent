@@ -1,6 +1,6 @@
 # Prediction Market Trader Agent
 
-A library for exploring the landscape of AI Agent frameworks, using the example application of a prediction market betting agent. The various agents interact with markets from [Manifold](https://manifold.markets/), [AIOmen](https://aiomen.eth.limo/) and [Polymarket](https://polymarket.com/).
+A library for exploring the landscape of AI Agent frameworks, using the example application of a prediction market betting agent. The various agents interact with markets from [Manifold](https://manifold.markets/), [Presagio](https://presagio.pages.dev/) and [Polymarket](https://polymarket.com/).
 
 These agents build on top of the prediction market APIs from https://github.com/gnosis/prediction-market-agent-tooling.
 
@@ -31,47 +31,56 @@ Depending on the agent you want to run, you may require additional variables. Se
 
 ## Dune Dashboard
 
-The on-chain activity of the deployed agents from this repo can be tracked on a Dune dashboard [here](https://dune.com/hdser/omen-ai-agents).
+The on-chain activity of the deployed agents from this repo can be tracked on a Dune dashboard [here](https://dune.com/gnosischain_team/omen-ai-agents).
 
-## Running (*deprecated* see https://github.com/gnosis/prediction-market-agent/issues/211)
+## Running
 
 Execute `main.py` with optional arguments:
 
 ```bash
-% python main.py --help
- Usage: main.py [OPTIONS]                                                                    
+% python prediction_market_agent/run_agent.py --help
 
- Picks one market and answers it, optionally placing a bet.                                  
-
-╭─ Options ─────────────────────────────────────────────────────────────────────────────────╮
-│ --market-type                     [manifold|omen|polymarket]  [default: manifold]         │
-│ --agent-type                      [langchain|autogen|always_  [default: always_yes]       │
-│                                   yes|llamaindex|metagpt|cre                              │
-│                                   wai|custom_openai|custom_l                              │
-│                                   lama]                                                   │
-│ --auto-bet       --no-auto-bet                                [default: no-auto-bet]      │
-│ --help                                                        Show this message and exit. |
-╰───────────────────────────────────────────────────────────────────────────────────────────╯
+ Usage: run_agent.py [OPTIONS] AGENT:{coinflip|replicate_to_omen|think_thorough                                         
+                     ly|think_thoroughly_prophet|think_thoroughly_prophet_kelly                                         
+                     |knownoutcome|microchain|microchain_modifiable_system_prom                                         
+                     pt_0|microchain_modifiable_system_prompt_1|microchain_modi                                         
+                     fiable_system_prompt_2|microchain_modifiable_system_prompt                                         
+                     _3|microchain_with_goal_manager_agent_0|metaculus_bot_tour                                         
+                     nament_agent|prophet_gpt4o|prophet_gpt4|prophet_gpt4_final                                         
+                     |prophet_gpt4_kelly|olas_embedding_oa|social_media|omen_cl                                         
+                     eaner|ofv_challenger}                                                                              
+                     MARKET_TYPE:{omen|manifold|polymarket|metaculus}                                                   
+                                                                                                                        
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    agent            AGENT:{coinflip|replicate_to_omen|think_thorou  [default: None] [required]                     │
+│                       ghly|think_thoroughly_prophet|think_thoroughly                                                 │
+│                       _prophet_kelly|knownoutcome|microchain|microch                                                 │
+│                       ain_modifiable_system_prompt_0|microchain_modi                                                 │
+│                       fiable_system_prompt_1|microchain_modifiable_s                                                 │
+│                       ystem_prompt_2|microchain_modifiable_system_pr                                                 │
+│                       ompt_3|microchain_with_goal_manager_agent_0|me                                                 │
+│                       taculus_bot_tournament_agent|prophet_gpt4o|pro                                                 │
+│                       phet_gpt4|prophet_gpt4_final|prophet_gpt4_kell                                                 │
+│                       y|olas_embedding_oa|social_media|omen_cleaner|                                                 │
+│                       ofv_challenger}                                                                                │
+│ *    market_type      MARKET_TYPE:{omen|manifold|polymarket|metaculu  [default: None] [required]                     │
+│                       s}                                                                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --install-completion          Install completion for the current shell.                                              │
+│ --show-completion             Show completion for the current shell, to copy it or customize the installation.       │
+│ --help                        Show this message and exit.                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Deploying
 
-To deploy an agent to google cloud, see the example in `examples/cloud_deployment`.
+The easiest way to make your own agent that places a bet on a prediction market is to subclass the `DeployableTraderAgent`. See `DeployableCoinFlipAgent` for a minimal example.
 
-Requires the gcloud cli (see [here](https://cloud.google.com/sdk/docs/install)), and auth to have been completed (i.e. `gcloud auth login`).
-
-## Frameworks implemented
-
-| Framework | Notes |
-| --------- | ---------------- |
-| [LangChain](https://python.langchain.com/docs/modules/agents/) | Wraps OpenAI function calling API. Equips single agent with tools, makes calls in while loop. Has library of built-in tools, or can make own. Can extend using [Python Repl](https://python.langchain.com/docs/integrations/tools/python) tool to execute ad-hoc generated code. |
-| [LlamaIndex](https://docs.llamaindex.ai/en/stable/use_cases/agents.html) | Similar to LangChain. Tool library from `llama_hub`. No tool to execute ad-hoc generated code. |
-| [MetaGPT](https://github.com/geekan/MetaGPT) | Advertised as a framework for building an agent-based software dev team, but can be general purpose. Can do single-agent or multi-agent (as a [Team](https://docs.deepwisdom.ai/main/en/guide/tutorials/multi_agent_101.html)) execution. Has many predefined agent `Role`s, pre-equipped with relevant tools. |
-| [AutoGen](https://github.com/microsoft/autogen) | Multi-agent. Can use local model. Easy to explicitly control the execution pattern of the agents. `GPTAssistantAgent` class wraps the OpenAI Assistant API. |
-| [crewAI](https://github.com/joaomdmoura/crewAI) | Similar to AutoGen, except agents<->task mapping is only 1-1 currently. Agents tackly distinct tasks in series. Can use local model (Ollama integration). Agent tool integration with LangChain, so can use its existing tool library. |
+From there, you can add it to the `RUNNABLE_AGENTS` dict in `prediction_market_agent/run_agent.py`, and use that as the entrypoint for running the agent in your cloud deployment.
 
 ## Contributing
 
 See the [Issues](https://github.com/gnosis/prediction-market-agent/issues) for ideas of things that need fixing or implementing. The team is also receptive to new issues and PRs.
 
-An great self-contained first contribution would be to implement an agent using a framework in the ['Other frameworks to try'](https://github.com/gnosis/prediction-market-agent/issues/210) issue.
+A great self-contained first contribution would be to implement an agent using a framework in the ['Other frameworks to try'](https://github.com/gnosis/prediction-market-agent/issues/210) issue.
