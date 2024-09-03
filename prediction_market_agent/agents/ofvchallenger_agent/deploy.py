@@ -4,7 +4,10 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
+from prediction_market_agent_tooling.markets.omen.data_models import (
+    OmenMarket,
+    RealityResponse,
+)
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     Resolution,
     omen_submit_answer_market_tx,
@@ -14,6 +17,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic import BaseModel
 from web3 import Web3
 
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
@@ -39,6 +43,11 @@ MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
     # Olas market-creator 1.
     Web3.to_checksum_address("0xffc8029154ecd55abed15bd428ba596e7d23f557"),
 ]
+
+
+class Challenge(BaseModel):
+    old_responses: list[RealityResponse]
+    new_resolution: Resolution
 
 
 class OFVChallengerAgent(DeployableAgent):
@@ -76,7 +85,7 @@ class OFVChallengerAgent(DeployableAgent):
         market: OmenMarket,
         api_keys: APIKeys,
         web3: Web3 | None = None,
-    ) -> Resolution | None:
+    ) -> Challenge | None:
         logger.info(f"Challenging market {market.url=}")
 
         existing_responses = OmenSubgraphHandler().get_responses(
@@ -119,15 +128,19 @@ class OFVChallengerAgent(DeployableAgent):
             )
             return None
 
-        resolution = Resolution.from_bool(answer.factuality)
-        logger.info(f"Challenging market {market.url=} with resolution {resolution=}")
+        new_resolution = Resolution.from_bool(answer.factuality)
+        logger.info(
+            f"Challenging market {market.url=} with resolution {new_resolution=}"
+        )
 
         omen_submit_answer_market_tx(
             api_keys=api_keys,
             market=market,
-            resolution=resolution,
+            resolution=new_resolution,
             bond=CHALLENGE_BOND,
             web3=web3,
         )
 
-        return resolution
+        return Challenge(
+            old_responses=existing_responses, new_resolution=new_resolution
+        )
