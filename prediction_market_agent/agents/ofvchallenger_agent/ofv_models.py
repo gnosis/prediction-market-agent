@@ -11,13 +11,13 @@ Factuality = Annotated[
 class FactCheckClaimDetails(BaseModel):
     claim: str
     factuality: Factuality
-    correction: str | None
+    correction: str | None = None
     reference_url: str
 
 
 class FactCheckResult(BaseModel):
     factuality: Factuality
-    claims_details: list[FactCheckClaimDetails] | None
+    claims_details: list[FactCheckClaimDetails] | None = None
 
 
 class FactCheckAnswer(BaseModel):
