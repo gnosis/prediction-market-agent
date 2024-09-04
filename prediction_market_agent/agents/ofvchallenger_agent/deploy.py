@@ -101,7 +101,7 @@ class OFVChallengerAgent(DeployableAgent):
             for response in existing_responses
         ):
             logger.info(
-                f"Market {market.url=} already challenged by replicator. Skipping."
+                f"Market {market.url=} already challenged by challenger. Skipping."
             )
             return None
 
