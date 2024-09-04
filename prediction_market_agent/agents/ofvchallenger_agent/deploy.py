@@ -95,15 +95,6 @@ class OFVChallengerAgent(DeployableAgent):
             f"{market.url=}'s responses and bonds: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
         )
 
-        # Next bond needs to be at least double the previous one.
-        if any(
-            response.bond_xdai >= CHALLENGE_BOND / 2 for response in existing_responses
-        ):
-            logger.info(
-                f"Market {market.url=} already challenged with bond > {CHALLENGE_BOND} / 2. Skipping."
-            )
-            return None
-
         # We don't plan to re-challenge markets already challenged by the challenger, should we?
         if any(
             response.user_checksummed == OFV_CHALLENGER_SAFE_ADDRESS
@@ -111,6 +102,15 @@ class OFVChallengerAgent(DeployableAgent):
         ):
             logger.info(
                 f"Market {market.url=} already challenged by replicator. Skipping."
+            )
+            return None
+
+        # Next bond needs to be at least double the previous one.
+        if any(
+            response.bond_xdai >= CHALLENGE_BOND / 2 for response in existing_responses
+        ):
+            logger.info(
+                f"Market {market.url=} already challenged with bond > {CHALLENGE_BOND} / 2. Skipping."
             )
             return None
 
