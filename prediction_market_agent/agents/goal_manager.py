@@ -17,7 +17,6 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 GENERATE_GOAL_PROMPT_TEMPLATE = """
 Generate a specific goal for an open-ended, autonomous agent that has a high-level description and a number of specific capabilities.
-If applicable, use the agent's previous evaluated goals when considering its new goal.
 
 The goal should satisfy the following:
 - have a narrow focus
@@ -28,13 +27,17 @@ The goal should satisfy the following:
 - balance the need for exploration and exploitation
 - not be contingent on external factors that are out of the agent's control
 
+If applicable, use the agent's previous evaluated goals when considering its new goal, and state how this goal follows from the previous ones in the 'reasoning' field.
+
 [HIGH LEVEL DESCRIPTION]
 {high_level_description}
 
 [AGENT CAPABILITIES]
 {agent_capabilities}
 
+[PREVIOUS EVALUATED GOALS]
 {previous_evaluated_goals}
+
 {format_instructions}
 """
 
@@ -299,6 +302,8 @@ class GoalManager:
 
     @staticmethod
     def evaluated_goals_to_str(evaluated_goals: list[EvaluatedGoal]) -> str:
+        if not evaluated_goals:
+            return "-- None --"
         goals_str = ""
         for i, goal in enumerate(evaluated_goals):
             goals_str += f"## Goal {i+1}:\n{goal}\n"

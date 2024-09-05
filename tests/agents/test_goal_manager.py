@@ -64,7 +64,12 @@ def test_have_reached_retry_limit() -> None:
     )
 
 
-def test_evaluated_goals_to_str() -> None:
+def test_evaluated_goals_to_str_0() -> None:
+    goals_str = GoalManager.evaluated_goals_to_str([])
+    assert goals_str == "-- None --"
+
+
+def test_evaluated_goals_to_str_1() -> None:
     gs = [
         EvaluatedGoal(
             goal="foo0",
@@ -126,14 +131,13 @@ def test_generate_goal() -> None:
         reasoning="The Tour de France is cancelled this year.",
         output=None,
     )
-    goal2 = goal_manager.generate_goal(latest_evaluated_goals=[evaluated_goal])
-
+    goal1 = goal_manager.generate_goal(latest_evaluated_goals=[evaluated_goal])
     # Generates a goal related to the Tour de France
     assert "Tour de France" in goal0.goal
 
     # Does not generate a goal related to the Tour de France, based on the
     # reasoning of the previous evaluated goal
-    assert "Tour de France" not in goal2.goal
+    assert "Tour de France" not in goal1.goal
 
 
 def test_get_chat_history_after_goal_prompt() -> None:
