@@ -1,9 +1,12 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import HexAddress, HexBytes
+from prediction_market_agent_tooling.gtypes import HexAddress, HexBytes, xDai, xdai_type
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.omen.data_models import RealityQuestion
+from prediction_market_agent_tooling.markets.omen.data_models import (
+    RealityQuestion,
+    RealityResponse,
+)
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     claim_bonds_on_realitio_questions,
     finalize_markets,
@@ -14,16 +17,23 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
+
+
+class ClaimResult(BaseModel):
+    claimed_question_ids: list[HexBytes]
+    claimed: xDai
 
 
 class FinalizeAndResolveResult(BaseModel):
     finalized: list[HexAddress]
     resolved: list[HexAddress]
-    claimed_question_ids: list[HexBytes]
+    claimed: ClaimResult
 
 
+@observe()
 def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     api_keys: APIKeys,
 ) -> FinalizeAndResolveResult:
@@ -67,24 +77,45 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     balances_after_resolution = get_balances(public_key)
     logger.info(f"{balances_after_resolution=}")
 
-    # Fetch questions that are already finalised (last answer is older than 24 hours), but we didn't claim the bonded xDai yet.
-    created_not_claimed_questions: list[
-        RealityQuestion
-    ] = OmenSubgraphHandler().get_questions(
+    claimed = claim_all_bonds_on_reality(api_keys, finalized_before=before)
+
+    return FinalizeAndResolveResult(
+        finalized=finalized_markets,
+        resolved=resolved_markets,
+        claimed=claimed,
+    )
+
+
+@observe()
+def claim_all_bonds_on_reality(
+    api_keys: APIKeys, finalized_before: datetime | None = None
+) -> ClaimResult:
+    # Just to be friendly with time differences.
+    finalized_before = finalized_before or utcnow() - timedelta(hours=1)
+    public_key = api_keys.bet_from_address
+
+    balances_before_claiming = get_balances(public_key)
+    logger.info(f"{balances_before_claiming=}")
+
+    # Fetch our responses that are on already finalised questions, but we didn't claim the bonded xDai yet.
+    responses: list[RealityResponse] = OmenSubgraphHandler().get_responses(
         user=public_key,
-        claimed=False,
-        current_answer_before=before - timedelta(hours=24),
+        question_claimed=False,
+        question_finalized_before=finalized_before,
+    )
+    # Extract only the unique questions out of responses (there could be multiple responses for the same question, but only the whole question can be claimed once).
+    questions: list[RealityQuestion] = list(
+        {r.question.questionId: r.question for r in responses}.values()
     )
     claimed_question_ids = claim_bonds_on_realitio_questions(
         api_keys,
-        created_not_claimed_questions,
+        questions,
         auto_withdraw=True,
     )
     balances_after_claiming = get_balances(public_key)
     logger.info(f"{balances_after_claiming=}")
 
-    return FinalizeAndResolveResult(
-        finalized=finalized_markets,
-        resolved=resolved_markets,
+    return ClaimResult(
         claimed_question_ids=claimed_question_ids,
+        claimed=xdai_type(balances_after_claiming.xdai - balances_before_claiming.xdai),
     )
