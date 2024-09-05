@@ -11,6 +11,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     Resolution,
     omen_submit_answer_market_tx,
+    omen_submit_invalid_answer_market_tx,
 )
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
@@ -122,24 +123,33 @@ class OFVChallengerAgent(DeployableAgent):
             )
             return None
 
-        if answer is None or answer.factuality is None:
+        if answer is None:
             logger.error(
                 f"Failed to get factuality for market {market.url=}, question {market.question_title=}. Skipping."
             )
             return None
 
-        new_resolution = Resolution.from_bool(answer.factuality)
+        new_resolution = (
+            Resolution.from_bool(answer.factuality)
+            if answer.factuality is not None
+            else Resolution.CANCEL
+        )
         logger.info(
             f"Challenging market {market.url=} with resolution {new_resolution=}"
         )
 
-        omen_submit_answer_market_tx(
-            api_keys=api_keys,
-            market=market,
-            resolution=new_resolution,
-            bond=CHALLENGE_BOND,
-            web3=web3,
-        )
+        if new_resolution != Resolution.CANCEL:
+            omen_submit_answer_market_tx(
+                api_keys=api_keys,
+                market=market,
+                resolution=new_resolution,
+                bond=CHALLENGE_BOND,
+                web3=web3,
+            )
+        else:
+            omen_submit_invalid_answer_market_tx(
+                api_keys=api_keys, market=market, bond=CHALLENGE_BOND, web3=web3
+            )
 
         return Challenge(
             old_responses=existing_responses, new_resolution=new_resolution
