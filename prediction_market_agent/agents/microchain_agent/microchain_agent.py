@@ -113,7 +113,8 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
-    functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
+    if functions_config.include_agent_functions:
+        functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
 
     if functions_config.include_universal_functions:
         functions.extend([f() for f in API_FUNCTIONS])
