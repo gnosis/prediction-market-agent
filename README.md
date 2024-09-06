@@ -35,7 +35,7 @@ The on-chain activity of the deployed agents from this repo can be tracked on a 
 
 ## Running
 
-Execute `main.py` with optional arguments:
+Execute `prediction_market_agent/run_agent.py`, specifying the ID of the 'runnable agent', and the market type as arguments:
 
 ```bash
 % python prediction_market_agent/run_agent.py --help
