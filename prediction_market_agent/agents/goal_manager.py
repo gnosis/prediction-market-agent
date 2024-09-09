@@ -214,6 +214,7 @@ class GoalManager:
             for g in latest_evaluated_goals[: self.retry_limit + 1]
         )
 
+    @observe()
     def get_goal(self) -> Goal:
         """
         Manage the fetching of goals from memory, and deciding when to generate
