@@ -134,7 +134,7 @@ class OFVChallengerAgent(DeployableAgent):
             return Challenge(
                 old_responses=existing_responses,
                 new_resolution=None,
-                reasoning="Unknown exception, see logs.",
+                reasoning=f"Exception in OFV: {str(e)}",
             )
 
         if answer is None:
