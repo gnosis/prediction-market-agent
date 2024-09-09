@@ -100,7 +100,7 @@ class OFVChallengerAgent(DeployableAgent):
 
         # We don't plan to re-challenge markets already challenged by the challenger, should we?
         if any(
-            response.user_checksummed == OFV_CHALLENGER_SAFE_ADDRESS
+            response.user_checksummed == api_keys.bet_from_address
             for response in existing_responses
         ):
             logger.info(
@@ -109,7 +109,7 @@ class OFVChallengerAgent(DeployableAgent):
             return Challenge(
                 old_responses=existing_responses,
                 new_resolution=None,
-                reasoning=f"Already challenged by {OFV_CHALLENGER_SAFE_ADDRESS=}.",
+                reasoning=f"Already challenged by {api_keys.bet_from_address=}.",
             )
 
         # Next bond needs to be at least double the previous one.
