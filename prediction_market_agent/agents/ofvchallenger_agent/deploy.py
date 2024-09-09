@@ -16,7 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen_resolving import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe
+from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from web3 import Web3
@@ -48,7 +48,8 @@ MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
 
 class Challenge(BaseModel):
     old_responses: list[RealityResponse]
-    new_resolution: Resolution
+    new_resolution: Resolution | None
+    reasoning: str
 
 
 class OFVChallengerAgent(DeployableAgent):
@@ -86,8 +87,9 @@ class OFVChallengerAgent(DeployableAgent):
         market: OmenMarket,
         api_keys: APIKeys,
         web3: Web3 | None = None,
-    ) -> Challenge | None:
+    ) -> Challenge:
         logger.info(f"Challenging market {market.url=}")
+        langfuse_context.update_current_observation(metadata={"url": market.url})
 
         existing_responses = OmenSubgraphHandler().get_responses(
             question_id=market.question.id
@@ -98,13 +100,17 @@ class OFVChallengerAgent(DeployableAgent):
 
         # We don't plan to re-challenge markets already challenged by the challenger, should we?
         if any(
-            response.user_checksummed == OFV_CHALLENGER_SAFE_ADDRESS
+            response.user_checksummed == api_keys.bet_from_address
             for response in existing_responses
         ):
             logger.info(
                 f"Market {market.url=} already challenged by challenger. Skipping."
             )
-            return None
+            return Challenge(
+                old_responses=existing_responses,
+                new_resolution=None,
+                reasoning=f"Already challenged by {api_keys.bet_from_address=}.",
+            )
 
         # Next bond needs to be at least double the previous one.
         if any(
@@ -113,7 +119,11 @@ class OFVChallengerAgent(DeployableAgent):
             logger.info(
                 f"Market {market.url=} already challenged with bond > {CHALLENGE_BOND} / 2. Skipping."
             )
-            return None
+            return Challenge(
+                old_responses=existing_responses,
+                new_resolution=None,
+                reasoning=f"Already challenged with bond > {CHALLENGE_BOND} / 2.",
+            )
 
         try:
             answer = ofv_answer_binary_question(market.question_title, api_keys)
@@ -121,13 +131,21 @@ class OFVChallengerAgent(DeployableAgent):
             logger.exception(
                 f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"
             )
-            return None
+            return Challenge(
+                old_responses=existing_responses,
+                new_resolution=None,
+                reasoning=f"Exception in OFV: {str(e)}",
+            )
 
         if answer is None:
             logger.error(
                 f"Failed to get factuality for market {market.url=}, question {market.question_title=}. Skipping."
             )
-            return None
+            return Challenge(
+                old_responses=existing_responses,
+                new_resolution=None,
+                reasoning="OFV failed to provide an answer.",
+            )
 
         new_resolution = (
             Resolution.from_bool(answer.factuality)
@@ -152,5 +170,7 @@ class OFVChallengerAgent(DeployableAgent):
             )
 
         return Challenge(
-            old_responses=existing_responses, new_resolution=new_resolution
+            old_responses=existing_responses,
+            new_resolution=new_resolution,
+            reasoning="Challenge response submitted.",
         )
