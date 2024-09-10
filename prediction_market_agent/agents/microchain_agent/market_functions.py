@@ -16,7 +16,6 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
     TavilyStorage,
 )
@@ -133,7 +132,6 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
     def description(self) -> str:
         return self._description
 
-    @observe(name="PredictProbabilityForQuestion")
     def __call__(self, market_id: str) -> str:
         question = self.market_type.market_class.get_binary_market(
             id=market_id
@@ -177,7 +175,6 @@ class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
     def description(self) -> str:
         return self._description + " Note, this costs money to run."
 
-    @observe(name="PredictProbabilityForQuestionMech")
     def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
         MECH_CALL_XDAI_LIMIT = 0.011

@@ -43,6 +43,7 @@ class QuestionWithKnownOutcome(BaseModel):
             close_time=utcnow() + timedelta(days=1),
             resolution=None,
             outcomes=["YES", "NO"],
+            outcome_token_pool=None,
         )
 
 

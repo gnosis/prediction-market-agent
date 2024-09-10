@@ -43,6 +43,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         created_time=datetime(2024, 1, 1),
         resolution=None,
         outcomes=["YES", "NO"],
+        outcome_token_pool=None,
     )
 
 
