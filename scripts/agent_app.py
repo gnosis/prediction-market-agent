@@ -98,7 +98,7 @@ def predict(
     st.warning(f"Took {end_time / 60:.2f} minutes.")
     st.success(
         streamlit_escape(
-            f"Would bet {processed_market.amount.amount} {processed_market.amount.currency} on {processed_market.answer}!"
+            f"Would do the following trades {processed_market.trades} on {processed_market.answer}!"
         )
     )
 
