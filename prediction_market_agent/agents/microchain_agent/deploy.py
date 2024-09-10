@@ -2,6 +2,7 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.goal_manager import GoalManager
@@ -54,6 +55,13 @@ class DeployableMicrochainAgent(DeployableAgent):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
+        self.run_general_agent(market_type=market_type)
+
+    @observe()
+    def run_general_agent(
+        self,
+        market_type: MarketType,
+    ) -> None:
         self.langfuse_update_current_trace(
             tags=[GENERAL_AGENT_TAG, self.system_prompt_choice, self.task_description]
         )

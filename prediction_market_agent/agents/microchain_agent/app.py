@@ -66,7 +66,9 @@ st.session_state.session_id = st.session_state.get(
 
 
 @observe()
-def run_agent(agent: Agent, iterations: int, model: SupportedModel) -> None:
+def run_general_agent_streamlit(
+    agent: Agent, iterations: int, model: SupportedModel
+) -> None:
     langfuse_context.update_current_trace(
         tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG], session_id=st.session_state.session_id
     )
@@ -288,7 +290,7 @@ with history_container:
             model=st.session_state.model,
         )
         # Run the agent after the user's reasoning
-        run_agent(
+        run_general_agent_streamlit(
             agent=st.session_state.agent,
             iterations=int(iterations),
             model=st.session_state.model,
@@ -296,7 +298,7 @@ with history_container:
         save_last_turn_history_to_memory(st.session_state.agent)
     if run_agent_button:
         maybe_initialize_agent(st.session_state.model, system_prompt)
-        run_agent(
+        run_general_agent_streamlit(
             agent=st.session_state.agent,
             iterations=int(iterations),
             model=st.session_state.model,
