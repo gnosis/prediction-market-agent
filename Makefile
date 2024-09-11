@@ -10,4 +10,4 @@ push:
 	docker push $(IMAGE_NAME)
 
 tests-docker: build
-	docker run --env-file .env --rm $(IMAGE_NAME) pytest tests
+	docker run --env-file .env --rm $(IMAGE_NAME) poetry run pytest tests
