@@ -87,6 +87,7 @@ class OmenCleanerAgent(DeployableAgent):
         )
         generated_image_mapping: dict[HexAddress, IPFSCIDVersion0 | None] = {}
         for market in recently_created_markets:
+            logger.info(f"Generating image for market {market.url}.")
             if OmenSubgraphHandler().get_market_image_url(market.id) is None:
                 agent_market = OmenAgentMarket.from_data_model(market)
                 # Provide some liquidity to the market to be able to assign the image.

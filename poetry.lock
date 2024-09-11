@@ -5602,13 +5602,13 @@ files = [
 
 [[package]]
 name = "narwhals"
-version = "1.6.4"
+version = "1.7.0"
 description = "Extremely lightweight compatibility layer between dataframe libraries"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "narwhals-1.6.4-py3-none-any.whl", hash = "sha256:d5e98a811af6794f4a07fee37039c8e2cb5791db4b998a795eeefd367ce8277c"},
-    {file = "narwhals-1.6.4.tar.gz", hash = "sha256:e49f660660bfe9e0dc37164df53b147b13a4ee8ee3fe41c40c4e91f64cb50fff"},
+    {file = "narwhals-1.7.0-py3-none-any.whl", hash = "sha256:40d8c0457743540276d6e8b2add31affa1c8936035d378838000c281d8f5921f"},
+    {file = "narwhals-1.7.0.tar.gz", hash = "sha256:2d769c9dd23bd355632a813eb65d5cae6bad595c4058387acfb7fa86db50a0e9"},
 ]
 
 [package.extras]
@@ -6759,13 +6759,13 @@ test = ["coverage", "django", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.48.13"
+version = "0.48.14"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.12,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.48.13-py3-none-any.whl", hash = "sha256:a9df843249995bce1c5332774f9dd6ed7efefe914603d12fadd124177fdd2bb4"},
-    {file = "prediction_market_agent_tooling-0.48.13.tar.gz", hash = "sha256:1db65456b951eb84fc2500a9c1ae790eeae36c17f22eca7b9462e3ff3a3713ea"},
+    {file = "prediction_market_agent_tooling-0.48.14-py3-none-any.whl", hash = "sha256:68dd303df6a4f218a763efb650eaa29b185d9ab67d494a1b1f07fb81685fcfc9"},
+    {file = "prediction_market_agent_tooling-0.48.14.tar.gz", hash = "sha256:8d6961fa6760b2ffe600e450ea95932781eb3782b947376dd3565772dd70acea"},
 ]
 
 [package.dependencies]
@@ -10871,4 +10871,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "4bbfac92b0d4a0177431da1f8513feac855dbea99971edf72e60af340f08f206"
+content-hash = "ec120265dca6538dedd0eb7a6915445b8a0fd34bdfebe0cbc00a0cb34f061d22"
