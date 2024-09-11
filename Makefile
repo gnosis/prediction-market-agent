@@ -10,4 +10,4 @@ push:
 	docker push $(IMAGE_NAME)
 
 tests-docker: build
-	docker run --env-file .env --rm $(IMAGE_NAME) bash -c "pytest tests"
+	docker run --env-file .env --rm $(IMAGE_NAME) pytest tests

@@ -36,7 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Extract environment variables for Docker container
-        run: env > .env
+        run: |
+          echo "MANIFOLD_API_KEY=${{ secrets.MANIFOLD_API_KEY }}" >> .env
+          echo "SERP_API_KEY=${{ secrets.SERP_API_KEY }}" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "BET_FROM_PRIVATE_KEY=${{ secrets.BET_FROM_PRIVATE_KEY }}" >> .env
+          echo "GRAPH_API_KEY=${{ secrets.GRAPH_API_KEY }}" >> .env
+          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
       - name: Build Dockerimage
         run: make build
       - name: Run pytest in Docker
