@@ -37,6 +37,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Extract environment variables for Docker container
         run: env > .env
+      - name: Build Dockerimage
+        run: make build
       - name: Run pytest in Docker
         run: make tests-docker
 

@@ -1,6 +1,6 @@
 .PHONY: build push tests
 
-IMAGE_NAME := ghcr.io/gnosis/prediction-market-agent:test
+IMAGE_NAME := ghcr.io/gnosis/prediction-market-agent:$(if $(GITHUB_SHA),$(GITHUB_SHA),test)
 
 build:
 	docker build . -t $(IMAGE_NAME)
