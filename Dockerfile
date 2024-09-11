@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --only main
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
 FROM --platform=linux/amd64 python:3.10.14-bookworm AS runtime
 
@@ -26,9 +26,7 @@ WORKDIR /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY tokenizers ./tokenizers
-COPY prediction_market_agent ./prediction_market_agent
-COPY scripts ./scripts
+COPY . .
 
 ENV PYTHONPATH=/app
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python

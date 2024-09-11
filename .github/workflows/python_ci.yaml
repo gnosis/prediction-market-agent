@@ -31,6 +31,13 @@ jobs:
       - name: Run pytest
         run: poetry run pytest tests
 
+  pytest-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run pytest in Docker
+        run: make tests-docker
+
   pytest-paid:
     runs-on: ubuntu-latest
     steps:
