@@ -1,4 +1,4 @@
-.PHONY: build push tests
+.PHONY: build push tests-docker
 
 IMAGE_NAME := ghcr.io/gnosis/prediction-market-agent:$(if $(GITHUB_SHA),$(GITHUB_SHA),test)
 
