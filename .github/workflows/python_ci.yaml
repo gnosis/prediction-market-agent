@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Extract environment variables for Docker container
+        run: env > .env
       - name: Run pytest in Docker
         run: make tests-docker
 
