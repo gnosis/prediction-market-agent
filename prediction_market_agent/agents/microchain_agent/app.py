@@ -25,7 +25,6 @@ import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.costs import openai_costs
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -73,21 +72,21 @@ def run_general_agent_streamlit(
         tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG], session_id=st.session_state.session_id
     )
     maybe_initialize_long_term_memory()
-    with openai_costs(
-        model.value if model.is_openai else None
-    ) as costs:  # TODO: Support for Replicate costs (below as well).
-        with st.spinner("Agent is running..."):
-            for _ in range(iterations):
-                agent.run(iterations=1, resume=st.session_state.total_iterations > 0)
-                st.session_state.total_iterations += 1
-        st.session_state.running_cost += costs.cost
+    with st.spinner("Agent is running..."):
+        for _ in range(iterations):
+            agent.run(iterations=1, resume=st.session_state.total_iterations > 0)
+            st.session_state.total_iterations += 1
+    st.session_state.running_cost = agent.llm.generator.token_tracker.get_total_cost(
+        model.value
+    )
 
 
 def execute_reasoning(agent: Agent, reasoning: str, model: SupportedModel) -> None:
-    with openai_costs(model.value if model.is_openai else None) as costs:
-        agent.execute_command(f'Reasoning("{reasoning}")')
-        display_new_history_callback(agent)  # Run manually after `execute_command`
-        st.session_state.running_cost += costs.cost
+    agent.execute_command(f'Reasoning("{reasoning}")')
+    display_new_history_callback(agent)  # Run manually after `execute_command`
+    st.session_state.running_cost = agent.llm.generator.token_tracker.get_total_cost(
+        model.value
+    )
 
 
 def display_agent_history(agent: Agent) -> None:
@@ -310,9 +309,7 @@ with history_container:
         and st.session_state.running_cost > 0.0
     ):
         # Display running cost
-        st.info(
-            f"Running OpenAPI credits cost: ${st.session_state.running_cost:.2f}"
-        )  # TODO debug why always == 0.0
+        st.info(f"Running LLM credits cost: ${st.session_state.running_cost:.2f}")
 
 # Once the agent has run...
 
