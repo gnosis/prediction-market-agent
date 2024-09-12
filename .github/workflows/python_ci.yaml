@@ -18,7 +18,7 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Run mypy
         run: poetry run mypy
@@ -26,15 +26,32 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
         run: poetry run pytest tests
 
+  pytest-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract environment variables for Docker container
+        run: |
+          echo "MANIFOLD_API_KEY=${{ secrets.MANIFOLD_API_KEY }}" >> .env
+          echo "SERP_API_KEY=${{ secrets.SERP_API_KEY }}" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "BET_FROM_PRIVATE_KEY=${{ secrets.BET_FROM_PRIVATE_KEY }}" >> .env
+          echo "GRAPH_API_KEY=${{ secrets.GRAPH_API_KEY }}" >> .env
+          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
+      - name: Build Dockerimage
+        run: make build
+      - name: Run pytest in Docker
+        run: make tests-docker
+
   pytest-paid:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Run pytest
         run: poetry run pytest tests
@@ -57,7 +74,7 @@ jobs:
   black:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Check with black
         run: poetry run black --check .
@@ -65,7 +82,7 @@ jobs:
   autoflake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Check with autoflake
         run: |
@@ -75,7 +92,7 @@ jobs:
   isort:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
       - name: Check with isort
         run: |
