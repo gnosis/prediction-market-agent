@@ -25,6 +25,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     omen_create_market_tx,
     omen_remove_fund_market_tx,
 )
+from prediction_market_agent_tooling.markets.omen.omen_contracts import sDaiContract
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -165,6 +166,7 @@ def omen_replicate_from_tx(
             language="en",
             outcomes=[OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME],
             auto_deposit=auto_deposit,
+            collateral_token_address=sDaiContract().address,
         )
         created_addresses.append(market_address)
         logger.info(
