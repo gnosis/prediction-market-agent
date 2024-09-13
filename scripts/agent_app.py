@@ -31,6 +31,8 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
+    DeployablePredictionProphetGPTo1MiniAgent,
+    DeployablePredictionProphetGPTo1PreviewAgent,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
@@ -49,6 +51,8 @@ SupportedAgentType: t.TypeAlias = (
     | type[DeployablePredictionProphetGPT4TurboPreviewAgent]
     | type[DeployablePredictionProphetGPT4TurboFinalAgent]
     | type[DeployableOlasEmbeddingOAAgent]
+    | type[DeployablePredictionProphetGPTo1PreviewAgent]
+    | type[DeployablePredictionProphetGPTo1MiniAgent]
 )
 
 AGENTS: list[SupportedAgentType] = [
@@ -59,6 +63,8 @@ AGENTS: list[SupportedAgentType] = [
     DeployablePredictionProphetGPT4TurboPreviewAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPTo1PreviewAgent,
+    DeployablePredictionProphetGPTo1MiniAgent,
 ]
 
 add_sink_to_logger()
