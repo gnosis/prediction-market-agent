@@ -3,7 +3,6 @@ from datetime import timedelta
 import typer
 from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import SortBy
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 
@@ -44,15 +43,12 @@ def main(
     close_time_after = utcnow() + timedelta(days=14)
     # But make sure that the markets won't be open too long, so we can evaluate results in a reasonable time.
     close_time_before = close_time_after + timedelta(days=7)
-    # Instead of default sorting (by volume, liquidity, etc.), sort by soonest, so it fetches some markets for the filters above.
-    sort_by = SortBy.CLOSING_SOONEST
 
     addresses = omen_replicate_from_tx(
         api_keys=keys,
         market_type=MarketType.MANIFOLD,  # Use only Manifold, it has generally more markets.
         n_to_replicate=n_to_replicate,
         initial_funds=xdai_type(initial_funds_xdai),
-        sort_by=sort_by,
         close_time_before=close_time_before,
         close_time_after=close_time_after,
         auto_deposit=True,

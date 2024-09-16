@@ -53,7 +53,6 @@ def omen_replicate_from_tx(
     market_type: MarketType,
     n_to_replicate: int,
     initial_funds: xDai,
-    sort_by: SortBy = SortBy.NONE,
     close_time_before: datetime | None = None,
     close_time_after: datetime | None = None,
     auto_deposit: bool = False,
@@ -66,7 +65,11 @@ def omen_replicate_from_tx(
         10 if market_type == MarketType.POLYMARKET else 1000,
         market_type,
         filter_by=FilterBy.OPEN,
-        sort_by=sort_by,
+        sort_by=(
+            SortBy.NONE
+            if market_type == MarketType.POLYMARKET
+            else SortBy.CLOSING_SOONEST
+        ),
         excluded_questions=set(m.question_title for m in existing_markets),
     )
     markets_sorted = sorted(
