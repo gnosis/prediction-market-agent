@@ -81,3 +81,33 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
         self.agent = OlasAgent(
             model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
         )
+
+
+class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        # o1-preview supports only temperature=1.0
+        self.agent = PredictionProphetAgent(
+            model="o1-preview-2024-09-12",
+            research_temperature=1.0,
+            prediction_temperature=1.0,
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+
+    def load(self) -> None:
+        super().load()
+        # o1-mini supports only temperature=1.0
+        self.agent = PredictionProphetAgent(
+            model="o1-mini-2024-09-12",
+            research_temperature=1.0,
+            prediction_temperature=1.0,
+            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
+            logger=logger,
+        )
