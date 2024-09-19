@@ -3,8 +3,6 @@ from typing import Optional
 
 import requests
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import xDai
-from prediction_market_agent_tooling.jobs.jobs import get_jobs
 
 from prediction_market_agent.utils import APIKeys
 
@@ -75,24 +73,7 @@ class SendTelegramMessage(Function):
         return "Message sent"
 
 
-class GetJobs(Function):
-    @property
-    def description(self) -> str:
-        return """Use this function to get available jobs in a JSON dumped format.
-You need to provide max bond value in xDai, that is, how much you are willing to bond on the fact that you completed the job as required in the description.
-"""
-
-    @property
-    def example_args(self) -> list[int]:
-        return [10]
-
-    def __call__(self, max_bond: xDai) -> str:
-        jobs = get_jobs(max_bond)
-        return json.dumps([j.model_dump() for j in jobs], indent=2, default=str)
-
-
 API_FUNCTIONS: list[type[Function]] = [
     CallAPI,
     SendTelegramMessage,
-    GetJobs,
 ]

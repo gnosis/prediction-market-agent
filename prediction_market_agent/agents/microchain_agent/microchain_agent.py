@@ -28,6 +28,7 @@ from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIO
 from prediction_market_agent.agents.microchain_agent.code_functions import (
     CODE_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.jobs_functions import JOB_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
     LEARNING_FUNCTIONS,
 )
@@ -119,6 +120,9 @@ def build_agent_functions(
     if functions_config.include_universal_functions:
         functions.extend([f() for f in API_FUNCTIONS])
         functions.extend([f() for f in CODE_FUNCTIONS])
+
+    if functions_config.include_job_functions:
+        functions.extend([f(market_type=market_type, keys=keys) for f in JOB_FUNCTIONS])
 
     if functions_config.include_learning_functions:
         functions.extend([f() for f in LEARNING_FUNCTIONS])
