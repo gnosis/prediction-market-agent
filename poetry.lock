@@ -2476,13 +2476,13 @@ typing = ["typing-extensions (>=4.12.2)"]
 
 [[package]]
 name = "flaml"
-version = "2.3.0"
+version = "2.2.0"
 description = "A fast library for automated machine learning and tuning"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.6"
 files = [
-    {file = "FLAML-2.3.0-py3-none-any.whl", hash = "sha256:0a2e62d874eab70fcf1321a2a327cd93827b90708f79cbbd1a2cff9f53ad4015"},
-    {file = "flaml-2.3.0.tar.gz", hash = "sha256:2e9bfb66ac328972c4018e588dd6e54ad48a3d4b70d6ee5c3aa721d6bf381215"},
+    {file = "FLAML-2.2.0-py3-none-any.whl", hash = "sha256:eb7429801879f66901ec13892ea21a914e3a5a094151b621a924e554637ec4a4"},
+    {file = "flaml-2.2.0.tar.gz", hash = "sha256:edf6bc2b5dda66e035d26048e8e181af8f5a827feffa138e67e712989c939359"},
 ]
 
 [package.dependencies]
@@ -2497,9 +2497,9 @@ benchmark = ["catboost (>=0.26)", "pandas (==1.1.4)", "psutil (==5.8.0)", "xgboo
 blendsearch = ["optuna (>=2.8.0,<=3.6.1)", "packaging"]
 catboost = ["catboost (>=0.26,<1.2)", "catboost (>=0.26,<=1.2.5)"]
 forecast = ["hcrystalball (==0.1.10)", "holidays (<0.14)", "prophet (>=1.0.1)", "pytorch-forecasting (>=0.9.0)", "pytorch-lightning (==1.9.0)", "statsmodels (>=0.12.2)", "tensorboardX (==2.6)"]
-hf = ["datasets", "nltk (<=3.8.1)", "rouge-score", "seqeval", "transformers[torch] (==4.26)"]
+hf = ["datasets", "nltk", "rouge-score", "seqeval", "transformers[torch] (==4.26)"]
 mathchat = ["diskcache", "openai (==0.27.8)", "pydantic (==1.10.9)", "sympy", "termcolor", "wolframalpha"]
-nlp = ["datasets", "nltk (<=3.8.1)", "rouge-score", "seqeval", "transformers[torch] (==4.26)"]
+nlp = ["datasets", "nltk", "rouge-score", "seqeval", "transformers[torch] (==4.26)"]
 nni = ["nni"]
 notebook = ["jupyter"]
 openai = ["diskcache", "openai (==0.27.8)"]
@@ -2507,7 +2507,7 @@ ray = ["ray[tune] (>=1.13,<2.0)"]
 retrievechat = ["chromadb", "diskcache", "openai (==0.27.8)", "sentence-transformers", "termcolor", "tiktoken"]
 spark = ["joblib (<=1.3.2)", "joblibspark (>=0.5.0)", "pyspark (>=3.2.0)"]
 synapse = ["joblibspark (>=0.5.0)", "optuna (>=2.8.0,<=3.6.1)", "pyspark (>=3.2.0)"]
-test = ["catboost (>=0.26)", "catboost (>=0.26,<1.2)", "coverage (>=5.3)", "dataclasses", "datasets", "dill", "hcrystalball (==0.1.10)", "ipykernel", "joblib (<=1.3.2)", "joblibspark (>=0.5.0)", "jupyter", "lightgbm (>=2.3.1)", "mlflow (==2.15.1)", "nbconvert", "nbformat", "nltk (<=3.8.1)", "openml", "optuna (>=2.8.0,<=3.6.1)", "packaging", "pandas (>=1.1.4)", "pandas (>=1.1.4,<2.0.0)", "pre-commit", "psutil (==5.8.0)", "pydantic (==1.10.9)", "pytest (>=6.1.1)", "pytorch-forecasting (>=0.9.0,<=0.10.1)", "pytorch-lightning (<1.9.1)", "requests (<2.29.0)", "rgf-python", "rouge-score", "scikit-learn (>=1.0.0)", "scipy (>=1.4.1)", "seqeval", "statsmodels (>=0.12.2)", "sympy", "tensorboardX (==2.6)", "thop", "torch", "torchvision", "transformers[torch] (==4.26)", "wolframalpha", "xgboost (>=0.90,<2.0.0)"]
+test = ["catboost (>=0.26)", "catboost (>=0.26,<1.2)", "coverage (>=5.3)", "dataclasses", "datasets", "hcrystalball (==0.1.10)", "ipykernel", "joblib (<=1.3.2)", "joblibspark (>=0.5.0)", "jupyter", "lightgbm (>=2.3.1)", "mlflow", "nbconvert", "nbformat", "nltk", "openml", "optuna (>=2.8.0,<=3.6.1)", "packaging", "pandas (>=1.1.4)", "pre-commit", "psutil (==5.8.0)", "pydantic (==1.10.9)", "pyspark (>=3.2.0)", "pytest (>=6.1.1)", "pytorch-forecasting (>=0.9.0,<=0.10.1)", "pytorch-lightning (<1.9.1)", "requests (<2.29.0)", "rgf-python", "rouge-score", "scikit-learn (>=1.0.0)", "scipy (>=1.4.1)", "seqeval", "statsmodels (>=0.12.2)", "sympy", "tensorboardX (==2.6)", "thop", "torch", "torchvision", "transformers[torch] (==4.26)", "wolframalpha", "xgboost (>=0.90,<2.0.0)"]
 ts-forecast = ["hcrystalball (==0.1.10)", "holidays (<0.14)", "prophet (>=1.0.1)", "statsmodels (>=0.12.2)"]
 vw = ["scikit-learn", "vowpalwabbit (>=8.10.0,<9.0.0)"]
 
@@ -4374,13 +4374,13 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "langfuse"
-version = "2.50.0"
+version = "2.50.1"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langfuse-2.50.0-py3-none-any.whl", hash = "sha256:2ff502588597e726d242ccc75fb63604c1d4148c23ae19cf49b99cb06292c29e"},
-    {file = "langfuse-2.50.0.tar.gz", hash = "sha256:4a03c3f54b2a7fa906151d1da9f1ef668ad65f05aac9155355a1c1f085272338"},
+    {file = "langfuse-2.50.1-py3-none-any.whl", hash = "sha256:5d2f8647ebe25efa9fe64a53c34620a0589fda036b82fcc0c54c697c0fae7fa5"},
+    {file = "langfuse-2.50.1.tar.gz", hash = "sha256:4e9dfdf731dca77e0b76e85396e132474de9b3d37266372f881f11c7fc2f9b87"},
 ]
 
 [package.dependencies]
@@ -5795,17 +5795,6 @@ files = [
     {file = "numpy-1.26.4-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:95a7476c59002f2f6c590b9b7b998306fba6a5aa646b1e22ddfeaf8f78c3a29c"},
     {file = "numpy-1.26.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:7e50d0a0cc3189f9cb0aeb3a6a6af18c16f59f004b866cd2be1c14b36134a4a0"},
     {file = "numpy-1.26.4.tar.gz", hash = "sha256:2a02aba9ed12e4ac4eb3ea9421c420301a0c6460d9830d74a9df87efa4912010"},
-]
-
-[[package]]
-name = "nvidia-nccl-cu12"
-version = "2.23.4"
-description = "NVIDIA Collective Communication Library (NCCL) Runtime"
-optional = false
-python-versions = ">=3"
-files = [
-    {file = "nvidia_nccl_cu12-2.23.4-py3-none-manylinux2014_aarch64.whl", hash = "sha256:aa946c8327e22ced28e7cef508a334673abc42064ec85f02d005ba1785ea4cec"},
-    {file = "nvidia_nccl_cu12-2.23.4-py3-none-manylinux2014_x86_64.whl", hash = "sha256:b097258d9aab2fa9f686e33c6fe40ae57b27df60cedbd15d139701bb5509e0c1"},
 ]
 
 [[package]]
@@ -10793,36 +10782,6 @@ cffi = ">=1.16.0"
 test = ["pytest"]
 
 [[package]]
-name = "xgboost"
-version = "2.1.1"
-description = "XGBoost Python Package"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "xgboost-2.1.1-py3-none-macosx_10_15_x86_64.macosx_11_0_x86_64.macosx_12_0_x86_64.whl", hash = "sha256:4163ab55118628f605cfccf950e2d667150640f6fc746bb5a173bddfd935950f"},
-    {file = "xgboost-2.1.1-py3-none-macosx_12_0_arm64.whl", hash = "sha256:40d1f647022f497c1b0f69073765baf50ff5802ca77c6bb1aca55a6bc65df00d"},
-    {file = "xgboost-2.1.1-py3-none-manylinux2014_aarch64.whl", hash = "sha256:4c534818aa08ab327ac2239ef211ef78db65a8573d069bc9898f824830fa2308"},
-    {file = "xgboost-2.1.1-py3-none-manylinux2014_x86_64.whl", hash = "sha256:deef471e8d353afa99e5cc0e2af7d99ace7013f40684fcf3eed9124de033265d"},
-    {file = "xgboost-2.1.1-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:8f3246a6d839dceb4553d3e5ea64ed718f9c692f072ee8275eeb895b58e283e6"},
-    {file = "xgboost-2.1.1-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:6475ca35dede1f87d1dc485b362caba08f69f6020f4440e97b167676a533850e"},
-    {file = "xgboost-2.1.1-py3-none-win_amd64.whl", hash = "sha256:fcf8413f3c621e97fdaaa45abb7ae808319c88eff5447328eff14c419c7c6ae0"},
-    {file = "xgboost-2.1.1.tar.gz", hash = "sha256:4b1729837f9f1ba88a32ef1be3f8efb860fee6454a68719b196dc88032c23d97"},
-]
-
-[package.dependencies]
-numpy = "*"
-nvidia-nccl-cu12 = {version = "*", markers = "platform_system == \"Linux\" and platform_machine != \"aarch64\""}
-scipy = "*"
-
-[package.extras]
-dask = ["dask", "distributed", "pandas"]
-datatable = ["datatable"]
-pandas = ["pandas (>=1.2)"]
-plotting = ["graphviz", "matplotlib"]
-pyspark = ["cloudpickle", "pyspark", "scikit-learn"]
-scikit-learn = ["scikit-learn"]
-
-[[package]]
 name = "yarl"
 version = "1.11.1"
 description = "Yet another URL library"
@@ -10949,4 +10908,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "b9fae87113f76a3aa486652272c900b3f3d3c08e3f1d65fe161797739033d1d1"
+content-hash = "d0b91246ccf96927bd72746eefa9ea6edf740b659f18178948fff67a48c5b7d5"
