@@ -39,6 +39,6 @@ You need to provide max bond value in {self.currency}, that is, how much you are
         )
 
 
-JOB_FUNCTIONS: list[type[Function]] = [
+JOB_FUNCTIONS: list[type[JobFunction]] = [
     GetJobs,
 ]
