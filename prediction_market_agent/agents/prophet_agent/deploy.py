@@ -38,6 +38,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
     agent: PredictionProphetAgent
 
     def load(self) -> None:
@@ -75,6 +76,7 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
     agent: OlasAgent
+    bet_on_n_markets_per_run = 20
 
     def load(self) -> None:
         super().load()
@@ -99,6 +101,7 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
     agent: PredictionProphetAgent
 
     def load(self) -> None:
