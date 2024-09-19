@@ -38,6 +38,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
     agent: PredictionProphetAgent
 
     def load(self) -> None:
