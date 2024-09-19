@@ -49,14 +49,14 @@ Only output a single function call per message.
 Make 'Reasoning' calls frequently - at least every other call. You need to reason step by step.
 """
 
-# Experimental system prompt for task-solving agent.
-TASK_AGENT_SYSTEM_PROMPT = f"""Act as a task-solving agents that picks up available tasks and solves them for getting rewards.
+# Experimental system prompt for job-solving agent.
+JOB_AGENT_SYSTEM_PROMPT = f"""Act as a job-solving agents that picks up available jobs and completes them for getting rewards.
 
-Pick up available task that's returned from GetTasks and pick one that you can solve and it's worth solving.
+Pick up available job that's returned from GetJobs and pick one that you can complete and it's worth finishing.
 
-While solving a task, reason step by step and write down thoroughly the process. You can use the 'Reasoning' function for that.
+While working on a job, reason step by step and write down thoroughly the process. You can use the 'Reasoning' function for that.
 
-Don't do anything else, just solve the task, and then pick up another one.
+Don't do anything else, just complete the job, and then pick up another one.
 
 {NON_UPDATABLE_DIVIDOR}
 
@@ -91,7 +91,7 @@ class SystemPromptChoice(str, Enum):
     JUST_BORN = "just_born"
     TRADING_AGENT = "trading_agent"
     TRADING_AGENT_MINIMAL = "trading_agent_minimal"
-    TASK_AGENT = "task_agent"
+    JOB_AGENT = "job_agent"
 
 
 class FunctionsConfig(BaseModel):
@@ -100,6 +100,7 @@ class FunctionsConfig(BaseModel):
     include_trading_functions: bool
     include_universal_functions: bool
     include_agent_functions: bool
+    include_job_functions: bool
 
     @staticmethod
     def from_system_prompt_choice(
@@ -109,6 +110,7 @@ class FunctionsConfig(BaseModel):
         include_learning_functions = False
         include_universal_functions = False
         include_agent_functions = False
+        include_job_functions = False
 
         if system_prompt_choice == SystemPromptChoice.JUST_BORN:
             include_learning_functions = True
@@ -121,22 +123,24 @@ class FunctionsConfig(BaseModel):
         ]:
             include_trading_functions = True
 
-        elif system_prompt_choice == SystemPromptChoice.TASK_AGENT:
+        elif system_prompt_choice == SystemPromptChoice.JOB_AGENT:
             include_universal_functions = True
             include_agent_functions = True
             include_trading_functions = True
+            include_job_functions = True
 
         return FunctionsConfig(
             include_trading_functions=include_trading_functions,
             include_learning_functions=include_learning_functions,
             include_universal_functions=include_universal_functions,
             include_agent_functions=include_agent_functions,
+            include_job_functions=include_job_functions,
         )
 
 
 SYSTEM_PROMPTS: dict[SystemPromptChoice, str] = {
     SystemPromptChoice.JUST_BORN: SYSTEM_PROMPT,
     SystemPromptChoice.TRADING_AGENT: TRADING_AGENT_SYSTEM_PROMPT,
-    SystemPromptChoice.TASK_AGENT: TASK_AGENT_SYSTEM_PROMPT,
+    SystemPromptChoice.JOB_AGENT: JOB_AGENT_SYSTEM_PROMPT,
     SystemPromptChoice.TRADING_AGENT_MINIMAL: TRADING_AGENT_SYSTEM_PROMPT_MINIMAL,
 }

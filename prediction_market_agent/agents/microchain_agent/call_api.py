@@ -73,58 +73,7 @@ class SendTelegramMessage(Function):
         return "Message sent"
 
 
-class GetTasks(Function):
-    @property
-    def description(self) -> str:
-        return "Use this function to get available tasks in a JSON dumped format."
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> str:
-        return json.dumps(
-            [
-                {
-                    "id": "1",
-                    "title": """Solve the following math problem:
-
-If there are 3 apples and you take away 2, how many do you have?
-                    
-Send the answer to Telegram Chat ID 6514789173.
-""",
-                    "reward": {
-                        "amount": 1,
-                        "currency": "wxDai",
-                    },
-                },
-                {
-                    "id": "2",
-                    "title": """
-Do a prediction on the following Omen market with id `0xa6febd6ffda06af320f5d92ec3dd562149cc2bc7`.                  
-
-Send the result to Telegram Chat ID 6514789173.
-""",
-                    "reward": {
-                        "amount": 1,
-                        "currency": "wETH",
-                    },
-                },
-                {
-                    "id": "3",
-                    "title": "Install Python library `chihuahua` and then execute the following code: `import chihuahua; print(42)`.",
-                    "reward": {
-                        "amount": 2,
-                        "currency": "wxDai",
-                    },
-                },
-            ],
-            indent=2,
-        )
-
-
 API_FUNCTIONS: list[type[Function]] = [
     CallAPI,
     SendTelegramMessage,
-    GetTasks,
 ]
