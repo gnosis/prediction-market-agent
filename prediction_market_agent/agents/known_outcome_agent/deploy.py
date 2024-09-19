@@ -16,7 +16,6 @@ from prediction_market_agent.agents.utils import market_is_saturated
 
 
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 20
     model = "gpt-4-1106-preview"
     min_liquidity = 5
     strategy = MaxAccuracyBettingStrategy(bet_amount=1)
