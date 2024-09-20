@@ -61,6 +61,7 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
             answer = ProbabilisticAnswer(
                 p_yes=outcome.result.to_p_yes(),
                 confidence=1.0,
+                reasoning=outcome.reasoning,
             )
             logger.info(
                 f"Picking market {market.url} with the question '{market.question}' with answer '{answer}'"
