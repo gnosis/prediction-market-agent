@@ -5,8 +5,8 @@ from uuid import UUID, uuid4
 
 import tenacity
 from crewai import Agent, Crew, Process, Task
-from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
@@ -22,11 +22,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
-from prediction_market_agent_tooling.tools.parallelism import (
-    DEFAULT_PROCESSPOOL_EXECUTOR,
-    par_generator,
-    par_map,
-)
+from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
 from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
     TavilyStorage,
 )
@@ -257,7 +253,7 @@ class ThinkThoroughlyBase(ABC):
 
         markets = par_map(
             items=[q.market_address for q in nearest_questions],
-            func=lambda market_address: self.subgraph_handler.get_omen_market_by_market_id(
+            func=lambda market_address: OmenSubgraphHandler().get_omen_market_by_market_id(
                 market_id=market_address
             ),
         )
@@ -365,7 +361,6 @@ class ThinkThoroughlyBase(ABC):
                     )
                 ],
                 func=process_scenarios,
-                executor=DEFAULT_PROCESSPOOL_EXECUTOR,
             )
 
             scenarios_with_probs = []
