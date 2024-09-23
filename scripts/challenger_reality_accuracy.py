@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import typer
 from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
 
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import (
@@ -8,8 +9,8 @@ from prediction_market_agent.agents.ofvchallenger_agent.deploy import (
 )
 
 
-def main() -> None:
-    since = timedelta(days=4)
+def main(since_days: int) -> None:
+    since = timedelta(days=since_days)
     ofv_challenger_accuracy = reality_accuracy(OFV_CHALLENGER_SAFE_ADDRESS, since)
     olas_accuracies = {
         addr: reality_accuracy(addr, since) for addr in MARKET_CREATORS_TO_CHALLENGE
@@ -28,4 +29,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
