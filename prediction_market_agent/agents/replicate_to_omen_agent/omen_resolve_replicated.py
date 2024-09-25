@@ -99,6 +99,7 @@ def claim_all_bonds_on_reality(
 
     # Fetch our responses that are on already finalised questions, but we didn't claim the bonded xDai yet.
     responses: list[RealityResponse] = OmenSubgraphHandler().get_responses(
+        limit=None,
         user=public_key,
         question_claimed=False,
         question_finalized_before=finalized_before,

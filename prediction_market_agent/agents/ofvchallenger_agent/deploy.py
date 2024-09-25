@@ -17,6 +17,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 from web3 import Web3
@@ -81,6 +82,14 @@ class OFVChallengerAgent(DeployableAgent):
         for market in markets_open_for_answers:
             self.challenge_market(market, api_keys)
 
+        # Compute accuracy on Reality and report as error if it goes down too much.
+        last_week_accuracy = reality_accuracy(
+            api_keys.bet_from_address, timedelta(days=7)
+        )
+        (logger.info if last_week_accuracy.accuracy >= 0.8 else logger.error)(
+            f"Last weeks accuracy is {last_week_accuracy.accuracy} on {last_week_accuracy.total} questions."
+        )
+
     @observe()
     def challenge_market(
         self,
@@ -92,7 +101,7 @@ class OFVChallengerAgent(DeployableAgent):
         langfuse_context.update_current_observation(metadata={"url": market.url})
 
         existing_responses = OmenSubgraphHandler().get_responses(
-            question_id=market.question.id
+            limit=None, question_id=market.question.id
         )
         logger.info(
             f"{market.url=}'s responses and bonds: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
