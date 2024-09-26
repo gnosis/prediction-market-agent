@@ -1,5 +1,6 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
+    BettingStrategy,
     MaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.loggers import logger
@@ -20,7 +21,9 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
-    strategy = MaxAccuracyBettingStrategy(bet_amount=1)
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MaxAccuracyBettingStrategy(bet_amount=1)
 
     @property
     def model(self) -> str | None:

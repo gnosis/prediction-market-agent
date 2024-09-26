@@ -1,5 +1,6 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
+    BettingStrategy,
     MaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.loggers import logger
@@ -18,7 +19,9 @@ from prediction_market_agent.agents.utils import market_is_saturated
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     model = "gpt-4-1106-preview"
     min_liquidity = 5
-    strategy = MaxAccuracyBettingStrategy(bet_amount=1)
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MaxAccuracyBettingStrategy(bet_amount=1)
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
