@@ -48,6 +48,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
         super().load()
         self.agent = PredictionProphetAgent(
             model="gpt-4o-2024-08-06",
+            include_reasoning=True,
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
@@ -60,6 +61,7 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
         super().load()
         self.agent = PredictionProphetAgent(
             model="gpt-4-0125-preview",
+            include_reasoning=True,
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
@@ -72,6 +74,7 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
         super().load()
         self.agent = PredictionProphetAgent(
             model="gpt-4-turbo-2024-04-09",
+            include_reasoning=True,
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
@@ -97,6 +100,7 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
             model="o1-preview-2024-09-12",
             research_temperature=1.0,
             prediction_temperature=1.0,
+            include_reasoning=True,
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
@@ -112,6 +116,7 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
             model="o1-mini-2024-09-12",
             research_temperature=1.0,
             prediction_temperature=1.0,
+            include_reasoning=True,
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
