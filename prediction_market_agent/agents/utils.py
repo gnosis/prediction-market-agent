@@ -11,7 +11,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC, to_utc_datetime
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -129,7 +129,7 @@ def get_event_date_from_question(question: str) -> DatetimeUTC | None:
     ).strip("'`\"")
 
     try:
-        event_date = to_utc_datetime(event_date_str)
+        event_date = DatetimeUTC.to_datetime_utc(event_date_str)
     except ValueError:
         logger.error(
             f"Could not extract event date from question `{question}`, got `{event_date_str}`."

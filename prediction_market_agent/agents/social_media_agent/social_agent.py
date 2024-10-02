@@ -7,10 +7,7 @@ from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.tools.langfuse_ import observe
-from prediction_market_agent_tooling.tools.utils import (
-    DatetimeUTC,
-    DatetimeUTCValidator,
-)
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.memory import (
@@ -39,7 +36,7 @@ class BetInputPrompt(BaseModel):
     title: str
     boolean_outcome: bool
     collateral_amount: float
-    creation_datetime: DatetimeUTCValidator
+    creation_datetime: DatetimeUTC
 
     @staticmethod
     def from_bet(bet: Bet) -> "BetInputPrompt":

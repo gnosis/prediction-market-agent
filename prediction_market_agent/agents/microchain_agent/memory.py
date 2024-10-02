@@ -3,11 +3,7 @@ import json
 from datetime import timedelta
 from typing import Dict, Sequence
 
-from prediction_market_agent_tooling.tools.utils import (
-    DatetimeUTC,
-    DatetimeUTCValidator,
-    check_not_none,
-)
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, check_not_none
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
@@ -32,7 +28,7 @@ class ChatMessage(BaseModel):
 
 
 class DatedChatMessage(ChatMessage):
-    datetime_: DatetimeUTCValidator
+    datetime_: DatetimeUTC
 
     @staticmethod
     def from_long_term_memory(
@@ -51,7 +47,7 @@ class DatedChatMessage(ChatMessage):
 
 class SimpleMemoryThinkThoroughly(BaseModel):
     metadata: AnswerWithScenario
-    datetime_: DatetimeUTCValidator
+    datetime_: DatetimeUTC
 
     @staticmethod
     def from_long_term_memory(
