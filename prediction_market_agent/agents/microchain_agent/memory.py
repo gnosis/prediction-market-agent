@@ -1,9 +1,13 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Dict, Sequence
 
-from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.tools.utils import (
+    DatetimeUTC,
+    DatetimeUTCValidator,
+    check_not_none,
+)
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
@@ -28,7 +32,7 @@ class ChatMessage(BaseModel):
 
 
 class DatedChatMessage(ChatMessage):
-    datetime_: datetime
+    datetime_: DatetimeUTCValidator
 
     @staticmethod
     def from_long_term_memory(
@@ -47,7 +51,7 @@ class DatedChatMessage(ChatMessage):
 
 class SimpleMemoryThinkThoroughly(BaseModel):
     metadata: AnswerWithScenario
-    datetime_: datetime
+    datetime_: DatetimeUTCValidator
 
     @staticmethod
     def from_long_term_memory(
@@ -109,11 +113,11 @@ class DatedChatHistory(ChatHistory):
     chat_messages: Sequence[DatedChatMessage]
 
     @property
-    def start_time(self) -> datetime:
+    def start_time(self) -> DatetimeUTC:
         return self.chat_messages[0].datetime_
 
     @property
-    def end_time(self) -> datetime:
+    def end_time(self) -> DatetimeUTC:
         return self.chat_messages[-1].datetime_
 
     @property
@@ -124,8 +128,8 @@ class DatedChatHistory(ChatHistory):
     def from_long_term_memory(
         cls,
         long_term_memory: LongTermMemoryTableHandler,
-        from_: datetime | None = None,
-        to: datetime | None = None,
+        from_: DatetimeUTC | None = None,
+        to: DatetimeUTC | None = None,
     ) -> "DatedChatHistory":
         memories = long_term_memory.search(from_=from_, to_=to)
 

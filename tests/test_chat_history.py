@@ -1,8 +1,7 @@
-from datetime import datetime
 from typing import Generator
 
 import pytest
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import utc_datetime, utcnow
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     ChatHistory,
@@ -28,19 +27,19 @@ def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
 def chat_history() -> DatedChatHistory:
     chat_messages = [
         DatedChatMessage(
-            content="foo", role="system", datetime_=datetime(2022, 1, 1, 0, 0)
+            content="foo", role="system", datetime_=utc_datetime(2022, 1, 1, 0, 0)
         ),
         DatedChatMessage(
-            content="bar", role="assistant", datetime_=datetime(2022, 1, 1, 0, 20)
+            content="bar", role="assistant", datetime_=utc_datetime(2022, 1, 1, 0, 20)
         ),
         DatedChatMessage(
-            content="baz", role="user", datetime_=datetime(2022, 1, 1, 0, 25)
+            content="baz", role="user", datetime_=utc_datetime(2022, 1, 1, 0, 25)
         ),
         DatedChatMessage(
-            content="qux", role="system", datetime_=datetime(2022, 1, 1, 0, 30)
+            content="qux", role="system", datetime_=utc_datetime(2022, 1, 1, 0, 30)
         ),
         DatedChatMessage(
-            content="quux", role="assistant", datetime_=datetime(2022, 1, 1, 0, 35)
+            content="quux", role="assistant", datetime_=utc_datetime(2022, 1, 1, 0, 35)
         ),
     ]
     return DatedChatHistory(chat_messages=chat_messages)

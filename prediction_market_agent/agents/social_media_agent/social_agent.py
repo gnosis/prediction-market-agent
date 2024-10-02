@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 from string import Template
 from typing import Any, Dict, Optional
@@ -8,6 +7,10 @@ from autogen import AssistantAgent, UserProxyAgent
 from autogen.cache import Cache
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.tools.langfuse_ import observe
+from prediction_market_agent_tooling.tools.utils import (
+    DatetimeUTC,
+    DatetimeUTCValidator,
+)
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.memory import (
@@ -36,7 +39,7 @@ class BetInputPrompt(BaseModel):
     title: str
     boolean_outcome: bool
     collateral_amount: float
-    creation_datetime: datetime
+    creation_datetime: DatetimeUTCValidator
 
     @staticmethod
     def from_bet(bet: Bet) -> "BetInputPrompt":
@@ -139,7 +142,7 @@ def extract_reasoning_behind_tweet(
     tweet: str,
     bets: list[Bet],
     long_term_memory: LongTermMemoryTableHandler,
-    memories_since: datetime | None = None,
+    memories_since: DatetimeUTC | None = None,
 ) -> str:
     """
     Fetches memories from the DB that are most closely related to bets.
@@ -165,7 +168,7 @@ def build_reply_tweet(
     tweet: str,
     bets: list[Bet],
     long_term_memory: LongTermMemoryTableHandler,
-    memories_since: datetime | None = None,
+    memories_since: DatetimeUTC | None = None,
 ) -> str:
     reasoning = extract_reasoning_behind_tweet(
         tweet=tweet,

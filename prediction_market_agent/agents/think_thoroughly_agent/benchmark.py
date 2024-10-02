@@ -1,5 +1,5 @@
 import typing as t
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import typer
 from prediction_market_agent_tooling.benchmark.agents import (
@@ -23,7 +23,7 @@ from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
 )
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import utc_datetime, utcnow
 
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
@@ -40,7 +40,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         volume=None,
         question=question,
         current_p_yes=Probability(0.5),
-        created_time=datetime(2024, 1, 1),
+        created_time=utc_datetime(2024, 1, 1),
         resolution=None,
         outcomes=["YES", "NO"],
         outcome_token_pool=None,

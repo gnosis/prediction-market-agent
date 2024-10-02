@@ -28,7 +28,7 @@ from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
 )
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
-    add_utc_timezone_validator,
+    DatetimeUTC,
     utcnow,
 )
 from pydantic import BaseModel
@@ -264,7 +264,7 @@ class ThinkThoroughlyBase(ABC):
         self,
         question: str,
         scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
-        created_time: datetime.datetime | None,
+        created_time: DatetimeUTC | None,
         research_report: str | None = None,
     ) -> ProbabilisticAnswer:
         predictor = self._get_predictor(self.model)
@@ -284,12 +284,10 @@ class ThinkThoroughlyBase(ABC):
 
         correlated_markets = self.get_correlated_markets(question)
 
-        event_date = add_utc_timezone_validator(get_event_date_from_question(question))
+        event_date = get_event_date_from_question(question)
         n_remaining_days = (event_date - utcnow()).days if event_date else "Unknown"
         n_market_open_days = (
-            (utcnow() - add_utc_timezone_validator(created_time)).days
-            if created_time
-            else "Unknown"
+            (utcnow() - created_time).days if created_time else "Unknown"
         )
         logger.info(
             f"Event date is {event_date} and {n_remaining_days} days remaining. Market is already open for {n_market_open_days} days."
@@ -327,7 +325,7 @@ class ThinkThoroughlyBase(ABC):
         self,
         question: str,
         n_iterations: int = 1,
-        created_time: datetime.datetime | None = None,
+        created_time: DatetimeUTC | None = None,
     ) -> ProbabilisticAnswer | None:
         hypothetical_scenarios = self.get_hypohetical_scenarios(question)
         conditional_scenarios = self.get_required_conditions(question)
@@ -525,7 +523,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         self,
         question: str,
         scenarios_with_probabilities: list[t.Tuple[str, AnswerWithScenario]],
-        created_time: datetime.datetime | None,
+        created_time: DatetimeUTC | None,
         research_report: str | None = None,
     ) -> ProbabilisticAnswer:
         api_keys = APIKeys()

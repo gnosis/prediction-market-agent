@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import HexAddress, HexBytes, xDai, xdai_type
@@ -18,7 +18,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.langfuse_ import observe
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
 
 
@@ -88,10 +88,10 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
 
 @observe()
 def claim_all_bonds_on_reality(
-    api_keys: APIKeys, finalized_before: datetime | None = None
+    api_keys: APIKeys, finalized_before: DatetimeUTC | None = None
 ) -> ClaimResult:
     # Just to be friendly with time differences.
-    finalized_before = finalized_before or utcnow() - timedelta(hours=1)
+    finalized_before = finalized_before or utcnow()
     public_key = api_keys.bet_from_address
 
     balances_before_claiming = get_balances(public_key)

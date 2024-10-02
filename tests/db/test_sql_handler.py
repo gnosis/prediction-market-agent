@@ -52,7 +52,7 @@ def test_get_first(
 ) -> None:
     prompt_earlier_date = example_prompts[0].prompt
     prompt_later_date = example_prompts[1].prompt
-    column_to_order: str = Prompt.datetime_.key  # type: ignore
+    column_to_order: str = Prompt.datetime_.key  # type: ignore[attr-defined]
     # insert 2 prompts with different dates
     prompt_sql_handler.save_multiple(example_prompts)
 

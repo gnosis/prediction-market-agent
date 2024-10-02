@@ -1,8 +1,7 @@
 import json
 import typing as t
-from datetime import datetime
 
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from sqlmodel import col
 
 from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
@@ -40,8 +39,8 @@ class LongTermMemoryTableHandler:
 
     def search(
         self,
-        from_: datetime | None = None,
-        to_: datetime | None = None,
+        from_: DatetimeUTC | None = None,
+        to_: DatetimeUTC | None = None,
     ) -> t.Sequence[LongTermMemories]:
         """Searches the LongTermMemoryTableHandler for entries within a specified datetime range that match
         self.task_description."""
@@ -55,7 +54,7 @@ class LongTermMemoryTableHandler:
 
         return self.sql_handler.get_with_filter_and_order(
             query_filters=query_filters,
-            order_by_column_name=LongTermMemories.datetime_.key,  # type: ignore
+            order_by_column_name=LongTermMemories.datetime_.key,  # type: ignore[attr-defined]
             order_desc=True,
         )
 
@@ -64,6 +63,6 @@ class LongTermMemoryTableHandler:
         Delete all memories with `task_description`
         """
         self.sql_handler.delete_all_entries(
-            col_name=LongTermMemories.task_description.key,  # type: ignore
+            col_name=LongTermMemories.task_description.key,  # type: ignore[attr-defined]
             col_value=self.task_description,
         )

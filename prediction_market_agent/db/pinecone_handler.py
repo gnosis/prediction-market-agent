@@ -1,7 +1,6 @@
 import base64
 import sys
 import typing as t
-from datetime import datetime
 from typing import Optional
 
 from langchain_core.vectorstores import VectorStore
@@ -14,6 +13,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -110,7 +110,7 @@ class PineconeHandler:
         return list(unique_market_titles.values())
 
     def insert_all_omen_markets_if_not_exists(
-        self, created_after: datetime | None = None
+        self, created_after: DatetimeUTC | None = None
     ) -> None:
         subgraph_handler = OmenSubgraphHandler()
         markets = subgraph_handler.get_omen_binary_markets_simple(

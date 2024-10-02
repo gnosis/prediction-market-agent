@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from prediction_market_agent_tooling.gtypes import (
     ChecksumAddress,
@@ -20,7 +20,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_TRUE_OUTCOME,
 )
 from prediction_market_agent_tooling.markets.omen.omen import (
-    OMEN_DEFAULT_MARKET_FEE,
+    OMEN_DEFAULT_MARKET_FEE_PERC,
     OmenAgentMarket,
     omen_create_market_tx,
     omen_remove_fund_market_tx,
@@ -34,7 +34,7 @@ from prediction_market_agent_tooling.tools.is_predictable import (
     is_predictable_without_description,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
@@ -53,8 +53,8 @@ def omen_replicate_from_tx(
     market_type: MarketType,
     n_to_replicate: int,
     initial_funds: xDai,
-    close_time_before: datetime | None = None,
-    close_time_after: datetime | None = None,
+    close_time_before: DatetimeUTC | None = None,
+    close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
@@ -159,10 +159,10 @@ def omen_replicate_from_tx(
             )
             continue
 
-        market_address = omen_create_market_tx(
+        created_market = omen_create_market_tx(
             api_keys=api_keys,
             initial_funds=initial_funds,
-            fee=OMEN_DEFAULT_MARKET_FEE,
+            fee_perc=OMEN_DEFAULT_MARKET_FEE_PERC,
             question=market.question,
             closing_time=safe_closing_time,
             category=category,
@@ -170,6 +170,9 @@ def omen_replicate_from_tx(
             outcomes=[OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME],
             auto_deposit=auto_deposit,
             collateral_token_address=sDaiContract().address,
+        )
+        market_address = (
+            created_market.market_event.fixed_product_market_maker_checksummed
         )
         created_addresses.append(market_address)
         logger.info(
