@@ -5933,18 +5933,18 @@ sympy = "*"
 
 [[package]]
 name = "open-aea"
-version = "1.57.0"
+version = "1.58.0"
 description = "Open Autonomous Economic Agent framework (without vendor lock-in)"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "open_aea-1.57.0-py3-none-any.whl", hash = "sha256:19714577414fa7ce7c9a43e4dd9d7849189b77b158a3d60e75cb43a7ea0eecd5"},
-    {file = "open_aea-1.57.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:a56d0b6dfa5bcdcf24d0edd167bf0e90c205bb6f20b59bcee0975a8dbd1811fe"},
-    {file = "open_aea-1.57.0-py3-none-manylinux1_x86_64.whl", hash = "sha256:a03df0c0e8354a8a0d940969252dbdf633f9b5698ce499e1cd30f694f7635151"},
-    {file = "open_aea-1.57.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:1fb3c78c7877bcd41d33b3bd5ee51f2cfe62efa2a07f193838133c771fff5237"},
-    {file = "open_aea-1.57.0-py3-none-win32.whl", hash = "sha256:a068d8710d3e235499ae866d167825bca1b56314f255b05591b2e362c1f9b3a6"},
-    {file = "open_aea-1.57.0-py3-none-win_amd64.whl", hash = "sha256:eb2ef61a7e7d74f4b99fc27fdbad7350320c18528f85678fe1a6503736ef2de5"},
-    {file = "open_aea-1.57.0.tar.gz", hash = "sha256:7cef260f56a4214752ea6242d43cf20a7488815f7e2de53ff2836b57a650a385"},
+    {file = "open_aea-1.58.0-py3-none-any.whl", hash = "sha256:ebe4b908279567a712cfe324480af8530d7e8f85d167af112ab0e176f8b6e911"},
+    {file = "open_aea-1.58.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:20fb1979d5e4d9b7e5d87b28141980509ce8871f6d521eb2b8b418fd799dd264"},
+    {file = "open_aea-1.58.0-py3-none-manylinux1_x86_64.whl", hash = "sha256:f9750158cf3a3f460ba12fb02b66c0998c9de69d9cccb21307c3bfd03feb1d97"},
+    {file = "open_aea-1.58.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:b1ae7f75503dc72f8c11a7e154362df808527abacd5c043a1fba6db49d1d144c"},
+    {file = "open_aea-1.58.0-py3-none-win32.whl", hash = "sha256:28e540ae7dc5e09d704fb7c20e1db42c1ce240e5effa77caa1ba5427c539a28a"},
+    {file = "open_aea-1.58.0-py3-none-win_amd64.whl", hash = "sha256:9a7ea0b11c7b2625abdf93a9e1a17c74df0cd52e12edcfad9a95d731bce9cc56"},
+    {file = "open_aea-1.58.0.tar.gz", hash = "sha256:46c2085a5ffba482c7421af517d770626a65ee0521cba9f08ce53c99186d4e3c"},
 ]
 
 [package.dependencies]
@@ -5972,13 +5972,13 @@ test-tools = ["click (>=8.1.0,<9)", "coverage (>=6.4.4,<8.0.0)", "jsonschema (>=
 
 [[package]]
 name = "open-aea-cli-ipfs"
-version = "1.57.0"
+version = "1.58.0"
 description = "CLI extension for open AEA framework wrapping IPFS functionality."
 optional = false
 python-versions = "*"
 files = [
-    {file = "open_aea_cli_ipfs-1.57.0-py3-none-any.whl", hash = "sha256:6cbefd42a682f1f0c116e527f728998f61a9bc930995acdd754b5335e54ad97d"},
-    {file = "open_aea_cli_ipfs-1.57.0.tar.gz", hash = "sha256:8254a1ecef4e7e3dbc9ba990243413963a0d5055b336c1ce6f2e0ae4ddaa25ce"},
+    {file = "open_aea_cli_ipfs-1.58.0-py3-none-any.whl", hash = "sha256:f54b389d98ff17962b631b79014fcc2c8eaf0171e83c8e0e1d0ae1c31f8361fe"},
+    {file = "open_aea_cli_ipfs-1.58.0.tar.gz", hash = "sha256:b34f37b673dfae84afff3d5c06ff7faf4c2b8477f23ed548b29b2b8f0e96da8d"},
 ]
 
 [package.dependencies]
@@ -5988,13 +5988,13 @@ pytest = ">=7.0.0,<7.3.0"
 
 [[package]]
 name = "open-aea-ledger-cosmos"
-version = "1.57.0"
+version = "1.58.0"
 description = "Python package wrapping the public and private key cryptography and ledger api of Cosmos."
 optional = false
 python-versions = "*"
 files = [
-    {file = "open_aea_ledger_cosmos-1.57.0-py3-none-any.whl", hash = "sha256:dfedc58ae4cebd938b51834f3eca5e2c8ffce95661a84212c3c4b6341e8952d4"},
-    {file = "open_aea_ledger_cosmos-1.57.0.tar.gz", hash = "sha256:35ae99e188a256bfcb06d510d161643922d6ed1e639eed92b3b5f7ee3576d5bf"},
+    {file = "open_aea_ledger_cosmos-1.58.0-py3-none-any.whl", hash = "sha256:2f1d2cd46a2f9b9cfa50c0e5db1b607c0c622bb6b9cabc32d42fea984c56a27e"},
+    {file = "open_aea_ledger_cosmos-1.58.0.tar.gz", hash = "sha256:49f6a3d0a5d9e37abe7c787f1c8e4dae55f0085e47ed98065e2ad99dfb9b490e"},
 ]
 
 [package.dependencies]
@@ -6006,13 +6006,13 @@ pycryptodome = ">=3.10.1,<4.0.0"
 
 [[package]]
 name = "open-aea-ledger-ethereum"
-version = "1.57.0"
+version = "1.58.0"
 description = "Python package wrapping the public and private key cryptography and ledger api of Ethereum."
 optional = false
 python-versions = "*"
 files = [
-    {file = "open_aea_ledger_ethereum-1.57.0-py3-none-any.whl", hash = "sha256:8ad775344baa77fc6b8e5a92edfa6d7e32f3361a885113379733e7ce4e4d6405"},
-    {file = "open_aea_ledger_ethereum-1.57.0.tar.gz", hash = "sha256:7c16858ad751db3906ec72046c821ad5b057c5e47edbc951da99c52714fb8c5e"},
+    {file = "open_aea_ledger_ethereum-1.58.0-py3-none-any.whl", hash = "sha256:06421f95a843814bc74d7c453530b4d71a8462ad0c6404d2039c525164e6da7b"},
+    {file = "open_aea_ledger_ethereum-1.58.0.tar.gz", hash = "sha256:2f5bbf330e573b5a455f2b109fc5884d9aa749ec7a20a1c7bd796bd7bc1ac414"},
 ]
 
 [package.dependencies]
@@ -6916,8 +6916,8 @@ openai = ["openai (>=1.0.0,<2.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
-reference = "5abc3c8b76f25ee6b33ff2613f12b3b54af8ca9e"
-resolved_reference = "5abc3c8b76f25ee6b33ff2613f12b3b54af8ca9e"
+reference = "313af051965f2863289d209b4a19d9833ef6bec0"
+resolved_reference = "313af051965f2863289d209b4a19d9833ef6bec0"
 
 [[package]]
 name = "prediction-prophet"
@@ -10994,4 +10994,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "70ddd1ed68464babb66c80dadd36d6ebf656ba579938ab288082c48162686f9e"
+content-hash = "6177007ac11810d990035f23ef5a6beec55f1fae5e76183bfcd2e55a137e382a"
