@@ -28,7 +28,7 @@ from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
 )
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
-    add_utc_timezone_validator,
+    convert_to_utc_datetime,
     utcnow,
 )
 from pydantic import BaseModel
@@ -284,10 +284,10 @@ class ThinkThoroughlyBase(ABC):
 
         correlated_markets = self.get_correlated_markets(question)
 
-        event_date = add_utc_timezone_validator(get_event_date_from_question(question))
+        event_date = convert_to_utc_datetime(get_event_date_from_question(question))
         n_remaining_days = (event_date - utcnow()).days if event_date else "Unknown"
         n_market_open_days = (
-            (utcnow() - add_utc_timezone_validator(created_time)).days
+            (utcnow() - convert_to_utc_datetime(created_time)).days
             if created_time
             else "Unknown"
         )
