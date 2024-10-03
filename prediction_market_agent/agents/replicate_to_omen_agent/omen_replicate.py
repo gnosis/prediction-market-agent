@@ -20,7 +20,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_TRUE_OUTCOME,
 )
 from prediction_market_agent_tooling.markets.omen.omen import (
-    OMEN_DEFAULT_MARKET_FEE,
+    OMEN_DEFAULT_MARKET_FEE_PERC,
     OmenAgentMarket,
     omen_create_market_tx,
     omen_remove_fund_market_tx,
@@ -159,10 +159,10 @@ def omen_replicate_from_tx(
             )
             continue
 
-        market_address = omen_create_market_tx(
+        created_market = omen_create_market_tx(
             api_keys=api_keys,
             initial_funds=initial_funds,
-            fee=OMEN_DEFAULT_MARKET_FEE,
+            fee_perc=OMEN_DEFAULT_MARKET_FEE_PERC,
             question=market.question,
             closing_time=safe_closing_time,
             category=category,
@@ -170,6 +170,9 @@ def omen_replicate_from_tx(
             outcomes=[OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME],
             auto_deposit=auto_deposit,
             collateral_token_address=sDaiContract().address,
+        )
+        market_address = ChecksumAddress(
+            created_market.market_event.fixed_product_market_maker_checksummed
         )
         created_addresses.append(market_address)
         logger.info(
