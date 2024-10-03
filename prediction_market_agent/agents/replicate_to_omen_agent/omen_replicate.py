@@ -171,7 +171,7 @@ def omen_replicate_from_tx(
             auto_deposit=auto_deposit,
             collateral_token_address=sDaiContract().address,
         )
-        market_address = ChecksumAddress(
+        market_address = (
             created_market.market_event.fixed_product_market_maker_checksummed
         )
         created_addresses.append(market_address)
