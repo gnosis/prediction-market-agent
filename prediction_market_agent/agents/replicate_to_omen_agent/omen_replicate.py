@@ -172,7 +172,7 @@ def omen_replicate_from_tx(
             collateral_token_address=sDaiContract().address,
         )
         market_address = ChecksumAddress(
-            created_market.market_event.fixedProductMarketMaker
+            created_market.market_event.fixed_product_market_maker_checksummed
         )
         created_addresses.append(market_address)
         logger.info(
