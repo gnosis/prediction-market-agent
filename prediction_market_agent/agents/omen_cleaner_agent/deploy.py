@@ -55,12 +55,11 @@ class OmenCleanerAgent(DeployableAgent):
     @observe()
     def resolve_finalized_markets(self, api_keys: APIKeys) -> list[HexAddress]:
         logger.info("Resolving finalized markets.")
-        # Delay by 24 hours to give a chance for the market creator to be resolve it.
         finalized_unresolved_markets = [
             market
             for market in OmenSubgraphHandler().get_omen_binary_markets(
                 limit=None,
-                finalized_before=utcnow() - timedelta(hours=24),
+                finalized_before=utcnow(),
                 resolved=False,
             )
             if market.id not in IGNORED_FOR_RESOLUTION
