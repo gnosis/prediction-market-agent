@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.langfuse_ import observe
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 
 from prediction_market_agent.agents.social_media_agent.social_agent import (
     build_reply_tweet,
@@ -63,7 +63,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
         self.post(tweet, reasoning_reply_tweet)
 
     def get_unique_bets_for_market(
-        self, market_type: MarketType, start_time: datetime
+        self, market_type: MarketType, start_time: DatetimeUTC
     ) -> list[Bet]:
         """
         Returns bets for a given market since start_date.

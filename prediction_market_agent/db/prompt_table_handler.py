@@ -21,15 +21,17 @@ class PromptTableHandler:
         prompt_to_save = Prompt(
             prompt=prompt,
             datetime_=utcnow(),
-            session_identifier=self.session_identifier
-            if self.session_identifier
-            else PROMPT_DEFAULT_SESSION_IDENTIFIER,
+            session_identifier=(
+                self.session_identifier
+                if self.session_identifier
+                else PROMPT_DEFAULT_SESSION_IDENTIFIER
+            ),
         )
         self.sql_handler.save_multiple([prompt_to_save])
 
     def fetch_latest_prompt(self) -> Prompt | None:
         # We ignore since mypy doesn't play well with SQLModel class attributes.
-        column_to_order: str = Prompt.datetime_.key  # type: ignore
+        column_to_order: str = Prompt.datetime_.key  # type: ignore[attr-defined]
         session_identifier = (
             self.session_identifier
             if self.session_identifier
