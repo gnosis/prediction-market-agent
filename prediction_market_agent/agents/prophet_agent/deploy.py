@@ -1,7 +1,7 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    MaxAccuracyBettingStrategy,
+    KellyBettingStrategy,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -22,9 +22,6 @@ class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 1
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return MaxAccuracyBettingStrategy(bet_amount=1)
-
     @property
     def model(self) -> str | None:
         return self.agent.model
@@ -44,6 +41,9 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = 20
     agent: PredictionProphetAgent
 
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=0.7)
+
     def load(self) -> None:
         super().load()
         self.agent = PredictionProphetAgent(
@@ -56,6 +56,9 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=0.5)
 
     def load(self) -> None:
         super().load()
@@ -70,6 +73,9 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=None)
+
     def load(self) -> None:
         super().load()
         self.agent = PredictionProphetAgent(
@@ -83,6 +89,9 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
     agent: OlasAgent
 
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=25, max_price_impact=0.5)
+
     def load(self) -> None:
         super().load()
         self.agent = OlasAgent(
@@ -92,6 +101,9 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=25, max_price_impact=0.7)
 
     def load(self) -> None:
         super().load()
@@ -108,6 +120,9 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=None)
 
     def load(self) -> None:
         super().load()

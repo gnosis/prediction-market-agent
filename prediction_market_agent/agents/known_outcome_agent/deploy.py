@@ -1,7 +1,7 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    MaxAccuracyBettingStrategy,
+    KellyBettingStrategy,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -21,7 +21,7 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     min_liquidity = 5
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return MaxAccuracyBettingStrategy(bet_amount=1)
+        return KellyBettingStrategy(max_bet_amount=2, max_price_impact=0.6)
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
