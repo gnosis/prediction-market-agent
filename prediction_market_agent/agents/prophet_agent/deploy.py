@@ -42,7 +42,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(max_bet_amount=25, max_price_impact=0.5)
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=0.7)
 
     def load(self) -> None:
         super().load()
