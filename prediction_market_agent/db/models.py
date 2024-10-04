@@ -1,6 +1,6 @@
-from datetime import datetime
 from typing import Optional
 
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from sqlmodel import Field, SQLModel
 
 
@@ -10,7 +10,7 @@ class LongTermMemories(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     task_description: str
     metadata_: Optional[str] = None
-    datetime_: datetime
+    datetime_: DatetimeUTC
 
 
 PROMPT_DEFAULT_SESSION_IDENTIFIER = "microchain-streamlit"
@@ -28,7 +28,7 @@ class Prompt(SQLModel, table=True):
     # This allows for future distinction between user sessions, if prompts from a specific
     # user (or app) should be persisted.
     session_identifier: str
-    datetime_: datetime
+    datetime_: DatetimeUTC
 
 
 class EvaluatedGoalModel(SQLModel, table=True):
@@ -47,4 +47,4 @@ class EvaluatedGoalModel(SQLModel, table=True):
     is_complete: bool
     reasoning: str
     output: str | None
-    datetime_: datetime
+    datetime_: DatetimeUTC

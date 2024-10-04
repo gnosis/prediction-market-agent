@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 from string import Template
 
@@ -12,6 +11,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
 )
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
@@ -115,7 +115,7 @@ def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
 
 
 @observe()
-def get_event_date_from_question(question: str) -> datetime | None:
+def get_event_date_from_question(question: str) -> DatetimeUTC | None:
     llm = ChatOpenAI(
         model="gpt-4-turbo",
         temperature=0.0,
@@ -129,7 +129,7 @@ def get_event_date_from_question(question: str) -> datetime | None:
     ).strip("'`\"")
 
     try:
-        event_date = datetime.strptime(event_date_str, "%m-%d-%Y")
+        event_date = DatetimeUTC.to_datetime_utc(event_date_str)
     except ValueError:
         logger.error(
             f"Could not extract event date from question `{question}`, got `{event_date_str}`."

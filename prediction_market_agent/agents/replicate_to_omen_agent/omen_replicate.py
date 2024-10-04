@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from prediction_market_agent_tooling.gtypes import (
     ChecksumAddress,
@@ -34,7 +34,7 @@ from prediction_market_agent_tooling.tools.is_predictable import (
     is_predictable_without_description,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
@@ -53,8 +53,8 @@ def omen_replicate_from_tx(
     market_type: MarketType,
     n_to_replicate: int,
     initial_funds: xDai,
-    close_time_before: datetime | None = None,
-    close_time_after: datetime | None = None,
+    close_time_before: DatetimeUTC | None = None,
+    close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
