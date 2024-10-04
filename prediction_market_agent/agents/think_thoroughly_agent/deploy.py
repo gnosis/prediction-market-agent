@@ -1,7 +1,7 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    MaxAccuracyBettingStrategy,
+    KellyBettingStrategy,
 )
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -18,9 +18,6 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     model: str
     bet_on_n_markets_per_run = 1
-
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return MaxAccuracyBettingStrategy(bet_amount=1)
 
     def load(self) -> None:
         self.agent = self.agent_class(
@@ -41,10 +38,16 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithItsOwnResearch
     model: str = "gpt-4-turbo-2024-04-09"
 
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=None)
+
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
     model: str = "gpt-4-turbo-2024-04-09"
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=0.4)
 
 
 if __name__ == "__main__":
