@@ -331,10 +331,11 @@ class GoalManager:
         The input list is assumed to be sorted in descending order of datetime.
         """
         unique_evaluated_goals: list[EvaluatedGoal] = []
-        unique_goals: list[Goal] = []
+        unique_goals: set[Goal] = set()
         for goal in evaluated_goals:
-            if goal.to_goal() not in unique_goals:
-                unique_goals.append(goal.to_goal())
+            goal_obj = goal.to_goal()
+            if goal_obj not in unique_goals:
+                unique_goals.add(goal_obj)
                 unique_evaluated_goals.append(goal)
             if len(unique_evaluated_goals) == self.goal_history_limit:
                 break
