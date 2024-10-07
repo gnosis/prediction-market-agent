@@ -20,16 +20,18 @@ def test_have_reached_retry_limit() -> None:
         sqlalchemy_db_url=SQLITE_DB_URL,
     )
 
-    g0 = EvaluatedGoal(
-        goal="goal0",
-        motivation="motivation",
-        completion_criteria="completion_criteria",
-        is_complete=False,
-        reasoning="reasoning",
-        output=None,
-    )
-    g1 = g0.model_copy()
-    g1.goal = "goal1"
+    def get_goal(goal: str) -> EvaluatedGoal:
+        return EvaluatedGoal(
+            goal=goal,
+            motivation="motivation",
+            completion_criteria="completion_criteria",
+            is_complete=False,
+            reasoning="reasoning",
+            output=None,
+        )
+
+    g0 = get_goal("goal0")
+    g1 = get_goal("goal1")
 
     assert goal_manager.have_reached_retry_limit(latest_evaluated_goals=[]) is True
 
@@ -298,21 +300,23 @@ def test_get_unique_evaluated_goals() -> None:
         retry_limit=4,
         goal_history_limit=3,
     )
-    g0 = EvaluatedGoal(
-        goal="foo0",
-        motivation="bar0",
-        completion_criteria="baz0",
-        is_complete=False,
-        reasoning="qux0",
-        output=None,
-    )
-    g1 = g0.model_copy()
 
-    g2 = g0.model_copy()
-    g2.goal = "foo2"
-    g3 = g2.model_copy()
+    def get_goal(goal: str) -> EvaluatedGoal:
+        return EvaluatedGoal(
+            goal=goal,
+            motivation="bar",
+            completion_criteria="baz",
+            is_complete=False,
+            reasoning="qux",
+            output=None,
+        )
 
-    g4 = g0.model_copy()
-    g4.goal = "foo4"
+    g0 = get_goal("foo0")
+    g1 = get_goal("foo0")
+
+    g2 = get_goal("foo2")
+    g3 = get_goal("foo2")
+
+    g4 = get_goal("foo4")
 
     assert goal_manager.get_unique_evaluated_goals([g0, g1, g2, g3, g4]) == [g0, g2, g4]

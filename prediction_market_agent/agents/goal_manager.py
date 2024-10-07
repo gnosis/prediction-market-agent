@@ -63,6 +63,9 @@ class Goal(BaseModel):
         description="The criteria that will be used to evaluate whether the goal has been completed",
     )
 
+    class Config:
+        frozen = True  # Makes `Goal` immutable and hashable
+
     def to_prompt(self) -> str:
         return (
             f"# Goal:\n"
