@@ -286,3 +286,33 @@ def test_evaluate_goal_progress_2() -> None:
     )
     assert goal_evaluation.is_complete is False
     assert goal_evaluation.output is None
+
+
+def test_get_unique_evaluated_goals() -> None:
+    goal_manager = GoalManager(
+        agent_id="",  # Not relevant to test
+        high_level_description="",  # Not relevant to test
+        agent_capabilities="",  # Not relevant to test
+        model=DEFAULT_OPENAI_MODEL,
+        sqlalchemy_db_url=SQLITE_DB_URL,
+        retry_limit=4,
+        goal_history_limit=3,
+    )
+    g0 = EvaluatedGoal(
+        goal="foo0",
+        motivation="bar0",
+        completion_criteria="baz0",
+        is_complete=False,
+        reasoning="qux0",
+        output=None,
+    )
+    g1 = g0.model_copy()
+
+    g2 = g0.model_copy()
+    g2.goal = "foo2"
+    g3 = g2.model_copy()
+
+    g4 = g0.model_copy()
+    g4.goal = "foo4"
+
+    assert goal_manager.get_unique_evaluated_goals([g0, g1, g2, g3, g4]) == [g0, g2, g4]

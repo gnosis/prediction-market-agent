@@ -27,7 +27,7 @@ The goal should satisfy the following:
 - balance the need for exploration and exploitation
 - not be contingent on external factors that are out of the agent's control
 
-If applicable, use the agent's previous evaluated goals when considering its new goal, and state how this goal follows from the previous ones in the 'reasoning' field.
+If applicable, use the agent's previous evaluated goals when considering its new goal, and state how this goal follows from the previous ones in the 'motivation' field.
 
 [HIGH LEVEL DESCRIPTION]
 {high_level_description}
@@ -143,6 +143,7 @@ class GoalManager:
         high_level_description: str,
         agent_capabilities: str,
         retry_limit: int = 3,
+        goal_history_limit: int = 10,  # How many unique goal histories to pass to the LLM when generating a new goal
         model: str = DEFAULT_OPENAI_MODEL,
         sqlalchemy_db_url: str | None = None,
     ):
@@ -150,6 +151,7 @@ class GoalManager:
         self.high_level_description = high_level_description
         self.agent_capabilities = agent_capabilities
         self.retry_limit = retry_limit
+        self.goal_history_limit = goal_history_limit
         self.model = model
         self.table_handler = EvaluatedGoalTableHandler(
             agent_id=agent_id,
@@ -223,9 +225,16 @@ class GoalManager:
         TODO add the ability to continue from a previous session if the goal
         is not complete.
         """
+        # In the worst case, when every goal is retried the maximum number of
+        # times, we need to retrieve (retry_limit + 1) * goal_history_limit
+        # evaluated goals to ensure we get `goal_history_limit` unique goals
         latest_evaluated_goals = self.get_latest_evaluated_goals_from_memory(
-            limit=self.retry_limit
+            limit=(self.retry_limit + 1) * self.goal_history_limit
         )
+        unique_latest_evaluated_goals = self.get_unique_evaluated_goals(
+            evaluated_goals=latest_evaluated_goals
+        )
+
         if latest_evaluated_goals:
             # Previous goals have been retrieved from memory. Generate a new
             # goal based on these, or retry the last on if it did not complete.
@@ -233,11 +242,11 @@ class GoalManager:
 
             if latest_evaluated_goal.is_complete:
                 # Generate a new goal
-                return self.generate_goal(latest_evaluated_goals)
+                return self.generate_goal(unique_latest_evaluated_goals)
             else:
                 # Try again, unless we've reached the retry limit
                 if self.have_reached_retry_limit(latest_evaluated_goals):
-                    return self.generate_goal(latest_evaluated_goals)
+                    return self.generate_goal(unique_latest_evaluated_goals)
                 else:
                     return latest_evaluated_goal.to_goal()
 
@@ -311,3 +320,23 @@ class GoalManager:
             if i < len(evaluated_goals) - 1:
                 goals_str += "\n"
         return goals_str
+
+    def get_unique_evaluated_goals(
+        self, evaluated_goals: list[EvaluatedGoal]
+    ) -> list[EvaluatedGoal]:
+        """
+        Return a list of unique evaluated goals from the input list, up to the
+        length of the goal history limit.
+
+        The input list is assumed to be sorted in descending order of datetime.
+        """
+        unique_evaluated_goals: list[EvaluatedGoal] = []
+        unique_goals: list[Goal] = []
+        for goal in evaluated_goals:
+            if goal.to_goal() not in unique_goals:
+                unique_goals.append(goal.to_goal())
+                unique_evaluated_goals.append(goal)
+            if len(unique_evaluated_goals) == self.goal_history_limit:
+                break
+
+        return unique_evaluated_goals
