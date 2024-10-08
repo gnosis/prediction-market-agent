@@ -17,8 +17,6 @@ from prediction_market_agent.utils import APIKeys
 def main(creator: str) -> None:
     """
     Generates and sets images for all markets created by the given creator, if they still have some liquidity.
-
-    Replicator address: 0x993DFcE14768e4dE4c366654bE57C21D9ba54748
     """
     keys = APIKeys()
     image_contract = OmenThumbnailMapping()
