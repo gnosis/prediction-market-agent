@@ -20,7 +20,7 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
-    bet_on_n_markets_per_run = 1
+    bet_on_n_markets_per_run = 3
 
     @property
     def model(self) -> str | None:

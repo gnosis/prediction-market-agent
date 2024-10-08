@@ -19,6 +19,7 @@ from prediction_market_agent.agents.utils import market_is_saturated
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     model = "gpt-4-1106-preview"
     min_liquidity = 5
+    bet_on_n_markets_per_run: int = 2
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(max_bet_amount=2, max_price_impact=0.6)
