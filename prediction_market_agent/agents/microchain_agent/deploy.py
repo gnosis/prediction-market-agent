@@ -182,5 +182,6 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
             agent_id=self.task_description,
             high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
             agent_capabilities=f"You have the following capabilities:\n{get_functions_summary_list(agent.engine)}",
-            retry_limit=3,
+            retry_limit=1,
+            goal_history_limit=10,
         )
