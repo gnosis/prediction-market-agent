@@ -4,6 +4,9 @@ import typer
 from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import (
+    OMEN_DEFAULT_REALITIO_BOND_VALUE,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
@@ -36,7 +39,9 @@ def main(
         )
 
     if resolve:
-        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(keys)
+        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
+            keys, realitio_bond=OMEN_DEFAULT_REALITIO_BOND_VALUE
+        )
         return
 
     # Get participants at least 2 weeks to make the bets.

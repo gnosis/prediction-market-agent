@@ -5,6 +5,9 @@ from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import private_key_type
 from web3 import Web3
 
+from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
+    REPLICATOR_BOND,
+)
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
 )
@@ -34,7 +37,7 @@ def main(
     )
 
     result = omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
-        api_keys=api_keys
+        api_keys=api_keys, realitio_bond=REPLICATOR_BOND
     )
     pprint(result.model_dump())
 

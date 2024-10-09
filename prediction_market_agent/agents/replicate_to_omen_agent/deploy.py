@@ -26,6 +26,7 @@ REPLICATOR_ADDRESS = Web3.to_checksum_address(
     "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
 )
 REPLICATOR_TAG = "replicator"
+REPLICATOR_BOND = xdai_type(10)
 
 
 class ReplicateConfig(BaseModel):
@@ -64,7 +65,9 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         logger.info(
             f"Finalising, resolving and claiming back xDai from existing markets replicated by {keys.bet_from_address}."
         )
-        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(keys)
+        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
+            keys, realitio_bond=REPLICATOR_BOND
+        )
 
         logger.info(
             f"Unfunding soon to be known markets replicated by {keys.bet_from_address}."
