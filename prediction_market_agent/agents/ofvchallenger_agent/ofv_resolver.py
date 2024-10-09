@@ -2,6 +2,7 @@ from factcheck import FactCheck
 from factcheck.utils.multimodal import modal_normalization
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.is_predictable import is_predictable_binary
 from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
@@ -101,9 +102,21 @@ def ofv_answer_binary_question(
         n_fact_runs > 0 and n_fact_runs % 2 != 0
     ), "n_fact_runs must be greater than 0 and an odd number"
 
+    # Check if the question is invalid, if so, return `Invalid` resolution right away.
+    question_is_invalid = is_invalid(market_question)
+    if question_is_invalid:
+        logger.warning(
+            f"Question `{market_question}` is invalid, skipping fact checking and returning invalid resolution."
+        )
+        return FactCheckAnswer(
+            factuality=None,
+            chosen_results=[],
+            all_considered_results=[],
+        )
+
     # Check if the question is reasonable to look for an answer.
-    is_answerable = is_predictable_binary(market_question)
-    if not is_answerable:
+    question_is_answerable = is_predictable_binary(market_question)
+    if not question_is_answerable:
         logger.warning(
             f"Question `{market_question}` is not answerable, skipping fact checking."
         )
