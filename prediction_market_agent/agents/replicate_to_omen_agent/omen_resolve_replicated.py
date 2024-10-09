@@ -147,7 +147,7 @@ def filter_replicated_markets_to_answer(
             response.bond_xdai >= realitio_bond / 2 for response in existing_responses
         ):
             logger.info(
-                f"Market {market.url=} already asnwered with bond > {realitio_bond} / 2. Skipping."
+                f"Market {market.url=} already answered with bond >= {realitio_bond} / 2. Skipping."
             )
             continue
 
