@@ -9,6 +9,8 @@ from pydantic import BaseModel, computed_field
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
 
+CORRELATION_THRESHOLD = 0.8
+
 
 class Correlation(BaseModel):
     correlation: float
@@ -28,16 +30,16 @@ class CorrelatedMarketPair(BaseModel):
         For negatively correlated markets: Bet YES/YES or NO/NO.
         """
         # Check correlation: +ve correlation or -ve correlation
-        if self.correlation > 0:
+        if self.correlation >= CORRELATION_THRESHOLD:
             # For +ve correlation, bet YES/NO or NO/YES
             p_yes = min(self.main_market.current_p_yes, self.related_market.current_p_yes)
             p_no = min(self.main_market.current_p_no, self.related_market.current_p_no)
             total_probability = p_yes + p_no
         else:
-            # For -ve correlation, bet YES/YES or NO/NO
-            combined_yes_prob = self.main_market.current_p_yes + self.related_market.current_p_yes
-            combined_no_prob = self.main_market.current_p_no + self.related_market.current_p_no
-            total_probability = max(combined_yes_prob, combined_no_prob)
+            # Smaller correlations will be handled in a future ticket
+            # https://github.com/gnosis/prediction-market-agent/issues/508
+            # Negative correlations are not yet supported by the current LLM prompt, hence not handling those for now.
+            return 0
 
         # Ensure total_probability is non-zero to avoid division errors
         if total_probability > 0:
@@ -46,7 +48,7 @@ class CorrelatedMarketPair(BaseModel):
             return 0  # No arbitrage possible if the sum of probabilities is zero
 
 
-CORRELATION_THRESHOLD = 0.8  # correlation assessed by LLM
+
 
 if __name__ == "__main__":
     # ToDo
@@ -63,17 +65,19 @@ if __name__ == "__main__":
         model="gpt-4o-mini",
         api_key=APIKeys().openai_api_key_secretstr_v1,
     )
-    prompt_template = """You are given 2 Prediction Market titles, market 1 and market 2. Your job is to output a single float number between -1 and 1, representing the correlation between the event outcomes of markets 1 and 2. 
+    prompt_template = """You are given 2 Prediction Market titles, market 1 and market 2. Your job is to output a single float number between -1 and 1, representing the correlation between the event outcomes of markets 1 and 2.
+    Correlation can be understood as the conditional probability that market 2 resolves to YES, given that market 1 resolved to YES.
+    Correlation should be a float number between -1 and 1. 
 
-                [MARKET 1]
-                {main_market}
+    [MARKET 1]
+    {main_market}
 
-                [MARKET 2]
-                {related_market}
+    [MARKET 2]
+    {related_market}
 
-                Follow the formatting instructions below for producing an output in the correct format.
-                {format_instructions}
-                """
+    Follow the formatting instructions below for producing an output in the correct format.
+    {format_instructions}
+    """
     parser = PydanticOutputParser(pydantic_object=Correlation)
     prompt = PromptTemplate(
         template=prompt_template,
@@ -89,12 +93,13 @@ if __name__ == "__main__":
                                                   id_in=[i.market_address.lower() for i in related], finalized=False,
                                                   resolved=False)
 
+        # Note that negative correlation is hard - e.g. for the US presidential election, markets on each candidate
+        # are not seen as -100% correlated.
         for related_market in omen_markets:
             # Todo - add langfuse config
             result = chain.invoke({"main_market": main_market, "related_market": related_market})
             print(f"{result=}")
-            if related_market.market_maker_contract_address_checksummed != main_market.market_maker_contract_address_checksummed and abs(
-                    result.correlation) >= CORRELATION_THRESHOLD:
+            if related_market.market_maker_contract_address_checksummed != main_market.market_maker_contract_address_checksummed and result.correlation >= CORRELATION_THRESHOLD:
                 print(
                     f'found matching markets, {main_market=}, main market prices {main_market.outcomeTokenMarginalPrices} {related_market=} related market prices {related_market.outcomeTokenMarginalPrices}')
 
