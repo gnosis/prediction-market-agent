@@ -18,14 +18,15 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL
 
 WARMUP_TOURNAMENT_ID = 3294
-TOURNAMENT_ID = 3349
+TOURNAMENT_ID_Q3 = 3349  # https://www.metaculus.com/tournament/aibq3
+TOURNAMENT_ID_Q4 = 32506  # https://www.metaculus.com/tournament/aibq4
 
 
 class DeployableMetaculusBotTournamentAgent(DeployableAgent):
     model: str = DEFAULT_OPENAI_MODEL
     dummy_prediction: bool = False
     repeat_predictions: bool = False
-    tournament_id: int = TOURNAMENT_ID
+    tournament_id: int = TOURNAMENT_ID_Q4
 
     def run(
         self,
