@@ -36,6 +36,7 @@ from prediction_market_agent.agents.arbitrage_agent.data_models import (
     CorrelatedMarketPair,
     Correlation,
 )
+from prediction_market_agent.agents.arbitrage_agent.prompt import prompt_template
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
 
@@ -43,6 +44,7 @@ from prediction_market_agent.utils import APIKeys
 class DeployableOmenArbitrageAgent(DeployableTraderAgent):
     """Agent that places mirror bets on Omen for (quasi) risk-neutral profit."""
 
+    model = "gpt-4o-mini"
     correlation_threshold: float = 0.8
 
     def load(self) -> None:
@@ -71,22 +73,10 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
     def _build_chain(self) -> RunnableSerializable[t.Any, t.Any]:
         llm = ChatOpenAI(
             temperature=0,
-            model="gpt-4o-mini",
+            model=self.model,
             api_key=APIKeys().openai_api_key_secretstr_v1,
         )
-        prompt_template = """You are given 2 Prediction Market titles, market 1 and market 2. Your job is to output a single float number between -1 and 1, representing the correlation between the event outcomes of markets 1 and 2.
-                    Correlation can be understood as the conditional probability that market 2 resolves to YES, given that market 1 resolved to YES.
-                    Correlation should be a float number between -1 and 1. 
 
-                    [MARKET 1]
-                    {main_market_question}
-
-                    [MARKET 2]
-                    {related_market_question}
-
-                    Follow the formatting instructions below for producing an output in the correct format.
-                    {format_instructions}
-                    """
         parser = PydanticOutputParser(pydantic_object=Correlation)
         prompt = PromptTemplate(
             template=prompt_template,
@@ -184,7 +174,6 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
     ) -> list[Trade]:
         trades = []
         correlated_markets = self.get_correlated_markets(market=market)
-        # For each correlated market, we want to place YES/NO or NO/YES trades.
         for pair in correlated_markets:
             if pair.potential_profit_per_bet_unit > 0:
                 trades_for_pair = self.build_trades_for_correlated_markets(pair)
