@@ -12,8 +12,8 @@ class CorrelatedMarketPair(BaseModel):
     main_market: AgentMarket
     related_market: AgentMarket
     correlation: float
-    
-    @computed_field
+
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def potential_profit_per_bet_unit(self) -> float:
         """
@@ -29,27 +29,42 @@ class CorrelatedMarketPair(BaseModel):
 
         # Ensure total_probability is non-zero to avoid division errors
         if total_probability > 0:
-            return (1. / total_probability) - 1.
+            return (1.0 / total_probability) - 1.0
         else:
             return 0  # No arbitrage possible if the sum of probabilities is zero
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def market_to_bet_yes(self) -> AgentMarket:
-        return self.main_market if self.main_market.current_p_yes <= self.related_market.current_p_yes else self.related_market
+        return (
+            self.main_market
+            if self.main_market.current_p_yes <= self.related_market.current_p_yes
+            else self.related_market
+        )
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def market_to_bet_no(self) -> AgentMarket:
-        return self.main_market if self.main_market.current_p_yes > self.related_market.current_p_yes else self.related_market
+        return (
+            self.main_market
+            if self.main_market.current_p_yes > self.related_market.current_p_yes
+            else self.related_market
+        )
 
-    @staticmethod
-    def split_bet_amount_between_yes_and_no(self, total_bet_amount: float) -> t.Tuple[float, float]:
-        """ Splits total bet amount following equations below:
-                A1/p1 = A2/p2 (same profit regardless of outcome resolution)
-                A1 + A2 = total bet amount
-                """
-        amount_to_bet_yes = total_bet_amount * self.market_to_bet_yes.current_p_yes / (
-                self.market_to_bet_yes.current_p_yes + self.market_to_bet_no.current_p_no)
+    def split_bet_amount_between_yes_and_no(
+        self, total_bet_amount: float
+    ) -> t.Tuple[float, float]:
+        """Splits total bet amount following equations below:
+        A1/p1 = A2/p2 (same profit regardless of outcome resolution)
+        A1 + A2 = total bet amount
+        """
+        amount_to_bet_yes = (
+            total_bet_amount
+            * self.market_to_bet_yes.current_p_yes
+            / (
+                self.market_to_bet_yes.current_p_yes
+                + self.market_to_bet_no.current_p_no
+            )
+        )
         amount_to_bet_no = total_bet_amount - amount_to_bet_yes
         return amount_to_bet_yes, amount_to_bet_no
