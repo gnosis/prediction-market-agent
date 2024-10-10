@@ -17,7 +17,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     model: str
-    bet_on_n_markets_per_run = 1
+    bet_on_n_markets_per_run = 2
 
     def load(self) -> None:
         self.agent = self.agent_class(

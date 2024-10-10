@@ -164,7 +164,7 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
     task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
     # Force less iterations, because Replicate's API allows at max 4096 input tokens.
-    n_iterations = 20
+    n_iterations = 10
     description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 3. Uses Llama 3.1 model."
 
 
@@ -182,5 +182,6 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
             agent_id=self.task_description,
             high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
             agent_capabilities=f"You have the following capabilities:\n{get_functions_summary_list(agent.engine)}",
-            retry_limit=3,
+            retry_limit=1,
+            goal_history_limit=10,
         )
