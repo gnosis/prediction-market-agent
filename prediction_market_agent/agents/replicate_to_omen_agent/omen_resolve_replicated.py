@@ -1,4 +1,5 @@
 from datetime import timedelta
+from functools import partial
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
@@ -52,15 +53,22 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
 
     now = utcnow()
 
-    # Fetch markets created by us that are already open, but no answer was submitted yet.
-    created_opened_markets = OmenSubgraphHandler().get_omen_binary_markets(
+    # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
+    get_omen_binary_markets_common_filters = partial(
+        OmenSubgraphHandler().get_omen_binary_markets,
         limit=None,
         creator=public_key,
         # We need markets already opened for answers.
-        opened_before=now,
-        # With a little bandwidth for the market to be finalized,
+        question_opened_before=now,
+    )
+    created_opened_markets = get_omen_binary_markets_common_filters(
+        # Markets with a little bandwidth for the market to be finalized,
         # so we have time for processing it without erroring out at the end.
-        finalized_after=now + timedelta(minutes=30),
+        question_finalized_after=now
+        + timedelta(minutes=30),
+    ) + get_omen_binary_markets_common_filters(
+        # And markets without any answer at all.
+        question_with_answers=False,
     )
     logger.info(f"Found {len(created_opened_markets)} markets to answer.")
     # Finalize them (set answer on Realitio).
