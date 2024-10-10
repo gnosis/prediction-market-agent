@@ -12,8 +12,7 @@ class CorrelatedMarketPair(BaseModel):
     main_market: AgentMarket
     related_market: AgentMarket
     correlation: float
-    correlation_threshold = 0.8
-
+    
     @computed_field
     @property
     def potential_profit_per_bet_unit(self) -> float:
