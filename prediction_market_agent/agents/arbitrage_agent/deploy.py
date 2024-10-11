@@ -42,15 +42,22 @@ from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
 
 
-class DeployableOmenArbitrageAgent(DeployableTraderAgent):
+class DeployableArbitrageAgent(DeployableTraderAgent):
     """Agent that places mirror bets on Omen for (quasi) risk-neutral profit."""
 
-    model = "gpt-4o-mini"
+    model = "gpt-4o"
 
     def load(self) -> None:
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
         self.chain = self._build_chain()
+
+    def run(self, market_type: MarketType) -> None:
+        if market_type != MarketType.OMEN:
+            raise RuntimeError(
+                "Can arbitrage only on Omen since related markets embeddings available only for Omen markets."
+            )
+        super().run(market_type=market_type)
 
     def get_markets(
         self,

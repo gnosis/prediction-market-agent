@@ -12,6 +12,9 @@ import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.arbitrage_agent.deploy import (
+    DeployableArbitrageAgent,
+)
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -74,6 +77,7 @@ class RunnableAgent(str, Enum):
     social_media = "social_media"
     omen_cleaner = "omen_cleaner"
     ofv_challenger = "ofv_challenger"
+    arbitrage = "arbitrage"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -98,6 +102,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.ofv_challenger: OFVChallengerAgent,
     RunnableAgent.prophet_o1preview: DeployablePredictionProphetGPTo1PreviewAgent,
     RunnableAgent.prophet_o1mini: DeployablePredictionProphetGPTo1MiniAgent,
+    RunnableAgent.arbitrage: DeployableArbitrageAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
