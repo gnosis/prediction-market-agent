@@ -1,4 +1,5 @@
 from datetime import timedelta
+from functools import partial
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
@@ -68,14 +69,21 @@ class OFVChallengerAgent(DeployableAgent):
         # Claim the bonds as first thing, to have funds for the new challenges.
         claim_all_bonds_on_reality(api_keys)
 
-        markets_open_for_answers = OmenSubgraphHandler().get_omen_binary_markets(
+        get_omen_binary_markets_common_filters = partial(
+            OmenSubgraphHandler().get_omen_binary_markets,
             limit=None,
             creator_in=MARKET_CREATORS_TO_CHALLENGE,
             # We need markets already opened for answers.
-            opened_before=utcnow(),
+            question_opened_before=utcnow(),
+        )
+        markets_open_for_answers = get_omen_binary_markets_common_filters(
             # With a little bandwidth for the market to be finalized,
             # so we have time for processing it without erroring out at the end.
-            finalized_after=utcnow() + timedelta(minutes=30),
+            question_finalized_after=utcnow()
+            + timedelta(minutes=30),
+        ) + get_omen_binary_markets_common_filters(
+            # And also markets without any answer at all yet.
+            question_with_answers=False,
         )
         logger.info(f"Found {len(markets_open_for_answers)} markets to challenge.")
 

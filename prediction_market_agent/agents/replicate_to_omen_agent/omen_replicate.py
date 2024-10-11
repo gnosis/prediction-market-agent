@@ -29,6 +29,7 @@ from prediction_market_agent_tooling.markets.omen.omen_contracts import sDaiCont
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.is_predictable import (
     is_predictable_binary,
     is_predictable_without_description,
@@ -128,6 +129,12 @@ def omen_replicate_from_tx(
             continue
 
         # Do as the last steps, becuase it calls OpenAI (costly & slow).
+        if is_invalid(market.question):
+            logger.info(
+                f"Skipping `{market.question}` because it seems to be an invalid question."
+            )
+            continue
+
         if not is_predictable_binary(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable."
@@ -205,7 +212,7 @@ def omen_unfund_replicated_known_markets_tx(
     markets = OmenSubgraphHandler().get_omen_binary_markets(
         limit=None,
         creator=from_address,
-        opened_before=opened_before,
+        question_opened_before=opened_before,
         liquidity_bigger_than=wei_type(0),
     )
 
