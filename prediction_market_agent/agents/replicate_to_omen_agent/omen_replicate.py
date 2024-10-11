@@ -205,7 +205,7 @@ def omen_unfund_replicated_known_markets_tx(
     markets = OmenSubgraphHandler().get_omen_binary_markets(
         limit=None,
         creator=from_address,
-        opened_before=opened_before,
+        question_opened_before=opened_before,
         liquidity_bigger_than=wei_type(0),
     )
 

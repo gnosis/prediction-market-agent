@@ -59,7 +59,7 @@ class OmenCleanerAgent(DeployableAgent):
             market
             for market in OmenSubgraphHandler().get_omen_binary_markets(
                 limit=None,
-                finalized_before=utcnow(),
+                question_finalized_before=utcnow(),
                 resolved=False,
             )
             if market.id not in IGNORED_FOR_RESOLUTION
