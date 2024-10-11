@@ -12,7 +12,9 @@ class Correlation(BaseModel):
 class CorrelatedMarketPair(BaseModel):
     main_market: AgentMarket
     related_market: AgentMarket
-    correlation: float
+
+    def __repr__(self) -> str:
+        return f"main_market_question {self.main_market.question=} related_market_question {self.related_market.question=}"
 
     @computed_field  # type: ignore[prop-decorator]
     @property

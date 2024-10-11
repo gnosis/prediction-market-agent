@@ -6,19 +6,19 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
-    DeployableOmenArbitrageAgent,
+    DeployableArbitrageAgent,
 )
 
 
 @pytest.fixture(scope="module")
-def arbitrage_agent() -> t.Generator[DeployableOmenArbitrageAgent, None, None]:
+def arbitrage_agent() -> t.Generator[DeployableArbitrageAgent, None, None]:
     with patch(
         "prediction_market_agent.agents.arbitrage_agent.deploy.DeployableOmenArbitrageAgent.load",
         new=lambda x: None,
     ), patch(
         "prediction_market_agent_tooling.tools.langfuse_.get_langfuse_langchain_config"
     ):
-        agent = DeployableOmenArbitrageAgent()
+        agent = DeployableArbitrageAgent()
         # needed since load was mocked
         agent.chain = agent._build_chain()
         yield agent
@@ -50,7 +50,7 @@ def unrelated_market() -> t.Generator[AgentMarket, None, None]:
     [("related_market", True), ("unrelated_market", False)],
 )
 def test_correlation_for_similar_markets(
-    arbitrage_agent: DeployableOmenArbitrageAgent,
+    arbitrage_agent: DeployableArbitrageAgent,
     main_market: AgentMarket,
     related_market_fixture_name: str,
     is_correlated: bool,

@@ -47,16 +47,14 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
 
     model = "gpt-4o"
 
-    def load(self) -> None:
-        self.subgraph_handler = OmenSubgraphHandler()
-        self.pinecone_handler = PineconeHandler()
-        self.chain = self._build_chain()
-
     def run(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
             raise RuntimeError(
                 "Can arbitrage only on Omen since related markets embeddings available only for Omen markets."
             )
+        self.subgraph_handler = OmenSubgraphHandler()
+        self.pinecone_handler = PineconeHandler()
+        self.chain = self._build_chain()
         super().run(market_type=market_type)
 
     def get_markets(
@@ -68,7 +66,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     ) -> t.Sequence[AgentMarket]:
         return super().get_markets(
             market_type=market_type,
-            limit=100,
+            limit=limit,
             sort_by=SortBy.HIGHEST_LIQUIDITY,
             # Fetching most liquid markets since more likely they will have related markets
             filter_by=FilterBy.OPEN,
@@ -119,7 +117,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             id_in=[i.market_address.lower() for i in related],
             resolved=False,
         )
-
+        omen_markets = [m for m in omen_markets if m.id != market.id]
         # Note that negative correlation is hard - e.g. for the US presidential election, markets on each candidate are not seen as -100% correlated.
         for related_market in omen_markets:
             result: Correlation = self.chain.invoke(
@@ -129,13 +127,12 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
                 },
                 config=get_langfuse_langchain_config(),
             )
-            if related_market.id != market.id and result.near_perfect_correlation:
+            if result.near_perfect_correlation:
                 related_agent_market = OmenAgentMarket.from_data_model(related_market)
                 correlated_markets.append(
                     CorrelatedMarketPair(
                         main_market=market,
                         related_market=related_agent_market,
-                        correlation=result.correlation,
                     )
                 )
         return correlated_markets
