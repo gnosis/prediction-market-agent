@@ -50,8 +50,6 @@ OLAS_TYPES_TO_PYTHON_TYPES = {
 }
 
 
-# ToDo - Build langchain tool (or similar) from mech-tools
-
 if __name__ == "__main__":
     # all_tools = get_tools_for_agents(agent_id=None, chain_config='gnosis')
 
@@ -74,8 +72,11 @@ if __name__ == "__main__":
 
     DynamicModel = create_model("DynamicModel", **dict_schema)
 
-    # ToDo - Call mech and get response
-    # ToDo - build response dynamically from output schema
+    # ToDo - next steps
+    #  1. Create function (see ClassFactory().create_class) for microchain
+    #  2. __call__ from function above should call the mech via `interaction`
+    #  3. Determine correct types for mech response (see ModelSchema)
+    #  4. Load all mechs dynamically into general-agent
 
     # mock_response = {
     #     "requestId": 24799777447209263141401480763500015573309571847555969842339861220699351973823,
@@ -92,9 +93,6 @@ if __name__ == "__main__":
 
     # function_call = lambda x: mech_request()
 
-    # ToDo - Call function dynamically using attrs
-    # ToDo - get agent ID description
-    # ToDo - Create function (see dynamic_class = ClassFactory().create_class(class_name, (base,), attributes))
     # class_name = tool_id_identifier.replace("-", " ").title().replace(" ", "")
     # attributes = {
     #     "__name__": class_name,
