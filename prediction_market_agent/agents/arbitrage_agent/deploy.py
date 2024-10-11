@@ -46,6 +46,8 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     """Agent that places mirror bets on Omen for (quasi) risk-neutral profit."""
 
     model = "gpt-4o"
+    # trade amount will be divided between correlated markets.
+    total_trade_amount = BetAmount(amount=0.1, currency=OmenAgentMarket.currency)
 
     def run(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
@@ -142,10 +144,10 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         self, pair: CorrelatedMarketPair
     ) -> list[Trade]:
         market_to_bet_yes, market_to_bet_no = pair.main_market, pair.related_market
-        total_amount: BetAmount = pair.main_market.get_tiny_bet_amount()
+
         # Split between main_market and related_market
         amount_yes, amount_no = pair.split_bet_amount_between_yes_and_no(
-            total_amount.amount
+            self.total_trade_amount.amount
         )
         trades = [
             Trade(
