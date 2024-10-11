@@ -48,6 +48,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     model = "gpt-4o"
     # trade amount will be divided between correlated markets.
     total_trade_amount = BetAmount(amount=0.1, currency=OmenAgentMarket.currency)
+    bet_on_n_markets_per_run = 5
 
     def run(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
@@ -69,7 +70,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     ) -> t.Sequence[AgentMarket]:
         return super().get_markets(
             market_type=market_type,
-            limit=limit,
+            limit=50,
             sort_by=SortBy.HIGHEST_LIQUIDITY,
             # Fetching most liquid markets since more likely they will have related markets
             filter_by=FilterBy.OPEN,
