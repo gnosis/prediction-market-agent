@@ -27,7 +27,7 @@ def arbitrage_agent() -> t.Generator[DeployableOmenArbitrageAgent, None, None]:
 @pytest.fixture(scope="module")
 def main_market() -> t.Generator[AgentMarket, None, None]:
     m1 = Mock(OmenAgentMarket, wraps=OmenAgentMarket)
-    m1.question = "Will Kamala Harris win the US presidential election?"
+    m1.question = "Will Kamala Harris win the US presidential election in 2024?"
     yield m1
 
 
@@ -60,7 +60,4 @@ def test_correlation_for_similar_markets(
     correlation = arbitrage_agent.calculate_correlation_between_markets(
         market=main_market, related_market=other_market
     )
-    assert (
-        arbitrage_agent.is_correlation_above_threshold(correlation.correlation)
-        == is_correlated
-    )
+    assert correlation.near_perfect_correlation == is_correlated

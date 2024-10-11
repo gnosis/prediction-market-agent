@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.deploy.agent import (
     DeployableTraderAgent,
 )
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
@@ -45,7 +46,6 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
     """Agent that places mirror bets on Omen for (quasi) risk-neutral profit."""
 
     model = "gpt-4o-mini"
-    correlation_threshold: float = 0.8
 
     def load(self) -> None:
         self.subgraph_handler = OmenSubgraphHandler()
@@ -100,16 +100,13 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
         return correlation
 
     @observe()
-    def is_correlation_above_threshold(self, correlation_score: float) -> bool:
-        return correlation_score >= self.correlation_threshold
-
-    @observe()
     def get_correlated_markets(self, market: AgentMarket) -> list[CorrelatedMarketPair]:
         # We try to find similar, open markets which point to the same outcome.
         correlated_markets = []
         related = self.pinecone_handler.find_nearest_questions_with_threshold(
             limit=10, text=market.question
         )
+
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
             limit=len(related),
             id_in=[i.market_address.lower() for i in related],
@@ -118,16 +115,14 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
 
         # Note that negative correlation is hard - e.g. for the US presidential election, markets on each candidate are not seen as -100% correlated.
         for related_market in omen_markets:
-            result = self.chain.invoke(
+            result: Correlation = self.chain.invoke(
                 {
                     "main_market_question": market,
                     "related_market_question": related_market,
                 },
                 config=get_langfuse_langchain_config(),
             )
-            if related_market.id != market.id and self.is_correlation_above_threshold(
-                result.correlation
-            ):
+            if related_market.id != market.id and result.near_perfect_correlation:
                 related_agent_market = OmenAgentMarket.from_data_model(related_market)
                 correlated_markets.append(
                     CorrelatedMarketPair(
@@ -148,7 +143,7 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
         amount_yes, amount_no = pair.split_bet_amount_between_yes_and_no(
             total_amount.amount
         )
-        return [
+        trades = [
             Trade(
                 trade_type=TradeType.BUY,
                 outcome=True,
@@ -164,6 +159,8 @@ class DeployableOmenArbitrageAgent(DeployableTraderAgent):
                 ),
             ),
         ]
+        logger.info(f"Placing arbitrage trades {trades}")
+        return trades
 
     @observe()
     def build_trades(

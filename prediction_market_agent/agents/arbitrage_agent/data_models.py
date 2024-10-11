@@ -5,7 +5,8 @@ from pydantic import BaseModel, computed_field
 
 
 class Correlation(BaseModel):
-    correlation: float
+    near_perfect_correlation: bool
+    reasoning: str
 
 
 class CorrelatedMarketPair(BaseModel):
