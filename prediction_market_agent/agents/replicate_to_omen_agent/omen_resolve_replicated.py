@@ -97,7 +97,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     created_finalized_markets = OmenSubgraphHandler().get_omen_binary_markets(
         limit=None,
         creator=public_key,
-        finalized_before=now,
+        question_finalized_before=now,
         resolved=False,
     )
     # Resolve them (resolve them on Oracle).
