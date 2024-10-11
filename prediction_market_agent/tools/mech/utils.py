@@ -43,7 +43,11 @@ class MechTool(str, Enum):
     PREDICTION_URL_COT = "prediction-url-cot"
 
 
-def mech_request(question: str, mech_tool: MechTool) -> MechResponse:
+def mech_request_using_mech_enum(question: str, mech_tool: MechTool) -> MechResponse:
+    return mech_request(question, mech_tool.value)
+
+
+def mech_request(question: str, mech_tool_id: str, agent_id: int) -> MechResponse:
     private_key = APIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures
@@ -58,12 +62,11 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResponse:
         response = interact(
             prompt=question,
             # Taken from https://github.com/valory-xyz/mech?tab=readme-ov-file#examples-of-deployed-mechs
-            agent_id=6,
+            agent_id=agent_id,
             private_key_path=tmpfile_path,
-            # To see a list of available tools, comment out the tool parameter
-            # and run the function. You will be prompted to select a tool.
-            tool=mech_tool.value,
-            confirmation_type=ConfirmationType.WAIT_FOR_BOTH,
+            tool=mech_tool_id,
+            confirmation_type=ConfirmationType.OFF_CHAIN,
         )
         del os.environ[mech_strategy_env_var]
-        return MechResponse.model_validate_json(response["result"])
+        # return MechResponse.model_validate_json(response["result"])
+        return response
