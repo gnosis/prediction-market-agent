@@ -13,7 +13,7 @@ from prediction_market_agent.agents.arbitrage_agent.deploy import (
 @pytest.fixture(scope="module")
 def arbitrage_agent() -> t.Generator[DeployableArbitrageAgent, None, None]:
     with patch(
-        "prediction_market_agent.agents.arbitrage_agent.deploy.DeployableOmenArbitrageAgent.load",
+        "prediction_market_agent.agents.arbitrage_agent.deploy.DeployableArbitrageAgent.load",
         new=lambda x: None,
     ), patch(
         "prediction_market_agent_tooling.tools.langfuse_.get_langfuse_langchain_config"
