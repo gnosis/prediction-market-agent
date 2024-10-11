@@ -30,7 +30,7 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
         )
 
     def before_process_markets(self, market_type: MarketType) -> None:
-        self.agent.update_markets()
+        self.agent.pinecone_handler.update_markets()
         super().before_process_markets(market_type=market_type)
 
 

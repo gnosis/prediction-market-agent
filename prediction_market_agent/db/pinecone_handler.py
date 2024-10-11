@@ -1,4 +1,5 @@
 import base64
+import datetime
 import sys
 import typing as t
 from typing import Optional
@@ -13,7 +14,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -108,6 +109,12 @@ class PineconeHandler:
                 unique_market_titles[market.question_title] = market
 
         return list(unique_market_titles.values())
+
+    def update_markets(self) -> None:
+        """We use the agent's run to add embeddings of new markets that don't exist yet in the
+        vector DB."""
+        created_after = utcnow() - datetime.timedelta(days=7)
+        self.insert_all_omen_markets_if_not_exists(created_after=created_after)
 
     def insert_all_omen_markets_if_not_exists(
         self, created_after: DatetimeUTC | None = None

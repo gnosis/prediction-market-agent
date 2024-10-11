@@ -1,4 +1,3 @@
-import datetime
 import typing as t
 from abc import ABC
 from uuid import UUID, uuid4
@@ -182,14 +181,6 @@ class ThinkThoroughlyBase(ABC):
             temperature=0.0,
         )
         return llm
-
-    def update_markets(self) -> None:
-        """We use the agent's run to add embeddings of new markets that don't exist yet in the
-        vector DB."""
-        created_after = utcnow() - datetime.timedelta(days=7)
-        self.pinecone_handler.insert_all_omen_markets_if_not_exists(
-            created_after=created_after
-        )
 
     @observe()
     def get_required_conditions(self, question: str) -> Scenarios:
