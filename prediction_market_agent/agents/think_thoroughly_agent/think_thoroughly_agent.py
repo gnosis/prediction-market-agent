@@ -484,7 +484,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 goal=scenario,
                 initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
                 max_results_per_search=5,
-                min_scraped_sites=3,
+                min_scraped_sites=2,
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,

@@ -23,7 +23,7 @@ def prophet_research(
 ) -> Research:
     """
     Use `min_scraped_sites` as a proxy for setting a minimum requirement for
-    'how thorough the research must be'. Up to (min_scraped_sites * max_results_per_search)
+    'how thorough the research must be'. Up to (subqueries_limit * max_results_per_search)
     sites will be scraped, but the actual number may be less because of:
 
     - duplication of URLs across searches
