@@ -13,7 +13,7 @@ class CorrelatedMarketPair(BaseModel):
     main_market: AgentMarket
     related_market: AgentMarket
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"main_market {self.main_market.question} related_market_question {self.related_market.question} potential profit {self.potential_profit_per_bet_unit}"
 
     @computed_field  # type: ignore[prop-decorator]
