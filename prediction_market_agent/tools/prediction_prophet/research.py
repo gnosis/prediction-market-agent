@@ -2,9 +2,6 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
     TavilyStorage,
 )
-from prediction_prophet.benchmark.agents import (  # noqa: F401 # Just to make it available for the user of research.
-    _make_prediction as prophet_make_prediction,
-)
 from prediction_prophet.functions.research import Research
 from prediction_prophet.functions.research import research as original_research
 from pydantic.types import SecretStr
@@ -23,7 +20,7 @@ def prophet_research(
 ) -> Research:
     """
     Use `min_scraped_sites` as a proxy for setting a minimum requirement for
-    'how thorough the research must be'. Up to (min_scraped_sites * max_results_per_search)
+    'how thorough the research must be'. Up to (subqueries_limit * max_results_per_search)
     sites will be scraped, but the actual number may be less because of:
 
     - duplication of URLs across searches
