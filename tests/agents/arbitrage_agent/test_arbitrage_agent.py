@@ -45,6 +45,7 @@ def unrelated_market() -> t.Generator[AgentMarket, None, None]:
     yield m1
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 @pytest.mark.parametrize(
     "related_market_fixture_name, is_correlated",
     [("related_market", True), ("unrelated_market", False)],
