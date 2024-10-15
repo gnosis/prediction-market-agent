@@ -8,18 +8,15 @@ from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
+from tests.utils import RUN_PAID_TESTS
 
 
 @pytest.fixture(scope="module")
 def arbitrage_agent() -> t.Generator[DeployableArbitrageAgent, None, None]:
     with patch(
-        "prediction_market_agent.agents.arbitrage_agent.deploy.DeployableArbitrageAgent.load",
-        new=lambda x: None,
-    ), patch(
         "prediction_market_agent_tooling.tools.langfuse_.get_langfuse_langchain_config"
     ):
-        agent = DeployableArbitrageAgent()
-        # needed since load was mocked
+        agent = DeployableArbitrageAgent(place_bet=False)
         agent.chain = agent._build_chain()
         yield agent
 

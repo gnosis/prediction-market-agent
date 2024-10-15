@@ -111,32 +111,12 @@ class PineconeHandler:
 
         return list(unique_market_titles.values())
 
-    def update_markets(self, clean_resolved_markets=True) -> None:
+    def update_markets(self) -> None:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
-        self.insert_all_omen_markets_if_not_exists()
-        if clean_resolved_markets:
-            self.remove_resolved_markets()
+        self.insert_open_omen_markets_if_not_exists()
 
-    def remove_resolved_markets(self) -> None:
-        """Remove markets that are closed but still present in the index."""
-        existing_ids = self.get_existing_ids_in_index()
-        resolved_markets = OmenSubgraphHandler().get_omen_binary_markets(
-            limit=sys.maxsize,
-            resolved=True,
-        )
-        resolved_markets_id = [
-            self.encode_text(m.question_title)
-            for m in resolved_markets
-            if m.is_resolved
-        ]
-        ids_to_delete = set(existing_ids).intersection(resolved_markets_id)
-        self.remove_markets_by_id(ids_to_delete=list(ids_to_delete))
-
-    def remove_markets_by_id(self, ids_to_delete: list[str]) -> None:
-        self.index.delete(ids=ids_to_delete)
-
-    def insert_all_omen_markets_if_not_exists(self) -> None:
+    def insert_open_omen_markets_if_not_exists(self) -> None:
         subgraph_handler = OmenSubgraphHandler()
         markets = subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,

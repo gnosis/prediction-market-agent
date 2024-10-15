@@ -49,6 +49,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     # trade amount will be divided between correlated markets.
     total_trade_amount = BetAmount(amount=0.1, currency=OmenAgentMarket.currency)
     bet_on_n_markets_per_run = 5
+    max_related_markets_per_market = 10
 
     def run(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
@@ -112,8 +113,13 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def get_correlated_markets(self, market: AgentMarket) -> list[CorrelatedMarketPair]:
         # We try to find similar, open markets which point to the same outcome.
         correlated_markets = []
+        # We only wanted to find related markets that are open.
+        # We intentionally query more markets in the hope it yields open markets.
+        # We could store market_status (open, closed) in Pinecone, but we refrain from it
+        # to keep the chain data (or graph) as the source-of-truth, instead of managing the
+        # update process of the vectorDB.
         related = self.pinecone_handler.find_nearest_questions_with_threshold(
-            limit=10, text=market.question
+            limit=self.max_related_markets_per_market * 10, text=market.question
         )
 
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
@@ -121,8 +127,15 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             id_in=[i.market_address for i in related],
             resolved=False,
         )
+
+        # Order omen_markets in the same order as related
+        related_market_addresses = [i.market_address for i in related]
+        omen_markets = sorted(
+            omen_markets, key=lambda m: related_market_addresses.index(m.id)
+        )
         omen_markets = [m for m in omen_markets if m.id != market.id]
-        # Note that negative correlation is hard - e.g. for the US presidential election, markets on each candidate are not seen as -100% correlated.
+        print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
+
         for related_market in omen_markets:
             result: Correlation = self.chain.invoke(
                 {
