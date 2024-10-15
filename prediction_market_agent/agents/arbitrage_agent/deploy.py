@@ -118,7 +118,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
 
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
             limit=len(related),
-            id_in=[i.market_address.lower() for i in related],
+            id_in=[i.market_address for i in related],
             resolved=False,
         )
         omen_markets = [m for m in omen_markets if m.id != market.id]
