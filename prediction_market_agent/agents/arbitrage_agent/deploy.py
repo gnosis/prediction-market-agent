@@ -150,7 +150,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
                     CorrelatedMarketPair(
                         main_market=market,
                         related_market=related_agent_market,
-                        correlation=result.near_perfect_correlation,
+                        correlation=result,
                     )
                 )
         return correlated_markets
@@ -162,25 +162,30 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         market_to_bet_yes, market_to_bet_no = pair.main_market, pair.related_market
 
         # Split between main_market and related_market
-        amount_yes, amount_no = pair.split_bet_amount_between_yes_and_no(
+        arbitrage_bet = pair.split_bet_amount_between_yes_and_no(
             self.total_trade_amount.amount
         )
-        trades = [
-            Trade(
-                trade_type=TradeType.BUY,
-                outcome=True,
-                amount=TokenAmount(
-                    amount=amount_yes, currency=market_to_bet_yes.currency
-                ),
+
+        main_trade = Trade(
+            trade_type=TradeType.BUY,
+            outcome=arbitrage_bet.main_market_bet.direction,
+            amount=TokenAmount(
+                amount=arbitrage_bet.main_market_bet.size,
+                currency=pair.main_market.currency,
             ),
-            Trade(
-                trade_type=TradeType.BUY,
-                outcome=False,
-                amount=TokenAmount(
-                    amount=amount_no, currency=market_to_bet_no.currency
-                ),
+        )
+
+        # related trade
+        related_trade = Trade(
+            trade_type=TradeType.BUY,
+            outcome=arbitrage_bet.related_market_bet.direction,
+            amount=TokenAmount(
+                amount=arbitrage_bet.related_market_bet.size,
+                currency=pair.related_market.currency,
             ),
-        ]
+        )
+
+        trades = [main_trade, related_trade]
         logger.info(f"Placing arbitrage trades {trades}")
         return trades
 

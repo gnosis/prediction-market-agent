@@ -75,7 +75,7 @@ class PineconeHandler:
         filtered_markets = [ids_market_map[id] for id in missing_ids]
         return filtered_markets
 
-    def get_existing_ids_in_index(self):
+    def get_existing_ids_in_index(self) -> list[str]:
         # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
         ids_in_vec_db = [y for x in self.index.list() for y in x]
         return ids_in_vec_db
