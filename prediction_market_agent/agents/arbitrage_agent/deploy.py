@@ -199,7 +199,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         trades = []
         correlated_markets = self.get_correlated_markets(market=market)
         for pair in correlated_markets:
-            if pair.potential_profit_per_bet_unit > 0:
+            if pair.potential_profit_per_bet_unit() > 0:
                 trades_for_pair = self.build_trades_for_correlated_markets(pair)
                 trades.extend(trades_for_pair)
 
