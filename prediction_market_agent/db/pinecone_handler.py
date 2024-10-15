@@ -13,7 +13,6 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -70,13 +69,16 @@ class PineconeHandler:
 
         """
         ids_market_map = {self.encode_text(m.question_title): m for m in markets}
-
         all_ids = list(ids_market_map.keys())
-        # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
-        ids_in_vec_db = [y for x in self.index.list() for y in x]
+        ids_in_vec_db = self.get_existing_ids_in_index()
         missing_ids = set(all_ids).difference(ids_in_vec_db)
         filtered_markets = [ids_market_map[id] for id in missing_ids]
         return filtered_markets
+
+    def get_existing_ids_in_index(self) -> list[str]:
+        # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
+        ids_in_vec_db = [y for x in self.index.list() for y in x]
+        return ids_in_vec_db
 
     def insert_texts(
         self,
@@ -109,15 +111,17 @@ class PineconeHandler:
 
         return list(unique_market_titles.values())
 
-    def insert_all_omen_markets_if_not_exists(
-        self, created_after: DatetimeUTC | None = None
-    ) -> None:
+    def update_markets(self) -> None:
+        """We use the agent's run to add embeddings of new markets that don't exist yet in the
+        vector DB."""
+        self.insert_open_omen_markets_if_not_exists()
+
+    def insert_open_omen_markets_if_not_exists(self) -> None:
         subgraph_handler = OmenSubgraphHandler()
         markets = subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,
-            filter_by=FilterBy.NONE,
+            filter_by=FilterBy.OPEN,
             sort_by=SortBy.NEWEST,
-            created_after=created_after,
         )
 
         markets_without_duplicates = self.deduplicate_markets(markets)
