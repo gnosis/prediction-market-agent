@@ -5,13 +5,14 @@ from pydantic import BaseModel, computed_field
 
 
 class Correlation(BaseModel):
-    near_perfect_correlation: bool
+    near_perfect_correlation: bool | None
     reasoning: str
 
 
 class CorrelatedMarketPair(BaseModel):
     main_market: AgentMarket
     related_market: AgentMarket
+    correlation: Correlation
 
     def __str__(self) -> str:
         return f"main_market {self.main_market.question} related_market_question {self.related_market.question} potential profit {self.potential_profit_per_bet_unit}"

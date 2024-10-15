@@ -1,5 +1,4 @@
 import base64
-import datetime
 import sys
 import typing as t
 from typing import Optional
@@ -14,7 +13,6 @@ from prediction_market_agent_tooling.markets.omen.data_models import OmenMarket
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from tqdm import tqdm
 
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -71,13 +69,16 @@ class PineconeHandler:
 
         """
         ids_market_map = {self.encode_text(m.question_title): m for m in markets}
-
         all_ids = list(ids_market_map.keys())
-        # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
-        ids_in_vec_db = [y for x in self.index.list() for y in x]
+        ids_in_vec_db = self.get_existing_ids_in_index()
         missing_ids = set(all_ids).difference(ids_in_vec_db)
         filtered_markets = [ids_market_map[id] for id in missing_ids]
         return filtered_markets
+
+    def get_existing_ids_in_index(self):
+        # index.list() returns [[id1,id2,...],[id4,id5,...]], hence the flattening.
+        ids_in_vec_db = [y for x in self.index.list() for y in x]
+        return ids_in_vec_db
 
     def insert_texts(
         self,
@@ -110,21 +111,37 @@ class PineconeHandler:
 
         return list(unique_market_titles.values())
 
-    def update_markets(self) -> None:
+    def update_markets(self, clean_resolved_markets=True) -> None:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
-        created_after = utcnow() - datetime.timedelta(days=7)
-        self.insert_all_omen_markets_if_not_exists(created_after=created_after)
+        self.insert_all_omen_markets_if_not_exists()
+        if clean_resolved_markets:
+            self.remove_resolved_markets()
 
-    def insert_all_omen_markets_if_not_exists(
-        self, created_after: DatetimeUTC | None = None
-    ) -> None:
+    def remove_resolved_markets(self) -> None:
+        """Remove markets that are closed but still present in the index."""
+        existing_ids = self.get_existing_ids_in_index()
+        resolved_markets = OmenSubgraphHandler().get_omen_binary_markets(
+            limit=sys.maxsize,
+            resolved=True,
+        )
+        resolved_markets_id = [
+            self.encode_text(m.question_title)
+            for m in resolved_markets
+            if m.is_resolved
+        ]
+        ids_to_delete = set(existing_ids).intersection(resolved_markets_id)
+        self.remove_markets_by_id(ids_to_delete=list(ids_to_delete))
+
+    def remove_markets_by_id(self, ids_to_delete: list[str]) -> None:
+        self.index.delete(ids=ids_to_delete)
+
+    def insert_all_omen_markets_if_not_exists(self) -> None:
         subgraph_handler = OmenSubgraphHandler()
         markets = subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,
-            filter_by=FilterBy.NONE,
+            filter_by=FilterBy.OPEN,
             sort_by=SortBy.NEWEST,
-            created_after=created_after,
         )
 
         markets_without_duplicates = self.deduplicate_markets(markets)

@@ -37,7 +37,7 @@ from prediction_market_agent.agents.arbitrage_agent.data_models import (
     CorrelatedMarketPair,
     Correlation,
 )
-from prediction_market_agent.agents.arbitrage_agent.prompt import prompt_template
+from prediction_market_agent.agents.arbitrage_agent.prompt import PROMPT_TEMPLATE
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
 
@@ -57,8 +57,8 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             )
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
-        self.chain = self._build_chain()
         self.pinecone_handler.update_markets()
+        self.chain = self._build_chain()
         super().run(market_type=market_type)
 
     def get_markets(
@@ -88,7 +88,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
 
         parser = PydanticOutputParser(pydantic_object=Correlation)
         prompt = PromptTemplate(
-            template=prompt_template,
+            template=PROMPT_TEMPLATE,
             input_variables=["main_market_question", "related_market_question"],
             partial_variables={"format_instructions": parser.get_format_instructions()},
         )
@@ -131,12 +131,13 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
                 },
                 config=get_langfuse_langchain_config(),
             )
-            if result.near_perfect_correlation:
+            if result.near_perfect_correlation is not None:
                 related_agent_market = OmenAgentMarket.from_data_model(related_market)
                 correlated_markets.append(
                     CorrelatedMarketPair(
                         main_market=market,
                         related_market=related_agent_market,
+                        correlation=result.near_perfect_correlation,
                     )
                 )
         return correlated_markets
