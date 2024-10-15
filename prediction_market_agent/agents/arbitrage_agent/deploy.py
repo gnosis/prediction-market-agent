@@ -133,7 +133,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         omen_markets = sorted(
             omen_markets, key=lambda m: related_market_addresses.index(m.id)
         )
-        omen_markets = [m for m in omen_markets if m.id != market.id]
+        omen_markets = [m for m in omen_markets if m.id != market.id][:10]
         print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
 
         for related_market in omen_markets:
@@ -159,8 +159,6 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def build_trades_for_correlated_markets(
         self, pair: CorrelatedMarketPair
     ) -> list[Trade]:
-        market_to_bet_yes, market_to_bet_no = pair.main_market, pair.related_market
-
         # Split between main_market and related_market
         arbitrage_bet = pair.split_bet_amount_between_yes_and_no(
             self.total_trade_amount.amount
@@ -199,7 +197,8 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         trades = []
         correlated_markets = self.get_correlated_markets(market=market)
         for pair in correlated_markets:
-            if pair.potential_profit_per_bet_unit() > 0:
+            # We want to profit at least 0.5% per market (value chosen as initial baseline).
+            if pair.potential_profit_per_bet_unit() > 0.005:
                 trades_for_pair = self.build_trades_for_correlated_markets(pair)
                 trades.extend(trades_for_pair)
 
