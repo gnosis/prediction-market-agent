@@ -29,7 +29,7 @@ class GetMarketCreatorsStalkerMarkets:
     # Do as many bets as we can for the special markets.
     bet_on_n_markets_per_run = MAX_AVAILABLE_MARKETS
     # These tends to be long-running markets, it's not interesting to bet on them too much.
-    time_to_bet_again = timedelta(days=7)
+    same_market_bet_interval = timedelta(days=7)
 
     def get_markets(
         self,
