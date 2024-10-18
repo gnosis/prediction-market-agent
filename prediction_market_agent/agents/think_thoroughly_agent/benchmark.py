@@ -17,6 +17,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
+    MarketFees,
     SortBy,
 )
 from prediction_market_agent_tooling.markets.markets import (
@@ -44,6 +45,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         resolution=None,
         outcomes=["YES", "NO"],
         outcome_token_pool=None,
+        fees=MarketFees.get_zero_fees(),
     )
 
 

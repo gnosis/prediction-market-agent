@@ -43,6 +43,10 @@ from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
 from prediction_market_agent.agents.social_media_agent.deploy import (
     DeployableSocialMediaAgent,
 )
+from prediction_market_agent.agents.specialized_agent.deploy import (
+    SpecializedAgent1,
+    SpecializedAgent2,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
@@ -74,6 +78,8 @@ class RunnableAgent(str, Enum):
     social_media = "social_media"
     omen_cleaner = "omen_cleaner"
     ofv_challenger = "ofv_challenger"
+    specialized_1 = "specialized_1"
+    specialized_2 = "specialized_2"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -98,6 +104,8 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.ofv_challenger: OFVChallengerAgent,
     RunnableAgent.prophet_o1preview: DeployablePredictionProphetGPTo1PreviewAgent,
     RunnableAgent.prophet_o1mini: DeployablePredictionProphetGPTo1MiniAgent,
+    RunnableAgent.specialized_1: SpecializedAgent1,
+    RunnableAgent.specialized_2: SpecializedAgent2,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
