@@ -25,7 +25,7 @@ SPECIALIZED_FOR_MARKET_CREATORS: list[ChecksumAddress] = [
 ]
 
 
-class GetSpecializedMarkets:
+class GetMarketCreatorsStalkerMarkets:
     # Do as many bets as we can for the special markets.
     bet_on_n_markets_per_run = MAX_AVAILABLE_MARKETS
     # These tends to be long-running markets, it's not interesting to bet on them too much.
@@ -56,11 +56,13 @@ class GetSpecializedMarkets:
         return available_markets
 
 
-class SpecializedAgent1(
-    GetSpecializedMarkets, DeployablePredictionProphetGPTo1PreviewAgent
+class MarketCreatorsStalkerAgent1(
+    GetMarketCreatorsStalkerMarkets, DeployablePredictionProphetGPTo1PreviewAgent
 ):
     pass
 
 
-class SpecializedAgent2(GetSpecializedMarkets, DeployablePredictionProphetGPT4oAgent):
+class MarketCreatorsStalkerAgent2(
+    GetMarketCreatorsStalkerMarkets, DeployablePredictionProphetGPT4oAgent
+):
     pass

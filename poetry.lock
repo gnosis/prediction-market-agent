@@ -6898,65 +6898,61 @@ test = ["coverage", "django", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.52.1"
+version = "0.52.2"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = ">=3.10,<3.12"
-files = []
-develop = false
+python-versions = "<3.12,>=3.10"
+files = [
+    {file = "prediction_market_agent_tooling-0.52.2-py3-none-any.whl", hash = "sha256:f978599139ca7d2d445bc2b933a8309b96dd6ee9cb4641b121547dc6369ec4e6"},
+    {file = "prediction_market_agent_tooling-0.52.2.tar.gz", hash = "sha256:6c3af7d8749285b6bed0ad7b25d065ec4109825a711bb383be6bb063434dff05"},
+]
 
 [package.dependencies]
-autoflake = "^2.2.1"
+autoflake = ">=2.2.1,<3.0.0"
 base58 = ">=1.0.2,<2.0"
-cron-validator = "^1.0.8"
+cron-validator = ">=1.0.8,<2.0.0"
 eth-account = ">=0.8.0,<0.12.0"
-eth-typing = "^3.0.0"
-functions-framework = "^3.5.0"
-google-api-python-client = {version = "2.95.0", optional = true}
-google-cloud-functions = "^1.16.0"
-google-cloud-resource-manager = "^1.12.0"
-google-cloud-secret-manager = "^2.18.2"
-hishel = "^0.0.31"
-isort = "^5.13.2"
-langchain = {version = "^0.2.6", optional = true}
+eth-typing = ">=3.0.0,<4.0.0"
+functions-framework = ">=3.5.0,<4.0.0"
+google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
+google-cloud-functions = ">=1.16.0,<2.0.0"
+google-cloud-resource-manager = ">=1.12.0,<2.0.0"
+google-cloud-secret-manager = ">=2.18.2,<3.0.0"
+hishel = ">=0.0.31,<0.0.32"
+isort = ">=5.13.2,<6.0.0"
+langchain = {version = ">=0.2.6,<0.3.0", optional = true, markers = "extra == \"langchain\""}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = "^0.1.0", optional = true}
-langfuse = "^2.42.0"
-loguru = "^0.7.2"
-loky = "^3.4.1"
-numpy = "^1.26.4"
-pinatapy-vourhey = "^0.2.0"
-prompt-toolkit = "^3.0.43"
-psycopg2-binary = "^2.9.9"
-pydantic = "^2.6.1"
-pydantic-settings = "^2.4.0"
-pymongo = "^4.8.0"
-python-dateutil = "^2.9.0.post0"
-safe-cli = "^1.0.0"
-safe-eth-py = "^6.0.0b14"
-scikit-learn = "^1.3.1"
-sqlmodel = "^0.0.22"
-streamlit = "^1.31.0"
-subgrounds = "^1.9.1"
-tabulate = "^0.9.0"
-tavily-python = "^0.3.9"
-tqdm = "^4.66.2"
+langchain-openai = {version = ">=0.1.0,<0.2.0", optional = true, markers = "extra == \"langchain\""}
+langfuse = ">=2.42.0,<3.0.0"
+loguru = ">=0.7.2,<0.8.0"
+loky = ">=3.4.1,<4.0.0"
+numpy = ">=1.26.4,<2.0.0"
+pinatapy-vourhey = ">=0.2.0,<0.3.0"
+prompt-toolkit = ">=3.0.43,<4.0.0"
+psycopg2-binary = ">=2.9.9,<3.0.0"
+pydantic = ">=2.6.1,<3.0.0"
+pydantic-settings = ">=2.4.0,<3.0.0"
+pymongo = ">=4.8.0,<5.0.0"
+python-dateutil = ">=2.9.0.post0,<3.0.0"
+safe-cli = ">=1.0.0,<2.0.0"
+safe-eth-py = ">=6.0.0b14,<7.0.0"
+scikit-learn = ">=1.3.1,<2.0.0"
+sqlmodel = ">=0.0.22,<0.0.23"
+streamlit = ">=1.31.0,<2.0.0"
+subgrounds = ">=1.9.1,<2.0.0"
+tabulate = ">=0.9.0,<0.10.0"
+tavily-python = ">=0.3.9,<0.4.0"
+tqdm = ">=4.66.2,<5.0.0"
 typer = ">=0.9.0,<1.0.0"
-types-python-dateutil = "^2.9.0.20240906"
-types-pytz = "^2024.1.0.20240203"
-types-requests = "^2.31.0.0"
-web3 = "^6.15.1"
+types-python-dateutil = ">=2.9.0.20240906,<3.0.0.0"
+types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
+types-requests = ">=2.31.0.0,<3.0.0.0"
+web3 = ">=6.15.1,<7.0.0"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.2.6,<0.3.0)", "langchain-openai (>=0.1.0,<0.2.0)"]
 openai = ["openai (>=1.0.0,<2.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
-reference = "4966d79bfaddb6a233e80446fa3eefbb77d20782"
-resolved_reference = "4966d79bfaddb6a233e80446fa3eefbb77d20782"
 
 [[package]]
 name = "prediction-prophet"
@@ -11152,4 +11148,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "9e3dfc96a430680a78c4ecf2043abd0193df5e11372b9b2109073cc67659ef09"
+content-hash = "149b7bddb84906e072689dd44b5739729540a5f3ac843c789928986ac4028435"
