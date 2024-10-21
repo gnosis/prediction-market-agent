@@ -130,7 +130,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
 
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
             limit=len(related),
-            id_in=[i.market_address for i in related],
+            id_in=[i.market_address for i in related if i.market_address != market.id],
             resolved=False,
         )
 
@@ -139,7 +139,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         omen_markets = sorted(
             omen_markets, key=lambda m: related_market_addresses.index(m.id)
         )
-        omen_markets = [m for m in omen_markets if m.id != market.id]
+
         print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
 
         for related_market in omen_markets:
