@@ -14,7 +14,7 @@ class PineconeMetadata(BaseModel):
         return PineconeMetadata(
             question_title=market.question_title,
             market_address=market.id,
-            close_time_timestamp=market.close_time.timestamp(),
+            close_time_timestamp=int(market.close_time.timestamp()),
         )
 
 

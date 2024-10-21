@@ -150,12 +150,17 @@ class PineconeHandler:
                 )
 
     def find_nearest_questions_with_threshold(
-        self, limit: int, text: str, threshold: float = 0.25
+        self,
+        limit: int,
+        text: str,
+        threshold: float = 0.25,
+        filter_on_metadata: dict[str, dict[str, t.Any]]
+        | None = None,  # see https://docs.pinecone.io/guides/data/filter-with-metadata#additional-filter-examples for details on the fitler parameter
     ) -> list[PineconeMetadata]:
         # Note that pagination is not implemented in the Pinecone client.
         # Hence we set a large limit and hope we get enough results that satisfy the threshold.
         documents_and_scores = self.vectorstore.similarity_search_with_relevance_scores(
-            query=text, k=limit, score_threshold=threshold
+            query=text, k=limit, score_threshold=threshold, filter=filter_on_metadata
         )
 
         logger.debug(f"Found {len(documents_and_scores)} relevant documents.")
