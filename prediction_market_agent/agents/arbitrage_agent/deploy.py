@@ -32,6 +32,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
 )
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.arbitrage_agent.data_models import (
     CorrelatedMarketPair,
@@ -118,8 +119,13 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         # We could store market_status (open, closed) in Pinecone, but we refrain from it
         # to keep the chain data (or graph) as the source-of-truth, instead of managing the
         # update process of the vectorDB.
+
         related = self.pinecone_handler.find_nearest_questions_with_threshold(
-            limit=self.max_related_markets_per_market * 10, text=market.question
+            limit=self.max_related_markets_per_market,
+            text=market.question,
+            filter={
+                "close_time_timestamp": {"gte": utcnow().timestamp() + 3600}
+            },  # closing 1h from now
         )
 
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
@@ -133,7 +139,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         omen_markets = sorted(
             omen_markets, key=lambda m: related_market_addresses.index(m.id)
         )
-        omen_markets = [m for m in omen_markets if m.id != market.id][:10]
+        omen_markets = [m for m in omen_markets if m.id != market.id]
         print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
 
         for related_market in omen_markets:
