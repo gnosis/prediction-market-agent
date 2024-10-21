@@ -124,7 +124,7 @@ class PineconeHandler:
         markets = subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,
             filter_by=FilterBy.NONE,
-            created_after=DatetimeUTC.fromtimestamp(start_timestamp)
+            created_after=DatetimeUTC.to_datetime_utc(start_timestamp)
             if start_timestamp
             else None,
             sort_by=SortBy.NEWEST,
