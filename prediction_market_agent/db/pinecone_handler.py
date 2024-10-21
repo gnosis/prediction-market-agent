@@ -112,22 +112,17 @@ class PineconeHandler:
 
         return list(unique_market_titles.values())
 
-    def update_markets(self) -> None:
+    def insert_all_omen_markets_if_not_exists(
+        self, created_after: DatetimeUTC | None = None
+    ) -> None:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
-        self.insert_open_omen_markets_if_not_exists()
-
-    def insert_open_omen_markets_if_not_exists(
-        self, start_timestamp: int | None = None
-    ) -> None:
         subgraph_handler = OmenSubgraphHandler()
         markets = subgraph_handler.get_omen_binary_markets_simple(
             limit=sys.maxsize,
             filter_by=FilterBy.NONE,
-            created_after=DatetimeUTC.fromtimestamp(start_timestamp)
-            if start_timestamp
-            else None,
             sort_by=SortBy.NEWEST,
+            created_after=created_after,
         )
 
         markets_without_duplicates = self.deduplicate_markets(markets)

@@ -59,7 +59,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             )
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
-        self.pinecone_handler.update_markets()
+        self.pinecone_handler.insert_all_omen_markets_if_not_exists()
         self.chain = self._build_chain()
         super().run(market_type=market_type)
 
