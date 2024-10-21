@@ -1,5 +1,5 @@
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
+from prediction_market_agent_tooling.tools.tavily.tavily_storage import (
     TavilyStorage,
 )
 from prediction_prophet.benchmark.agents import (  # noqa: F401 # Just to make it available for the user of research.
