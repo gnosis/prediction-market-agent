@@ -13,6 +13,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
@@ -80,6 +81,7 @@ class RunnableAgent(str, Enum):
     ofv_challenger = "ofv_challenger"
     market_creators_stalker1 = "market_creators_stalker1"
     market_creators_stalker2 = "market_creators_stalker2"
+    invalid = "invalid"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -106,6 +108,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_o1mini: DeployablePredictionProphetGPTo1MiniAgent,
     RunnableAgent.market_creators_stalker1: MarketCreatorsStalkerAgent1,
     RunnableAgent.market_creators_stalker2: MarketCreatorsStalkerAgent2,
+    RunnableAgent.invalid: InvalidAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
