@@ -25,7 +25,7 @@ class InvalidAgent(DeployableTraderAgent):
             return False
 
         # In contrast to the parent implementation, this agent will place bets only on invalid markets,
-        # it doesn't care whetever the market is predictable or not.
+        # it doesn't care whether the market is predictable or not.
         return is_invalid(market.question)
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
