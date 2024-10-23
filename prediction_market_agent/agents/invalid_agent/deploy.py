@@ -11,16 +11,14 @@ from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 
 
 class InvalidAgent(DeployableTraderAgent):
+    """This agent works only on Omen.
+    Because on Omen, after market is resolved as invalid, outcome tokens are worth equally, which means one can be profitable by buying the cheapest token.
+    Also the function to mark invalid questions is based on Omen-resolution rules."""
+
     bet_on_n_markets_per_run: int = 10
+    supported_markets = [MarketType.OMEN]
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        if market_type != MarketType.OMEN:
-            raise RuntimeError(
-                "This agent works only on Omen."
-                " Because on Omen, after market is resolved as invalid, outcome tokens are worth equally, which means one can be profitable by buying the cheapest token."
-                " Also the function to mark invalid questions is based on Omen-resolution rules."
-            )
-
         if self.have_bet_on_market_since(market, since=self.same_market_bet_interval):
             return False
 
