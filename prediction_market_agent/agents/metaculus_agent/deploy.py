@@ -25,7 +25,9 @@ TOURNAMENT_ID = 3349
 
 
 class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
-    model: str = DEFAULT_OPENAI_MODEL
+    bet_on_n_markets_per_run: int = (
+        sys.maxsize
+    )  # On Metaculus "betting" is free, we can just bet on everything available in one run.
     dummy_prediction: bool = False
     repeat_predictions: bool = False
     tournament_id: int = TOURNAMENT_ID
@@ -34,18 +36,17 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
     def load(self) -> None:
         # Using this one because it had the lowest `p_yes mse` from the `match_bets_with_langfuse_traces.py` evaluation at the time of writing this.
         self.agent = DeployablePredictionProphetGPTo1PreviewAgent(
-            enable_langfuse=self.enable_langfuse,
-            place_bet=self.place_bet,
+            enable_langfuse=self.enable_langfuse
         )
 
-    def get_markets(self) -> Sequence[AgentMarket]:  # type: ignore # TODO: Needs to be decided in https://github.com/gnosis/prediction-market-agent/pull/511#discussion_r1810034688 and then I'll implement it here.
-        markets: Sequence[
-            MetaculusAgentMarket
-        ] = MetaculusAgentMarket.get_binary_markets(
-            limit=sys.maxsize,
-            tournament_id=self.tournament_id,
-            filter_by=FilterBy.OPEN,
-            sort_by=SortBy.NEWEST,
+    def get_markets(self, market_type: MarketType) -> Sequence[AgentMarket]:  # type: ignore # TODO: Needs to be decided in https://github.com/gnosis/prediction-market-agent/pull/511#discussion_r1810034688 and then I'll implement it here.
+        markets: Sequence[MetaculusAgentMarket] = (
+            MetaculusAgentMarket.get_binary_markets(
+                limit=self.bet_on_n_markets_per_run,
+                tournament_id=self.tournament_id,
+                filter_by=FilterBy.OPEN,
+                sort_by=SortBy.NEWEST,
+            )
         )
         return markets
 
