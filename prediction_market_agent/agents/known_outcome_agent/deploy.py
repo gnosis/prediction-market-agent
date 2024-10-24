@@ -13,7 +13,11 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
     Result,
     get_known_outcome,
 )
-from prediction_market_agent.agents.utils import market_is_saturated
+from prediction_market_agent.agents.utils import (
+    get_maximum_possible_bet_amount,
+    market_is_saturated,
+)
+from prediction_market_agent.utils import APIKeys
 
 
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
@@ -23,7 +27,12 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     supported_markets = [MarketType.OMEN]
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(max_bet_amount=2, max_price_impact=0.6)
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=2, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.6,
+        )
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
