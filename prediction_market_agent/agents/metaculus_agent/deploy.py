@@ -20,7 +20,8 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
 )
 
 WARMUP_TOURNAMENT_ID = 3294
-TOURNAMENT_ID = 3349
+TOURNAMENT_ID_Q3 = 3349  # https://www.metaculus.com/tournament/aibq3
+TOURNAMENT_ID_Q4 = 32506  # https://www.metaculus.com/tournament/aibq4
 
 
 class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
@@ -29,7 +30,7 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
     )  # On Metaculus "betting" is free, we can just bet on everything available in one run.
     dummy_prediction: bool = False
     repeat_predictions: bool = False
-    tournament_id: int = TOURNAMENT_ID
+    tournament_id: int = TOURNAMENT_ID_Q4
     supported_markets = [MarketType.METACULUS]
 
     def load(self) -> None:
