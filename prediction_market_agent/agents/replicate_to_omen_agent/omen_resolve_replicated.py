@@ -1,4 +1,5 @@
 from datetime import timedelta
+from functools import partial
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
@@ -25,6 +26,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
@@ -52,20 +54,35 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
 
     now = utcnow()
 
-    # Fetch markets created by us that are already open, but no answer was submitted yet.
-    created_opened_markets = OmenSubgraphHandler().get_omen_binary_markets(
+    # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
+    get_omen_binary_markets_common_filters = partial(
+        OmenSubgraphHandler().get_omen_binary_markets,
         limit=None,
         creator=public_key,
         # We need markets already opened for answers.
-        opened_before=now,
-        # With a little bandwidth for the market to be finalized,
+        question_opened_before=now,
+    )
+    created_opened_markets = get_omen_binary_markets_common_filters(
+        # Markets with a little bandwidth for the market to be finalized,
         # so we have time for processing it without erroring out at the end.
-        finalized_after=now + timedelta(minutes=30),
+        question_finalized_after=now
+        + timedelta(minutes=30),
+    ) + get_omen_binary_markets_common_filters(
+        # And markets without any answer at all.
+        question_with_answers=False,
     )
     logger.info(f"Found {len(created_opened_markets)} markets to answer.")
     # Finalize them (set answer on Realitio).
     created_opened_markets_with_resolutions = [
-        (m, find_resolution_on_other_markets(m)) for m in created_opened_markets
+        (
+            m,
+            (
+                find_resolution_on_other_markets(m)
+                if not is_invalid(m.question_title)
+                else Resolution.CANCEL
+            ),
+        )
+        for m in created_opened_markets
     ]
     created_opened_markets_with_resolutions_to_answer = (
         filter_replicated_markets_to_answer(
@@ -89,7 +106,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     created_finalized_markets = OmenSubgraphHandler().get_omen_binary_markets(
         limit=None,
         creator=public_key,
-        finalized_before=now,
+        question_finalized_before=now,
         resolved=False,
     )
     # Resolve them (resolve them on Oracle).

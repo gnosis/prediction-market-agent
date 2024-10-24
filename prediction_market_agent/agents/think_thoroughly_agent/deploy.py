@@ -51,7 +51,9 @@ class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAge
 
 
 if __name__ == "__main__":
-    agent = DeployableThinkThoroughlyAgent(place_bet=False)
+    agent = DeployableThinkThoroughlyAgent(
+        place_trades=False, store_prediction=False, store_trades=False
+    )
     agent.deploy_local(
         market_type=MarketType.OMEN,
         sleep_time=540,

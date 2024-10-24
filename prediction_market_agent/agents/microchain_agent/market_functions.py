@@ -16,9 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet_simplified,
 )
-from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
-    TavilyStorage,
-)
+from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (

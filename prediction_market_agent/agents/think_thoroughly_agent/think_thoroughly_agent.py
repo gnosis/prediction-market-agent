@@ -23,9 +23,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
-from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
-    TavilyStorage,
-)
+from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     DatetimeUTC,
@@ -484,7 +482,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 goal=scenario,
                 initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
                 max_results_per_search=5,
-                min_scraped_sites=3,
+                min_scraped_sites=2,
                 model=model,
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
