@@ -35,12 +35,11 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.54.0", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.55.0", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
 markdownify = "^0.11.6"
-tavily-python = "^0.3.9"
 microchain-python = { git = "https://github.com/galatolofederico/microchain.git", rev = "de75f1d4a073b7c54f824b409733f4f70d40a61b" }
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
@@ -52,7 +51,7 @@ tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "69b3ab619b25eab5890e58d5dc65be3aadf5bb65" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "5a7e9e4300d53acf32e09bd4b995c1722c3a7131" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.2.0"
 
