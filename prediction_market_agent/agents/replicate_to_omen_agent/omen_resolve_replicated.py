@@ -26,6 +26,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
@@ -73,7 +74,15 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     logger.info(f"Found {len(created_opened_markets)} markets to answer.")
     # Finalize them (set answer on Realitio).
     created_opened_markets_with_resolutions = [
-        (m, find_resolution_on_other_markets(m)) for m in created_opened_markets
+        (
+            m,
+            (
+                find_resolution_on_other_markets(m)
+                if not is_invalid(m.question_title)
+                else Resolution.CANCEL
+            ),
+        )
+        for m in created_opened_markets
     ]
     created_opened_markets_with_resolutions_to_answer = (
         filter_replicated_markets_to_answer(
