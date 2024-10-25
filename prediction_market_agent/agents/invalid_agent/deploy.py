@@ -9,6 +9,9 @@ from prediction_market_agent_tooling.markets.data_models import ProbabilisticAns
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 
+from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
+from prediction_market_agent.utils import APIKeys
+
 
 class InvalidAgent(DeployableTraderAgent):
     """This agent works only on Omen.
@@ -32,7 +35,11 @@ class InvalidAgent(DeployableTraderAgent):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         # Keep Kelly here! See `answer_binary_market`.
-        return KellyBettingStrategy(max_bet_amount=5)
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+            )
+        )
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return ProbabilisticAnswer(

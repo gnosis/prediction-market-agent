@@ -12,6 +12,8 @@ from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agen
     ThinkThoroughlyWithItsOwnResearch,
     ThinkThoroughlyWithPredictionProphetResearch,
 )
+from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
+from prediction_market_agent.utils import APIKeys
 
 
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
@@ -39,7 +41,12 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
     model: str = "gpt-4-turbo-2024-04-09"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=None)
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=None,
+        )
 
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
@@ -47,7 +54,12 @@ class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAge
     model: str = "gpt-4-turbo-2024-04-09"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(max_bet_amount=5, max_price_impact=0.4)
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.4,
+        )
 
 
 if __name__ == "__main__":
