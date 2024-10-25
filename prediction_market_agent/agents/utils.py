@@ -142,5 +142,6 @@ def get_event_date_from_question(question: str) -> DatetimeUTC | None:
 def get_maximum_possible_bet_amount(
     min_: float, max_: float, trading_balance: float
 ) -> float:
+    trading_balance *= 0.95  # Allow to use only most of the trading balance, to keep something to pay for fees on markets where it's necessary.
     # Require bet size of at least `min_` and maximum `max_`, use available trading balance if its between.
     return min(max(min_, trading_balance), max_)

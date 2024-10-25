@@ -17,7 +17,7 @@ def test_disable_crewai_telemetry() -> None:
 @pytest.mark.parametrize(
     "min_, max_, trading_balance, expected",
     [
-        (1, 5, 3, 3),
+        (1, 5, 3, 3 * 0.95),
         (1, 5, 100, 5),
         (1, 5, 0.1, 1),
     ],
