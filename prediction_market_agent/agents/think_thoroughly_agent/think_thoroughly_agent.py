@@ -14,7 +14,6 @@ from langchain_core.callbacks import (
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
-from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -30,7 +29,6 @@ from prediction_market_agent_tooling.tools.utils import (
     utcnow,
 )
 from pydantic import BaseModel
-from requests import HTTPError
 
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
