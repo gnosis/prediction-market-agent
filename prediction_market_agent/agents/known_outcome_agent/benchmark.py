@@ -11,6 +11,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
 )
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.markets.market_fees import MarketFees
 from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from pydantic import BaseModel
@@ -44,6 +45,7 @@ class QuestionWithKnownOutcome(BaseModel):
             resolution=None,
             outcomes=["YES", "NO"],
             outcome_token_pool=None,
+            fees=MarketFees.get_zero_fees(),
         )
 
 

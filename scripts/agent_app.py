@@ -78,7 +78,7 @@ def predict(
     enable_langfuse: bool,
 ) -> None:
     agent = AgentClass(
-        place_bet=False,
+        place_trades=False,
         enable_langfuse=enable_langfuse,
     )
 

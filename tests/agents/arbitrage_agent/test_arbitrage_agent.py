@@ -16,7 +16,7 @@ def arbitrage_agent() -> t.Generator[DeployableArbitrageAgent, None, None]:
     with patch(
         "prediction_market_agent_tooling.tools.langfuse_.get_langfuse_langchain_config"
     ):
-        agent = DeployableArbitrageAgent(place_bet=False)
+        agent = DeployableArbitrageAgent()
         agent.chain = agent._build_chain()
         yield agent
 

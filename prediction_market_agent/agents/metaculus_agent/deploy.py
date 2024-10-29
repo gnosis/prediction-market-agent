@@ -1,16 +1,20 @@
 import sys
 from typing import Sequence
 
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
+from prediction_market_agent_tooling.markets.agent_market import (
+    FilterBy,
+    ProcessedMarket,
+    SortBy,
+)
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.metaculus.metaculus import (
     MetaculusAgentMarket,
 )
-from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.think_thoroughly_agent.think_thoroughly_agent import (
     ThinkThoroughlyWithItsOwnResearch,
@@ -78,7 +82,7 @@ class DeployableMetaculusBotTournamentAgent(DeployableAgent):
             if answer is None:
                 logger.error("No answer was given. Skipping")
             else:
-                market.submit_prediction(
-                    p_yes=answer.p_yes,
-                    reasoning=check_not_none(answer.reasoning),
+                processed_market = ProcessedMarket(answer=answer)
+                market.store_prediction(
+                    processed_market=processed_market, keys=APIKeys()
                 )

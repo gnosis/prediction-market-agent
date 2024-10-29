@@ -4,17 +4,10 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from langchain_openai import ChatOpenAI
-from prediction_market_agent_tooling.deploy.agent import (
-    MAX_AVAILABLE_MARKETS,
-    DeployableTraderAgent,
-)
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import (
-    AgentMarket,
-    FilterBy,
-    SortBy,
-)
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     BetAmount,
     Position,
@@ -51,6 +44,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     total_trade_amount = BetAmount(amount=0.1, currency=OmenAgentMarket.currency)
     bet_on_n_markets_per_run = 5
     max_related_markets_per_market = 10
+    n_markets_to_fetch = 50
 
     def run(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
@@ -62,21 +56,6 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         self.pinecone_handler.insert_all_omen_markets_if_not_exists()
         self.chain = self._build_chain()
         super().run(market_type=market_type)
-
-    def get_markets(
-        self,
-        market_type: MarketType,
-        limit: int = MAX_AVAILABLE_MARKETS,
-        sort_by: SortBy = SortBy.CLOSING_SOONEST,
-        filter_by: FilterBy = FilterBy.OPEN,
-    ) -> t.Sequence[AgentMarket]:
-        return super().get_markets(
-            market_type=market_type,
-            limit=50,
-            sort_by=SortBy.HIGHEST_LIQUIDITY,
-            # Fetching most liquid markets since more likely they will have related markets
-            filter_by=FilterBy.OPEN,
-        )
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return ProbabilisticAnswer(p_yes=Probability(0.5), confidence=1.0)
