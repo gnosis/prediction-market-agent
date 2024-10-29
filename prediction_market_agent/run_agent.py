@@ -12,6 +12,9 @@ import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.arbitrage_agent.deploy import (
+    DeployableArbitrageAgent,
+)
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
@@ -78,6 +81,7 @@ class RunnableAgent(str, Enum):
     social_media = "social_media"
     omen_cleaner = "omen_cleaner"
     ofv_challenger = "ofv_challenger"
+    arbitrage = "arbitrage"
     market_creators_stalker1 = "market_creators_stalker1"
     market_creators_stalker2 = "market_creators_stalker2"
     invalid = "invalid"
@@ -105,6 +109,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.ofv_challenger: OFVChallengerAgent,
     RunnableAgent.prophet_o1preview: DeployablePredictionProphetGPTo1PreviewAgent,
     RunnableAgent.prophet_o1mini: DeployablePredictionProphetGPTo1MiniAgent,
+    RunnableAgent.arbitrage: DeployableArbitrageAgent,
     RunnableAgent.market_creators_stalker1: MarketCreatorsStalkerAgent1,
     RunnableAgent.market_creators_stalker2: MarketCreatorsStalkerAgent2,
     RunnableAgent.invalid: InvalidAgent,

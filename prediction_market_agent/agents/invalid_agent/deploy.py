@@ -22,7 +22,9 @@ class InvalidAgent(DeployableTraderAgent):
     supported_markets = [MarketType.OMEN]
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        if self.have_bet_on_market_since(market, since=self.same_market_bet_interval):
+        if self.have_bet_on_market_since(
+            market, since=self.same_market_trade_interval.get(market=market)
+        ):
             return False
 
         # If the market is new, don't bet on it as the potential profit from market invalidity is low.

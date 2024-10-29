@@ -37,7 +37,9 @@ def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
     texts = TRUMP_MARKETS + BIDEN_MARKETS + UNRELATED_MARKETS
     metadatas = [
         PineconeMetadata(
-            question_title=text, market_address=HexAddress(HexStr(""))
+            question_title=text,
+            market_address=HexAddress(HexStr("")),
+            close_time_timestamp=0,
         ).model_dump()
         for text in texts
     ]

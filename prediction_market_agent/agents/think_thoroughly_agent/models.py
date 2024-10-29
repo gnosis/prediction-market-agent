@@ -7,11 +7,14 @@ from pydantic import BaseModel
 class PineconeMetadata(BaseModel):
     question_title: str
     market_address: HexAddress
+    close_time_timestamp: int
 
     @staticmethod
     def from_omen_market(market: OmenMarket) -> "PineconeMetadata":
         return PineconeMetadata(
-            question_title=market.question_title, market_address=market.id
+            question_title=market.question_title,
+            market_address=market.id,
+            close_time_timestamp=int(market.close_time.timestamp()),
         )
 
 

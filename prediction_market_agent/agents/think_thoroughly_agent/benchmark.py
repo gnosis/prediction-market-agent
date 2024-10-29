@@ -20,6 +20,7 @@ from prediction_market_agent_tooling.markets.agent_market import (
     MarketFees,
     SortBy,
 )
+from prediction_market_agent_tooling.markets.market_fees import MarketFees
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
