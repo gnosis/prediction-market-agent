@@ -19,7 +19,7 @@ from prediction_market_agent.utils import APIKeys
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     model: str
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
         self.agent = self.agent_class(

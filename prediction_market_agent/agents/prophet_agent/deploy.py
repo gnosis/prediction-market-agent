@@ -120,6 +120,7 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
