@@ -14,7 +14,6 @@ from langchain_core.callbacks import (
 from langchain_core.language_models import BaseChatModel
 from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
-from openai import APIError
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -30,7 +29,6 @@ from prediction_market_agent_tooling.tools.utils import (
     utcnow,
 )
 from pydantic import BaseModel
-from requests import HTTPError
 
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
@@ -291,7 +289,9 @@ class ThinkThoroughlyBase(ABC):
             f"Event date is {event_date} and {n_remaining_days} days remaining. Market is already open for {n_market_open_days} days."
         )
 
-        logger.info(f"Starting to generate final decision for '{question}'.")
+        logger.info(
+            f"Starting to generate final decision for '{question}' based on {len(scenarios_with_probabilities)=} and {len(correlated_markets)=}."
+        )
         inputs = {
             "scenarios_with_probabilities": "\n".join(
                 f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
@@ -340,6 +340,9 @@ class ThinkThoroughlyBase(ABC):
                 f"Starting to generate predictions for each scenario, iteration {iteration + 1} / {n_iterations}."
             )
 
+            all_scenarios = (
+                hypothetical_scenarios.scenarios + conditional_scenarios.scenarios
+            )
             sub_predictions = par_generator(
                 items=[
                     (
@@ -351,12 +354,9 @@ class ThinkThoroughlyBase(ABC):
                         scenarios_with_probs,
                         self.generate_prediction_for_one_outcome,
                     )
-                    for scenario in (
-                        hypothetical_scenarios.scenarios
-                        + conditional_scenarios.scenarios
-                    )
+                    for scenario in all_scenarios
                 ],
-                func=process_scenarios,
+                func=process_scenario,
             )
 
             scenarios_with_probs = []
@@ -370,17 +370,14 @@ class ThinkThoroughlyBase(ABC):
                 )
                 self.save_answer_to_long_term_memory(prediction)
 
-        final_answer = (
-            self.generate_final_decision(
-                question, scenarios_with_probs, created_time=created_time
-            )
-            if scenarios_with_probs
-            else None
+            if len(scenarios_with_probs) < len(all_scenarios) / 2:
+                raise ValueError(
+                    "Too many of sub_predictions have failed, stopping the agent."
+                )
+
+        final_answer = self.generate_final_decision(
+            question, scenarios_with_probs, created_time=created_time
         )
-        if final_answer is None:
-            logger.error(
-                f"Could not generate final decision for '{question}' with {n_iterations} iterations."
-            )
         return final_answer
 
 
@@ -432,19 +429,13 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
                 for s, a in previous_scenarios_and_answers
             )
 
-        try:
-            output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
-        except (APIError, HTTPError) as e:
-            logger.error(
-                f"Could not retrieve response from the model provider because of {e}"
-            )
-            return None
+        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
 
         if (
             task_research_one_outcome.tools_errors > 0
             or task_create_probability_for_one_outcome.tools_errors > 0
         ):
-            logger.error(
+            logger.warning(
                 f"Could not retrieve reasonable prediction for '{scenario}' because of errors in the tools"
             )
             return None
@@ -477,34 +468,29 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
 
         api_keys = APIKeys()
 
-        try:
-            research = prophet_research(
-                goal=scenario,
-                initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
-                max_results_per_search=5,
-                min_scraped_sites=2,
-                model=model,
-                openai_api_key=api_keys.openai_api_key,
-                tavily_api_key=api_keys.tavily_api_key,
-                tavily_storage=TavilyStorage(
-                    agent_id=ThinkThoroughlyWithPredictionProphetResearch.identifier
-                ),
-            )
-            prediction = prophet_make_prediction(
-                market_question=scenario,
-                additional_information=research.report,
-                engine=model,
-                temperature=LLM_SUPER_LOW_TEMPERATURE,
-                api_key=api_keys.openai_api_key,
-            )
-        except Exception as e:
-            logger.error(
-                f"Could not generate prediction for '{scenario}' because of {e}"
-            )
-            return None
+        research = prophet_research(
+            goal=scenario,
+            initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
+            max_results_per_search=5,
+            min_scraped_sites=2,
+            model=model,
+            openai_api_key=api_keys.openai_api_key,
+            tavily_api_key=api_keys.tavily_api_key,
+            tavily_storage=TavilyStorage(
+                agent_id=ThinkThoroughlyWithPredictionProphetResearch.identifier
+            ),
+        )
+        prediction = prophet_make_prediction(
+            market_question=scenario,
+            additional_information=research.report,
+            engine=model,
+            temperature=LLM_SUPER_LOW_TEMPERATURE,
+            include_reasoning=True,
+            api_key=api_keys.openai_api_key,
+        )
 
         if prediction.outcome_prediction is None:
-            logger.error(
+            logger.warning(
                 f"ThinkThoroughlyWithPredictionProhpetResearch didn't generate prediction for '{scenario}'."
             )
             return None
@@ -514,7 +500,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             original_question=original_question,
             p_yes=prediction.outcome_prediction.p_yes,
             confidence=prediction.outcome_prediction.confidence,
-            reasoning=prediction.outcome_prediction.reasoning,  # TODO: Possible improvement: Prophet currently doesn't return reasoning of its prediction, so it's just None all the time.
+            reasoning=prediction.outcome_prediction.reasoning,
         )
 
     def generate_final_decision(
@@ -552,7 +538,7 @@ def observe_unique_id(unique_id: UUID) -> None:
     )
 
 
-def process_scenarios(
+def process_scenario(
     inputs: tuple[
         bool,
         UUID,
@@ -580,9 +566,13 @@ def process_scenarios(
     ) = inputs
     # Reset Langfuse, as this is executed as a separate process and Langfuse isn't thread-safe.
     initialize_langfuse(enable_langfuse)
-    return (
-        scenario,
-        observe(name="process_scenario")(process_function)(
+    try:
+        result = observe(name="process_scenario")(process_function)(
             unique_id, model, scenario, original_question, scenarios_with_probs
-        ),
-    )
+        )
+    except Exception as e:
+        # Log only as warning, because ThinkThoroughly is generating a lot of scenarios and it can happen that some of them will fail for any random error.
+        # If too many of them fail, it will be logged as error and we will know.
+        logger.warning(f"Error in `process_scenario` subprocess: {str(e)}")
+        result = None
+    return (scenario, result)

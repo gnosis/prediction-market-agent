@@ -59,7 +59,6 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     think_thoroughly_prophet = "think_thoroughly_prophet"
-    think_thoroughly_prophet_kelly = "think_thoroughly_prophet_kelly"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
     microchain_modifiable_system_prompt_0 = "microchain_modifiable_system_prompt_0"
