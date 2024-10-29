@@ -28,6 +28,7 @@ SPECIALIZED_FOR_MARKET_CREATORS: list[ChecksumAddress] = [
 class GetMarketCreatorsStalkerMarkets:
     # Do as many bets as we can for the special markets.
     bet_on_n_markets_per_run = MAX_AVAILABLE_MARKETS
+    n_markets_to_fetch: int = MAX_AVAILABLE_MARKETS
     # These tends to be long-running markets, it's not interesting to bet on them too much.
     same_market_bet_interval = timedelta(days=7)
     supported_markets: t.Sequence[MarketType] = [MarketType.OMEN]
@@ -35,14 +36,13 @@ class GetMarketCreatorsStalkerMarkets:
     def get_markets(
         self,
         market_type: MarketType,
-        limit: int = MAX_AVAILABLE_MARKETS,
         sort_by: SortBy = SortBy.CLOSING_SOONEST,
         filter_by: FilterBy = FilterBy.OPEN,
     ) -> t.Sequence[OmenAgentMarket]:
         available_markets = [
             OmenAgentMarket.from_data_model(m)
             for m in OmenSubgraphHandler().get_omen_binary_markets_simple(
-                limit=limit,
+                limit=self.n_markets_to_fetch,
                 sort_by=sort_by,
                 filter_by=filter_by,
                 creator_in=SPECIALIZED_FOR_MARKET_CREATORS,
