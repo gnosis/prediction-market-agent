@@ -131,7 +131,7 @@ def get_event_date_from_question(question: str) -> DatetimeUTC | None:
     try:
         event_date = DatetimeUTC.to_datetime_utc(event_date_str)
     except ValueError:
-        logger.error(
+        logger.warning(
             f"Could not extract event date from question `{question}`, got `{event_date_str}`."
         )
         return None
