@@ -16,6 +16,7 @@ from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
@@ -46,6 +47,10 @@ from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
 from prediction_market_agent.agents.social_media_agent.deploy import (
     DeployableSocialMediaAgent,
 )
+from prediction_market_agent.agents.specialized_agent.deploy import (
+    MarketCreatorsStalkerAgent1,
+    MarketCreatorsStalkerAgent2,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
@@ -57,7 +62,6 @@ class RunnableAgent(str, Enum):
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     think_thoroughly_prophet = "think_thoroughly_prophet"
-    think_thoroughly_prophet_kelly = "think_thoroughly_prophet_kelly"
     knownoutcome = "knownoutcome"
     microchain = "microchain"
     microchain_modifiable_system_prompt_0 = "microchain_modifiable_system_prompt_0"
@@ -78,6 +82,9 @@ class RunnableAgent(str, Enum):
     omen_cleaner = "omen_cleaner"
     ofv_challenger = "ofv_challenger"
     arbitrage = "arbitrage"
+    market_creators_stalker1 = "market_creators_stalker1"
+    market_creators_stalker2 = "market_creators_stalker2"
+    invalid = "invalid"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -103,6 +110,9 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_o1preview: DeployablePredictionProphetGPTo1PreviewAgent,
     RunnableAgent.prophet_o1mini: DeployablePredictionProphetGPTo1MiniAgent,
     RunnableAgent.arbitrage: DeployableArbitrageAgent,
+    RunnableAgent.market_creators_stalker1: MarketCreatorsStalkerAgent1,
+    RunnableAgent.market_creators_stalker2: MarketCreatorsStalkerAgent2,
+    RunnableAgent.invalid: InvalidAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

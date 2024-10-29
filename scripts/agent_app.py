@@ -79,6 +79,8 @@ def predict(
 ) -> None:
     agent = AgentClass(
         place_trades=False,
+        store_prediction=False,
+        store_trades=False,
         enable_langfuse=enable_langfuse,
     )
 

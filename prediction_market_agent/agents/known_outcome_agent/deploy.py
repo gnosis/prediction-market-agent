@@ -13,25 +13,34 @@ from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent impo
     Result,
     get_known_outcome,
 )
-from prediction_market_agent.agents.utils import market_is_saturated
+from prediction_market_agent.agents.utils import (
+    get_maximum_possible_bet_amount,
+    market_is_saturated,
+)
+from prediction_market_agent.utils import APIKeys
 
 
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     model = "gpt-4-1106-preview"
     min_liquidity = 5
     bet_on_n_markets_per_run: int = 2
+    supported_markets = [MarketType.OMEN]
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(max_bet_amount=2, max_price_impact=0.6)
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=2, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.6,
+        )
 
     def load(self) -> None:
         self.markets_with_known_outcomes: dict[str, Result] = {}
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        if not isinstance(market, OmenAgentMarket):
-            raise NotImplementedError(
-                "This agent only supports predictions on Omen markets"
-            )
+        assert isinstance(
+            market, OmenAgentMarket
+        ), "It's true thanks to supported_markets property, this just makes mypy happy."
 
         # Assume very high probability markets are already known, and have
         # been correctly bet on, and therefore the value of betting on them

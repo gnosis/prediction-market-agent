@@ -131,9 +131,17 @@ def get_event_date_from_question(question: str) -> DatetimeUTC | None:
     try:
         event_date = DatetimeUTC.to_datetime_utc(event_date_str)
     except ValueError:
-        logger.error(
+        logger.warning(
             f"Could not extract event date from question `{question}`, got `{event_date_str}`."
         )
         return None
 
     return event_date
+
+
+def get_maximum_possible_bet_amount(
+    min_: float, max_: float, trading_balance: float
+) -> float:
+    trading_balance *= 0.95  # Allow to use only most of the trading balance, to keep something to pay for fees on markets where it's necessary.
+    # Require bet size of at least `min_` and maximum `max_`, use available trading balance if its between.
+    return min(max(min_, trading_balance), max_)
