@@ -1,23 +1,9 @@
-import serpapi
+from prediction_market_agent_tooling.tools.google import search_google
 
-from prediction_market_agent import utils
-
-
-def google_search(query: str) -> list[str]:
-    params = {
-        "q": query,
-        "api_key": utils.APIKeys().serp_api_key.get_secret_value(),
-        "num": 4,
-    }
-    search = serpapi.GoogleSearch(params)
-    urls = [result["link"] for result in search.get_dict()["organic_results"]]
-    return urls
-
-
-google_search_schema = {
+search_google_schema = {
     "type": "function",
     "function": {
-        "name": "google_search",
+        "name": "search_google",
         "parameters": {
             "type": "object",
             "properties": {
@@ -35,5 +21,5 @@ google_search_schema = {
 
 class GoogleSearchTool:
     def __init__(self) -> None:
-        self.fn = google_search
-        self.schema = google_search_schema
+        self.fn = search_google
+        self.schema = search_google_schema
