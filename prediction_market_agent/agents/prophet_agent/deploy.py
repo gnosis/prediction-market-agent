@@ -79,12 +79,15 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
     """
 
     bet_on_n_markets_per_run = 20
-    trade_on_markets_created_after = DatetimeUTC(2024, 10, 31, 0)
+    trade_on_markets_created_after = DatetimeUTC(2024, 10, 31, 0)  # Date of deployment
     get_markets_sort_by = SortBy.NEWEST
     same_market_trade_interval = MarketLifetimeProportionalInterval(max_trades=4)
-    relevant_news_response_cache = RelevantNewsResponseCache(
-        sqlalchemy_db_url=APIKeys().sqlalchemy_db_url.get_secret_value()
-    )
+
+    def load(self) -> None:
+        super().load()
+        self.relevant_news_response_cache = RelevantNewsResponseCache(
+            sqlalchemy_db_url=APIKeys().sqlalchemy_db_url.get_secret_value()
+        )
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
         if not super().verify_market(market_type, market):
