@@ -8,7 +8,6 @@ on:
 
 env:
   MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY }}
-  SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   BET_FROM_PRIVATE_KEY: ${{ secrets.BET_FROM_PRIVATE_KEY }}
   GRAPH_API_KEY: ${{ secrets.GRAPH_API_KEY }}
@@ -38,7 +37,6 @@ jobs:
       - name: Extract environment variables for Docker container
         run: |
           echo "MANIFOLD_API_KEY=${{ secrets.MANIFOLD_API_KEY }}" >> .env
-          echo "SERP_API_KEY=${{ secrets.SERP_API_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "BET_FROM_PRIVATE_KEY=${{ secrets.BET_FROM_PRIVATE_KEY }}" >> .env
           echo "GRAPH_API_KEY=${{ secrets.GRAPH_API_KEY }}" >> .env
@@ -58,8 +56,6 @@ jobs:
         env:
           RUN_PAID_TESTS: "1"
     if: github.event_name == 'workflow_dispatch'
-    # TODO: Remove once the environment variables are fixed in the new repository.
-    continue-on-error: true
 
   test-build-image:
     runs-on: ubuntu-latest

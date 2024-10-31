@@ -17,7 +17,6 @@ numexpr = "*"
 pyautogen = "^0.2.32"
 flaml = "^2.2.0,<2.3.0" # Bug in newer version, because they started importing xgboost, without requiring it as a dependency.
 beautifulsoup4 = "*"
-serpapi = "*"
 google-search-results = "*"
 pytest = "*"
 llama-index = "~0.9.0"

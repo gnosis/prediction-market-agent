@@ -9,12 +9,12 @@ from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
 )
+from prediction_market_agent_tooling.tools.tavily.tavily_search import tavily_search
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
 
 from prediction_market_agent.tools.web_scrape.basic_summary import _summary
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
-from prediction_market_agent.tools.web_search.tavily import web_search
 from prediction_market_agent.utils import APIKeys, completion_str_to_json
 
 
@@ -220,7 +220,7 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcome
             ).content
         ).strip('"')
         logger.debug(f"Searching web for the search query '{search_query}'")
-        search_results = web_search(query=search_query, max_results=5)
+        search_results = tavily_search(query=search_query, max_results=5).results
         if not search_results:
             raise ValueError("No search results found.")
 
