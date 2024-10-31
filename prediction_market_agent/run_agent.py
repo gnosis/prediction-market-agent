@@ -36,6 +36,7 @@ from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleaner
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
     DeployablePredictionProphetGPT4oAgent,
+    DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
     DeployablePredictionProphetGPTo1MiniAgent,
@@ -71,6 +72,7 @@ class RunnableAgent(str, Enum):
     microchain_with_goal_manager_agent_0 = "microchain_with_goal_manager_agent_0"
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
+    prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
     prophet_gpt4_kelly = "prophet_gpt4_kelly"
@@ -102,6 +104,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
+    RunnableAgent.prophet_gpt4o_new_market_trader: DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
     RunnableAgent.olas_embedding_oa: DeployableOlasEmbeddingOAAgent,
