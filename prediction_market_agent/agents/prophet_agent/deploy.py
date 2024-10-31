@@ -6,7 +6,6 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
-from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
@@ -53,7 +52,6 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4o-2024-08-06",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -74,7 +72,6 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4-0125-preview",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -95,7 +92,6 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4-turbo-2024-04-09",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -138,7 +134,6 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
             research_temperature=1.0,
             prediction_temperature=1.0,
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -162,6 +157,5 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
             research_temperature=1.0,
             prediction_temperature=1.0,
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )

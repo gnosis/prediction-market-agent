@@ -1,6 +1,8 @@
 import pandas as pd
 import typer
-from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.caches.inmemory_cache import (
+    persistent_inmemory_cache,
+)
 
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
     ofv_answer_binary_question,

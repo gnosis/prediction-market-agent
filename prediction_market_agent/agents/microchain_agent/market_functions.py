@@ -16,7 +16,6 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet_simplified,
 )
-from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -139,7 +138,6 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
             model=self.model,
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
         )
         prediction = prophet_make_prediction(
             market_question=question,
