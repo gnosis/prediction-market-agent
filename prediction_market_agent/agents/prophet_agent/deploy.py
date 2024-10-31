@@ -73,9 +73,9 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
     DeployablePredictionProphetGPT4oAgent
 ):
     """
-    This agent trades on new markets, then re-evaluates the market over its
-    lifetime, if it observes that news has been published about the market since
-    its last trade.
+    This agent trades on new markets, then re-evaluates positions over each
+    market's lifetime, if it observes that news has been published about the
+    market since its last trade.
     """
 
     bet_on_n_markets_per_run = 20
