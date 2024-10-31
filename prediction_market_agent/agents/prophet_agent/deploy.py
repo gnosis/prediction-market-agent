@@ -3,10 +3,21 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     KellyBettingStrategy,
 )
+from prediction_market_agent_tooling.deploy.trade_interval import (
+    MarketLifetimeProportionalInterval,
+)
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
+    get_certified_relevant_news_since_cached,
+)
+from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_cache import (
+    RelevantNewsResponseCache,
+)
 from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
@@ -56,6 +67,47 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
             tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
+
+
+class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
+    DeployablePredictionProphetGPT4oAgent
+):
+    """
+    This agent trades on new markets, then re-evaluates positions over each
+    market's lifetime, if it observes that news has been published about the
+    market since its last trade.
+    """
+
+    bet_on_n_markets_per_run = 20
+    trade_on_markets_created_after = DatetimeUTC(2024, 10, 31, 0)  # Date of deployment
+    get_markets_sort_by = SortBy.NEWEST
+    same_market_trade_interval = MarketLifetimeProportionalInterval(max_trades=4)
+
+    def load(self) -> None:
+        super().load()
+        self.relevant_news_response_cache = RelevantNewsResponseCache(
+            sqlalchemy_db_url=APIKeys().sqlalchemy_db_url.get_secret_value()
+        )
+
+    def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
+        if not super().verify_market(market_type, market):
+            return False
+
+        # If we have previously traded on this market, check if there is new
+        # relevant news that implies we should re-run a full prediction and
+        # potentially adjust our position.
+        user_id = market.get_user_id(api_keys=APIKeys())
+        last_trade_datetime = market.get_most_recent_trade_datetime(user_id=user_id)
+        if last_trade_datetime is None:
+            return True
+
+        news = get_certified_relevant_news_since_cached(
+            question=market.question,
+            days_ago=(utcnow() - last_trade_datetime).days,
+            cache=self.relevant_news_response_cache,
+            tavily_storage=self.agent.tavily_storage,
+        )
+        return news is not None
 
 
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
