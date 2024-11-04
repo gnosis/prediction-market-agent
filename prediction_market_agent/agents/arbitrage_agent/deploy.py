@@ -103,7 +103,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             limit=self.max_related_markets_per_market,
             text=market.question,
             filter_on_metadata={
-                "close_time_timestamp": {"gte": utcnow().timestamp() + 3600}
+                "close_time_timestamp": {"$gte": int(utcnow().timestamp() + 3600)}
             },  # closing 1h from now
         )
 
