@@ -41,7 +41,7 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
             max_bet_amount=get_maximum_possible_bet_amount(
                 min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=None,
+            max_price_impact=0.5,
         )
 
 
@@ -51,9 +51,9 @@ class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAge
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+                min_=1, max_=25, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=0.4,
+            max_price_impact=0.1,
         )
 
 

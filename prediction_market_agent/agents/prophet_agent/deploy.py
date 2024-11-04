@@ -2,6 +2,7 @@ from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     KellyBettingStrategy,
+    MaxAccuracyWithKellyScaledBetsStrategy,
 )
 from prediction_market_agent_tooling.deploy.trade_interval import (
     MarketLifetimeProportionalInterval,
@@ -116,9 +117,9 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+                min_=1, max_=2, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=0.5,
+            max_price_impact=0.7,
         )
 
     def load(self) -> None:
@@ -137,9 +138,9 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+                min_=1, max_=25, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=None,
+            max_price_impact=0.1,
         )
 
     def load(self) -> None:
@@ -160,7 +161,7 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
             max_bet_amount=get_maximum_possible_bet_amount(
                 min_=5, max_=25, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=0.5,
+            max_price_impact=0.1,
         )
 
     def load(self) -> None:
@@ -175,11 +176,10 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = 2
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return MaxAccuracyWithKellyScaledBetsStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=5, max_=25, trading_balance=market.get_trade_balance(APIKeys())
+                min_=0.1, max_=1, trading_balance=market.get_trade_balance(APIKeys())
             ),
-            max_price_impact=0.7,
         )
 
     def load(self) -> None:
