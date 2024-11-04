@@ -18,13 +18,10 @@ from prediction_market_agent.utils import APIKeys
 
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
-    model: str
     bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
-        self.agent = self.agent_class(
-            model=self.model, enable_langfuse=self.enable_langfuse
-        )
+        self.agent = self.agent_class(enable_langfuse=self.enable_langfuse)
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return self.agent.answer_binary_market(
@@ -38,7 +35,6 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
 
 class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithItsOwnResearch
-    model: str = "gpt-4-turbo-2024-04-09"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
@@ -51,7 +47,6 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
-    model: str = "gpt-4-turbo-2024-04-09"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
