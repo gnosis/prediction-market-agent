@@ -24,6 +24,8 @@ UNRELATED_MARKETS = [
     "Will Cristiano Ronaldo score in the Euro 2024 quarter-finals on 7 July 2024?",
 ]
 
+MOCK_CLOSING_TIMESTAMP = 100
+
 
 @pytest.fixture()
 def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
@@ -39,7 +41,7 @@ def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
         PineconeMetadata(
             question_title=text,
             market_address=HexAddress(HexStr("")),
-            close_time_timestamp=0,
+            close_time_timestamp=MOCK_CLOSING_TIMESTAMP,
         ).model_dump()
         for text in texts
     ]
@@ -53,6 +55,20 @@ def test_search_similarity(test_pinecone_handler: PineconeHandler) -> None:
     limit = len(TRUMP_MARKETS) + len(BIDEN_MARKETS)
     # We aim to find all presidential-related questions - we add 1 to test the threshold effectiveness
     questions = test_pinecone_handler.find_nearest_questions_with_threshold(
-        limit=limit + 1, text="Will Trump win the election in 2024?"
+        limit=limit + 1,
+        text="Will Trump win the election in 2024?",
+        filter_on_metadata={"close_time_timestamp": {"$gte": MOCK_CLOSING_TIMESTAMP}},
     )
     assert len(questions) == limit
+
+
+def test_search_filter_metadata_works(test_pinecone_handler: PineconeHandler) -> None:
+    # We expect no questions since filter should match no entries.
+    questions = test_pinecone_handler.find_nearest_questions_with_threshold(
+        limit=10,
+        text="Will Trump win the election in 2024?",
+        filter_on_metadata={
+            "close_time_timestamp": {"$gte": MOCK_CLOSING_TIMESTAMP + 1}
+        },
+    )
+    assert len(questions) == 0
