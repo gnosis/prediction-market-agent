@@ -6972,7 +6972,7 @@ matplotlib = "^3.8.3"
 memory-profiler = "^0.61.0"
 openai = "^1.10.0"
 pandas = "^2.1.1"
-prediction-market-agent-tooling = {version = "^0.56.0.dev113", extras = ["google", "langchain"]}
+prediction-market-agent-tooling = {version = ">=0.56.0,<1", extras = ["google", "langchain"]}
 pyautogen = "^0.2.19"
 pysqlite3-binary = {version = "^0.5.2.post3", markers = "sys_platform == \"linux\""}
 python-dateutil = "^2.9.0.post0"
@@ -6991,8 +6991,8 @@ watchdog = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
-reference = "peter/latest-pmat-cache"
-resolved_reference = "933b6b55d69dee0e0ac7fb9c6de9c1a8bf4800fe"
+reference = "main"
+resolved_reference = "e1450b518d589c52c0bdc652f5cae96fc51c2493"
 
 [[package]]
 name = "preshed"
@@ -11142,4 +11142,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "613230cf9c12674452e7da5ac2d6ea5784a18dc1bfb295f73759e661d88fe3a0"
+content-hash = "2b683503c8f77a849adda800955bb1f4a2564d0695cf208eddf4ac6e836a78a5"
