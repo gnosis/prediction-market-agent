@@ -103,7 +103,6 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
             question=market.question,
             days_ago=(utcnow() - last_trade_datetime).days,
             cache=self.relevant_news_response_cache,
-            tavily_storage=self.agent.tavily_storage,
         )
         return news is not None
 
