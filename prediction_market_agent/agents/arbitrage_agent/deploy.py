@@ -1,4 +1,5 @@
 import typing as t
+from datetime import timedelta
 
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -103,8 +104,10 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             limit=self.max_related_markets_per_market,
             text=market.question,
             filter_on_metadata={
-                "close_time_timestamp": {"gte": utcnow().timestamp() + 3600}
-            },  # closing 1h from now
+                "close_time_timestamp": {
+                    "$gte": int((utcnow() + timedelta(hours=1)).timestamp())
+                }
+            },
         )
 
         omen_markets = self.subgraph_handler.get_omen_binary_markets(
