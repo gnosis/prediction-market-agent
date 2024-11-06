@@ -104,9 +104,10 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 class ThinkThoroughlyBase(ABC):
     identifier: str
+    model: str
+    model_for_generate_prediction_for_one_outcome: str
 
-    def __init__(self, model: str, enable_langfuse: bool, memory: bool = True) -> None:
-        self.model = model
+    def __init__(self, enable_langfuse: bool, memory: bool = True) -> None:
         self.enable_langfuse = enable_langfuse
         self.subgraph_handler = OmenSubgraphHandler()
         self.pinecone_handler = PineconeHandler()
@@ -338,7 +339,7 @@ class ThinkThoroughlyBase(ABC):
                     (
                         self.enable_langfuse,
                         unique_id,
-                        self.model,
+                        self.model_for_generate_prediction_for_one_outcome,
                         scenario,
                         question,
                         scenarios_with_probs,
@@ -373,6 +374,8 @@ class ThinkThoroughlyBase(ABC):
 
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
     identifier = "think-thoroughly-agent"
+    model = "gpt-4-turbo-2024-04-09"
+    model_for_generate_prediction_for_one_outcome = "gpt-4-turbo-2024-04-09"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
@@ -438,6 +441,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     identifier = "think-thoroughly-prophet-research-agent"
+    model = "gpt-4-turbo-2024-04-09"
+    model_for_generate_prediction_for_one_outcome = "gpt-4o-2024-08-06"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
