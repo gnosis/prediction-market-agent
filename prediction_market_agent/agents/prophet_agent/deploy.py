@@ -9,7 +9,6 @@ from prediction_market_agent_tooling.deploy.trade_interval import (
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
-
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
     get_certified_relevant_news_since_cached,
@@ -17,7 +16,6 @@ from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_cache import (
     RelevantNewsResponseCache,
 )
-from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
