@@ -4,7 +4,9 @@ import streamlit as st
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.caches.inmemory_cache import (
+    persistent_inmemory_cache,
+)
 from prediction_market_agent_tooling.tools.utils import LLM_SUPER_LOW_TEMPERATURE
 
 

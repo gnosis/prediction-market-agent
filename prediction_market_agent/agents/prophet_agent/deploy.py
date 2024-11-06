@@ -16,7 +16,6 @@ from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_cache import (
     RelevantNewsResponseCache,
 )
-from prediction_market_agent_tooling.tools.tavily.tavily_storage import TavilyStorage
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
@@ -64,7 +63,6 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4o-2024-08-06",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -105,7 +103,6 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
             question=market.question,
             days_ago=(utcnow() - last_trade_datetime).days,
             cache=self.relevant_news_response_cache,
-            tavily_storage=self.agent.tavily_storage,
         )
         return news is not None
 
@@ -126,7 +123,6 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4-0125-preview",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -147,7 +143,6 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
         self.agent = PredictionProphetAgent(
             model="gpt-4-turbo-2024-04-09",
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -190,7 +185,6 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
             research_temperature=1.0,
             prediction_temperature=1.0,
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )
 
@@ -214,6 +208,5 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
             research_temperature=1.0,
             prediction_temperature=1.0,
             include_reasoning=True,
-            tavily_storage=TavilyStorage(agent_id=self.__class__.__name__),
             logger=logger,
         )

@@ -1,9 +1,11 @@
+from datetime import timedelta
+
 import requests
 import tenacity
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.cache import persistent_inmemory_cache
+from prediction_market_agent_tooling.tools.caches.db_cache import db_cache
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from requests import Response
 
@@ -11,7 +13,6 @@ from requests import Response
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1), reraise=True
 )
-@persistent_inmemory_cache
 def fetch_html(url: str, timeout: int) -> Response:
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
@@ -21,6 +22,7 @@ def fetch_html(url: str, timeout: int) -> Response:
 
 
 @observe()
+@db_cache(max_age=timedelta(days=1))
 def web_scrape(url: str, timeout: int = 10) -> str:
     """
     Taken from agentcoinorg/predictionprophet
