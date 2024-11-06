@@ -48,11 +48,13 @@ You need to submit this even if the job itself didn't ask for it explicitly, to 
 
     @property
     def example_args(self) -> list[int | str]:
-        return ["0x1", 1, "I completed this job as described."]
+        return ["0x1", "GeneralAgent", 1, "I completed this job as described."]
 
-    def __call__(self, job_id: str, max_bond: float, result: str) -> str:
+    def __call__(
+        self, job_id: str, agent_name: str, max_bond: float, result: str
+    ) -> str:
         job = self.market_type.job_class.get_job(id=job_id)
-        processed = job.submit_job_result(max_bond, result)
+        processed = job.submit_job_result(agent_name, max_bond, result)
         return json.dumps(
             processed.model_dump(),
             indent=2,
