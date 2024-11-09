@@ -30,7 +30,7 @@ class GetMarketCreatorsStalkerMarkets:
     bet_on_n_markets_per_run = MAX_AVAILABLE_MARKETS
     n_markets_to_fetch: int = MAX_AVAILABLE_MARKETS
     # These tends to be long-running markets, it's not interesting to bet on them too much.
-    same_market_bet_interval = timedelta(days=7)
+    same_market_trade_interval = timedelta(days=7)
     supported_markets: t.Sequence[MarketType] = [MarketType.OMEN]
 
     def get_markets(
