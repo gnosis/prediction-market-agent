@@ -75,7 +75,6 @@ class RunnableAgent(str, Enum):
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
-    prophet_gpt4_kelly = "prophet_gpt4_kelly"
     prophet_o1preview = "prophet_o1preview"
     prophet_o1mini = "prophet_o1mini"
     olas_embedding_oa = "olas_embedding_oa"

@@ -4,9 +4,9 @@ from typing import Any, Tuple
 
 import requests
 from eth_typing import ChecksumAddress
-from loguru import logger
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import ABI
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
