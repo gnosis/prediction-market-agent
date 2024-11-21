@@ -31,6 +31,7 @@ class APIKeys(APIKeysBase):
     PINATA_API_KEY: t.Optional[SecretStr] = None
     PINATA_API_SECRET: t.Optional[SecretStr] = None
     TELEGRAM_BOT_KEY: t.Optional[SecretStr] = None
+    GNOSISSCAN_API_KEY: t.Optional[SecretStr] = None
 
     @property
     def serper_api_key(self) -> SecretStr:
@@ -78,6 +79,12 @@ class APIKeys(APIKeysBase):
     def telegram_bot_key(self) -> SecretStr:
         return check_not_none(
             self.TELEGRAM_BOT_KEY, "TELEGRAM_BOT_KEY missing in the environment."
+        )
+
+    @property
+    def gnosisscan_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.GNOSISSCAN_API_KEY, "GNOSISSCAN_API_KEY missing in the environment."
         )
 
 
