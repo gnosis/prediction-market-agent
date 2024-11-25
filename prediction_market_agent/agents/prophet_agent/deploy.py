@@ -37,11 +37,8 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         prediction = self.agent.predict(market.question)
-        if prediction.outcome_prediction is None:
-            logger.error(f"Prediction failed for {market.question}.")
-            return None
         logger.info(
-            f"Answering '{market.question}' with probability '{prediction.outcome_prediction.p_yes}'."
+            f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
         )
         return prediction.outcome_prediction
 
@@ -161,7 +158,9 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
     def load(self) -> None:
         super().load()
         self.agent = OlasAgent(
-            model=DEFAULT_OPENAI_MODEL, embedding_model=EmbeddingModel.openai
+            model=DEFAULT_OPENAI_MODEL,
+            embedding_model=EmbeddingModel.openai,
+            logger=logger,
         )
 
 

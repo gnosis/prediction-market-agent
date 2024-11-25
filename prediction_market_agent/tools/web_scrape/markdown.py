@@ -22,7 +22,7 @@ def fetch_html(url: str, timeout: int) -> Response:
 
 
 @observe()
-@db_cache(max_age=timedelta(days=1))
+@db_cache(max_age=timedelta(days=1), ignore_args=["timeout"])
 def web_scrape(url: str, timeout: int = 10) -> str:
     """
     Taken from agentcoinorg/predictionprophet
