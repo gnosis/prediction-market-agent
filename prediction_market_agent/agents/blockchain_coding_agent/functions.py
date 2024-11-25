@@ -1,28 +1,27 @@
 import typing as t
-from typing import Callable
 
-from autogen import register_function, ConversableAgent
-from pydantic import BaseModel
+import requests
+import tenacity
+from autogen import ConversableAgent, register_function
 from tavily import TavilyClient
 
 from prediction_market_agent.utils import APIKeys
 
 
-class FunctionDefinition(BaseModel):
-    function_name: str
-    function_callable: Callable
-
-
-def search_tool(
-    query: t.Annotated[str, "The search query"]
-) -> t.Annotated[str, "The search results"]:
-    tavily = TavilyClient(api_key=APIKeys().tavily_api_key.get_secret_value())
-    return tavily.get_search_context(query=query, search_depth="advanced")
+@tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
+def tavily_search(
+    query: str,
+) -> dict[str, t.Any]:
+    """
+    Internal minimalistic wrapper around Tavily's search method, that will retry if the call fails.
+    """
+    tavily = TavilyClient(api_key=(APIKeys()).tavily_api_key.get_secret_value())
+    response: dict[str, t.Any] = tavily.search(query=query)
+    return response
 
 
 from typing import List
 
-import requests_cache
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     OmenConditionalTokenContract,
@@ -31,7 +30,7 @@ from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from web3 import Web3
 
 
-def fetch_read_methods_from_blockscout(contract_address: str) -> str:
+def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
     w3 = OmenConditionalTokenContract().get_web3()
     if not is_contract(w3, Web3.to_checksum_address(contract_address)):
         raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
@@ -41,10 +40,9 @@ def fetch_read_methods_from_blockscout(contract_address: str) -> str:
     return read_not_proxy + read_proxy
 
 
-def fetch_read_methods(contract_address: str) -> str:
+def fetch_read_methods(contract_address: str) -> t.Any:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
-    session = requests_cache.CachedSession("demo_cache")
-    r = session.get(url)
+    r = requests.get(url)
     return r.json()
 
 
@@ -52,10 +50,9 @@ def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
     return bool(web3.eth.get_code(contract_address))
 
 
-def fetch_read_methods_proxy(contract_address: str) -> str:
+def fetch_read_methods_proxy(contract_address: str) -> t.Any:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
-    session = requests_cache.CachedSession("demo_cache")
-    r = session.get(url)
+    r = requests.get(url)
     return r.json()
 
 
@@ -74,7 +71,7 @@ def execute_read_function(
     abi: str,
     function_name: str,
     function_parameters: List[str] = [],
-) -> str:
+) -> t.Any:
     """
     Purpose:
         Executes a read function on a smart contract using the specified contract address, ABI, function name, and function parameters.
@@ -89,8 +86,8 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    from web3 import Web3
     from prediction_market_agent_tooling.tools.contract import abi_field_validator
+    from web3 import Web3
 
     c = ContractOnGnosisChain(
         abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)
@@ -100,10 +97,10 @@ def execute_read_function(
 
 def register_all_functions(
     caller_agent: ConversableAgent, executor_agent: ConversableAgent
-):
+) -> None:
     # Register the search tool.
     register_function(
-        search_tool,
+        tavily_search,
         caller=caller_agent,
         executor=executor_agent,
         name="search_tool",

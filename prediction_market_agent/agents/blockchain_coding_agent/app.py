@@ -4,8 +4,8 @@ import streamlit as st
 from autogen import Cache
 
 from prediction_market_agent.agents.blockchain_coding_agent.agents import (
-    get_code_writer_agent,
     get_code_executor_agent,
+    get_code_writer_agent,
 )
 from prediction_market_agent.agents.blockchain_coding_agent.functions import (
     register_all_functions,
@@ -39,7 +39,7 @@ with st.container():
         asyncio.set_event_loop(loop)
 
         # Define an asynchronous function
-        async def initiate_chat():
+        async def initiate_chat() -> None:
             with Cache.disk(cache_path_root="/tmp/autogen_cache_app2") as cache:
                 await code_executor_agent.a_initiate_chat(
                     code_writer_agent,
@@ -49,5 +49,4 @@ with st.container():
                 # The correct result should be 289421015806737773 (as of block 37141392)
                 # print(chat_result)
 
-        # Run the asynchronous function within the event loop
         loop.run_until_complete(initiate_chat())

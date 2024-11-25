@@ -4,8 +4,8 @@ import typing as t
 from pathlib import Path
 
 import streamlit as st
-from autogen import ConversableAgent, Agent
-from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
+from autogen import Agent, ConversableAgent
+from autogen.coding.jupyter import JupyterCodeExecutor, LocalJupyterServer
 
 from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
     code_writer_system_message,
@@ -59,8 +59,8 @@ class TrackableConversableAgent(ConversableAgent):
     """Helper class for displaying intermediate messages in Streamlit."""
 
     def _process_received_message(
-        self, message: t.Union[dict, str], sender: Agent, silent: bool
-    ):
+        self, message: t.Union[t.Dict[t.Any, t.Any], str], sender: Agent, silent: bool
+    ) -> t.Any:
         with st.chat_message(sender.name):
             st.markdown(message)
         return super()._process_received_message(message, sender, silent)
