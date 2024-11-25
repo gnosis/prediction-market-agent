@@ -1,17 +1,18 @@
 import typing as t
-from typing import Callable
+from typing import List
+from urllib.parse import urljoin
 
-from autogen import register_function, ConversableAgent
-from pydantic import BaseModel
+import requests_cache
+from autogen import ConversableAgent, register_function
+from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.markets.omen.omen_contracts import (
+    OmenConditionalTokenContract,
+)
+from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from tavily import TavilyClient
+from web3 import Web3
 
 from prediction_market_agent.utils import APIKeys
-
-
-class FunctionDefinition(BaseModel):
-    function_name: str
-    function_callable: Callable
-
 
 tavily = TavilyClient(api_key=APIKeys().tavily_api_key.get_secret_value())
 
@@ -22,29 +23,24 @@ def search_tool(
     return tavily.get_search_context(query=query, search_depth="advanced")
 
 
-from typing import List
-
-import requests_cache
-from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    OmenConditionalTokenContract,
-)
-from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
-from web3 import Web3
+GNOSIS_BLOCKSCOUT_BASE_URL = "https://gnosis.blockscout.com/api/v2/smart-contracts/"
 
 
 def fetch_read_methods_from_blockscout(contract_address: str) -> str:
+    # ToDo - Fetch write methods
     w3 = OmenConditionalTokenContract().get_web3()
     if not is_contract(w3, Web3.to_checksum_address(contract_address)):
         raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
     read_not_proxy = fetch_read_methods(contract_address)
     read_proxy = fetch_read_methods_proxy(contract_address)
-    # ToDo - Fetch write methods
     return read_not_proxy + read_proxy
 
 
 def fetch_read_methods(contract_address: str) -> str:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
+    url = urljoin(
+        GNOSIS_BLOCKSCOUT_BASE_URL,
+        f"/{contract_address}/methods-read?is_custom_abi=false",
+    )
     session = requests_cache.CachedSession("demo_cache")
     r = session.get(url)
     return r.json()
@@ -55,7 +51,11 @@ def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
 
 
 def fetch_read_methods_proxy(contract_address: str) -> str:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
+    url = urljoin(
+        GNOSIS_BLOCKSCOUT_BASE_URL,
+        f"/{contract_address}/methods-read-proxy?is_custom_abi=false",
+    )
+
     session = requests_cache.CachedSession("demo_cache")
     r = session.get(url)
     return r.json()
@@ -69,6 +69,11 @@ def checksum_address(address: str) -> ChecksumAddress:
     from web3 import Web3
 
     return Web3.to_checksum_address(address)
+
+
+def get_balance_using_PMAT() -> None:
+    # ToDO - pass it to agent
+    pass
 
 
 def execute_read_function(
@@ -91,8 +96,8 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    from web3 import Web3
     from prediction_market_agent_tooling.tools.contract import abi_field_validator
+    from web3 import Web3
 
     c = ContractOnGnosisChain(
         abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)

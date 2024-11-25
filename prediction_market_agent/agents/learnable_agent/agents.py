@@ -4,7 +4,7 @@ from pathlib import Path
 
 import streamlit as st
 from autogen import ConversableAgent
-from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
+from autogen.coding.jupyter import JupyterCodeExecutor, LocalJupyterServer
 
 from prediction_market_agent.agents.learnable_agent.prompts import (
     code_writer_system_message,

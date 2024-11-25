@@ -4,8 +4,8 @@ import streamlit as st
 from autogen import Cache
 
 from prediction_market_agent.agents.learnable_agent.agents import (
-    get_code_writer_agent,
     get_code_executor_agent,
+    get_code_writer_agent,
 )
 from prediction_market_agent.agents.learnable_agent.functions import (
     register_all_functions,
