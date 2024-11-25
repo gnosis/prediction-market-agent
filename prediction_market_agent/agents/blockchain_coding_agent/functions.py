@@ -13,12 +13,10 @@ class FunctionDefinition(BaseModel):
     function_callable: Callable
 
 
-tavily = TavilyClient(api_key=APIKeys().tavily_api_key.get_secret_value())
-
-
 def search_tool(
     query: t.Annotated[str, "The search query"]
 ) -> t.Annotated[str, "The search results"]:
+    tavily = TavilyClient(api_key=APIKeys().tavily_api_key.get_secret_value())
     return tavily.get_search_context(query=query, search_depth="advanced")
 
 
