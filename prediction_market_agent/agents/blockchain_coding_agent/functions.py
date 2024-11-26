@@ -50,7 +50,7 @@ def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
     return bool(web3.eth.get_code(contract_address))
 
 
-def fetch_read_methods_proxy(contract_address: str) -> t.Any:
+def fetch_read_methods_proxy(contract_address: str) -> dict[str, t.Any]:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
     r = requests.get(url)
     return r.json()
