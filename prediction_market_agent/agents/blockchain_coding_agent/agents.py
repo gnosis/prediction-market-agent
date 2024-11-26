@@ -5,7 +5,7 @@ from pathlib import Path
 
 import streamlit as st
 from autogen import Agent, ConversableAgent
-from autogen.coding.jupyter import JupyterCodeExecutor, LocalJupyterServer
+from autogen.coding import LocalCommandLineCodeExecutor
 
 from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
     code_writer_system_message,
@@ -16,6 +16,7 @@ MAX_CONSECUTIVE_AUTO_REPLY = 30
 
 
 def get_code_executor_agent(for_streamlit: bool = False) -> ConversableAgent:
+    local_executor = LocalCommandLineCodeExecutor()
     output_dir = Path(".cache/coding")
     output_dir.mkdir(exist_ok=True)
     code_executor_agent = (
@@ -24,7 +25,7 @@ def get_code_executor_agent(for_streamlit: bool = False) -> ConversableAgent:
         name="code_executor_agent",
         llm_config=False,  # Turn off LLM for this agent.
         code_execution_config={
-            "executor": JupyterCodeExecutor(LocalJupyterServer(), output_dir=output_dir)
+            "executor": local_executor,
         },  # Use the local command line code executor.
         human_input_mode="NEVER",
         max_consecutive_auto_reply=MAX_CONSECUTIVE_AUTO_REPLY,
