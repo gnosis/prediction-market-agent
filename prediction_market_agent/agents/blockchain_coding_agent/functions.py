@@ -40,7 +40,7 @@ def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
     return read_not_proxy + read_proxy
 
 
-def fetch_read_methods(contract_address: str) -> t.Any:
+def fetch_read_methods(contract_address: str) -> dict[str, t.Any]:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
     r = requests.get(url)
     return r.json()
