@@ -88,4 +88,4 @@ class DeployableSocialMediaAgent(DeployableAgent):
 
 if __name__ == "__main__":
     agent = DeployableSocialMediaAgent()
-    agent.deploy_local(market_type=MarketType.OMEN, sleep_time=540, timeout=180)
+    agent.deploy_local(market_type=MarketType.OMEN, sleep_time=540, run_time=180)
