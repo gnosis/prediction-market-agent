@@ -1,33 +1,27 @@
 import typing as t
+from typing import List
 
 import requests
 import tenacity
 from autogen import ConversableAgent, register_function
-from tavily import TavilyClient
-
-from prediction_market_agent.utils import APIKeys
+from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.config import RPCConfig
+from prediction_market_agent_tooling.markets.omen.omen_contracts import (
+    OmenConditionalTokenContract,
+)
+from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
+from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
+from prediction_market_agent_tooling.tools.tavily.tavily_search import (
+    tavily_search as tavily_search_pmat,
+)
+from web3 import Web3
 
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
 def tavily_search(
     query: str,
-) -> dict[str, t.Any]:
-    """
-    Internal minimalistic wrapper around Tavily's search method, that will retry if the call fails.
-    """
-    tavily = TavilyClient(api_key=(APIKeys()).tavily_api_key.get_secret_value())
-    response: dict[str, t.Any] = tavily.search(query=query)
-    return response
-
-
-from typing import List
-
-from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    OmenConditionalTokenContract,
-)
-from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
-from web3 import Web3
+) -> TavilyResponse:
+    return tavily_search_pmat(query=query)
 
 
 def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
@@ -40,24 +34,26 @@ def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
     return read_not_proxy + read_proxy
 
 
-def fetch_read_methods(contract_address: str) -> dict[str, t.Any]:
+def fetch_read_methods(contract_address: str) -> list[dict[str, t.Any]]:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
     r = requests.get(url)
-    return r.json()
+    data: list[dict[str, t.Any]] = r.json()
+    return data
 
 
 def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
     return bool(web3.eth.get_code(contract_address))
 
 
-def fetch_read_methods_proxy(contract_address: str) -> dict[str, t.Any]:
+def fetch_read_methods_proxy(contract_address: str) -> list[dict[str, t.Any]]:
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
     r = requests.get(url)
-    return r.json()
+    data: list[dict[str, t.Any]] = r.json()
+    return data
 
 
 def get_rpc_endpoint() -> str:
-    return "https://rpc.gnosischain.com"
+    return RPCConfig().gnosis_rpc_url
 
 
 def checksum_address(address: str) -> ChecksumAddress:

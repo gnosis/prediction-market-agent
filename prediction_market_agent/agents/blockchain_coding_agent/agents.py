@@ -1,5 +1,3 @@
-# The code writer agent's system message is to instruct the LLM on how to use
-# the code executor in the code executor agent.
 import typing as t
 from pathlib import Path
 
