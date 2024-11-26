@@ -1,47 +1,32 @@
-from typing import List
-
-import requests_cache
 from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    OmenConditionalTokenContract,
-)
-from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from web3 import Web3
 
 
-def fetch_contract_source_code(contract_address: str) -> str:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/source-code"
-    url = f"
-  'https://gnosis.blockscout.com/api/v2/smart-contracts/0xf8D1677c8a0c961938bf2f9aDc3F3CFDA759A9d9"\
-  -H 'accept: application/json'
+# def fetch_read_methods_from_blockscout(contract_address: str) -> str:
+#     w3 = OmenConditionalTokenContract().get_web3()
+#     if not is_contract(w3, Web3.to_checksum_address(contract_address)):
+#         raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
+#     read_not_proxy = fetch_read_methods(contract_address)
+#     read_proxy = fetch_read_methods_proxy(contract_address)
+#     # ToDo - Fetch write methods
+#     return read_not_proxy + read_proxy
 
-
-def fetch_read_methods_from_blockscout(contract_address: str) -> str:
-    w3 = OmenConditionalTokenContract().get_web3()
-    if not is_contract(w3, Web3.to_checksum_address(contract_address)):
-        raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
-    read_not_proxy = fetch_read_methods(contract_address)
-    read_proxy = fetch_read_methods_proxy(contract_address)
-    # ToDo - Fetch write methods
-    return read_not_proxy + read_proxy
-
-
-def fetch_read_methods(contract_address: str) -> str:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
-    session = requests_cache.CachedSession("demo_cache")
-    r = session.get(url)
-    return r.json()
+# def fetch_read_methods(contract_address: str) -> str:
+#     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
+#     session = requests_cache.CachedSession("demo_cache")
+#     r = session.get(url)
+#     return r.json()
 
 
 def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
     return bool(web3.eth.get_code(contract_address))
 
 
-def fetch_read_methods_proxy(contract_address: str) -> str:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
-    session = requests_cache.CachedSession("demo_cache")
-    r = session.get(url)
-    return r.json()
+# def fetch_read_methods_proxy(contract_address: str) -> str:
+#     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
+#     session = requests_cache.CachedSession("demo_cache")
+#     r = session.get(url)
+#     return r.json()
 
 
 def get_rpc_endpoint() -> str:
@@ -58,7 +43,8 @@ def execute_read_function(
     contract_address: str,
     abi: str,
     function_name: str,
-    function_parameters: List[str] = [],
+    function_parameters: list[str],
+    w3: Web3,
 ) -> str:
     """
     Purpose:
@@ -69,6 +55,7 @@ def execute_read_function(
         abi (str): The ABI (Application Binary Interface) of the smart contract.
         function_name (str): The name of the function to execute on the smart contract.
         function_parameters (list): A list of parameters to pass to the function.
+        w3 (Web3): A Web3 instance.
 
     Returns:
         Any: The result of calling the specified function on the smart contract.
@@ -77,10 +64,13 @@ def execute_read_function(
     from web3 import Web3
     from prediction_market_agent_tooling.tools.contract import abi_field_validator
 
-    c = ContractOnGnosisChain(
-        abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)
+    contract = w3.eth.contract(
+        address=Web3.to_checksum_address(contract_address), abi=abi_field_validator(abi)
     )
-    return c.call(function_name, function_parameters)
+    output = contract.functions[function_name](
+        *parse_function_params(function_params)
+    ).call()  # type: ignore # TODO: Fix Mypy, as this works just OK.
+    return output
 
 
 # def fetch_abi_from_verified_contract_on_gnosis_chain(contract_address: str) -> str:

@@ -13,6 +13,7 @@ from scripts.web3_scan_utils import (
     get_rpc_endpoint,
     execute_read_function,
     checksum_address,
+    fetch_web3_instance,
 )
 
 code_writer_system_message = """You are a helpful AI assistant.
@@ -88,6 +89,14 @@ register_function(
     executor=code_executor_agent,  # The user proxy agent can execute the calculator calls.
     name="get_rpc_endpoint",  # By default, the function name is used as the tool name.
     description="Returns the RPC endpoint to be used for interacting with Gnosis Chain when instantiating a provider",  # A description of the tool.
+)
+
+register_function(
+    fetch_web3_instance,
+    caller=code_writer_agent,  # The assistant agent can suggest calls to the calculator.
+    executor=code_executor_agent,  # The user proxy agent can execute the calculator calls.
+    name="fetch_web3_instance",  # By default, the function name is used as the tool name.
+    description="Builds a Web3 provider instance capable of executing read and write functions on the Gnosis Chain.",  # A description of the tool.
 )
 
 register_function(
