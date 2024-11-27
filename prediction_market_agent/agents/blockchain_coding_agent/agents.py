@@ -5,6 +5,7 @@ from pathlib import Path
 
 import streamlit as st
 from autogen import Agent, ConversableAgent
+from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 from autogen.coding import LocalCommandLineCodeExecutor
 
 from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
@@ -54,6 +55,32 @@ def get_code_writer_agent(for_streamlit: bool = False) -> ConversableAgent:
     )
 
     return code_writer_agent
+
+
+def termination_msg(x):
+    return isinstance(x, dict) and "TERMINATE" == str(x.get("content", ""))[-9:].upper()
+
+
+def get_code_rag_agent(for_streamlit: bool = False) -> RetrieveUserProxyAgent:
+    # ToDo - Pass list of web3.py docs to the RetrieveUserProxyAgent
+    return RetrieveUserProxyAgent(
+        name="Boss_Assistant",
+        is_termination_msg=termination_msg,
+        human_input_mode="NEVER",
+        default_auto_reply="Reply `TERMINATE` if the task is done.",
+        max_consecutive_auto_reply=3,
+        get_or_create=True,
+        retrieve_config={
+            "task": "code",
+            "docs_path": "https://raw.githubusercontent.com/microsoft/FLAML/main/website/docs/Examples/Integrate%20-%20Spark.md",
+            "chunk_token_size": 1000,
+            "model": "gpt-4o",
+            "collection_name": "groupchat",
+            "get_or_create": True,
+        },
+        code_execution_config=False,  # we don't want to execute code in this case.
+        description="Assistant who has extra content retrieval power for solving difficult problems.",
+    )
 
 
 class TrackableConversableAgent(ConversableAgent):
