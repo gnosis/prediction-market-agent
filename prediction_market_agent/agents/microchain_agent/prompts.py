@@ -116,6 +116,8 @@ class FunctionsConfig(BaseModel):
             include_learning_functions = True
             include_agent_functions = True
             include_trading_functions = True
+            include_job_functions = True
+            include_universal_functions = True
 
         elif system_prompt_choice in [
             SystemPromptChoice.TRADING_AGENT,
