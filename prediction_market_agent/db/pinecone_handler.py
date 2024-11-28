@@ -1,4 +1,3 @@
-import base64
 import hashlib
 import sys
 import typing as t
@@ -56,9 +55,6 @@ class PineconeHandler:
         """Encodes string using sha-256 and returns it as string"""
         # We use SHA-256 for generating IDs with fixed length.
         return hashlib.sha256(text.encode()).hexdigest()
-
-    def decode_id(self, id: str) -> str:
-        return base64.b64decode(id).decode("utf-8")
 
     def filter_markets_already_in_index(
         self, markets: list[OmenMarket]
