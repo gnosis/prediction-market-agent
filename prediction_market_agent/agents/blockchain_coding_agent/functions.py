@@ -57,7 +57,6 @@ def get_rpc_endpoint() -> str:
 
 
 def checksum_address(address: str) -> ChecksumAddress:
-    from web3 import Web3
 
     return Web3.to_checksum_address(address)
 
