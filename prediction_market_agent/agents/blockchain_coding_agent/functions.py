@@ -2,7 +2,6 @@ import typing as t
 from typing import List
 
 import requests
-import tenacity
 from autogen import ConversableAgent, register_function
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import RPCConfig
