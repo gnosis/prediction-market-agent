@@ -3,10 +3,14 @@
 import typing as t
 from pathlib import Path
 
+import chromadb
 import streamlit as st
 from autogen import Agent, ConversableAgent
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
+from autogen.agentchat.contrib.vectordb.chromadb import ChromaVectorDB
 from autogen.coding import LocalCommandLineCodeExecutor
+from autogen.retrieve_utils import parse_html_to_markdown
+from chromadb.utils import embedding_functions
 
 from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
     code_writer_system_message,
@@ -62,24 +66,39 @@ def termination_msg(x):
 
 
 def get_code_rag_agent(for_streamlit: bool = False) -> RetrieveUserProxyAgent:
-    # ToDo - Pass list of web3.py docs to the RetrieveUserProxyAgent
+    model = "text-embedding-3-large"  # same model as used by PineconeHandler
+    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+        api_key=APIKeys().openai_api_key.get_secret_value(),
+        model_name=model,
+    )
+    vector_db = ChromaVectorDB(embedding_function=openai_ef)
+
     return RetrieveUserProxyAgent(
-        name="Boss_Assistant",
+        name="Web3 Python expert",
         is_termination_msg=termination_msg,
         human_input_mode="NEVER",
-        default_auto_reply="Reply `TERMINATE` if the task is done.",
-        max_consecutive_auto_reply=3,
-        get_or_create=True,
+        # get_or_create=True,
         retrieve_config={
             "task": "code",
-            "docs_path": "https://raw.githubusercontent.com/microsoft/FLAML/main/website/docs/Examples/Integrate%20-%20Spark.md",
-            "chunk_token_size": 1000,
+            "docs_path": [
+                "prediction_market_agent/agents/blockchain_coding_agent/web3py_index.html"
+            ],
+            "vector_db": None,
+            # "client": chromadb.PersistentClient().get_or_create_collection(
+            #     name="autogen_agent", embedding_function=openai_ef
+            # ),
+            # "chunk_mode": "one_line",  # chunk_mode
+            "custom_text_split_function": parse_html_to_markdown,
+            "client": chromadb.PersistentClient(),
+            "embedding_function": openai_ef,
             "model": "gpt-4o",
-            "collection_name": "groupchat",
+            # "collection_name": "groupchat",
             "get_or_create": True,
         },
-        code_execution_config=False,  # we don't want to execute code in this case.
-        description="Assistant who has extra content retrieval power for solving difficult problems.",
+        code_execution_config={
+            "executor": LocalCommandLineCodeExecutor(),
+        },
+        description="Assistant who is an expert in web3.py package documentation and has extra content retrieval power for solving coding tasks related to web3.py usage.",
     )
 
 
