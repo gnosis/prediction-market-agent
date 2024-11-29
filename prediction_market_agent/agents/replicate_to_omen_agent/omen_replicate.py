@@ -91,16 +91,10 @@ def omen_replicate_from_tx(
     logger.info(f"Found {len(markets_to_replicate)} markets to replicate.")
 
     # Get a set of possible categories from existing markets (but created by anyone, not just your agent)
-    existing_categories = set(
-        m.category
-        for m in OmenSubgraphHandler().get_omen_binary_markets_simple(
-            limit=1000,
-            sort_by=SortBy.NEWEST,
-            filter_by=FilterBy.NONE,
-        )
-    )
+    existing_categories = set(m.category for m in existing_markets)
 
     created_addresses: list[ChecksumAddress] = []
+    created_questions: set[str] = set()
 
     for market in markets_to_replicate:
         if len(created_addresses) > n_to_replicate:
@@ -108,6 +102,12 @@ def omen_replicate_from_tx(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
             )
             break
+
+        if market.question in created_questions:
+            logger.info(
+                f"Skipping `{market.question}` because it was already replicated in this run."
+            )
+            continue
 
         if market.close_time is None:
             logger.info(
@@ -164,7 +164,12 @@ def omen_replicate_from_tx(
             created_addresses.append(
                 ChecksumAddress(HexAddress(HexStr(int_to_hexbytes(0).hex())))
             )
+            created_questions.add(market.question)
             continue
+
+        logger.info(
+            f"Replicating {market.question} from {market.url} in category {category}."
+        )
 
         created_market = omen_create_market_tx(
             api_keys=api_keys,
@@ -182,8 +187,9 @@ def omen_replicate_from_tx(
             created_market.market_event.fixed_product_market_maker_checksummed
         )
         created_addresses.append(market_address)
+        created_questions.add(market.question)
         logger.info(
-            f"Created `https://aiomen.eth.limo/#/{market_address}` for `{market.question}` in category {category} out of {market.url}."
+            f"Created `{created_market.url}` for `{market.question}` in category {category} out of {market.url}."
         )
 
         generate_and_set_image_for_market(
