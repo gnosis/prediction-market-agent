@@ -9,7 +9,10 @@ from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     OmenConditionalTokenContract,
 )
-from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
+from prediction_market_agent_tooling.tools.contract import (
+    ContractOnGnosisChain,
+    abi_field_validator,
+)
 from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
 from prediction_market_agent_tooling.tools.tavily.tavily_search import (
     tavily_search as tavily_search_pmat,
@@ -56,7 +59,6 @@ def get_rpc_endpoint() -> str:
 
 
 def checksum_address(address: str) -> ChecksumAddress:
-
     return Web3.to_checksum_address(address)
 
 
@@ -80,7 +82,6 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    from prediction_market_agent_tooling.tools.contract import abi_field_validator
 
     c = ContractOnGnosisChain(
         abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)
