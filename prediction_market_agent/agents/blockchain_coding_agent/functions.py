@@ -82,7 +82,6 @@ def execute_read_function(
 
     """
     from prediction_market_agent_tooling.tools.contract import abi_field_validator
-    from web3 import Web3
 
     c = ContractOnGnosisChain(
         abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)
