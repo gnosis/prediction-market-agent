@@ -46,11 +46,14 @@ class CreatePredictionMarket(Function):
 
     @property
     def description(self) -> str:
-        return f"Use this function to create a new prediction market on Omen. Question of the prediciton market can only be binary, in the Yes/No format. Using this function will cost you {CreatePredictionMarket.INITIAL_FUNDS} xDai."
+        return f"Use this function to create a new prediction market on Omen. Question of the prediciton market can only be binary, in the Yes/No format. Questions can not have violent nature. Using this function will cost you {CreatePredictionMarket.INITIAL_FUNDS} xDai."
 
     @property
     def example_args(self) -> list[str]:
-        return ["Binary yes/no question", "Closing time"]
+        return [
+            "Will GNO hit $1000 dollars by the end of 2024?",
+            "2024-12-31T23:59:59Z",
+        ]
 
     def __call__(self, question: str, closing_time: str) -> str:
         keys = APIKeys()
