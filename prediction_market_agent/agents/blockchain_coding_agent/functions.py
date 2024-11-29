@@ -17,7 +17,6 @@ from prediction_market_agent_tooling.tools.tavily.tavily_search import (
 from web3 import Web3
 
 
-@tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
 def tavily_search(
     query: str,
 ) -> TavilyResponse:
