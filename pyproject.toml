@@ -34,7 +34,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = { version = "^0.57.2", extras = ["langchain", "google"] }
+prediction-market-agent-tooling = { version = "^0.57.3", extras = ["langchain", "google"] }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -45,13 +45,13 @@ pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.22"
 farcaster = "^0.7.11"
-mech-client = "^0.2.15"
+mech-client = "^0.2.19"
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "main" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "bump-autogen" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.2.0"
 

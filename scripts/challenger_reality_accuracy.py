@@ -66,8 +66,10 @@ def plot_number_of_challenges(since: timedelta) -> None:
 
     for responses in question_id_to_responses.values():
         first_response = responses[0]
-        dates.append(first_response.question.answer_finalized_datetime)
-        counts.append(len(responses))
+        # Could be None if pending arbitration, let's just ignore those.
+        if first_response.question.answer_finalized_datetime is not None:
+            dates.append(first_response.question.answer_finalized_datetime)
+            counts.append(len(responses))
 
     # Add jitter to counts and dates to reduce overlap
     counts_jittered = [count + np.random.uniform(-0.1, 0.1) for count in counts]
