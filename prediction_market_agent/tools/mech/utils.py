@@ -3,8 +3,8 @@ import tempfile
 import typing as t
 from contextlib import contextmanager
 from enum import Enum
+from importlib.util import find_spec
 
-from mech_client.interact import ConfirmationType, interact
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from pydantic import BaseModel
@@ -43,7 +43,27 @@ class MechTool(str, Enum):
     PREDICTION_URL_COT = "prediction-url-cot"
 
 
+def is_package_available(package_name: str) -> bool:
+    """
+    Asserts whether the specified package is available.
+
+    Args:
+        package_name (str): The name of the package to check.
+
+    Returns:
+        True if the package is available, False otherwise.
+    """
+    if find_spec(package_name):
+        return True
+    return False
+
+
 def mech_request(question: str, mech_tool: MechTool) -> MechResponse:
+    if not is_package_available("mech_client"):
+        raise EnvironmentError("Package `mech_client` is not installed.")
+
+    from mech_client.interact import interact, ConfirmationType
+
     private_key = APIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:
         # Increase gas price to reduce chance of 'out of gas' transaction failures

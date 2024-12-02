@@ -1,13 +1,18 @@
 import typing as t
 
 import requests_cache
-import tenacity
-from autogen import ConversableAgent, register_function
+from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import PrivateKey, ABI
+from prediction_market_agent_tooling.tools.contract import abi_field_validator
+from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
+from prediction_market_agent_tooling.tools.tavily.tavily_search import (
+    tavily_search as tavily_search_pmat,
+)
 from prediction_market_agent_tooling.tools.web3_utils import (
+    parse_function_params,
     send_function_on_contract_tx,
 )
-from tavily import TavilyClient
+from web3 import Web3
 from web3.types import TxReceipt
 
 from prediction_market_agent.agents.blockchain_coding_agent.models import (
@@ -17,36 +22,23 @@ from prediction_market_agent.agents.blockchain_coding_agent.models import (
 from prediction_market_agent.utils import APIKeys
 
 
-@tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
 def tavily_search(
     query: str,
-) -> dict[str, t.Any]:
-    """
-    Internal minimalistic wrapper around Tavily's search method, that will retry if the call fails.
-    """
-    tavily = TavilyClient(api_key=(APIKeys()).tavily_api_key.get_secret_value())
-    response: dict[str, t.Any] = tavily.search(query=query)
-    return response
+) -> TavilyResponse:
+    return tavily_search_pmat(query=query)
 
 
-from eth_typing import ChecksumAddress
-from web3 import Web3
+def get_rpc_endpoint() -> str:
+    # return "https://rpc.gnosischain.com"
+    return "http://localhost:8545"
 
 
-# def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
-#     w3 = OmenConditionalTokenContract().get_web3()
-#     if not is_contract(w3, Web3.to_checksum_address(contract_address)):
-#         raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
-#     read_not_proxy = fetch_read_methods(contract_address)
-#     read_proxy = fetch_read_methods_proxy(contract_address)
-#     # ToDo - Fetch write methods
-#     return read_not_proxy + read_proxy
+def checksum_address(address: str) -> ChecksumAddress:
+    return Web3.to_checksum_address(address)
 
 
-# def fetch_read_methods(contract_address: str) -> t.Any:
-#     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
-#     r = requests.get(url)
-#     return r.json()
+def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
+    return bool(web3.eth.get_code(contract_address))
 
 
 def fetch_source_code_and_abi_from_contract(
@@ -69,38 +61,11 @@ def fetch_source_code_and_abi_from_contract(
     return SourceCodeContainer(source_code=source_code, abi=abi)
 
 
-def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
-    return bool(web3.eth.get_code(contract_address))
-
-
-# def fetch_read_methods_proxy(contract_address: str) -> t.Any:
-#     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
-#     r = requests.get(url)
-#     return r.json()
-
-
-def get_rpc_endpoint() -> str:
-    # return "https://rpc.gnosischain.com"
-    return "http://localhost:8545"
-
-
-def checksum_address(address: str) -> ChecksumAddress:
-    from web3 import Web3
-
-    return Web3.to_checksum_address(address)
-
-
-# def fetch_web3_instance() -> Web3:
-#     from web3 import Web3
-#
-#     return Web3(Web3.HTTPProvider(get_rpc_endpoint()))
-
-
 def execute_read_function(
     contract_address: str,
     abi: str,
     function_name: str,
-    function_params: t.List[str],
+    function_params: t.List[t.Any],
 ) -> str:
     """
     Purpose:
@@ -116,11 +81,8 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    from web3 import Web3
-    from prediction_market_agent_tooling.tools.contract import abi_field_validator
-    from prediction_market_agent_tooling.tools.web3_utils import parse_function_params
-
-    w3 = Web3(Web3.HTTPProvider(get_rpc_endpoint()))
+    rpc_endpoint = get_rpc_endpoint()
+    w3 = Web3(Web3.HTTPProvider(rpc_endpoint))
     contract = w3.eth.contract(
         address=Web3.to_checksum_address(contract_address), abi=abi_field_validator(abi)
     )
@@ -129,6 +91,9 @@ def execute_read_function(
         *parse_function_params(function_params)
     ).call()  # type: ignore # TODO: Fix Mypy, as this works just OK.
     return output
+
+
+##### Write
 
 
 def get_private_key() -> PrivateKey:
@@ -141,6 +106,7 @@ def execute_write_function(
     function_name: str,
     function_params: t.List[t.Any],
 ) -> TxReceipt:
+    # ToDo - Do not use PMAT if possible.
     w3 = Web3(Web3.HTTPProvider(get_rpc_endpoint()))
     private_key = get_private_key()
     return send_function_on_contract_tx(
@@ -150,65 +116,4 @@ def execute_write_function(
         from_private_key=private_key,
         function_name=function_name,
         function_params=function_params,
-    )
-
-
-def register_all_functions(
-    caller_agent: ConversableAgent, executor_agent: ConversableAgent
-) -> None:
-    register_function(
-        tavily_search,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Search the web for the given query",
-    )
-
-    register_function(
-        fetch_source_code_and_abi_from_contract,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Function for fetching the ABI and source code from a verified smart contract on Gnosis Chain",
-    )
-
-    register_function(
-        get_rpc_endpoint,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Returns the RPC endpoint that should be used when instantiating a Web3.py provider instance to be used for interacting with Gnosis Chain.",
-    )
-
-    register_function(
-        get_private_key,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Returns the private key to be used when sending transactions.",
-    )
-
-    # register_function(
-    #     fetch_web3_instance,
-    #     caller=caller_agent,
-    #     executor=executor_agent,
-    #     description="Returns the Web3 provider instance to be used for interacting with Gnosis Chain when calling functions.",
-    # )
-
-    register_function(
-        execute_read_function,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Executes a call function on a smart contract deployed on the Gnosis Chain and returns the result of the function execution.",
-    )
-
-    register_function(
-        execute_write_function,
-        caller=caller_agent,
-        executor=executor_agent,
-        description="Executes a write function on a smart contract deployed on the Gnosis Chain and returns the transaction receipt.",
-    )
-
-    register_function(
-        checksum_address,
-        caller=caller_agent,
-        executor=executor_agent,
-        name="checksum_address",
-        description="Extracts the checksummed address of an address.",
     )
