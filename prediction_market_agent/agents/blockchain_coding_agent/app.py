@@ -1,51 +1,57 @@
 import asyncio
+from enum import Enum
 
 import streamlit as st
-from autogen import Cache
 
-from prediction_market_agent.agents.blockchain_coding_agent.agents import (
-    get_code_executor_agent,
-    get_code_writer_agent,
+from prediction_market_agent.agents.blockchain_coding_agent.agents import get_agent_team
+from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
+    message_read,
+    message_write,
 )
-from prediction_market_agent.agents.blockchain_coding_agent.functions import (
-    register_all_functions,
+from prediction_market_agent.agents.blockchain_coding_agent.streamlit_console import (
+    streamlit_console,
 )
 
-st.write("""# AutoGen Chat Agents""")
+
+def is_user_prompt_not_null(prompt: str) -> bool:
+    return prompt is not None and prompt != ""
+
+
+class UserPrompt(str, Enum):
+    READ_CONDITIONAL_TOKENS_BALANCE = message_read
+    WRITE_USDC_APPROVAL = message_write
+
+
+agent_team = get_agent_team()
+
+st.title("Blockchain agent")
 
 
 with st.container():
+    st.subheader("How to interact with the agent")
     st.markdown(
-        """Use the web3.py Python library and interact with the Conditional Tokens contract on the Gnosis Chain (contract address 0xCeAfDD6bc0bEF976fdCd1112955828E00543c0Ce) in order to read the balance of wallet address 0x2FC96c4e7818dBdc3D72A463F47f0E1CeEa0A2D0 with position id 38804060408381130621475891941405037249059836800475827360004002125093421139610.
-                    Return the balance fetched using the latest block.
-                    Consider using the function execute_read_function to execute a read function on the smart contract.
-                    Whenever passing an address as parameter, calculate the checksum address of the address.
-                    Let's think step-by-step.
-                    """
+        """You have 2 options:
+        
+    1. Enter a custom prompt in the text input OR
+    2. Load one of the predefined prompts (Read, Write).
+    """
     )
-    user_input = st.chat_input(
-        placeholder="Copy prompt from above",
+    st.divider()
+    user_input = st.text_input(label="Enter a new prompt if so desired", key="prompt")
+    prompt_option = st.selectbox(
+        "Select a prompt option",
+        (UserPrompt.READ_CONDITIONAL_TOKENS_BALANCE, UserPrompt.WRITE_USDC_APPROVAL),
+        placeholder="Select an option",
+        index=0,
+        key="prompt_option",
+        disabled=is_user_prompt_not_null(st.session_state.prompt),
     )
-    if user_input:
-        code_executor_agent = get_code_executor_agent(for_streamlit=True)
-        code_writer_agent = get_code_writer_agent(for_streamlit=True)
 
-        register_all_functions(
-            caller_agent=code_writer_agent, executor_agent=code_executor_agent
-        )
+    submit_button = st.button("Submit", key="button")
 
-        # Create an event loop
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        # Define an asynchronous function
-        async def initiate_chat() -> None:
-            with Cache.disk(cache_path_root="/tmp/autogen_cache_app2") as cache:
-                await code_executor_agent.a_initiate_chat(
-                    code_writer_agent,
-                    message=user_input,
-                    cache=cache,
-                )
-                # The correct result should be 289421015806737773 (as of block 37141392)
-
-        loop.run_until_complete(initiate_chat())
+    if submit_button:
+        message = st.session_state.prompt_option
+        if st.session_state.prompt is not None and st.session_state.prompt != "":
+            message = user_input
+        stream = agent_team.run_stream(task=message)
+        asyncio.run(streamlit_console(stream))

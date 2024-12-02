@@ -53,7 +53,7 @@ plotly = "^5.22.0"
 prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "bump-autogen" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.2.0"
-autogen-agentchat = {version = ">=0.2,<1.0", extras = ["jupyter-executor","retrievechat"]}
+autogen-agentchat = "0.4.0.dev8"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
