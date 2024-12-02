@@ -4,11 +4,11 @@ from autogen_agentchat.teams import BaseGroupChat, RoundRobinGroupChat
 from autogen_ext.models._openai._openai_client import OpenAIChatCompletionClient
 
 from prediction_market_agent.agents.blockchain_coding_agent.functions import (
-    get_rpc_endpoint,
     checksum_address,
     execute_read_function,
     execute_write_function,
     fetch_source_code_and_abi_from_contract,
+    get_rpc_endpoint,
 )
 from prediction_market_agent.utils import APIKeys
 

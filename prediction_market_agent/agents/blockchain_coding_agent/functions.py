@@ -2,7 +2,7 @@ import typing as t
 
 import requests_cache
 from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.gtypes import PrivateKey, ABI
+from prediction_market_agent_tooling.gtypes import ABI, PrivateKey
 from prediction_market_agent_tooling.tools.contract import abi_field_validator
 from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
 from prediction_market_agent_tooling.tools.tavily.tavily_search import (
@@ -16,8 +16,8 @@ from web3 import Web3
 from web3.types import TxReceipt
 
 from prediction_market_agent.agents.blockchain_coding_agent.models import (
-    SourceCodeContainer,
     SmartContractResponse,
+    SourceCodeContainer,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -66,7 +66,7 @@ def execute_read_function(
     abi: str,
     function_name: str,
     function_params: t.List[t.Any],
-) -> str:
+) -> t.Any:
     """
     Purpose:
         Executes a read function on a smart contract using the specified contract address, ABI, function name, and function parameters.

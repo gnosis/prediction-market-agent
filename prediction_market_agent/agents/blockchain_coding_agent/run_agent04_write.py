@@ -2,9 +2,7 @@ import asyncio
 
 from autogen_agentchat.task import Console
 
-from prediction_market_agent.agents.blockchain_coding_agent.agents import (
-    get_agent_team,
-)
+from prediction_market_agent.agents.blockchain_coding_agent.agents import get_agent_team
 
 
 async def main() -> None:

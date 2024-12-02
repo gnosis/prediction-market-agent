@@ -62,7 +62,7 @@ def mech_request(question: str, mech_tool: MechTool) -> MechResponse:
     if not is_package_available("mech_client"):
         raise EnvironmentError("Package `mech_client` is not installed.")
 
-    from mech_client.interact import interact, ConfirmationType
+    from mech_client.interact import ConfirmationType, interact
 
     private_key = APIKeys().bet_from_private_key.get_secret_value()
     with saved_str_to_tmpfile(private_key) as tmpfile_path:

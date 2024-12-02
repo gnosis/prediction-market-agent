@@ -5,7 +5,7 @@ from pathlib import Path
 
 from autogen import ConversableAgent
 from autogen.coding import LocalCommandLineCodeExecutor
-from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
+from autogen.coding.jupyter import JupyterCodeExecutor, LocalJupyterServer
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel
 
