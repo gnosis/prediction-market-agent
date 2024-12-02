@@ -38,6 +38,9 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     RememberPastActions,
 )
+from prediction_market_agent.agents.microchain_agent.messages_functions import (
+    MESSAGES_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -45,6 +48,12 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     FunctionsConfig,
     build_full_unformatted_system_prompt,
     extract_updatable_system_prompt,
+)
+from prediction_market_agent.agents.microchain_agent.sending_functions import (
+    SENDING_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.twitter_functions import (
+    TWITTER_FUNCTIONS,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -133,6 +142,15 @@ def build_agent_functions(
         )
         if market_type == MarketType.OMEN:
             functions.extend([f() for f in OMEN_FUNCTIONS])
+
+    if functions_config.include_sending_functions:
+        functions.extend(f() for f in SENDING_FUNCTIONS)
+
+    if functions_config.include_twitter_functions:
+        functions.extend(f() for f in TWITTER_FUNCTIONS)
+
+    if functions_config.include_messages_functions:
+        functions.extend(f() for f in MESSAGES_FUNCTIONS)
 
     if long_term_memory:
         functions.append(

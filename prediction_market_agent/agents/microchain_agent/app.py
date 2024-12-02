@@ -185,10 +185,10 @@ def get_function_bullet_point_list(agent: Agent) -> str:
 
 st.set_page_config(
     layout="wide",
-    page_title="Gnosis AI: Prediction Market Trader Agent",
+    page_title="Gnosis AI: Agents Playground",
     page_icon=":owl:",
 )
-st.title("Prediction Market Trader Agent")
+st.title("Agent")
 with st.sidebar:
     streamlit_login()
 check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
@@ -247,7 +247,7 @@ with st.sidebar:
 
 intro_expander = st.expander(
     "Interact with an autonomous agent that uses its own balance to "
-    "participate in prediction markets. More info..."
+    "live its live on blockchain. More info..."
 )
 system_prompt_expander = st.expander("Agent's current system prompt")
 
