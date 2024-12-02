@@ -80,9 +80,7 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
 
     def load(self) -> None:
         super().load()
-        self.relevant_news_response_cache = RelevantNewsResponseCache(
-            sqlalchemy_db_url=APIKeys().sqlalchemy_db_url.get_secret_value()
-        )
+        self.relevant_news_response_cache = RelevantNewsResponseCache()
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
         if not super().verify_market(market_type, market):

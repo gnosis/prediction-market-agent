@@ -47,6 +47,5 @@ with st.container():
                     cache=cache,
                 )
                 # The correct result should be 289421015806737773 (as of block 37141392)
-                # print(chat_result)
 
         loop.run_until_complete(initiate_chat())
