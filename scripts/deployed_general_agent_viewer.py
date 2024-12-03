@@ -102,7 +102,7 @@ currency = MARKET_TYPE.market_class.currency
 
 st.set_page_config(
     layout="wide",
-    page_title="Gnosis AI: Deployed Prediction Market Trader Agent",
+    page_title="Gnosis AI: Agents Viewer",
     page_icon=":owl:",
 )
 st.title("Deployed Trader Agent Viewer")
