@@ -49,13 +49,14 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     build_full_unformatted_system_prompt,
     extract_updatable_system_prompt,
 )
+from prediction_market_agent.agents.microchain_agent.search_functions import (
+    SEARCH_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.sending_functions import (
     SENDING_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.twitter_functions import (
     TWITTER_FUNCTIONS,
-from prediction_market_agent.agents.microchain_agent.search_functions import (
-    SEARCH_FUNCTIONS,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
