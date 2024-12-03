@@ -54,6 +54,8 @@ from prediction_market_agent.agents.microchain_agent.sending_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.twitter_functions import (
     TWITTER_FUNCTIONS,
+from prediction_market_agent.agents.microchain_agent.search_functions import (
+    SEARCH_FUNCTIONS,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -129,6 +131,7 @@ def build_agent_functions(
     if functions_config.include_universal_functions:
         functions.extend([f() for f in API_FUNCTIONS])
         functions.extend([f() for f in CODE_FUNCTIONS])
+        functions.extend([f() for f in SEARCH_FUNCTIONS])
 
     if functions_config.include_job_functions:
         functions.extend([f(market_type=market_type, keys=keys) for f in JOB_FUNCTIONS])
