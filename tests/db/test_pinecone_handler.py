@@ -9,6 +9,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.models import (
     PineconeMetadata,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
+from tests.utils import RUN_PAID_TESTS
 
 TRUMP_MARKETS = [
     "Will Donald Trump announce his vice presidential pick by 5 July 2024?",
@@ -51,6 +52,7 @@ def test_pinecone_handler() -> Generator[PineconeHandler, None, None]:
     yield p
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_search_similarity(test_pinecone_handler: PineconeHandler) -> None:
     limit = len(TRUMP_MARKETS) + len(BIDEN_MARKETS)
     # We aim to find all presidential-related questions - we add 1 to test the threshold effectiveness
@@ -62,6 +64,7 @@ def test_search_similarity(test_pinecone_handler: PineconeHandler) -> None:
     assert len(questions) == limit
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_search_filter_metadata_works(test_pinecone_handler: PineconeHandler) -> None:
     # We expect no questions since filter should match no entries.
     questions = test_pinecone_handler.find_nearest_questions_with_threshold(

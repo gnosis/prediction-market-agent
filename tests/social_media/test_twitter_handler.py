@@ -8,6 +8,7 @@ from prediction_market_agent.agents.social_media_agent.social_media.twitter_hand
     TwitterHandler,
 )
 from prediction_market_agent.utils import SocialMediaAPIKeys
+from tests.utils import RUN_PAID_TESTS
 
 
 @pytest.fixture(scope="module")
@@ -24,6 +25,7 @@ def twitter_handler_obj() -> Generator[TwitterHandler, None, None]:
     yield TwitterHandler(keys=mock_keys)
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_make_tweet_more_concise(twitter_handler_obj: TwitterHandler) -> None:
     long_tweet = (
         "Account recovery is the most requested use for ZK Email, as losing your wallet hampers crypto "
