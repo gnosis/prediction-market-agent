@@ -49,6 +49,9 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     build_full_unformatted_system_prompt,
     extract_updatable_system_prompt,
 )
+from prediction_market_agent.agents.microchain_agent.search_functions import (
+    SEARCH_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.sending_functions import (
     SENDING_FUNCTIONS,
 )
@@ -129,6 +132,7 @@ def build_agent_functions(
     if functions_config.include_universal_functions:
         functions.extend([f() for f in API_FUNCTIONS])
         functions.extend([f() for f in CODE_FUNCTIONS])
+        functions.extend([f() for f in SEARCH_FUNCTIONS])
 
     if functions_config.include_job_functions:
         functions.extend([f(market_type=market_type, keys=keys) for f in JOB_FUNCTIONS])
