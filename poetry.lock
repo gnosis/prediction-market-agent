@@ -5996,13 +5996,13 @@ web3 = ">=6.0.0,<7"
 
 [[package]]
 name = "openai"
-version = "1.56.1"
+version = "1.56.2"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.56.1-py3-none-any.whl", hash = "sha256:38e61183c2a98fedebbbb04a909a052d9f897358b070483fc0caff17300a227c"},
-    {file = "openai-1.56.1.tar.gz", hash = "sha256:8b0449f22a0c318441eae8a8a789753c3b2cac86542be51ca45df788e26aa180"},
+    {file = "openai-1.56.2-py3-none-any.whl", hash = "sha256:82d0c48f9504e04c7797e9b799dcf7f49a246d99b6cbfd90f3193ea80815b69e"},
+    {file = "openai-1.56.2.tar.gz", hash = "sha256:17312af69bc7670d4048f98ab5849f8784d98c39ac64fcde19406e3774a0c1e5"},
 ]
 
 [package.dependencies]
@@ -6869,7 +6869,7 @@ test = ["coverage", "django", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.57.4"
+version = "0.57.5"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = ">=3.10,<3.12"
@@ -6928,8 +6928,8 @@ optuna = ["optuna (>=4.1.0,<5.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
-reference = "peter/senddata-bytes"
-resolved_reference = "ed88661f9c1bf754a965a1eaed3f3f63d053ffe8"
+reference = "peter/nft"
+resolved_reference = "2f51e5e52e267e8649520b2478f3f1aba8168e92"
 
 [[package]]
 name = "prediction-prophet"
@@ -11123,4 +11123,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "a03488447c9141c3d67043162063b90101132b3b217be7f0cd75eea6a179e45c"
+content-hash = "f37fc4a7dcbe9eb33716ed92c8f4b2b29c0971032b959a09cb3fb597f2dbad22"
