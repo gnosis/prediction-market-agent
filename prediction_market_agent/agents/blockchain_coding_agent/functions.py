@@ -3,7 +3,7 @@ import typing as t
 import requests
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import RPCConfig
-from prediction_market_agent_tooling.gtypes import ABI, PrivateKey
+from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.caches.inmemory_cache import (
     persistent_inmemory_cache,
 )
@@ -32,10 +32,6 @@ def tavily_search(
     query: str,
 ) -> TavilyResponse:
     return tavily_search_pmat(query=query)
-
-
-def get_rpc_endpoint() -> str:
-    return RPCConfig().gnosis_rpc_url
 
 
 def checksum_address(address: str) -> ChecksumAddress:
@@ -87,7 +83,7 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    w3 = Web3(Web3.HTTPProvider(get_rpc_endpoint()))
+    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
     return call_function_on_contract(
         web3=w3,
         contract_address=Web3.to_checksum_address(contract_address),
@@ -97,24 +93,18 @@ def execute_read_function(
     )
 
 
-def get_private_key() -> PrivateKey:
-    return APIKeys().bet_from_private_key
-
-
 def execute_write_function(
     contract_address: str,
     abi: str,
     function_name: str,
     function_params: t.List[t.Any],
 ) -> TxReceipt:
-    # ToDo - Do not use PMAT if possible.
-    w3 = Web3(Web3.HTTPProvider(get_rpc_endpoint()))
-    private_key = get_private_key()
+    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
     return send_function_on_contract_tx(
         web3=w3,
         contract_address=Web3.to_checksum_address(contract_address),
         contract_abi=ABI(abi),
-        from_private_key=private_key,
+        from_private_key=APIKeys().bet_from_private_key,
         function_name=function_name,
         function_params=function_params,
     )
