@@ -1,4 +1,4 @@
-# Prediction Market Trader Agent
+# Gnosis Agent
 
 A library for exploring the landscape of AI Agent frameworks, using the example application of a prediction market betting agent. The various agents interact with markets from [Manifold](https://manifold.markets/), [Presagio](https://presagio.pages.dev/) and [Polymarket](https://polymarket.com/).
 
