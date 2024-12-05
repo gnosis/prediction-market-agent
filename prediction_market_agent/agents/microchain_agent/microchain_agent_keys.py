@@ -9,11 +9,11 @@ class MicrochainAgentKeys(APIKeys):
     # Double check to make sure you want to actually post on public social media.
     ENABLE_SOCIAL_MEDIA: bool = False
     # Double check to not spend big money during testing.
-    XDAI_CAP: float | None = OMEN_TINY_BET_AMOUNT
+    SENDING_XDAI_CAP: float | None = OMEN_TINY_BET_AMOUNT
 
     def cap_sending_xdai(self, amount: xDai) -> xDai:
-        if self.XDAI_CAP is None:
+        if self.SENDING_XDAI_CAP is None:
             return amount
-        amount = xDai(min(amount, self.XDAI_CAP))
+        amount = xDai(min(amount, self.SENDING_XDAI_CAP))
         logger.warning(f"Caping sending xDai value to {amount}.")
         return amount
