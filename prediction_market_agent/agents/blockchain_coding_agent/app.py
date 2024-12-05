@@ -51,7 +51,7 @@ with st.container():
 
     if submit_button:
         message = st.session_state.prompt_option
-        if st.session_state.prompt is not None and st.session_state.prompt != "":
+        if is_user_prompt_not_null(st.session_state.prompt):
             message = user_input
         stream = agent_team.run_stream(task=message)
         asyncio.run(streamlit_console(stream))
