@@ -5,8 +5,8 @@ import streamlit as st
 
 from prediction_market_agent.agents.blockchain_coding_agent.agents import get_agent_team
 from prediction_market_agent.agents.blockchain_coding_agent.prompts import (
-    message_read,
-    message_write,
+    CALL_ONCHAIN_FUNCTION_PROMPT,
+    SEND_ONCHAIN_FUNCTION_PROMPT,
 )
 from prediction_market_agent.agents.blockchain_coding_agent.streamlit_console import (
     streamlit_console,
@@ -18,8 +18,8 @@ def is_user_prompt_not_null(prompt: str) -> bool:
 
 
 class UserPrompt(str, Enum):
-    READ_CONDITIONAL_TOKENS_BALANCE = message_read
-    WRITE_USDC_APPROVAL = message_write
+    READ_CONDITIONAL_TOKENS_BALANCE = CALL_ONCHAIN_FUNCTION_PROMPT
+    WRITE_USDC_APPROVAL = SEND_ONCHAIN_FUNCTION_PROMPT
 
 
 agent_team = get_agent_team()
