@@ -7,16 +7,14 @@ from prediction_market_agent_tooling.gtypes import ABI
 from prediction_market_agent_tooling.tools.caches.inmemory_cache import (
     persistent_inmemory_cache,
 )
-from prediction_market_agent_tooling.tools.contract import (
-    abi_field_validator,
-)
+from prediction_market_agent_tooling.tools.contract import abi_field_validator
 from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
 from prediction_market_agent_tooling.tools.tavily.tavily_search import (
     tavily_search as tavily_search_pmat,
 )
 from prediction_market_agent_tooling.tools.web3_utils import (
-    send_function_on_contract_tx,
     call_function_on_contract,
+    send_function_on_contract_tx,
 )
 from web3 import Web3
 from web3.types import TxReceipt
