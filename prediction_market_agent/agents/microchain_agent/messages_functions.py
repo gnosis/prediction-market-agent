@@ -57,14 +57,14 @@ You can also specify the fee for the message, which will be deducted from your a
 
 
 class ReceiveMessage(Function):
-    def get_count_unseen_messages(self) -> int:
+    @staticmethod
+    def get_count_unseen_messages() -> int:
         return BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
             consumer_address=MicrochainAgentKeys().public_key
         )
 
     @property
     def description(self) -> str:
-        # TODO: Add number of unseen messages to the description.
         count_unseen_messages = self.get_count_unseen_messages()
         return f"Use {ReceiveMessage.__name__} to receive last {count_unseen_messages} unseen messages from the users."
 
