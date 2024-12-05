@@ -63,6 +63,8 @@ class BlockchainMessage(SQLModel, table=True):
     }  # required if initializing an existing table
     id: Optional[int] = Field(default=None, primary_key=True)
     consumer_address: HexAddress
+    sender_address: HexAddress
     transaction_hash: HexBytes
     block: int
     value_wei: int
+    data_field: Optional[HexBytes]

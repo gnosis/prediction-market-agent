@@ -57,23 +57,27 @@ You can also specify the fee for the message, which will be deducted from your a
 
 
 class ReceiveMessage(Function):
+    def get_count_unseen_messages(self) -> int:
+        return 2
+
     @property
     def description(self) -> str:
         # TODO: Add number of unseen messages to the description.
-        return f"Use {ReceiveMessage.__name__} to receive last unseen message from the users. Afterwards, process each message sequentially."
+        count_unseen_messages = self.get_count_unseen_messages()
+        return f"Use {ReceiveMessage.__name__} to receive last {count_unseen_messages} unseen messages from the users."
 
     @property
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> list[BlockchainMessage]:
+    def __call__(self) -> BlockchainMessage:
         keys = MicrochainAgentKeys()
         fetcher = BlockchainTransactionFetcher()
         # Txs were retrieved here, hence they are stored in the DB and won't be fetched again.
-        txs_to_process = fetcher.update_unprocessed_transactions_sent_to_address(
+        tx_to_process = fetcher.fetch_one_unprocessed_transaction_sent_to_address_and_store_as_processed(
             keys.public_key
         )
-        return txs_to_process
+        return tx_to_process
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
