@@ -1,9 +1,9 @@
 name: Python CD
 
 on:
+  pull_request:
   push:
     branches: [main]
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -11,6 +11,7 @@ env:
 
 jobs:
   build-and-push-image:
+    if: (contains(github.event.pull_request.body, 'deploy please') && github.event_name == 'pull_request') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     permissions:
       contents: read
