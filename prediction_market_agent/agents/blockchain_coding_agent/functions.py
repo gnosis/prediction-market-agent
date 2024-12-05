@@ -44,8 +44,15 @@ def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
 
 @persistent_inmemory_cache
 def fetch_source_code_and_abi_from_contract(
-    contract_address: str,
+    contract_address: str, fetched_addresses: t.Set[str] | None = None
 ) -> SourceCodeContainer:
+    # Code snippet to avoid infinite recursion if implementation contains cyclic references.
+    if fetched_addresses is None:
+        fetched_addresses = set()
+    if contract_address in fetched_addresses:
+        return SourceCodeContainer(source_code="", abi=[])
+    fetched_addresses.add(contract_address)
+    # Regular function logic.
     url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}"
     r = requests.get(url)
     r.raise_for_status()
@@ -55,7 +62,9 @@ def fetch_source_code_and_abi_from_contract(
     # If proxy, expand abi and source code with implementation data.
     if data_parsed.implementations:
         for proxy in data_parsed.implementations:
-            proxy_container = fetch_source_code_and_abi_from_contract(proxy.address)
+            proxy_container = fetch_source_code_and_abi_from_contract(
+                proxy.address, fetched_addresses=fetched_addresses
+            )
             abi.extend(proxy_container.abi)
             source_code += "\n" + proxy_container.source_code
 
