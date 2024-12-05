@@ -5,6 +5,8 @@ import pytest
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     WrappedxDaiContract,
 )
+from pytest_postgresql.executor import PostgreSQLExecutor
+from pytest_postgresql.janitor import DatabaseJanitor
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
@@ -14,6 +16,7 @@ from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,
 )
+from prediction_market_agent.utils import DBKeys
 
 
 def mock_summaries(function_names: list[str]) -> Summaries:
@@ -83,3 +86,18 @@ def wxdai_contract_mocked_rag(
     yield ContractClassConverter(
         contract_address=contract_address, contract_name=wxdai.__class__.__name__
     )
+
+
+@pytest.fixture(scope="session")
+def session_keys_with_postgresql_proc_and_enabled_cache(
+    postgresql_proc: PostgreSQLExecutor,
+) -> Generator[DBKeys, None, None]:
+    with DatabaseJanitor(
+        user=postgresql_proc.user,
+        host=postgresql_proc.host,
+        port=postgresql_proc.port,
+        dbname=postgresql_proc.dbname,
+        version=postgresql_proc.version,
+    ):
+        sqlalchemy_db_url = f"postgresql+psycopg2://{postgresql_proc.user}:@{postgresql_proc.host}:{postgresql_proc.port}/{postgresql_proc.dbname}"
+        yield DBKeys(SQLALCHEMY_DB_URL=sqlalchemy_db_url)

@@ -12,7 +12,6 @@ from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
 from prediction_market_agent.db.models import BlockchainMessage
-from prediction_market_agent.utils import APIKeys
 
 
 class BroadcastPublicMessageToHumans(Function):
@@ -60,7 +59,7 @@ You can also specify the fee for the message, which will be deducted from your a
 class ReceiveMessage(Function):
     def get_count_unseen_messages(self) -> int:
         return BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            consumer_address=APIKeys().public_key
+            consumer_address=MicrochainAgentKeys().public_key
         )
 
     @property

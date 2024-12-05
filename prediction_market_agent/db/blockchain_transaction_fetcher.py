@@ -42,12 +42,13 @@ class BlockchainTransactionFetcher:
         # We order by block_time because it's used as partition on Dune.
         # We use >= for block because we might have lost transactions from the same block.
         # Additionally, processed tx_hashes are filtered out anyways.
-        query = f'select * from gnosis.transactions where "from" = {Web3.to_checksum_address(consumer_address)} AND block_number >= {min_block_number} and value > {xdai_to_wei(self.MIN_TRANSACTION_AMOUNT)} order by block_time asc'
-        df = spice.query(query=query, api_key=keys.dune_api_key.get_secret_value())
+        query = f'select * from gnosis.transactions where "to" = {Web3.to_checksum_address(consumer_address)} AND block_number >= {min_block_number} and value > {xdai_to_wei(self.MIN_TRANSACTION_AMOUNT)} order by block_time asc'
+        df = spice.query(query, api_key=keys.dune_api_key.get_secret_value())
+
         existing_hashes = self.blockchain_table_handler.fetch_all_transaction_hashes(
             consumer_address=consumer_address
         )
-        # Filter out existing hashes
+        # Filter out existing hashes - hashes by default lowercase
         df = df.filter(~pl.col("hash").is_in(existing_hashes))
         return df
 
@@ -74,13 +75,15 @@ class BlockchainTransactionFetcher:
             consumer_address=consumer_address,
             transaction_hash=oldest_non_processed_message["hash"],
             value_wei=oldest_non_processed_message["value"],
-            block=oldest_non_processed_message["block_number"],
+            block=int(oldest_non_processed_message["block_number"]),
             sender_address=oldest_non_processed_message["from"],
             data_field=self.unzip_message_else_do_nothing(
                 oldest_non_processed_message["data"]
             ),
         )
 
+        # Store here to avoid having to refresh after session was closed.
+        item = blockchain_message.model_copy(deep=True)
         # mark unseen transaction as processed in DB
         self.blockchain_table_handler.save_multiple([blockchain_message])
-        return blockchain_message
+        return item

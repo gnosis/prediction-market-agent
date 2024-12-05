@@ -11,12 +11,16 @@ SQLModelType = t.TypeVar("SQLModelType", bound=SQLModel)
 
 class SQLHandler:
     def __init__(
-        self, model: t.Type[SQLModelType], sqlalchemy_db_url: str | None = None
+        self,
+        model: t.Type[SQLModelType],
+        sqlalchemy_db_url: str | None = None,
+        echo: bool = False,
     ):
         self.engine = create_engine(
             sqlalchemy_db_url
             if sqlalchemy_db_url
-            else check_not_none(DBKeys().SQLALCHEMY_DB_URL)
+            else check_not_none(DBKeys().SQLALCHEMY_DB_URL),
+            echo=echo,
         )
         self.table = model
         self._init_table_if_not_exists()

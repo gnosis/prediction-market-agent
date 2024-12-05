@@ -16,13 +16,13 @@ class BlockchainMessageTableHandler:
     ):
         self.session_identifier = session_identifier
         self.sql_handler = SQLHandler(
-            model=BlockchainMessage, sqlalchemy_db_url=sqlalchemy_db_url
+            model=BlockchainMessage, sqlalchemy_db_url=sqlalchemy_db_url, echo=True
         )
 
     def __build_consumer_column_filter(
         self, consumer_address: ChecksumAddress
     ) -> ColumnElement[bool]:
-        return col(BlockchainMessage.receiver_address) == consumer_address
+        return col(BlockchainMessage.consumer_address) == consumer_address
 
     def fetch_latest_blockchain_message(
         self, consumer_address: ChecksumAddress
@@ -39,13 +39,17 @@ class BlockchainMessageTableHandler:
         return items[0] if items else None
 
     def fetch_all_transaction_hashes(
-        self, consumer_address: ChecksumAddress
+        self, consumer_address: ChecksumAddress, convert_to_lowercase: bool = True
     ) -> list[str]:
         query_filter = self.__build_consumer_column_filter(consumer_address)
         items: t.Sequence[
             BlockchainMessage
         ] = self.sql_handler.get_with_filter_and_order(query_filters=[query_filter])
-        return list(set([i.transaction_hash.hex() for i in items]))
+        tx_hashes = [
+            i.transaction_hash.lower() if convert_to_lowercase else i.transaction_hash
+            for i in items
+        ]
+        return list(set(tx_hashes))
 
     def save_multiple(self, items: t.Sequence[BlockchainMessage]) -> None:
         return self.sql_handler.save_multiple(items)

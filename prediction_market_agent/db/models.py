@@ -1,6 +1,7 @@
 from typing import Optional
 
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from sqlalchemy import Column, BigInteger
 from sqlmodel import Field, SQLModel
 
 
@@ -58,9 +59,9 @@ class BlockchainMessage(SQLModel, table=True):
         "extend_existing": True
     }  # required if initializing an existing table
     id: Optional[int] = Field(default=None, primary_key=True)
-    receiver_address: str
+    consumer_address: str
     sender_address: str
-    transaction_hash: str
-    block: int
-    value_wei: int
+    transaction_hash: str = Field(unique=True)
+    block: int = Field(sa_column=Column(BigInteger, nullable=False))
+    value_wei: int = Field(sa_column=Column(BigInteger, nullable=False))
     data_field: Optional[str]
