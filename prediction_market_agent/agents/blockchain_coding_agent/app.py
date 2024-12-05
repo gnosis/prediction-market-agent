@@ -14,7 +14,7 @@ from prediction_market_agent.agents.blockchain_coding_agent.streamlit_console im
 
 
 def is_user_prompt_not_null(prompt: str) -> bool:
-    return prompt is not None and prompt != ""
+    return prompt != ""
 
 
 class UserPrompt(str, Enum):
