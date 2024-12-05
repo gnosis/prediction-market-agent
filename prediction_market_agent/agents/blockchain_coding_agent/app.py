@@ -40,7 +40,7 @@ with st.container():
     user_input = st.text_input(label="Enter a new prompt if so desired", key="prompt")
     prompt_option = st.selectbox(
         "Select a prompt option",
-        (UserPrompt.READ_CONDITIONAL_TOKENS_BALANCE, UserPrompt.WRITE_USDC_APPROVAL),
+        list(UserPrompt),
         placeholder="Select an option",
         index=0,
         key="prompt_option",
