@@ -22,7 +22,7 @@ class BlockchainMessageTableHandler:
     def __build_consumer_column_filter(
         self, consumer_address: ChecksumAddress
     ) -> ColumnElement[bool]:
-        return col(BlockchainMessage.consumer_address) == consumer_address
+        return col(BlockchainMessage.receiver_address) == consumer_address
 
     def fetch_latest_blockchain_message(
         self, consumer_address: ChecksumAddress

@@ -1,9 +1,5 @@
 from typing import Optional
 
-from prediction_market_agent_tooling.gtypes import (
-    HexAddress,
-)
-from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from sqlmodel import Field, SQLModel
 
@@ -62,9 +58,9 @@ class BlockchainMessage(SQLModel, table=True):
         "extend_existing": True
     }  # required if initializing an existing table
     id: Optional[int] = Field(default=None, primary_key=True)
-    consumer_address: HexAddress
-    sender_address: HexAddress
-    transaction_hash: HexBytes
+    receiver_address: str
+    sender_address: str
+    transaction_hash: str
     block: int
     value_wei: int
-    data_field: Optional[HexBytes]
+    data_field: Optional[str]
