@@ -13,7 +13,7 @@ from prediction_market_agent.agents.social_media_agent.prompts import POST_MAX_L
 from prediction_market_agent.agents.social_media_agent.social_media.abstract_handler import (
     AbstractSocialMediaHandler,
 )
-from prediction_market_agent.utils import APIKeys, SocialMediaAPIKeys
+from prediction_market_agent.utils import SocialMediaAPIKeys
 
 
 class TwitterHandler(AbstractSocialMediaHandler):
@@ -36,7 +36,7 @@ class TwitterHandler(AbstractSocialMediaHandler):
         self.llm = ChatOpenAI(
             temperature=0,
             model=model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            api_key=keys.openai_api_key_secretstr_v1,
         )
 
     @observe()
@@ -57,11 +57,12 @@ class TwitterHandler(AbstractSocialMediaHandler):
     def does_post_length_exceed_max_length(tweet: str) -> bool:
         return len(tweet) > POST_MAX_LENGTH
 
-    def post(self, text: str, reasoning_reply_tweet: str) -> None:
+    def post(self, text: str, reasoning_reply_tweet: str | None = None) -> None:
         quote_tweet_id = self.post_else_retry_with_summarization(text)
-        self.post_else_retry_with_summarization(
-            reasoning_reply_tweet, quote_tweet_id=quote_tweet_id
-        )
+        if reasoning_reply_tweet is not None:
+            self.post_else_retry_with_summarization(
+                reasoning_reply_tweet, quote_tweet_id=quote_tweet_id
+            )
 
     def post_else_retry_with_summarization(
         self, text: str, quote_tweet_id: str | None = None
@@ -79,6 +80,12 @@ class TwitterHandler(AbstractSocialMediaHandler):
                     f"Tweet too long. Length: {len(text)}, max length: {POST_MAX_LENGTH}"
                 )
                 return None
+        return self.post_tweet(text, quote_tweet_id)
+
+    def post_tweet(self, text: str, quote_tweet_id: str | None = None) -> str | None:
+        """
+        Posts the provided text on Twitter.
+        """
         posted_tweet = self.client.create_tweet(
             text=text, quote_tweet_id=quote_tweet_id
         )

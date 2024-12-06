@@ -136,6 +136,7 @@ class FunctionsConfig(BaseModel):
     include_sending_functions: bool
     include_twitter_functions: bool
     include_messages_functions: bool
+    include_nft_functions: bool
 
     @staticmethod
     def from_system_prompt_choice(
@@ -149,6 +150,7 @@ class FunctionsConfig(BaseModel):
         include_sending_functions = False
         include_twitter_functions = False
         include_messages_functions = False
+        include_nft_functions = False
 
         if system_prompt_choice == SystemPromptChoice.JUST_BORN:
             include_learning_functions = True
@@ -170,8 +172,8 @@ class FunctionsConfig(BaseModel):
             include_job_functions = True
 
         elif system_prompt_choice == SystemPromptChoice.DARE_YOU_GET_MY_RESOURCES_AGENT:
-            include_sending_functions = True
             include_messages_functions = True
+            include_nft_functions = True
 
         return FunctionsConfig(
             include_trading_functions=include_trading_functions,
@@ -182,6 +184,7 @@ class FunctionsConfig(BaseModel):
             include_sending_functions=include_sending_functions,
             include_twitter_functions=include_twitter_functions,
             include_messages_functions=include_messages_functions,
+            include_nft_functions=include_nft_functions,
         )
 
 
