@@ -8,16 +8,14 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
     MicrochainAgentKeys,
 )
 from prediction_market_agent.agents.microchain_agent.utils import compress_message
-from prediction_market_agent.db.blockchain_transaction_fetcher import (
-    BlockchainTransactionFetcher,
-)
-from prediction_market_agent.db.models import BlockchainMessage
+
+TRANSACTION_MESSAGE_FEE = xdai_type(0.01)
 
 
 class BroadcastPublicMessageToHumans(Function):
     @property
     def description(self) -> str:
-        return f"""Use {BroadcastPublicMessageToHumans.__name__} to send a message that humans can see. Use this to communicate with users that send you messages."""
+        return f"Use {SendMessage.__class__} to send a message to everyone."
 
     @property
     def example_args(self) -> list[str]:
@@ -32,25 +30,20 @@ class BroadcastPublicMessageToHumans(Function):
 class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
-        return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address. 
-You can also specify the fee for the message, which will be deducted from your account. Higher the fee, bigger the chance that agent will read the message and act accordingly."""
+        return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
+Fee for sending the message is {TRANSACTION_MESSAGE_FEE} xDai."""
 
     @property
     def example_args(self) -> list[str]:
-        return ["0x123", "Hello!", "0.001"]
+        return ["0x123", "Hello!"]
 
-    def __call__(
-        self,
-        address: str,
-        message: str,
-        fee: float,
-    ) -> str:
+    def __call__(self, address: str, message: str) -> str:
         keys = MicrochainAgentKeys()
         send_xdai_to(
             web3=ContractOnGnosisChain.get_web3(),
             from_private_key=keys.bet_from_private_key,
             to_address=Web3.to_checksum_address(address),
-            value=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
+            value=xdai_to_wei(keys.cap_sending_xdai(TRANSACTION_MESSAGE_FEE)),
             data_text=compress_message(message),
         )
         return "Message sent to the agent."
