@@ -1,11 +1,15 @@
+import pytest
+
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
     CodeInterpreter,
 )
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,
 )
+from tests.utils import RUN_PAID_TESTS
 
 
+@pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
 def test_generate_summaries(
     wxdai_contract_class_converter: ContractClassConverter,
 ) -> None:
