@@ -6,6 +6,8 @@ from unittest.mock import PropertyMock, patch
 import polars as pl
 import pytest
 from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
@@ -28,11 +30,11 @@ def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
     anvil_account_1 = Web3.to_checksum_address(
         "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
     )
-    compressed_message = compress_message("hello hello hello")
+    compress_message("hello hello hello")
     return pl.DataFrame(
         {
             "hash": ["0x123", "0x456"],
-            "value": [xdai_to_wei(1), xdai_to_wei(2)],
+            "value": [xdai_to_wei(xdai_type(1)), xdai_to_wei(xdai_type(2))],
             "block_number": [1, 2],
             "from": [anvil_account_1, anvil_account_1],
             "data": ["test", Web3.to_hex(compress_message("test"))],
@@ -41,12 +43,12 @@ def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def patch_spice():
+def patch_spice() -> Generator[PropertyMock, None, None]:
     with patch(
         "spice.query",
         side_effect=mock_spice_query,
-    ) as patcher:
-        yield patcher
+    ) as mock_spice:
+        yield mock_spice
 
 
 @pytest.fixture
@@ -69,7 +71,9 @@ def patch_pytest_db(
     with patch.dict(
         os.environ,
         {
-            "SQLALCHEMY_DB_URL": session_keys_with_postgresql_proc_and_enabled_cache.SQLALCHEMY_DB_URL.get_secret_value()
+            "SQLALCHEMY_DB_URL": check_not_none(
+                session_keys_with_postgresql_proc_and_enabled_cache.SQLALCHEMY_DB_URL
+            ).get_secret_value()
         },
     ) as mock_db:
         yield mock_db

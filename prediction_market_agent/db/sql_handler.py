@@ -26,12 +26,6 @@ class SQLHandler:
 
         api_keys = APIKeys_PMAT(SQLALCHEMY_DB_URL=SecretStr(self.sqlalchemy_db_url))
         self.db_manager = DBManager(api_keys)
-        # self.engine = create_engine(
-        #     sqlalchemy_db_url
-        #     if sqlalchemy_db_url
-        #     else check_not_none(DBKeys().SQLALCHEMY_DB_URL),
-        #     echo=echo,
-        # )
         self.table = model
         self._init_table_if_not_exists()
 
@@ -53,7 +47,7 @@ class SQLHandler:
         with self.db_manager.get_session() as session:
             query = session.query(self.table)
             if col_name and col_value:
-                query = query.filter_by(**{col_name: col_value}).delete()
+                query = query.filter_by(**{col_name: col_value})
             query.delete()
             session.commit()
 
