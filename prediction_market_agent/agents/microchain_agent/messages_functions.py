@@ -8,6 +8,10 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
     MicrochainAgentKeys,
 )
 from prediction_market_agent.agents.microchain_agent.utils import compress_message
+from prediction_market_agent.db.blockchain_transaction_fetcher import (
+    BlockchainTransactionFetcher,
+)
+from prediction_market_agent.db.models import BlockchainMessage
 
 TRANSACTION_MESSAGE_FEE = xdai_type(0.01)
 
@@ -15,7 +19,7 @@ TRANSACTION_MESSAGE_FEE = xdai_type(0.01)
 class BroadcastPublicMessageToHumans(Function):
     @property
     def description(self) -> str:
-        return f"Use {SendMessage.__class__} to send a message to everyone."
+        return f"Use {BroadcastPublicMessageToHumans.__class__} to send a message to everyone."
 
     @property
     def example_args(self) -> list[str]:
