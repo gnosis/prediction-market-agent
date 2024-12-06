@@ -30,7 +30,8 @@ class BroadcastPublicMessageToHumans(Function):
 class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
-        return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address. 
+        return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
+Fee for sending the message is {TRANSACTION_MESSAGE_FEE} xDai."""
 
     @property
     def example_args(self) -> list[str]:
