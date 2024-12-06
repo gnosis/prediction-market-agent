@@ -1,6 +1,6 @@
 import os
 from typing import Generator
-from unittest.mock import patch, PropertyMock
+from unittest.mock import PropertyMock, patch
 
 import pytest
 from eth_typing import ChecksumAddress
@@ -21,7 +21,9 @@ def agent2_address() -> ChecksumAddress:
 
 
 @pytest.fixture
-def patch_public_key(agent2_address: ChecksumAddress):
+def patch_public_key(
+    agent2_address: ChecksumAddress,
+) -> Generator[PropertyMock, None, None]:
     with patch(
         "prediction_market_agent.agents.microchain_agent.microchain_agent_keys.MicrochainAgentKeys.public_key",
         new_callable=PropertyMock,

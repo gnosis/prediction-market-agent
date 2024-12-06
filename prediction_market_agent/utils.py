@@ -18,7 +18,14 @@ class DBKeys(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
-    SQLALCHEMY_DB_URL: t.Optional[str] = None
+    SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
+
+
+class NFTTreasuryKeys(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+    SAFE_TREASURY_ADDRESS: t.Optional[str] = None
 
 
 class APIKeys(APIKeysBase):

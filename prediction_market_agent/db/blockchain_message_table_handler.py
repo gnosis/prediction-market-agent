@@ -16,7 +16,7 @@ class BlockchainMessageTableHandler:
     ):
         self.session_identifier = session_identifier
         self.sql_handler = SQLHandler(
-            model=BlockchainMessage, sqlalchemy_db_url=sqlalchemy_db_url, echo=True
+            model=BlockchainMessage, sqlalchemy_db_url=sqlalchemy_db_url
         )
 
     def __build_consumer_column_filter(

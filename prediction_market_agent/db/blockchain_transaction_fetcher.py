@@ -17,7 +17,7 @@ from prediction_market_agent.utils import APIKeys
 class BlockchainTransactionFetcher:
     MIN_TRANSACTION_AMOUNT = xDai(0.001)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.blockchain_table_handler = BlockchainMessageTableHandler()
 
     def unzip_message_else_do_nothing(self, data_field: str) -> str:
@@ -58,7 +58,7 @@ class BlockchainTransactionFetcher:
         df = self.fetch_unseen_transactions_df(consumer_address=consumer_address)
         return len(df)
 
-    def fetch_one_unprocessed_transaction_sent_to_address_and_store_as_processed(
+    def fetch_one_unprocessed_blockchain_message_and_store_as_processed(
         self, consumer_address: ChecksumAddress
     ) -> BlockchainMessage | None:
         """

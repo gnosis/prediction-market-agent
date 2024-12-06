@@ -5,6 +5,7 @@ import pytest
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     WrappedxDaiContract,
 )
+from pydantic import SecretStr
 from pytest_postgresql.executor import PostgreSQLExecutor
 from pytest_postgresql.janitor import DatabaseJanitor
 from web3 import Web3
@@ -100,4 +101,4 @@ def session_keys_with_postgresql_proc_and_enabled_cache(
         version=postgresql_proc.version,
     ):
         sqlalchemy_db_url = f"postgresql+psycopg2://{postgresql_proc.user}:@{postgresql_proc.host}:{postgresql_proc.port}/{postgresql_proc.dbname}"
-        yield DBKeys(SQLALCHEMY_DB_URL=sqlalchemy_db_url)
+        yield DBKeys(SQLALCHEMY_DB_URL=SecretStr(sqlalchemy_db_url))

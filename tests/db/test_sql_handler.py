@@ -4,7 +4,7 @@ from typing import Generator
 
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlmodel import Session, col
+from sqlmodel import col
 
 from prediction_market_agent.db.models import Prompt
 from prediction_market_agent.db.sql_handler import SQLHandler
@@ -32,7 +32,7 @@ def example_prompts() -> list[Prompt]:
 def test_get_all(prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]) -> None:
     assert len(prompt_sql_handler.get_all()) == 0
     p = example_prompts[0].model_copy()
-    with Session(prompt_sql_handler.engine) as session:
+    with prompt_sql_handler.db_manager.get_session() as session:
         session.add(p)
         session.commit()
     assert len(prompt_sql_handler.get_all()) == 1

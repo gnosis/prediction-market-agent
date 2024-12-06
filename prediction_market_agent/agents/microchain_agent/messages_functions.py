@@ -1,5 +1,6 @@
 from microchain import Function
 from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
 from web3 import Web3
@@ -69,14 +70,19 @@ class ReceiveMessage(Function):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> BlockchainMessage:
+    def __call__(self) -> BlockchainMessage | None:
         keys = MicrochainAgentKeys()
         fetcher = BlockchainTransactionFetcher()
         # Txs were retrieved here, hence they are stored in the DB and won't be fetched again.
-        tx_to_process = fetcher.fetch_one_unprocessed_transaction_sent_to_address_and_store_as_processed(
-            keys.public_key
+        message_to_process = (
+            fetcher.fetch_one_unprocessed_blockchain_message_and_store_as_processed(
+                keys.public_key
+            )
         )
-        return tx_to_process
+        # ToDo - Fund the treasury with xDai.
+        if not message_to_process:
+            logger.info("No messages to process.")
+        return message_to_process
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [

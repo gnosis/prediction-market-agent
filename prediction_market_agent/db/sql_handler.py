@@ -3,6 +3,7 @@ import typing as t
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.tools.db.db_manager import DBManager
 from prediction_market_agent_tooling.tools.utils import check_not_none
+from pydantic import SecretStr
 from sqlalchemy import BinaryExpression, ColumnElement
 from sqlmodel import SQLModel, asc, desc
 
@@ -16,14 +17,14 @@ class SQLHandler:
         self,
         model: t.Type[SQLModelType],
         sqlalchemy_db_url: str | None = None,
-        echo: bool = False,
     ):
-        sqlalchemy_db_url = (
+        self.sqlalchemy_db_url = (
             sqlalchemy_db_url
-            if sqlalchemy_db_url
-            else check_not_none(DBKeys().SQLALCHEMY_DB_URL),
+            if sqlalchemy_db_url is not None
+            else check_not_none(DBKeys().SQLALCHEMY_DB_URL).get_secret_value()
         )
-        api_keys = APIKeys_PMAT(SQLALCHEMY_DB_URL=sqlalchemy_db_url)
+
+        api_keys = APIKeys_PMAT(SQLALCHEMY_DB_URL=SecretStr(self.sqlalchemy_db_url))
         self.db_manager = DBManager(api_keys)
         # self.engine = create_engine(
         #     sqlalchemy_db_url

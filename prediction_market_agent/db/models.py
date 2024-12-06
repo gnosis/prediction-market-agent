@@ -1,7 +1,7 @@
 from typing import Optional
 
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
-from sqlalchemy import Column, BigInteger
+from sqlalchemy import BigInteger, Column
 from sqlmodel import Field, SQLModel
 
 
