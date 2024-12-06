@@ -19,7 +19,7 @@ TRANSACTION_MESSAGE_FEE = xdai_type(0.01)
 class BroadcastPublicMessageToHumans(Function):
     @property
     def description(self) -> str:
-        return f"Use {BroadcastPublicMessageToHumans.__class__} to send a message to everyone."
+        return f"""Use {BroadcastPublicMessageToHumans.__name__} to send a message that humans can see. Use this to communicate with users that send you messages."""
 
     @property
     def example_args(self) -> list[str]:
