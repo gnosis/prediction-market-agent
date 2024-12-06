@@ -41,6 +41,7 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     MESSAGES_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -155,6 +156,9 @@ def build_agent_functions(
 
     if functions_config.include_messages_functions:
         functions.extend(f() for f in MESSAGES_FUNCTIONS)
+
+    if functions_config.include_nft_functions:
+        functions.extend(f() for f in NFT_FUNCTIONS)
 
     if long_term_memory:
         functions.append(
