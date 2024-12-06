@@ -170,7 +170,6 @@ class FunctionsConfig(BaseModel):
             include_job_functions = True
 
         elif system_prompt_choice == SystemPromptChoice.DARE_YOU_GET_MY_RESOURCES_AGENT:
-            include_sending_functions = True
             include_messages_functions = True
 
         return FunctionsConfig(

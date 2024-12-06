@@ -4,7 +4,9 @@ from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
 from web3 import Web3
 
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
+    MicrochainAgentKeys,
+)
 
 
 class SendXDAI(Function):
@@ -21,14 +23,14 @@ class SendXDAI(Function):
         address: str,
         amount: float,
     ) -> str:
-        keys = APIKeys()
+        keys = MicrochainAgentKeys()
         web3 = ContractOnGnosisChain.get_web3()
         address_checksum = Web3.to_checksum_address(address)
         send_xdai_to(
             web3,
             keys.bet_from_private_key,
             address_checksum,
-            xdai_to_wei(xdai_type(amount)),
+            xdai_to_wei(keys.cap_sending_xdai(xdai_type(amount))),
         )
         return f"Sent {amount} xDAI to {address_checksum}."
 
