@@ -1,6 +1,7 @@
 from typing import Optional
 
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from sqlalchemy import BigInteger, Column
 from sqlmodel import Field, SQLModel
 
 
@@ -48,3 +49,19 @@ class EvaluatedGoalModel(SQLModel, table=True):
     reasoning: str
     output: str | None
     datetime_: DatetimeUTC
+
+
+class BlockchainMessage(SQLModel, table=True):
+    """Messages sent to agents via data fields within blockchain transfers."""
+
+    __tablename__ = "blockchain_messages"
+    __table_args__ = {
+        "extend_existing": True
+    }  # required if initializing an existing table
+    id: Optional[int] = Field(default=None, primary_key=True)
+    consumer_address: str
+    sender_address: str
+    transaction_hash: str = Field(unique=True)
+    block: int = Field(sa_column=Column(BigInteger, nullable=False))
+    value_wei: int = Field(sa_column=Column(BigInteger, nullable=False))
+    data_field: Optional[str]

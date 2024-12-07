@@ -4,7 +4,7 @@ from typing import Generator
 
 import pytest
 from prediction_market_agent_tooling.tools.utils import utcnow
-from sqlmodel import Session, col
+from sqlmodel import col
 
 from prediction_market_agent.db.models import Prompt
 from prediction_market_agent.db.sql_handler import SQLHandler
@@ -30,9 +30,9 @@ def example_prompts() -> list[Prompt]:
 
 
 def test_get_all(prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]) -> None:
-    assert len(prompt_sql_handler.get_all()) == 0
+    prompt_sql_handler.delete_all_entries()
     p = example_prompts[0].model_copy()
-    with Session(prompt_sql_handler.engine) as session:
+    with prompt_sql_handler.db_manager.get_session() as session:
         session.add(p)
         session.commit()
     assert len(prompt_sql_handler.get_all()) == 1
@@ -50,6 +50,7 @@ def get_first(
 def test_get_first(
     prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]
 ) -> None:
+    prompt_sql_handler.delete_all_entries()
     prompt_earlier_date = example_prompts[0].prompt
     prompt_later_date = example_prompts[1].prompt
     column_to_order: str = Prompt.datetime_.key  # type: ignore[attr-defined]
@@ -72,6 +73,7 @@ def test_get_first(
 def test_get_with_filter(
     prompt_sql_handler: SQLHandler, example_prompts: list[Prompt]
 ) -> None:
+    prompt_sql_handler.delete_all_entries()
     session_identifier = example_prompts[0].session_identifier
     prompt_sql_handler.save_multiple(example_prompts)
     results: t.Sequence[Prompt] = prompt_sql_handler.get_with_filter_and_order(

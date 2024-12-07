@@ -19,6 +19,7 @@ def table_handler() -> Generator[EvaluatedGoalTableHandler, None, None]:
         agent_id=TEST_AGENT_ID,
     )
     yield table_handler
+    table_handler.delete_all_evaluated_goals()
 
 
 def test_save_load_evaluated_goal_0(table_handler: EvaluatedGoalTableHandler) -> None:

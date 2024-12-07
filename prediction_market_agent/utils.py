@@ -18,7 +18,14 @@ class DBKeys(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
-    SQLALCHEMY_DB_URL: t.Optional[str] = None
+    SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
+
+
+class NFTTreasuryKeys(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+    SAFE_TREASURY_ADDRESS: t.Optional[str] = None
 
 
 class APIKeys(APIKeysBase):
@@ -32,6 +39,7 @@ class APIKeys(APIKeysBase):
     PINATA_API_SECRET: t.Optional[SecretStr] = None
     TELEGRAM_BOT_KEY: t.Optional[SecretStr] = None
     GNOSISSCAN_API_KEY: t.Optional[SecretStr] = None
+    DUNE_API_KEY: t.Optional[SecretStr] = None
 
     @property
     def serper_api_key(self) -> SecretStr:
@@ -85,6 +93,12 @@ class APIKeys(APIKeysBase):
     def gnosisscan_api_key(self) -> SecretStr:
         return check_not_none(
             self.GNOSISSCAN_API_KEY, "GNOSISSCAN_API_KEY missing in the environment."
+        )
+
+    @property
+    def dune_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.DUNE_API_KEY, "DUNE_API_KEY missing in the environment."
         )
 
 
