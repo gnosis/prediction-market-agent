@@ -26,6 +26,10 @@ def agent2_address() -> ChecksumAddress:
     return Web3.to_checksum_address("0xb4D8C8BedE2E49b08d2A22485f72fA516116FE7F")
 
 
+MOCK_HASH_1 = "mock_hash"
+MOCK_HASH_2 = "mock_hash"
+
+
 def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
     anvil_account_1 = Web3.to_checksum_address(
         "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
@@ -33,7 +37,7 @@ def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
     compress_message("hello hello hello")
     return pl.DataFrame(
         {
-            "hash": ["0x123", "0x456"],
+            "hash": [MOCK_HASH_1, MOCK_HASH_2],
             "value": [xdai_to_wei(xdai_type(1)), xdai_to_wei(xdai_type(2))],
             "block_number": [1, 2],
             "from": [anvil_account_1, anvil_account_1],
@@ -80,7 +84,9 @@ def patch_pytest_db(
 
 
 def test_receive_message_description(
-    patch_pytest_db: PropertyMock, patch_public_key: PropertyMock
+    patch_pytest_db: PropertyMock,
+    patch_public_key: PropertyMock,
+    patch_spice: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
     description = r.description
@@ -93,12 +99,15 @@ def test_receive_message_description(
 
 
 def test_receive_message_call(
-    patch_pytest_db: PropertyMock, patch_public_key: PropertyMock
+    patch_pytest_db: PropertyMock,
+    patch_public_key: PropertyMock,
+    patch_spice: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
-    # We expect at least 1 message since there was a test tx sent to agent 2.
+
     blockchain_message = r()
     assert blockchain_message is not None
+    assert blockchain_message.transaction_hash == MOCK_HASH_1
 
 
 def test_receive_message_then_check_count_unseen_messages(
