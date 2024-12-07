@@ -9,6 +9,7 @@ from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
+from pydantic import SecretStr
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
@@ -26,8 +27,8 @@ def agent2_address() -> ChecksumAddress:
     return Web3.to_checksum_address("0xb4D8C8BedE2E49b08d2A22485f72fA516116FE7F")
 
 
-MOCK_HASH_1 = "mock_hash"
-MOCK_HASH_2 = "mock_hash"
+MOCK_HASH_1 = "mock_hash1"
+MOCK_HASH_2 = "mock_hash2"
 
 
 def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
@@ -44,6 +45,16 @@ def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
             "data": ["test", Web3.to_hex(compress_message("test"))],
         }
     )
+
+
+@pytest.fixture(scope="module")
+def patch_dune_api_key() -> Generator[PropertyMock, None, None]:
+    with patch(
+        "prediction_market_agent.utils.APIKeys.dune_api_key",
+        new_callable=PropertyMock,
+    ) as mock_dune:
+        mock_dune.return_value = SecretStr("mock_dune_api_key")
+        yield mock_dune
 
 
 @pytest.fixture(scope="module")
@@ -87,6 +98,7 @@ def test_receive_message_description(
     patch_pytest_db: PropertyMock,
     patch_public_key: PropertyMock,
     patch_spice: PropertyMock,
+    patch_dune_api_key: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
     description = r.description
@@ -102,6 +114,7 @@ def test_receive_message_call(
     patch_pytest_db: PropertyMock,
     patch_public_key: PropertyMock,
     patch_spice: PropertyMock,
+    patch_dune_api_key: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
 
@@ -114,6 +127,7 @@ def test_receive_message_then_check_count_unseen_messages(
     patch_pytest_db: PropertyMock,
     patch_public_key: PropertyMock,
     patch_spice: typing.Any,
+    patch_dune_api_key: PropertyMock,
 ) -> None:
     # Idea here is to fetch the next message, and then fetch the count of unseen messages, asserting that
     # this number decreased by 1.
