@@ -48,7 +48,7 @@ class BlockchainTransactionFetcher:
         existing_hashes = self.blockchain_table_handler.fetch_all_transaction_hashes(
             consumer_address=consumer_address
         )
-        # Filter out existing hashes - hashes by default lowercase
+        # Filter out existing hashes - hashes are by default lowercase
         df = df.filter(~pl.col("hash").is_in(existing_hashes))
         return df
 
