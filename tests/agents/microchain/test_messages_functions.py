@@ -80,14 +80,14 @@ def patch_public_key(
 
 @pytest.fixture
 def patch_pytest_db(
-    session_keys_with_postgresql_proc_and_enabled_cache: DBKeys,
+    session_keys_with_mocked_db: DBKeys,
 ) -> Generator[PropertyMock, None, None]:
     # Mocking os.environ because mocking Pydantic's attribute is not possible via patch.
     with patch.dict(
         os.environ,
         {
             "SQLALCHEMY_DB_URL": check_not_none(
-                session_keys_with_postgresql_proc_and_enabled_cache.SQLALCHEMY_DB_URL
+                session_keys_with_mocked_db.SQLALCHEMY_DB_URL
             ).get_secret_value()
         },
     ) as mock_db:

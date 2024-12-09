@@ -58,7 +58,6 @@ dune-spice = "^0.2.5"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
-pytest-postgresql = "^6.1.1"
 
 [build-system]
 requires = ["poetry-core"]
