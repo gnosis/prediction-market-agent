@@ -41,16 +41,6 @@ class SQLHandler:
             session.add_all(items)
             session.commit()
 
-    def delete_all_entries(
-        self, col_name: str | None = None, col_value: str | None = None
-    ) -> None:
-        with self.db_manager.get_session() as session:
-            query = session.query(self.table)
-            if col_name and col_value:
-                query = query.filter_by(**{col_name: col_value})
-            query.delete()
-            session.commit()
-
     def get_with_filter_and_order(
         self,
         query_filters: t.Sequence[ColumnElement[bool] | BinaryExpression[bool]] = (),
