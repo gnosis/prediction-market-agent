@@ -1,22 +1,29 @@
 import typing as t
-from typing import List
 
 import requests
-from autogen import ConversableAgent, register_function
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import RPCConfig
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    OmenConditionalTokenContract,
+from prediction_market_agent_tooling.gtypes import ABI
+from prediction_market_agent_tooling.tools.caches.inmemory_cache import (
+    persistent_inmemory_cache,
 )
-from prediction_market_agent_tooling.tools.contract import (
-    ContractOnGnosisChain,
-    abi_field_validator,
-)
+from prediction_market_agent_tooling.tools.contract import abi_field_validator
 from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
 from prediction_market_agent_tooling.tools.tavily.tavily_search import (
     tavily_search as tavily_search_pmat,
 )
+from prediction_market_agent_tooling.tools.web3_utils import (
+    call_function_on_contract,
+    send_function_on_contract_tx,
+)
 from web3 import Web3
+from web3.types import TxReceipt
+
+from prediction_market_agent.agents.blockchain_coding_agent.models import (
+    SmartContractResponse,
+    SourceCodeContainer,
+)
+from prediction_market_agent.utils import APIKeys
 
 
 def tavily_search(
@@ -25,112 +32,86 @@ def tavily_search(
     return tavily_search_pmat(query=query)
 
 
-def fetch_read_methods_from_blockscout(contract_address: str) -> t.Any:
-    w3 = OmenConditionalTokenContract().get_web3()
-    if not is_contract(w3, Web3.to_checksum_address(contract_address)):
-        raise ValueError(f"{contract_address=} is not a contract on Gnosis Chain.")
-    read_not_proxy = fetch_read_methods(contract_address)
-    read_proxy = fetch_read_methods_proxy(contract_address)
-    # ToDo - Fetch write methods
-    return read_not_proxy + read_proxy
-
-
-def fetch_read_methods(contract_address: str) -> list[dict[str, t.Any]]:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read?is_custom_abi=false"
-    r = requests.get(url)
-    data: list[dict[str, t.Any]] = r.json()
-    return data
+def checksum_address(address: str) -> ChecksumAddress:
+    return Web3.to_checksum_address(address)
 
 
 def is_contract(web3: Web3, contract_address: ChecksumAddress) -> bool:
     return bool(web3.eth.get_code(contract_address))
 
 
-def fetch_read_methods_proxy(contract_address: str) -> list[dict[str, t.Any]]:
-    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}/methods-read-proxy?is_custom_abi=false"
+@persistent_inmemory_cache
+def fetch_source_code_and_abi_from_contract(
+    contract_address: str, fetched_addresses: t.Set[str] | None = None
+) -> SourceCodeContainer:
+    # Code snippet to avoid infinite recursion if implementation contains cyclic references.
+    if fetched_addresses is None:
+        fetched_addresses = set()
+    if contract_address in fetched_addresses:
+        return SourceCodeContainer(source_code="", abi=[])
+    fetched_addresses.add(contract_address)
+    # Regular function logic.
+    url = f"https://gnosis.blockscout.com/api/v2/smart-contracts/{contract_address}"
     r = requests.get(url)
-    data: list[dict[str, t.Any]] = r.json()
-    return data
+    r.raise_for_status()
+    data_parsed = SmartContractResponse.model_validate(r.json())
+    source_code = data_parsed.source_code
+    abi = data_parsed.abi
+    # If proxy, expand abi and source code with implementation data.
+    if data_parsed.implementations:
+        for proxy in data_parsed.implementations:
+            proxy_container = fetch_source_code_and_abi_from_contract(
+                proxy.address, fetched_addresses=fetched_addresses
+            )
+            abi.extend(proxy_container.abi)
+            source_code += "\n" + proxy_container.source_code
 
-
-def get_rpc_endpoint() -> str:
-    return RPCConfig().gnosis_rpc_url
-
-
-def checksum_address(address: str) -> ChecksumAddress:
-    return Web3.to_checksum_address(address)
+    return SourceCodeContainer(source_code=source_code, abi=abi)
 
 
 def execute_read_function(
     contract_address: str,
     abi: str,
     function_name: str,
-    function_parameters: List[str] = [],
+    function_params: t.List[t.Any],
 ) -> t.Any:
     """
     Purpose:
         Executes a read function on a smart contract using the specified contract address, ABI, function name, and function parameters.
+        It uses PMAT under-the-hood.
 
     Args:
         contract_address (str): The address of the smart contract on which to execute the function.
         abi (str): The ABI (Application Binary Interface) of the smart contract.
         function_name (str): The name of the function to execute on the smart contract.
-        function_parameters (list): A list of parameters to pass to the function.
+        function_params (list): A list of parameters to pass to the function.
 
     Returns:
         Any: The result of calling the specified function on the smart contract.
 
     """
-
-    c = ContractOnGnosisChain(
-        abi=abi_field_validator(abi), address=Web3.to_checksum_address(contract_address)
-    )
-    return c.call(function_name, function_parameters)
-
-
-def register_all_functions(
-    caller_agent: ConversableAgent, executor_agent: ConversableAgent
-) -> None:
-    # Register the search tool.
-    register_function(
-        tavily_search,
-        caller=caller_agent,
-        executor=executor_agent,
-        name="search_tool",
-        description="Search the web for the given query",
+    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
+    return call_function_on_contract(
+        web3=w3,
+        contract_address=Web3.to_checksum_address(contract_address),
+        contract_abi=abi_field_validator(abi),
+        function_name=function_name,
+        function_params=function_params,
     )
 
-    # Register the calculator function to the two agents.
-    register_function(
-        fetch_read_methods_from_blockscout,
-        caller=caller_agent,  # The assistant agent can suggest calls to the calculator.
-        executor=executor_agent,  # The user proxy agent can execute the calculator calls.
-        name="fetch_read_methods_from_blockscout",  # By default, the function name is used as the tool name.
-        description="Function for fetching the ABI from a verified smart contract on Gnosis Chain",
-        # A description of the tool.
-    )
 
-    register_function(
-        get_rpc_endpoint,
-        caller=caller_agent,  # The assistant agent can suggest calls to the calculator.
-        executor=executor_agent,  # The user proxy agent can execute the calculator calls.
-        name="get_rpc_endpoint",  # By default, the function name is used as the tool name.
-        description="Returns the RPC endpoint to be used for interacting with Gnosis Chain when instantiating a provider",
-        # A description of the tool.
-    )
-
-    register_function(
-        execute_read_function,
-        caller=caller_agent,
-        executor=executor_agent,
-        name="execute_read_function",
-        description="Executes a function on a smart contract deployed on the Gnosis Chain and returns the result of the function execution.",
-    )
-
-    register_function(
-        checksum_address,
-        caller=caller_agent,
-        executor=executor_agent,
-        name="checksum_address",
-        description="Extracts the checksummed address of an address.",
+def execute_write_function(
+    contract_address: str,
+    abi: str,
+    function_name: str,
+    function_params: t.List[t.Any],
+) -> TxReceipt:
+    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
+    return send_function_on_contract_tx(
+        web3=w3,
+        contract_address=Web3.to_checksum_address(contract_address),
+        contract_abi=ABI(abi),
+        from_private_key=APIKeys().bet_from_private_key,
+        function_name=function_name,
+        function_params=function_params,
     )
