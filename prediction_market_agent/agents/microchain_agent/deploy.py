@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.goal_manager import GoalManager
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import (
     ChatHistory,
     ChatMessage,
@@ -23,7 +24,6 @@ from prediction_market_agent.agents.microchain_agent.prompts import (
     FunctionsConfig,
     SystemPromptChoice,
 )
-from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -38,7 +38,7 @@ class DeployableMicrochainAgent(DeployableAgent):
     n_iterations = 50
     load_historical_prompt: bool = False
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN
+    identifier: AgentIdentifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
     description: str
 
     def build_goal_manager(
@@ -63,13 +63,13 @@ class DeployableMicrochainAgent(DeployableAgent):
         market_type: MarketType,
     ) -> None:
         self.langfuse_update_current_trace(
-            tags=[GENERAL_AGENT_TAG, self.system_prompt_choice, self.task_description]
+            tags=[GENERAL_AGENT_TAG, self.system_prompt_choice, self.identifier]
         )
 
-        long_term_memory = LongTermMemoryTableHandler(
-            task_description=self.task_description
+        long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(
+            self.identifier
         )
-        prompt_handler = PromptTableHandler(session_identifier=self.task_description)
+        prompt_handler = PromptTableHandler.from_agent_identifier(self.identifier)
         unformatted_system_prompt = get_unformatted_system_prompt(
             unformatted_prompt=SYSTEM_PROMPTS[self.system_prompt_choice],
             prompt_table_handler=(
@@ -134,34 +134,33 @@ class DeployableMicrochainModifiableSystemPromptAgentAbstract(
 ):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
     load_historical_prompt: bool = True
-    task_description: AgentIdentifier
 
 
 class DeployableMicrochainModifiableSystemPromptAgent0(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
     description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 0."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent1(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
     description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 1."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent2(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
     description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 2."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent3(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
     # Force less iterations, because Replicate's API allows at max 4096 input tokens.
     n_iterations = 10
@@ -169,7 +168,7 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 
 
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
-    task_description = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
     system_prompt_choice = SystemPromptChoice.TRADING_AGENT_MINIMAL
     description = "Microchain agent woth minimal 'trader' system prompt, and GoalManager, version 0"
@@ -179,7 +178,7 @@ class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
         agent: Agent,
     ) -> GoalManager:
         return GoalManager(
-            agent_id=self.task_description,
+            agent_id=self.identifier,
             high_level_description="You are a trader agent in prediction markets, aiming to maximise your long-term profit.",
             agent_capabilities=f"You have the following capabilities:\n{get_functions_summary_list(agent.engine)}",
             retry_limit=1,

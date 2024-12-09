@@ -1,4 +1,5 @@
-from typing import Optional
+import json
+from typing import Any, Optional
 
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from sqlmodel import Field, SQLModel
@@ -12,8 +13,12 @@ class LongTermMemories(SQLModel, table=True):
     metadata_: Optional[str] = None
     datetime_: DatetimeUTC
 
-
-PROMPT_DEFAULT_SESSION_IDENTIFIER = "microchain-streamlit"
+    @property
+    def metadata_dict(self) -> dict[str, Any] | None:
+        out: dict[str, Any] | None = (
+            json.loads(self.metadata_) if self.metadata_ else None
+        )
+        return out
 
 
 class Prompt(SQLModel, table=True):
