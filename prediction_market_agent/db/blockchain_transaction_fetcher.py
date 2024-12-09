@@ -5,13 +5,11 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
-    TRANSACTION_MESSAGE_FEE,
-)
 from prediction_market_agent.agents.microchain_agent.utils import decompress_message
 from prediction_market_agent.db.blockchain_message_table_handler import (
     BlockchainMessageTableHandler,
 )
+from prediction_market_agent.db.constants import TRANSACTION_MESSAGE_FEE
 from prediction_market_agent.db.models import BlockchainMessage
 from prediction_market_agent.utils import APIKeys
 

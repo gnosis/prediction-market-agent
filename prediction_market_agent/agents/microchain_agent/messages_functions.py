@@ -1,5 +1,4 @@
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
@@ -12,9 +11,8 @@ from prediction_market_agent.agents.microchain_agent.utils import compress_messa
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
+from prediction_market_agent.db.constants import TRANSACTION_MESSAGE_FEE
 from prediction_market_agent.db.models import BlockchainMessage
-
-TRANSACTION_MESSAGE_FEE = xdai_type(0.01)
 
 
 class BroadcastPublicMessageToHumans(Function):
