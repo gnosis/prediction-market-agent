@@ -58,7 +58,7 @@ class ReceiveMessage(Function):
     @staticmethod
     def get_count_unseen_messages() -> int:
         return BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            consumer_address=MicrochainAgentKeys().public_key
+            consumer_address=MicrochainAgentKeys().bet_from_address
         )
 
     @property
