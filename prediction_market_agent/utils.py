@@ -21,13 +21,6 @@ class DBKeys(BaseSettings):
     SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
 
 
-class NFTTreasuryKeys(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
-    SAFE_TREASURY_ADDRESS: t.Optional[str] = None
-
-
 class APIKeys(APIKeysBase):
     # Don't get fooled! Serper and Serp are two different services.
     SERPER_API_KEY: t.Optional[SecretStr] = None
