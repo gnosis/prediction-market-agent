@@ -58,7 +58,7 @@ class ReceiveMessage(Function):
     @staticmethod
     def get_count_unseen_messages() -> int:
         return BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            consumer_address=MicrochainAgentKeys().public_key
+            consumer_address=MicrochainAgentKeys().bet_from_address
         )
 
     @property
@@ -76,7 +76,7 @@ class ReceiveMessage(Function):
         # Txs were retrieved here, hence they are stored in the DB and won't be fetched again.
         message_to_process = (
             fetcher.fetch_one_unprocessed_blockchain_message_and_store_as_processed(
-                keys.public_key
+                keys.bet_from_address
             )
         )
         # ToDo - Fund the treasury with xDai.
