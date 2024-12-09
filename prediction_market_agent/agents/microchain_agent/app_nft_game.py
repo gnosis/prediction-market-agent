@@ -52,11 +52,9 @@ def send_message_part(nft_agent: NFTAgent) -> None:
         st.success("Message sent and will be processed soon!")
 
 
-def customized_chat_message(
-    role: t.Literal["user", "assistant", "system"],
-    message: str,
-    created_at: DatetimeUTC,
-) -> None:
+def parse_function_and_body(
+    role: t.Literal["user", "assistant", "system"], message: str
+) -> t.Tuple[str | None, str | None]:
     message = message.strip()
 
     if role == "assistant":
@@ -66,6 +64,19 @@ def customized_chat_message(
         parsed_function = "Response"
         parsed_body = message
     else:
+        parsed_function = None
+        parsed_body = None
+
+    return parsed_function, parsed_body
+
+
+def customized_chat_message(
+    role: t.Literal["user", "assistant", "system"],
+    message: str,
+    created_at: DatetimeUTC,
+) -> None:
+    parsed_function, parsed_body = parse_function_and_body(role, message)
+    if parsed_function is None:
         return
 
     match parsed_function:
@@ -75,6 +86,8 @@ def customized_chat_message(
             icon = "👤"
         case BroadcastPublicMessageToHumans.__name__:
             icon = "📣"
+        case SendPaidMessageToAnotherAgent.__name__:
+            icon = "💸"
         case _:
             icon = "🤖"
 

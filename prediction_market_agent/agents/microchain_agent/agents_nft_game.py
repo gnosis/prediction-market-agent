@@ -19,7 +19,7 @@ class NFTAgent(BaseModel):
 AGENTS_IN_THE_GAME = [
     NFTAgent(
         name="Sneaky Pete",
-        identifier=AgentIdentifier.NFT_GAME_AGENT_0,
+        identifier=AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0,
         wallet_address=Web3.to_checksum_address(
             "0xd845A24014B3BD96212A21f602a4F16A7dA518A4"
         ),
