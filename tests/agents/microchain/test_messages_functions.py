@@ -1,4 +1,3 @@
-import os
 import typing
 from typing import Generator
 from unittest.mock import PropertyMock, patch
@@ -7,7 +6,6 @@ import polars as pl
 import pytest
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xdai_type
-from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from pydantic import SecretStr
 from web3 import Web3
@@ -81,16 +79,14 @@ def patch_public_key(
 def patch_pytest_db(
     session_keys_with_mocked_db: DBKeys,
 ) -> Generator[PropertyMock, None, None]:
-    # Mocking os.environ because mocking Pydantic's attribute is not possible via patch.
-    with patch.dict(
-        os.environ,
-        {
-            "SQLALCHEMY_DB_URL": check_not_none(
-                session_keys_with_mocked_db.SQLALCHEMY_DB_URL
-            ).get_secret_value()
-        },
-    ) as mock_db:
-        yield mock_db
+    with patch(
+        "prediction_market_agent_tooling.config.APIKeys.sqlalchemy_db_url",
+        new_callable=PropertyMock,
+    ) as mock_sqlalchemy_db_url:
+        mock_sqlalchemy_db_url.return_value = (
+            session_keys_with_mocked_db.SQLALCHEMY_DB_URL
+        )
+        yield mock_sqlalchemy_db_url
 
 
 def test_receive_message_description(
