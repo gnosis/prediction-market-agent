@@ -5,6 +5,7 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 """
 
 import typing as t
+from datetime import timedelta
 
 import streamlit as st
 from prediction_market_agent_tooling.tools.balances import get_balances
@@ -104,6 +105,7 @@ def customized_chat_message(
             st.markdown(parsed_body)
 
 
+@st.fragment(run_every=timedelta(seconds=5))
 def show_function_calls_part(nft_agent: NFTAgent) -> None:
     st.markdown(f"""### Agent's actions""")
 
@@ -124,6 +126,7 @@ def show_function_calls_part(nft_agent: NFTAgent) -> None:
         )
 
 
+@st.fragment(run_every=timedelta(seconds=5))
 def show_about_agent_part(nft_agent: NFTAgent) -> None:
     system_prompt = prompt_table_handler(nft_agent.identifier).fetch_latest_prompt()
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
@@ -143,6 +146,16 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
 
 
+@st.fragment(run_every=timedelta(seconds=5))
+def show_treasury_part() -> None:
+    treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
+    st.markdown(
+        f"""### Treasury
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>.""",
+        unsafe_allow_html=True,
+    )
+
+
 def get_agent_page(nft_agent: NFTAgent) -> t.Callable[[], None]:
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
@@ -157,13 +170,8 @@ def get_agent_page(nft_agent: NFTAgent) -> t.Callable[[], None]:
     return page
 
 
-treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
-st.sidebar.markdown(
-    f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>.""",
-    unsafe_allow_html=True,
-)
-
+with st.sidebar:
+    show_treasury_part()
 
 pg = st.navigation(
     [
