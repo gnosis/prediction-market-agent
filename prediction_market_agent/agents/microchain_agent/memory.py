@@ -1,5 +1,4 @@
 # inspired by crewAI's LongTermMemory (https://github.com/joaomdmoura/crewAI/blob/main/src/crewai/memory/long_term/long_term_memory.py)
-import json
 from datetime import timedelta
 from typing import Dict, Sequence
 
