@@ -4,6 +4,7 @@ import typing as t
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from sqlmodel import col
 
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.answer_with_scenario import (
     AnswerWithScenario,
 )
@@ -17,6 +18,12 @@ class LongTermMemoryTableHandler:
         self.sql_handler = SQLHandler(
             model=LongTermMemories, sqlalchemy_db_url=sqlalchemy_db_url
         )
+
+    @staticmethod
+    def from_agent_identifier(
+        identifier: AgentIdentifier,
+    ) -> "LongTermMemoryTableHandler":
+        return LongTermMemoryTableHandler(task_description=identifier.value)
 
     def save_history(self, history: list[dict[str, t.Any]]) -> None:
         """Save item to storage. Note that score allows many types for easier handling by agent."""

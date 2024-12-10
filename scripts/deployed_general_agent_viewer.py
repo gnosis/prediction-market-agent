@@ -27,6 +27,7 @@ from prediction_market_agent_tooling.gtypes import PrivateKey
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
     DeployableMicrochainModifiableSystemPromptAgent0,
@@ -48,7 +49,6 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_function_useage_from_history,
     get_total_asset_value,
 )
-from prediction_market_agent.agents.utils import AgentIdentifier
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -110,20 +110,20 @@ st.title("Deployed Trader Agent Viewer")
 settings = DeployedGeneralAgentSettings()
 
 with st.sidebar:
-    task_description = AgentIdentifier(
+    identifier = AgentIdentifier(
         st.selectbox(
             label="Select the agent",
             options=[x.value for x in settings.available_agents],
             index=0,
         )
     )
-    if task_description is None:
+    if identifier is None:
         st.error("Please select an agent.")
         st.stop()
     else:
-        st.info(settings.to_agent_description(task_description))
+        st.info(settings.to_agent_description(identifier))
 
-keys = settings.to_api_keys(task_description)
+keys = settings.to_api_keys(identifier)
 starting_balance = settings.starting_balance
 
 with st.sidebar:
@@ -150,7 +150,7 @@ with st.sidebar:
         "View the source code on our [github](https://github.com/gnosis/prediction-market-agent/tree/main/scripts/deployed_agent_viewer.py)."
     )
 
-long_term_memory = LongTermMemoryTableHandler(task_description=task_description)
+long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(identifier)
 chat_history = DatedChatHistory.from_long_term_memory(long_term_memory=long_term_memory)
 sessions = chat_history.cluster_by_session()
 
@@ -196,7 +196,7 @@ agent = build_agent(
     allow_stop=True,
     long_term_memory=long_term_memory,
     functions_config=FunctionsConfig.from_system_prompt_choice(
-        settings.to_system_prompt_choice(task_description)
+        settings.to_system_prompt_choice(identifier)
     ),
     enable_langfuse=False,  # placeholder, not used
 )

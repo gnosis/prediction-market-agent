@@ -30,6 +30,7 @@ from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit
 from prediction_market_agent_tooling.tools.utils import utcnow
 from streamlit_extras.bottom_container import bottom
 
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.deploy import GENERAL_AGENT_TAG
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
@@ -48,7 +49,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_initial_history_length,
     has_been_run_past_initialization,
 )
-from prediction_market_agent.agents.utils import STREAMLIT_TAG, AgentIdentifier
+from prediction_market_agent.agents.utils import STREAMLIT_TAG
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
@@ -124,7 +125,9 @@ def long_term_memory_is_initialized() -> bool:
 def maybe_initialize_long_term_memory() -> None:
     # Initialize the db storage
     if not long_term_memory_is_initialized():
-        st.session_state.long_term_memory = LongTermMemoryTableHandler(AGENT_IDENTIFIER)
+        st.session_state.long_term_memory = (
+            LongTermMemoryTableHandler.from_agent_identifier(AGENT_IDENTIFIER)
+        )
 
 
 def agent_is_initialized() -> bool:
@@ -140,7 +143,7 @@ def maybe_initialize_agent(
 ) -> None:
     # Set the unformatted system prompt
     prompt_table_handler = (
-        PromptTableHandler(session_identifier=AGENT_IDENTIFIER)
+        PromptTableHandler.from_agent_identifier(AGENT_IDENTIFIER)
         if st.session_state.get("load_historical_prompt")
         else None
     )
