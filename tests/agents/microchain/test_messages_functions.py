@@ -35,7 +35,6 @@ def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
     anvil_account_1 = Web3.to_checksum_address(
         "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
     )
-    compress_message("hello hello hello")
     return pl.DataFrame(
         {
             "hash": [MOCK_HASH_1, MOCK_HASH_2],
