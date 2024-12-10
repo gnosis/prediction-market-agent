@@ -34,7 +34,7 @@ class DatedChatMessage(ChatMessage):
     def from_long_term_memory(
         long_term_memory: LongTermMemories,
     ) -> "DatedChatMessage":
-        metadata = json.loads(check_not_none(long_term_memory.metadata_))
+        metadata = check_not_none(long_term_memory.metadata_dict)
         return DatedChatMessage(
             content=metadata["content"],
             role=metadata["role"],
@@ -54,8 +54,8 @@ class SimpleMemoryThinkThoroughly(BaseModel):
         long_term_memory: LongTermMemories,
     ) -> "SimpleMemoryThinkThoroughly":
         return SimpleMemoryThinkThoroughly(
-            metadata=AnswerWithScenario.model_validate_json(
-                check_not_none(long_term_memory.metadata_)
+            metadata=AnswerWithScenario.model_validate(
+                check_not_none(long_term_memory.metadata_dict)
             ),
             datetime_=long_term_memory.datetime_,
         )
