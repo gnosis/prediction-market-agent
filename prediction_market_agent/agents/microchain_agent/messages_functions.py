@@ -71,7 +71,6 @@ class ReceiveMessage(Function):
     def __call__(self) -> BlockchainMessage | None:
         keys = MicrochainAgentKeys()
         fetcher = BlockchainTransactionFetcher()
-        # Txs were retrieved here, hence they are stored in the DB and won't be fetched again.
         message_to_process = (
             fetcher.fetch_one_unprocessed_blockchain_message_and_store_as_processed(
                 keys.bet_from_address

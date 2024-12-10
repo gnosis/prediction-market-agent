@@ -1,6 +1,7 @@
 import typing as t
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from sqlalchemy import ColumnElement
 from sqlmodel import col
 
@@ -39,16 +40,13 @@ class BlockchainMessageTableHandler:
         return items[0] if items else None
 
     def fetch_all_transaction_hashes(
-        self, consumer_address: ChecksumAddress, convert_to_lowercase: bool = True
-    ) -> list[str]:
+        self, consumer_address: ChecksumAddress
+    ) -> list[HexBytes]:
         query_filter = self.__build_consumer_column_filter(consumer_address)
         items: t.Sequence[
             BlockchainMessage
         ] = self.sql_handler.get_with_filter_and_order(query_filters=[query_filter])
-        tx_hashes = [
-            i.transaction_hash.lower() if convert_to_lowercase else i.transaction_hash
-            for i in items
-        ]
+        tx_hashes = [HexBytes(i.transaction_hash) for i in items]
         return list(set(tx_hashes))
 
     def save_multiple(self, items: t.Sequence[BlockchainMessage]) -> None:

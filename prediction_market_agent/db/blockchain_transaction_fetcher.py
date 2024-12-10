@@ -47,7 +47,7 @@ class BlockchainTransactionFetcher:
             consumer_address=consumer_address
         )
         # Filter out existing hashes - hashes are by default lowercase
-        df = df.filter(~pl.col("hash").is_in(existing_hashes))
+        df = df.filter(~pl.col("hash").is_in([i.hex() for i in existing_hashes]))
         return df
 
     def fetch_count_unprocessed_transactions(
