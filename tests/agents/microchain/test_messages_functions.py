@@ -25,8 +25,9 @@ def agent2_address() -> ChecksumAddress:
     return Web3.to_checksum_address("0xb4D8C8BedE2E49b08d2A22485f72fA516116FE7F")
 
 
-MOCK_HASH_1 = "mock_hash1"
-MOCK_HASH_2 = "mock_hash2"
+# Random transactions found on Gnosisscan.
+MOCK_HASH_1 = "0x5ba6dd51d3660f98f02683e032daa35644d3f7f975975da3c2628a5b4b1f5cb6"
+MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6a"
 
 
 def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
