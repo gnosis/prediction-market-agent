@@ -31,7 +31,7 @@ def mocked_agent_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="function")
-def table_handler(
+def evaluated_goal_table_handler(
     mocked_agent_id: str,
 ) -> Generator[EvaluatedGoalTableHandler, None, None]:
     """Creates a in-memory SQLite DB for testing"""
