@@ -4,8 +4,13 @@ from string import Template
 from typing import Any, Dict, Optional
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
-from autogen_agentchat.teams import BaseGroupChat, RoundRobinGroupChat
+from autogen_agentchat.teams import (
+    BaseGroupChat,
+    MagenticOneGroupChat,
+)
+from autogen_agentchat.teams._group_chat._magentic_one._prompts import (
+    ORCHESTRATOR_FINAL_ANSWER_PROMPT,
+)
 from autogen_agentchat.ui import Console
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from prediction_market_agent_tooling.markets.data_models import Bet
@@ -70,40 +75,10 @@ def reflection_message(
 
 
 def build_team(model: str) -> BaseGroupChat:
-    # user_proxy = UserProxyAgent(
-    #     name="User",
-    #     human_input_mode="NEVER",
-    #     is_termination_msg=lambda x: x.get("content", "").find("TERMINATE") >= 0,
-    #     code_execution_config={
-    #         "last_n_messages": 1,
-    #         "work_dir": "tasks",
-    #         "use_docker": False,
-    #     },
-    # )
-
-    # writer = AssistantAgent(
-    #     name="Writer",
-    #     llm_config=llm_config,
-    #     system_message="""You are a professional influencer, known for your insightful and engaging tweets. You
-    #     transform complex concepts into compelling narratives. You should improve the quality of the content based on
-    #     the feedback from the user. You must always return only the tweet. """,
-    # )
-
-    #     critic = AssistantAgent(
-    #         name="Critic",
-    #         llm_config=llm_config,
-    #         system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is
-    #         to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with
-    #         required guidelines. You should also always remind everyone that the limit for any posts being created is
-    # {POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
-    #     )
-
-    # Create an OpenAI model client.
     model_client = OpenAIChatCompletionClient(
         model=model, api_key=APIKeys().openai_api_key.get_secret_value()
     )
 
-    # Create the primary agent.
     primary_agent = AssistantAgent(
         "primary",
         model_client=model_client,
@@ -111,25 +86,24 @@ def build_team(model: str) -> BaseGroupChat:
         system_message="""You are a professional influencer, known for your insightful and engaging tweets. You transform complex concepts into compelling narratives. You should improve the quality of the content based on the feedback from the user. You must always return only the tweet.""",
     )
 
-    # Create the critic agent.
     critic_agent = AssistantAgent(
         "critic",
         model_client=model_client,
         description="Critique the tweet and provide feedback.",
         system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with required guidelines. You should also always remind everyone that the limit for any posts being created is {POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
-        # Respond with 'APPROVE' to when your feedbacks are addressed.""",
     )
 
-    text_termination = TextMentionTermination("APPROVE")
-    max_message_termination = MaxMessageTermination(5)
-    # Combine the termination conditions using the `|`` operator so that the
-    # task stops when either condition is met.
-    termination = text_termination | max_message_termination
-
-    reflection_team = RoundRobinGroupChat(
-        [primary_agent, critic_agent], termination_condition=termination, max_turns=4
+    final_prompt = (
+        ORCHESTRATOR_FINAL_ANSWER_PROMPT
+        + "\n Output only the final version of the tweet and nothing else."
     )
-    return reflection_team
+
+    magentic_team = MagenticOneGroupChat(
+        [primary_agent, critic_agent],
+        model_client=model_client,
+        final_answer_prompt=final_prompt,
+    )
+    return magentic_team
 
 
 @observe()
@@ -205,26 +179,6 @@ def build_reply_tweet(
 def build_tweet(model: str, task: str) -> str:
     team = build_team(model)
 
-    # ToDo - prompt better so it always produces a tweet
-    # ToDo - Follow this https://microsoft.github.io/autogen/dev/user-guide/agentchat-user-guide/tutorial/teams.html#team-usage-guide
-
     task_result = asyncio.run(Console(team.run_stream(task=task)))
-    reply_tweet = task_result.messages[-2].content  # Last message is critic's approval
-
-    # in case we trigger repeated runs, Cache makes it faster.
-    # with Cache.disk(cache_seed=42) as cache:
-    #     # max_turns = the maximum number of turns for the chat between the two agents. One turn means one conversation round trip.
-    #     res = user_proxy.initiate_chat(
-    #         recipient=writer,
-    #         message=task,
-    #         max_turns=2,
-    #         summary_method=SummaryMethod.REFLECTION_WITH_LLM,
-    #         cache=cache,
-    #     )
-    # We extract the last message since the revised tweet is contained in the last response
-    # from the writer.
-    # reply_tweet = res.chat_history[-1]["content"]
-
-    return str(
-        reply_tweet
-    )  # Casting needed as summary is of type any and no Pydantic support
+    reply_tweet = task_result.messages[-1].content  # Last message is critic's approval
+    return str(reply_tweet)
