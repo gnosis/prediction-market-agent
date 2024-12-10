@@ -58,14 +58,19 @@ def parse_function_and_body(
     message = message.strip()
 
     if role == "assistant":
+        # Microchain agent is a function calling agent, his outputs are in the form of `SendPaidMessageToAnotherAgent(address='...',message='...')`.
         parsed_function = message.split("(")[0]
         parsed_body = message.split("(")[1].rsplit(")")[0]
     elif role == "user":
+        # Responses from the individual functions are stored under `user` role.
         parsed_function = "Response"
         parsed_body = message
-    else:
+    elif role == "system":
+        # System message isn't shown in the chat history, so ignore.
         parsed_function = None
         parsed_body = None
+    else:
+        raise ValueError(f"Unknown role: {role}")
 
     return parsed_function, parsed_body
 
