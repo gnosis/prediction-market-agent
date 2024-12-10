@@ -5,7 +5,7 @@ from prediction_market_agent.db.evaluated_goal_table_handler import (
 
 
 def test_save_load_evaluated_goal_0(
-    table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
+    evaluated_goal_table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
 ) -> None:
     evaluated_goal = EvaluatedGoal(
         goal="abc",
@@ -15,18 +15,18 @@ def test_save_load_evaluated_goal_0(
         reasoning="jkl",
         output="mno",
     )
-    table_handler.save_evaluated_goal(
+    evaluated_goal_table_handler.save_evaluated_goal(
         model=evaluated_goal.to_model(agent_id=mocked_agent_id)
     )
 
-    loaded_models = table_handler.get_latest_evaluated_goals(limit=1)
+    loaded_models = evaluated_goal_table_handler.get_latest_evaluated_goals(limit=1)
     assert len(loaded_models) == 1
     loaded_evaluated_goal = EvaluatedGoal.from_model(model=loaded_models[0])
     assert loaded_evaluated_goal == evaluated_goal
 
 
 def test_save_load_evaluated_goal_1(
-    table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
+    evaluated_goal_table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
 ) -> None:
     evaluated_goal0 = EvaluatedGoal(
         goal="foo",
@@ -45,20 +45,22 @@ def test_save_load_evaluated_goal_1(
         output="bar",
     )
 
-    table_handler.save_evaluated_goal(
+    evaluated_goal_table_handler.save_evaluated_goal(
         model=evaluated_goal0.to_model(agent_id=mocked_agent_id)
     )
-    table_handler.save_evaluated_goal(
+    evaluated_goal_table_handler.save_evaluated_goal(
         model=evaluated_goal1.to_model(agent_id=mocked_agent_id)
     )
 
-    loaded_models = table_handler.get_latest_evaluated_goals(limit=1)
+    loaded_models = evaluated_goal_table_handler.get_latest_evaluated_goals(limit=1)
     assert len(loaded_models) == 1
     loaded_evaluated_goal = EvaluatedGoal.from_model(model=loaded_models[0])
     assert loaded_evaluated_goal == evaluated_goal1
 
     for limit in [2, 3]:
-        loaded_models = table_handler.get_latest_evaluated_goals(limit=limit)
+        loaded_models = evaluated_goal_table_handler.get_latest_evaluated_goals(
+            limit=limit
+        )
         assert len(loaded_models) == 2
         # Check LIFO order
         assert loaded_models[0].datetime_ > loaded_models[1].datetime_
@@ -69,7 +71,7 @@ def test_save_load_evaluated_goal_1(
 
 
 def test_save_load_evaluated_goal_multiple_agents(
-    table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
+    evaluated_goal_table_handler: EvaluatedGoalTableHandler, mocked_agent_id: str
 ) -> None:
     evaluated_goal0 = EvaluatedGoal(
         goal="foo",
@@ -88,14 +90,14 @@ def test_save_load_evaluated_goal_multiple_agents(
         output="bar",
     )
 
-    table_handler.save_evaluated_goal(
+    evaluated_goal_table_handler.save_evaluated_goal(
         model=evaluated_goal0.to_model(agent_id=mocked_agent_id)
     )
-    table_handler.save_evaluated_goal(
+    evaluated_goal_table_handler.save_evaluated_goal(
         model=evaluated_goal1.to_model(agent_id=mocked_agent_id + "1")
     )
 
-    loaded_models = table_handler.get_latest_evaluated_goals(limit=1)
+    loaded_models = evaluated_goal_table_handler.get_latest_evaluated_goals(limit=1)
     assert len(loaded_models) == 1
     loaded_evaluated_goal = EvaluatedGoal.from_model(model=loaded_models[0])
     assert loaded_evaluated_goal == evaluated_goal0
