@@ -11,7 +11,6 @@ from prediction_market_agent.agents.microchain_agent.utils import compress_messa
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
-from prediction_market_agent.db.constants import TRANSACTION_MESSAGE_FEE
 from prediction_market_agent.db.models import BlockchainMessage
 
 
@@ -34,7 +33,7 @@ class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
-Fee for sending the message is {TRANSACTION_MESSAGE_FEE} xDai."""
+Fee for sending the message is {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} xDai."""
 
     @property
     def example_args(self) -> list[str]:
@@ -46,7 +45,9 @@ Fee for sending the message is {TRANSACTION_MESSAGE_FEE} xDai."""
             web3=ContractOnGnosisChain.get_web3(),
             from_private_key=keys.bet_from_private_key,
             to_address=Web3.to_checksum_address(address),
-            value=xdai_to_wei(keys.cap_sending_xdai(TRANSACTION_MESSAGE_FEE)),
+            value=xdai_to_wei(
+                keys.cap_sending_xdai(MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT)
+            ),
             data_text=compress_message(message),
         )
         return "Message sent to the agent."
