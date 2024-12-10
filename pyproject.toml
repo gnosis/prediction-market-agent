@@ -14,7 +14,6 @@ langchain-experimental = "*"
 langchain-community = "*"
 langchain-openai = "*"
 numexpr = "*"
-pyautogen = "^0.3.1"
 flaml = "^2.2.0,<2.3.0" # Bug in newer version, because they started importing xgboost, without requiring it as a dependency.
 beautifulsoup4 = "*"
 google-search-results = "*"
@@ -53,7 +52,9 @@ plotly = "^5.22.0"
 prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "bump-autogen" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.2.0"
-autogen-agentchat = "0.4.0.dev8"
+autogen-agentchat = "0.4.0.dev11"
+autogen-core = "0.4.0.dev11"
+autogen-ext = "0.4.0.dev11"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
