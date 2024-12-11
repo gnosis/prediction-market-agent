@@ -40,7 +40,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         return cls.name.lower().replace(" ", "-")
 
     def load(self) -> None:
-        if MicrochainAgentKeys().bet_from_private_key != self.wallet_address:
+        if MicrochainAgentKeys().bet_from_address != self.wallet_address:
             raise RuntimeError(
                 f"Agent {self.identifier} deployed with a wrong private key."
             )
