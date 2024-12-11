@@ -1,4 +1,3 @@
-import json
 from typing import Generator
 
 import pytest
@@ -38,11 +37,11 @@ def test_save_load_long_term_memory_item(
 
     results = memory_long_term_memory_handler.search(to_=timestamp)
     assert len(results) == 1
-    assert json.loads(str(results[0].metadata_)) == first_item
+    assert results[0].metadata_dict == first_item
 
     results = memory_long_term_memory_handler.search(from_=timestamp)
     assert len(results) == 1
-    assert json.loads(str(results[0].metadata_)) == second_item
+    assert results[0].metadata_dict == second_item
 
     # Retrieve all
     assert len(memory_long_term_memory_handler.search()) == 2

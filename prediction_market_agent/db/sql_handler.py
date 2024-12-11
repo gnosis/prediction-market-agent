@@ -1,41 +1,32 @@
 import typing as t
 
-from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.tools.db.db_manager import DBManager
 from sqlalchemy import BinaryExpression, ColumnElement
-from sqlmodel import Session, SQLModel, asc, create_engine, desc
-
-from prediction_market_agent.utils import DBKeys
+from sqlmodel import SQLModel, asc, desc
 
 SQLModelType = t.TypeVar("SQLModelType", bound=SQLModel)
 
 
 class SQLHandler:
     def __init__(
-        self, model: t.Type[SQLModelType], sqlalchemy_db_url: str | None = None
+        self,
+        model: t.Type[SQLModelType],
+        sqlalchemy_db_url: str | None = None,
     ):
-        self.engine = create_engine(
-            sqlalchemy_db_url
-            if sqlalchemy_db_url
-            else check_not_none(DBKeys().SQLALCHEMY_DB_URL)
-        )
+        self.db_manager = DBManager(sqlalchemy_db_url)
         self.table = model
         self._init_table_if_not_exists()
 
     def _init_table_if_not_exists(self) -> None:
-        table = SQLModel.metadata.tables[str(self.table.__tablename__)]
-        SQLModel.metadata.create_all(self.engine, tables=[table])
+        self.db_manager.create_tables(sqlmodel_tables=[self.table])
 
     def get_all(self) -> t.Sequence[SQLModelType]:
-        return Session(self.engine).query(self.table).all()
+        with self.db_manager.get_session() as session:
+            return session.query(self.table).all()
 
     def save_multiple(self, items: t.Sequence[SQLModelType]) -> None:
-        with Session(self.engine) as session:
+        with self.db_manager.get_session() as session:
             session.add_all(items)
-            session.commit()
-
-    def delete_all_entries(self, col_name: str, col_value: str) -> None:
-        with Session(self.engine) as session:
-            session.query(self.table).filter_by(**{col_name: col_value}).delete()
             session.commit()
 
     def get_with_filter_and_order(
@@ -45,7 +36,7 @@ class SQLHandler:
         order_desc: bool = True,
         limit: int | None = None,
     ) -> t.Sequence[SQLModelType]:
-        with Session(self.engine) as session:
+        with self.db_manager.get_session() as session:
             query = session.query(self.table)
             for exp in query_filters:
                 query = query.where(exp)

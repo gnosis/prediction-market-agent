@@ -1,6 +1,9 @@
-from typing import Optional
+import json
+from typing import Any, Optional
 
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from sqlalchemy import BigInteger, Column
 from sqlmodel import Field, SQLModel
 
 
@@ -12,8 +15,18 @@ class LongTermMemories(SQLModel, table=True):
     metadata_: Optional[str] = None
     datetime_: DatetimeUTC
 
-
-PROMPT_DEFAULT_SESSION_IDENTIFIER = "microchain-streamlit"
+    @property
+    def metadata_dict(self) -> dict[str, Any] | None:
+        try:
+            out: dict[str, Any] | None = (
+                json.loads(self.metadata_) if self.metadata_ else None
+            )
+            return out
+        except Exception as e:
+            logger.error(
+                f"Error while loading {self.__class__.__name__} with {self.id=} metadata: {self.metadata_} "
+            )
+            raise e
 
 
 class Prompt(SQLModel, table=True):
@@ -48,3 +61,19 @@ class EvaluatedGoalModel(SQLModel, table=True):
     reasoning: str
     output: str | None
     datetime_: DatetimeUTC
+
+
+class BlockchainMessage(SQLModel, table=True):
+    """Messages sent to agents via data fields within blockchain transfers."""
+
+    __tablename__ = "blockchain_messages"
+    __table_args__ = {
+        "extend_existing": True
+    }  # required if initializing an existing table
+    id: Optional[int] = Field(default=None, primary_key=True)
+    consumer_address: str
+    sender_address: str
+    transaction_hash: str = Field(unique=True)
+    block: int = Field(sa_column=Column(BigInteger, nullable=False))
+    value_wei: int = Field(sa_column=Column(BigInteger, nullable=False))
+    data_field: Optional[str]

@@ -12,6 +12,7 @@ class MicrochainAgentKeys(APIKeys):
     SENDING_XDAI_CAP: float | None = OMEN_TINY_BET_AMOUNT
     # Double check to not transfer NFTs during testing.
     ENABLE_NFT_TRANSFER: bool = False
+    RECEIVER_MINIMUM_AMOUNT: xDai = OMEN_TINY_BET_AMOUNT
 
     def cap_sending_xdai(self, amount: xDai) -> xDai:
         if self.SENDING_XDAI_CAP is None:
