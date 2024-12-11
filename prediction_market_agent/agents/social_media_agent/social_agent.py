@@ -1,10 +1,14 @@
+import asyncio
 from enum import Enum
 from string import Template
-from typing import Any, Dict, Optional
 
-import autogen
-from autogen import AssistantAgent, UserProxyAgent
-from autogen.cache import Cache
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import BaseGroupChat, MagenticOneGroupChat
+from autogen_agentchat.teams._group_chat._magentic_one._prompts import (
+    ORCHESTRATOR_FINAL_ANSWER_PROMPT,
+)
+from autogen_agentchat.ui import Console
+from autogen_ext.models.openai import OpenAIChatCompletionClient
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
@@ -14,7 +18,6 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     SimpleMemoryThinkThoroughly,
 )
 from prediction_market_agent.agents.social_media_agent.prompts import (
-    CRITIC_PROMPT,
     INFLUENCER_PROMPT,
     POST_MAX_LENGTH,
     REASONING_PROMPT,
@@ -54,63 +57,36 @@ class AutogenAgentType(str, Enum):
     USER = "user"
 
 
-def reflection_message(
-    recipient: UserProxyAgent,
-    messages: list[Dict[Any, Any]],
-    sender: AssistantAgent,
-    config: Optional[Any] = None,
-) -> str:
-    reflect_prompt = Template(CRITIC_PROMPT).substitute(
-        TWEET=recipient.chat_messages_for_summary(sender)[-1]["content"]
-    )
-    return reflect_prompt
-
-
-def build_llm_config(model: str) -> Dict[str, Any]:
-    keys = APIKeys()
-    return {
-        "config_list": [
-            {"model": model, "api_key": keys.openai_api_key.get_secret_value()}
-        ],
-    }
-
-
-def build_agents(model: str) -> Dict[AutogenAgentType, autogen.ConversableAgent]:
-    llm_config = build_llm_config(model)
-
-    user_proxy = autogen.UserProxyAgent(
-        name="User",
-        human_input_mode="NEVER",
-        is_termination_msg=lambda x: x.get("content", "").find("TERMINATE") >= 0,
-        code_execution_config={
-            "last_n_messages": 1,
-            "work_dir": "tasks",
-            "use_docker": False,
-        },
+def build_team(model: str) -> BaseGroupChat:
+    model_client = OpenAIChatCompletionClient(
+        model=model, api_key=APIKeys().openai_api_key.get_secret_value()
     )
 
-    writer = autogen.AssistantAgent(
-        name="Writer",
-        llm_config=llm_config,
-        system_message="""You are a professional influencer, known for your insightful and engaging tweets. You 
-        transform complex concepts into compelling narratives. You should improve the quality of the content based on 
-        the feedback from the user. You must always return only the tweet. """,
+    primary_agent = AssistantAgent(
+        "primary",
+        model_client=model_client,
+        description="Generate a tweet for the user. Make sure the feedback given by the critic is being addressed.",
+        system_message="""You are a professional influencer, known for your insightful and engaging tweets. You transform complex concepts into compelling narratives. You should improve the quality of the content based on the feedback from the user. You must always return only the tweet.""",
     )
 
-    critic = autogen.AssistantAgent(
-        name="Critic",
-        llm_config=llm_config,
-        system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is 
-        to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with 
-        required guidelines. You should also always remind everyone that the limit for any posts being created is 
-{POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
+    critic_agent = AssistantAgent(
+        "critic",
+        model_client=model_client,
+        description="Critique the tweet and provide feedback.",
+        system_message=f""" You are a critic, known for your thoroughness and commitment to standards. Your task is to scrutinize content for any harmful elements or regulatory violations, ensuring all materials align with required guidelines. You should also always remind everyone that the limit for any posts being created is {POST_MAX_LENGTH} characters. References to betting and gambling are allowed.""",
     )
 
-    return {
-        AutogenAgentType.CRITIC: critic,
-        AutogenAgentType.WRITER: writer,
-        AutogenAgentType.USER: user_proxy,
-    }
+    final_prompt = (
+        ORCHESTRATOR_FINAL_ANSWER_PROMPT
+        + "\n Output only the final version of the tweet and nothing else."
+    )
+
+    magentic_team = MagenticOneGroupChat(
+        [primary_agent, critic_agent],
+        model_client=model_client,
+        final_answer_prompt=final_prompt,
+    )
+    return magentic_team
 
 
 @observe()
@@ -184,38 +160,8 @@ def build_reply_tweet(
 
 
 def build_tweet(model: str, task: str) -> str:
-    agents = build_agents(model)
-    user_proxy, writer, critic = (
-        agents[AutogenAgentType.USER],
-        agents[AutogenAgentType.WRITER],
-        agents[AutogenAgentType.CRITIC],
-    )
-    user_proxy.register_nested_chats(
-        [
-            {
-                "recipient": critic,
-                "message": reflection_message,
-                "summary_method": "last_msg",
-                "max_turns": 1,
-            }
-        ],
-        trigger=writer,
-    )
+    team = build_team(model)
 
-    # in case we trigger repeated runs, Cache makes it faster.
-    with Cache.disk(cache_seed=42) as cache:
-        # max_turns = the maximum number of turns for the chat between the two agents. One turn means one conversation round trip.
-        res = user_proxy.initiate_chat(
-            recipient=writer,
-            message=task,
-            max_turns=2,
-            summary_method=SummaryMethod.REFLECTION_WITH_LLM,
-            cache=cache,
-        )
-    # We extract the last message since the revised tweet is contained in the last response
-    # from the writer.
-    reply_tweet = res.chat_history[-1]["content"]
-
-    return str(
-        reply_tweet
-    )  # Casting needed as summary is of type any and no Pydantic support
+    task_result = asyncio.run(Console(team.run_stream(task=task)))
+    reply_tweet = task_result.messages[-1].content  # Last message is critic's approval
+    return str(reply_tweet)
