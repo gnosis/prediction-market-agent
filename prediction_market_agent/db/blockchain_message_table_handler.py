@@ -12,10 +12,8 @@ from prediction_market_agent.db.sql_handler import SQLHandler
 class BlockchainMessageTableHandler:
     def __init__(
         self,
-        session_identifier: str | None = None,
         sqlalchemy_db_url: str | None = None,
     ):
-        self.session_identifier = session_identifier
         self.sql_handler = SQLHandler(
             model=BlockchainMessage, sqlalchemy_db_url=sqlalchemy_db_url
         )
