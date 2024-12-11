@@ -33,13 +33,18 @@ from prediction_market_agent.utils import APIKeys
 GENERAL_AGENT_TAG = "general_agent"
 
 
-class DeployableMicrochainAgent(DeployableAgent):
+class DeployableMicrochainAgentAbstract(DeployableAgent):
     model = SupportedModel.gpt_4o
-    n_iterations = 50
-    load_historical_prompt: bool = False
-    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.TRADING_AGENT
-    identifier: AgentIdentifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
-    description: str
+    max_iterations: int | None = 50
+    import_actions_from_memory = 0
+    initial_system_prompt: SystemPromptChoice
+    identifier: AgentIdentifier
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            f"Microchain {cls.__name__} with {cls.initial_system_prompt} system prompt."
+        )
 
     def build_goal_manager(
         self,
@@ -63,7 +68,7 @@ class DeployableMicrochainAgent(DeployableAgent):
         market_type: MarketType,
     ) -> None:
         self.langfuse_update_current_trace(
-            tags=[GENERAL_AGENT_TAG, self.system_prompt_choice, self.identifier]
+            tags=[GENERAL_AGENT_TAG, self.initial_system_prompt, self.identifier]
         )
 
         long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(
@@ -71,10 +76,8 @@ class DeployableMicrochainAgent(DeployableAgent):
         )
         prompt_handler = PromptTableHandler.from_agent_identifier(self.identifier)
         unformatted_system_prompt = get_unformatted_system_prompt(
-            unformatted_prompt=SYSTEM_PROMPTS[self.system_prompt_choice],
-            prompt_table_handler=(
-                prompt_handler if self.load_historical_prompt else None
-            ),
+            unformatted_prompt=SYSTEM_PROMPTS[self.initial_system_prompt],
+            prompt_table_handler=prompt_handler,
         )
 
         agent: Agent = build_agent(
@@ -83,9 +86,10 @@ class DeployableMicrochainAgent(DeployableAgent):
             unformatted_system_prompt=unformatted_system_prompt,
             allow_stop=True,
             long_term_memory=long_term_memory,
+            import_actions_from_memory=self.import_actions_from_memory,
             keys=APIKeys(),
             functions_config=FunctionsConfig.from_system_prompt_choice(
-                self.system_prompt_choice
+                self.initial_system_prompt
             ),
             enable_langfuse=self.enable_langfuse,
         )
@@ -97,64 +101,91 @@ class DeployableMicrochainAgent(DeployableAgent):
         # Save formatted system prompt
         initial_formatted_system_prompt = agent.system_prompt
 
-        try:
-            agent.run(self.n_iterations)
-        except Exception as e:
-            logger.error(e)
-            raise e
-        finally:
-            if goal_manager:
-                goal = check_not_none(goal)
-                goal_evaluation = goal_manager.evaluate_goal_progress(
-                    goal=goal,
-                    chat_history=ChatHistory.from_list_of_dicts(agent.history),
+        iteration = 0
+        while self.max_iterations is None or iteration < self.max_iterations:
+            starting_history_length = len(agent.history)
+            try:
+                # After the first iteration, resume=True to not re-initialize the agent.
+                agent.run(iterations=1, resume=iteration > 0)
+            except Exception as e:
+                logger.error(f"Error while running microchain agent: {e}")
+                raise e
+            finally:
+                # Save the agent's history to the long-term memory after every iteration to keep users updated.
+                save_agent_history(
+                    agent=agent,
+                    long_term_memory=long_term_memory,
+                    initial_system_prompt=initial_formatted_system_prompt,
+                    # Because the agent is running in a while cycle, always save into database only what's new, to not duplicate entries.
+                    save_last_n=len(agent.history) - starting_history_length,
                 )
-                goal_manager.save_evaluated_goal(
-                    goal=goal,
-                    evaluation=goal_evaluation,
-                )
-                agent.history.append(
-                    ChatMessage(
-                        role="user",
-                        content=str(f"# Goal evaluation\n{goal_evaluation}"),
-                    ).model_dump()
-                )
+                if agent.system_prompt != initial_formatted_system_prompt:
+                    prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+            iteration += 1
 
+        if goal_manager:
+            goal = check_not_none(goal)
+            goal_evaluation = goal_manager.evaluate_goal_progress(
+                goal=goal,
+                chat_history=ChatHistory.from_list_of_dicts(agent.history),
+            )
+            goal_manager.save_evaluated_goal(
+                goal=goal,
+                evaluation=goal_evaluation,
+            )
+            agent.history.append(
+                ChatMessage(
+                    role="user",
+                    content=f"# Goal evaluation\n{goal_evaluation}",
+                ).model_dump()
+            )
             save_agent_history(
                 agent=agent,
                 long_term_memory=long_term_memory,
                 initial_system_prompt=initial_formatted_system_prompt,
+                save_last_n=1,
             )
-            if agent.system_prompt != initial_formatted_system_prompt:
-                prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+
+
+class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
+    system_prompt_choice = SystemPromptChoice.TRADING_AGENT
+    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
     DeployableMicrochainAgent
 ):
     system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
-    load_historical_prompt: bool = True
 
 
 class DeployableMicrochainModifiableSystemPromptAgent0(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
-    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 0."
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 0."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent1(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
-    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 1."
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 1."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent2(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
-    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 2."
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 2."
 
 
 class DeployableMicrochainModifiableSystemPromptAgent3(
@@ -163,15 +194,21 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
     # Force less iterations, because Replicate's API allows at max 4096 input tokens.
-    n_iterations = 10
-    description = "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 3. Uses Llama 3.1 model."
+    max_iterations = 10
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Microchain agent with 'just born' system prompt, and ability to adjust its own system prompt, version 3. Uses Llama 3.1 model."
 
 
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
     system_prompt_choice = SystemPromptChoice.TRADING_AGENT_MINIMAL
-    description = "Microchain agent woth minimal 'trader' system prompt, and GoalManager, version 0"
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Microchain agent woth minimal 'trader' system prompt, and GoalManager, version 0"
 
     def build_goal_manager(
         self,

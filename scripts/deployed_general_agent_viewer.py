@@ -89,12 +89,12 @@ class DeployedGeneralAgentSettings(BaseSettings):
         )
 
     def to_agent_description(self, identifier: AgentIdentifier) -> str:
-        return AGENT_IDENTIFIER_TO_CLASS[identifier].description
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].get_description()
 
     def to_system_prompt_choice(
         self, identifier: AgentIdentifier
     ) -> SystemPromptChoice:
-        return AGENT_IDENTIFIER_TO_CLASS[identifier].system_prompt_choice
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].initial_system_prompt
 
 
 MARKET_TYPE = MarketType.OMEN

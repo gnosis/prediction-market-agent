@@ -12,10 +12,10 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.agents_nft_game import (
-    AGENTS_IN_THE_GAME,
+from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
+    NFT_AGENTS,
     TREASURY_SAFE_ADDRESS,
-    NFTAgent,
+    DeployableAgentNFTGameAbstract,
 )
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     BroadcastPublicMessageToHumans,
@@ -44,7 +44,7 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
     return PromptTableHandler.from_agent_identifier(identifier)
 
 
-def send_message_part(nft_agent: NFTAgent) -> None:
+def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
 
     if st.button("Send message", disabled=not message):
@@ -106,7 +106,7 @@ def customized_chat_message(
 
 
 @st.fragment(run_every=timedelta(seconds=5))
-def show_function_calls_part(nft_agent: NFTAgent) -> None:
+def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     st.markdown(f"""### Agent's actions""")
 
     with st.spinner("Loading agent's actions..."):
@@ -127,7 +127,7 @@ def show_function_calls_part(nft_agent: NFTAgent) -> None:
 
 
 @st.fragment(run_every=timedelta(seconds=5))
-def show_about_agent_part(nft_agent: NFTAgent) -> None:
+def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     system_prompt = prompt_table_handler(nft_agent.identifier).fetch_latest_prompt()
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     st.markdown(
@@ -156,7 +156,9 @@ Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.
     )
 
 
-def get_agent_page(nft_agent: NFTAgent) -> t.Callable[[], None]:
+def get_agent_page(
+    nft_agent: type[DeployableAgentNFTGameAbstract],
+) -> t.Callable[[], None]:
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
 
@@ -175,8 +177,8 @@ with st.sidebar:
 
 pg = st.navigation(
     [
-        st.Page(get_agent_page(agent), title=agent.name, url_path=agent.url)
-        for agent in AGENTS_IN_THE_GAME
+        st.Page(get_agent_page(agent), title=agent.name, url_path=agent.get_url())
+        for agent in NFT_AGENTS
     ]
 )
 pg.run()

@@ -13,7 +13,10 @@ from microchain import (
 )
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import should_not_happen
+from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
+    should_not_happen,
+)
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -36,7 +39,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    RememberPastActions,
+    LookAtPastActions,
 )
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     MESSAGES_FUNCTIONS,
@@ -162,7 +165,7 @@ def build_agent_functions(
 
     if long_term_memory:
         functions.append(
-            RememberPastActions(long_term_memory=long_term_memory, model=model)
+            LookAtPastActions(long_term_memory=long_term_memory, model=model)
         )
 
     return functions
@@ -177,6 +180,7 @@ def build_agent(
     enable_langfuse: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
+    import_actions_from_memory: int = 0,
     allow_stop: bool = True,
     bootstrap: str | None = None,
     raise_on_error: bool = True,
@@ -222,6 +226,17 @@ def build_agent(
         enable_langfuse=enable_langfuse,
     )
 
+    if import_actions_from_memory:
+        latest_saved_memories = check_not_none(
+            long_term_memory, "long_term_memory is needed for this functionality."
+        ).search(limit=import_actions_from_memory)
+        agent.history.extend(
+            m.metadata_dict
+            for m in latest_saved_memories
+            if check_not_none(m.metadata_dict)["role"]
+            != "system"  # Do not include system message as that one is automatically in the beginning of the history.
+        )
+
     for f in build_agent_functions(
         agent=agent,
         market_type=market_type,
@@ -259,6 +274,7 @@ def save_agent_history(
     long_term_memory: LongTermMemoryTableHandler,
     agent: Agent,
     initial_system_prompt: str,
+    save_last_n: int | None = None,
 ) -> None:
     """
     Save the agent's history to the long-term memory. But first, restore the
@@ -270,7 +286,9 @@ def save_agent_history(
 
     # Restore the system prompt to its initial state
     agent.history[0] = dict(role="system", content=initial_system_prompt)
-    long_term_memory.save_history(agent.history)
+    long_term_memory.save_history(
+        agent.history[-save_last_n if save_last_n else len(agent.history) :]
+    )
 
     # Restore the head system prompt
     agent.history[0] = head_system_prompt
