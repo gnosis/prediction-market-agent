@@ -267,7 +267,7 @@ def get_unformatted_system_prompt(
             return build_full_unformatted_system_prompt(historical_prompt.prompt)
 
     # If no historical prompt is found, return the original prompt.
-    return unformatted_prompt
+    return build_full_unformatted_system_prompt(unformatted_prompt)
 
 
 def save_agent_history(

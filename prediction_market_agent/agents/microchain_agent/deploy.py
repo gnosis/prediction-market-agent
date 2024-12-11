@@ -1,3 +1,5 @@
+import abc
+
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
@@ -20,9 +22,10 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     save_agent_history,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    SYSTEM_PROMPTS,
+    JUST_BORN_SYSTEM_PROMPT_CONFIG,
+    TRADING_AGENT_SYSTEM_PROMPT_CONFIG,
+    TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG,
     FunctionsConfig,
-    SystemPromptChoice,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -33,18 +36,21 @@ from prediction_market_agent.utils import APIKeys
 GENERAL_AGENT_TAG = "general_agent"
 
 
-class DeployableMicrochainAgentAbstract(DeployableAgent):
+class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     model = SupportedModel.gpt_4o
     max_iterations: int | None = 50
     import_actions_from_memory = 0
-    initial_system_prompt: SystemPromptChoice
     identifier: AgentIdentifier
+    functions_config: FunctionsConfig
 
     @classmethod
     def get_description(cls) -> str:
-        return (
-            f"Microchain {cls.__name__} with {cls.initial_system_prompt} system prompt."
-        )
+        return f"Microchain-based {cls.__name__}."
+
+    @classmethod
+    @abc.abstractmethod
+    def get_initial_system_prompt(cls) -> str:
+        pass
 
     def build_goal_manager(
         self,
@@ -67,16 +73,14 @@ class DeployableMicrochainAgentAbstract(DeployableAgent):
         self,
         market_type: MarketType,
     ) -> None:
-        self.langfuse_update_current_trace(
-            tags=[GENERAL_AGENT_TAG, self.initial_system_prompt, self.identifier]
-        )
+        self.langfuse_update_current_trace(tags=[GENERAL_AGENT_TAG, self.identifier])
 
         long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(
             self.identifier
         )
         prompt_handler = PromptTableHandler.from_agent_identifier(self.identifier)
         unformatted_system_prompt = get_unformatted_system_prompt(
-            unformatted_prompt=SYSTEM_PROMPTS[self.initial_system_prompt],
+            unformatted_prompt=self.get_initial_system_prompt(),
             prompt_table_handler=prompt_handler,
         )
 
@@ -88,9 +92,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent):
             long_term_memory=long_term_memory,
             import_actions_from_memory=self.import_actions_from_memory,
             keys=APIKeys(),
-            functions_config=FunctionsConfig.from_system_prompt_choice(
-                self.initial_system_prompt
-            ),
+            functions_config=self.functions_config,
             enable_langfuse=self.enable_langfuse,
         )
 
@@ -148,14 +150,22 @@ class DeployableMicrochainAgentAbstract(DeployableAgent):
 
 
 class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
-    system_prompt_choice = SystemPromptChoice.TRADING_AGENT
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
+    functions_config = TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
+
+    @classmethod
+    def get_initial_system_prompt(cls) -> str:
+        return TRADING_AGENT_SYSTEM_PROMPT_CONFIG.system_prompt
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
     DeployableMicrochainAgent
 ):
-    system_prompt_choice: SystemPromptChoice = SystemPromptChoice.JUST_BORN
+    functions_config = JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
+
+    @classmethod
+    def get_initial_system_prompt(cls) -> str:
+        return JUST_BORN_SYSTEM_PROMPT_CONFIG.system_prompt
 
 
 class DeployableMicrochainModifiableSystemPromptAgent0(
@@ -204,7 +214,11 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
-    system_prompt_choice = SystemPromptChoice.TRADING_AGENT_MINIMAL
+    functions_config = TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
+
+    @classmethod
+    def get_initial_system_prompt(cls) -> str:
+        return TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.system_prompt
 
     @classmethod
     def get_description(cls) -> str:

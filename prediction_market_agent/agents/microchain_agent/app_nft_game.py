@@ -13,7 +13,7 @@ from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
-    NFT_AGENTS,
+    DEPLOYED_NFT_AGENTS,
     TREASURY_SAFE_ADDRESS,
     DeployableAgentNFTGameAbstract,
 )
@@ -178,7 +178,7 @@ with st.sidebar:
 pg = st.navigation(
     [
         st.Page(get_agent_page(agent), title=agent.name, url_path=agent.get_url())
-        for agent in NFT_AGENTS
+        for agent in DEPLOYED_NFT_AGENTS
     ]
 )
 pg.run()
