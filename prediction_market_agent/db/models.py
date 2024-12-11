@@ -1,6 +1,7 @@
 import json
 from typing import Any, Optional
 
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from sqlalchemy import BigInteger, Column
 from sqlmodel import Field, SQLModel
@@ -16,10 +17,16 @@ class LongTermMemories(SQLModel, table=True):
 
     @property
     def metadata_dict(self) -> dict[str, Any] | None:
-        out: dict[str, Any] | None = (
-            json.loads(self.metadata_) if self.metadata_ else None
-        )
-        return out
+        try:
+            out: dict[str, Any] | None = (
+                json.loads(self.metadata_) if self.metadata_ else None
+            )
+            return out
+        except Exception as e:
+            logger.error(
+                f"Error while loading {self.__class__.__name__} with {self.id=} metadata: {self.metadata_} "
+            )
+            raise e
 
 
 class Prompt(SQLModel, table=True):
