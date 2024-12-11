@@ -1,13 +1,9 @@
 import asyncio
 from enum import Enum
 from string import Template
-from typing import Any, Dict, Optional
 
-from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.teams import (
-    BaseGroupChat,
-    MagenticOneGroupChat,
-)
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import BaseGroupChat, MagenticOneGroupChat
 from autogen_agentchat.teams._group_chat._magentic_one._prompts import (
     ORCHESTRATOR_FINAL_ANSWER_PROMPT,
 )
@@ -22,10 +18,9 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     SimpleMemoryThinkThoroughly,
 )
 from prediction_market_agent.agents.social_media_agent.prompts import (
-    CRITIC_PROMPT,
     INFLUENCER_PROMPT,
-    REASONING_PROMPT,
     POST_MAX_LENGTH,
+    REASONING_PROMPT,
 )
 from prediction_market_agent.agents.utils import extract_reasonings_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -60,18 +55,6 @@ class AutogenAgentType(str, Enum):
     WRITER = "writer"
     CRITIC = "critic"
     USER = "user"
-
-
-def reflection_message(
-    recipient: UserProxyAgent,
-    messages: list[Dict[Any, Any]],
-    sender: AssistantAgent,
-    config: Optional[Any] = None,
-) -> str:
-    reflect_prompt = Template(CRITIC_PROMPT).substitute(
-        TWEET=recipient.chat_messages_for_summary(sender)[-1]["content"]
-    )
-    return reflect_prompt
 
 
 def build_team(model: str) -> BaseGroupChat:
