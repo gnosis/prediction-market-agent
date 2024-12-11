@@ -52,9 +52,10 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
-from prediction_market_agent.agents.social_media_agent.deploy import (
-    DeployableSocialMediaAgent,
-)
+
+# from prediction_market_agent.agents.social_media_agent.deploy import (
+#     DeployableSocialMediaAgent,
+# )
 from prediction_market_agent.agents.specialized_agent.deploy import (
     MarketCreatorsStalkerAgent1,
     MarketCreatorsStalkerAgent2,
@@ -112,7 +113,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.microchain_modifiable_system_prompt_2: DeployableMicrochainModifiableSystemPromptAgent2,
     RunnableAgent.microchain_modifiable_system_prompt_3: DeployableMicrochainModifiableSystemPromptAgent3,
     RunnableAgent.microchain_with_goal_manager_agent_0: DeployableMicrochainWithGoalManagerAgent0,
-    RunnableAgent.social_media: DeployableSocialMediaAgent,
+    # RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
     RunnableAgent.prophet_gpt4o_new_market_trader: DeployablePredictionProphetGPT4oAgentNewMarketTrader,
