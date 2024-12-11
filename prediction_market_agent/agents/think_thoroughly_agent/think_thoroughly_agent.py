@@ -28,6 +28,7 @@ from prediction_market_agent_tooling.tools.utils import (
 )
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
@@ -103,7 +104,7 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 
 class ThinkThoroughlyBase(ABC):
-    identifier: str
+    identifier: AgentIdentifier
     model: str
     model_for_generate_prediction_for_one_outcome: str
 
@@ -113,7 +114,9 @@ class ThinkThoroughlyBase(ABC):
         self.pinecone_handler = PineconeHandler()
         self.memory = memory
         self._long_term_memory = (
-            LongTermMemoryTableHandler(self.identifier) if self.memory else None
+            LongTermMemoryTableHandler.from_agent_identifier(self.identifier)
+            if self.memory
+            else None
         )
 
         disable_crewai_telemetry()  # To prevent telemetry from being sent to CrewAI
@@ -373,7 +376,7 @@ class ThinkThoroughlyBase(ABC):
 
 
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
-    identifier = "think-thoroughly-agent"
+    identifier = AgentIdentifier.THINK_THOROUGHLY
     model = "gpt-4-turbo-2024-04-09"
     model_for_generate_prediction_for_one_outcome = "gpt-4-turbo-2024-04-09"
 
@@ -440,7 +443,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
-    identifier = "think-thoroughly-prophet-research-agent"
+    identifier = AgentIdentifier.THINK_THOROUGHLY_PROPHET
     model = "gpt-4-turbo-2024-04-09"
     model_for_generate_prediction_for_one_outcome = "gpt-4o-2024-08-06"
 
