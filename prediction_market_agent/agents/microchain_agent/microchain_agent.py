@@ -283,6 +283,10 @@ def save_agent_history(
     """
     # Save off the most up-to-date, or 'head' system prompt
     head_system_prompt = agent.history[0]
+    if head_system_prompt["role"] != "system":
+        raise ValueError(
+            f"Expected the first message in the history to be a system message, but got: {head_system_prompt}"
+        )
 
     # Restore the system prompt to its initial state
     agent.history[0] = dict(role="system", content=initial_system_prompt)
