@@ -50,9 +50,9 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
 
-class DeployableAgentNFTGame0(DeployableAgentNFTGameAbstract):
+class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     name = "Sneaky Pete"
-    identifier = AgentIdentifier.NFT_GAME_AGENT_0
+    identifier = AgentIdentifier.NFT_GAME_AGENT_1
     wallet_address = Web3.to_checksum_address(
         "0xd845A24014B3BD96212A21f602a4F16A7dA518A4"
     )
@@ -80,9 +80,9 @@ class DeployableAgentNFTGame0(DeployableAgentNFTGameAbstract):
         )
 
 
-class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
+class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     name = "Banana Man"
-    identifier = AgentIdentifier.NFT_GAME_AGENT_1
+    identifier = AgentIdentifier.NFT_GAME_AGENT_2
     wallet_address = Web3.to_checksum_address(
         "0xb4D8C8BedE2E49b08d2A22485f72fA516116FE7F"
     )
@@ -103,9 +103,9 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
         )
 
 
-class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
+class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     name = "Whispers"
-    identifier = AgentIdentifier.NFT_GAME_AGENT_2
+    identifier = AgentIdentifier.NFT_GAME_AGENT_3
     wallet_address = Web3.to_checksum_address(
         "0xC09a8aB38A554022ACBACBA174F14C8B35E89946"
     )
@@ -126,9 +126,9 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
         )
 
 
-class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
+class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     name = "Fuzzy Feet"
-    identifier = AgentIdentifier.NFT_GAME_AGENT_3
+    identifier = AgentIdentifier.NFT_GAME_AGENT_4
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
@@ -149,9 +149,9 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
         )
 
 
-class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
+class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     name = "Bubble Beard"
-    identifier = AgentIdentifier.NFT_GAME_AGENT_4
+    identifier = AgentIdentifier.NFT_GAME_AGENT_5
     wallet_address = Web3.to_checksum_address(
         "0x84690A78d74e90608fc3e73cA79A06ee4F261A06"
     )
@@ -220,9 +220,9 @@ Your main object is to maximize your resources and have fun while doing it.
 
 
 DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
-    DeployableAgentNFTGame0,
     DeployableAgentNFTGame1,
     DeployableAgentNFTGame2,
     DeployableAgentNFTGame3,
     DeployableAgentNFTGame4,
+    DeployableAgentNFTGame5,
 ]
