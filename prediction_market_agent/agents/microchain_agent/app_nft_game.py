@@ -91,6 +91,9 @@ def customized_chat_message(
     parsed_function, parsed_body = parse_function_and_body(role, message)
     if parsed_function is None:
         return
+    # If the message is output from Reasoning function, skip it, because it's not interesting to read `The reasoning has been recorded` over and over again.
+    if parsed_body == Reasoning()(""):
+        return
 
     match parsed_function:
         case Reasoning.__name__:
