@@ -13,11 +13,13 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     ReceiveMessage,
 )
+from prediction_market_agent.db.blockchain_message_table_handler import (
+    BlockchainMessageTableHandler,
+)
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
 from prediction_market_agent.tools.message_utils import compress_message
-from prediction_market_agent.utils import DBKeys
 
 
 @pytest.fixture(scope="module")
@@ -76,17 +78,15 @@ def patch_public_key(
         yield mock_public_key
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def patch_pytest_db(
-    session_keys_with_mocked_db: DBKeys,
+    memory_blockchain_handler: BlockchainMessageTableHandler,
 ) -> Generator[PropertyMock, None, None]:
     with patch(
         "prediction_market_agent_tooling.config.APIKeys.sqlalchemy_db_url",
         new_callable=PropertyMock,
     ) as mock_sqlalchemy_db_url:
-        mock_sqlalchemy_db_url.return_value = (
-            session_keys_with_mocked_db.SQLALCHEMY_DB_URL
-        )
+        mock_sqlalchemy_db_url.return_value = SecretStr("sqlite://")
         yield mock_sqlalchemy_db_url
 
 

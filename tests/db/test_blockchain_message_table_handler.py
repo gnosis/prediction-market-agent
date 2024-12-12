@@ -1,25 +1,9 @@
-from typing import Generator
-
-import pytest
 from web3 import Web3
 
 from prediction_market_agent.db.blockchain_message_table_handler import (
     BlockchainMessageTableHandler,
 )
 from prediction_market_agent.db.models import BlockchainMessage
-from tests.db.conftest import reset_init_params_db_manager
-
-
-@pytest.fixture(scope="function")
-def memory_blockchain_handler() -> Generator[BlockchainMessageTableHandler, None, None]:
-    """Creates a in-memory SQLite DB for testing"""
-    prompt_handler = BlockchainMessageTableHandler(
-        sqlalchemy_db_url="sqlite://",
-    )
-    reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
-    yield prompt_handler
-    reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
-
 
 MOCK_ADDRESS = Web3.to_checksum_address(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
