@@ -6,6 +6,7 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 
 import typing as t
 from datetime import timedelta
+from enum import Enum
 
 import streamlit as st
 from microchain.functions import Reasoning
@@ -32,8 +33,10 @@ st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
 )
 
-# Respones from Microchain's functions don't have a function name to show, so use this dummy one.
-DUMMY_RESPONSE_FUNCTION_NAME = "Response"
+
+class DummyFunctionName(str, Enum):
+    # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
+    RESPONSE_FUNCTION_NAME = "Response"
 
 
 @st.cache_resource
@@ -68,7 +71,7 @@ def parse_function_and_body(
         parsed_body = message.split("(")[1].rsplit(")")[0]
     elif role == "user":
         # Responses from the individual functions are stored under `user` role.
-        parsed_function = DUMMY_RESPONSE_FUNCTION_NAME
+        parsed_function = DummyFunctionName.RESPONSE_FUNCTION_NAME
         parsed_body = message
     elif role == "system":
         # System message isn't shown in the chat history, so ignore.
@@ -93,7 +96,7 @@ def customized_chat_message(
         case Reasoning.__name__:
             # Skip Reasoning messages, because it's not interesting to read `The reasoning has been recorded` in the chat every time the agent something thinks about.
             return
-        case DUMMY_RESPONSE_FUNCTION_NAME:
+        case DummyFunctionName.RESPONSE_FUNCTION_NAME:
             icon = "✔️"
         case ReceiveMessage.__name__:
             icon = "👤"
