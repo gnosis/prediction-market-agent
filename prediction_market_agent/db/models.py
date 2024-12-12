@@ -7,7 +7,7 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from pydantic import computed_field
-from sqlalchemy import BigInteger, Column, Numeric
+from sqlalchemy import Column, Numeric
 from sqlmodel import Field, SQLModel
 
 from prediction_market_agent.tools.message_utils import decompress_message
@@ -80,7 +80,7 @@ class BlockchainMessage(SQLModel, table=True):
     consumer_address: str
     sender_address: str
     transaction_hash: str = Field(unique=True)
-    block: int = Field(sa_column=Column(BigInteger, nullable=False))
+    block: int = Field(sa_column=Column(Numeric, nullable=False))
     value_wei: int = Field(sa_column=Column(Numeric, nullable=False))
     data_field: Optional[str]
 

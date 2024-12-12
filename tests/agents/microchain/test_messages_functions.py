@@ -28,18 +28,18 @@ def agent2_address() -> ChecksumAddress:
 # Random transactions found on Gnosisscan.
 MOCK_HASH_1 = "0x5ba6dd51d3660f98f02683e032daa35644d3f7f975975da3c2628a5b4b1f5cb6"
 MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6a"
+MOCK_SENDER_SPICE_QUERY = Web3.to_checksum_address(
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+)  # anvil account 1
 
 
 def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
-    anvil_account_1 = Web3.to_checksum_address(
-        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-    )
     return pl.DataFrame(
         {
             "hash": [MOCK_HASH_1, MOCK_HASH_2],
             "value": [xdai_to_wei(xdai_type(1)), xdai_to_wei(xdai_type(2))],
             "block_number": [1, 2],
-            "from": [anvil_account_1, anvil_account_1],
+            "from": [MOCK_SENDER_SPICE_QUERY, MOCK_SENDER_SPICE_QUERY],
             "data": ["test", Web3.to_hex(compress_message("test"))],
         }
     )
@@ -116,7 +116,7 @@ def test_receive_message_call(
 
     blockchain_message = r()
     assert blockchain_message is not None
-    assert blockchain_message.transaction_hash == MOCK_HASH_1
+    assert MOCK_SENDER_SPICE_QUERY in blockchain_message
 
 
 def test_receive_message_then_check_count_unseen_messages(
