@@ -7,6 +7,7 @@ from prediction_market_agent.db.blockchain_message_table_handler import (
     BlockchainMessageTableHandler,
 )
 from prediction_market_agent.db.models import BlockchainMessage
+from tests.db.conftest import reset_init_params_db_manager
 
 
 @pytest.fixture(scope="function")
