@@ -16,7 +16,7 @@ def memory_blockchain_handler() -> Generator[BlockchainMessageTableHandler, None
         sqlalchemy_db_url="sqlite://",
     )
     yield prompt_handler
-    # reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
+    reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
 
 
 MOCK_ADDRESS = Web3.to_checksum_address(
