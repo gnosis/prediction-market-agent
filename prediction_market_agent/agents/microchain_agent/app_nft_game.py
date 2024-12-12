@@ -94,8 +94,7 @@ def customized_chat_message(
 
     match parsed_function:
         case Reasoning.__name__:
-            # Skip Reasoning messages, because it's not interesting to read `The reasoning has been recorded` in the chat every time the agent something thinks about.
-            return
+            icon = "🧠"
         case DummyFunctionName.RESPONSE_FUNCTION_NAME:
             icon = "✔️"
         case ReceiveMessage.__name__:
