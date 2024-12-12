@@ -93,7 +93,7 @@ class BlockchainMessage(SQLModel, table=True):
         try:
             return decompress_message(HexBytes(self.data_field))
         except Exception:
-            return str(self.data_field)
+            return self.data_field
 
     def __str__(self) -> str:
         return f"""Sender: {self.sender_address} \n Value: {wei_to_xdai(wei_type(self.value_wei))} \n Message: {self.parsed_message}
