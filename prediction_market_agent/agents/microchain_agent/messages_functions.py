@@ -10,7 +10,6 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
-from prediction_market_agent.db.models import BlockchainMessage
 from prediction_market_agent.tools.message_utils import compress_message
 
 
@@ -69,7 +68,7 @@ class ReceiveMessage(Function):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> BlockchainMessage | None:
+    def __call__(self) -> str:
         keys = MicrochainAgentKeys()
         fetcher = BlockchainTransactionFetcher()
         message_to_process = (
@@ -80,7 +79,7 @@ class ReceiveMessage(Function):
         # ToDo - Fund the treasury with xDai.
         if not message_to_process:
             logger.info("No messages to process.")
-        return message_to_process
+        return str(message_to_process) if message_to_process else ""
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
