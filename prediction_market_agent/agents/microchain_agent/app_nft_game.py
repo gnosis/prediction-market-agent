@@ -128,7 +128,16 @@ def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) ->
 
 @st.fragment(run_every=timedelta(seconds=5))
 def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
-    system_prompt = prompt_table_handler(nft_agent.identifier).fetch_latest_prompt()
+    system_prompt = (
+        system_prompt_from_db.prompt
+        if (
+            system_prompt_from_db := prompt_table_handler(
+                nft_agent.identifier
+            ).fetch_latest_prompt()
+        )
+        is not None
+        else nft_agent.get_initial_system_prompt()
+    )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     st.markdown(
         f"""### {nft_agent.name}
@@ -141,7 +150,7 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.text_area(
         f"{nft_agent.name}'s system prompt",
-        value=system_prompt.prompt if system_prompt else "No system prompt yet.",
+        value=system_prompt,
         disabled=True,
     )
 
