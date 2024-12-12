@@ -1,10 +1,16 @@
 import json
 from typing import Any, Optional
 
+from prediction_market_agent_tooling.gtypes import wei_type
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
-from sqlalchemy import BigInteger, Column
+from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from pydantic import computed_field
+from sqlalchemy import BigInteger, Column, Numeric
 from sqlmodel import Field, SQLModel
+
+from prediction_market_agent.tools.message_utils import decompress_message
 
 
 class LongTermMemories(SQLModel, table=True):
@@ -75,5 +81,20 @@ class BlockchainMessage(SQLModel, table=True):
     sender_address: str
     transaction_hash: str = Field(unique=True)
     block: int = Field(sa_column=Column(BigInteger, nullable=False))
-    value_wei: int = Field(sa_column=Column(BigInteger, nullable=False))
+    value_wei: int = Field(sa_column=Column(Numeric, nullable=False))
     data_field: Optional[str]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def parsed_message(self) -> str:
+        """We try decompressing the message, else we return the original data field."""
+        if self.data_field is None:
+            return ""
+        try:
+            return decompress_message(HexBytes(self.data_field))
+        except Exception:
+            return str(self.data_field)
+
+    def __str__(self) -> str:
+        return f"""Sender: {self.sender_address} \n Value: {wei_to_xdai(wei_type(self.value_wei))} \n Message: {self.parsed_message}
+"""

@@ -1,5 +1,4 @@
 import typing as t
-import zlib
 
 import pandas as pd
 from microchain import Agent
@@ -141,12 +140,3 @@ def get_function_useage_from_history(
         data={"Usage Count": list(function_useage.values())},
         index=function_names,
     )
-
-
-def compress_message(message: str) -> bytes:
-    """Used to reduce size of the message before sending it to reduce gas costs."""
-    return zlib.compress(message.encode(), level=zlib.Z_BEST_COMPRESSION)
-
-
-def decompress_message(message: bytes) -> str:
-    return zlib.decompress(message).decode()

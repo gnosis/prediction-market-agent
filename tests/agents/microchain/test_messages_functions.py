@@ -13,10 +13,10 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     ReceiveMessage,
 )
-from prediction_market_agent.agents.microchain_agent.utils import compress_message
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
+from prediction_market_agent.tools.message_utils import compress_message
 from prediction_market_agent.utils import DBKeys
 
 
