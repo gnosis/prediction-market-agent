@@ -25,7 +25,9 @@ MOCK_ADDRESS = Web3.to_checksum_address(
 )  # anvil 1
 
 
-def test_save_prompt(memory_blockchain_handler: BlockchainMessageTableHandler) -> None:
+def test_save_blockchain_message(
+    memory_blockchain_handler: BlockchainMessageTableHandler,
+) -> None:
     mock_value_wei = 20000000000000000000  # large enough value for surpassing bigint limitation on postgres | sqlite
     blockchain_message = BlockchainMessage(
         consumer_address=MOCK_ADDRESS,
