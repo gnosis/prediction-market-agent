@@ -79,7 +79,7 @@ class ReceiveMessage(Function):
         # ToDo - Fund the treasury with xDai.
         if not message_to_process:
             logger.info("No messages to process.")
-        return str(message_to_process) if message_to_process else ""
+        return str(message_to_process) if message_to_process else "No new messages"
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [

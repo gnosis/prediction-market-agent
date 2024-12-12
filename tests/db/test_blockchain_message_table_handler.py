@@ -36,8 +36,6 @@ def test_save_prompt(memory_blockchain_handler: BlockchainMessageTableHandler) -
     )
 
     # assert DB is empty
-    items = memory_blockchain_handler.sql_handler.get_all()
-    assert not items
+    assert not memory_blockchain_handler.sql_handler.get_all()
     memory_blockchain_handler.save_multiple([blockchain_message])
-    items = memory_blockchain_handler.sql_handler.get_all()
-    assert len(items) == 1
+    assert len(memory_blockchain_handler.sql_handler.get_all()) == 1
