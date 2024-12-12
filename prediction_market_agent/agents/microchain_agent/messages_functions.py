@@ -1,9 +1,14 @@
 from microchain import Function
+from prediction_market_agent_tooling.gtypes import wei_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
+from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
 from web3 import Web3
 
+from prediction_market_agent.agents.microchain_agent.agents_nft_game import (
+    TREASURY_SAFE_ADDRESS,
+)
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
@@ -54,6 +59,9 @@ Fee for sending the message is {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} x
 
 
 class ReceiveMessage(Function):
+    # Percentage of message value that goes to the treasury.
+    TREASURY_ACCUMULATION_PERCENTAGE = 0.7
+
     @staticmethod
     def get_count_unseen_messages() -> int:
         return BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
@@ -77,9 +85,22 @@ class ReceiveMessage(Function):
                 keys.bet_from_address
             )
         )
-        # ToDo - Fund the treasury with xDai.
+
         if not message_to_process:
             logger.info("No messages to process.")
+        else:
+            # Accumulate a percentage of the message value in the treasury.
+            tx_receipt = send_xdai_to(
+                web3=ContractOnGnosisChain.get_web3(),
+                from_private_key=keys.bet_from_private_key,
+                to_address=TREASURY_SAFE_ADDRESS,
+                value=wei_type(
+                    self.TREASURY_ACCUMULATION_PERCENTAGE * message_to_process.value_wei
+                ),
+            )
+            logger.info(
+                f"Funded the treasury with xDai, tx_hash: {HexBytes(tx_receipt['transactionHash']).hex()}"
+            )
         return message_to_process
 
 
