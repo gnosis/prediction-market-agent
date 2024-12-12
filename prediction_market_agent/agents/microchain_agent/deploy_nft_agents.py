@@ -21,6 +21,7 @@ NFT_TOKEN_FACTORY = Web3.to_checksum_address(
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     max_iterations = None
+    sleep_between_iterations = 15
     import_actions_from_memory = 10
     functions_config = FunctionsConfig(
         include_messages_functions=True,

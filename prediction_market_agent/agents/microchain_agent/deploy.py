@@ -1,4 +1,5 @@
 import abc
+import time
 
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -40,6 +41,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     model = SupportedModel.gpt_4o
     max_iterations: int | None = 50
     import_actions_from_memory = 0
+    sleep_between_iterations = 0
     identifier: AgentIdentifier
     functions_config: FunctionsConfig
 
@@ -124,6 +126,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 if agent.system_prompt != initial_formatted_system_prompt:
                     prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
             iteration += 1
+            if self.sleep_between_iterations:
+                time.sleep(self.sleep_between_iterations)
 
         if goal_manager:
             goal = check_not_none(goal)
