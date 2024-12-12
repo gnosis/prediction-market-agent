@@ -16,6 +16,7 @@ def memory_blockchain_handler() -> Generator[BlockchainMessageTableHandler, None
     prompt_handler = BlockchainMessageTableHandler(
         sqlalchemy_db_url="sqlite://",
     )
+    reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
     yield prompt_handler
     reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
 
