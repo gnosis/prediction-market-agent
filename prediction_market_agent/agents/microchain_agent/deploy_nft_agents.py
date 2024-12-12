@@ -59,11 +59,8 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xDDe0780F744B84b505E344931F37cEDEaD8B6163"
     )
-    functions_config = DeployableAgentNFTGameAbstract.functions_config.model_copy(
-        update=dict(
-            include_agent_functions=True,
-            include_learning_functions=True,
-        )
+    functions_config = DeployableAgentNFTGameAbstract.functions_config.combine(
+        FunctionsConfig(include_agent_functions=True, include_learning_functions=True)
     )
     model = SupportedModel.gpt_4o
 
