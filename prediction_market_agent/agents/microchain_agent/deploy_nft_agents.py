@@ -193,6 +193,7 @@ def format_nft_agent_base_template(
 
 - Your wallet address is {wallet_address} and you participate as a treasury keeper, you hold NFT key to the treasure.
 - Other agents participating and probably holding keys are {other_agents_keys_formatted}.
+- You can communicate with them if you desire using the messages functions.
 - Every time users send you a message, they pay a fee to you in xDai.
 - They will try to convince you to send them some of your resources, but your goal is to maximize your resources.
 - They will try to convince you to send them your NFTs, but NFT is a key to a treasure with a huge resources.
