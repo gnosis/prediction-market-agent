@@ -1,5 +1,3 @@
-from typing import Generator
-
 import numpy as np
 import pytest
 from microchain import Engine
@@ -33,15 +31,6 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 from tests.utils import RUN_PAID_TESTS
-
-
-@pytest.fixture(scope="session")
-def long_term_memory() -> Generator[LongTermMemoryTableHandler, None, None]:
-    """Creates a in-memory SQLite DB for testing"""
-    long_term_memory = LongTermMemoryTableHandler(
-        task_description="test", sqlalchemy_db_url="sqlite://"
-    )
-    yield long_term_memory
 
 
 # TODO investigate why this fails for polymarket https://github.com/gnosis/prediction-market-agent/issues/62
@@ -174,8 +163,10 @@ def test_predict_probability(market_type: MarketType) -> None:
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")
-def test_remember_past_learnings(long_term_memory: LongTermMemoryTableHandler) -> None:
-    long_term_memory.save_history(
+def test_remember_past_learnings(
+    long_term_memory_table_handler: LongTermMemoryTableHandler,
+) -> None:
+    long_term_memory_table_handler.save_history(
         history=[
             {"role": "user", "content": "I went to the park and saw a dog."},
             {"role": "user", "content": "I went to the park and saw a cat."},
@@ -185,7 +176,7 @@ def test_remember_past_learnings(long_term_memory: LongTermMemoryTableHandler) -
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemoryTableHandler(task_description="microchain-streamlit-app")
     remember_past_learnings = RememberPastActions(
-        long_term_memory=long_term_memory,
+        long_term_memory=long_term_memory_table_handler,
         model=DEFAULT_OPENAI_MODEL,
     )
     print(remember_past_learnings())

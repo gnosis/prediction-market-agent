@@ -5,7 +5,6 @@ import pytest
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     WrappedxDaiContract,
 )
-from pydantic import SecretStr
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter import (
@@ -15,7 +14,6 @@ from prediction_market_agent.agents.microchain_agent.blockchain.code_interpreter
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,
 )
-from prediction_market_agent.utils import DBKeys
 
 
 def mock_summaries(function_names: list[str]) -> Summaries:
@@ -85,8 +83,3 @@ def wxdai_contract_mocked_rag(
     yield ContractClassConverter(
         contract_address=contract_address, contract_name=wxdai.__class__.__name__
     )
-
-
-@pytest.fixture(scope="session")
-def session_keys_with_mocked_db() -> Generator[DBKeys, None, None]:
-    yield DBKeys(SQLALCHEMY_DB_URL=SecretStr("sqlite://"))

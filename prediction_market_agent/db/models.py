@@ -1,9 +1,11 @@
 import json
 from typing import Any, Optional
 
+from prediction_market_agent_tooling.gtypes import wei_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
-from sqlalchemy import BigInteger, Column
+from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from sqlalchemy import Column, Numeric
 from sqlmodel import Field, SQLModel
 
 
@@ -74,6 +76,10 @@ class BlockchainMessage(SQLModel, table=True):
     consumer_address: str
     sender_address: str
     transaction_hash: str = Field(unique=True)
-    block: int = Field(sa_column=Column(BigInteger, nullable=False))
-    value_wei: int = Field(sa_column=Column(BigInteger, nullable=False))
+    block: int = Field(sa_column=Column(Numeric, nullable=False))
+    value_wei: int = Field(sa_column=Column(Numeric, nullable=False))
     data_field: Optional[str]
+
+    def __str__(self) -> str:
+        return f"""Sender: {self.sender_address} \n Value: {wei_to_xdai(wei_type(self.value_wei))} \n Message: {self.data_field}
+"""
