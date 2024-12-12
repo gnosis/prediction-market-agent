@@ -126,7 +126,11 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 if agent.system_prompt != initial_formatted_system_prompt:
                     prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
             iteration += 1
+            logger.info(f"{self.__class__.__name__} iteration {iteration} completed.")
             if self.sleep_between_iterations:
+                logger.info(
+                    f"{self.__class__.__name__} sleeping for {self.sleep_between_iterations} seconds."
+                )
                 time.sleep(self.sleep_between_iterations)
 
         if goal_manager:
