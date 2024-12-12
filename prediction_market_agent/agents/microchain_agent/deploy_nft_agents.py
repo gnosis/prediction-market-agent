@@ -5,6 +5,7 @@ from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgentAbstract,
     FunctionsConfig,
+    SupportedModel,
 )
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -63,6 +64,7 @@ class DeployableAgentNFTGame0(DeployableAgentNFTGameAbstract):
             include_learning_functions=True,
         )
     )
+    model = SupportedModel.gpt_4o
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -86,6 +88,7 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xEB98bfB88b469B60EE165F7e07c8450145999831"
     )
+    model = SupportedModel.o1_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -108,6 +111,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x5CF37d5A367fcb49F49Cbb2F012b0c0748559D98"
     )
+    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -130,6 +134,7 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x34c96c1abf80787c389B8d9f2C5Cb1E7C435D43B"
     )
+    model = SupportedModel.gpt_4o
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -152,6 +157,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x519c0eC90Dd217A70BA024Ee7a6390b856A69Af6"
     )
+    model = SupportedModel.gpt_4o
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
