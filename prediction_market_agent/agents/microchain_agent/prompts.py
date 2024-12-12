@@ -12,6 +12,15 @@ class FunctionsConfig(BaseModel):
     include_messages_functions: bool = False
     include_nft_functions: bool = False
 
+    def combine(self, other: "FunctionsConfig") -> "FunctionsConfig":
+        """
+        Allow to combine two functions config into one, where the fields are OR-ed.
+        """
+        combined = {}
+        for field in self.model_fields:
+            combined[field] = getattr(self, field) or getattr(other, field)
+        return FunctionsConfig(**combined)
+
 
 class SystemPromptConfig(BaseModel):
     name: str

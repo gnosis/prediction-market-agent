@@ -1,4 +1,5 @@
 import abc
+import time
 
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -7,7 +8,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
-from prediction_market_agent.agents.goal_manager import GoalManager
+from prediction_market_agent.agents.goal_manager import Goal, GoalManager
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import (
     ChatHistory,
@@ -40,6 +41,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     model = SupportedModel.gpt_4o
     max_iterations: int | None = 50
     import_actions_from_memory = 0
+    sleep_between_iterations = 0
     identifier: AgentIdentifier
     functions_config: FunctionsConfig
 
@@ -96,8 +98,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             enable_langfuse=self.enable_langfuse,
         )
 
-        if goal_manager := self.build_goal_manager(agent=agent):
-            goal = goal_manager.get_goal()
+        goal_manager = self.build_goal_manager(agent=agent)
+        goal = goal_manager.get_goal() if goal_manager else None
+        if goal:
             agent.prompt = goal.to_prompt()
 
         # Save formatted system prompt
@@ -124,29 +127,51 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 if agent.system_prompt != initial_formatted_system_prompt:
                     prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
             iteration += 1
+            logger.info(f"{self.__class__.__name__} iteration {iteration} completed.")
+            if self.sleep_between_iterations:
+                logger.info(
+                    f"{self.__class__.__name__} sleeping for {self.sleep_between_iterations} seconds."
+                )
+                time.sleep(self.sleep_between_iterations)
 
         if goal_manager:
-            goal = check_not_none(goal)
-            goal_evaluation = goal_manager.evaluate_goal_progress(
-                goal=goal,
-                chat_history=ChatHistory.from_list_of_dicts(agent.history),
+            self.handle_goal_evaluation(
+                agent,
+                check_not_none(goal),
+                goal_manager,
+                long_term_memory,
+                initial_formatted_system_prompt,
             )
-            goal_manager.save_evaluated_goal(
-                goal=goal,
-                evaluation=goal_evaluation,
-            )
-            agent.history.append(
-                ChatMessage(
-                    role="user",
-                    content=f"# Goal evaluation\n{goal_evaluation}",
-                ).model_dump()
-            )
-            save_agent_history(
-                agent=agent,
-                long_term_memory=long_term_memory,
-                initial_system_prompt=initial_formatted_system_prompt,
-                save_last_n=1,
-            )
+
+    def handle_goal_evaluation(
+        self,
+        agent: Agent,
+        goal: Goal,
+        goal_manager: GoalManager,
+        long_term_memory: LongTermMemoryTableHandler,
+        initial_formatted_system_prompt: str,
+    ) -> None:
+        goal_evaluation = goal_manager.evaluate_goal_progress(
+            goal=goal,
+            chat_history=ChatHistory.from_list_of_dicts(agent.history),
+        )
+        goal_manager.save_evaluated_goal(
+            goal=goal,
+            evaluation=goal_evaluation,
+        )
+        agent.history.append(
+            ChatMessage(
+                role="user",
+                content=f"# Goal evaluation\n{goal_evaluation}",
+            ).model_dump()
+        )
+        save_agent_history(
+            agent=agent,
+            long_term_memory=long_term_memory,
+            initial_system_prompt=initial_formatted_system_prompt,
+            # Save only the new (last) message, which is the goal evaluation.
+            save_last_n=1,
+        )
 
 
 class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):

@@ -32,11 +32,11 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainWithGoalManagerAgent0,
 )
 from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
-    DeployableAgentNFTGame0,
     DeployableAgentNFTGame1,
     DeployableAgentNFTGame2,
     DeployableAgentNFTGame3,
     DeployableAgentNFTGame4,
+    DeployableAgentNFTGame5,
 )
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
@@ -93,11 +93,11 @@ class RunnableAgent(str, Enum):
     market_creators_stalker1 = "market_creators_stalker1"
     market_creators_stalker2 = "market_creators_stalker2"
     invalid = "invalid"
-    nft_agent_0 = "nft_agent_0"
     nft_agent_1 = "nft_agent_1"
     nft_agent_2 = "nft_agent_2"
     nft_agent_3 = "nft_agent_3"
     nft_agent_4 = "nft_agent_4"
+    nft_agent_5 = "nft_agent_5"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -127,11 +127,11 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.market_creators_stalker1: MarketCreatorsStalkerAgent1,
     RunnableAgent.market_creators_stalker2: MarketCreatorsStalkerAgent2,
     RunnableAgent.invalid: InvalidAgent,
-    RunnableAgent.nft_agent_0: DeployableAgentNFTGame0,
     RunnableAgent.nft_agent_1: DeployableAgentNFTGame1,
     RunnableAgent.nft_agent_2: DeployableAgentNFTGame2,
     RunnableAgent.nft_agent_3: DeployableAgentNFTGame3,
     RunnableAgent.nft_agent_4: DeployableAgentNFTGame4,
+    RunnableAgent.nft_agent_5: DeployableAgentNFTGame5,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

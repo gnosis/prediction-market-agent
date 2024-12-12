@@ -71,12 +71,15 @@ from prediction_market_agent.utils import APIKeys
 
 class SupportedModel(str, Enum):
     gpt_4o = "gpt-4o-2024-08-06"
+    gpt_4o_mini = "gpt-4o-mini-2024-07-18"
     gpt_4_turbo = "gpt-4-turbo"
+    o1_preview = "o1-preview-2024-09-12"
+    o1_mini = "o1-mini-2024-09-12"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
 
     @property
     def is_openai(self) -> bool:
-        return "gpt-" in self.value
+        return self.value.startswith("gpt-") or self.value.startswith("o1-")
 
     @property
     def is_replicate(self) -> bool:
@@ -283,6 +286,10 @@ def save_agent_history(
     """
     # Save off the most up-to-date, or 'head' system prompt
     head_system_prompt = agent.history[0]
+    if head_system_prompt["role"] != "system":
+        raise ValueError(
+            f"Expected the first message in the history to be a system message, but got: {head_system_prompt}"
+        )
 
     # Restore the system prompt to its initial state
     agent.history[0] = dict(role="system", content=initial_system_prompt)
