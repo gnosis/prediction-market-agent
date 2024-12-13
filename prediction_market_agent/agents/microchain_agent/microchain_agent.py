@@ -13,7 +13,10 @@ from microchain import (
 )
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import should_not_happen
+from prediction_market_agent_tooling.tools.utils import (
+    check_not_none,
+    should_not_happen,
+)
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -36,7 +39,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    RememberPastActions,
+    LookAtPastActions,
 )
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     MESSAGES_FUNCTIONS,
@@ -68,12 +71,15 @@ from prediction_market_agent.utils import APIKeys
 
 class SupportedModel(str, Enum):
     gpt_4o = "gpt-4o-2024-08-06"
+    gpt_4o_mini = "gpt-4o-mini-2024-07-18"
     gpt_4_turbo = "gpt-4-turbo"
+    o1_preview = "o1-preview-2024-09-12"
+    o1_mini = "o1-mini-2024-09-12"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
 
     @property
     def is_openai(self) -> bool:
-        return "gpt-" in self.value
+        return self.value.startswith("gpt-") or self.value.startswith("o1-")
 
     @property
     def is_replicate(self) -> bool:
@@ -162,7 +168,7 @@ def build_agent_functions(
 
     if long_term_memory:
         functions.append(
-            RememberPastActions(long_term_memory=long_term_memory, model=model)
+            LookAtPastActions(long_term_memory=long_term_memory, model=model)
         )
 
     return functions
@@ -177,6 +183,7 @@ def build_agent(
     enable_langfuse: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
+    import_actions_from_memory: int = 0,
     allow_stop: bool = True,
     bootstrap: str | None = None,
     raise_on_error: bool = True,
@@ -222,6 +229,17 @@ def build_agent(
         enable_langfuse=enable_langfuse,
     )
 
+    if import_actions_from_memory:
+        latest_saved_memories = check_not_none(
+            long_term_memory, "long_term_memory is needed for this functionality."
+        ).search(limit=import_actions_from_memory)
+        agent.history.extend(
+            m.metadata_dict
+            for m in latest_saved_memories
+            if check_not_none(m.metadata_dict)["role"]
+            != "system"  # Do not include system message as that one is automatically in the beginning of the history.
+        )
+
     for f in build_agent_functions(
         agent=agent,
         market_type=market_type,
@@ -252,13 +270,14 @@ def get_unformatted_system_prompt(
             return build_full_unformatted_system_prompt(historical_prompt.prompt)
 
     # If no historical prompt is found, return the original prompt.
-    return unformatted_prompt
+    return build_full_unformatted_system_prompt(unformatted_prompt)
 
 
 def save_agent_history(
     long_term_memory: LongTermMemoryTableHandler,
     agent: Agent,
     initial_system_prompt: str,
+    save_last_n: int | None = None,
 ) -> None:
     """
     Save the agent's history to the long-term memory. But first, restore the
@@ -267,10 +286,16 @@ def save_agent_history(
     """
     # Save off the most up-to-date, or 'head' system prompt
     head_system_prompt = agent.history[0]
+    if head_system_prompt["role"] != "system":
+        raise ValueError(
+            f"Expected the first message in the history to be a system message, but got: {head_system_prompt}"
+        )
 
     # Restore the system prompt to its initial state
     agent.history[0] = dict(role="system", content=initial_system_prompt)
-    long_term_memory.save_history(agent.history)
+    long_term_memory.save_history(
+        agent.history[-save_last_n if save_last_n else len(agent.history) :]
+    )
 
     # Restore the head system prompt
     agent.history[0] = head_system_prompt

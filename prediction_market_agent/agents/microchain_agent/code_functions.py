@@ -1,7 +1,10 @@
+import asyncio
 import json
 import tempfile
 
-from autogen.coding import CodeBlock, LocalCommandLineCodeExecutor
+from autogen_core import CancellationToken
+from autogen_core.code_executor import CodeBlock
+from autogen_ext.code_executors.local import LocalCommandLineCodeExecutor
 from microchain import Function
 
 
@@ -24,21 +27,22 @@ class ExecuteCodeFunction(Function):
 
     def __call__(self, code_blocks: str) -> str:
         code_blocks_parsed = [
-            CodeBlock.model_validate(b) for b in json.loads(code_blocks)
+            CodeBlock(**loaded_code_block)
+            for loaded_code_block in json.loads(code_blocks)
         ]
-
-        # Simple check to forbid out any malicious code.
-        for code_block in code_blocks_parsed:
-            LocalCommandLineCodeExecutor.sanitize_command(
-                code_block.language, code_block.code
-            )
 
         with tempfile.TemporaryDirectory() as temp_dir:
             executor = LocalCommandLineCodeExecutor(
                 timeout=60,
                 work_dir=temp_dir,
             )
-            result = executor.execute_code_blocks(code_blocks_parsed)
+            # We assume no event loop is currently running.
+            result = asyncio.run(
+                executor.execute_code_blocks(
+                    code_blocks=code_blocks_parsed,
+                    cancellation_token=CancellationToken(),
+                )
+            )
 
         return f"Code finished with exit code {result.exit_code} and output:\n\n{result.output}"
 

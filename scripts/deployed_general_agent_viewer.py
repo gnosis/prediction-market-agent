@@ -41,12 +41,9 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     SupportedModel,
     build_agent,
 )
-from prediction_market_agent.agents.microchain_agent.prompts import (
-    FunctionsConfig,
-    SystemPromptChoice,
-)
+from prediction_market_agent.agents.microchain_agent.prompts import FunctionsConfig
 from prediction_market_agent.agents.microchain_agent.utils import (
-    get_function_useage_from_history,
+    get_function_usage_from_history,
     get_total_asset_value,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -89,12 +86,10 @@ class DeployedGeneralAgentSettings(BaseSettings):
         )
 
     def to_agent_description(self, identifier: AgentIdentifier) -> str:
-        return AGENT_IDENTIFIER_TO_CLASS[identifier].description
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].get_description()
 
-    def to_system_prompt_choice(
-        self, identifier: AgentIdentifier
-    ) -> SystemPromptChoice:
-        return AGENT_IDENTIFIER_TO_CLASS[identifier].system_prompt_choice
+    def to_functions_config(self, identifier: AgentIdentifier) -> FunctionsConfig:
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].functions_config
 
 
 MARKET_TYPE = MarketType.OMEN
@@ -195,16 +190,14 @@ agent = build_agent(
     unformatted_system_prompt="foo",  # placeholder, not used
     allow_stop=True,
     long_term_memory=long_term_memory,
-    functions_config=FunctionsConfig.from_system_prompt_choice(
-        settings.to_system_prompt_choice(identifier)
-    ),
+    functions_config=settings.to_functions_config(identifier),
     enable_langfuse=False,  # placeholder, not used
 )
 tab1, tab2 = st.tabs(["Overall", "Per-Session"])
 usage_count_col_name = "Usage Count"
 tool_name_col_name = "Tool Name"
 with tab1:
-    function_use = get_function_useage_from_history(
+    function_use = get_function_usage_from_history(
         chat_history=chat_history.to_undated_chat_history(),
         agent=agent,
     )
@@ -218,7 +211,7 @@ with tab2:
     session_start_times = [session.start_time for session in sessions]
     session_function_use: dict[datetime, pd.DataFrame] = {}
     for session in sessions:
-        session_function_use[session.start_time] = get_function_useage_from_history(
+        session_function_use[session.start_time] = get_function_usage_from_history(
             chat_history=session,
             agent=agent,
         )

@@ -18,7 +18,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     SellYes,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    RememberPastActions,
+    LookAtPastActions,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
     get_balance,
@@ -175,11 +175,11 @@ def test_remember_past_learnings(
     )
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemoryTableHandler(task_description="microchain-streamlit-app")
-    remember_past_learnings = RememberPastActions(
+    past_actions = LookAtPastActions(
         long_term_memory=long_term_memory_table_handler,
         model=DEFAULT_OPENAI_MODEL,
     )
-    print(remember_past_learnings())
+    print(past_actions())
 
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])

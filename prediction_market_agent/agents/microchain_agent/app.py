@@ -39,9 +39,10 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     get_unformatted_system_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.prompts import (
-    SYSTEM_PROMPTS,
-    FunctionsConfig,
-    SystemPromptChoice,
+    JOB_AGENT_SYSTEM_PROMPT_CONFIG,
+    JUST_BORN_SYSTEM_PROMPT_CONFIG,
+    TRADING_AGENT_SYSTEM_PROMPT_CONFIG,
+    TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG,
     extract_updatable_system_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -59,6 +60,15 @@ from prediction_market_agent.utils import APIKeys
 MARKET_TYPE = MarketType.OMEN
 AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
+ALLOWED_CONFIGS = {
+    x.name: x
+    for x in (
+        TRADING_AGENT_SYSTEM_PROMPT_CONFIG,
+        TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG,
+        JOB_AGENT_SYSTEM_PROMPT_CONFIG,
+        JUST_BORN_SYSTEM_PROMPT_CONFIG,
+    )
+}
 
 st.session_state.session_id = st.session_state.get(
     "session_id", "StrealitGeneralAgent - " + utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -162,9 +172,7 @@ def maybe_initialize_agent(
             allow_stop=ALLOW_STOP,
             long_term_memory=st.session_state.long_term_memory,
             keys=KEYS,
-            functions_config=FunctionsConfig.from_system_prompt_choice(
-                st.session_state.system_prompt_select
-            ),
+            functions_config=st.session_state.selected_config.functions_config,
             enable_langfuse=ENABLE_LANGFUSE,
         )
         st.session_state.total_iterations = 0
@@ -219,23 +227,22 @@ with st.sidebar:
         )
     )
 
-    st.session_state.system_prompt_select = SystemPromptChoice(
+    st.session_state.selected_config = ALLOWED_CONFIGS[
         st.selectbox(
-            "Initial memory",
-            [p.value for p in SystemPromptChoice],
+            "Initial memory config",
+            list(ALLOWED_CONFIGS.keys()),
             index=0,
             disabled=agent_is_initialized(),
         )
-    )
+    ]
+
     st.toggle(
         "Load historical prompt",
         key="load_historical_prompt",
         disabled=agent_is_initialized(),
     )
 
-    system_prompt = SYSTEM_PROMPTS[
-        SystemPromptChoice(st.session_state.system_prompt_select)
-    ]
+    system_prompt = st.session_state.selected_config.system_prompt
 
     st.divider()
     st.subheader("Built by Gnosis AI")

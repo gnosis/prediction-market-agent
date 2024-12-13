@@ -10,7 +10,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 )
 
 
-class RememberPastActions(Function):
+class LookAtPastActions(Function):
     def __init__(
         self, long_term_memory: LongTermMemoryTableHandler, model: str
     ) -> None:

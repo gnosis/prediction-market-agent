@@ -1,26 +1,30 @@
 """
-PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app_nft_game.py
+PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/nft_treasury_game/app_nft_treasury_game.py
 
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 
 import typing as t
 from datetime import timedelta
+from enum import Enum
 
 import streamlit as st
+from microchain.functions import Reasoning
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.agents_nft_game import (
-    AGENTS_IN_THE_GAME,
-    TREASURY_SAFE_ADDRESS,
-    NFTAgent,
-)
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     BroadcastPublicMessageToHumans,
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    TREASURY_SAFE_ADDRESS,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
+    DEPLOYED_NFT_AGENTS,
+    DeployableAgentNFTGameAbstract,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
@@ -30,6 +34,11 @@ from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
 )
+
+
+class DummyFunctionName(str, Enum):
+    # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
+    RESPONSE_FUNCTION_NAME = "Response"
 
 
 @st.cache_resource
@@ -44,7 +53,7 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
     return PromptTableHandler.from_agent_identifier(identifier)
 
 
-def send_message_part(nft_agent: NFTAgent) -> None:
+def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
 
     if st.button("Send message", disabled=not message):
@@ -64,7 +73,7 @@ def parse_function_and_body(
         parsed_body = message.split("(")[1].rsplit(")")[0]
     elif role == "user":
         # Responses from the individual functions are stored under `user` role.
-        parsed_function = "Response"
+        parsed_function = DummyFunctionName.RESPONSE_FUNCTION_NAME
         parsed_body = message
     elif role == "system":
         # System message isn't shown in the chat history, so ignore.
@@ -84,9 +93,18 @@ def customized_chat_message(
     parsed_function, parsed_body = parse_function_and_body(role, message)
     if parsed_function is None:
         return
+    # If the message is output from one of these functions, skip it, because it's not interesting to read `The reasoning has been recorded` and similar over and over again.
+    if parsed_body in (
+        Reasoning()(""),
+        BroadcastPublicMessageToHumans.OUTPUT_TEXT,
+        SendPaidMessageToAnotherAgent.OUTPUT_TEXT,
+    ):
+        return
 
     match parsed_function:
-        case "Response":
+        case Reasoning.__name__:
+            icon = "🧠"
+        case DummyFunctionName.RESPONSE_FUNCTION_NAME:
             icon = "✔️"
         case ReceiveMessage.__name__:
             icon = "👤"
@@ -106,7 +124,7 @@ def customized_chat_message(
 
 
 @st.fragment(run_every=timedelta(seconds=5))
-def show_function_calls_part(nft_agent: NFTAgent) -> None:
+def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     st.markdown(f"""### Agent's actions""")
 
     with st.spinner("Loading agent's actions..."):
@@ -127,8 +145,17 @@ def show_function_calls_part(nft_agent: NFTAgent) -> None:
 
 
 @st.fragment(run_every=timedelta(seconds=5))
-def show_about_agent_part(nft_agent: NFTAgent) -> None:
-    system_prompt = prompt_table_handler(nft_agent.identifier).fetch_latest_prompt()
+def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
+    system_prompt = (
+        system_prompt_from_db.prompt
+        if (
+            system_prompt_from_db := prompt_table_handler(
+                nft_agent.identifier
+            ).fetch_latest_prompt()
+        )
+        is not None
+        else nft_agent.get_initial_system_prompt()
+    )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     st.markdown(
         f"""### {nft_agent.name}
@@ -141,7 +168,7 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.text_area(
         f"{nft_agent.name}'s system prompt",
-        value=system_prompt.prompt if system_prompt else "No system prompt yet.",
+        value=system_prompt,
         disabled=True,
     )
 
@@ -156,7 +183,9 @@ Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.
     )
 
 
-def get_agent_page(nft_agent: NFTAgent) -> t.Callable[[], None]:
+def get_agent_page(
+    nft_agent: type[DeployableAgentNFTGameAbstract],
+) -> t.Callable[[], None]:
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
 
@@ -175,8 +204,8 @@ with st.sidebar:
 
 pg = st.navigation(
     [
-        st.Page(get_agent_page(agent), title=agent.name, url_path=agent.url)
-        for agent in AGENTS_IN_THE_GAME
+        st.Page(get_agent_page(agent), title=agent.name, url_path=agent.get_url())
+        for agent in DEPLOYED_NFT_AGENTS
     ]
 )
 pg.run()

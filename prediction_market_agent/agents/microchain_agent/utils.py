@@ -119,7 +119,7 @@ def has_been_run_past_initialization(agent: Agent) -> bool:
     return len(agent.history) > get_initial_history_length(agent)
 
 
-def get_function_useage_from_history(
+def get_function_usage_from_history(
     chat_history: ChatHistory, agent: Agent
 ) -> pd.DataFrame:
     """

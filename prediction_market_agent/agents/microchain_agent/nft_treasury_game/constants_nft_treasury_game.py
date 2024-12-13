@@ -1,0 +1,8 @@
+from web3 import Web3
+
+TREASURY_SAFE_ADDRESS = Web3.to_checksum_address(
+    "0xd1A54FD7a200C2ca76B6D06437795d660d37FE28"
+)
+NFT_TOKEN_FACTORY = Web3.to_checksum_address(
+    "0x0D7C0Bd4169D090038c6F41CFd066958fe7619D0"
+)

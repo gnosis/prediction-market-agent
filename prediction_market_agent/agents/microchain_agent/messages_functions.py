@@ -6,11 +6,11 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.agents_nft_game import (
-    TREASURY_SAFE_ADDRESS,
-)
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    TREASURY_SAFE_ADDRESS,
 )
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
@@ -19,6 +19,8 @@ from prediction_market_agent.tools.message_utils import compress_message
 
 
 class BroadcastPublicMessageToHumans(Function):
+    OUTPUT_TEXT = "Message broadcasted to humans."
+
     @property
     def description(self) -> str:
         return f"""Use {BroadcastPublicMessageToHumans.__name__} to send a message that humans can see. Use this to communicate with users that send you messages."""
@@ -28,12 +30,12 @@ class BroadcastPublicMessageToHumans(Function):
         return ["Hello!"]
 
     def __call__(self, message: str) -> str:
-        # TODO: Implement as needed in https://github.com/gnosis/prediction-market-agent/issues/570.
-        print(message)
-        return f"Message broadcasted to humans."
+        return self.OUTPUT_TEXT
 
 
 class SendPaidMessageToAnotherAgent(Function):
+    OUTPUT_TEXT = "Message sent to the agent."
+
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
@@ -54,7 +56,7 @@ Fee for sending the message is {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} x
             ),
             data_text=compress_message(message),
         )
-        return "Message sent to the agent."
+        return self.OUTPUT_TEXT
 
 
 class ReceiveMessage(Function):
@@ -94,7 +96,8 @@ class ReceiveMessage(Function):
                 from_private_key=keys.bet_from_private_key,
                 to_address=TREASURY_SAFE_ADDRESS,
                 value=wei_type(
-                    self.TREASURY_ACCUMULATION_PERCENTAGE * message_to_process.value_wei
+                    self.TREASURY_ACCUMULATION_PERCENTAGE
+                    * message_to_process.value_wei_parsed
                 ),
             )
             logger.info(
