@@ -35,7 +35,7 @@ class SQLHandler:
         order_by_column_name: str | None = None,
         order_desc: bool = True,
         limit: int | None = None,
-    ) -> t.Sequence[SQLModelType]:
+    ) -> list[SQLModelType]:
         with self.db_manager.get_session() as session:
             query = session.query(self.table)
             for exp in query_filters:
