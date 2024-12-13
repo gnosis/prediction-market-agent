@@ -8,11 +8,11 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.utils import decompress_message
 from prediction_market_agent.db.blockchain_message_table_handler import (
     BlockchainMessageTableHandler,
 )
 from prediction_market_agent.db.models import BlockchainMessage
+from prediction_market_agent.tools.message_utils import decompress_message
 from prediction_market_agent.utils import APIKeys
 
 

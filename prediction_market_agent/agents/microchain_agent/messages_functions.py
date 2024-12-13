@@ -12,11 +12,10 @@ from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.utils import compress_message
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
 )
-from prediction_market_agent.db.models import BlockchainMessage
+from prediction_market_agent.tools.message_utils import compress_message
 
 
 class BroadcastPublicMessageToHumans(Function):
@@ -77,7 +76,7 @@ class ReceiveMessage(Function):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self) -> BlockchainMessage | None:
+    def __call__(self) -> str:
         keys = MicrochainAgentKeys()
         fetcher = BlockchainTransactionFetcher()
         message_to_process = (
@@ -101,7 +100,7 @@ class ReceiveMessage(Function):
             logger.info(
                 f"Funded the treasury with xDai, tx_hash: {HexBytes(tx_receipt['transactionHash']).hex()}"
             )
-        return message_to_process
+        return str(message_to_process) if message_to_process else "No new messages"
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
