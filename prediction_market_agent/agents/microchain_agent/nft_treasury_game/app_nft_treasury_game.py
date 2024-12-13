@@ -9,7 +9,7 @@ from datetime import timedelta
 from enum import Enum
 
 import streamlit as st
-from microchain.functions import Reasoning
+from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from streamlit_extras.stylable_container import stylable_container
@@ -101,6 +101,8 @@ def customized_chat_message(
     match parsed_function_call_name:
         case Reasoning.__name__:
             icon = "🧠"
+        case Stop.__name__:
+            icon = "😴"
         case ReceiveMessage.__name__:
             icon = "👤"
         case BroadcastPublicMessageToHumans.__name__:
@@ -116,6 +118,9 @@ def customized_chat_message(
             st.markdown(
                 parsed_function_call_body.replace("reasoning='", "").replace("')", "")
             )
+        elif parsed_function_call_name == Stop.__name__:
+            # If the agent decided to stop, show it as a break, as it will be started soon again.
+            st.markdown("Taking a break.")
         else:
             # Otherwise, show it as a normal function-response call, e.g. `ReceiveMessages() -> ...`.
             st.markdown(
@@ -125,6 +130,7 @@ def customized_chat_message(
         # Only show the output if it's supposed to be interesting.
         if parsed_function_call_name not in (
             Reasoning.__name__,
+            Stop.__name__,
             BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
         ):
