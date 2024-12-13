@@ -31,7 +31,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainModifiableSystemPromptAgent3,
     DeployableMicrochainWithGoalManagerAgent0,
 )
-from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DeployableAgentNFTGame1,
     DeployableAgentNFTGame2,
     DeployableAgentNFTGame3,

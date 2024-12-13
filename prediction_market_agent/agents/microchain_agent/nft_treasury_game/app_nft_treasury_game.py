@@ -1,5 +1,5 @@
 """
-PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app_nft_game.py
+PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/nft_treasury_game/app_nft_treasury_game.py
 
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
@@ -14,15 +14,17 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
-    DEPLOYED_NFT_AGENTS,
-    TREASURY_SAFE_ADDRESS,
-    DeployableAgentNFTGameAbstract,
-)
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
     BroadcastPublicMessageToHumans,
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    TREASURY_SAFE_ADDRESS,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
+    DEPLOYED_NFT_AGENTS,
+    DeployableAgentNFTGameAbstract,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,

@@ -6,11 +6,11 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.deploy_nft_agents import (
-    TREASURY_SAFE_ADDRESS,
-)
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    TREASURY_SAFE_ADDRESS,
 )
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
