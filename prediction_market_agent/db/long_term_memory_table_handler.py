@@ -49,7 +49,7 @@ class LongTermMemoryTableHandler:
         from_: DatetimeUTC | None = None,
         to_: DatetimeUTC | None = None,
         limit: int | None = None,
-    ) -> t.Sequence[LongTermMemories]:
+    ) -> list[LongTermMemories]:
         """Searches the LongTermMemoryTableHandler for entries within a specified datetime range that match
         self.task_description."""
         query_filters = [
