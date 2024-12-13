@@ -12,6 +12,7 @@ import streamlit as st
 from microchain.functions import Reasoning
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -27,6 +28,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
 )
+from prediction_market_agent.db.blockchain_transaction_fetcher import (
+    BlockchainTransactionFetcher,
+)
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
     LongTermMemoryTableHandler,
@@ -41,6 +45,11 @@ st.set_page_config(
 class DummyFunctionName(str, Enum):
     # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
     RESPONSE_FUNCTION_NAME = "Response"
+
+
+@st.cache_resource
+def blockchain_transaction_fetcher() -> BlockchainTransactionFetcher:
+    return BlockchainTransactionFetcher()
 
 
 @st.cache_resource
@@ -185,6 +194,24 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
         value=system_prompt,
         disabled=True,
     )
+    st.markdown("---")
+    with st.popover("Show unprocessed incoming messages"):
+        transactions = blockchain_transaction_fetcher().fetch_unseen_transactions(
+            nft_agent.wallet_address
+        )
+
+        if not transactions:
+            st.info("No unprocessed messages")
+        else:
+            for transaction in transactions:
+                st.markdown(
+                    f"""
+                    **From:** {transaction.sender_address}  
+                    **Message:** {transaction.data_field}  
+                    **Value:** {wei_to_xdai(transaction.value_wei_parsed)} xDai
+                    """
+                )
+                st.divider()
 
 
 @st.fragment(run_every=timedelta(seconds=5))
