@@ -74,8 +74,8 @@ class BlockchainTransactionFetcher:
         blockchain_message = BlockchainMessage(
             consumer_address=consumer_address,
             transaction_hash=oldest_non_processed_message["hash"],
-            value_wei=oldest_non_processed_message["value"],
-            block=int(oldest_non_processed_message["block_number"]),
+            value_wei=str(oldest_non_processed_message["value"]),
+            block=str(oldest_non_processed_message["block_number"]),
             sender_address=oldest_non_processed_message["from"],
             data_field=self.unzip_message_else_do_nothing(
                 oldest_non_processed_message["data"]

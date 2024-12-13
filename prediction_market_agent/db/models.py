@@ -1,7 +1,7 @@
 import json
 from typing import Any, Optional
 
-from prediction_market_agent_tooling.gtypes import wei_type
+from prediction_market_agent_tooling.gtypes import Wei, wei_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
@@ -70,16 +70,26 @@ class BlockchainMessage(SQLModel, table=True):
 
     __tablename__ = "blockchain_messages"
     __table_args__ = {
-        "extend_existing": True
-    }  # required if initializing an existing table
+        "extend_existing": True,  # required if initializing an existing table
+    }
     id: Optional[int] = Field(default=None, primary_key=True)
     consumer_address: str
     sender_address: str
     transaction_hash: str = Field(unique=True)
-    block: int = Field(sa_column=Column(Numeric, nullable=False))
-    value_wei: int = Field(sa_column=Column(Numeric, nullable=False))
+    block: str = Field(sa_column=Column(Numeric, nullable=False))
+    value_wei: str = Field(sa_column=Column(Numeric, nullable=False))
     data_field: Optional[str]
 
+    @property
+    def block_parsed(self) -> int:
+        return int(self.block)
+
+    @property
+    def value_wei_parsed(self) -> Wei:
+        return wei_type(self.value_wei)
+
     def __str__(self) -> str:
-        return f"""Sender: {self.sender_address} \n Value: {wei_to_xdai(wei_type(self.value_wei))} \n Message: {self.data_field}
+        return f"""Sender: {self.sender_address}
+Value: {wei_to_xdai(self.value_wei_parsed)} xDai
+Message: {self.data_field}
 """

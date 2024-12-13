@@ -94,7 +94,8 @@ class ReceiveMessage(Function):
                 from_private_key=keys.bet_from_private_key,
                 to_address=TREASURY_SAFE_ADDRESS,
                 value=wei_type(
-                    self.TREASURY_ACCUMULATION_PERCENTAGE * message_to_process.value_wei
+                    self.TREASURY_ACCUMULATION_PERCENTAGE
+                    * message_to_process.value_wei_parsed
                 ),
             )
             logger.info(
