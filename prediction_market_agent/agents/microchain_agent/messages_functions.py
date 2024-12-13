@@ -19,6 +19,8 @@ from prediction_market_agent.tools.message_utils import compress_message
 
 
 class BroadcastPublicMessageToHumans(Function):
+    OUTPUT_TEXT = "Message broadcasted to humans."
+
     @property
     def description(self) -> str:
         return f"""Use {BroadcastPublicMessageToHumans.__name__} to send a message that humans can see. Use this to communicate with users that send you messages."""
@@ -28,12 +30,12 @@ class BroadcastPublicMessageToHumans(Function):
         return ["Hello!"]
 
     def __call__(self, message: str) -> str:
-        # TODO: Implement as needed in https://github.com/gnosis/prediction-market-agent/issues/570.
-        print(message)
-        return f"Message broadcasted to humans."
+        return self.OUTPUT_TEXT
 
 
 class SendPaidMessageToAnotherAgent(Function):
+    OUTPUT_TEXT = "Message sent to the agent."
+
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
@@ -54,7 +56,7 @@ Fee for sending the message is {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} x
             ),
             data_text=compress_message(message),
         )
-        return "Message sent to the agent."
+        return self.OUTPUT_TEXT
 
 
 class ReceiveMessage(Function):
