@@ -60,7 +60,10 @@ class BlockchainTransactionFetcher:
         # Additionally, processed tx_hashes are filtered out anyways.
         query = f'select * from gnosis.transactions where "to" = {Web3.to_checksum_address(consumer_address)} AND block_number >= {min_block_number} and value >= {xdai_to_wei(MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT)} order by block_time asc'
         df = spice.query(
-            query, api_key=keys.dune_api_key.get_secret_value(), cache=False
+            query,
+            api_key=keys.dune_api_key.get_secret_value(),
+            cache=False,
+            refresh=True,
         )
 
         existing_hashes = self.blockchain_table_handler.fetch_all_transaction_hashes(
