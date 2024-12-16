@@ -16,17 +16,20 @@ from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
-    BroadcastPublicMessageToHumans,
-    ReceiveMessage,
-    SendPaidMessageToAnotherAgent,
-)
+from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    NFT_TOKEN_FACTORY,
     TREASURY_SAFE_ADDRESS,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
+    MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    BroadcastPublicMessageToHumans,
+    ReceiveMessage,
+    SendPaidMessageToAnotherAgent,
 )
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
@@ -66,10 +69,14 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
 
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
+    default_value = MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT
+    value = st.number_input(
+        "Value in xDai", min_value=default_value, max_value=0.1, value=default_value
+    )
 
     if st.button("Send message", disabled=not message):
         # TODO: Don't do this manually with deployment private key, use the user's wallet!
-        SendPaidMessageToAnotherAgent()(nft_agent.wallet_address, message)
+        SendPaidMessageToAnotherAgent()(nft_agent.wallet_address, message, value)
         st.success("Message sent and will be processed soon!")
 
 
@@ -189,10 +196,11 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
         else nft_agent.get_initial_system_prompt()
     )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
+    n_nft = BalanceOfNFT()(NFT_TOKEN_FACTORY, nft_agent.wallet_address)
     st.markdown(
         f"""### {nft_agent.name}
 
-Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span>.
+Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> and still holds <span style='font-size: 1.1em;'><strong>{n_nft} NFT keys</strong></span>.
 
 ---
 """,

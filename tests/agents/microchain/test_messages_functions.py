@@ -9,7 +9,7 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     ReceiveMessage,
 )
 from prediction_market_agent.db.blockchain_message_table_handler import (

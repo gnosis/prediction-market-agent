@@ -44,10 +44,10 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     LookAtPastActions,
 )
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
+from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     MESSAGES_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
