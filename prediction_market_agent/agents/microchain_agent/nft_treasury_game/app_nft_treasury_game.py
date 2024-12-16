@@ -9,6 +9,7 @@ from datetime import timedelta
 from enum import Enum
 
 import streamlit as st
+from eth_typing import ChecksumAddress
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.omen.omen import OMEN_TINY_BET_AMOUNT
 from prediction_market_agent_tooling.tools.balances import get_balances
@@ -17,7 +18,6 @@ from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from python_web3_wallet import my_component as wallet_component
 from streamlit_extras.stylable_container import stylable_container
-from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
@@ -71,10 +71,10 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
 
 @st.dialog("Send message to agent")
 def send_message_via_wallet(
-    recipient: str, message: str, amount_to_send: float
+    recipient: ChecksumAddress, message: str, amount_to_send: float
 ) -> None:
     wallet_component(
-        recipient=Web3.to_checksum_address(recipient),
+        recipient=recipient,
         amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
         data=message,
     )
