@@ -51,7 +51,9 @@ class BlockchainTransactionFetcher:
             )
         )
         min_block_number = (
-            0 if not latest_blockchain_message else latest_blockchain_message.block
+            37554163  # Block at the time of starting agents.
+            if not latest_blockchain_message
+            else latest_blockchain_message.block
         )
         # We order by block_time because it's used as partition on Dune.
         # We use >= for block because we might have lost transactions from the same block.
