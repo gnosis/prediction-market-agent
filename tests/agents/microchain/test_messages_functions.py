@@ -43,7 +43,9 @@ MOCK_SENDER_SPICE_QUERY = Web3.to_checksum_address(
 )  # anvil account 1
 
 
-def mock_spice_query(query: str, api_key: str, cache: bool) -> pl.DataFrame:
+def mock_spice_query(
+    query: str, api_key: str, cache: bool, refresh: bool
+) -> pl.DataFrame:
     return pl.DataFrame(
         {
             "hash": [MOCK_HASH_1, MOCK_HASH_2],
