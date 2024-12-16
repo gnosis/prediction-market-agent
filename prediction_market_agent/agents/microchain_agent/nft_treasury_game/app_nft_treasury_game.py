@@ -89,7 +89,7 @@ def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
         format="%0.5f",
     )
     message_compressed = HexBytes(compress_message(message)).hex() if message else ""
-    if st.button("Send message"):
+    if st.button("Send message", disabled=not message):
         send_message_via_wallet(
             recipient=nft_agent.wallet_address,
             message=message_compressed,
