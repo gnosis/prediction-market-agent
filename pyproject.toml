@@ -67,4 +67,3 @@ langchain-chroma = "^0.1.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-

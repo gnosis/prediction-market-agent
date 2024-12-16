@@ -70,7 +70,9 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
 
 
 @st.dialog("Send message to agent")
-def send_message_via_wallet(recipient: str, message: str, amount_to_send: float):
+def send_message_via_wallet(
+    recipient: str, message: str, amount_to_send: float
+) -> None:
     wallet_component(
         recipient=Web3.to_checksum_address(recipient),
         amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
@@ -86,7 +88,7 @@ def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
         step=OMEN_TINY_BET_AMOUNT,
         format="%0.5f",
     )
-    message_compressed = HexBytes(compress_message(message)).hex() if message else None
+    message_compressed = HexBytes(compress_message(message)).hex() if message else ""
     if st.button("Send message"):
         send_message_via_wallet(
             recipient=nft_agent.wallet_address,
