@@ -71,7 +71,11 @@ def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
     default_value = MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT
     value = st.number_input(
-        "Value in xDai", min_value=default_value, max_value=0.1, value=default_value
+        "Value in xDai",
+        min_value=default_value,
+        max_value=0.1,
+        value=default_value,
+        format="%.5f",
     )
 
     if st.button("Send message", disabled=not message):
