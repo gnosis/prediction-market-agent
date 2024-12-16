@@ -125,7 +125,10 @@ def customized_chat_message(
         if parsed_function_call_name == Reasoning.__name__:
             # Don't show reasoning as function call, to make it a bit nicer.
             st.markdown(
-                parsed_function_call_body.replace("reasoning='", "").replace("')", "")
+                parsed_function_call_body.replace("reasoning='", "")
+                .replace("')", "")
+                .replace('reasoning="', "")
+                .replace('")', "")
             )
         elif parsed_function_call_name == Stop.__name__:
             # If the agent decided to stop, show it as a break, as it will be started soon again.
