@@ -51,7 +51,7 @@ class BlockchainTransactionFetcher:
             )
         )
         min_block_number = (
-            37554163  # Block at the time of starting agents.
+            37554165  # Block at the time of starting agents.
             if not latest_blockchain_message
             else latest_blockchain_message.block
         )
@@ -59,7 +59,9 @@ class BlockchainTransactionFetcher:
         # We use >= for block because we might have lost transactions from the same block.
         # Additionally, processed tx_hashes are filtered out anyways.
         query = f'select * from gnosis.transactions where "to" = {Web3.to_checksum_address(consumer_address)} AND block_number >= {min_block_number} and value >= {xdai_to_wei(MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT)} order by block_time asc'
-        df = spice.query(query, api_key=keys.dune_api_key.get_secret_value())
+        df = spice.query(
+            query, api_key=keys.dune_api_key.get_secret_value(), cache=False
+        )
 
         existing_hashes = self.blockchain_table_handler.fetch_all_transaction_hashes(
             consumer_address=consumer_address
