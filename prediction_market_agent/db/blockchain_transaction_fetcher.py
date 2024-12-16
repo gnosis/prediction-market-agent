@@ -65,9 +65,7 @@ class BlockchainTransactionFetcher:
         # Filter out existing hashes - hashes are by default lowercase
         df = df.filter(~pl.col("hash").is_in([i.hex() for i in existing_hashes]))
         return [
-            self.blockchain_message_from_dune_df_row(consumer_address, x).model_copy(
-                deep=True  # To prevent `is not bound to a Session` error.
-            )
+            self.blockchain_message_from_dune_df_row(consumer_address, x)
             for x in df.iter_rows(named=True)
         ]
 
