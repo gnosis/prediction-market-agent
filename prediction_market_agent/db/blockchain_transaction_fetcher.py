@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 import spice
 from eth_typing import ChecksumAddress
@@ -27,9 +29,21 @@ class BlockchainTransactionFetcher:
         except:
             return data_field
 
-    def fetch_unseen_transactions_df(
+    def blockchain_message_from_dune_df_row(
+        self, consumer_address: ChecksumAddress, x: dict[str, Any]
+    ) -> BlockchainMessage:
+        return BlockchainMessage(
+            consumer_address=consumer_address,
+            transaction_hash=x["hash"],
+            value_wei=str(x["value"]),
+            block=str(x["block_number"]),
+            sender_address=x["from"],
+            data_field=self.unzip_message_else_do_nothing(x["data"]),
+        )
+
+    def fetch_unseen_transactions(
         self, consumer_address: ChecksumAddress
-    ) -> pl.DataFrame:
+    ) -> list[BlockchainMessage]:
         keys = APIKeys()
         latest_blockchain_message = (
             self.blockchain_table_handler.fetch_latest_blockchain_message(
@@ -50,13 +64,16 @@ class BlockchainTransactionFetcher:
         )
         # Filter out existing hashes - hashes are by default lowercase
         df = df.filter(~pl.col("hash").is_in([i.hex() for i in existing_hashes]))
-        return df
+        return [
+            self.blockchain_message_from_dune_df_row(consumer_address, x)
+            for x in df.iter_rows(named=True)
+        ]
 
     def fetch_count_unprocessed_transactions(
         self, consumer_address: ChecksumAddress
     ) -> int:
-        df = self.fetch_unseen_transactions_df(consumer_address=consumer_address)
-        return len(df)
+        transactions = self.fetch_unseen_transactions(consumer_address=consumer_address)
+        return len(transactions)
 
     def fetch_one_unprocessed_blockchain_message_and_store_as_processed(
         self, consumer_address: ChecksumAddress
@@ -65,25 +82,13 @@ class BlockchainTransactionFetcher:
         Method for fetching oldest unprocessed transaction sent to the consumer address.
         After being fetched, it is stored in the DB as processed.
         """
-        df = self.fetch_unseen_transactions_df(consumer_address=consumer_address)
-        if df.is_empty():
+        transactions = self.fetch_unseen_transactions(consumer_address=consumer_address)
+        if not transactions:
             return None
 
         # We only want the oldest non-processed message.
-        oldest_non_processed_message = df.row(0, named=True)
-        blockchain_message = BlockchainMessage(
-            consumer_address=consumer_address,
-            transaction_hash=oldest_non_processed_message["hash"],
-            value_wei=str(oldest_non_processed_message["value"]),
-            block=str(oldest_non_processed_message["block_number"]),
-            sender_address=oldest_non_processed_message["from"],
-            data_field=self.unzip_message_else_do_nothing(
-                oldest_non_processed_message["data"]
-            ),
-        )
+        blockchain_message = transactions[0]
 
-        # Store here to avoid having to refresh after session was closed.
-        item = blockchain_message.model_copy(deep=True)
         # mark unseen transaction as processed in DB
         self.blockchain_table_handler.save_multiple([blockchain_message])
-        return item
+        return blockchain_message

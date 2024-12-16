@@ -48,4 +48,7 @@ class BlockchainMessageTableHandler:
         return list(set(tx_hashes))
 
     def save_multiple(self, items: t.Sequence[BlockchainMessage]) -> None:
-        return self.sql_handler.save_multiple(items)
+        return self.sql_handler.save_multiple(
+            # Re-create the items to avoid SQLModel errors. This is a workaround. It's weird, but it works. :shrug:
+            [BlockchainMessage(**i.model_dump()) for i in items]
+        )
