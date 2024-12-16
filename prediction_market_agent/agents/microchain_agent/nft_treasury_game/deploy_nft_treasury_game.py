@@ -198,6 +198,7 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
 - Sending a message costs you a fee.
 - Receiving messages will pay you a fee.
 - If you have unseen incoming messages, always process them first.
+- Regularly check balances of your wallet and the treasury.
 """
 
 
