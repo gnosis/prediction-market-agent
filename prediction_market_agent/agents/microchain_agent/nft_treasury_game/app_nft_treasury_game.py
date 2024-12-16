@@ -74,7 +74,7 @@ def send_message_via_wallet(
     recipient: str, message: str, amount_to_send: float
 ) -> None:
     wallet_component(
-        recipient=Web3.to_checksum_address(recipient),
+        recipient=recipient,
         amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
         data=message,
     )
