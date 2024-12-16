@@ -10,10 +10,14 @@ from enum import Enum
 
 import streamlit as st
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.markets.omen.omen import OMEN_TINY_BET_AMOUNT
 from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from python_web3_wallet import my_component as wallet_component
 from streamlit_extras.stylable_container import stylable_container
+from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.messages_functions import (
@@ -36,6 +40,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+from prediction_market_agent.tools.message_utils import compress_message
 
 st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
@@ -64,13 +69,30 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
     return PromptTableHandler.from_agent_identifier(identifier)
 
 
+@st.dialog("Send message to agent")
+def send_message_via_wallet(recipient: str, message: str, amount_to_send: float):
+    wallet_component(
+        recipient=Web3.to_checksum_address(recipient),
+        amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
+        data=message,
+    )
+
+
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
-
-    if st.button("Send message", disabled=not message):
-        # TODO: Don't do this manually with deployment private key, use the user's wallet!
-        SendPaidMessageToAnotherAgent()(nft_agent.wallet_address, message)
-        st.success("Message sent and will be processed soon!")
+    amount_to_send = st.number_input(
+        "Amount to send to agent (xDAI)",
+        min_value=OMEN_TINY_BET_AMOUNT,
+        step=OMEN_TINY_BET_AMOUNT,
+        format="%0.5f",
+    )
+    message_compressed = HexBytes(compress_message(message)).hex() if message else None
+    if st.button("Send message"):
+        send_message_via_wallet(
+            recipient=nft_agent.wallet_address,
+            message=message_compressed,
+            amount_to_send=amount_to_send,
+        )
 
 
 def parse_function_and_body(
