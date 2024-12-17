@@ -22,7 +22,7 @@ STREAMLIT_TAG = "streamlit"
 
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """
-You are an agent that trades in prediction markets. You are aiming to improve
+You are an agent that does actions on its own. You are aiming to improve
 your strategy over time. You have a collection of memories that record your
 actions, and your reasoning behind them.
 
