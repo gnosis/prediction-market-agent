@@ -11,7 +11,6 @@ from enum import Enum
 import streamlit as st
 from eth_typing import ChecksumAddress
 from microchain.functions import Reasoning, Stop
-from prediction_market_agent_tooling.markets.omen.omen import OMEN_TINY_BET_AMOUNT
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
