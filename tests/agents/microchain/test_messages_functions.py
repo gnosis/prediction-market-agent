@@ -9,7 +9,7 @@ from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     ReceiveMessage,
 )
 from prediction_market_agent.db.blockchain_message_table_handler import (
@@ -43,7 +43,9 @@ MOCK_SENDER_SPICE_QUERY = Web3.to_checksum_address(
 )  # anvil account 1
 
 
-def mock_spice_query(query: str, api_key: str) -> pl.DataFrame:
+def mock_spice_query(
+    query: str, api_key: str, cache: bool, refresh: bool
+) -> pl.DataFrame:
     return pl.DataFrame(
         {
             "hash": [MOCK_HASH_1, MOCK_HASH_2],
@@ -78,7 +80,7 @@ def patch_spice() -> Generator[PropertyMock, None, None]:
 def patch_send_xdai() -> Generator[PropertyMock, None, None]:
     # Note that we patch where the function is called (see https://docs.python.org/3/library/unittest.mock.html#where-to-patch).
     with patch(
-        "prediction_market_agent.agents.microchain_agent.messages_functions.send_xdai_to",
+        "prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions.send_xdai_to",
         return_value={"transactionHash": HexBytes(MOCK_HASH_1)},
     ) as mock_send_xdai:
         yield mock_send_xdai

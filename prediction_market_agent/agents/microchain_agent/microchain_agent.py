@@ -21,6 +21,9 @@ from prediction_market_agent_tooling.tools.utils import (
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.balance_functions import (
+    BALANCE_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.blockchain.contract_class_converter import (
     ContractClassConverter,
 )
@@ -41,10 +44,10 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     LookAtPastActions,
 )
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
+from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     MESSAGES_FUNCTIONS,
 )
-from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -73,8 +76,6 @@ class SupportedModel(str, Enum):
     gpt_4o = "gpt-4o-2024-08-06"
     gpt_4o_mini = "gpt-4o-mini-2024-07-18"
     gpt_4_turbo = "gpt-4-turbo"
-    o1_preview = "o1-preview-2024-09-12"
-    o1_mini = "o1-mini-2024-09-12"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
 
     @property
@@ -165,6 +166,9 @@ def build_agent_functions(
 
     if functions_config.include_nft_functions:
         functions.extend(f() for f in NFT_FUNCTIONS)
+
+    if functions_config.balance_functions:
+        functions.extend(f() for f in BALANCE_FUNCTIONS)
 
     if long_term_memory:
         functions.append(

@@ -1,5 +1,5 @@
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import wei_type
+from prediction_market_agent_tooling.gtypes import wei_type, xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
@@ -39,21 +39,19 @@ class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
-Fee for sending the message is {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} xDai."""
+You need to send a fee of at least {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} xDai for other agent to read the message."""
 
     @property
     def example_args(self) -> list[str]:
-        return ["0x123", "Hello!"]
+        return ["0x123", "Hello!", f"{MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT}"]
 
-    def __call__(self, address: str, message: str) -> str:
+    def __call__(self, address: str, message: str, fee: float) -> str:
         keys = MicrochainAgentKeys()
         send_xdai_to(
             web3=ContractOnGnosisChain.get_web3(),
             from_private_key=keys.bet_from_private_key,
             to_address=Web3.to_checksum_address(address),
-            value=xdai_to_wei(
-                keys.cap_sending_xdai(MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT)
-            ),
+            value=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
             data_text=compress_message(message),
         )
         return self.OUTPUT_TEXT
@@ -72,7 +70,7 @@ class ReceiveMessage(Function):
     @property
     def description(self) -> str:
         count_unseen_messages = self.get_count_unseen_messages()
-        return f"Use {ReceiveMessage.__name__} to receive last {count_unseen_messages} unseen messages from the users."
+        return f"Use {ReceiveMessage.__name__} to receive last unseen message from the users or other agents. Currently, you have {count_unseen_messages} unseen messages."
 
     @property
     def example_args(self) -> list[str]:

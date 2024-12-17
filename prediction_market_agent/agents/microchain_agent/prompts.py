@@ -11,6 +11,7 @@ class FunctionsConfig(BaseModel):
     include_twitter_functions: bool = False
     include_messages_functions: bool = False
     include_nft_functions: bool = False
+    balance_functions: bool = False
 
     def combine(self, other: "FunctionsConfig") -> "FunctionsConfig":
         """

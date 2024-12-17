@@ -20,17 +20,23 @@ from python_web3_wallet import my_component as wallet_component
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.messages_functions import (
-    BroadcastPublicMessageToHumans,
-    ReceiveMessage,
-    SendPaidMessageToAnotherAgent,
-)
+from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    NFT_TOKEN_FACTORY,
     TREASURY_SAFE_ADDRESS,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
+    get_nft_token_factory_max_supply,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
+    MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    BroadcastPublicMessageToHumans,
+    ReceiveMessage,
+    SendPaidMessageToAnotherAgent,
 )
 from prediction_market_agent.db.blockchain_transaction_fetcher import (
     BlockchainTransactionFetcher,
@@ -82,13 +88,17 @@ def send_message_via_wallet(
 
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
+    keys = MicrochainAgentKeys()
+    default_value = keys.RECEIVER_MINIMUM_AMOUNT
     amount_to_send = st.number_input(
-        "Amount to send to agent (xDAI)",
-        min_value=OMEN_TINY_BET_AMOUNT,
-        step=OMEN_TINY_BET_AMOUNT,
-        format="%0.5f",
+        "Value in xDai",
+        min_value=default_value,
+        max_value=keys.SENDING_XDAI_CAP,
+        value=default_value,
+        format="%.5f",
     )
     message_compressed = HexBytes(compress_message(message)).hex() if message else ""
+
     if st.button("Send message", disabled=not message):
         send_message_via_wallet(
             recipient=nft_agent.wallet_address,
@@ -149,7 +159,10 @@ def customized_chat_message(
         if parsed_function_call_name == Reasoning.__name__:
             # Don't show reasoning as function call, to make it a bit nicer.
             st.markdown(
-                parsed_function_call_body.replace("reasoning='", "").replace("')", "")
+                parsed_function_call_body.replace("reasoning='", "")
+                .replace("')", "")
+                .replace('reasoning="', "")
+                .replace('")', "")
             )
         elif parsed_function_call_name == Stop.__name__:
             # If the agent decided to stop, show it as a break, as it will be started soon again.
@@ -210,10 +223,16 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
         else nft_agent.get_initial_system_prompt()
     )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
+    n_nft = BalanceOfNFT()(NFT_TOKEN_FACTORY, nft_agent.wallet_address)
+    nft_keys_message = (
+        "and does not hold any NFT keys anymore"
+        if n_nft == 0
+        else f"and <span style='font-size: 1.1em;'><strong>{n_nft} NFT key{'s' if n_nft > 1 else ''}</strong></span>"
+    )
     st.markdown(
         f"""### {nft_agent.name}
 
-Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span>.
+Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> {nft_keys_message}.
 
 ---
 """,
@@ -249,7 +268,7 @@ def show_treasury_part() -> None:
     treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
     st.markdown(
         f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>.""",
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {get_nft_token_factory_max_supply()} NFT keys.""",
         unsafe_allow_html=True,
     )
 
