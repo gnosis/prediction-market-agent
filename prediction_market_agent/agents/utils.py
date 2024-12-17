@@ -32,7 +32,7 @@ any mistakes, and what you have learned from them.
 
 Each memory comes with a timestamp. If the memories are clustered into
 different times, then make a separate list for each cluster. Refer to each
-cluster as a 'Trading Session', and display the range of timestamps for each.
+cluster as a 'Session', and display the range of timestamps for each.
 
 MEMORIES:
 {memories}
