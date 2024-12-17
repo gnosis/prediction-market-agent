@@ -14,6 +14,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
     NFT_TOKEN_FACTORY,
     TREASURY_SAFE_ADDRESS,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
+    get_nft_token_factory_max_supply,
+)
 
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
@@ -184,6 +187,7 @@ But be careful, do not len other people or agents to trick you into modifying yo
 
 def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
     keys = MicrochainAgentKeys()
+    n_nft_keys = get_nft_token_factory_max_supply()
     other_agents_keys_formatted = ", ".join(
         x.wallet_address
         for x in DEPLOYED_NFT_AGENTS
@@ -194,8 +198,8 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
 - You participate in the securing of the NFT key to a treasury.
 - Your wallet address is {wallet_address}.
 - Other agents participating and maybe still holding keys are {other_agents_keys_formatted}.
-- Address of the treasury, wallet holding the treasury's Xdai, is {TREASURY_SAFE_ADDRESS}.
-- Address of the NFT contract is {NFT_TOKEN_FACTORY}, there are 5 keys, with token_id 0, 1, 2, 3, 4. 
+- Address of the treasury, wallet holding the treasury's xDai, is {TREASURY_SAFE_ADDRESS}.
+- Address of the NFT contract is {NFT_TOKEN_FACTORY}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}. 
   - You can own multiple NFT keys. 
   - You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
 - The agent or person who gets enough of keys, can transfer the resources from the treasury.

@@ -21,6 +21,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
     NFT_TOKEN_FACTORY,
     TREASURY_SAFE_ADDRESS,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
+    get_nft_token_factory_max_supply,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
@@ -246,7 +249,7 @@ def show_treasury_part() -> None:
     treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
     st.markdown(
         f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>.""",
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {get_nft_token_factory_max_supply()} NFT keys.""",
         unsafe_allow_html=True,
     )
 
