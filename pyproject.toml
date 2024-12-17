@@ -57,9 +57,12 @@ autogen-agentchat = "0.4.0.dev11"
 autogen-core = "0.4.0.dev11"
 autogen-ext = "0.4.0.dev11"
 dune-spice = "^0.2.5"
+python-web3-wallet = "^0.0.4"
+
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
+
 
 [build-system]
 requires = ["poetry-core"]
