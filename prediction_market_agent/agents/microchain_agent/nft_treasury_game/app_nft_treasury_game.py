@@ -202,10 +202,15 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
     )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     n_nft = BalanceOfNFT()(NFT_TOKEN_FACTORY, nft_agent.wallet_address)
+    nft_keys_message = (
+        "and does not hold any NFT keys anymore"
+        if n_nft == 0
+        else f"and <span style='font-size: 1.1em;'><strong>{n_nft} NFT key{'s' if n_nft > 1 else ''}</strong></span>"
+    )
     st.markdown(
         f"""### {nft_agent.name}
 
-Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> and still holds <span style='font-size: 1.1em;'><strong>{n_nft} NFT keys</strong></span>.
+Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> {nft_keys_message}.
 
 ---
 """,
