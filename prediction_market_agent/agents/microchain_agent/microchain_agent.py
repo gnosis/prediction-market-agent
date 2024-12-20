@@ -42,7 +42,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    LookAtPastActions,
+    MEMORY_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
@@ -171,8 +171,8 @@ def build_agent_functions(
         functions.extend(f() for f in BALANCE_FUNCTIONS)
 
     if long_term_memory:
-        functions.append(
-            LookAtPastActions(long_term_memory=long_term_memory, model=model)
+        functions.extend(
+            f(long_term_memory=long_term_memory, model=model) for f in MEMORY_FUNCTIONS
         )
 
     return functions
