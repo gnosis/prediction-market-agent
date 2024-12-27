@@ -240,7 +240,6 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.markdown("---")
     with st.popover("Show unprocessed incoming messages"):
-        # ToDo - Fetch all from queue
         messages = fetch_unseen_transactions(nft_agent.wallet_address)
 
         if not messages:
