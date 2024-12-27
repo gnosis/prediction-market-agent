@@ -37,15 +37,16 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
 )
-from prediction_market_agent.db.blockchain_transaction_fetcher import (
-    BlockchainTransactionFetcher,
-)
+from prediction_market_agent.db.agent_communication import fetch_unseen_transactions
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
-from prediction_market_agent.tools.message_utils import compress_message
+from prediction_market_agent.tools.message_utils import (
+    compress_message,
+    unzip_message_else_do_nothing,
+)
 
 st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
@@ -55,11 +56,6 @@ st.set_page_config(
 class DummyFunctionName(str, Enum):
     # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
     RESPONSE_FUNCTION_NAME = "Response"
-
-
-@st.cache_resource
-def blockchain_transaction_fetcher() -> BlockchainTransactionFetcher:
-    return BlockchainTransactionFetcher()
 
 
 @st.cache_resource
@@ -244,19 +240,18 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.markdown("---")
     with st.popover("Show unprocessed incoming messages"):
-        transactions = blockchain_transaction_fetcher().fetch_unseen_transactions(
-            nft_agent.wallet_address
-        )
+        # ToDo - Fetch all from queue
+        messages = fetch_unseen_transactions(nft_agent.wallet_address)
 
-        if not transactions:
+        if not messages:
             st.info("No unprocessed messages")
         else:
-            for transaction in transactions:
+            for message in messages:
                 st.markdown(
                     f"""
-                    **From:** {transaction.sender_address}  
-                    **Message:** {transaction.data_field}  
-                    **Value:** {wei_to_xdai(transaction.value_wei_parsed)} xDai
+                    **From:** {message.sender}
+                    **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
+                    **Value:** {wei_to_xdai(message.value)} xDai
                     """
                 )
                 st.divider()
