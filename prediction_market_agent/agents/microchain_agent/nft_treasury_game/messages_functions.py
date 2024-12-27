@@ -4,6 +4,7 @@ from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
+from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -51,6 +52,7 @@ You need to send a fee of at least {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUN
         api_keys = APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key)
         send_message(
             api_keys=api_keys,
+            recipient=Web3.to_checksum_address(address),
             message=HexBytes(compress_message(message)),
             amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
         )

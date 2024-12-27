@@ -107,7 +107,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         initial_formatted_system_prompt = agent.system_prompt
 
         iteration = 0
-        while self.max_iterations is None or iteration < self.max_iterations:
+        while not agent.do_stop and (
+            self.max_iterations is None or iteration < self.max_iterations
+        ):
             starting_history_length = len(agent.history)
             try:
                 # After the first iteration, resume=True to not re-initialize the agent.

@@ -44,12 +44,15 @@ def pop_message(api_keys: APIKeys_PMAT) -> MessageContainer:
 
 
 def send_message(
-    api_keys: APIKeys_PMAT, message: HexBytes, amount_wei: Wei
+    api_keys: APIKeys_PMAT,
+    recipient: ChecksumAddress,
+    message: HexBytes,
+    amount_wei: Wei,
 ) -> TxReceipt:
     agent_comm_contract = AgentCommunicationContract()
     return agent_comm_contract.send_message(
         api_keys=api_keys,
-        agent_address=api_keys.bet_from_address,
+        agent_address=recipient,
         message=message,
         amount_wei=amount_wei,
         web3=ContractOnGnosisChain.get_web3(),
