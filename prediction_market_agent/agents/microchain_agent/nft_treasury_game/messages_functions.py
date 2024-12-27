@@ -5,7 +5,6 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
-from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -16,6 +15,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
     pop_message,
+    send_message,
 )
 from prediction_market_agent.tools.message_utils import (
     compress_message,
@@ -52,12 +52,11 @@ You need to send a fee of at least {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUN
 
     def __call__(self, address: str, message: str, fee: float) -> str:
         keys = MicrochainAgentKeys()
-        send_xdai_to(
-            web3=ContractOnGnosisChain.get_web3(),
-            from_private_key=keys.bet_from_private_key,
-            to_address=Web3.to_checksum_address(address),
-            value=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
-            data_text=compress_message(message),
+        api_keys = APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key)
+        send_message(
+            api_keys=api_keys,
+            message=HexBytes(compress_message(message)),
+            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
         )
         return self.OUTPUT_TEXT
 

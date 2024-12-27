@@ -1,8 +1,13 @@
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
+from prediction_market_agent_tooling.gtypes import HexBytes, Wei
+from prediction_market_agent_tooling.tools.contract import (
+    AgentCommunicationContract,
+    ContractOnGnosisChain,
+)
 from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.parallelism import par_map
+from web3.types import TxReceipt
 
 
 def fetch_unseen_transactions(
@@ -36,3 +41,16 @@ def pop_message(api_keys: APIKeys_PMAT) -> MessageContainer:
         agent_address=api_keys.bet_from_address,
     )
     return popped_message
+
+
+def send_message(
+    api_keys: APIKeys_PMAT, message: HexBytes, amount_wei: Wei
+) -> TxReceipt:
+    agent_comm_contract = AgentCommunicationContract()
+    return agent_comm_contract.send_message(
+        api_keys=api_keys,
+        agent_address=api_keys.bet_from_address,
+        message=message,
+        amount_wei=amount_wei,
+        web3=ContractOnGnosisChain.get_web3(),
+    )
