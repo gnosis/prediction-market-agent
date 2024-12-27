@@ -1,6 +1,8 @@
 import zlib
 
-from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
+from prediction_market_agent_tooling.gtypes import HexBytes
+from prediction_market_agent_tooling.tools.data_models import MessageContainer
+from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 
 
 def compress_message(message: str) -> bytes:
@@ -18,3 +20,10 @@ def unzip_message_else_do_nothing(data_field: str) -> str:
         return decompress_message(HexBytes(data_field))
     except Exception:
         return data_field
+
+
+def parse_message_for_agent(message: MessageContainer) -> str:
+    return f"""Sender: {message.sender}
+    Value: {wei_to_xdai(message.value)} xDai
+    Message: {unzip_message_else_do_nothing(message.message.hex())}
+    """
