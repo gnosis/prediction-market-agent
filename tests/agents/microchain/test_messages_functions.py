@@ -42,16 +42,6 @@ MOCK_COUNT_UNPROCESSED_TXS = 1
 
 
 @pytest.fixture(scope="module")
-def patch_send_xdai() -> Generator[PropertyMock, None, None]:
-    # Note that we patch where the function is called (see https://docs.python.org/3/library/unittest.mock.html#where-to-patch).
-    with patch(
-        "prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions.send_xdai_to",
-        return_value={"transactionHash": HexBytes(MOCK_HASH_1)},
-    ) as mock_send_xdai:
-        yield mock_send_xdai
-
-
-@pytest.fixture(scope="module")
 def patch_count_unseen_messages() -> Generator[PropertyMock, None, None]:
     with patch.object(
         AgentCommunicationContract,
@@ -79,7 +69,6 @@ def patch_public_key(
 
 def test_receive_message_description(
     patch_public_key: PropertyMock,
-    patch_send_xdai: PropertyMock,
     patch_count_unseen_messages: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
@@ -91,7 +80,6 @@ def test_receive_message_description(
 
 
 def test_receive_message_call(
-    patch_send_xdai: PropertyMock,
     patch_public_key: PropertyMock,
     patch_count_unseen_messages: PropertyMock,
 ) -> None:
