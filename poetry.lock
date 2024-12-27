@@ -6596,13 +6596,13 @@ test = ["coverage", "django", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.57.8"
+version = "0.57.9"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.12,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.57.8-py3-none-any.whl", hash = "sha256:74e2747bc1ed593d88e0e03556ffd2365a6bcb941db39290d4e59be93da3dbe6"},
-    {file = "prediction_market_agent_tooling-0.57.8.tar.gz", hash = "sha256:adb8c67da317349246eda7dc9a6791ec03eb3a10156b269f8a0f3645efe96603"},
+    {file = "prediction_market_agent_tooling-0.57.9-py3-none-any.whl", hash = "sha256:73afad95f539fc43af9516961f38b62cd5d2df46067ee555cca4a248d13fafa8"},
+    {file = "prediction_market_agent_tooling-0.57.9.tar.gz", hash = "sha256:4e2c96ff43aa80fbfe6e6f2669abd834fdfc3cb1a4a257d426c1f1f03c15373c"},
 ]
 
 [package.dependencies]
@@ -7991,27 +7991,27 @@ files = [
 
 [[package]]
 name = "qdrant-client"
-version = "1.12.1"
+version = "1.12.2"
 description = "Client library for the Qdrant vector search engine"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "qdrant_client-1.12.1-py3-none-any.whl", hash = "sha256:b2d17ce18e9e767471368380dd3bbc4a0e3a0e2061fedc9af3542084b48451e0"},
-    {file = "qdrant_client-1.12.1.tar.gz", hash = "sha256:35e8e646f75b7b883b3d2d0ee4c69c5301000bba41c82aa546e985db0f1aeb72"},
+    {file = "qdrant_client-1.12.2-py3-none-any.whl", hash = "sha256:a0ae500a46a679ff3521ba3f1f1cf3d72b57090a768cec65fc317066bcbac1e6"},
+    {file = "qdrant_client-1.12.2.tar.gz", hash = "sha256:2777e09b3e89bb22bb490384d8b1fa8140f3915287884f18984f7031a346aba5"},
 ]
 
 [package.dependencies]
 grpcio = ">=1.41.0"
 grpcio-tools = ">=1.41.0"
 httpx = {version = ">=0.20.0", extras = ["http2"]}
-numpy = {version = ">=1.21", markers = "python_version >= \"3.8\" and python_version < \"3.12\""}
+numpy = {version = ">=1.21", markers = "python_version >= \"3.10\" and python_version < \"3.12\""}
 portalocker = ">=2.7.0,<3.0.0"
 pydantic = ">=1.10.8"
 urllib3 = ">=1.26.14,<3"
 
 [package.extras]
-fastembed = ["fastembed (==0.3.6)"]
-fastembed-gpu = ["fastembed-gpu (==0.3.6)"]
+fastembed = ["fastembed (==0.5.0)"]
+fastembed-gpu = ["fastembed-gpu (==0.5.0)"]
 
 [[package]]
 name = "rapidfuzz"
@@ -10766,4 +10766,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "e865d7dcb8c2e3a13355a7595cf804b3e0d37b72ac7db341dd2d2797cb71f031"
+content-hash = "a11807f73b82a6f5cb19b403c7e91cb950547b919008083ba51e0b95a4b2e105"

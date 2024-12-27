@@ -1,16 +1,12 @@
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import wei_type, xdai_type
+from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
-from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
+from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
-)
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    TREASURY_SAFE_ADDRESS,
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -94,18 +90,6 @@ class ReceiveMessage(Function):
             api_keys=APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key),
         )
 
-        # Accumulate a percentage of the message value in the treasury.
-        tx_receipt = send_xdai_to(
-            web3=ContractOnGnosisChain.get_web3(),
-            from_private_key=keys.bet_from_private_key,
-            to_address=TREASURY_SAFE_ADDRESS,
-            value=wei_type(
-                self.TREASURY_ACCUMULATION_PERCENTAGE * popped_message.value
-            ),
-        )
-        logger.info(
-            f"Funded the treasury with xDai, tx_hash: {HexBytes(tx_receipt['transactionHash']).hex()}"
-        )
         return parse_message_for_agent(message=popped_message)
 
 
