@@ -125,7 +125,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
 
         for related_market in omen_markets:
-            if related_market.id == market.id:
+            if related_market.id.lower() == market.id.lower():
                 logger.info(
                     f"Skipping related market {related_market.id} since same market as {market.id}"
                 )
