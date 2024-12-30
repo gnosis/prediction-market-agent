@@ -59,7 +59,7 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xDDe0780F744B84b505E344931F37cEDEaD8B6163"
     )
-    model = SupportedModel.gpt_4o
+    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -83,7 +83,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xEB98bfB88b469B60EE165F7e07c8450145999831"
     )
-    model = SupportedModel.gpt_4_turbo
+    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -138,7 +138,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x34c96c1abf80787c389B8d9f2C5Cb1E7C435D43B"
     )
-    model = SupportedModel.gpt_4o
+    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -168,7 +168,7 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x519c0eC90Dd217A70BA024Ee7a6390b856A69Af6"
     )
-    model = SupportedModel.gpt_4o
+    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
