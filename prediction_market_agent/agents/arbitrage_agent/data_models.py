@@ -24,6 +24,10 @@ class CorrelatedMarketPair(BaseModel):
     def __str__(self) -> str:
         return f"main_market {self.main_market.question} related_market_question {self.related_market.question} potential_profit_per_unit {self.potential_profit_per_bet_unit()}"
 
+    @property
+    def main_market_and_related_market_equal(self) -> bool:
+        return self.main_market.id.lower() == self.related_market.id.lower()
+
     def potential_profit_per_bet_unit(self) -> float:
         """
         Calculate potential profit per bet unit based on high positive market correlation.
