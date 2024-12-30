@@ -125,6 +125,11 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
 
         for related_market in omen_markets:
+            if related_market.id.lower() == market.id.lower():
+                logger.info(
+                    f"Skipping related market {related_market.id} since same market as {market.id}"
+                )
+                continue
             result: Correlation = self.chain.invoke(
                 {
                     "main_market_question": market,
@@ -185,6 +190,11 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         trades = []
         correlated_markets = self.get_correlated_markets(market=market)
         for pair in correlated_markets:
+            if pair.main_market_and_related_market_equal:
+                logger.info(
+                    "Skipping market pair since related- and main market are the same."
+                )
+                continue
             # We want to profit at least 0.5% per market (value chosen as initial baseline).
             if pair.potential_profit_per_bet_unit() > 0.005:
                 trades_for_pair = self.build_trades_for_correlated_markets(pair)
