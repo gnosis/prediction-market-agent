@@ -280,7 +280,7 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
             for message in messages:
                 st.markdown(
                     f"""
-                    **From:** {message.sender} 
+                    **From:** {message.sender}  
                     **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
                     **Value:** {wei_to_xdai(message.value)} xDai
                     """
