@@ -48,6 +48,7 @@ class LongTermMemoryTableHandler:
         self,
         from_: DatetimeUTC | None = None,
         to_: DatetimeUTC | None = None,
+        offset: int = 0,
         limit: int | None = None,
     ) -> list[LongTermMemories]:
         """Searches the LongTermMemoryTableHandler for entries within a specified datetime range that match
@@ -64,5 +65,6 @@ class LongTermMemoryTableHandler:
             query_filters=query_filters,
             order_by_column_name=LongTermMemories.datetime_.key,  # type: ignore[attr-defined]
             order_desc=True,
+            offset=offset,
             limit=limit,
         )

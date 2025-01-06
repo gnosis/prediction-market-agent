@@ -12,13 +12,14 @@ from web3.types import TxReceipt
 
 def fetch_unseen_transactions(
     consumer_address: ChecksumAddress,
+    n: int | None = None,
 ) -> list[MessageContainer]:
     agent_comm_contract = AgentCommunicationContract()
 
     count_unseen_messages = fetch_count_unprocessed_transactions(consumer_address)
 
     message_containers = par_map(
-        items=list(range(count_unseen_messages)),
+        items=list(range(n or count_unseen_messages)),
         func=lambda idx: agent_comm_contract.get_at_index(
             agent_address=consumer_address, idx=idx
         ),

@@ -34,6 +34,7 @@ class SQLHandler:
         query_filters: t.Sequence[ColumnElement[bool] | BinaryExpression[bool]] = (),
         order_by_column_name: str | None = None,
         order_desc: bool = True,
+        offset: int = 0,
         limit: int | None = None,
     ) -> list[SQLModelType]:
         with self.db_manager.get_session() as session:
@@ -47,6 +48,8 @@ class SQLHandler:
                     if order_desc
                     else asc(order_by_column_name)
                 )
+            if offset:
+                query = query.offset(offset)
             if limit:
                 query = query.limit(limit)
             results = query.all()
