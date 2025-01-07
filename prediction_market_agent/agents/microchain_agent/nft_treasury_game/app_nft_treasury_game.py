@@ -15,7 +15,7 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
-from python_web3_wallet import wallet_component as wallet_component
+from python_web3_wallet import wallet_component
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
