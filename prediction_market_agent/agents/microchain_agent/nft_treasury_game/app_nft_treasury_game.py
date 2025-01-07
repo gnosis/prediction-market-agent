@@ -37,7 +37,10 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
 )
-from prediction_market_agent.db.agent_communication import fetch_unseen_transactions
+from prediction_market_agent.db.agent_communication import (
+    fetch_count_unprocessed_transactions,
+    fetch_unseen_transactions,
+)
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
     LongTermMemoryTableHandler,
@@ -178,12 +181,44 @@ def customized_chat_message(
             st.markdown(parsed_function_output_body)
 
 
-@st.fragment(run_every=timedelta(seconds=5))
 def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     st.markdown(f"""### Agent's actions""")
 
+    n_total_messages = long_term_memory_table_handler(nft_agent.identifier).count()
+    messages_per_page = 50
+    if "page_number" not in st.session_state:
+        st.session_state.page_number = 0
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Previous page", disabled=st.session_state.page_number == 0):
+            st.session_state.page_number -= 1
+    with col2:
+        if st.button(
+            "Next page",
+            disabled=st.session_state.page_number
+            == n_total_messages // messages_per_page,
+        ):
+            st.session_state.page_number += 1
+    with col3:
+        st.write(f"Current page {st.session_state.page_number + 1}")
+
+    show_function_calls_part_messages(
+        nft_agent, messages_per_page, st.session_state.page_number
+    )
+
+
+@st.fragment(run_every=timedelta(seconds=10))
+def show_function_calls_part_messages(
+    nft_agent: type[DeployableAgentNFTGameAbstract],
+    messages_per_page: int,
+    page_number: int,
+) -> None:
     with st.spinner("Loading agent's actions..."):
-        calls = long_term_memory_table_handler(nft_agent.identifier).search()
+        calls = long_term_memory_table_handler(nft_agent.identifier).search(
+            offset=page_number * messages_per_page,
+            limit=messages_per_page,
+        )
 
     if not calls:
         st.markdown("No actions yet.")
@@ -205,7 +240,7 @@ def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) ->
             customized_chat_message(function_call, function_output)
 
 
-@st.fragment(run_every=timedelta(seconds=5))
+@st.fragment(run_every=timedelta(seconds=10))
 def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     system_prompt = (
         system_prompt_from_db.prompt
@@ -240,7 +275,9 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.markdown("---")
     with st.popover("Show unprocessed incoming messages"):
-        messages = fetch_unseen_transactions(nft_agent.wallet_address)
+        show_n = 10
+        n_messages = fetch_count_unprocessed_transactions(nft_agent.wallet_address)
+        messages = fetch_unseen_transactions(nft_agent.wallet_address, n=show_n)
 
         if not messages:
             st.info("No unprocessed messages")
@@ -248,15 +285,18 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
             for message in messages:
                 st.markdown(
                     f"""
-                    **From:** {message.sender}
+                    **From:** {message.sender}  
                     **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
                     **Value:** {wei_to_xdai(message.value)} xDai
                     """
                 )
                 st.divider()
 
+            if n_messages > show_n:
+                st.write(f"... and another {n_messages - show_n} unprocessed messages.")
 
-@st.fragment(run_every=timedelta(seconds=5))
+
+@st.fragment(run_every=timedelta(seconds=10))
 def show_treasury_part() -> None:
     treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
     st.markdown(

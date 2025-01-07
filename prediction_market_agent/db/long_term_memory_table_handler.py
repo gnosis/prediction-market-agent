@@ -2,6 +2,7 @@ import json
 import typing as t
 
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
+from sqlalchemy.sql.elements import ColumnElement
 from sqlmodel import col
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -44,14 +45,9 @@ class LongTermMemoryTableHandler:
     ) -> None:
         return self.save_history([answer_with_scenario.model_dump()])
 
-    def search(
-        self,
-        from_: DatetimeUTC | None = None,
-        to_: DatetimeUTC | None = None,
-        limit: int | None = None,
-    ) -> list[LongTermMemories]:
-        """Searches the LongTermMemoryTableHandler for entries within a specified datetime range that match
-        self.task_description."""
+    def _get_query_filters(
+        self, from_: DatetimeUTC | None, to_: DatetimeUTC | None
+    ) -> list[ColumnElement[bool]]:
         query_filters = [
             col(LongTermMemories.task_description) == self.task_description
         ]
@@ -59,10 +55,26 @@ class LongTermMemoryTableHandler:
             query_filters.append(col(LongTermMemories.datetime_) >= from_)
         if to_ is not None:
             query_filters.append(col(LongTermMemories.datetime_) <= to_)
+        return query_filters
 
+    def search(
+        self,
+        from_: DatetimeUTC | None = None,
+        to_: DatetimeUTC | None = None,
+        offset: int = 0,
+        limit: int | None = None,
+    ) -> list[LongTermMemories]:
+        """Searches the LongTermMemoryTableHandler for entries within a specified datetime range that match
+        self.task_description."""
+        query_filters = self._get_query_filters(from_, to_)
         return self.sql_handler.get_with_filter_and_order(
             query_filters=query_filters,
             order_by_column_name=LongTermMemories.datetime_.key,  # type: ignore[attr-defined]
             order_desc=True,
+            offset=offset,
             limit=limit,
         )
+
+    def count(self) -> int:
+        query_filters = self._get_query_filters(None, None)
+        return self.sql_handler.count(query_filters=query_filters)
