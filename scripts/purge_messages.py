@@ -1,6 +1,5 @@
 import typer
-from prediction_market_agent_tooling.gtypes import PrivateKey
-from pydantic import SecretStr
+from prediction_market_agent_tooling.gtypes import private_key_type
 
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -9,8 +8,8 @@ from prediction_market_agent.db.agent_communication import (
 from prediction_market_agent.utils import APIKeys
 
 
-def main(private_key: SecretStr) -> None:
-    keys = APIKeys(BET_FROM_PRIVATE_KEY=PrivateKey(private_key))
+def main(private_key: str) -> None:
+    keys = APIKeys(BET_FROM_PRIVATE_KEY=private_key_type(private_key))
     n_messages = fetch_count_unprocessed_transactions(
         consumer_address=keys.bet_from_address
     )
