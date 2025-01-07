@@ -1,3 +1,5 @@
+import time
+
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import xdai_type
@@ -95,8 +97,23 @@ class ReceiveMessage(Function):
         return parse_message_for_agent(message=popped_message)
 
 
+class Wait(Function):
+    @property
+    def description(self) -> str:
+        return f"""Use {Wait.__name__} to wait for given amount of time in seconds and the reason for it. You can use this for example to wait for a while before checking for new messages."""
+
+    @property
+    def example_args(self) -> list[str]:
+        return ["10", "Waiting for responses."]
+
+    def __call__(self, wait: int, reason: str) -> str:
+        time.sleep(wait)
+        return f"Waited for {wait} seconds to {reason}."
+
+
 MESSAGES_FUNCTIONS: list[type[Function]] = [
     BroadcastPublicMessageToHumans,
     SendPaidMessageToAnotherAgent,
     ReceiveMessage,
+    Wait,
 ]

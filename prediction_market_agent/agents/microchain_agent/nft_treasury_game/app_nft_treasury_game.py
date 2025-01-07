@@ -36,6 +36,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_
     BroadcastPublicMessageToHumans,
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
+    Wait,
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -144,6 +145,8 @@ def customized_chat_message(
             icon = "🧠"
         case Stop.__name__:
             icon = "😴"
+        case Wait.__name__:
+            icon = "⏳"
         case ReceiveMessage.__name__:
             icon = "👤"
         case BroadcastPublicMessageToHumans.__name__:
@@ -177,6 +180,7 @@ def customized_chat_message(
             Stop.__name__,
             BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
+            Wait.__name__,
         ):
             st.markdown(parsed_function_output_body)
 
