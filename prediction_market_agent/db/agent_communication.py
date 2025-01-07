@@ -19,7 +19,13 @@ def fetch_unseen_transactions(
     count_unseen_messages = fetch_count_unprocessed_transactions(consumer_address)
 
     message_containers = par_map(
-        items=list(range(n or count_unseen_messages)),
+        items=list(
+            range(
+                min(n, count_unseen_messages)
+                if n is not None
+                else count_unseen_messages
+            )
+        ),
         func=lambda idx: agent_comm_contract.get_at_index(
             agent_address=consumer_address, idx=idx
         ),
