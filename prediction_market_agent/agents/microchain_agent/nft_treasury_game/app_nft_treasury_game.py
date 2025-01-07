@@ -184,6 +184,7 @@ def customized_chat_message(
 def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     st.markdown(f"""### Agent's actions""")
 
+    n_total_messages = long_term_memory_table_handler(nft_agent.identifier).count()
     messages_per_page = 50
     if "page_number" not in st.session_state:
         st.session_state.page_number = 0
@@ -193,7 +194,11 @@ def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) ->
         if st.button("Previous page", disabled=st.session_state.page_number == 0):
             st.session_state.page_number -= 1
     with col2:
-        if st.button("Next page"):
+        if st.button(
+            "Next page",
+            disabled=st.session_state.page_number
+            == n_total_messages // messages_per_page,
+        ):
             st.session_state.page_number += 1
     with col3:
         st.write(f"Current page {st.session_state.page_number + 1}")

@@ -54,3 +54,13 @@ class SQLHandler:
                 query = query.limit(limit)
             results = query.all()
         return results
+
+    def count(
+        self,
+        query_filters: t.Sequence[ColumnElement[bool] | BinaryExpression[bool]] = (),
+    ) -> int:
+        with self.db_manager.get_session() as session:
+            query = session.query(self.table)
+            for exp in query_filters:
+                query = query.where(exp)
+            return query.count()
