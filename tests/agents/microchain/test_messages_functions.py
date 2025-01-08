@@ -1,10 +1,11 @@
-import typing
 from typing import Generator
 from unittest.mock import PropertyMock, patch
 
-import polars as pl
 import pytest
 from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import wei_type
+from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
+from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
@@ -12,13 +13,9 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     ReceiveMessage,
 )
-from prediction_market_agent.db.blockchain_message_table_handler import (
-    BlockchainMessageTableHandler,
+from prediction_market_agent.db.agent_communication import (
+    fetch_count_unprocessed_transactions,
 )
-from prediction_market_agent.db.blockchain_transaction_fetcher import (
-    BlockchainTransactionFetcher,
-)
-from prediction_market_agent.tools.message_utils import compress_message
 
 
 @pytest.fixture(scope="session")
@@ -38,52 +35,20 @@ def account2_private_key() -> SecretStr:
 # Random transactions found on Gnosisscan.
 MOCK_HASH_1 = "0x5ba6dd51d3660f98f02683e032daa35644d3f7f975975da3c2628a5b4b1f5cb6"
 MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6a"
-MOCK_SENDER_SPICE_QUERY = Web3.to_checksum_address(
+MOCK_SENDER = Web3.to_checksum_address(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 )  # anvil account 1
-
-
-def mock_spice_query(
-    query: str, api_key: str, cache: bool, refresh: bool
-) -> pl.DataFrame:
-    return pl.DataFrame(
-        {
-            "hash": [MOCK_HASH_1, MOCK_HASH_2],
-            "value": [Web3.to_wei(1, "ether"), Web3.to_wei(2, "ether")],
-            "block_number": [1, 2],
-            "from": [MOCK_SENDER_SPICE_QUERY, MOCK_SENDER_SPICE_QUERY],
-            "data": ["test", Web3.to_hex(compress_message("test"))],
-        }
-    )
+MOCK_COUNT_UNPROCESSED_TXS = 1
 
 
 @pytest.fixture(scope="module")
-def patch_dune_api_key() -> Generator[PropertyMock, None, None]:
-    with patch(
-        "prediction_market_agent.utils.APIKeys.dune_api_key",
-        new_callable=PropertyMock,
-    ) as mock_dune:
-        mock_dune.return_value = SecretStr("mock_dune_api_key")
-        yield mock_dune
-
-
-@pytest.fixture(scope="module")
-def patch_spice() -> Generator[PropertyMock, None, None]:
-    with patch(
-        "spice.query",
-        side_effect=mock_spice_query,
-    ) as mock_spice:
-        yield mock_spice
-
-
-@pytest.fixture(scope="module")
-def patch_send_xdai() -> Generator[PropertyMock, None, None]:
-    # Note that we patch where the function is called (see https://docs.python.org/3/library/unittest.mock.html#where-to-patch).
-    with patch(
-        "prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions.send_xdai_to",
-        return_value={"transactionHash": HexBytes(MOCK_HASH_1)},
-    ) as mock_send_xdai:
-        yield mock_send_xdai
+def patch_count_unseen_messages() -> Generator[PropertyMock, None, None]:
+    with patch.object(
+        AgentCommunicationContract,
+        "count_unseen_messages",
+        return_value=MOCK_COUNT_UNPROCESSED_TXS,
+    ) as mock:
+        yield mock
 
 
 @pytest.fixture
@@ -102,70 +67,34 @@ def patch_public_key(
         yield mock_public_key
 
 
-@pytest.fixture(scope="function")
-def patch_pytest_db(
-    memory_blockchain_handler: BlockchainMessageTableHandler,
-) -> Generator[PropertyMock, None, None]:
-    with patch(
-        "prediction_market_agent_tooling.config.APIKeys.sqlalchemy_db_url",
-        new_callable=PropertyMock,
-    ) as mock_sqlalchemy_db_url:
-        mock_sqlalchemy_db_url.return_value = SecretStr("sqlite://")
-        yield mock_sqlalchemy_db_url
-
-
 def test_receive_message_description(
-    patch_pytest_db: PropertyMock,
     patch_public_key: PropertyMock,
-    patch_spice: PropertyMock,
-    patch_dune_api_key: PropertyMock,
-    patch_send_xdai: PropertyMock,
+    patch_count_unseen_messages: PropertyMock,
 ) -> None:
     r = ReceiveMessage()
     description = r.description
-    count_unseen_messages = (
-        BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            patch_public_key.return_value
-        )
+    count_unseen_messages = fetch_count_unprocessed_transactions(
+        patch_public_key.return_value
     )
     assert str(count_unseen_messages) in description
 
 
 def test_receive_message_call(
-    patch_send_xdai: PropertyMock,
-    patch_pytest_db: PropertyMock,
     patch_public_key: PropertyMock,
-    patch_spice: PropertyMock,
-    patch_dune_api_key: PropertyMock,
+    patch_count_unseen_messages: PropertyMock,
 ) -> None:
-    r = ReceiveMessage()
-
-    blockchain_message = r()
-    assert blockchain_message is not None
-    assert MOCK_SENDER_SPICE_QUERY in blockchain_message
-
-
-def test_receive_message_then_check_count_unseen_messages(
-    patch_pytest_db: PropertyMock,
-    patch_public_key: PropertyMock,
-    patch_spice: typing.Any,
-    patch_dune_api_key: PropertyMock,
-    patch_send_xdai: PropertyMock,
-) -> None:
-    # Idea here is to fetch the next message, and then fetch the count of unseen messages, asserting that
-    # this number decreased by 1.
-    r = ReceiveMessage()
-
-    initial_count_unseen_messages = (
-        BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            patch_public_key.return_value
-        )
+    mock_log_message = MessageContainer(
+        sender=MOCK_SENDER,
+        recipient=MOCK_SENDER,
+        message=HexBytes("0x123"),  # dummy message
+        value=wei_type(10000),
     )
+    with patch.object(
+        AgentCommunicationContract,
+        "pop_message",
+        return_value=mock_log_message,
+    ):
+        r = ReceiveMessage()
 
-    r()
-    current_count_unseen_messages = (
-        BlockchainTransactionFetcher().fetch_count_unprocessed_transactions(
-            patch_public_key.return_value
-        )
-    )
-    assert current_count_unseen_messages == initial_count_unseen_messages - 1
+        blockchain_message = r()
+        assert blockchain_message is not None

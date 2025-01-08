@@ -3,9 +3,6 @@ from typing import Generator
 import pytest
 from prediction_market_agent_tooling.tools.db.db_manager import DBManager
 
-from prediction_market_agent.db.blockchain_message_table_handler import (
-    BlockchainMessageTableHandler,
-)
 from prediction_market_agent.db.evaluated_goal_table_handler import (
     EvaluatedGoalTableHandler,
 )
@@ -46,16 +43,6 @@ def prompt_table_handler(
     prompt_handler = PromptTableHandler(
         sqlalchemy_db_url="sqlite://",
         session_identifier=prompt_test_session_identifier,
-    )
-    yield prompt_handler
-    reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)
-
-
-@pytest.fixture(scope="function")
-def memory_blockchain_handler() -> Generator[BlockchainMessageTableHandler, None, None]:
-    """Creates a in-memory SQLite DB for testing"""
-    prompt_handler = BlockchainMessageTableHandler(
-        sqlalchemy_db_url="sqlite://",
     )
     yield prompt_handler
     reset_init_params_db_manager(prompt_handler.sql_handler.db_manager)

@@ -9,10 +9,13 @@ from datetime import timedelta
 from enum import Enum
 
 import streamlit as st
+from eth_typing import ChecksumAddress
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from python_web3_wallet import wallet_component
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -33,15 +36,21 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_
     BroadcastPublicMessageToHumans,
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
+    Wait,
 )
-from prediction_market_agent.db.blockchain_transaction_fetcher import (
-    BlockchainTransactionFetcher,
+from prediction_market_agent.db.agent_communication import (
+    fetch_count_unprocessed_transactions,
+    fetch_unseen_transactions,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+from prediction_market_agent.tools.message_utils import (
+    compress_message,
+    unzip_message_else_do_nothing,
+)
 
 st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
@@ -51,11 +60,6 @@ st.set_page_config(
 class DummyFunctionName(str, Enum):
     # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
     RESPONSE_FUNCTION_NAME = "Response"
-
-
-@st.cache_resource
-def blockchain_transaction_fetcher() -> BlockchainTransactionFetcher:
-    return BlockchainTransactionFetcher()
 
 
 @st.cache_resource
@@ -70,22 +74,36 @@ def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
     return PromptTableHandler.from_agent_identifier(identifier)
 
 
+@st.dialog("Send message to agent")
+def send_message_via_wallet(
+    recipient: ChecksumAddress, message: str, amount_to_send: float
+) -> None:
+    wallet_component(
+        recipient=recipient,
+        amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
+        data=message,
+    )
+
+
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
     keys = MicrochainAgentKeys()
     default_value = keys.RECEIVER_MINIMUM_AMOUNT
-    value = st.number_input(
+    amount_to_send = st.number_input(
         "Value in xDai",
         min_value=default_value,
         max_value=keys.SENDING_XDAI_CAP,
         value=default_value,
         format="%.5f",
     )
+    message_compressed = HexBytes(compress_message(message)).hex() if message else ""
 
     if st.button("Send message", disabled=not message):
-        # TODO: Don't do this manually with deployment private key, use the user's wallet!
-        SendPaidMessageToAnotherAgent()(nft_agent.wallet_address, message, value)
-        st.success("Message sent and will be processed soon!")
+        send_message_via_wallet(
+            recipient=nft_agent.wallet_address,
+            message=message_compressed,
+            amount_to_send=amount_to_send,
+        )
 
 
 def parse_function_and_body(
@@ -127,6 +145,8 @@ def customized_chat_message(
             icon = "🧠"
         case Stop.__name__:
             icon = "😴"
+        case Wait.__name__:
+            icon = "⏳"
         case ReceiveMessage.__name__:
             icon = "👤"
         case BroadcastPublicMessageToHumans.__name__:
@@ -160,16 +180,49 @@ def customized_chat_message(
             Stop.__name__,
             BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
+            Wait.__name__,
         ):
             st.markdown(parsed_function_output_body)
 
 
-@st.fragment(run_every=timedelta(seconds=5))
 def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     st.markdown(f"""### Agent's actions""")
 
+    n_total_messages = long_term_memory_table_handler(nft_agent.identifier).count()
+    messages_per_page = 50
+    if "page_number" not in st.session_state:
+        st.session_state.page_number = 0
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Previous page", disabled=st.session_state.page_number == 0):
+            st.session_state.page_number -= 1
+    with col2:
+        if st.button(
+            "Next page",
+            disabled=st.session_state.page_number
+            == n_total_messages // messages_per_page,
+        ):
+            st.session_state.page_number += 1
+    with col3:
+        st.write(f"Current page {st.session_state.page_number + 1}")
+
+    show_function_calls_part_messages(
+        nft_agent, messages_per_page, st.session_state.page_number
+    )
+
+
+@st.fragment(run_every=timedelta(seconds=10))
+def show_function_calls_part_messages(
+    nft_agent: type[DeployableAgentNFTGameAbstract],
+    messages_per_page: int,
+    page_number: int,
+) -> None:
     with st.spinner("Loading agent's actions..."):
-        calls = long_term_memory_table_handler(nft_agent.identifier).search()
+        calls = long_term_memory_table_handler(nft_agent.identifier).search(
+            offset=page_number * messages_per_page,
+            limit=messages_per_page,
+        )
 
     if not calls:
         st.markdown("No actions yet.")
@@ -191,7 +244,7 @@ def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) ->
             customized_chat_message(function_call, function_output)
 
 
-@st.fragment(run_every=timedelta(seconds=5))
+@st.fragment(run_every=timedelta(seconds=10))
 def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     system_prompt = (
         system_prompt_from_db.prompt
@@ -226,25 +279,28 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     )
     st.markdown("---")
     with st.popover("Show unprocessed incoming messages"):
-        transactions = blockchain_transaction_fetcher().fetch_unseen_transactions(
-            nft_agent.wallet_address
-        )
+        show_n = 10
+        n_messages = fetch_count_unprocessed_transactions(nft_agent.wallet_address)
+        messages = fetch_unseen_transactions(nft_agent.wallet_address, n=show_n)
 
-        if not transactions:
+        if not messages:
             st.info("No unprocessed messages")
         else:
-            for transaction in transactions:
+            for message in messages:
                 st.markdown(
                     f"""
-                    **From:** {transaction.sender_address}  
-                    **Message:** {transaction.data_field}  
-                    **Value:** {wei_to_xdai(transaction.value_wei_parsed)} xDai
+                    **From:** {message.sender}  
+                    **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
+                    **Value:** {wei_to_xdai(message.value)} xDai
                     """
                 )
                 st.divider()
 
+            if n_messages > show_n:
+                st.write(f"... and another {n_messages - show_n} unprocessed messages.")
 
-@st.fragment(run_every=timedelta(seconds=5))
+
+@st.fragment(run_every=timedelta(seconds=10))
 def show_treasury_part() -> None:
     treasury_xdai_balance = get_balances(TREASURY_SAFE_ADDRESS).xdai
     st.markdown(
