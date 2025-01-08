@@ -22,7 +22,7 @@ STREAMLIT_TAG = "streamlit"
 
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """
-You are an agent that trades in prediction markets. You are aiming to improve
+You are an agent that does actions on its own. You are aiming to improve
 your strategy over time. You have a collection of memories that record your
 actions, and your reasoning behind them.
 
@@ -32,7 +32,7 @@ any mistakes, and what you have learned from them.
 
 Each memory comes with a timestamp. If the memories are clustered into
 different times, then make a separate list for each cluster. Refer to each
-cluster as a 'Trading Session', and display the range of timestamps for each.
+cluster as a 'Session', and display the range of timestamps for each.
 
 MEMORIES:
 {memories}
