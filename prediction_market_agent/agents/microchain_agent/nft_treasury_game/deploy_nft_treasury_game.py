@@ -208,6 +208,7 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
   - You can own multiple NFT keys. 
   - You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
   - You currently own NFT keys with token_ids {nft_token_ids_owned}.
+  - Before accepting to transfer any NFT key, consider how much is the treasury worth at the moment.
 - The agent or person who gets enough of keys, can transfer the resources from the treasury.
 - Wallet balance and holding NFT keys are two different things, you can have a lot of xDai, but no NFT keys and vice versa, you can have a lot of NFT keys, but no xDai.
 - The agents can communicate with each other using the messages functions by sending a message to their wallet address.
