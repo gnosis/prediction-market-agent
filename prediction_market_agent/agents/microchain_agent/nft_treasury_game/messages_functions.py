@@ -13,6 +13,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
+    get_message_minimum_value,
     pop_message,
     send_message,
 )
@@ -43,11 +44,11 @@ class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
-You need to send a fee of at least {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT} xDai for other agent to read the message."""
+You need to send a fee of at least {get_message_minimum_value()} xDai for other agent to read the message."""
 
     @property
     def example_args(self) -> list[str]:
-        return ["0x123", "Hello!", f"{MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUNT}"]
+        return ["0x123", "Hello!", f"{get_message_minimum_value()}"]
 
     def __call__(self, address: str, message: str, fee: float) -> str:
         keys = MicrochainAgentKeys()
@@ -62,9 +63,6 @@ You need to send a fee of at least {MicrochainAgentKeys().RECEIVER_MINIMUM_AMOUN
 
 
 class ReceiveMessage(Function):
-    # Percentage of message value that goes to the treasury.
-    TREASURY_ACCUMULATION_PERCENTAGE = 0.7
-
     @staticmethod
     def get_count_unseen_messages() -> int:
         keys = MicrochainAgentKeys()
