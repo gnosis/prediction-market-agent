@@ -41,6 +41,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
     fetch_unseen_transactions,
+    get_message_minimum_value,
 )
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
@@ -88,7 +89,7 @@ def send_message_via_wallet(
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
     keys = MicrochainAgentKeys()
-    default_value = keys.RECEIVER_MINIMUM_AMOUNT
+    default_value = get_message_minimum_value()
     amount_to_send = st.number_input(
         "Value in xDai",
         min_value=default_value,

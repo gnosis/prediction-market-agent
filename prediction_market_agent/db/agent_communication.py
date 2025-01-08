@@ -1,6 +1,8 @@
+from functools import cache
+
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import HexBytes, Wei
+from prediction_market_agent_tooling.gtypes import HexBytes, Wei, xDai
 from prediction_market_agent_tooling.tools.contract import (
     AgentCommunicationContract,
     ContractOnGnosisChain,
@@ -64,3 +66,13 @@ def send_message(
         amount_wei=amount_wei,
         web3=ContractOnGnosisChain.get_web3(),
     )
+
+
+@cache
+def get_message_minimum_value() -> xDai:
+    return AgentCommunicationContract().minimum_message_value()
+
+
+@cache
+def get_treasury_tax_ratio() -> float:
+    return AgentCommunicationContract().ratio_given_to_treasury()
