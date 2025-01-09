@@ -1,6 +1,5 @@
 from prediction_market_agent_tooling.gtypes import xDai, xdai_type
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.omen.omen import OMEN_TINY_BET_AMOUNT
 
 from prediction_market_agent.utils import APIKeys
 
@@ -12,7 +11,6 @@ class MicrochainAgentKeys(APIKeys):
     SENDING_XDAI_CAP: xDai | None = xdai_type(0.1)
     # Double check to not transfer NFTs during testing.
     ENABLE_NFT_TRANSFER: bool = False
-    RECEIVER_MINIMUM_AMOUNT: xDai = OMEN_TINY_BET_AMOUNT
 
     def cap_sending_xdai(self, amount: xDai) -> xDai:
         if self.SENDING_XDAI_CAP is None:

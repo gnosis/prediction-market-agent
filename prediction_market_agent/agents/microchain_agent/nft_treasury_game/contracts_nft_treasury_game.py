@@ -18,6 +18,16 @@ class ContractNFTFactoryOnGnosisChain(ContractOwnableERC721OnGnosisChain):
         n_tokens: int = self.call("MAX_SUPPLY", web3=web3)
         return n_tokens
 
+    def token_ids_owned_by(
+        self, owner: ChecksumAddress, web3: Web3 | None = None
+    ) -> list[int]:
+        token_ids = list(range(self.max_supply(web3=web3)))
+        return [
+            token_id
+            for token_id in token_ids
+            if self.ownerOf(tokenId=token_id, web3=web3) == owner
+        ]
+
 
 @cache
 def get_nft_token_factory_max_supply() -> int:
