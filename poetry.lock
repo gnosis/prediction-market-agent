@@ -4915,13 +4915,13 @@ files = [
 
 [[package]]
 name = "marshmallow"
-version = "3.24.2"
+version = "3.25.0"
 description = "A lightweight library for converting complex datatypes to and from native Python datatypes."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "marshmallow-3.24.2-py3-none-any.whl", hash = "sha256:bf3c56db473bb160e5191f1c5e32e3fc8bfb58998eb2b35d6747de023e31f9e7"},
-    {file = "marshmallow-3.24.2.tar.gz", hash = "sha256:0822c3701de396b51d3f8ac97319aea5493998ba4e7d0e4c05f6fce7777bf3a2"},
+    {file = "marshmallow-3.25.0-py3-none-any.whl", hash = "sha256:50894cd57c6b097a6c6ed2bf216af47d10146990a54db52d03e32edb0448c905"},
+    {file = "marshmallow-3.25.0.tar.gz", hash = "sha256:5ba94a4eb68894ad6761a505eb225daf7e5cb7b4c32af62d4a45e9d42665bc31"},
 ]
 
 [package.dependencies]
@@ -5002,13 +5002,13 @@ files = [
 
 [[package]]
 name = "mem0ai"
-version = "0.1.40"
+version = "0.1.41"
 description = "Long-term memory for AI Agents"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "mem0ai-0.1.40-py3-none-any.whl", hash = "sha256:2b52b6313d22fa8dbeb3d68cdd67578946962e5239bc8fce7e75ccfeb2b00366"},
-    {file = "mem0ai-0.1.40.tar.gz", hash = "sha256:dd79c2cee3f79497671a5827b6b4c1d34152dd9b7eb2fda05cc022a8c1c25179"},
+    {file = "mem0ai-0.1.41-py3-none-any.whl", hash = "sha256:1c130e19b277ab42df284a4487215379a16dcaf1af4bd06a7abfd08ae256bd30"},
+    {file = "mem0ai-0.1.41.tar.gz", hash = "sha256:469bf918abe4babd529bdf9eb6107064fccbfc58e89d73c8f725a0279bea9c6e"},
 ]
 
 [package.dependencies]
@@ -7859,13 +7859,13 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-web3-wallet"
-version = "0.0.12"
+version = "0.0.14"
 description = "Streamlit component that allows users to connect a wallet and send transactions with dynamic recipients and amounts"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "python_web3_wallet-0.0.12-py3-none-any.whl", hash = "sha256:88d9744f935e66827dd9ca5e25ec982e892e8c009ef0ac098a6f9aef0cfa55fb"},
-    {file = "python_web3_wallet-0.0.12.tar.gz", hash = "sha256:d48a21345771d66f42caf587b97c1598e16c24f3bec23d261d09711316b637a1"},
+    {file = "python_web3_wallet-0.0.14-py3-none-any.whl", hash = "sha256:ca4ae5944a65790a8ca6746e5d869372a01fc920a25f49260c8edd845dab8502"},
+    {file = "python_web3_wallet-0.0.14.tar.gz", hash = "sha256:2ee797c7d771a40931be6df3c30b369b42b0f01971900f10e4220e2e37780879"},
 ]
 
 [package.dependencies]
@@ -10694,4 +10694,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "1cfcfe31336983cc064acda9e8f2e58988beb3a7003a907435ab2aebe128d725"
+content-hash = "e1a88cd8c2d44f3a9a74d6dfcadc80e73757ec6ba7ffaa04ba13cfd13b27026f"
