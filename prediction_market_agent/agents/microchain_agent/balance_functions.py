@@ -16,7 +16,7 @@ class GetOtherWalletXDAIBalance(Function):
 
     def __call__(self, wallet_address: str) -> str:
         balances = get_balances(Web3.to_checksum_address(wallet_address))
-        return f"Balance of {wallet_address} is {balances.xdai} xDai and {balances.wxdai} wxDai."
+        return f"Balance of {wallet_address} is {balances.xdai} xDai and {balances.wxdai} wxDai and {balances.sdai} sDai."
 
 
 class GetMyXDAIBalance(Function):
@@ -30,7 +30,7 @@ class GetMyXDAIBalance(Function):
 
     def __call__(self) -> str:
         balances = get_balances(APIKeys().bet_from_address)
-        return f"You have {balances.xdai} xDai and {balances.wxdai} wxDai."
+        return f"You have {balances.xdai} xDai and {balances.wxdai} wxDai and {balances.sdai} sDai."
 
 
 BALANCE_FUNCTIONS: list[type[Function]] = [GetOtherWalletXDAIBalance, GetMyXDAIBalance]

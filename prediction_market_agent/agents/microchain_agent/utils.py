@@ -57,9 +57,8 @@ def get_balance(api_keys: APIKeys, market_type: MarketType) -> BetAmount:
     currency = market_type.market_class.currency
     if market_type == MarketType.OMEN:
         balances = get_balances(api_keys.bet_from_address)
-        total_balance = balances.xdai + balances.wxdai
         return BetAmount(
-            amount=total_balance,
+            amount=balances.total,
             currency=currency,
         )
     else:
