@@ -56,7 +56,8 @@ openfactverification-kongzii = "^0.2.0"
 autogen-agentchat = "0.4.0.dev11"
 autogen-core = "0.4.0.dev11"
 autogen-ext = "0.4.0.dev11"
-python-web3-wallet = "^0.0.6"
+python-web3-wallet = "0.0.14"
+
 
 
 [tool.poetry.group.dev.dependencies]
@@ -66,3 +67,8 @@ langchain-chroma = "^0.1.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "test-pypi"
+url = "https://test.pypi.org/simple/"
+priority = "explicit"
