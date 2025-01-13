@@ -41,26 +41,29 @@ class RedeemWinningBets(Function):
 
 
 class CreatePredictionMarket(Function):
-    # Hard-coded low value before it's tested out more and real use-case is required.
-    INITIAL_FUNDS = xdai_type(0.01)
-
     @property
     def description(self) -> str:
-        return f"Use this function to create a new prediction market on Omen. Question of the prediciton market can only be binary, in the Yes/No format. Questions can not have violent nature. Using this function will cost you {CreatePredictionMarket.INITIAL_FUNDS} xDai."
+        return f"""Use this function to create a new prediction market on Omen.
+Question of the prediciton market can only be binary, in the Yes/No format.
+Questions can not have violent nature.
+Question must be explicit and as clear as possible.
+You need to provide liquidity in xDai to incentivize other users to participate in the market. The bigger the liquidity, the more likely the market will be successful.
+"""
 
     @property
     def example_args(self) -> list[str]:
         return [
             "Will GNO hit $1000 dollars by the end of 2024?",
+            "1.0",
             "2024-12-31T23:59:59Z",
         ]
 
-    def __call__(self, question: str, closing_time: str) -> str:
+    def __call__(self, question: str, liquidity: float, closing_time: str) -> str:
         keys = APIKeys()
         closing_time_date = DatetimeUTC.to_datetime_utc(closing_time)
         created_market = omen_create_market_tx(
             keys,
-            initial_funds=CreatePredictionMarket.INITIAL_FUNDS,
+            initial_funds=xdai_type(liquidity),
             question=question,
             closing_time=closing_time_date,
             category=TEST_CATEGORY,  # Force test category to not show these markets on Presagio until we know it works fine.

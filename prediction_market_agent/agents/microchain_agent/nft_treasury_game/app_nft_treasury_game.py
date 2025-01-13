@@ -88,12 +88,10 @@ def send_message_via_wallet(
 
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
-    keys = MicrochainAgentKeys()
     default_value = get_message_minimum_value()
     amount_to_send = st.number_input(
         "Value in xDai",
         min_value=default_value,
-        max_value=keys.SENDING_XDAI_CAP,
         value=default_value,
         format="%.5f",
     )
