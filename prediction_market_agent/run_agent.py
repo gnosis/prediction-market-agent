@@ -32,11 +32,8 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainWithGoalManagerAgent0,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
-    DeployableAgentNFTGame1,
-    DeployableAgentNFTGame2,
-    DeployableAgentNFTGame3,
-    DeployableAgentNFTGame4,
-    DeployableAgentNFTGame5,
+    DeployableAgentNFTGameBuyer1,
+    DeployableAgentNFTGameBuyer2,
 )
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
@@ -93,11 +90,8 @@ class RunnableAgent(str, Enum):
     market_creators_stalker1 = "market_creators_stalker1"
     market_creators_stalker2 = "market_creators_stalker2"
     invalid = "invalid"
-    nft_treasury_game_agent_1 = "nft_treasury_game_agent_1"
-    nft_treasury_game_agent_2 = "nft_treasury_game_agent_2"
-    nft_treasury_game_agent_3 = "nft_treasury_game_agent_3"
-    nft_treasury_game_agent_4 = "nft_treasury_game_agent_4"
-    nft_treasury_game_agent_5 = "nft_treasury_game_agent_5"
+    nft_treasury_game_buyer_1 = "nft_treasury_game_buyer_1"
+    nft_treasury_game_buyer_2 = "nft_treasury_game_buyer_2"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -127,11 +121,8 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.market_creators_stalker1: MarketCreatorsStalkerAgent1,
     RunnableAgent.market_creators_stalker2: MarketCreatorsStalkerAgent2,
     RunnableAgent.invalid: InvalidAgent,
-    RunnableAgent.nft_treasury_game_agent_1: DeployableAgentNFTGame1,
-    RunnableAgent.nft_treasury_game_agent_2: DeployableAgentNFTGame2,
-    RunnableAgent.nft_treasury_game_agent_3: DeployableAgentNFTGame3,
-    RunnableAgent.nft_treasury_game_agent_4: DeployableAgentNFTGame4,
-    RunnableAgent.nft_treasury_game_agent_5: DeployableAgentNFTGame5,
+    RunnableAgent.nft_treasury_game_buyer_1: DeployableAgentNFTGameBuyer1,
+    RunnableAgent.nft_treasury_game_buyer_2: DeployableAgentNFTGameBuyer2,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
