@@ -30,7 +30,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
-    MicrochainAgentKeys,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     BroadcastPublicMessageToHumans,
