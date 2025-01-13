@@ -1,4 +1,5 @@
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.tools.utils import utcnow
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -198,7 +199,15 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
         for x in DEPLOYED_NFT_AGENTS
         if x.wallet_address != wallet_address
     )
-    return f"""NFT Treasury game description:
+    now = utcnow()
+    sending_cap_message = (
+        f"- Keep in mind that you are able to send, and others agents are able to send at max {keys.SENDING_XDAI_CAP} xDai, however people can send you as much as they want."
+        if keys.SENDING_XDAI_CAP is not None
+        else ""
+    )
+    return f"""Today is {now.strftime("%Y-%m-%d %H:%M:%S")}. The day is {now.strftime("%A")}. You participate in the NFT Treasury game.
+    
+NFT Treasury game description:
 
 - You participate in the securing of the NFT key to a treasury.
 - Your wallet address is {wallet_address}.
@@ -217,7 +226,8 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
   - Treasury tax rate is currently {get_treasury_tax_ratio() * 100:.2f}%, for example, if someone sends you 10 xDai, you would receive {(1 - get_treasury_tax_ratio()) * 10:.2f} xDai.
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
-- Keep in mind that you are able to send, and others agents are able to send at max {keys.SENDING_XDAI_CAP} xDai, however people can send you as much as they want.
+- You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
+{sending_cap_message}
 """
 
 

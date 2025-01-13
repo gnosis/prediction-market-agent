@@ -30,7 +30,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
-    MicrochainAgentKeys,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     BroadcastPublicMessageToHumans,
@@ -88,12 +87,10 @@ def send_message_via_wallet(
 
 def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
     message = st.text_area("Write a message to the agent")
-    keys = MicrochainAgentKeys()
     default_value = get_message_minimum_value()
     amount_to_send = st.number_input(
         "Value in xDai",
         min_value=default_value,
-        max_value=keys.SENDING_XDAI_CAP,
         value=default_value,
         format="%.5f",
     )
