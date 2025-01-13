@@ -7,8 +7,8 @@ from pydantic import BeforeValidator
 from prediction_market_agent.utils import APIKeys
 
 
-def xdai_none_validator(value: str | float) -> xDai | None:
-    if str(value).lower().strip() == "none":
+def xdai_none_validator(value: str | float | None) -> xDai | None:
+    if value is None or str(value).lower().strip() == "none":
         return None
     return xdai_type(value)
 
