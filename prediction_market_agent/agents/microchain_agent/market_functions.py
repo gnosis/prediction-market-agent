@@ -101,7 +101,7 @@ class PredictProbabilityForQuestionBase(MarketFunction):
         super().__init__(market_type=market_type, keys=keys)
         self._description = (
             "Use this function to research perform research and predict the "
-            "probability of an event occuring. Returns the probability. The "
+            "probability of an event occurring. Returns the probability. The "
             "one parameter is the market id of the prediction market you want "
             "to predict the probability of."
         )

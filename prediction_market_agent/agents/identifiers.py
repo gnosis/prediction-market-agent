@@ -17,3 +17,5 @@ class AgentIdentifier(str, Enum):
     NFT_TREASURY_GAME_AGENT_3 = "nft-treasury-game-agent-3"
     NFT_TREASURY_GAME_AGENT_4 = "nft-treasury-game-agent-4"
     NFT_TREASURY_GAME_AGENT_5 = "nft-treasury-game-agent-5"
+    NFT_TREASURY_GAME_AGENT_6 = "nft-treasury-game-agent-6"
+    NFT_TREASURY_GAME_AGENT_7 = "nft-treasury-game-agent-7"
