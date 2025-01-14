@@ -128,7 +128,7 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # Do as the last steps, becuase it calls OpenAI (costly & slow).
+        # Do as the last steps, because it calls OpenAI (costly & slow).
         if is_invalid(market.question):
             logger.info(
                 f"Skipping `{market.question}` because it seems to be an invalid question."

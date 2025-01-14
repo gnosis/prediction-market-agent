@@ -44,7 +44,7 @@ class CreatePredictionMarket(Function):
     @property
     def description(self) -> str:
         return f"""Use this function to create a new prediction market on Omen.
-Question of the prediciton market can only be binary, in the Yes/No format.
+Question of the prediction market can only be binary, in the Yes/No format.
 Questions can not have violent nature.
 Question must be explicit and as clear as possible.
 You need to provide liquidity in xDai to incentivize other users to participate in the market. The bigger the liquidity, the more likely the market will be successful.

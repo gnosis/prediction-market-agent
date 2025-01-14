@@ -187,7 +187,7 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
             return True
     except Exception as e:
         logger.error(
-            f"Exception occured, cannot assert if title happened in the past because of '{e}'."
+            f"Exception occurred, cannot assert if title happened in the past because of '{e}'."
         )
 
     return False

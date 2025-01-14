@@ -37,7 +37,7 @@ def full(data_path: str) -> None:
     df["ofv_resolution"] = df["ofv_resolution"].apply(
         lambda r: "None" if r is None else "YES" if r else "NO"
     )
-    # Save all the predictions and separatelly these that are incorrect.
+    # Save all the predictions and separately these that are incorrect.
     df.to_csv("markets_resolved.tsv", sep="\t", index=False)
     df[df["ofv_resolution"] != df["my_resolution"]].to_csv(
         "markets_resolved_incorretly_by_ofv.tsv", sep="\t", index=False

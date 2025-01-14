@@ -128,11 +128,11 @@ def get_function_usage_from_history(
     usage count.
     """
     function_names = [function for function in agent.engine.functions]
-    function_useage = {function: 0 for function in function_names}
+    function_usage = {function: 0 for function in function_names}
     for message in chat_history.chat_messages:
         for function in function_names:
             if message.content.startswith(f"{function}("):
-                function_useage[function] += 1
+                function_usage[function] += 1
                 break
 
     return pd.DataFrame(
