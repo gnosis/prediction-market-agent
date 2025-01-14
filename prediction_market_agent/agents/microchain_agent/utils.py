@@ -136,6 +136,6 @@ def get_function_usage_from_history(
                 break
 
     return pd.DataFrame(
-        data={"Usage Count": list(function_useage.values())},
+        data={"Usage Count": list(function_usage.values())},
         index=function_names,
     )
