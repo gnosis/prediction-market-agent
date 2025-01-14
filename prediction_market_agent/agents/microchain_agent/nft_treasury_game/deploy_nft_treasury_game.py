@@ -38,7 +38,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     name: str
     wallet_address: ChecksumAddress
-    mech_address: ChecksumAddress | None
+    mech_address: ChecksumAddress | None = None
 
     @classmethod
     def build_treasury_safe(cls) -> Safe:
