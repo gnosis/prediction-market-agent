@@ -22,7 +22,7 @@ def main(
     from_private_key: (
         str | None
     ) = None,  # This is the private key of the address that will be used to create the markets, so people can filter the markets by this address.
-    test: bool = True,  # Test is on by default, so we don't accidentaly create the markets.
+    test: bool = True,  # Test is on by default, so we don't accidentally create the markets.
     n_to_replicate: int = 50,
     initial_funds_xdai: float = 0.1,  # Just a small amount to make the markets bettable, probably no need for more in hackathon.
     resolve: bool = False,

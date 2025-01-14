@@ -193,7 +193,7 @@ def completion_str_to_json(completion: str) -> dict[str, t.Any]:
 
 def patch_sqlite3() -> None:
     """
-    Helps in the environemnt where one can't update system's sqlite3 installation, for example, Streamlit Cloud, where we get:
+    Helps in the environment where one can't update system's sqlite3 installation, for example, Streamlit Cloud, where we get:
 
     ```
     Your system has an unsupported version of sqlite3. Chroma requires sqlite3 >= 3.35.0.
