@@ -1,5 +1,5 @@
-from microchain import Agent
 from eth_typing import URI
+from microchain import Agent
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.markets.markets import MarketType
