@@ -3,7 +3,7 @@ from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.tools.utils import utcnow
 from safe_eth.eth import EthereumClient
-from safe_eth.safe.safe import Safe
+from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -43,7 +43,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     @classmethod
     def build_treasury_safe(cls) -> Safe:
         client = EthereumClient(URI(RPCConfig().gnosis_rpc_url))
-        return Safe(TREASURY_SAFE_ADDRESS, client)
+        return SafeV141(TREASURY_SAFE_ADDRESS, client)
 
     @classmethod
     def retrieve_treasury_thresold(cls) -> int:
@@ -222,6 +222,7 @@ You are a bit of a mystery, but you are also a bit of a trickster.
             + nft_treasury_game_buyer_prompt()
         )
 
+
 class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     name = "Lock Goblin"
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_7
@@ -244,6 +245,7 @@ You are also very good at making people believe that you are on their side, even
             + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
             + nft_treasury_game_buyer_prompt()
         )
+
 
 def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
     keys = MicrochainAgentKeys()
