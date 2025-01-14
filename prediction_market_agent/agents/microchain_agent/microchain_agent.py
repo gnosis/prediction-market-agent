@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Callable
 
 from eth_typing import ChecksumAddress
 from microchain import (
@@ -191,6 +192,7 @@ def build_agent(
     allow_stop: bool = True,
     bootstrap: str | None = None,
     raise_on_error: bool = True,
+    on_iteration_end: Callable[[Agent], None] | None = None,
 ) -> Agent:
     engine = Engine()
     generator = (
@@ -230,6 +232,7 @@ def build_agent(
         llm=LLM(generator=generator),
         engine=engine,
         on_iteration_step=on_iteration_step,
+        on_iteration_end=on_iteration_end,
         enable_langfuse=enable_langfuse,
     )
 
@@ -261,7 +264,7 @@ def build_agent(
         engine_help=agent.engine.help
     )
     if bootstrap:
-        agent.bootstrap = [bootstrap]
+        agent.bootstrap.append(bootstrap)
     return agent
 
 

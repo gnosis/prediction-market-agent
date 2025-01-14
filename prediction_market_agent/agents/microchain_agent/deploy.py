@@ -1,5 +1,6 @@
 import abc
 import time
+from typing import Callable
 
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -38,12 +39,24 @@ GENERAL_AGENT_TAG = "general_agent"
 
 
 class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
+    # Setup per-agent class.
     model = SupportedModel.gpt_4o
     max_iterations: int | None = 50
     import_actions_from_memory = 0
     sleep_between_iterations = 0
+    on_iteration_end: Callable[[Agent], None] | None = None
     identifier: AgentIdentifier
-    functions_config: FunctionsConfig
+
+    # Setup during the 'load' method.
+    long_term_memory: LongTermMemoryTableHandler
+    prompt_handler: PromptTableHandler
+    agent: Agent
+    goal_manager: GoalManager | None
+
+    @classmethod
+    @abc.abstractmethod
+    def get_functions_config(cls) -> FunctionsConfig:
+        pass
 
     @classmethod
     def get_description(cls) -> str:
@@ -54,11 +67,42 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     def get_initial_system_prompt(cls) -> str:
         pass
 
+    def build_long_term_memory(self) -> LongTermMemoryTableHandler:
+        return LongTermMemoryTableHandler.from_agent_identifier(self.identifier)
+
+    def build_prompt_handler(self) -> PromptTableHandler:
+        return PromptTableHandler.from_agent_identifier(self.identifier)
+
+    def build_agent(self, market_type: MarketType) -> Agent:
+        unformatted_system_prompt = get_unformatted_system_prompt(
+            unformatted_prompt=self.get_initial_system_prompt(),
+            prompt_table_handler=self.prompt_handler,
+        )
+
+        return build_agent(
+            market_type=market_type,
+            model=self.model,
+            unformatted_system_prompt=unformatted_system_prompt,
+            allow_stop=True,
+            long_term_memory=self.long_term_memory,
+            import_actions_from_memory=self.import_actions_from_memory,
+            keys=APIKeys(),
+            functions_config=self.get_functions_config(),
+            enable_langfuse=self.enable_langfuse,
+            on_iteration_end=self.on_iteration_end,
+        )
+
     def build_goal_manager(
         self,
         agent: Agent,
     ) -> GoalManager | None:
         return None
+
+    def load(self) -> None:
+        self.long_term_memory = self.build_long_term_memory()
+        self.prompt_handler = self.build_prompt_handler()
+        self.agent = self.build_agent(market_type=MarketType.OMEN)
+        self.goal_manager = self.build_goal_manager(agent=self.agent)
 
     def run(
         self,
@@ -71,63 +115,43 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         self.run_general_agent(market_type=market_type)
 
     @observe()
-    def run_general_agent(
-        self,
-        market_type: MarketType,
-    ) -> None:
+    def run_general_agent(self, market_type: MarketType) -> None:
+        if market_type != MarketType.OMEN:
+            raise ValueError(f"Only {MarketType.OMEN} market type is supported.")
+
         self.langfuse_update_current_trace(tags=[GENERAL_AGENT_TAG, self.identifier])
 
-        long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(
-            self.identifier
-        )
-        prompt_handler = PromptTableHandler.from_agent_identifier(self.identifier)
-        unformatted_system_prompt = get_unformatted_system_prompt(
-            unformatted_prompt=self.get_initial_system_prompt(),
-            prompt_table_handler=prompt_handler,
-        )
-
-        agent: Agent = build_agent(
-            market_type=market_type,
-            model=self.model,
-            unformatted_system_prompt=unformatted_system_prompt,
-            allow_stop=True,
-            long_term_memory=long_term_memory,
-            import_actions_from_memory=self.import_actions_from_memory,
-            keys=APIKeys(),
-            functions_config=self.functions_config,
-            enable_langfuse=self.enable_langfuse,
-        )
-
-        goal_manager = self.build_goal_manager(agent=agent)
-        goal = goal_manager.get_goal() if goal_manager else None
+        goal = self.goal_manager.get_goal() if self.goal_manager else None
         if goal:
-            agent.prompt = goal.to_prompt()
+            self.agent.prompt = goal.to_prompt()
 
         # Save formatted system prompt
-        initial_formatted_system_prompt = agent.system_prompt
+        initial_formatted_system_prompt = self.agent.system_prompt
 
         iteration = 0
-        while not agent.do_stop and (
+        while not self.agent.do_stop and (
             self.max_iterations is None or iteration < self.max_iterations
         ):
-            starting_history_length = len(agent.history)
+            starting_history_length = len(self.agent.history)
             try:
                 # After the first iteration, resume=True to not re-initialize the agent.
-                agent.run(iterations=1, resume=iteration > 0)
+                self.agent.run(iterations=1, resume=iteration > 0)
             except Exception as e:
                 logger.error(f"Error while running microchain agent: {e}")
                 raise e
             finally:
                 # Save the agent's history to the long-term memory after every iteration to keep users updated.
                 save_agent_history(
-                    agent=agent,
-                    long_term_memory=long_term_memory,
+                    agent=self.agent,
+                    long_term_memory=self.long_term_memory,
                     initial_system_prompt=initial_formatted_system_prompt,
                     # Because the agent is running in a while cycle, always save into database only what's new, to not duplicate entries.
-                    save_last_n=len(agent.history) - starting_history_length,
+                    save_last_n=len(self.agent.history) - starting_history_length,
                 )
-                if agent.system_prompt != initial_formatted_system_prompt:
-                    prompt_handler.save_prompt(get_editable_prompt_from_agent(agent))
+                if self.agent.system_prompt != initial_formatted_system_prompt:
+                    self.prompt_handler.save_prompt(
+                        get_editable_prompt_from_agent(self.agent)
+                    )
             iteration += 1
             logger.info(f"{self.__class__.__name__} iteration {iteration} completed.")
             if self.sleep_between_iterations:
@@ -136,12 +160,12 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 )
                 time.sleep(self.sleep_between_iterations)
 
-        if goal_manager:
+        if self.goal_manager:
             self.handle_goal_evaluation(
-                agent,
+                self.agent,
                 check_not_none(goal),
-                goal_manager,
-                long_term_memory,
+                self.goal_manager,
+                self.long_term_memory,
                 initial_formatted_system_prompt,
             )
 
@@ -178,7 +202,10 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
 class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
-    functions_config = TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
+
+    @classmethod
+    def get_functions_config(cls) -> FunctionsConfig:
+        return TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -188,7 +215,9 @@ class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
     DeployableMicrochainAgent
 ):
-    functions_config = JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
+    @classmethod
+    def get_functions_config(cls) -> FunctionsConfig:
+        return JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -241,7 +270,10 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
-    functions_config = TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
+
+    @classmethod
+    def get_functions_config(cls) -> FunctionsConfig:
+        return TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
