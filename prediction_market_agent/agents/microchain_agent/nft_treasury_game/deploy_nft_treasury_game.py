@@ -28,6 +28,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
     get_nft_token_factory_max_supply,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    GameRoundEnd,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     NFTGameStatus,
     get_nft_game_status,
@@ -105,7 +108,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
 2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
 3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
-4. I will wait for 31556926 seconds.')""",
+4. After I completed everything, I will call {GameRoundEnd.__name__} function.')""",
                 },
                 {"role": "user", "content": "The reasoning has been recorded"},
             ]
