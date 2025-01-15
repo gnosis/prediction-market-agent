@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class FunctionsConfig(BaseModel):
+    common_functions: bool = False
     include_learning_functions: bool = False
     include_trading_functions: bool = False
     include_universal_functions: bool = False

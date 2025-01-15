@@ -1,6 +1,5 @@
 import abc
 import time
-from typing import Callable
 
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -44,7 +43,6 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     max_iterations: int | None = 50
     import_actions_from_memory = 0
     sleep_between_iterations = 0
-    on_iteration_end: Callable[[Agent], None] | None = None
     identifier: AgentIdentifier
 
     # Setup during the 'load' method.
@@ -89,7 +87,6 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             keys=APIKeys(),
             functions_config=self.get_functions_config(),
             enable_langfuse=self.enable_langfuse,
-            on_iteration_end=self.on_iteration_end,
         )
 
     def build_goal_manager(
@@ -129,6 +126,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         initial_formatted_system_prompt = self.agent.system_prompt
 
         iteration = 0
+
         while not self.agent.do_stop and (
             self.max_iterations is None or iteration < self.max_iterations
         ):
@@ -141,19 +139,20 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 raise e
             finally:
                 # Save the agent's history to the long-term memory after every iteration to keep users updated.
-                save_agent_history(
-                    agent=self.agent,
-                    long_term_memory=self.long_term_memory,
-                    initial_system_prompt=initial_formatted_system_prompt,
-                    # Because the agent is running in a while cycle, always save into database only what's new, to not duplicate entries.
+                self.save_agent_history(
+                    initial_formatted_system_prompt=initial_formatted_system_prompt,
                     save_last_n=len(self.agent.history) - starting_history_length,
                 )
                 if self.agent.system_prompt != initial_formatted_system_prompt:
                     self.prompt_handler.save_prompt(
                         get_editable_prompt_from_agent(self.agent)
                     )
+
             iteration += 1
             logger.info(f"{self.__class__.__name__} iteration {iteration} completed.")
+
+            self.after_iteration_callback()
+
             if self.sleep_between_iterations:
                 logger.info(
                     f"{self.__class__.__name__} sleeping for {self.sleep_between_iterations} seconds."
@@ -162,39 +161,45 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
         if self.goal_manager:
             self.handle_goal_evaluation(
-                self.agent,
-                check_not_none(goal),
-                self.goal_manager,
-                self.long_term_memory,
-                initial_formatted_system_prompt,
+                check_not_none(goal), initial_formatted_system_prompt
             )
+
+    def save_agent_history(
+        self, initial_formatted_system_prompt: str, save_last_n: int
+    ) -> None:
+        save_agent_history(
+            agent=self.agent,
+            long_term_memory=self.long_term_memory,
+            initial_system_prompt=initial_formatted_system_prompt,
+            # Because the agent is running in a while cycle, always save into database only what's new, to not duplicate entries.
+            save_last_n=save_last_n,
+        )
+
+    def after_iteration_callback(self) -> None:
+        pass
 
     def handle_goal_evaluation(
         self,
-        agent: Agent,
         goal: Goal,
-        goal_manager: GoalManager,
-        long_term_memory: LongTermMemoryTableHandler,
         initial_formatted_system_prompt: str,
     ) -> None:
-        goal_evaluation = goal_manager.evaluate_goal_progress(
+        assert self.goal_manager is not None, "Goal manager must be set."
+        goal_evaluation = self.goal_manager.evaluate_goal_progress(
             goal=goal,
-            chat_history=ChatHistory.from_list_of_dicts(agent.history),
+            chat_history=ChatHistory.from_list_of_dicts(self.agent.history),
         )
-        goal_manager.save_evaluated_goal(
+        self.goal_manager.save_evaluated_goal(
             goal=goal,
             evaluation=goal_evaluation,
         )
-        agent.history.append(
+        self.agent.history.append(
             ChatMessage(
                 role="user",
                 content=f"# Goal evaluation\n{goal_evaluation}",
             ).model_dump()
         )
-        save_agent_history(
-            agent=agent,
-            long_term_memory=long_term_memory,
-            initial_system_prompt=initial_formatted_system_prompt,
+        self.save_agent_history(
+            initial_formatted_system_prompt=initial_formatted_system_prompt,
             # Save only the new (last) message, which is the goal evaluation.
             save_last_n=1,
         )

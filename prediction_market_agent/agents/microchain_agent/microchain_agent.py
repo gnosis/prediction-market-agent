@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Callable
 
 from eth_typing import ChecksumAddress
 from microchain import (
@@ -34,6 +33,9 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
 from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.code_functions import (
     CODE_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.common_functions import (
+    COMMON_FUNCIONS,
 )
 from prediction_market_agent.agents.microchain_agent.jobs_functions import JOB_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
@@ -135,6 +137,9 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
+    if functions_config.common_functions:
+        functions.extend(f() for f in COMMON_FUNCIONS)
+
     if functions_config.include_agent_functions:
         functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
 
@@ -189,10 +194,10 @@ def build_agent(
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     import_actions_from_memory: int = 0,
+    max_tokens: int = 8196,
     allow_stop: bool = True,
     bootstrap: str | None = None,
     raise_on_error: bool = True,
-    on_iteration_end: Callable[[Agent], None] | None = None,
 ) -> Agent:
     engine = Engine()
     generator = (
@@ -202,6 +207,7 @@ def build_agent(
             api_base=api_base,
             temperature=0.7,
             enable_langfuse=enable_langfuse,
+            max_tokens=max_tokens,
         )
         if model.is_openai
         else (
@@ -212,6 +218,7 @@ def build_agent(
                 ),
                 api_key=keys.replicate_api_key.get_secret_value(),
                 enable_langfuse=enable_langfuse,
+                max_tokens=max_tokens,
             )
             if model.is_replicate
             else should_not_happen()
@@ -232,7 +239,6 @@ def build_agent(
         llm=LLM(generator=generator),
         engine=engine,
         on_iteration_step=on_iteration_step,
-        on_iteration_end=on_iteration_end,
         enable_langfuse=enable_langfuse,
     )
 

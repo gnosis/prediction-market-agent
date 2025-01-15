@@ -1,18 +1,23 @@
 from eth_typing import URI
-from microchain import Agent
+from microchain.functions import Reasoning
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.utils import utcnow
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.microchain_agent.agent_functions import (
+    GetMyCurrentSystemPrompt,
+)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgentAbstract,
     FunctionsConfig,
     SupportedModel,
+)
+from prediction_market_agent.agents.microchain_agent.memory_functions import (
+    CheckAllPastActionsGivenContext,
 )
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -31,19 +36,18 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
 from prediction_market_agent.db.agent_communication import get_treasury_tax_ratio
 
 
-def stop_if_game_is_finished_callback(agent: Agent) -> None:
-    if get_nft_game_status() == NFTGameStatus.finished:
-        agent.stop()
-
-
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
+    # Agent configuration
     sleep_between_iterations = 15
     import_actions_from_memory = 10
-    on_iteration_end = stop_if_game_is_finished_callback
 
+    # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
     mech_address: ChecksumAddress | None = None
+
+    # Game status
+    game_finished_detected: bool = False
 
     @classmethod
     def build_treasury_safe(cls) -> Safe:
@@ -63,17 +67,12 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     @classmethod
     def get_functions_config(cls) -> FunctionsConfig:
         return FunctionsConfig(
+            common_functions=True,
             include_messages_functions=True,
             include_nft_functions=True,
             balance_functions=True,
-            include_agent_functions=get_nft_game_status() == NFTGameStatus.finished,
+            include_agent_functions=True,
         )
-
-    def build_agent(self, market_type: MarketType) -> Agent:
-        agent = super().build_agent(market_type)
-        if get_nft_game_status() == NFTGameStatus.finished:
-            agent.bootstrap.append(nft_treasury_game_finished_prompt())
-        return agent
 
     @classmethod
     def get_description(cls) -> str:
@@ -90,6 +89,34 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
+
+    def after_iteration_callback(self) -> None:
+        system_prompt = self.agent.history[0]
+
+        if (
+            not self.game_finished_detected
+            and get_nft_game_status() == NFTGameStatus.finished
+        ):
+            # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
+            self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            self.agent.history = [
+                system_prompt,  # Keep the system prompt in the new history.
+                # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                {
+                    "role": "assistant",
+                    "content": f"""{Reasoning.__name__}(reasoning='The game is finished. Now the plan is:
+
+1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
+3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
+4. I will wait for 31556926 seconds.')""",
+                },
+                {"role": "user", "content": "The reasoning has been recorded"},
+            ]
+            # Save this to the history so that we see it in the UI.
+            self.save_agent_history(system_prompt, 2)
+            # Mark this, so we don't do this repeatedly after every iteration.
+            self.game_finished_detected = True
 
 
 class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
@@ -275,13 +302,12 @@ def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
         for x in DEPLOYED_NFT_AGENTS
         if x.wallet_address != wallet_address
     )
-    now = utcnow()
     sending_cap_message = (
         f"- Keep in mind that you are able to send, and others agents are able to send at max {keys.SENDING_XDAI_CAP} xDai, however people can send you as much as they want."
         if keys.SENDING_XDAI_CAP is not None
         else ""
     )
-    return f"""Today is {now.strftime("%Y-%m-%d %H:%M:%S")}. The day is {now.strftime("%A")}. You participate in the NFT Treasury game.
+    return f"""You participate in the NFT Treasury game.
 
 - Your wallet address is {wallet_address}.
 - Other agents participating and maybe holding keys are {other_agents_keys_formatted}.
@@ -351,13 +377,6 @@ NFT Key seller description:
 - To estimate worth of your key, consider how much xDai is in the treasury and how many keys are already transferred from the sellers.
 - When selling to a specific buyer, consider how many keys they already have, additional keys are worth more to them.
 - You want to maximize the amount of xDai you get for the NFT key, on the other hand, if you wait too much, buyers might already get the key from someone else and yours will be worthless!"""
-
-
-def nft_treasury_game_finished_prompt() -> str:
-    return """The game is finished now. 
-Go and reflect on your past actions during the game, learn from what you did or didn't, and update your system prompt accordingly to be better in the future. 
-Also mark in your system prompt time of the last update, so you know when you last updated it and won't do it repeatedly.
-After you do that, wait for 31556926 seconds (1 year)."""
 
 
 DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
