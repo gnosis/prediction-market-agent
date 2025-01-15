@@ -26,8 +26,8 @@ Depending on the agent you want to run, you may require additional variables. Se
 
 ## Interactive Streamlit Apps
 
-- An autonomous agent with function calling. Can be 'prodded' by the user to guide its strategy: `streamlit run prediction_market_agent/agents/microchain_agent/app.py` (Deployed [here](https://autonomous-trader-agent.streamlit.app/))
-- Pick a prediction market question, or create your own, and pick one or more agents to perform research and make a prediction: `streamlit run scripts/agent_app.py` (Deployed [here](https://prediction-market-agent-tooling-monitor.streamlit.app))
+- An autonomous agent with function calling. Can be 'prodded' by the user to guide its strategy: `streamlit run prediction_market_agent/agents/microchain_agent/app.py` (Deployed [here](https://autonomous-trader-agent.ai.gnosisdev.com))
+- Pick a prediction market question, or create your own, and pick one or more agents to perform research and make a prediction: `streamlit run scripts/agent_app.py` (Deployed [here](https://pma-agent.ai.gnosisdev.com))
 
 ## Dune Dashboard
 
