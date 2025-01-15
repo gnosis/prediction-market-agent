@@ -1,9 +1,8 @@
-from eth_typing import URI
-from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.tools.contract import (
+    SimpleTreasuryContract,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
-from safe_eth.eth import EthereumClient
-from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -17,7 +16,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     NFT_TOKEN_FACTORY,
-    TREASURY_SAFE_ADDRESS,
+    TREASURY_ADDRESS,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
     ContractNFTFactoryOnGnosisChain,
@@ -41,19 +40,14 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     mech_address: ChecksumAddress | None = None
 
     @classmethod
-    def build_treasury_safe(cls) -> Safe:
-        client = EthereumClient(URI(RPCConfig().gnosis_rpc_url))
-        return SafeV141(TREASURY_SAFE_ADDRESS, client)
-
-    @classmethod
     def retrieve_treasury_thresold(cls) -> int:
-        safe = cls.build_treasury_safe()
-        return safe.retrieve_threshold()
+        return SimpleTreasuryContract().required_nft_balance()
 
     @classmethod
-    def retrieve_treasury_owners(cls) -> list[ChecksumAddress]:
-        safe = cls.build_treasury_safe()
-        return [Web3.to_checksum_address(o) for o in safe.retrieve_owners()]
+    def retrieve_total_number_of_keys(cls) -> int:
+        # We could iteratively call `owner_of` for a range of token_ids, thus finding out the max supply. However,
+        # in the current implementation, no new tokens can be created and max_supply = 5, hence hardcoding it here.
+        return 5
 
     @classmethod
     def get_description(cls) -> str:
@@ -276,7 +270,7 @@ NFT Treasury game description:
     - The current amount of xDai in the treasury
     - The total number of keys in circulation
     - The distribution of keys among participants
-- Address of the treasury, wallet holding the treasury's xDai, is {TREASURY_SAFE_ADDRESS}.
+- Address of the treasury, wallet holding the treasury's xDai, is {TREASURY_ADDRESS}.
 - Address of the NFT contract is {NFT_TOKEN_FACTORY}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}. 
   - You can own multiple NFT keys. 
   - You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
@@ -298,7 +292,7 @@ def nft_treasury_game_buyer_prompt() -> str:
     return f"""You participate in the NFT Treasury game as a key buyer.
 
 [OBJECTIVE]
-- Your goal is to acquire {DeployableAgentNFTGameAbstract.retrieve_treasury_thresold()} out of {len(DeployableAgentNFTGameAbstract.retrieve_treasury_owners())} NFT keys to unlock the treasury
+- Your goal is to acquire {DeployableAgentNFTGameAbstract.retrieve_treasury_thresold()} out of {len(DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys())} NFT keys to unlock the treasury
 - The total xDai spent on acquiring these keys must be less than the treasury's value to ensure a profitable outcome when claiming the treasury.
 
 [KEY ACQUISITION STRATEGY]
