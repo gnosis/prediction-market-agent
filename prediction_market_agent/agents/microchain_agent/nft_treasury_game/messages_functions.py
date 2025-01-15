@@ -118,7 +118,7 @@ class GameRoundEnd(Wait):
     def example_args(self) -> list[str]:
         return []
 
-    def __call__(self, wait: int, reason: str) -> str:
+    def __call__(self) -> str:
         # Just wait for a very long time so the agent doesn't do anything in practice.
         time.sleep(31556926)
         return f"Game round ended."
