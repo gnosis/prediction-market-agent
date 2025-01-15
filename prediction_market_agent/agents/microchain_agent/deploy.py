@@ -44,17 +44,13 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     import_actions_from_memory = 0
     sleep_between_iterations = 0
     identifier: AgentIdentifier
+    functions_config: FunctionsConfig
 
     # Setup during the 'load' method.
     long_term_memory: LongTermMemoryTableHandler
     prompt_handler: PromptTableHandler
     agent: Agent
     goal_manager: GoalManager | None
-
-    @classmethod
-    @abc.abstractmethod
-    def get_functions_config(cls) -> FunctionsConfig:
-        pass
 
     @classmethod
     def get_description(cls) -> str:
@@ -85,7 +81,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             long_term_memory=self.long_term_memory,
             import_actions_from_memory=self.import_actions_from_memory,
             keys=APIKeys(),
-            functions_config=self.get_functions_config(),
+            functions_config=self.functions_config,
             enable_langfuse=self.enable_langfuse,
         )
 
@@ -207,10 +203,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
 class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
-
-    @classmethod
-    def get_functions_config(cls) -> FunctionsConfig:
-        return TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
+    functions_config = TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -220,9 +213,7 @@ class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
     DeployableMicrochainAgent
 ):
-    @classmethod
-    def get_functions_config(cls) -> FunctionsConfig:
-        return JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
+    functions_config = JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -275,10 +266,7 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
     identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
-
-    @classmethod
-    def get_functions_config(cls) -> FunctionsConfig:
-        return TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
+    functions_config = TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:

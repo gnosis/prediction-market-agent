@@ -2,7 +2,6 @@ from eth_typing import URI
 from microchain.functions import Reasoning
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from prediction_market_agent_tooling.tools.utils import utcnow
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
@@ -40,6 +39,13 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
     sleep_between_iterations = 15
     import_actions_from_memory = 10
+    functions_config = FunctionsConfig(
+        common_functions=True,
+        include_messages_functions=True,
+        include_nft_functions=True,
+        balance_functions=True,
+        include_agent_functions=True,
+    )
 
     # Setup per-nft-agent class.
     name: str
@@ -63,16 +69,6 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     def retrieve_treasury_owners(cls) -> list[ChecksumAddress]:
         safe = cls.build_treasury_safe()
         return [Web3.to_checksum_address(o) for o in safe.retrieve_owners()]
-
-    @classmethod
-    def get_functions_config(cls) -> FunctionsConfig:
-        return FunctionsConfig(
-            common_functions=True,
-            include_messages_functions=True,
-            include_nft_functions=True,
-            balance_functions=True,
-            include_agent_functions=True,
-        )
 
     @classmethod
     def get_description(cls) -> str:

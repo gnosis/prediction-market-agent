@@ -89,7 +89,7 @@ class DeployedGeneralAgentSettings(BaseSettings):
         return AGENT_IDENTIFIER_TO_CLASS[identifier].get_description()
 
     def to_functions_config(self, identifier: AgentIdentifier) -> FunctionsConfig:
-        return AGENT_IDENTIFIER_TO_CLASS[identifier].get_functions_config()
+        return AGENT_IDENTIFIER_TO_CLASS[identifier].functions_config
 
 
 MARKET_TYPE = MarketType.OMEN
