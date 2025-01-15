@@ -246,7 +246,9 @@ def build_agent(
         ).search(limit=import_actions_from_memory)
         agent.history.extend(
             m.metadata_dict
-            for m in latest_saved_memories
+            for m in latest_saved_memories[
+                ::-1
+            ]  # Revert the list to have the oldest messages first, as they were in the history.
             if check_not_none(m.metadata_dict)["role"]
             != "system"  # Do not include system message as that one is automatically in the beginning of the history.
         )

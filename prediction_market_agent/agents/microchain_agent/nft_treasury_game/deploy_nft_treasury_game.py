@@ -1,7 +1,10 @@
+import time
+
 from eth_typing import URI
 from microchain.functions import Reasoning
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
@@ -88,6 +91,15 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
+
+    def before_iteration_callback(self) -> None:
+        if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
+            self.agent.history[-1]
+        ):
+            # Just sleep for a very long time if the last thing the agent did was being done with this game.
+            # That way he won't be doing anything until the game is reset.
+            logger.info("Agent is done with the game, sleeping.")
+            time.sleep(31_536_000)
 
     def after_iteration_callback(self) -> None:
         system_prompt = self.agent.history[0]

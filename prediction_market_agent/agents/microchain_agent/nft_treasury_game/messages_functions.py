@@ -109,19 +109,19 @@ class Wait(Function):
         return f"Waited for {wait} seconds to {reason}."
 
 
-class GameRoundEnd(Wait):
+class GameRoundEnd(Function):
+    GAME_ROUND_END_OUTPUT = "Agent decided to stop playing."
+
     @property
     def description(self) -> str:
         return f"""Use {GameRoundEnd.__name__} to indicate that you are done playing this game."""
 
     @property
     def example_args(self) -> list[str]:
-        return []
+        return ["The game has finished and I did all necessary steps."]
 
-    def __call__(self) -> str:
-        # Just wait for a very long time so the agent doesn't do anything in practice.
-        time.sleep(31556926)
-        return f"Game round ended."
+    def __call__(self, reasoning: str) -> str:
+        return self.GAME_ROUND_END_OUTPUT
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [

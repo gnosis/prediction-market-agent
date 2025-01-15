@@ -126,6 +126,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         while not self.agent.do_stop and (
             self.max_iterations is None or iteration < self.max_iterations
         ):
+            self.before_iteration_callback()
+
             starting_history_length = len(self.agent.history)
             try:
                 # After the first iteration, resume=True to not re-initialize the agent.
@@ -170,6 +172,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             # Because the agent is running in a while cycle, always save into database only what's new, to not duplicate entries.
             save_last_n=save_last_n,
         )
+
+    def before_iteration_callback(self) -> None:
+        pass
 
     def after_iteration_callback(self) -> None:
         pass
