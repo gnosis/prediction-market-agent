@@ -18,7 +18,9 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 
 class LongTermMemoryBasedFunction(Function):
     def __init__(
-        self, long_term_memory: LongTermMemoryTableHandler, model: str
+        self,
+        long_term_memory: LongTermMemoryTableHandler,
+        model: str = "gpt-4o",  # Use model that works well with these functions, provide other one only if necessary.
     ) -> None:
         self.long_term_memory = long_term_memory
         self.model = model

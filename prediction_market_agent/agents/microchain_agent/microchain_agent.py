@@ -177,9 +177,7 @@ def build_agent_functions(
         functions.extend(f() for f in BALANCE_FUNCTIONS)
 
     if long_term_memory:
-        functions.extend(
-            f(long_term_memory=long_term_memory, model=model) for f in MEMORY_FUNCTIONS
-        )
+        functions.extend(f(long_term_memory=long_term_memory) for f in MEMORY_FUNCTIONS)
 
     return functions
 

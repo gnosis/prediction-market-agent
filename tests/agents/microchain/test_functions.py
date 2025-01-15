@@ -30,7 +30,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
-from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
+from prediction_market_agent.utils import APIKeys
 from tests.utils import RUN_PAID_TESTS
 
 
@@ -177,8 +177,7 @@ def test_look_at_past_actions(
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemoryTableHandler(task_description="microchain-streamlit-app")
     past_actions = LookAtPastActionsFromLastDay(
-        long_term_memory=long_term_memory_table_handler,
-        model=DEFAULT_OPENAI_MODEL,
+        long_term_memory=long_term_memory_table_handler
     )
     print(past_actions())
 
@@ -203,8 +202,7 @@ def test_check_past_actions_given_context(
     ## Uncomment below to test with the memories accrued from use of https://autonomous-trader-agent.streamlit.app/
     # long_term_memory = LongTermMemoryTableHandler(task_description="microchain-streamlit-app")
     past_actions = CheckAllPastActionsGivenContext(
-        long_term_memory=long_term_memory_table_handler,
-        model=DEFAULT_OPENAI_MODEL,
+        long_term_memory=long_term_memory_table_handler
     )
     print(past_actions(context="What coalitions did I form?"))
 
