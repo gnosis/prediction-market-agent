@@ -77,6 +77,7 @@ if __name__ == "__main__":
     )  # mech 1
     # Example usage
     signature_data = safe_tx.sign(private_key=nft_owner_private_key)
+    result = safe_tx.unsign(address=nft_owner_address)
     mech_signature = sign_with_mech(mech1_address, signature_data)
     # Remove owner, only mech has valid signature
     # ToDo - Add mech signature to transaction
@@ -87,8 +88,7 @@ if __name__ == "__main__":
         safe_hash_preimage=safe_tx.safe_tx_hash_preimage,
     )
     safe_tx.signatures = SafeSignature.export_signatures(signatures)
-    # ToDo - maybe below not needed
-    result = safe_tx.unsign(address=nft_owner_address)
+
     # safe_tx.sign(owner_1_private_key)
     # safe_tx.sign(owner_2_private_key)
 
@@ -98,5 +98,5 @@ if __name__ == "__main__":
     # Sign transaction with all 3 mechs
     # Execute transaction
     # Assert that treasury has balance 0.
-    safe.send_multisig_tx
+
     print("end")
