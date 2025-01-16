@@ -93,10 +93,12 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
     def before_iteration_callback(self) -> None:
-        if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
-            self.agent.history[-1]
+        if (
+            self.agent.history
+            and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(self.agent.history[-1])
+            and get_nft_game_status() == NFTGameStatus.finished
         ):
-            # Just sleep for a very long time if the last thing the agent did was being done with this game.
+            # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
             # That way he won't be doing anything until the game is reset.
             logger.info("Agent is done with the game, sleeping.")
             time.sleep(31_536_000)
