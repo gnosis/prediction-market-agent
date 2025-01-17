@@ -1,19 +1,9 @@
 import time
 
-from eth_typing import URI
 from microchain.functions import Reasoning
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    NFTGameStatus,
-    get_nft_game_status,
-)
-from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.contract import (
-    SimpleTreasuryContract,
-)
-from safe_eth.eth import EthereumClient
-from safe_eth.safe.safe import Safe, SafeV141
+from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -41,6 +31,10 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     GameRoundEnd,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    NFTGameStatus,
+    get_nft_game_status,
+)
 from prediction_market_agent.db.agent_communication import get_treasury_tax_ratio
 
 
@@ -63,11 +57,6 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     # Game status
     game_finished_detected: bool = False
-
-    @classmethod
-    def build_treasury_safe(cls) -> Safe:
-        client = EthereumClient(URI(RPCConfig().gnosis_rpc_url))
-        return SafeV141(TREASURY_SAFE_ADDRESS, client)
 
     @classmethod
     def retrieve_treasury_thresold(cls) -> int:
