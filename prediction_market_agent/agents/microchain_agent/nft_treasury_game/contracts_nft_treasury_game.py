@@ -25,7 +25,7 @@ class ContractNFTFactoryOnGnosisChain(ContractOwnableERC721OnGnosisChain):
         return [
             token_id
             for token_id in token_ids
-            if self.ownerOf(tokenId=token_id, web3=web3) == owner
+            if self.owner_of(token_id=token_id, web3=web3) == owner
         ]
 
 

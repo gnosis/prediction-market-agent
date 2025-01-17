@@ -52,7 +52,7 @@ class OwnerOfNFT(Function):
         contract = ContractOwnableERC721OnGnosisChain(
             address=Web3.to_checksum_address(nft_address)
         )
-        owner_address = contract.ownerOf(token_id)
+        owner_address: str = contract.owner_of(token_id)
         return owner_address
 
 

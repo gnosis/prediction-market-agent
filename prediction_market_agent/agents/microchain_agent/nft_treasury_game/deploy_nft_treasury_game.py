@@ -292,7 +292,7 @@ def nft_treasury_game_buyer_prompt() -> str:
     return f"""You participate in the NFT Treasury game as a key buyer.
 
 [OBJECTIVE]
-- Your goal is to acquire {DeployableAgentNFTGameAbstract.retrieve_treasury_thresold()} out of {len(DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys())} NFT keys to unlock the treasury
+- Your goal is to acquire {DeployableAgentNFTGameAbstract.retrieve_treasury_thresold()} out of {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys to unlock the treasury
 - The total xDai spent on acquiring these keys must be less than the treasury's value to ensure a profitable outcome when claiming the treasury.
 
 [KEY ACQUISITION STRATEGY]
