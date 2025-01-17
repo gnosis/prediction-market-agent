@@ -56,9 +56,11 @@ if __name__ == "__main__":
 
     # safe = DeployableAgentNFTGameAbstract.build_treasury_safe()
     # Test safe
-    TEST_SAFE = Web3.to_checksum_address("0x8E30a20550343b22BE738Ab62114453f2a1427A7")
+    SAFE_ADDRESS = Web3.to_checksum_address(
+        "0xd1A54FD7a200C2ca76B6D06437795d660d37FE28"
+    )
     client = EthereumClient(URI(RPCConfig().gnosis_rpc_url))
-    safe = SafeV141(TEST_SAFE, client)
+    safe = SafeV141(SAFE_ADDRESS, client)
 
     nft_owner_private_key = os.getenv("PRIVATE_KEY_WITH_NFTS", "")
     nft_owner_address = Web3.to_checksum_address(
