@@ -35,7 +35,7 @@ from prediction_market_agent.agents.microchain_agent.code_functions import (
     CODE_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.common_functions import (
-    COMMON_FUNCIONS,
+    COMMON_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.jobs_functions import JOB_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
@@ -138,7 +138,7 @@ def build_agent_functions(
         functions.append(Stop())
 
     if functions_config.common_functions:
-        functions.extend(f() for f in COMMON_FUNCIONS)
+        functions.extend(f() for f in COMMON_FUNCTIONS)
 
     if functions_config.include_agent_functions:
         functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])

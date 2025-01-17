@@ -16,6 +16,6 @@ class TodayDate(Function):
         return f"Today is {now.strftime('%Y-%m-%d %H:%M:%S')}. The day is {now.strftime('%A')}."
 
 
-COMMON_FUNCIONS: list[type[Function]] = [
+COMMON_FUNCTIONS: list[type[Function]] = [
     TodayDate,
 ]
