@@ -79,7 +79,6 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             unformatted_system_prompt=unformatted_system_prompt,
             allow_stop=True,
             long_term_memory=self.long_term_memory,
-            import_actions_from_memory=self.import_actions_from_memory,
             keys=APIKeys(),
             functions_config=self.functions_config,
             enable_langfuse=self.enable_langfuse,
@@ -107,6 +106,26 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         """
         self.run_general_agent(market_type=market_type)
 
+    def initialise_agent(self) -> None:
+        self.agent.build_initial_messages()
+
+        # Inject past history if wanted.
+        if self.import_actions_from_memory:
+            latest_saved_memories = check_not_none(
+                self.long_term_memory,
+                "long_term_memory is needed for this functionality.",
+            ).search(limit=self.import_actions_from_memory)
+            messages_to_insert = [
+                m.metadata_dict
+                for m in latest_saved_memories[
+                    ::-1
+                ]  # Revert the list to have the oldest messages first, as they were in the history.
+                if check_not_none(m.metadata_dict)["role"]
+                != "system"  # Do not include system message as that one is automatically in the beginning of the history.
+            ]
+            # Inject them after the system message.
+            self.agent.history[1:1] = messages_to_insert
+
     @observe()
     def run_general_agent(self, market_type: MarketType) -> None:
         if market_type != MarketType.OMEN:
@@ -117,6 +136,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         goal = self.goal_manager.get_goal() if self.goal_manager else None
         if goal:
             self.agent.prompt = goal.to_prompt()
+
+        # Initialise the agent before our working loop.
+        self.initialise_agent()
 
         # Save formatted system prompt
         initial_formatted_system_prompt = self.agent.system_prompt
@@ -130,8 +152,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
             starting_history_length = len(self.agent.history)
             try:
-                # After the first iteration, resume=True to not re-initialize the agent.
-                self.agent.run(iterations=1, resume=iteration > 0)
+                # We initialise agent manually because of inserting past history, so force resume=True, to not re-initialise it which would remove the history.
+                self.agent.run(iterations=1, resume=True)
             except Exception as e:
                 logger.error(f"Error while running microchain agent: {e}")
                 raise e
