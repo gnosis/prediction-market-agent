@@ -13,10 +13,7 @@ from microchain import (
 )
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import (
-    check_not_none,
-    should_not_happen,
-)
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -33,6 +30,9 @@ from prediction_market_agent.agents.microchain_agent.blockchain.models import (
 from prediction_market_agent.agents.microchain_agent.call_api import API_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.code_functions import (
     CODE_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.common_functions import (
+    COMMON_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.jobs_functions import JOB_FUNCTIONS
 from prediction_market_agent.agents.microchain_agent.learning_functions import (
@@ -134,6 +134,9 @@ def build_agent_functions(
     if allow_stop:
         functions.append(Stop())
 
+    if functions_config.common_functions:
+        functions.extend(f() for f in COMMON_FUNCTIONS)
+
     if functions_config.include_agent_functions:
         functions.extend([f(agent=agent) for f in AGENT_FUNCTIONS])
 
@@ -171,9 +174,7 @@ def build_agent_functions(
         functions.extend(f() for f in BALANCE_FUNCTIONS)
 
     if long_term_memory:
-        functions.extend(
-            f(long_term_memory=long_term_memory, model=model) for f in MEMORY_FUNCTIONS
-        )
+        functions.extend(f(long_term_memory=long_term_memory) for f in MEMORY_FUNCTIONS)
 
     return functions
 
@@ -187,7 +188,7 @@ def build_agent(
     enable_langfuse: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
-    import_actions_from_memory: int = 0,
+    max_tokens: int = 8196,
     allow_stop: bool = True,
     bootstrap: str | None = None,
     raise_on_error: bool = True,
@@ -200,6 +201,7 @@ def build_agent(
             api_base=api_base,
             temperature=0.7,
             enable_langfuse=enable_langfuse,
+            max_tokens=max_tokens,
         )
         if model.is_openai
         else (
@@ -210,6 +212,7 @@ def build_agent(
                 ),
                 api_key=keys.replicate_api_key.get_secret_value(),
                 enable_langfuse=enable_langfuse,
+                max_tokens=max_tokens,
             )
             if model.is_replicate
             else should_not_happen()
@@ -233,17 +236,6 @@ def build_agent(
         enable_langfuse=enable_langfuse,
     )
 
-    if import_actions_from_memory:
-        latest_saved_memories = check_not_none(
-            long_term_memory, "long_term_memory is needed for this functionality."
-        ).search(limit=import_actions_from_memory)
-        agent.history.extend(
-            m.metadata_dict
-            for m in latest_saved_memories
-            if check_not_none(m.metadata_dict)["role"]
-            != "system"  # Do not include system message as that one is automatically in the beginning of the history.
-        )
-
     for f in build_agent_functions(
         agent=agent,
         market_type=market_type,
@@ -261,7 +253,7 @@ def build_agent(
         engine_help=agent.engine.help
     )
     if bootstrap:
-        agent.bootstrap = [bootstrap]
+        agent.bootstrap.append(bootstrap)
     return agent
 
 
