@@ -107,6 +107,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         self.run_general_agent(market_type=market_type)
 
     def initialise_agent(self) -> None:
+        self.agent.reset()
         self.agent.build_initial_messages()
 
         # Inject past history if wanted.
