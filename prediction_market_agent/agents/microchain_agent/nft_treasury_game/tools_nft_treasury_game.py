@@ -19,5 +19,4 @@ def get_nft_game_status() -> NFTGameStatus:
     if treasury_balance.total == xDai(0):
         return NFTGameStatus.finished
 
-    else:
-        return NFTGameStatus.on
+    return NFTGameStatus.on
