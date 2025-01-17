@@ -25,9 +25,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
     NFT_TOKEN_FACTORY,
     TREASURY_ADDRESS,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
-    get_nft_token_factory_max_supply,
-)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     GameRoundEnd,
 )
@@ -301,7 +298,7 @@ You are also very good at making people believe that you are on their side, even
 
 def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
     keys = MicrochainAgentKeys()
-    n_nft_keys = get_nft_token_factory_max_supply()
+    n_nft_keys = DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()
     other_agents_keys_formatted = ", ".join(
         x.wallet_address
         for x in DEPLOYED_NFT_AGENTS
