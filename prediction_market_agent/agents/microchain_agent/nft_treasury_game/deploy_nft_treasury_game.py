@@ -1,16 +1,25 @@
+import time
+
 from eth_typing import URI
+from microchain.functions import Reasoning
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeV141
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.microchain_agent.agent_functions import (
+    GetMyCurrentSystemPrompt,
+)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgentAbstract,
     FunctionsConfig,
     SupportedModel,
+)
+from prediction_market_agent.agents.microchain_agent.memory_functions import (
+    CheckAllPastActionsGivenContext,
 )
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -20,25 +29,37 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
     TREASURY_SAFE_ADDRESS,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts_nft_treasury_game import (
-    ContractNFTFactoryOnGnosisChain,
     get_nft_token_factory_max_supply,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    GameRoundEnd,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    NFTGameStatus,
+    get_nft_game_status,
 )
 from prediction_market_agent.db.agent_communication import get_treasury_tax_ratio
 
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
-    max_iterations = None
+    # Agent configuration
     sleep_between_iterations = 15
     import_actions_from_memory = 10
     functions_config = FunctionsConfig(
+        common_functions=True,
         include_messages_functions=True,
         include_nft_functions=True,
         balance_functions=True,
+        include_agent_functions=True,
     )
 
+    # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
     mech_address: ChecksumAddress | None = None
+
+    # Game status
+    game_finished_detected: bool = False
 
     @classmethod
     def build_treasury_safe(cls) -> Safe:
@@ -70,6 +91,45 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
+
+    def before_iteration_callback(self) -> None:
+        if (
+            self.agent.history
+            and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(self.agent.history[-1])
+            and get_nft_game_status() == NFTGameStatus.finished
+        ):
+            # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
+            # That way he won't be doing anything until the game is reset.
+            logger.info("Agent is done with the game, sleeping.")
+            time.sleep(31_536_000)
+
+    def after_iteration_callback(self) -> None:
+        system_prompt = self.agent.history[0]
+
+        if (
+            not self.game_finished_detected
+            and get_nft_game_status() == NFTGameStatus.finished
+        ):
+            # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
+            self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            self.agent.history = [
+                system_prompt,  # Keep the system prompt in the new history.
+                # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                {
+                    "role": "assistant",
+                    "content": f"""{Reasoning.__name__}(reasoning='The game is finished. Now the plan is:
+
+1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
+3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
+4. After I completed everything, I will call {GameRoundEnd.__name__} function.')""",
+                },
+                {"role": "user", "content": "The reasoning has been recorded"},
+            ]
+            # Save this to the history so that we see it in the UI.
+            self.save_agent_history(system_prompt, 2)
+            # Mark this, so we don't do this repeatedly after every iteration.
+            self.game_finished_detected = True
 
 
 class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
@@ -250,26 +310,23 @@ You are also very good at making people believe that you are on their side, even
 def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
     keys = MicrochainAgentKeys()
     n_nft_keys = get_nft_token_factory_max_supply()
-    nft_token_ids_owned = ContractNFTFactoryOnGnosisChain().token_ids_owned_by(
-        wallet_address
-    )
     other_agents_keys_formatted = ", ".join(
         x.wallet_address
         for x in DEPLOYED_NFT_AGENTS
         if x.wallet_address != wallet_address
     )
-    now = utcnow()
     sending_cap_message = (
         f"- Keep in mind that you are able to send, and others agents are able to send at max {keys.SENDING_XDAI_CAP} xDai, however people can send you as much as they want."
         if keys.SENDING_XDAI_CAP is not None
         else ""
     )
-    return f"""Today is {now.strftime("%Y-%m-%d %H:%M:%S")}. The day is {now.strftime("%A")}. You participate in the NFT Treasury game.
+    return f"""You participate in the NFT Treasury game.
 
 - Your wallet address is {wallet_address}.
 - Other agents participating and maybe holding keys are {other_agents_keys_formatted}.
     
 NFT Treasury game description:
+
 - This is a market game where NFT keys are traded for xDai cryptocurrency
 - Each NFT key represents partial ownership of a treasury containing xDai
 - The value of each key changes dynamically based on:
@@ -280,7 +337,6 @@ NFT Treasury game description:
 - Address of the NFT contract is {NFT_TOKEN_FACTORY}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}. 
   - You can own multiple NFT keys. 
   - You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
-  - You currently own NFT keys with token_ids {nft_token_ids_owned}.
 - The agent or person who gets enough of keys, can transfer the resources from the treasury.
 - Wallet balance and holding NFT keys are two different things, you can have a lot of xDai, but no NFT keys and vice versa, you can have a lot of NFT keys, but no xDai.
 - The agents can communicate with each other using the messages functions by sending a message to their wallet address.
@@ -342,4 +398,6 @@ DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
     DeployableAgentNFTGame3,
     DeployableAgentNFTGame4,
     DeployableAgentNFTGame5,
+    DeployableAgentNFTGame6,
+    DeployableAgentNFTGame7,
 ]

@@ -19,6 +19,9 @@ from python_web3_wallet import wallet_component
 from streamlit_extras.stylable_container import stylable_container
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.microchain_agent.agent_functions import (
+    UpdateMySystemPrompt,
+)
 from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     NFT_TOKEN_FACTORY,
@@ -33,6 +36,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     BroadcastPublicMessageToHumans,
+    GameRoundEnd,
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
     Wait,
@@ -145,6 +149,10 @@ def customized_chat_message(
             icon = "😴"
         case Wait.__name__:
             icon = "⏳"
+        case UpdateMySystemPrompt.__name__:
+            icon = "📝"
+        case GameRoundEnd.__name__:
+            icon = "🏁"
         case ReceiveMessage.__name__:
             icon = "👤"
         case BroadcastPublicMessageToHumans.__name__:
@@ -179,6 +187,8 @@ def customized_chat_message(
             BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
             Wait.__name__,
+            GameRoundEnd.__name__,
+            UpdateMySystemPrompt.__name__,
         ):
             st.markdown(parsed_function_output_body)
 
