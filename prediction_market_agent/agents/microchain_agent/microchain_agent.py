@@ -13,10 +13,7 @@ from microchain import (
 )
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.utils import (
-    check_not_none,
-    should_not_happen,
-)
+from prediction_market_agent_tooling.tools.utils import should_not_happen
 
 from prediction_market_agent.agents.microchain_agent.agent_functions import (
     AGENT_FUNCTIONS,
@@ -191,7 +188,6 @@ def build_agent(
     enable_langfuse: bool,
     api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
-    import_actions_from_memory: int = 0,
     max_tokens: int = 8196,
     allow_stop: bool = True,
     bootstrap: str | None = None,
@@ -239,19 +235,6 @@ def build_agent(
         on_iteration_step=on_iteration_step,
         enable_langfuse=enable_langfuse,
     )
-
-    if import_actions_from_memory:
-        latest_saved_memories = check_not_none(
-            long_term_memory, "long_term_memory is needed for this functionality."
-        ).search(limit=import_actions_from_memory)
-        agent.history.extend(
-            m.metadata_dict
-            for m in latest_saved_memories[
-                ::-1
-            ]  # Revert the list to have the oldest messages first, as they were in the history.
-            if check_not_none(m.metadata_dict)["role"]
-            != "system"  # Do not include system message as that one is automatically in the beginning of the history.
-        )
 
     for f in build_agent_functions(
         agent=agent,
