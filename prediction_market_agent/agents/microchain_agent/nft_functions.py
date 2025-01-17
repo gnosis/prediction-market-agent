@@ -2,6 +2,7 @@ from microchain import Function
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721OnGnosisChain,
+    SimpleTreasuryContract,
 )
 from web3 import Web3
 
@@ -51,7 +52,7 @@ class OwnerOfNFT(Function):
         contract = ContractOwnableERC721OnGnosisChain(
             address=Web3.to_checksum_address(nft_address)
         )
-        owner_address = contract.ownerOf(token_id)
+        owner_address: str = contract.owner_of(token_id)
         return owner_address
 
 
@@ -90,8 +91,29 @@ class SafeTransferFromNFT(Function):
         return "Token transferred successfully."
 
 
+class WithdrawFromTreasury(Function):
+    @property
+    def description(self) -> str:
+        required_balance_nft_tokens = SimpleTreasuryContract().required_nft_balance()
+        return f"Transfers the entire balance of the treasury to the caller. For the function to succeed, the caller must own {required_balance_nft_tokens} NFT tokens."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> str:
+        keys = MicrochainAgentKeys()
+        treasury_contract = SimpleTreasuryContract()
+        logger.info(
+            f"Withdrawing from the treasury using sender {keys.bet_from_address}"
+        )
+        treasury_contract.withdraw(api_keys=keys)
+        return "Treasury successfully emptied."
+
+
 NFT_FUNCTIONS: list[type[Function]] = [
     BalanceOfNFT,
     OwnerOfNFT,
     SafeTransferFromNFT,
+    WithdrawFromTreasury,
 ]
