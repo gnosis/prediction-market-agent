@@ -202,6 +202,8 @@ def claim_all_bonds_on_reality(
         api_keys,
         questions,
         auto_withdraw=True,
+        # Skip failed claims, because we don't want to block the whole process because of some failed claim.
+        skip_failed=True,
     )
     balances_after_claiming = get_balances(public_key)
     logger.info(f"{balances_after_claiming=}")
