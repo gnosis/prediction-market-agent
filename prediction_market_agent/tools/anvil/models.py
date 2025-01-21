@@ -1,6 +1,11 @@
+from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import BaseModel, Field, computed_field
 
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
+    DEPLOYED_NFT_AGENTS,
+)
 from prediction_market_agent.tools.message_utils import unzip_message_else_do_nothing
 
 
@@ -68,3 +73,24 @@ class BalanceData(BaseModel):
 # class AnvilDump(BaseModel):
 #     blocks: list[BalanceData]
 #     accounts: list[AccountDump]
+
+
+class TransactionDict(BaseModel):
+    from_address: ChecksumAddress = Field(alias="from")
+    to_address: ChecksumAddress = Field(alias="to")
+    block_number: int = Field(alias="blockNumber")
+    hash: HexBytes
+    value: int
+    input: HexBytes | None
+    type: int
+
+    def relevant_to_nft_game(self) -> bool:
+        agents_addresses = [a.wallet_address for a in DEPLOYED_NFT_AGENTS]
+        involves_nft_agents = (
+            self.from_address in agents_addresses or self.to_address in agents_addresses
+        )
+        treasury_address = SimpleTreasuryContract().address
+        involves_treasury = (
+            self.from_address == treasury_address or self.to_address == treasury_address
+        )
+        return involves_treasury or involves_nft_agents

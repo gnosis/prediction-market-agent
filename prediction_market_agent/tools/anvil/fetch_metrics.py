@@ -1,32 +1,25 @@
 import time
 
+import tqdm
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import (
     AgentCommunicationContract,
     ContractOwnableERC721BaseClass,
 )
-from prediction_market_agent_tooling.tools.parallelism import par_map
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    TREASURY_ADDRESS,
-)
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
-    DEPLOYED_NFT_AGENTS,
-)
-from prediction_market_agent.tools.anvil.anvil_requests import get_balance
 from prediction_market_agent.tools.anvil.models import (
     ERC721Transfer,
     AgentCommunicationMessage,
-    BalanceData,
+    TransactionDict,
 )
 
 
 def fetch_nft_transfers(
     web3: Web3,
     nft_contract_address: ChecksumAddress,
-    from_block: int = 37341108,
+    from_block: int,
     to_block: int | None = None,
 ) -> list[ERC721Transfer]:
     s = ContractOwnableERC721BaseClass(address=nft_contract_address)
@@ -60,27 +53,19 @@ def extract_messages_exchanged(
     return messages
 
 
-def extract_balances_per_block(
-    rpc_url: str,
-    from_block: int = 37341108,
+def extract_transactions_involving_agents_and_treasuries(
+    web3: Web3,
+    from_block: int,
     to_block: int | None = None,
-) -> list[BalanceData]:
+) -> list[TransactionDict]:
     blocks = list(range(from_block, to_block + 1))  # include end block
 
-    balance_data: list[BalanceData] = []
-    agent_addresses = [a.wallet_address for a in DEPLOYED_NFT_AGENTS]
+    txs = []
+    for block in tqdm.tqdm(blocks):
+        block = web3.eth.get_block(block, full_transactions=True)
+        for tx in block.transactions:
+            transaction = TransactionDict.model_validate(tx)
+            if transaction.relevant_to_nft_game():
+                txs.append(transaction)
 
-    for address in agent_addresses + [TREASURY_ADDRESS]:
-        balances = par_map(
-            items=blocks,
-            func=lambda block: get_balance(
-                rpc_url=rpc_url, address=address, block=block
-            ),
-        )
-        balance_data.extend(
-            [
-                BalanceData(address=address, block=block, balance_wei=balance)
-                for block, balance in balances
-            ]
-        )
-    return balance_data
+    return txs

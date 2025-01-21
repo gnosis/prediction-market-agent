@@ -5,37 +5,38 @@ from prediction_market_agent_tooling.loggers import logger
 from pydantic import BaseModel
 from web3 import Web3
 
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    NFT_TOKEN_FACTORY,
+)
 from prediction_market_agent.tools.anvil.fetch_metrics import (
-    extract_balances_per_block,
+    extract_transactions_involving_agents_and_treasuries,
     fetch_nft_transfers,
     extract_messages_exchanged,
 )
 
 
-def main() -> None:
-    WRITE_OUTPUT = True
-    NFT_CONTRACT = Web3.to_checksum_address(
-        "0x0D7C0Bd4169D090038c6F41CFd066958fe7619D0"
-    )
-    RPC_URL = "http://localhost:8545"
-    w3 = Web3(Web3.HTTPProvider(RPC_URL))
-    from_block = 38142651
+def main(rpc_url: str) -> None:
+    WRITE_OUTPUT = False
+    w3 = Web3(Web3.HTTPProvider(rpc_url))
+    from_block = 38021575
     to_block = None
-    ###############
-    transfers = fetch_nft_transfers(web3=w3, nft_contract_address=NFT_CONTRACT)
+    transfers = fetch_nft_transfers(
+        web3=w3,
+        nft_contract_address=NFT_TOKEN_FACTORY,
+        from_block=from_block,
+        to_block=to_block,
+    )
     messages = extract_messages_exchanged(
         web3=w3, from_block=from_block, to_block=to_block
     )
-    from_block = 38143011
-    balances = extract_balances_per_block(
-        RPC_URL, from_block=from_block, to_block=from_block + 10
+
+    transactions = extract_transactions_involving_agents_and_treasuries(
+        web3=w3, from_block=from_block, to_block=to_block
     )
     if WRITE_OUTPUT:
         export_pydantic_models(transfers, "transfers")
         export_pydantic_models(messages, "messages", properties_to_exclude=["message"])
-        export_pydantic_models(balances, "balances")
-
-    print("finished")
+        export_pydantic_models(transactions, "transactions")
 
 
 def export_pydantic_models(
