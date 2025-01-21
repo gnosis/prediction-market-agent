@@ -1,19 +1,8 @@
 import requests
-from prediction_market_agent_tooling.gtypes import xdai_type, HexBytes
+from prediction_market_agent_tooling.gtypes import HexBytes, xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
-
-
-def get_snapshot(rpc_url: str):
-    data = {
-        "jsonrpc": "2.0",
-        "method": "evm_snapshot",
-    }
-
-    response = requests.post(rpc_url, json=data)
-    response.raise_for_status()
-    print(response.json())
 
 
 def get_balance(rpc_url: str, address: str, block: int) -> tuple[int, int]:
@@ -36,7 +25,7 @@ def get_balance(rpc_url: str, address: str, block: int) -> tuple[int, int]:
         logger.error(
             f"Error occurred while fetching balance for {address} block {block}"
         )
-        return -1
+        return block, -1
 
 
 def set_balance(rpc_url: str, address: str, balance: int) -> None:

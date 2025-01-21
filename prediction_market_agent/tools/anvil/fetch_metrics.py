@@ -10,8 +10,8 @@ from prediction_market_agent_tooling.tools.contract import (
 from web3 import Web3
 
 from prediction_market_agent.tools.anvil.models import (
-    ERC721Transfer,
     AgentCommunicationMessage,
+    ERC721Transfer,
     TransactionDict,
 )
 
@@ -27,7 +27,7 @@ def fetch_nft_transfers(
 
     # fetch transfer events in the last block
     start = time.time()
-    logs = nft_c.events.Transfer().get_logs(fromBlock=from_block, toBlock=to_block)
+    logs = nft_c.events.Transfer().get_logs(fromBlock=from_block, toBlock=to_block)  # type: ignore[attr-defined]
     logger.debug(f"elapsed {time.time() - start}")
     logger.debug(f"fetched {len(logs)} NFT transfers")
     events = [ERC721Transfer.from_event_log(log) for log in logs]
@@ -43,7 +43,8 @@ def extract_messages_exchanged(
     agent_communication_c = agent_communication_contract.get_web3_contract(web3=web3)
 
     start = time.time()
-    logs = agent_communication_c.events.LogMessage().get_logs(
+
+    logs = agent_communication_c.events.LogMessage().get_logs(  # type: ignore[attr-defined]
         fromBlock=from_block, toBlock=to_block
     )
     logger.debug(f"elapsed {time.time() - start}")
@@ -58,6 +59,7 @@ def extract_transactions_involving_agents_and_treasuries(
     from_block: int,
     to_block: int | None = None,
 ) -> list[TransactionDict]:
+    to_block = web3.eth.get_block_number() if to_block is None else to_block
     blocks = list(range(from_block, to_block + 1))  # include end block
 
     txs = []

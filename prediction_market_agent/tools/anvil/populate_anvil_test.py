@@ -1,9 +1,6 @@
 from eth_account import Account
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import (
-    private_key_type,
-    xdai_type,
-)
+from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
 from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721OnGnosisChain,
 )

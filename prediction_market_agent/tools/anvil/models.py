@@ -1,3 +1,5 @@
+import typing as t
+
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
@@ -22,7 +24,7 @@ class ERC721Transfer(EventBase):
     token_id: int
 
     @classmethod
-    def from_event_log(cls, log: dict) -> "ERC721Transfer":
+    def from_event_log(cls, log: dict[t.Any, t.Any]) -> "ERC721Transfer":
         d = {
             "from_address": log["args"]["from"],
             "to_address": log["args"]["to"],
@@ -37,7 +39,7 @@ class AgentCommunicationMessage(EventBase):
     message: bytes
     value: int
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def decoded_message(self) -> str:
         try:
@@ -46,7 +48,7 @@ class AgentCommunicationMessage(EventBase):
             return unzip_message_else_do_nothing(HexBytes(self.message).hex())
 
     @classmethod
-    def from_event_log(cls, log: dict) -> "AgentCommunicationMessage":
+    def from_event_log(cls, log: dict[t.Any, t.Any]) -> "AgentCommunicationMessage":
         d = {
             "sender": log["args"]["sender"],
             "message": log["args"]["message"],
