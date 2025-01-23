@@ -9,8 +9,11 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     NFT_TOKEN_FACTORY,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
+    DEPLOYED_NFT_AGENTS,
+)
+from prediction_market_agent.db.agent_communication import fetch_unseen_transactions
 from prediction_market_agent.tools.anvil.fetch_metrics import (
-    extract_messages_exchanged,
     extract_transactions_involving_agents_and_treasuries,
     fetch_nft_transfers,
 )
@@ -27,16 +30,19 @@ def main(rpc_url: str) -> None:
         from_block=from_block,
         to_block=to_block,
     )
-    messages = extract_messages_exchanged(
-        web3=w3, from_block=from_block, to_block=to_block
-    )
+
+    messages = []
+    for agent in DEPLOYED_NFT_AGENTS:
+        messages.extend(
+            fetch_unseen_transactions(consumer_address=agent.wallet_address, web3=w3)
+        )
 
     transactions = extract_transactions_involving_agents_and_treasuries(
         web3=w3, from_block=from_block, to_block=to_block
     )
     if WRITE_OUTPUT:
         export_pydantic_models(transfers, "transfers")
-        export_pydantic_models(messages, "messages", properties_to_exclude={"message"})
+        export_pydantic_models(messages, "messages")
         export_pydantic_models(transactions, "transactions")
 
 
