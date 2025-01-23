@@ -1,31 +1,7 @@
 import requests
-from prediction_market_agent_tooling.gtypes import HexBytes, xdai_type
-from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
-
-
-def get_balance(rpc_url: str, address: str, block: int) -> tuple[int, int]:
-    data = {
-        "jsonrpc": "2.0",
-        "method": "eth_getBalance",
-        "params": [
-            Web3.to_checksum_address(address),
-            {"blockNumber": hex(block)},
-        ],
-        "id": 1,
-    }
-
-    response = requests.post(rpc_url, json=data)
-    try:
-        # response is always 200, hence not raising status
-        balance = HexBytes(response.json()["result"])
-        return block, balance.as_int()
-    except:
-        logger.error(
-            f"Error occurred while fetching balance for {address} block {block}"
-        )
-        return block, -1
 
 
 def set_balance(rpc_url: str, address: str, balance: int) -> None:
@@ -41,5 +17,6 @@ def set_balance(rpc_url: str, address: str, balance: int) -> None:
     }
 
     response = requests.post(rpc_url, json=data)
-    response.raise_for_status()
+    if "error" in response.json():
+        raise ValueError(f"error occurred: {response.json()}")
     print(f"Set balance {balance} xDAI for address {address}")
