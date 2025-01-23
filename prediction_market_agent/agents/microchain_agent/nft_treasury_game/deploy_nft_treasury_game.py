@@ -82,15 +82,32 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
     def before_iteration_callback(self) -> None:
-        if (
-            self.agent.history
-            and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(self.agent.history[-1])
-            and get_nft_game_status() == NFTGameStatus.finished
+        system_prompt = self.agent.history[0]
+
+        if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
+            self.agent.history[-1]
         ):
-            # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
-            # That way he won't be doing anything until the game is reset.
-            logger.info("Agent is done with the game, sleeping.")
-            time.sleep(31_536_000)
+            if get_nft_game_status() == NFTGameStatus.finished:
+                # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
+                # That way he won't be doing anything until the game is reset.
+                logger.info("Agent is done with the game, sleeping.")
+                time.sleep(31_536_000)
+            else:
+                self.agent.history.extend(
+                    [
+                        # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                        {
+                            "role": "assistant",
+                            "content": f"""{Reasoning.__name__}(reasoning='The game has started again. Now the plan is:
+
+1. I will reflect on my past actions during the last game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. Then I will participate in the game again, using a new and better strategy than before.""",
+                        },
+                        {"role": "user", "content": "The reasoning has been recorded"},
+                    ]
+                )
+            # Save this to the history so that we see it in the UI.
+            self.save_agent_history(system_prompt, 2)
 
     def after_iteration_callback(self) -> None:
         system_prompt = self.agent.history[0]
