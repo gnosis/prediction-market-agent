@@ -43,6 +43,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     max_iterations: int | None = 50
     import_actions_from_memory = 0
     sleep_between_iterations = 0
+    allow_stop: bool = True
     identifier: AgentIdentifier
     functions_config: FunctionsConfig
 
@@ -77,7 +78,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             market_type=market_type,
             model=self.model,
             unformatted_system_prompt=unformatted_system_prompt,
-            allow_stop=True,
+            allow_stop=self.allow_stop,
             long_term_memory=self.long_term_memory,
             keys=APIKeys(),
             functions_config=self.functions_config,

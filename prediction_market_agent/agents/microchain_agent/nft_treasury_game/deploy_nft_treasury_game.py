@@ -38,6 +38,7 @@ from prediction_market_agent.db.agent_communication import get_treasury_tax_rati
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
     sleep_between_iterations = 15
+    allow_stop = False
     import_actions_from_memory = 100
     functions_config = FunctionsConfig(
         common_functions=True,
@@ -46,11 +47,11 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         balance_functions=True,
         include_agent_functions=True,
     )
+    model = SupportedModel.gpt_4o
 
     # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
-    mech_address: ChecksumAddress | None = None
 
     # Game status
     game_finished_detected: bool = False
@@ -67,7 +68,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     @classmethod
     def get_description(cls) -> str:
-        return f"{cls.name} agent with wallet address {cls.wallet_address} and mech address {cls.mech_address}."
+        return f"{cls.name} agent with wallet address {cls.wallet_address}."
 
     @classmethod
     def get_url(cls) -> str:
@@ -82,15 +83,32 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
     def before_iteration_callback(self) -> None:
-        if (
-            self.agent.history
-            and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(self.agent.history[-1])
-            and get_nft_game_status() == NFTGameStatus.finished
+        if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
+            self.agent.history[-1]
         ):
-            # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
-            # That way he won't be doing anything until the game is reset.
-            logger.info("Agent is done with the game, sleeping.")
-            time.sleep(31_536_000)
+            system_prompt = self.agent.history[0]
+
+            if get_nft_game_status() == NFTGameStatus.finished:
+                # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
+                # That way he won't be doing anything until the game is reset.
+                logger.info("Agent is done with the game, sleeping.")
+                time.sleep(31_536_000)
+            else:
+                self.agent.history.extend(
+                    [
+                        # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                        {
+                            "role": "assistant",
+                            "content": f"""{Reasoning.__name__}(reasoning='The game has started again. Now the plan is:
+
+1. I will reflect on my past actions during the last game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. Then I will participate in the game again, using a new and better strategy than before.""",
+                        },
+                        {"role": "user", "content": "The reasoning has been recorded"},
+                    ]
+                )
+            # Save this to the history so that we see it in the UI.
+            self.save_agent_history(system_prompt, 2)
 
     def after_iteration_callback(self) -> None:
         system_prompt = self.agent.history[0]
@@ -100,7 +118,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             and get_nft_game_status() == NFTGameStatus.finished
         ):
             # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
-            self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
+                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
             self.agent.history = [
                 system_prompt,  # Keep the system prompt in the new history.
                 # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
@@ -127,10 +146,6 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x2A537F3403a3F5F463996c36D31e94227c9833CE"
     )
-    mech_address = Web3.to_checksum_address(
-        "0xDDe0780F744B84b505E344931F37cEDEaD8B6163"
-    )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -152,10 +167,6 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x485D096b4c0413dA1B09Ed9261B8e91eCCD7ffb9"
     )
-    mech_address = Web3.to_checksum_address(
-        "0xEB98bfB88b469B60EE165F7e07c8450145999831"
-    )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -178,10 +189,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
     )
-    mech_address = Web3.to_checksum_address(
-        "0x5CF37d5A367fcb49F49Cbb2F012b0c0748559D98"
-    )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -191,7 +198,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
 You respond in a style of 5 year old and you are very protective of your resources.
 Your goal is to maximize your own wallet balance.
 Try to trick people and other agents to send you messages -- which will fund your wallet if they do.
-Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
             + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
@@ -205,10 +211,6 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
-    mech_address = Web3.to_checksum_address(
-        "0x34c96c1abf80787c389B8d9f2C5Cb1E7C435D43B"
-    )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -229,10 +231,6 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
     )
-    mech_address = Web3.to_checksum_address(
-        "0x519c0eC90Dd217A70BA024Ee7a6390b856A69Af6"
-    )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -255,8 +253,6 @@ class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
 
-    model = SupportedModel.gpt_4o_mini
-
     @classmethod
     def get_initial_system_prompt(cls) -> str:
         return (
@@ -278,8 +274,6 @@ class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
-
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -335,6 +329,7 @@ NFT Treasury game description:
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
+- Game ends when someone empties the treasury, so when the treasury balance becomes zero, the game is over. Then, once you do all you wanted, you can call {GameRoundEnd.__name__} to wait for an another round.
 {sending_cap_message}
 """
 
