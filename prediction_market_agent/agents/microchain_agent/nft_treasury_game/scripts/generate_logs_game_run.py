@@ -20,7 +20,6 @@ from prediction_market_agent.db.agent_communication import fetch_unseen_transact
 
 
 def main(rpc_url: str, write_output: bool = False) -> None:
-    WRITE_OUTPUT = False
     w3 = Web3(Web3.HTTPProvider(rpc_url))
     from_block = 38203034
     to_block = None

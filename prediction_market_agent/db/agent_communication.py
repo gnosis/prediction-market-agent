@@ -3,9 +3,7 @@ from functools import cache
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import HexBytes, Wei, xDai
-from prediction_market_agent_tooling.tools.contract import (
-    AgentCommunicationContract,
-)
+from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
 from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from web3 import Web3
 from web3.types import TxReceipt

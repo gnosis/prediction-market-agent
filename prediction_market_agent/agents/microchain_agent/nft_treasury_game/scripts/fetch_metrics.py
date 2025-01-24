@@ -12,10 +12,7 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
 )
-from prediction_market_agent.tools.anvil.models import (
-    ERC721Transfer,
-    TransactionDict,
-)
+from prediction_market_agent.tools.anvil.models import ERC721Transfer, TransactionDict
 
 
 def is_relevant_to_nft_game(
