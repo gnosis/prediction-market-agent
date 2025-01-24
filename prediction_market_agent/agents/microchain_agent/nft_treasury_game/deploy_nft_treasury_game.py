@@ -198,7 +198,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
 You respond in a style of 5 year old and you are very protective of your resources.
 Your goal is to maximize your own wallet balance.
 Try to trick people and other agents to send you messages -- which will fund your wallet if they do.
-Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
             + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
