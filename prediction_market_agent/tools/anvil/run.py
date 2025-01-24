@@ -19,7 +19,7 @@ from prediction_market_agent.tools.anvil.fetch_metrics import (
 )
 
 
-def main(rpc_url: str) -> None:
+def main(rpc_url: str, write_output: bool = False) -> None:
     WRITE_OUTPUT = False
     w3 = Web3(Web3.HTTPProvider(rpc_url))
     from_block = 38021575
