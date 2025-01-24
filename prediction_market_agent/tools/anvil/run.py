@@ -57,7 +57,7 @@ def export_pydantic_models(
     filepath = f"{file_identifier}.json"
     logger.info(f"Writing {len(items)} items to {filepath}")
     with open(filepath, "w") as f:
-        json.dump([i.model_dump(exclude=properties_to_exclude) for i in items], f)
+        json.dump([i.model_dump(exclude=properties_to_exclude) for i in items], f, indent=2)
 
 
 if __name__ == "__main__":
