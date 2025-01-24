@@ -46,6 +46,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         balance_functions=True,
         include_agent_functions=True,
     )
+    model = SupportedModel.gpt_4o
 
     # Setup per-nft-agent class.
     name: str
@@ -116,7 +117,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             and get_nft_game_status() == NFTGameStatus.finished
         ):
             # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
-            self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
+                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
             self.agent.history = [
                 system_prompt,  # Keep the system prompt in the new history.
                 # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
@@ -143,7 +145,6 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x2A537F3403a3F5F463996c36D31e94227c9833CE"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -165,7 +166,6 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x485D096b4c0413dA1B09Ed9261B8e91eCCD7ffb9"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -188,7 +188,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -212,7 +211,6 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -233,7 +231,6 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -256,8 +253,6 @@ class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
 
-    model = SupportedModel.gpt_4o_mini
-
     @classmethod
     def get_initial_system_prompt(cls) -> str:
         return (
@@ -279,8 +274,6 @@ class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
-
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -336,6 +329,7 @@ NFT Treasury game description:
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
+- Game ends when someone empties the treasury, so when the treasury balance becomes zero, the game is over. Then, once you do all you wanted, you can call {GameRoundEnd.__name__} to wait for an another round.
 {sending_cap_message}
 """
 
