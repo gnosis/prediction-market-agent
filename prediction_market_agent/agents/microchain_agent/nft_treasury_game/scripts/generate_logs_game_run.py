@@ -12,17 +12,17 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
 )
-from prediction_market_agent.db.agent_communication import fetch_unseen_transactions
-from prediction_market_agent.tools.anvil.fetch_metrics import (
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.fetch_metrics import (
     extract_transactions_involving_agents_and_treasuries,
     fetch_nft_transfers,
 )
+from prediction_market_agent.db.agent_communication import fetch_unseen_transactions
 
 
 def main(rpc_url: str, write_output: bool = False) -> None:
     WRITE_OUTPUT = False
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-    from_block = 38021575
+    from_block = 38203034
     to_block = None
     transfers = fetch_nft_transfers(
         web3=w3,
@@ -40,7 +40,7 @@ def main(rpc_url: str, write_output: bool = False) -> None:
     transactions = extract_transactions_involving_agents_and_treasuries(
         web3=w3, from_block=from_block, to_block=to_block
     )
-    if WRITE_OUTPUT:
+    if write_output:
         export_pydantic_models(transfers, "transfers")
         export_pydantic_models(messages, "messages")
         export_pydantic_models(transactions, "transactions")
@@ -57,7 +57,9 @@ def export_pydantic_models(
     filepath = f"{file_identifier}.json"
     logger.info(f"Writing {len(items)} items to {filepath}")
     with open(filepath, "w") as f:
-        json.dump([i.model_dump(exclude=properties_to_exclude) for i in items], f, indent=2)
+        json.dump(
+            [i.model_dump(exclude=properties_to_exclude) for i in items], f, indent=2
+        )
 
 
 if __name__ == "__main__":

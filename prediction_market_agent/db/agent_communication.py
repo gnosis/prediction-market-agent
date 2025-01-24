@@ -5,7 +5,6 @@ from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import HexBytes, Wei, xDai
 from prediction_market_agent_tooling.tools.contract import (
     AgentCommunicationContract,
-    ContractOnGnosisChain,
 )
 from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from web3 import Web3
@@ -66,7 +65,7 @@ def send_message(
         agent_address=recipient,
         message=message,
         amount_wei=amount_wei,
-        web3=web3 or ContractOnGnosisChain.get_web3(),
+        web3=web3,
     )
 
 

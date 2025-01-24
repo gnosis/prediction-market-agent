@@ -5,13 +5,33 @@ from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721BaseClass,
+    SimpleTreasuryContract,
 )
 from web3 import Web3
 
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
+    DEPLOYED_NFT_AGENTS,
+)
 from prediction_market_agent.tools.anvil.models import (
     ERC721Transfer,
     TransactionDict,
 )
+
+
+def is_relevant_to_nft_game(
+    transaction: TransactionDict,
+    agents_addresses: list[ChecksumAddress],
+    treasury_address: ChecksumAddress,
+) -> bool:
+    involves_nft_agents = (
+        transaction.from_address in agents_addresses
+        or transaction.to_address in agents_addresses
+    )
+    involves_treasury = (
+        transaction.from_address == treasury_address
+        or transaction.to_address == treasury_address
+    )
+    return involves_treasury or involves_nft_agents
 
 
 def fetch_nft_transfers(
@@ -45,7 +65,13 @@ def extract_transactions_involving_agents_and_treasuries(
         block = web3.eth.get_block(block, full_transactions=True)
         for tx in block.transactions:
             transaction = TransactionDict.model_validate(tx)
-            if transaction.relevant_to_nft_game():
+            agents_addresses = [a.wallet_address for a in DEPLOYED_NFT_AGENTS]
+            is_relevant = is_relevant_to_nft_game(
+                transaction=transaction,
+                agents_addresses=agents_addresses,
+                treasury_address=SimpleTreasuryContract().address,
+            )
+            if is_relevant:
                 txs.append(transaction)
 
     return txs
