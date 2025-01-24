@@ -38,6 +38,7 @@ from prediction_market_agent.db.agent_communication import get_treasury_tax_rati
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
     sleep_between_iterations = 15
+    allow_stop = False
     import_actions_from_memory = 100
     functions_config = FunctionsConfig(
         common_functions=True,
