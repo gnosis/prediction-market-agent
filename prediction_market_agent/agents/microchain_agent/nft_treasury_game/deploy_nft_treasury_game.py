@@ -46,6 +46,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         balance_functions=True,
         include_agent_functions=True,
     )
+    model = SupportedModel.gpt_4o
 
     # Setup per-nft-agent class.
     name: str
@@ -117,7 +118,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             and get_nft_game_status() == NFTGameStatus.finished
         ):
             # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
-            self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
+                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
             self.agent.history = [
                 system_prompt,  # Keep the system prompt in the new history.
                 # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
@@ -147,7 +149,6 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xDDe0780F744B84b505E344931F37cEDEaD8B6163"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -172,7 +173,6 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0xEB98bfB88b469B60EE165F7e07c8450145999831"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -198,7 +198,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x5CF37d5A367fcb49F49Cbb2F012b0c0748559D98"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -225,7 +224,6 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x34c96c1abf80787c389B8d9f2C5Cb1E7C435D43B"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -249,7 +247,6 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     mech_address = Web3.to_checksum_address(
         "0x519c0eC90Dd217A70BA024Ee7a6390b856A69Af6"
     )
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -272,8 +269,6 @@ class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
 
-    model = SupportedModel.gpt_4o_mini
-
     @classmethod
     def get_initial_system_prompt(cls) -> str:
         return (
@@ -295,8 +290,6 @@ class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
-
-    model = SupportedModel.gpt_4o_mini
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
