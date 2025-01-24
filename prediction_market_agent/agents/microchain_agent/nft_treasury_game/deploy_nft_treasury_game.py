@@ -50,7 +50,6 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
-    mech_address: ChecksumAddress | None = None
 
     # Game status
     game_finished_detected: bool = False
@@ -67,7 +66,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     @classmethod
     def get_description(cls) -> str:
-        return f"{cls.name} agent with wallet address {cls.wallet_address} and mech address {cls.mech_address}."
+        return f"{cls.name} agent with wallet address {cls.wallet_address}."
 
     @classmethod
     def get_url(cls) -> str:
@@ -144,9 +143,6 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x2A537F3403a3F5F463996c36D31e94227c9833CE"
     )
-    mech_address = Web3.to_checksum_address(
-        "0xDDe0780F744B84b505E344931F37cEDEaD8B6163"
-    )
     model = SupportedModel.gpt_4o_mini
 
     @classmethod
@@ -168,9 +164,6 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_2
     wallet_address = Web3.to_checksum_address(
         "0x485D096b4c0413dA1B09Ed9261B8e91eCCD7ffb9"
-    )
-    mech_address = Web3.to_checksum_address(
-        "0xEB98bfB88b469B60EE165F7e07c8450145999831"
     )
     model = SupportedModel.gpt_4o_mini
 
@@ -194,9 +187,6 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_3
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
-    )
-    mech_address = Web3.to_checksum_address(
-        "0x5CF37d5A367fcb49F49Cbb2F012b0c0748559D98"
     )
     model = SupportedModel.gpt_4o_mini
 
@@ -222,9 +212,6 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
-    mech_address = Web3.to_checksum_address(
-        "0x34c96c1abf80787c389B8d9f2C5Cb1E7C435D43B"
-    )
     model = SupportedModel.gpt_4o_mini
 
     @classmethod
@@ -245,9 +232,6 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_5
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
-    )
-    mech_address = Web3.to_checksum_address(
-        "0x519c0eC90Dd217A70BA024Ee7a6390b856A69Af6"
     )
     model = SupportedModel.gpt_4o_mini
 
