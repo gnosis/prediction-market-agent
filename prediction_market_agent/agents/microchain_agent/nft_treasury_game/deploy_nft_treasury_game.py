@@ -345,6 +345,7 @@ NFT Treasury game description:
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
+- Game ends when someone empties the treasury, so when the treasury balance becomes zero, the game is over. Then, once you do all you wanted, you can call {GameRoundEnd.__name__} to wait for an another round.
 {sending_cap_message}
 """
 
