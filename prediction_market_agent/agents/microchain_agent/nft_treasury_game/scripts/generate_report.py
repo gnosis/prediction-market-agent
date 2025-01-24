@@ -25,16 +25,17 @@ from prediction_market_agent.agents.utils import _summarize_learnings
 from prediction_market_agent.db.models import LongTermMemories
 
 SUMMARY_PROMPT_TEMPLATE = """
-Summarize the memories below. They contain summarizations of the actions of AI agents competing on an NFT game.
+Summarize the memories below. They represent the actions taken by AI agents competing on an NFT game.
 
 Memories:
 {memories}"""
 
 FINAL_SUMMARY_PROMPT_TEMPLATE = """
-Make a final summary of a collection of summaries from each agent. Encompass the main activities that took place involving the agents.
+Make a final summary of a collection of memories from each agent. Describe the main activities that took place on the game.
 
 Memories:
-{memories}"""
+{memories}
+"""
 
 
 def get_nft_balance(owner_address: ChecksumAddress, web3: Web3) -> int:

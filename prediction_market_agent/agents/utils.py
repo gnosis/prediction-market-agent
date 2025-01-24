@@ -16,7 +16,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
     SimpleMemoryThinkThoroughly,
 )
-from prediction_market_agent.utils import APIKeys, DEFAULT_OPENAI_MODEL
+from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 STREAMLIT_TAG = "streamlit"
 
