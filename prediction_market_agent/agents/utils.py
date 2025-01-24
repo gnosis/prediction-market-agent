@@ -16,10 +16,9 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
     SimpleMemoryThinkThoroughly,
 )
-from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
+from prediction_market_agent.utils import APIKeys, DEFAULT_OPENAI_MODEL
 
 STREAMLIT_TAG = "streamlit"
-
 
 MEMORIES_TO_LEARNINGS_TEMPLATE = """
 You are an agent that does actions on its own. You are aiming to improve
@@ -58,8 +57,9 @@ def market_is_saturated(market: AgentMarket) -> bool:
 def _summarize_learnings(
     memories: list[str],
     prompt_template: PromptTemplate,
-    model: str = DEFAULT_OPENAI_MODEL,
+    model: str | None = None,
 ) -> str:
+    model = model if model else DEFAULT_OPENAI_MODEL
     llm = ChatOpenAI(
         temperature=0,
         model=model,
@@ -88,7 +88,10 @@ def extract_reasonings_to_learnings(
     )
 
 
-def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
+def memories_to_learnings(
+    memories: list[DatedChatMessage],
+    model: str | None = None,
+) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
     past learnings.
