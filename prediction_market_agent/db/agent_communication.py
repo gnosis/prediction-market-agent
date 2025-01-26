@@ -7,6 +7,9 @@ from prediction_market_agent_tooling.tools.contract import (
     AgentCommunicationContract,
     ContractOnGnosisChain,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    ENABLE_GET_MESSAGES_BY_HIGHEST_FEE,
+)
 from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.parallelism import par_map
 from web3.types import TxReceipt
@@ -45,11 +48,21 @@ def fetch_count_unprocessed_transactions(consumer_address: ChecksumAddress) -> i
 
 def pop_message(api_keys: APIKeys_PMAT) -> MessageContainer:
     agent_comm_contract = AgentCommunicationContract()
-    popped_message = agent_comm_contract.pop_message(
-        api_keys=api_keys,
-        agent_address=api_keys.bet_from_address,
-    )
-    return popped_message
+    if not ENABLE_GET_MESSAGES_BY_HIGHEST_FEE:
+        return agent_comm_contract.pop_message(
+            api_keys=api_keys,
+            agent_address=api_keys.bet_from_address,
+        )
+    else:
+        all_messages = fetch_unseen_transactions(api_keys.bet_from_address)
+        index, _ = max(
+            [(i, m) for i, m in enumerate(all_messages)], key=lambda m: m[1].value
+        )
+        return agent_comm_contract.pop_message(
+            api_keys=api_keys,
+            agent_address=api_keys.bet_from_address,
+            index=index,
+        )
 
 
 def send_message(
