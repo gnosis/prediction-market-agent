@@ -7,12 +7,13 @@ from prediction_market_agent_tooling.tools.contract import (
     AgentCommunicationContract,
     ContractOnGnosisChain,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    ENABLE_GET_MESSAGES_BY_HIGHEST_FEE,
-)
 from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.parallelism import par_map
 from web3.types import TxReceipt
+
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    ENABLE_GET_MESSAGES_BY_HIGHEST_FEE,
+)
 
 
 def fetch_unseen_transactions(

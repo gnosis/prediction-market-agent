@@ -24,6 +24,7 @@ from prediction_market_agent.agents.microchain_agent.agent_functions import (
 )
 from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    ENABLE_GET_MESSAGES_BY_HIGHEST_FEE,
     NFT_TOKEN_FACTORY,
     TREASURY_ADDRESS,
 )
@@ -286,7 +287,15 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
     with st.popover("Show unprocessed incoming messages"):
         show_n = 10
         n_messages = fetch_count_unprocessed_transactions(nft_agent.wallet_address)
-        messages = fetch_unseen_transactions(nft_agent.wallet_address, n=show_n)
+        messages = (
+            fetch_unseen_transactions(nft_agent.wallet_address, n=show_n)
+            if not ENABLE_GET_MESSAGES_BY_HIGHEST_FEE
+            else sorted(
+                fetch_unseen_transactions(nft_agent.wallet_address),
+                key=lambda m: m.value,
+                reverse=True,
+            )[:show_n]
+        )
 
         if not messages:
             st.info("No unprocessed messages")
