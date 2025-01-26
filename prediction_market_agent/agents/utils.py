@@ -100,7 +100,7 @@ def memories_to_learnings(
     prompt = PromptTemplate.from_template(
         MEMORIES_TO_LEARNINGS_TEMPLATE.format(
             additional_prompt=(
-                f"Process memories to answer the following: {question}"
+                f"Process memories to answer the following question: {question}"
                 if question
                 else ""
             )
