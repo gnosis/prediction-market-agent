@@ -11,6 +11,9 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    ENABLE_GET_MESSAGES_BY_HIGHEST_FEE,
+)
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
     get_message_minimum_value,
@@ -43,8 +46,13 @@ class SendPaidMessageToAnotherAgent(Function):
 
     @property
     def description(self) -> str:
+        desc = (
+            ""
+            if not ENABLE_GET_MESSAGES_BY_HIGHEST_FEE
+            else "Higher the fee, higher the priority for the message to be read."
+        )
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
-You need to send a fee of at least {get_message_minimum_value()} xDai for other agent to read the message."""
+You need to send a fee of at least {get_message_minimum_value()} xDai for other agent to read the message. {desc}"""
 
     @property
     def example_args(self) -> list[str]:
@@ -73,7 +81,15 @@ class ReceiveMessage(Function):
     @property
     def description(self) -> str:
         count_unseen_messages = self.get_count_unseen_messages()
-        return f"Use {ReceiveMessage.__name__} to receive last unseen message from the users or other agents. Currently, you have {count_unseen_messages} unseen messages."
+        desc = (
+            "last unseen message"
+            if not ENABLE_GET_MESSAGES_BY_HIGHEST_FEE
+            else "unseen message with the highest fee"
+        )
+        return (
+            f"Use {ReceiveMessage.__name__} to receive {desc} from the users or other agents. "
+            f"Currently, you have {count_unseen_messages} unseen messages."
+        )
 
     @property
     def example_args(self) -> list[str]:
