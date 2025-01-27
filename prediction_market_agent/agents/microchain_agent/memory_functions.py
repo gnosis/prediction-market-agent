@@ -12,6 +12,9 @@ from prediction_market_agent.agents.microchain_agent.memory import DatedChatMess
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    GameRoundEnd,
+)
 from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
@@ -113,7 +116,8 @@ def fetch_memories_from_last_run(
         game_round_occurrences = [
             i
             for i in entries_for_agent
-            if i.metadata_dict is not None and "content" in i.metadata_dict
+            if i.metadata_dict is not None
+            and "content" in i.metadata_dict
             and f"{GameRoundEnd.__name__}(" in i.metadata_dict["content"]
         ]
         # We initially assume all memories should be processed (it's the case if we have # of game_round_occurrences

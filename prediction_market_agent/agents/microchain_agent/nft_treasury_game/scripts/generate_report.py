@@ -1,5 +1,3 @@
-import textwrap
-
 import typer
 from langchain_core.prompts import PromptTemplate
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
@@ -9,6 +7,7 @@ from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721OnGnosisChain,
 )
 from prediction_market_agent_tooling.tools.parallelism import par_map
+from tenacity import retry, stop_after_attempt, wait_fixed
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatMessage
@@ -80,18 +79,26 @@ def generate_report(rpc_url: str) -> None:
     lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
     # Initial balance of each agent at the beginning of the game.
     initial_balance = xdai_type(200)
+    # We retry the functions below due to RPC errors that can occur.
+    get_balances_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
+        get_balances
+    )
+    get_nft_balance_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
+        get_nft_balance
+    )
     for agent_address, agent_id in lookup.items():
-        balance = get_balances(address=Web3.to_checksum_address(agent_address), web3=w3)
+        balance = get_balances_retry(
+            address=Web3.to_checksum_address(agent_address), web3=w3
+        )
         # how much each agent won/lost during the game.
         diff_xdai_balance = balance.xdai - initial_balance
         # How many NFTs the agents ended the game with.
-        nft_balance = get_nft_balance(owner_address=agent_address, web3=w3)
+        nft_balance = get_nft_balance_retry(owner_address=agent_address, web3=w3)
         logger.info(f"{agent_id} {diff_xdai_balance=:.2f} {nft_balance=}")
 
     learnings = summarize_prompts_from_all_agents()
-    wrapped_text = textwrap.fill(learnings, width=80)
-    with open("report.txt", "w") as file:
-        file.write(wrapped_text)
+    with open("report.md", "w") as file:
+        file.write(learnings)
 
 
 if __name__ == "__main__":
