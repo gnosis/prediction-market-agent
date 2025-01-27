@@ -114,7 +114,7 @@ def fetch_memories_from_last_run(
             i
             for i in entries_for_agent
             if i.metadata_dict is not None and "content" in i.metadata_dict
-            and "GameRoundEnd(" in i.metadata_dict["content"]
+            and f"{GameRoundEnd.__name__}(" in i.metadata_dict["content"]
         ]
         # We initially assume all memories should be processed (it's the case if we have # of game_round_occurrences
         # <= 1). If game_round_occurrences > 1, at least 1 run was completed, hence we fetch the memories from the
