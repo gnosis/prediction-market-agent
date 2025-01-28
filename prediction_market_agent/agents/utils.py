@@ -34,8 +34,10 @@ Each memory comes with a timestamp. If the memories are clustered into
 different times, then make a separate list for each cluster. Refer to each
 cluster as a 'Session', and display the range of timestamps for each.
 
+{additional_prompt}
+
 MEMORIES:
-{memories}
+{{memories}}
 """
 
 EXTRACT_REASONINGS_TEMPLATE = """
@@ -88,12 +90,22 @@ def extract_reasonings_to_learnings(
     )
 
 
-def memories_to_learnings(memories: list[DatedChatMessage], model: str) -> str:
+def memories_to_learnings(
+    memories: list[DatedChatMessage], model: str, question: str | None = None
+) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
     past learnings.
     """
-    prompt = PromptTemplate.from_template(MEMORIES_TO_LEARNINGS_TEMPLATE)
+    prompt = PromptTemplate.from_template(
+        MEMORIES_TO_LEARNINGS_TEMPLATE.format(
+            additional_prompt=(
+                f"Process memories to answer the following question: {question}"
+                if question
+                else ""
+            )
+        )
+    )
     return _summarize_learnings(
         memories=[str(m) for m in memories],
         prompt_template=prompt,
