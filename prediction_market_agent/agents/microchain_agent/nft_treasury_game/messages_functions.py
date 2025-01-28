@@ -89,7 +89,7 @@ class GetUnseenMessagesInformation(Function):
 class ReceiveMessage(Function):
     @property
     def description(self) -> str:
-        return f"Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received. You have to also specify a minimum fee of the message you are willing to read. Before receiving messages, always check with {GetUnseenMessagesInformation.__name__} for the up to date statistics, so you can decide which message to read next."
+        return f"Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received. You have to also specify a minimum fee of the message you are willing to read. Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."
 
     @property
     def example_args(self) -> list[str]:
