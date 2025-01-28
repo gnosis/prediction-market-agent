@@ -43,7 +43,7 @@ class SendPaidMessageToAnotherAgent(Function):
     @property
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
-You need to send a fee of at least {get_message_minimum_value()} xDai for other agent to read the message.
+You need to send a fee of at least {get_message_minimum_value()} xDai to send the message.
 However, other agents, same as you, can decide to ignore messages with low fees."""
 
     @property
