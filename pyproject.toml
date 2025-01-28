@@ -59,7 +59,6 @@ autogen-ext = "0.4.0.dev11"
 python-web3-wallet = "0.0.16"
 
 
-
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
 
