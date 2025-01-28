@@ -11,10 +11,8 @@ from pydantic import SecretStr
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    GetUnseenMessagesInformation,
     ReceiveMessage,
-)
-from prediction_market_agent.db.agent_communication import (
-    fetch_count_unprocessed_transactions,
 )
 
 
@@ -38,17 +36,6 @@ MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6
 MOCK_SENDER = Web3.to_checksum_address(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 )  # anvil account 1
-MOCK_COUNT_UNPROCESSED_TXS = 1
-
-
-@pytest.fixture(scope="module")
-def patch_count_unseen_messages() -> Generator[PropertyMock, None, None]:
-    with patch.object(
-        AgentCommunicationContract,
-        "count_unseen_messages",
-        return_value=MOCK_COUNT_UNPROCESSED_TXS,
-    ) as mock:
-        yield mock
 
 
 @pytest.fixture
@@ -67,22 +54,36 @@ def patch_public_key(
         yield mock_public_key
 
 
-def test_receive_message_description(
-    patch_public_key: PropertyMock,
-    patch_count_unseen_messages: PropertyMock,
-) -> None:
-    r = ReceiveMessage()
-    description = r.description
-    count_unseen_messages = fetch_count_unprocessed_transactions(
-        patch_public_key.return_value
-    )
-    assert str(count_unseen_messages) in description
+def test_message_statistics(patch_public_key: PropertyMock) -> None:
+    with patch(
+        "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
+        return_value=[
+            MessageContainer(
+                sender=MOCK_SENDER,
+                recipient=MOCK_SENDER,
+                message=HexBytes("0x123"),  # dummy message
+                value=wei_type(10000),
+            ),
+            MessageContainer(
+                sender=MOCK_SENDER,
+                recipient=MOCK_SENDER,
+                message=HexBytes("0x123"),  # dummy message
+                value=wei_type(100000),
+            ),
+        ],
+    ):
+        r = GetUnseenMessagesInformation()
+        statistics = r()
+        assert statistics == (
+            f"Minimum fee: 1e-14 xDai\n"
+            f"Maximum fee: 1e-13 xDai\n"
+            f"Average fee: 5.5e-14 xDai\n"
+            f"Number of unique senders: 1\n"
+            f"Total number of messages: 2"
+        )
 
 
-def test_receive_message_call(
-    patch_public_key: PropertyMock,
-    patch_count_unseen_messages: PropertyMock,
-) -> None:
+def test_receive_message_call(patch_public_key: PropertyMock) -> None:
     mock_log_message = MessageContainer(
         sender=MOCK_SENDER,
         recipient=MOCK_SENDER,
@@ -93,8 +94,11 @@ def test_receive_message_call(
         AgentCommunicationContract,
         "pop_message",
         return_value=mock_log_message,
+    ), patch(
+        "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
+        return_value=[mock_log_message],
     ):
         r = ReceiveMessage()
 
-        blockchain_message = r()
+        blockchain_message = r(minimum_fee=0)
         assert blockchain_message is not None

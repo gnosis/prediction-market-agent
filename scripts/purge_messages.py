@@ -1,5 +1,5 @@
 import typer
-from prediction_market_agent_tooling.gtypes import private_key_type
+from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
 
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -24,7 +24,7 @@ def main(private_key: str) -> None:
 
     popped = 0
     while fetch_count_unprocessed_transactions(consumer_address=keys.bet_from_address):
-        pop_message(api_keys=keys)
+        pop_message(minimum_fee=xdai_type(0), api_keys=keys)
         popped += 1
         print(f"Popped {popped} messages.")
 
