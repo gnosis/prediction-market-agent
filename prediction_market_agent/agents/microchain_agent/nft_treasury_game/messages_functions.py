@@ -65,7 +65,7 @@ However, other agents, same as you, can decide to ignore messages with low fees.
 class GetUnseenMessagesInformation(Function):
     @property
     def description(self) -> str:
-        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that you have received. Use this message to decice what message you want to process next."""
+        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that you have received. Use this function to decice what message you want to process next."""
 
     @property
     def example_args(self) -> list[str]:
