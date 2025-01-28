@@ -60,7 +60,7 @@ def market_is_saturated(market: AgentMarket) -> bool:
 def _summarize_learnings(
     memories: list[str],
     prompt_template: PromptTemplate,
-    model: str | None = None,
+    model: str = DEFAULT_OPENAI_MODEL,
 ) -> str:
     model = model if model else DEFAULT_OPENAI_MODEL
     llm = ChatOpenAI(
@@ -92,7 +92,9 @@ def extract_reasonings_to_learnings(
 
 
 def memories_to_learnings(
-    memories: list[DatedChatMessage], model: str, question: str | None = None
+    memories: list[DatedChatMessage],
+    model: str = DEFAULT_OPENAI_MODEL,
+    question: str | None = None,
 ) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the
