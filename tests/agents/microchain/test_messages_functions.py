@@ -96,5 +96,5 @@ def test_receive_message_call(
     ):
         r = ReceiveMessage()
 
-        blockchain_message = r()
+        blockchain_message = r(minimum_fee=0)
         assert blockchain_message is not None
