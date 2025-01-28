@@ -118,6 +118,7 @@ def fetch_memories_from_last_run(
     for agent_id in agent_identifiers:
         ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
         entries_for_agent = ltm.search()
+        entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
         # We need the 2nd GameRoundEnd. If there is only one, then start_date should be None.
         game_round_occurrences = [
             i
@@ -136,6 +137,7 @@ def fetch_memories_from_last_run(
                 seconds=1
             )
             entries_for_agent = ltm.search(from_=start_date)
+            entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
 
         logger.info(
             f"Fetched {len(entries_for_agent)} memories from {agent_id} latest run"
