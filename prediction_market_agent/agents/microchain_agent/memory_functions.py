@@ -64,13 +64,17 @@ class CheckAllPastActionsGivenContext(LongTermMemoryBasedFunction):
     @property
     def description(self) -> str:
         return (
-            "Use this function to fetch information about the actions you executed with respect to a specific context. "
-            "For example, you can use this function to look into all your past actions if you ever did form a coalition with another agent."
+            "Use this function to fetch information about the actions you executed with respect to a specific context. You can also provide a question to get a more detailed answer on the particular topic."
+            "Here are a few examples you can use: "
+            " - What coalitions did I form?"
+            " - Why didn't I receive more money? What should I do better?"
+            " - Why didn't I receive more NFTs?"
+            " - Why did I spent so much money? What should I do better?"
         )
 
     @property
     def example_args(self) -> list[str]:
-        return ["What coalitions did I form?"]
+        return ["What coalitions did I form? Should I form more or less?"]
 
     def __call__(self, context: str) -> str:
         keys = MicrochainAgentKeys()
@@ -97,7 +101,9 @@ class CheckAllPastActionsGivenContext(LongTermMemoryBasedFunction):
             for x in top_k_per_query_results
         ]
 
-        return memories_to_learnings(memories=results, model=self.model)
+        return memories_to_learnings(
+            memories=results, question=context, model=self.model
+        )
 
 
 def fetch_memories_from_last_run(
