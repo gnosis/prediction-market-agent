@@ -62,6 +62,7 @@ def _summarize_learnings(
     prompt_template: PromptTemplate,
     model: str = DEFAULT_OPENAI_MODEL,
 ) -> str:
+    model = model if model else DEFAULT_OPENAI_MODEL
     llm = ChatOpenAI(
         temperature=0,
         model=model,
@@ -91,7 +92,9 @@ def extract_reasonings_to_learnings(
 
 
 def memories_to_learnings(
-    memories: list[DatedChatMessage], model: str, question: str | None = None
+    memories: list[DatedChatMessage],
+    model: str = DEFAULT_OPENAI_MODEL,
+    question: str | None = None,
 ) -> str:
     """
     Synthesize the memories into an intelligible summary that represents the

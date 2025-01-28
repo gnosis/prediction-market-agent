@@ -1,13 +1,19 @@
+import datetime
 from datetime import timedelta
 
 from langchain.vectorstores.chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from microchain import Function
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 
+from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatMessage
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
+    GameRoundEnd,
 )
 from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -98,6 +104,47 @@ class CheckAllPastActionsGivenContext(LongTermMemoryBasedFunction):
         return memories_to_learnings(
             memories=results, question=context, model=self.model
         )
+
+
+def fetch_memories_from_last_run(
+    agent_identifiers: list[AgentIdentifier],
+) -> dict[str, list[LongTermMemories]]:
+    """
+    Returns memories from the last run for each agent.
+    The last run is identified by looking at "GameRoundEnd" function calls
+    as part of the prompt history of each agent.
+    """
+    entries_from_latest_run: dict[str, list[LongTermMemories]] = {}
+    for agent_id in agent_identifiers:
+        ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
+        entries_for_agent = ltm.search()
+        entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
+        # We need the 2nd GameRoundEnd. If there is only one, then start_date should be None.
+        game_round_occurrences = [
+            i
+            for i in entries_for_agent
+            if i.metadata_dict is not None
+            and "content" in i.metadata_dict
+            and f"{GameRoundEnd.__name__}(" in i.metadata_dict["content"]
+        ]
+        # We initially assume all memories should be processed (it's the case if we have # of game_round_occurrences
+        # <= 1). If game_round_occurrences > 1, at least 1 run was completed, hence we fetch the memories from the
+        # latest run.
+        if len(game_round_occurrences) > 1:
+            # 2nd entry indicates the beginning of the latest run.
+            last_entry_before_latest_run = game_round_occurrences[1]
+            start_date = last_entry_before_latest_run.datetime_ + datetime.timedelta(
+                seconds=1
+            )
+            entries_for_agent = ltm.search(from_=start_date)
+            entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
+
+        logger.info(
+            f"Fetched {len(entries_for_agent)} memories from {agent_id} latest run"
+        )
+        entries_from_latest_run[agent_id] = entries_for_agent
+
+    return entries_from_latest_run
 
 
 MEMORY_FUNCTIONS: list[type[LongTermMemoryBasedFunction]] = [
