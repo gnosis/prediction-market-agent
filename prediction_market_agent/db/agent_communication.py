@@ -11,6 +11,10 @@ from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.parallelism import par_map
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from pydantic import BaseModel
+from prediction_market_agent_tooling.gtypes import HexBytes, Wei, xDai
+from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
+from prediction_market_agent_tooling.tools.data_models import MessageContainer
+from web3 import Web3
 from web3.types import TxReceipt
 
 
@@ -23,33 +27,34 @@ class MessagesStatistics(BaseModel):
 
 
 def fetch_unseen_transactions(
-    consumer_address: ChecksumAddress,
-    n: int | None = None,
+    consumer_address: ChecksumAddress, n: int | None = None, web3: Web3 | None = None
 ) -> list[MessageContainer]:
     agent_comm_contract = AgentCommunicationContract()
 
-    count_unseen_messages = fetch_count_unprocessed_transactions(consumer_address)
-
-    message_containers = par_map(
-        items=list(
-            range(
-                min(n, count_unseen_messages)
-                if n is not None
-                else count_unseen_messages
-            )
-        ),
-        func=lambda idx: agent_comm_contract.get_at_index(
-            agent_address=consumer_address, idx=idx
-        ),
+    count_unseen_messages = fetch_count_unprocessed_transactions(
+        consumer_address, web3=web3
     )
+
+    message_containers = [
+        agent_comm_contract.get_at_index(
+            agent_address=consumer_address, idx=idx, web3=web3
+        )
+        for idx in range(
+            min(n, count_unseen_messages) if n is not None else count_unseen_messages
+        )
+    ]
 
     return message_containers
 
 
-def fetch_count_unprocessed_transactions(consumer_address: ChecksumAddress) -> int:
+def fetch_count_unprocessed_transactions(
+    consumer_address: ChecksumAddress, web3: Web3 | None = None
+) -> int:
     agent_comm_contract = AgentCommunicationContract()
 
-    count_unseen_messages = agent_comm_contract.count_unseen_messages(consumer_address)
+    count_unseen_messages = agent_comm_contract.count_unseen_messages(
+        consumer_address, web3=web3
+    )
     return count_unseen_messages
 
 
@@ -98,6 +103,7 @@ def send_message(
     recipient: ChecksumAddress,
     message: HexBytes,
     amount_wei: Wei,
+    web3: Web3 | None = None,
 ) -> TxReceipt:
     agent_comm_contract = AgentCommunicationContract()
     return agent_comm_contract.send_message(
@@ -105,7 +111,7 @@ def send_message(
         agent_address=recipient,
         message=message,
         amount_wei=amount_wei,
-        web3=ContractOnGnosisChain.get_web3(),
+        web3=web3,
     )
 
 
