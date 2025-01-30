@@ -116,9 +116,7 @@ def fetch_memories_from_last_run(
     """
     entries_from_latest_run: dict[str, list[LongTermMemories]] = {}
     for agent_id in agent_identifiers:
-        ltm = LongTermMemoryTableHandler.from_agent_identifier(
-            identifier=agent_id,
-        )
+        ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
         entries_for_agent = ltm.search()
         entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
         # We need the 2nd GameRoundEnd. If there is only one, then start_date should be None.

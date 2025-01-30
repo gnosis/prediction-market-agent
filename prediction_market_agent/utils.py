@@ -20,12 +20,6 @@ class DBKeys(BaseSettings):
     )
     SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
 
-    @property
-    def sqlalchemy_db_url(self) -> SecretStr:
-        return check_not_none(
-            self.SQLALCHEMY_DB_URL, "SQLALCHEMY_DB_URL missing in the environment."
-        )
-
 
 class APIKeys(APIKeysBase):
     # Don't get fooled! Serper and Serp are two different services.
