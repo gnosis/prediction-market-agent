@@ -20,6 +20,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemories,
     LongTermMemoryTableHandler,
 )
+from prediction_market_agent.utils import DBKeys
 
 
 class LongTermMemoryBasedFunction(Function):
@@ -115,8 +116,12 @@ def fetch_memories_from_last_run(
     as part of the prompt history of each agent.
     """
     entries_from_latest_run: dict[str, list[LongTermMemories]] = {}
+    keys = DBKeys()
     for agent_id in agent_identifiers:
-        ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
+        ltm = LongTermMemoryTableHandler.from_agent_identifier(
+            identifier=agent_id,
+            sqlalchemy_db_url=keys.sqlalchemy_db_url.get_secret_value(),
+        )
         entries_for_agent = ltm.search()
         entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
         # We need the 2nd GameRoundEnd. If there is only one, then start_date should be None.
