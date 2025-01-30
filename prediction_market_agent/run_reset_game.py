@@ -31,6 +31,7 @@ def main(
 ) -> None:
     if not is_treasury_empty(rpc_url=rpc_url):
         logger.info(f"Treasury not empty, exiting.")
+        return
 
     generate_report(
         rpc_url=rpc_url,
