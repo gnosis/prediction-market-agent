@@ -1,7 +1,14 @@
+"""
+Run this script on an Anvil instance to reset the initial configurations for the NFT game.
+Usage:
+    python run_reset_game.py <RPC_URL> <OUTPUT_DIR> <xDai_balance_per_agent> <new_balance_treasury_xdai>
+"""
+
 from pathlib import Path
 from typing import Annotated
 
 import typer
+from prediction_market_agent_tooling.loggers import logger
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.generate_report import (
     generate_report,
@@ -9,6 +16,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.g
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.reset_balance_anvil import (
     redistribute_nft_keys,
     reset_balances,
+    is_treasury_empty,
 )
 
 APP = typer.Typer(pretty_exceptions_enable=False)
@@ -21,6 +29,9 @@ def main(
     xdai_balance_per_agent: Annotated[int, typer.Argument()] = 200,
     new_balance_treasury_xdai: Annotated[int, typer.Argument()] = 100,
 ) -> None:
+    if not is_treasury_empty(rpc_url=rpc_url):
+        logger.info(f"Treasury not empty, exiting.")
+
     generate_report(
         rpc_url=rpc_url,
         output_dir=output_dir,

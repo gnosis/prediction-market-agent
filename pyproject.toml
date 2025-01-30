@@ -60,8 +60,6 @@ python-web3-wallet = "0.0.16"
 types-tabulate = "^0.9.0.20241207"
 
 
-
-
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
 
