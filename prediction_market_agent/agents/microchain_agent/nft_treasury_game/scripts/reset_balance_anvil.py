@@ -2,9 +2,7 @@ from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
-from prediction_market_agent_tooling.tools.contract import (
-    SimpleTreasuryContract,
-)
+from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
@@ -41,7 +39,7 @@ def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
     return Web3.to_checksum_address(nft_contract.owner_of(token_id=token_id, web3=web3))
 
 
-def is_treasury_empty(rpc_url: str, balance_min_threshold: xDai = 0.1) -> bool:
+def is_treasury_empty(rpc_url: str, balance_min_threshold: xDai = xDai(0.1)) -> bool:
     w3 = Web3(Web3.HTTPProvider(rpc_url))
     balance = get_balances(SimpleTreasuryContract().address, web3=w3)
     return balance.xdai < balance_min_threshold

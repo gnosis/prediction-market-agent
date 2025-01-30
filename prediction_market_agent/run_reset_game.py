@@ -14,9 +14,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.g
     generate_report,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.reset_balance_anvil import (
+    is_treasury_empty,
     redistribute_nft_keys,
     reset_balances,
-    is_treasury_empty,
 )
 
 APP = typer.Typer(pretty_exceptions_enable=False)
