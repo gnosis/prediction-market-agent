@@ -22,11 +22,9 @@ class LongTermMemoryTableHandler:
 
     @staticmethod
     def from_agent_identifier(
-        identifier: AgentIdentifier, sqlalchemy_db_url: str | None = None
+        identifier: AgentIdentifier,
     ) -> "LongTermMemoryTableHandler":
-        return LongTermMemoryTableHandler(
-            task_description=identifier.value, sqlalchemy_db_url=sqlalchemy_db_url
-        )
+        return LongTermMemoryTableHandler(task_description=identifier.value)
 
     def save_history(self, history: list[dict[str, t.Any]]) -> None:
         """Save item to storage. Note that score allows many types for easier handling by agent."""
