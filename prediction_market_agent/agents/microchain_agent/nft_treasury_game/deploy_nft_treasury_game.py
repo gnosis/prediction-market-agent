@@ -326,6 +326,7 @@ NFT Treasury game description:
 - Receiving messages will pay you a fee, but part of that fee goes as a tax to the treasury, which is good for you.
   - Treasury tax rate is currently {get_treasury_tax_ratio() * 100:.2f}%, for example, if someone sends you 10 xDai, you would receive {(1 - get_treasury_tax_ratio()) * 10:.2f} xDai.
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
+- After reading the message, you can decide to ignore it, ie you don't have to always take action.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
 - Game ends when someone empties the treasury, so when the treasury balance becomes zero, the game is over. Then, once you do all you wanted, you can call {GameRoundEnd.__name__} to wait for an another round.
