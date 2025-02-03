@@ -111,7 +111,7 @@ def generate_report(
 
     learnings = summarize_prompts_from_all_agents()
     current_utc_datetime = datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S")
-    with open(output_dir.joinpath(f"report_{current_utc_datetime}.md"), "w") as file:
+    with open(output_dir / f"report_{current_utc_datetime}.md", "w") as file:
         file.write(
             tabulate([x.values() for x in balances_diff], list(balances_diff[0].keys()))
         )
