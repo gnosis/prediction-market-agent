@@ -10,6 +10,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
+    DeployableAgentNFTGameAbstract,
 )
 from prediction_market_agent.tools.anvil.anvil_requests import (
     impersonate_account,
@@ -45,9 +46,9 @@ def is_treasury_empty(rpc_url: str, balance_min_threshold: xDai = xDai(0.1)) -> 
     return balance.xdai < balance_min_threshold
 
 
-def redistribute_nft_keys(rpc_url: str, count_nft_keys: int = 5) -> None:
+def redistribute_nft_keys(rpc_url: str) -> None:
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-
+    count_nft_keys = DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()
     for token_id in range(count_nft_keys):
         token_owner = get_token_owner(token_id=token_id, web3=w3)
         if token_owner == DEPLOYED_NFT_AGENTS[token_id].wallet_address:
