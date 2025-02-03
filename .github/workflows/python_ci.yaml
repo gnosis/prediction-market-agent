@@ -94,3 +94,15 @@ jobs:
         run: |
           poetry run isort --profile black .
           git diff --exit-code --quiet || exit 1
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/python_prepare
+      - name: Install Dependencies
+        run: |
+          pip install pre-commit
+      - name: Run Pre-Commit
+        run: |
+          pre-commit run --all-files

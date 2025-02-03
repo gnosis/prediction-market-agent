@@ -26,13 +26,13 @@ def account2_address() -> ChecksumAddress:
 def account2_private_key() -> SecretStr:
     "Anvil test account private key. It's public already."
     return SecretStr(
-        "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+        "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"  # web3-private-key-ok
     )
 
 
 # Random transactions found on Gnosisscan.
-MOCK_HASH_1 = "0x5ba6dd51d3660f98f02683e032daa35644d3f7f975975da3c2628a5b4b1f5cb6"
-MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6a"
+MOCK_HASH_1 = "0x5ba6dd51d3660f98f02683e032daa35644d3f7f975975da3c2628a5b4b1f5cb6"  # web3-private-key-ok
+MOCK_HASH_2 = "0x429f61ea3e1afdd104fdd0a6f3b88432ec4c7b298fd126378e53a63bc60fed6a"  # web3-private-key-ok
 MOCK_SENDER = Web3.to_checksum_address(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 )  # anvil account 1
