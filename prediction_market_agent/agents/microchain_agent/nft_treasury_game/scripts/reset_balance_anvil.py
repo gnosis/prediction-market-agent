@@ -36,7 +36,7 @@ def reset_balances(
 
 def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
     nft_contract = SimpleTreasuryContract().nft_contract(web3=web3)
-    return Web3.to_checksum_address(nft_contract.owner_of(token_id=token_id, web3=web3))
+    return nft_contract.owner_of(token_id=token_id, web3=web3)
 
 
 def is_treasury_empty(rpc_url: str, balance_min_threshold: xDai = xDai(0.1)) -> bool:
