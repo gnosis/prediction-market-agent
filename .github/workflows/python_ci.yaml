@@ -100,9 +100,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
-      - name: Install Dependencies
-        run: |
-          pip install pre-commit
-      - name: Run Pre-Commit
-        run: |
-          pre-commit run --all-files
+      - uses: pre-commit/action@v3.0.1
