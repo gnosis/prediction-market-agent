@@ -92,7 +92,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
                 # That way he won't be doing anything until the game is reset.
                 logger.info("Agent is done with the game, sleeping.")
-                time.sleep(31_536_000)
+                time.sleep(60)
             else:
                 self.agent.history.extend(
                     [
