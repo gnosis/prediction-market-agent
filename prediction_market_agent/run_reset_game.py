@@ -34,7 +34,7 @@ def main(
         return
 
     # Give time to agents to reflect on the last game, in case this script gets executed right after it ended
-time.sleep(10 * 60)
+    time.sleep(10 * 60)
 
     generate_report(
         rpc_url=rpc_url,
