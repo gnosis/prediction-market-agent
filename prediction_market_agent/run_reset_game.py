@@ -33,7 +33,7 @@ def main(
         logger.info(f"Treasury not empty, exiting.")
         return
 
-# Give time to agents to reflect on the last game, in case this script gets executed right after it ended
+    # Give time to agents to reflect on the last game, in case this script gets executed right after it ended
 time.sleep(10 * 60)
 
     generate_report(
