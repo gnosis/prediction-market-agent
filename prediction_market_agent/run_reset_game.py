@@ -3,7 +3,7 @@ Run this script on an Anvil instance to reset the initial configurations for the
 Usage:
     python run_reset_game.py <RPC_URL> <OUTPUT_DIR> <xDai_balance_per_agent> <new_balance_treasury_xdai>
 """
-
+import time
 from pathlib import Path
 from typing import Annotated
 
