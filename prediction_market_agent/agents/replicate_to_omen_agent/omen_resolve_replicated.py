@@ -146,6 +146,9 @@ def find_resolution_on_other_markets_or_manually(
     # Sometimes questions can be no longer found (for example Manifold allows to rephrase questions),
     # in that case, resolve it with our resolver.
     if resolution is None:
+        logger.info(
+            "[REPLICATOR-RESOLUTION-NOT-FOUND] Resolution not found on other markets. Trying to resolve manually."
+        )
         try:
             fact_check = ofv_answer_binary_question(market.question_title, api_keys)
             resolution = (
@@ -157,6 +160,10 @@ def find_resolution_on_other_markets_or_manually(
             logger.exception(
                 f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"
             )
+    else:
+        logger.info(
+            f"[REPLICATOR-RESOLUTION-FOUND] Resolution {resolution} found on other markets for {market.url=}."
+        )
 
     return resolution
 
