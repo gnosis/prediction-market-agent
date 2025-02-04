@@ -13,7 +13,7 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
     omen_replicate_from_tx,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
-    omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx,
+    omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -39,7 +39,7 @@ def main(
         )
 
     if resolve:
-        omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
+        omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
             keys, realitio_bond=OMEN_DEFAULT_REALITIO_BOND_VALUE
         )
         return

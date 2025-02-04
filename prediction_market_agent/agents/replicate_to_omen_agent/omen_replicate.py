@@ -24,6 +24,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     OmenAgentMarket,
     omen_create_market_tx,
     omen_remove_fund_market_tx,
+    redeem_from_all_user_positions,
 )
 from prediction_market_agent_tooling.markets.omen.omen_contracts import sDaiContract
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
@@ -226,7 +227,7 @@ def omen_unfund_replicated_known_markets_tx(
         # Optionally, if `saturation_above_threshold` is provided, skip markets that are not saturated to leave some free money motivation for agents.
         if (
             saturation_above_threshold is not None
-            and not market.is_resolved
+            and market.is_open
             and not (
                 market.current_p_yes > saturation_above_threshold
                 or market.current_p_no > saturation_above_threshold
@@ -244,3 +245,6 @@ def omen_unfund_replicated_known_markets_tx(
             market=OmenAgentMarket.from_data_model(market),
             shares=None,
         )
+
+    logger.info("Redeeming funds from unfunded markets.")
+    redeem_from_all_user_positions(api_keys)
