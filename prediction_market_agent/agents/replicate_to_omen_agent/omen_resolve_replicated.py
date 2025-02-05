@@ -87,7 +87,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
         (
             m,
             (
-                find_resolution_on_other_markets_or_manually(m, api_keys)
+                find_resolution_on_other_markets_or_using_resolver(m, api_keys)
                 if not is_invalid(m.question_title)
                 else Resolution.CANCEL
             ),
@@ -137,7 +137,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
 
 
 @observe()
-def find_resolution_on_other_markets_or_manually(
+def find_resolution_on_other_markets_or_using_resolver(
     market: OmenMarket,
     api_keys: APIKeys,
 ) -> Resolution | None:
