@@ -4,7 +4,6 @@ Usage:
     python run_reset_game.py <RPC_URL> <OUTPUT_DIR> <xDai_balance_per_agent> <new_balance_treasury_xdai>
 """
 import time
-from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -25,7 +24,6 @@ APP = typer.Typer(pretty_exceptions_enable=False)
 @APP.command()
 def main(
     rpc_url: str,
-    output_dir: Path,
     xdai_balance_per_agent: Annotated[int, typer.Argument()] = 200,
     new_balance_treasury_xdai: Annotated[int, typer.Argument()] = 100,
 ) -> None:
