@@ -93,3 +93,16 @@ class BlockchainMessage(SQLModel, table=True):
 Value: {wei_to_xdai(self.value_wei_parsed)} xDai
 Message: {self.data_field}
 """
+
+
+class ReportNFTGame(SQLModel, table=True):
+    """Messages sent to agents via data fields within blockchain transfers."""
+
+    __tablename__ = "report_nft_game"
+    __table_args__ = {
+        "extend_existing": True,  # required if initializing an existing table
+    }
+    id: Optional[int] = Field(default=None, primary_key=True)
+    agent_id: Optional[str] = None
+    learnings: str
+    datetime_: DatetimeUTC
