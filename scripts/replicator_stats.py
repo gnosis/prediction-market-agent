@@ -61,6 +61,9 @@ def main() -> None:
         "reality_balance": reality_balance,
         "markets created": len(markets),
         "open markets": len([m for m in markets if m.is_open]),
+        "markets without an answer": len(
+            [m for m in markets if m.currentAnswer is None]
+        ),
         "liquidity in open markets": sum(
             [
                 OmenAgentMarket.from_data_model(m).get_liquidity().amount
