@@ -93,6 +93,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 # That way he won't be doing anything until the game is reset.
                 logger.info("Agent is done with the game, sleeping.")
                 time.sleep(60)
+                # TODO: Handle this better. Agent needs to stop after the sleep. (otherwise he will continue after 60s even if the game is still stopped)
+                exit()
             else:
                 self.agent.history.extend(
                     [
@@ -107,8 +109,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                         {"role": "user", "content": "The reasoning has been recorded"},
                     ]
                 )
-            # Save this to the history so that we see it in the UI.
-            self.save_agent_history(system_prompt, 2)
+                # Save this to the history so that we see it in the UI.
+                self.save_agent_history(system_prompt, 2)
 
     def after_iteration_callback(self) -> None:
         system_prompt = self.agent.history[0]
