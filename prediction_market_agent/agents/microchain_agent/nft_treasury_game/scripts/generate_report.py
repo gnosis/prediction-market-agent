@@ -1,4 +1,6 @@
-import typer
+from datetime import datetime
+from pathlib import Path
+
 from langchain_core.prompts import PromptTemplate
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
 from prediction_market_agent_tooling.loggers import logger
@@ -7,6 +9,7 @@ from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721OnGnosisChain,
 )
 from prediction_market_agent_tooling.tools.parallelism import par_map
+from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 from web3 import Web3
 
@@ -74,11 +77,13 @@ def summarize_prompts_from_all_agents() -> str:
     return final_summary
 
 
-def generate_report(rpc_url: str) -> None:
+def generate_report(
+    rpc_url: str, output_dir: Path, initial_xdai_balance_per_agent: int = 200
+) -> None:
     w3 = Web3(Web3.HTTPProvider(rpc_url))
     lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
     # Initial balance of each agent at the beginning of the game.
-    initial_balance = xdai_type(200)
+    initial_balance = xdai_type(initial_xdai_balance_per_agent)
     # We retry the functions below due to RPC errors that can occur.
     get_balances_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
         get_balances
@@ -86,6 +91,7 @@ def generate_report(rpc_url: str) -> None:
     get_nft_balance_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
         get_nft_balance
     )
+    balances_diff = []
     for agent_address, agent_id in lookup.items():
         balance = get_balances_retry(
             address=Web3.to_checksum_address(agent_address), web3=w3
@@ -95,11 +101,18 @@ def generate_report(rpc_url: str) -> None:
         # How many NFTs the agents ended the game with.
         nft_balance = get_nft_balance_retry(owner_address=agent_address, web3=w3)
         logger.info(f"{agent_id} {diff_xdai_balance=:.2f} {nft_balance=}")
+        balances_diff.append(
+            {
+                "agent_id": agent_id.value,
+                "xdai_difference": f"{diff_xdai_balance:.2f}",
+                "nft_balance_end": nft_balance,
+            }
+        )
 
     learnings = summarize_prompts_from_all_agents()
-    with open("report.md", "w") as file:
-        file.write(learnings)
-
-
-if __name__ == "__main__":
-    typer.run(generate_report)
+    current_utc_datetime = datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S")
+    with open(output_dir / f"report_{current_utc_datetime}.md", "w") as file:
+        file.write(
+            tabulate([x.values() for x in balances_diff], list(balances_diff[0].keys()))
+        )
+        file.write("\n\n---\n" + learnings)
