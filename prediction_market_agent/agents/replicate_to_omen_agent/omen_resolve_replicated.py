@@ -1,7 +1,6 @@
 from datetime import timedelta
 from functools import partial
 
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
     ChecksumAddress,
     HexAddress,
@@ -14,6 +13,9 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
     OmenMarket,
     RealityQuestion,
     RealityResponse,
+)
+from prediction_market_agent_tooling.markets.omen.omen import (
+    redeem_from_all_user_positions,
 )
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     Resolution,
@@ -31,6 +33,11 @@ from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
 
+from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
+    ofv_answer_binary_question,
+)
+from prediction_market_agent.utils import APIKeys
+
 
 class ClaimResult(BaseModel):
     claimed_question_ids: list[HexBytes]
@@ -44,7 +51,7 @@ class FinalizeAndResolveResult(BaseModel):
 
 
 @observe()
-def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
+def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
     api_keys: APIKeys,
     realitio_bond: xDai,
 ) -> FinalizeAndResolveResult:
@@ -53,6 +60,9 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
     logger.info(f"{balances_start=}")
 
     now = utcnow()
+
+    # Claim back as the first thing, so we have resources to work with.
+    claimed = claim_all_bonds_on_reality(api_keys, finalized_before=now)
 
     # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
     get_omen_binary_markets_common_filters = partial(
@@ -77,7 +87,7 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
         (
             m,
             (
-                find_resolution_on_other_markets(m)
+                find_resolution_on_other_markets_or_using_resolver(m, api_keys)
                 if not is_invalid(m.question_title)
                 else Resolution.CANCEL
             ),
@@ -114,16 +124,49 @@ def omen_finalize_and_resolve_and_claim_back_all_markets_based_on_others_tx(
         api_keys,
         created_finalized_markets,
     )
+    # Redeem from the resolved markets.
+    redeem_from_all_user_positions(api_keys)
     balances_after_resolution = get_balances(public_key)
     logger.info(f"{balances_after_resolution=}")
-
-    claimed = claim_all_bonds_on_reality(api_keys, finalized_before=now)
 
     return FinalizeAndResolveResult(
         finalized=finalized_markets,
         resolved=resolved_markets,
         claimed=claimed,
     )
+
+
+@observe()
+def find_resolution_on_other_markets_or_using_resolver(
+    market: OmenMarket,
+    api_keys: APIKeys,
+) -> Resolution | None:
+    # Try to find resolution on other markets.
+    resolution = find_resolution_on_other_markets(market)
+
+    # Sometimes questions can be no longer found (for example Manifold allows to rephrase questions),
+    # in that case, resolve it with our resolver.
+    if resolution is None:
+        logger.info(
+            "[REPLICATOR-RESOLUTION-NOT-FOUND] Resolution not found on other markets. Trying to resolve manually."
+        )
+        try:
+            fact_check = ofv_answer_binary_question(market.question_title, api_keys)
+            resolution = (
+                None
+                if fact_check is None or fact_check.factuality is None
+                else Resolution.from_bool(fact_check.factuality)
+            )
+        except Exception as e:
+            logger.exception(
+                f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"
+            )
+    else:
+        logger.info(
+            f"[REPLICATOR-RESOLUTION-FOUND] Resolution {resolution} found on other markets for {market.url=}."
+        )
+
+    return resolution
 
 
 @observe()
