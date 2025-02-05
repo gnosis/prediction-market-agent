@@ -67,14 +67,18 @@ def store_all_learnings_in_db(
 ) -> None:
     table_handler = ReportNFTGameTableHandler()
     for agent_id, learnings in learnings_per_agent.items():
-        report = build_report(agent_id=agent_id, learnings=learnings)
+        report = ReportNFTGame(
+            agent_id=agent_id, learnings=learnings, datetime_=DatetimeUTC.now()
+        )
         logger.info(f"Saving report from {agent_id}")
         table_handler.save_report(report)
 
-    final_report = build_report(agent_id=None, learnings=final_summary)
+    final_report = ReportNFTGame(
+        agent_id=None, learnings=final_summary, datetime_=DatetimeUTC.now()
+    )
+
     logger.info(f"Saving final summary")
     table_handler.save_report(final_report)
-    pass
 
 
 def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str]:
@@ -126,12 +130,6 @@ def calculate_nft_and_xdai_balances_diff(lookup, w3, initial_balance):
             }
         )
     return balances_diff
-
-
-def build_report(learnings: str, agent_id: str | None = None) -> ReportNFTGame:
-    return ReportNFTGame(
-        agent_id=agent_id, learnings=learnings, datetime_=DatetimeUTC.now()
-    )
 
 
 def generate_report(rpc_url: str, initial_xdai_balance_per_agent: int = 200) -> None:

@@ -96,13 +96,16 @@ Message: {self.data_field}
 
 
 class ReportNFTGame(SQLModel, table=True):
-    """Messages sent to agents via data fields within blockchain transfers."""
+    """Reports summarizing activities that took place during the NFT game."""
 
     __tablename__ = "report_nft_game"
     __table_args__ = {
-        "extend_existing": True,  # required if initializing an existing table
+        "extend_existing": True,
     }
     id: Optional[int] = Field(default=None, primary_key=True)
-    agent_id: Optional[str] = None
+    agent_id: Optional[
+        str
+    ] = None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table
+    # as well.
     learnings: str
     datetime_: DatetimeUTC
