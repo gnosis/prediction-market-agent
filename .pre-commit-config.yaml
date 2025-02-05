@@ -1,0 +1,9 @@
+ repos:
+  - repo: https://github.com/kongzii/pre-commit-hooks
+    rev: peter/web3
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: detect-web3-private-key
+        exclude: 'poetry.lock'
