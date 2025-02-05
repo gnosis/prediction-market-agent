@@ -61,6 +61,9 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
 
     now = utcnow()
 
+    # Claim back as the first thing, so we have resources to work with.
+    claimed = claim_all_bonds_on_reality(api_keys, finalized_before=now)
+
     # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
     get_omen_binary_markets_common_filters = partial(
         OmenSubgraphHandler().get_omen_binary_markets,
@@ -125,8 +128,6 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
     redeem_from_all_user_positions(api_keys)
     balances_after_resolution = get_balances(public_key)
     logger.info(f"{balances_after_resolution=}")
-
-    claimed = claim_all_bonds_on_reality(api_keys, finalized_before=now)
 
     return FinalizeAndResolveResult(
         finalized=finalized_markets,
