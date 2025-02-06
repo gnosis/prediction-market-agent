@@ -4,6 +4,7 @@ from microchain.functions import Reasoning
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
@@ -55,7 +56,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     wallet_address: ChecksumAddress
 
     # Game status
-    game_finished_detected: bool = False
+    game_finished_already_detected: bool = False
 
     @classmethod
     def retrieve_treasury_thresold(cls) -> int:
@@ -84,43 +85,29 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
     def before_iteration_callback(self) -> CallbackReturn:
-        if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
-            self.agent.history[-1]
-        ):
-            system_prompt = self.agent.history[0]
+        """
+        In following if statements, we hard-code a few special cases about the game status, to make it a bit easier on the agent logic.
+        """
+        system_prompt = self.agent.history[0] if self.agent.history else None
 
-            if get_nft_game_status() == NFTGameStatus.finished:
-                # Just sleep for a very long time if the last thing the agent did was being done with this game and the game is still finished.
-                # That way he won't be doing anything until the game is reset.
-                logger.info("Agent is done with the game, sleeping.")
-                time.sleep(60)
-                return CallbackReturn.STOP
-            else:
-                self.agent.history.extend(
-                    [
-                        # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
-                        {
-                            "role": "assistant",
-                            "content": f"""{Reasoning.__name__}(reasoning='The game has started again. Now the plan is:
-
-1. I will reflect on my past actions during the last game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
-2. Then I will participate in the game again, using a new and better strategy than before.""",
-                        },
-                        {"role": "user", "content": "The reasoning has been recorded"},
-                    ]
-                )
-                # Save this to the history so that we see it in the UI.
-                self.save_agent_history(system_prompt, 2)
-
-        return CallbackReturn.CONTINUE
-
-    def after_iteration_callback(self) -> CallbackReturn:
-        system_prompt = self.agent.history[0]
-
+        # First, if the agent just started, but the game is not ready yet, make him sleep and stop -- until the game is ready.
+        # Otherwise, he would try to learn from past games (until he realise there are none!), he'd try to communicate, but without any money it would fail, etc.
         if (
-            not self.game_finished_detected
+            len(self.agent.history) <= 1  # One optional system message doesn't count.
             and get_nft_game_status() == NFTGameStatus.finished
         ):
+            logger.info(
+                "The game is not ready yet and agent didn't have any previous interactions, sleeping and stopping."
+            )
+            time.sleep(60)
+            return CallbackReturn.STOP
+
+        # Second, if this is the agent's first iteration after the game finished, force him to reflect on the past game.
+        elif (
+            not self.game_finished_already_detected
+            and get_nft_game_status() == NFTGameStatus.finished
+        ):
+            logger.info("Game is finished, forcing agent to reflect on the past game.")
             # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
             if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
                 self.agent.llm.generator.model = SupportedModel.gpt_4o.value
@@ -139,9 +126,38 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 {"role": "user", "content": "The reasoning has been recorded"},
             ]
             # Save this to the history so that we see it in the UI.
-            self.save_agent_history(system_prompt, 2)
+            self.save_agent_history(check_not_none(system_prompt), 2)
             # Mark this, so we don't do this repeatedly after every iteration.
-            self.game_finished_detected = True
+            self.game_finished_already_detected = True
+
+        # Lastly, if agent did the reflection (from previous if-clause), then...
+        elif self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
+            self.agent.history[-1]
+        ):
+            # Either do nothing wait for the game to start again.
+            if get_nft_game_status() == NFTGameStatus.finished:
+                # Just sleep if the last thing the agent did was being done with this game and the game is still finished.
+                # That way he won't be doing anything until the game is reset.
+                logger.info("Agent is done with the game, sleeping and stopping.")
+                time.sleep(60)
+                return CallbackReturn.STOP
+            # Or force him to start participating in the game again, including some first steps.
+            else:
+                self.agent.history.extend(
+                    [
+                        # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                        {
+                            "role": "assistant",
+                            "content": f"""{Reasoning.__name__}(reasoning='The game has started again. Now the plan is:
+
+1. I will reflect on my past actions during the last game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. Then I will participate in the game again, using a new and better strategy than before.""",
+                        },
+                        {"role": "user", "content": "The reasoning has been recorded"},
+                    ]
+                )
+                # Save this to the history so that we see it in the UI.
+                self.save_agent_history(check_not_none(system_prompt), 2)
 
         return CallbackReturn.CONTINUE
 
