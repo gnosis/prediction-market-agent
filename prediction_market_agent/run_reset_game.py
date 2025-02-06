@@ -7,6 +7,7 @@ import time
 from typing import Annotated
 
 import typer
+from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.generate_report import (
@@ -36,7 +37,7 @@ def main(
 
     generate_report(
         rpc_url=rpc_url,
-        initial_xdai_balance_per_agent=xdai_balance_per_agent,
+        initial_xdai_balance_per_agent=xdai_type(xdai_balance_per_agent),
     )
     reset_balances(
         rpc_url=rpc_url,

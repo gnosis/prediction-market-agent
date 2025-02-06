@@ -1,5 +1,7 @@
+import typing as t
+
 from langchain_core.prompts import PromptTemplate
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
+from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.contract import (
@@ -103,7 +105,11 @@ def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str
     return learnings_per_agent, final_summary
 
 
-def calculate_nft_and_xdai_balances_diff(lookup, w3, initial_balance):
+def calculate_nft_and_xdai_balances_diff(
+    rpc_url: str, initial_balance: xDai
+) -> list[dict[str, t.Any]]:
+    w3 = Web3(Web3.HTTPProvider(rpc_url))
+    lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
     # We retry the functions below due to RPC errors that can occur.
     get_balances_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
         get_balances
@@ -133,11 +139,9 @@ def calculate_nft_and_xdai_balances_diff(lookup, w3, initial_balance):
 
 
 def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
-    w3 = Web3(Web3.HTTPProvider(rpc_url))
-    lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
-    # Initial balance of each agent at the beginning of the game.
-
-    balances_diff = calculate_nft_and_xdai_balances_diff(lookup, w3, initial_xdai_balance_per_agent)
+    balances_diff = calculate_nft_and_xdai_balances_diff(
+        rpc_url=rpc_url, initial_balance=initial_xdai_balance_per_agent
+    )
 
     (
         learnings_per_agent,
