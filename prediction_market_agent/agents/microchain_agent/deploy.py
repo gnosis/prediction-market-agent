@@ -119,10 +119,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
         # Inject past history if wanted.
         if self.import_actions_from_memory:
-            latest_saved_memories = check_not_none(
-                self.long_term_memory,
-                "long_term_memory is needed for this functionality.",
-            ).search(limit=self.import_actions_from_memory)
+            latest_saved_memories = self.long_term_memory.search(
+                limit=self.import_actions_from_memory
+            )
             messages_to_insert = [
                 m.metadata_dict
                 for m in latest_saved_memories[
