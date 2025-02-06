@@ -137,7 +137,7 @@ def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
     lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
     # Initial balance of each agent at the beginning of the game.
 
-    balances_diff = calculate_nft_and_xdai_balances_diff(lookup, w3, initial_balance)
+    balances_diff = calculate_nft_and_xdai_balances_diff(lookup, w3, initial_xdai_balance_per_agent)
 
     (
         learnings_per_agent,
