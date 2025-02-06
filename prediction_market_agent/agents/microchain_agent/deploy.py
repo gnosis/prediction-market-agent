@@ -1,5 +1,6 @@
 import abc
 import time
+from enum import Enum
 
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
@@ -35,6 +36,11 @@ from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 from prediction_market_agent.utils import APIKeys
 
 GENERAL_AGENT_TAG = "general_agent"
+
+
+class CallbackReturn(Enum):
+    CONTINUE = "continue"
+    STOP = "stop"
 
 
 class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
@@ -150,7 +156,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         while not self.agent.do_stop and (
             self.max_iterations is None or iteration < self.max_iterations
         ):
-            self.before_iteration_callback()
+            if self.before_iteration_callback() == CallbackReturn.STOP:
+                break
 
             starting_history_length = len(self.agent.history)
             try:
@@ -173,7 +180,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             iteration += 1
             logger.info(f"{self.__class__.__name__} iteration {iteration} completed.")
 
-            self.after_iteration_callback()
+            if self.after_iteration_callback() == CallbackReturn.STOP:
+                break
 
             if self.sleep_between_iterations:
                 logger.info(
@@ -197,11 +205,11 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             save_last_n=save_last_n,
         )
 
-    def before_iteration_callback(self) -> None:
-        pass
+    def before_iteration_callback(self) -> CallbackReturn:
+        return CallbackReturn.CONTINUE
 
-    def after_iteration_callback(self) -> None:
-        pass
+    def after_iteration_callback(self) -> CallbackReturn:
+        return CallbackReturn.CONTINUE
 
     def handle_goal_evaluation(
         self,
