@@ -161,6 +161,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
         return CallbackReturn.CONTINUE
 
+        return CallbackReturn.CONTINUE
+
 
 class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     name = "Sneaky Pete"
