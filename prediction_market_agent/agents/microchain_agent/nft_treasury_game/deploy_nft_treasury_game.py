@@ -11,6 +11,7 @@ from prediction_market_agent.agents.microchain_agent.agent_functions import (
     GetMyCurrentSystemPrompt,
 )
 from prediction_market_agent.agents.microchain_agent.deploy import (
+    CallbackReturn,
     DeployableMicrochainAgentAbstract,
     FunctionsConfig,
     SupportedModel,
@@ -82,7 +83,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
         super().load()
 
-    def before_iteration_callback(self) -> None:
+    def before_iteration_callback(self) -> CallbackReturn:
         if self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
             self.agent.history[-1]
         ):
@@ -93,8 +94,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 # That way he won't be doing anything until the game is reset.
                 logger.info("Agent is done with the game, sleeping.")
                 time.sleep(60)
-                # TODO: Handle this better. Agent needs to stop after the sleep. (otherwise he will continue after 60s even if the game is still stopped)
-                exit()
+                return CallbackReturn.STOP
             else:
                 self.agent.history.extend(
                     [
@@ -112,7 +112,9 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 # Save this to the history so that we see it in the UI.
                 self.save_agent_history(system_prompt, 2)
 
-    def after_iteration_callback(self) -> None:
+        return CallbackReturn.CONTINUE
+
+    def after_iteration_callback(self) -> CallbackReturn:
         system_prompt = self.agent.history[0]
 
         if (
@@ -140,6 +142,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             self.save_agent_history(system_prompt, 2)
             # Mark this, so we don't do this repeatedly after every iteration.
             self.game_finished_detected = True
+
+        return CallbackReturn.CONTINUE
 
 
 class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
