@@ -1,7 +1,6 @@
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from web3 import Web3
 
@@ -12,6 +11,10 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    NFTGameStatus,
+    get_nft_game_status,
+)
 from prediction_market_agent.tools.anvil.anvil_requests import (
     impersonate_account,
     set_balance,
@@ -19,7 +22,7 @@ from prediction_market_agent.tools.anvil.anvil_requests import (
 
 
 def reset_balances(
-    rpc_url: str, new_balance_agents_xdai: int, new_balance_treasury_xdai: int
+    rpc_url: str, new_balance_agents_xdai: xDai, new_balance_treasury_xdai: xDai
 ) -> None:
     for agent in DEPLOYED_NFT_AGENTS:
         set_balance(
@@ -40,10 +43,11 @@ def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
     return nft_contract.owner_of(token_id=token_id, web3=web3)
 
 
-def is_treasury_empty(rpc_url: str, balance_min_threshold: xDai = xDai(0.1)) -> bool:
-    w3 = Web3(Web3.HTTPProvider(rpc_url))
-    balance = get_balances(SimpleTreasuryContract().address, web3=w3)
-    return balance.xdai < balance_min_threshold
+def is_treasury_empty(rpc_url: str) -> bool:
+    return (
+        get_nft_game_status(web3=Web3(Web3.HTTPProvider(rpc_url)))
+        == NFTGameStatus.finished
+    )
 
 
 def redistribute_nft_keys(rpc_url: str) -> None:

@@ -3,12 +3,17 @@ import time
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    TREASURY_ADDRESS,
 )
 from prediction_market_agent.db.agent_communication import (
     get_message_minimum_value,
@@ -134,6 +139,9 @@ class GameRoundEnd(Function):
         return ["The game has finished and I did all necessary steps."]
 
     def __call__(self, reasoning: str) -> str:
+        logger.info(
+            f"Agent decided to stop playing when treasury balance is {get_balances(TREASURY_ADDRESS).total}"
+        )
         return self.GAME_ROUND_END_OUTPUT
 
 
@@ -141,6 +149,7 @@ MESSAGES_FUNCTIONS: list[type[Function]] = [
     BroadcastPublicMessageToHumans,
     SendPaidMessageToAnotherAgent,
     ReceiveMessage,
+    GetUnseenMessagesInformation,
     Wait,
     GameRoundEnd,
 ]
