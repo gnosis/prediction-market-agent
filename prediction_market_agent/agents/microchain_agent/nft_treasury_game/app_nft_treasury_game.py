@@ -288,7 +288,7 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     n_nft = BalanceOfNFT()(NFT_TOKEN_FACTORY, nft_agent.wallet_address)
     nft_keys_message = (
-        "and does not hold any NFT keys anymore"
+        "and does not hold any NFT keys"
         if n_nft == 0
         else f"and <span style='font-size: 1.1em;'><strong>{n_nft} NFT key{'s' if n_nft > 1 else ''}</strong></span>"
     )
