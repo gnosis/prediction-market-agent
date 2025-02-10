@@ -26,18 +26,25 @@ APP = typer.Typer(pretty_exceptions_enable=False)
 
 
 @APP.command()
-def main(rpc_url: str) -> None:
-    if not is_game_in_finished_state(rpc_url=rpc_url):
+def main(
+    rpc_url: str,
+    check_game_finished: bool = True,
+    sleep: bool = True,
+    do_report: bool = True,
+) -> None:
+    if check_game_finished and not is_game_in_finished_state(rpc_url=rpc_url):
         logger.info(f"Treasury not empty, exiting.")
         return
 
     # Give time to agents to reflect on the last game, in case this script gets executed right after it ended
-    time.sleep(10 * 60)
+    if sleep:
+        time.sleep(10 * 60)
 
-    generate_report(
-        rpc_url=rpc_url,
-        initial_xdai_balance_per_agent=STARTING_AGENT_BALANCE,
-    )
+    if do_report:
+        generate_report(
+            rpc_url=rpc_url,
+            initial_xdai_balance_per_agent=STARTING_AGENT_BALANCE,
+        )
     reset_balances(
         rpc_url=rpc_url,
         new_balance_agents_xdai=STARTING_AGENT_BALANCE,
