@@ -118,9 +118,10 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
         # First, if the agent just started, but the game is not ready yet, make him sleep and stop -- until the game is ready.
         # Otherwise, he would try to learn from past games (until he realise there are none!), he'd try to communicate, but without any money it would fail, etc.
-        if (
-            len(self.agent.history) <= 1  # One optional system message doesn't count.
-            and get_nft_game_status() == NFTGameStatus.finished
+        if len(
+            self.agent.history
+        ) <= 1 and (  # One optional system message doesn't count.
+            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
         ):
             logger.info(
                 "The game is not ready yet and agent didn't have any previous interactions, sleeping and stopping."
@@ -129,9 +130,8 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             return CallbackReturn.STOP
 
         # Second, if this is the agent's first iteration after the game finished, force him to reflect on the past game.
-        elif is_seller_without_keys or (
-            not self.game_finished_already_detected
-            and get_nft_game_status() == NFTGameStatus.finished
+        elif not self.game_finished_already_detected and (
+            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
         ):
             logger.info("Game is finished, forcing agent to reflect on the past game.")
             # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
