@@ -105,7 +105,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     def get_holding_n_nft_keys(self) -> int:
         contract = ContractOwnableERC721OnGnosisChain(address=NFT_TOKEN_FACTORY)
-        return contract.balanceOf(Web3.to_checksum_address(self.wallet_address))
+        return contract.balanceOf(self.wallet_address)
 
     def before_iteration_callback(self) -> CallbackReturn:
         """
