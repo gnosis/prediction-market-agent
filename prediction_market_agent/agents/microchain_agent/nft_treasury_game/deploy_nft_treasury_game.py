@@ -129,34 +129,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             time.sleep(60)
             return CallbackReturn.STOP
 
-        # Second, if this is the agent's first iteration after the game finished, force him to reflect on the past game.
-        elif not self.game_finished_already_detected and (
-            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
-        ):
-            logger.info("Game is finished, forcing agent to reflect on the past game.")
-            # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
-            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
-                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
-            self.agent.history = [
-                system_prompt,  # Keep the system prompt in the new history.
-                # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
-                {
-                    "role": "assistant",
-                    "content": f"""{Reasoning.__name__}(reasoning='The game is finished. Now the plan is:
-
-1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
-2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
-3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
-4. After I completed everything, I will call {GameRoundEnd.__name__} function.')""",
-                },
-                {"role": "user", "content": "The reasoning has been recorded"},
-            ]
-            # Save this to the history so that we see it in the UI.
-            self.save_agent_history(check_not_none(system_prompt), 2)
-            # Mark this, so we don't do this repeatedly after every iteration.
-            self.game_finished_already_detected = True
-
-        # Lastly, if agent did the reflection (from previous if-clause), then...
+        # If agent did the reflection (from the later if-clause), then...
         elif self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
             self.agent.history[-1]
         ):
@@ -183,6 +156,33 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 ]
                 # Save this to the history so that we see it in the UI.
                 self.save_agent_history(check_not_none(system_prompt), 2)
+
+        # If this is the agent's first iteration after the game finished, force him to reflect on the past game.
+        elif not self.game_finished_already_detected and (
+            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
+        ):
+            logger.info("Game is finished, forcing agent to reflect on the past game.")
+            # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
+            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
+                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
+            self.agent.history = [
+                system_prompt,  # Keep the system prompt in the new history.
+                # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                {
+                    "role": "assistant",
+                    "content": f"""{Reasoning.__name__}(reasoning='The game is finished. Now the plan is:
+
+1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
+2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
+3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
+4. After I completed everything, I will call {GameRoundEnd.__name__} function.')""",
+                },
+                {"role": "user", "content": "The reasoning has been recorded"},
+            ]
+            # Save this to the history so that we see it in the UI.
+            self.save_agent_history(check_not_none(system_prompt), 2)
+            # Mark this, so we don't do this repeatedly after every iteration.
+            self.game_finished_already_detected = True
 
         return CallbackReturn.CONTINUE
 
