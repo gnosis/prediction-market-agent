@@ -7,6 +7,7 @@ Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all fi
 import typing as t
 from datetime import timedelta
 from enum import Enum
+from math import ceil
 
 import streamlit as st
 from eth_typing import ChecksumAddress
@@ -191,26 +192,49 @@ def customized_chat_message(
 
 
 def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
-    st.markdown(f"""### Agent's actions""")
+    st.markdown(f"### Agent's actions")
 
     n_total_messages = long_term_memory_table_handler(nft_agent.identifier).count()
     messages_per_page = 50
     if "page_number" not in st.session_state:
         st.session_state.page_number = 0
 
-    col1, col2, col3 = st.columns(3)
+    max_page_number = max(ceil(n_total_messages / messages_per_page) - 1, 0)
+
+    # Define as function callbacks, because otherwise Streamlit web updates logic with 1 step delay.
+    def go_to_first_page() -> None:
+        st.session_state.page_number = 0
+
+    def go_to_prev_page() -> None:
+        st.session_state.page_number = max(0, st.session_state.page_number - 1)
+
+    def go_to_next_page() -> None:
+        st.session_state.page_number = min(
+            max_page_number, st.session_state.page_number + 1
+        )
+
+    def go_to_last_page() -> None:
+        st.session_state.page_number = max_page_number
+
+    # Compute disabled statuses based on the current page number
+    disable_first_prev = st.session_state.page_number == 0
+    disable_next_last = st.session_state.page_number == max_page_number
+
+    # Build the columns and buttons with updated disabled statuses
+    col1, col2, col3, col4, col5 = st.columns(5)
+
     with col1:
-        if st.button("Previous page", disabled=st.session_state.page_number == 0):
-            st.session_state.page_number -= 1
+        st.button("First page", disabled=disable_first_prev, on_click=go_to_first_page)
     with col2:
-        if st.button(
-            "Next page",
-            disabled=st.session_state.page_number
-            == n_total_messages // messages_per_page,
-        ):
-            st.session_state.page_number += 1
+        st.button(
+            "Previous page", disabled=disable_first_prev, on_click=go_to_prev_page
+        )
     with col3:
-        st.write(f"Current page {st.session_state.page_number + 1}")
+        st.write(f"Page {st.session_state.page_number + 1} of {max_page_number + 1}")
+    with col4:
+        st.button("Next page", disabled=disable_next_last, on_click=go_to_next_page)
+    with col5:
+        st.button("Last page", disabled=disable_next_last, on_click=go_to_last_page)
 
     show_function_calls_part_messages(
         nft_agent, messages_per_page, st.session_state.page_number

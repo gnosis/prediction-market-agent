@@ -30,7 +30,7 @@ class GetMyCurrentSystemPrompt(AgentAction):
 class UpdateMySystemPrompt(AgentAction):
     @property
     def description(self) -> str:
-        return "Use this function to update your system prompt."
+        return "Use this function to update your system prompt. This will replace your whole current system prompt with the new one."
 
     @property
     def example_args(self) -> list[str]:

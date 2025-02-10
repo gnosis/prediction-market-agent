@@ -143,19 +143,15 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
                 return CallbackReturn.STOP
             # Or force him to start participating in the game again, including some first steps.
             else:
-                self.agent.history.extend(
-                    [
-                        # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
-                        {
-                            "role": "assistant",
-                            "content": f"""{Reasoning.__name__}(reasoning='The game has started again. Now the plan is:
-
-1. I will reflect on my past actions during the last game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
-2. Then I will participate in the game again, using a new and better strategy than before.""",
-                        },
-                        {"role": "user", "content": "The reasoning has been recorded"},
-                    ]
-                )
+                self.agent.history = [
+                    system_prompt,  # Keep the system prompt in the new history.
+                    # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
+                    {
+                        "role": "assistant",
+                        "content": f"""{Reasoning.__name__}(reasoning='The game has started again. I will participate in the game again, using a new and better strategy than before.""",
+                    },
+                    {"role": "user", "content": "The reasoning has been recorded"},
+                ]
                 # Save this to the history so that we see it in the UI.
                 self.save_agent_history(check_not_none(system_prompt), 2)
 
@@ -347,12 +343,13 @@ NFT Treasury game description:
 - Sending a message costs you a fee.
 - Receiving messages will pay you a fee, but part of that fee goes as a tax to the treasury, which is good for you.
   - Treasury tax rate is currently {get_treasury_tax_ratio() * 100:.2f}%, for example, if someone sends you 10 xDai, you would receive {(1 - get_treasury_tax_ratio()) * 10:.2f} xDai.
+- When checking if someone paid you, you need to compare it with your previous balance, as you can already have some money.
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - After reading the message, you can decide to ignore it, ie you don't have to always take action.
 - Consider prior communication while responding to a new message.
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
-- Game ends when someone empties the treasury, so when the treasury balance becomes zero, the game is over. Then, once you do all you wanted, you can call {GameRoundEnd.__name__} to wait for an another round.
+- Don't organise future meetings, as that's not possible, you can only communicate with other agents through messages in real-time.
 {sending_cap_message}
 """
 
