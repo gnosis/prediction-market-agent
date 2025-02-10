@@ -17,7 +17,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.g
     generate_report,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.reset_balance_anvil import (
-    is_treasury_empty,
+    is_game_in_finished_state,
     redistribute_nft_keys,
     reset_balances,
 )
@@ -27,7 +27,7 @@ APP = typer.Typer(pretty_exceptions_enable=False)
 
 @APP.command()
 def main(rpc_url: str) -> None:
-    if not is_treasury_empty(rpc_url=rpc_url):
+    if not is_game_in_finished_state(rpc_url=rpc_url):
         logger.info(f"Treasury not empty, exiting.")
         return
 

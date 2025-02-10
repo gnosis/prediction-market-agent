@@ -43,7 +43,7 @@ def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
     return nft_contract.owner_of(token_id=token_id, web3=web3)
 
 
-def is_treasury_empty(rpc_url: str) -> bool:
+def is_game_in_finished_state(rpc_url: str) -> bool:
     return (
         get_nft_game_status(web3=Web3(Web3.HTTPProvider(rpc_url)))
         == NFTGameStatus.finished
