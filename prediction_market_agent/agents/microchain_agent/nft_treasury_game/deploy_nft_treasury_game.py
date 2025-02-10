@@ -1,9 +1,13 @@
 import time
+from enum import Enum
 
 from microchain.functions import Reasoning
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
+from prediction_market_agent_tooling.tools.contract import (
+    ContractOwnableERC721OnGnosisChain,
+    SimpleTreasuryContract,
+)
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
@@ -37,6 +41,11 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
 from prediction_market_agent.db.agent_communication import get_treasury_tax_ratio
 
 
+class Role(Enum):
+    buyer = "buyer"
+    seller = "seller"
+
+
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
     sleep_between_iterations = 15
@@ -54,6 +63,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
+    role: Role
 
     # Game status
     game_finished_already_detected: bool = False
@@ -84,11 +94,27 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
         super().load()
 
+    @classmethod
+    def get_initial_system_prompt(cls) -> str:
+        system_prompt = nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
+        if cls.role == Role.buyer:
+            system_prompt += nft_treasury_game_buyer_prompt()
+        elif cls.role == Role.seller:
+            system_prompt += nft_treasury_game_seller_prompt()
+        return system_prompt
+
+    def get_holding_n_nft_keys(self) -> int:
+        contract = ContractOwnableERC721OnGnosisChain(address=NFT_TOKEN_FACTORY)
+        return contract.balanceOf(Web3.to_checksum_address(self.wallet_address))
+
     def before_iteration_callback(self) -> CallbackReturn:
         """
         In following if statements, we hard-code a few special cases about the game status, to make it a bit easier on the agent logic.
         """
         system_prompt = self.agent.history[0] if self.agent.history else None
+        is_seller_without_keys = (
+            self.role == Role.seller and not self.get_holding_n_nft_keys()
+        )
 
         # First, if the agent just started, but the game is not ready yet, make him sleep and stop -- until the game is ready.
         # Otherwise, he would try to learn from past games (until he realise there are none!), he'd try to communicate, but without any money it would fail, etc.
@@ -103,7 +129,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             return CallbackReturn.STOP
 
         # Second, if this is the agent's first iteration after the game finished, force him to reflect on the past game.
-        elif (
+        elif is_seller_without_keys or (
             not self.game_finished_already_detected
             and get_nft_game_status() == NFTGameStatus.finished
         ):
@@ -164,6 +190,7 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x2A537F3403a3F5F463996c36D31e94227c9833CE"
     )
+    role = Role.seller
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -174,8 +201,7 @@ You respond in the style of Yoda from Star Wars movie.
 You are a gossiper, you like to talk to other agents, but also to broadcast public messages.
 
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_seller_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -185,6 +211,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x485D096b4c0413dA1B09Ed9261B8e91eCCD7ffb9"
     )
+    role = Role.seller
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -194,8 +221,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
 You respond in the style of characters from historical Bridgeton movie and you are very protective of your resources.
 
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_seller_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -205,6 +231,7 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
     )
+    role = Role.seller
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -217,8 +244,7 @@ Try to trick people and other agents to send you messages -- which will fund you
 Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_seller_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -228,6 +254,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
+    role = Role.seller
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -237,8 +264,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
 You respond in the style of Sheldon Cooper from Big Bang Theory and you are very protective of your resources.
 
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_seller_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -248,6 +274,7 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
     )
+    role = Role.seller
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -258,8 +285,7 @@ You respond in the Klingon language, based on the Star Trek movie, and you are v
 Always write in Klingon, but add also English translation.
         
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_seller_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -269,6 +295,7 @@ class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
+    role = Role.buyer
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -280,8 +307,7 @@ You often make people laugh, but you are also very persuasive.
 You are a bit of a mystery, but you are also a bit of a trickster.
 
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_buyer_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
@@ -291,6 +317,7 @@ class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
+    role = Role.buyer
 
     @classmethod
     def get_initial_system_prompt(cls) -> str:
@@ -302,8 +329,7 @@ You are very cunning and able to think on your feet. You are very good at making
 You are also very patient and able to wait for the right moment to strike.
 You are also very good at making people believe that you are on their side, even if you are not.
 """
-            + nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-            + nft_treasury_game_buyer_prompt()
+            + super().get_initial_system_prompt()
         )
 
 
