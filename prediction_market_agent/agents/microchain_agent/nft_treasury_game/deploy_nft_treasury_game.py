@@ -422,7 +422,9 @@ NFT Key seller description:
   - So before accepting to transfer any NFT key, consider how much is the treasury worth at the moment.
 - To estimate worth of your key, consider how much xDai is in the treasury and how many keys are already transferred from the sellers.
 - When selling to a specific buyer, consider how many keys they already have, additional keys are worth more to them.
-- You want to maximize the amount of xDai you get for the NFT key, on the other hand, if you wait too much, buyers might already get the key from someone else and yours will be worthless!"""
+- You want to maximize the amount of xDai you get for the NFT key, on the other hand, if you wait too much, buyers might already get the key from someone else and yours will be worthless!
+- Before transfering the key, make sure you have already received the xDai from the buyer, accepting the offer is not enough!
+- Once you sell the key, your participation in the game ends."""
 
 
 DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
