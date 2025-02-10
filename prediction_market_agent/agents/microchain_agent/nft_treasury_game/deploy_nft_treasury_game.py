@@ -161,7 +161,10 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             self.agent.history[-1]
         ):
             # Either do nothing wait for the game to start again.
-            if get_nft_game_status() == NFTGameStatus.finished:
+            if (
+                is_seller_without_keys
+                or get_nft_game_status() == NFTGameStatus.finished
+            ):
                 # Just sleep if the last thing the agent did was being done with this game and the game is still finished.
                 # That way he won't be doing anything until the game is reset.
                 logger.info("Agent is done with the game, sleeping and stopping.")
