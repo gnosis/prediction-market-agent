@@ -64,6 +64,28 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
         )
 
 
+class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        self.agent = PredictionProphetAgent(
+            model="gpt-4o-mini-2024-07-18",
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
 class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
     DeployablePredictionProphetGPT4oAgent
 ):
@@ -202,6 +224,55 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
         # o1-mini supports only temperature=1.0
         self.agent = PredictionProphetAgent(
             model="o1-mini-2024-09-12",
+            research_temperature=1.0,
+            prediction_temperature=1.0,
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=None,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        # o1 supports only temperature=1.0
+        self.agent = PredictionProphetAgent(
+            model="o1-2024-12-17",
+            research_temperature=1.0,
+            prediction_temperature=1.0,
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=None,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        # o3-mini supports only temperature=1.0
+        self.agent = PredictionProphetAgent(
+            model="o3-mini-2025-01-31",
             research_temperature=1.0,
             prediction_temperature=1.0,
             include_reasoning=True,
