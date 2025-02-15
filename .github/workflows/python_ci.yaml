@@ -101,3 +101,26 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/python_prepare
       - uses: pre-commit/action@v3.0.1
+
+  cleanup-ghcr-images:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Cleanup old GHCR images
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 86400 | todate)) | .id')
+          for image_id in $ghcr_images; do
+            tags=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions/$image_id | jq -r '.metadata.container.tags[]')
+            if [[ ! " ${tags[@]} " =~ " main " ]]; then
+              echo "Deleting image with ID: $image_id"
+              gh api --silent --method DELETE "/orgs/gnosis/packages/container/prediction-market-agent/versions/$image_id"
+            else
+              echo "Skipping image with ID: $image_id as it is tagged as main"
+            fi
+          done
