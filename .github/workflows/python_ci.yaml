@@ -104,7 +104,8 @@ jobs:
 
   cleanup-ghcr-images:
     runs-on: ubuntu-latest
-    # if: github.ref == 'refs/heads/main'
+    permissions:
+      packages: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
