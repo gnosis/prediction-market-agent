@@ -113,7 +113,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.metadata.container.tags | length == 0) | select(.created_at < (now - 43200 | todate)) | .id')
+          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 43200 | todate)) | .id')
           for image_id in $ghcr_images; do
             tags=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions/$image_id | jq -r '.metadata.container.tags[]')
             if [[ ! " ${tags[@]} " =~ " main " ]]; then
