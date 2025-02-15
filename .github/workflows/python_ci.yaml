@@ -104,6 +104,7 @@ jobs:
 
   cleanup-ghcr-images:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     permissions:
       packages: write
     steps:
@@ -113,7 +114,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 10 | todate)) | .id')
+          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 86400 | todate)) | .id')
           for image_id in $ghcr_images; do
             tags=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/gnosis/packages/container/prediction-market-agent/versions/$image_id | jq -r '.metadata.container.tags[]')
             if [[ ! " ${tags[@]} " =~ " main " ]]; then
