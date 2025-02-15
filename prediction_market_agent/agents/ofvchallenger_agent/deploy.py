@@ -33,7 +33,7 @@ from prediction_market_agent.utils import APIKeys
 
 OFV_CHALLENGER_TAG = "ofv_challenger"
 OFV_CHALLENGER_EOA_ADDRESS = Web3.to_checksum_address(
-    "0x03aEEE267A985ab9835c025377F0D8209901a928"
+    "0xA01143e55e014E874c8f59B5e8EFB5CEe9B8cdBF"
 )
 OFV_CHALLENGER_SAFE_ADDRESS = Web3.to_checksum_address(
     "0x9D0260500ba7b068b5b0f4AfA9F8864eBc0B059a"
