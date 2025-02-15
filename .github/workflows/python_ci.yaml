@@ -113,12 +113,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /user/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 43200 | todate)) | .id')
+          ghcr_images=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/${{ github.repository_owner }}/packages/container/prediction-market-agent/versions | jq -r '.[] | select(.created_at < (now - 43200 | todate)) | .id')
           for image_id in $ghcr_images; do
-            tags=$(gh api -H "Accept: application/vnd.github.v3+json" /user/packages/container/prediction-market-agent/versions/$image_id | jq -r '.metadata.container.tags[]')
+            tags=$(gh api -H "Accept: application/vnd.github.v3+json" /orgs/${{ github.repository_owner }}/packages/container/prediction-market-agent/versions/$image_id | jq -r '.metadata.container.tags[]')
             if [[ ! " ${tags[@]} " =~ " main " ]]; then
               echo "Deleting image with ID: $image_id"
-              gh api --silent --method DELETE -H "Accept: application/vnd.github.v3+json" /user/packages/container/prediction-market-agent/versions/$image_id
+              gh api --silent --method DELETE -H "Accept: application/vnd.github.v3+json" /orgs/${{ github.repository_owner }}/packages/container/prediction-market-agent/versions/$image_id
             else
               echo "Skipping image with ID: $image_id as it is tagged as main"
             fi
