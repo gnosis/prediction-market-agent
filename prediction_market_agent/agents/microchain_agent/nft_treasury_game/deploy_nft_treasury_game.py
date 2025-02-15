@@ -191,7 +191,7 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     name = "Sneaky Pete"
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_1
     wallet_address = Web3.to_checksum_address(
-        "0x2A537F3403a3F5F463996c36D31e94227c9833CE"
+        "0x1Ca11b2520345993e78312b00441050d2d57065f"
     )
     role = Role.seller
 
@@ -212,7 +212,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     name = "Banana Man"
     identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_2
     wallet_address = Web3.to_checksum_address(
-        "0x485D096b4c0413dA1B09Ed9261B8e91eCCD7ffb9"
+        "0x3C9E816b01797f3609F2A811D139DA34c84F9A59"
     )
     role = Role.seller
 
