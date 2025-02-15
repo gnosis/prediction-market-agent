@@ -17,6 +17,9 @@ from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion im
     get_kelly_bet_simplified,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic_ai import Agent as Agent
+from pydantic_ai.models import KnownModelName
+from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.microchain_agent.utils import (
     MicroMarket,
@@ -120,7 +123,7 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         self,
         market_type: MarketType,
         keys: APIKeys,
-        model: str = DEFAULT_OPENAI_MODEL,
+        model: KnownModelName = DEFAULT_OPENAI_MODEL,
     ) -> None:
         self.model = model
         super().__init__(market_type=market_type, keys=keys)
@@ -135,16 +138,14 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         ).question
         research = prophet_research(
             goal=question,
-            model=self.model,
+            agent=Agent(self.model, model_settings=ModelSettings(temperature=0.7)),
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
         )
         prediction = prophet_make_prediction(
             market_question=question,
             additional_information=research.report,
-            engine=self.model,
-            temperature=0,
-            api_key=self.keys.openai_api_key,
+            agent=Agent(self.model, model_settings=ModelSettings(temperature=0)),
         )
         if prediction.outcome_prediction is None:
             raise ValueError("Failed to make a prediction.")

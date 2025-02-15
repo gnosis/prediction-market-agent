@@ -33,7 +33,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = "^0.57.18"
+prediction-market-agent-tooling = "^0.57.19"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -50,19 +50,18 @@ streamlit = "^1.40.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "bump-autogen" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "peter/pydantic-ai" }
 transformers = "^4.43.3"
-openfactverification-kongzii = "^0.2.0"
+openfactverification-kongzii = "^0.5.0"
 autogen-agentchat = "0.4.0.dev11"
 autogen-core = "0.4.0.dev11"
 autogen-ext = "0.4.0.dev11"
 python-web3-wallet = "0.0.16"
 types-tabulate = "^0.9.0.20241207"
-
+pydantic-ai = { version = "^0.0.24", extras = ["logfire"] }
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
-
 
 [build-system]
 requires = ["poetry-core"]

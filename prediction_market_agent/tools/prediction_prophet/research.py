@@ -5,11 +5,12 @@ from prediction_prophet.benchmark.agents import (  # noqa: F401 # Just to make i
 from prediction_prophet.functions.research import Research
 from prediction_prophet.functions.research import research as original_research
 from pydantic.types import SecretStr
+from pydantic_ai import Agent
 
 
 def prophet_research(
+    agent: Agent,
     goal: str,
-    model: str,
     openai_api_key: SecretStr,
     tavily_api_key: SecretStr,
     initial_subqueries_limit: int = 20,
@@ -31,7 +32,7 @@ def prophet_research(
     """
     return original_research(
         goal=goal,
-        model=model,
+        agent=agent,
         use_summaries=False,
         initial_subqueries_limit=initial_subqueries_limit,
         subqueries_limit=subqueries_limit,
