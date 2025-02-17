@@ -1,3 +1,4 @@
+from langfuse.openai import AsyncOpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
@@ -23,6 +24,7 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
@@ -59,13 +61,27 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
 
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "gpt-4o-2024-08-06", model_settings=ModelSettings(temperature=0.7)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
-                "gpt-4o-2024-08-06", model_settings=ModelSettings(temperature=0.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -87,12 +103,27 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
+        model = "gpt-4o-mini-2024-07-18"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "gpt-4o-mini-2024-07-18", model_settings=ModelSettings(temperature=0.7)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
-                "gpt-4o-mini-2024-07-18", model_settings=ModelSettings(temperature=0.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -150,12 +181,27 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
+        model = "gpt-4-0125-preview"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "gpt-4-0125-preview", model_settings=ModelSettings(temperature=0.7)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
-                "gpt-4-0125-preview", model_settings=ModelSettings(temperature=0.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -175,12 +221,27 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
+        model = "gpt-4-turbo-2024-04-09"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "gpt-4-turbo-2024-04-09", model_settings=ModelSettings(temperature=0.7)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
-                "gpt-4-turbo-2024-04-09", model_settings=ModelSettings(temperature=0.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -200,12 +261,27 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
+        model = DEFAULT_OPENAI_MODEL
+        api_keys = APIKeys()
+
         self.agent = OlasAgent(
             research_agent=Agent(
-                DEFAULT_OPENAI_MODEL, model_settings=ModelSettings(temperature=0.5)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.5),
             ),
             prediction_agent=Agent(
-                DEFAULT_OPENAI_MODEL, model_settings=ModelSettings(temperature=0.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             embedding_model=EmbeddingModel.openai,
             logger=logger,
@@ -227,12 +303,27 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     def load(self) -> None:
         super().load()
         # o1-preview supports only temperature=1.0
+        model = "o1-preview-2024-09-12"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "o1-preview-2024-09-12", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             prediction_agent=Agent(
-                "o1-preview-2024-09-12", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -253,12 +344,27 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
     def load(self) -> None:
         super().load()
         # o1-mini supports only temperature=1.0
+        model = "o1-mini-2024-09-12"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "o1-mini-2024-09-12", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             prediction_agent=Agent(
-                "o1-mini-2024-09-12", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -281,12 +387,27 @@ class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
     def load(self) -> None:
         super().load()
         # o1 supports only temperature=1.0
+        model = "o1-2024-12-17"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "o1-2024-12-17", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             prediction_agent=Agent(
-                "o1-2024-12-17", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             include_reasoning=True,
             logger=logger,
@@ -308,12 +429,27 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
     def load(self) -> None:
         super().load()
         # o3-mini supports only temperature=1.0
+        model = "o3-mini-2025-01-31"
+        api_keys = APIKeys()
+
         self.agent = PredictionProphetAgent(
             research_agent=Agent(
-                "o3-mini-2025-01-31", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             prediction_agent=Agent(
-                "o3-mini-2025-01-31", model_settings=ModelSettings(temperature=1.0)
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
             ),
             include_reasoning=True,
             logger=logger,
