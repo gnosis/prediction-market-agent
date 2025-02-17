@@ -472,7 +472,6 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
-        # o1-preview supports only temperature=1.0
         model = "claude-3-opus-20240229"
         api_keys = APIKeys()
 
@@ -484,7 +483,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
-                model_settings=ModelSettings(temperature=1.0),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
                 AnthropicModel(
@@ -493,7 +492,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
-                model_settings=ModelSettings(temperature=1.0),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
