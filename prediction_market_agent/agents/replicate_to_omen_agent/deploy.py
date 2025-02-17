@@ -19,8 +19,11 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replica
 )
 from prediction_market_agent.utils import APIKeys
 
-REPLICATOR_ADDRESS = Web3.to_checksum_address(
-    "0x993DFcE14768e4dE4c366654bE57C21D9ba54748"
+REPLICATOR_EOA_ADDRESS = Web3.to_checksum_address(
+    "0xEdAf63b6dDc1c2B611B7539ec23B50213D4dCA38"
+)
+REPLICATOR_SAFE_ADDRESS = Web3.to_checksum_address(
+    "0x55D8Dfc1e6F994079A6A7fdb9D7a2712dc1b87B2"
 )
 REPLICATOR_TAG = "replicator"
 REPLICATOR_BOND = xdai_type(10)

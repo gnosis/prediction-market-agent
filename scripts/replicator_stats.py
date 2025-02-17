@@ -15,7 +15,7 @@ from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from tqdm import tqdm
 
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
-    REPLICATOR_ADDRESS,
+    REPLICATOR_SAFE_ADDRESS,
 )
 
 
@@ -23,7 +23,7 @@ def main() -> None:
     now = utcnow()
     markets = OmenSubgraphHandler().get_omen_binary_markets(
         limit=None,
-        creator=REPLICATOR_ADDRESS,
+        creator=REPLICATOR_SAFE_ADDRESS,
     )
     bets_for_market = {
         market.id: bets
@@ -55,7 +55,9 @@ def main() -> None:
         m for m in markets if m.opening_datetime > now + timedelta(days=1)
     ]
 
-    reality_balance = wei_to_xdai(OmenRealitioContract().balanceOf(REPLICATOR_ADDRESS))
+    reality_balance = wei_to_xdai(
+        OmenRealitioContract().balanceOf(REPLICATOR_SAFE_ADDRESS)
+    )
 
     stats = {
         "reality_balance": reality_balance,

@@ -3,6 +3,7 @@
 
 # .gitignore ignores:
 .env
+.env.monitor
 .agents_workspace
 .cache
 __pycache__
@@ -10,3 +11,8 @@ __pycache__
 logs
 .mypy_cache
 .pytest_cache
+.venv
+log
+
+# Created on mech-client `interact` call
+acn_cert.txt
