@@ -44,6 +44,9 @@ from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallen
 from prediction_market_agent.agents.omen_cleaner_agent.deploy import OmenCleanerAgent
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetClaude3OpusAgent,
+    DeployablePredictionProphetClaude35HaikuAgent,
+    DeployablePredictionProphetClaude35SonnetAgent,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4ominiAgent,
@@ -108,6 +111,9 @@ class RunnableAgent(str, Enum):
     nft_treasury_game_agent_5 = "nft_treasury_game_agent_5"
     nft_treasury_game_agent_6 = "nft_treasury_game_agent_6"
     nft_treasury_game_agent_7 = "nft_treasury_game_agent_7"
+    prophet_claude3_opus = "prophet_claude3_opus"
+    prophet_claude35_haiku = "prophet_claude35_haiku"
+    prophet_claude35_sonnet = "prophet_claude35_sonnet"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -147,6 +153,9 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.nft_treasury_game_agent_5: DeployableAgentNFTGame5,
     RunnableAgent.nft_treasury_game_agent_6: DeployableAgentNFTGame6,
     RunnableAgent.nft_treasury_game_agent_7: DeployableAgentNFTGame7,
+    RunnableAgent.prophet_claude3_opus: DeployablePredictionProphetClaude3OpusAgent,
+    RunnableAgent.prophet_claude35_haiku: DeployablePredictionProphetClaude35HaikuAgent,
+    RunnableAgent.prophet_claude35_sonnet: DeployablePredictionProphetClaude35SonnetAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

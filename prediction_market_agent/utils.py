@@ -26,6 +26,7 @@ class APIKeys(APIKeysBase):
     # Don't get fooled! Serper and Serp are two different services.
     SERPER_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
+    ANTHROPIC_API_KEY: t.Optional[SecretStr] = None
     REPLICATE_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     PINECONE_API_KEY: t.Optional[SecretStr] = None
@@ -45,6 +46,12 @@ class APIKeys(APIKeysBase):
     def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def anthropic_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY missing in the environment."
         )
 
     @property

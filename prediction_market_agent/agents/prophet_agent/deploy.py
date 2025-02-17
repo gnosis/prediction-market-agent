@@ -24,6 +24,7 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 from pydantic_ai import Agent
+from pydantic_ai.models.anthropic import AnthropicModel, AsyncAnthropic
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
@@ -450,6 +451,133 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=None,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        # o1-preview supports only temperature=1.0
+        model = "claude-3-opus-20240229"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
+            ),
+            prediction_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=1.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=None,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        model = "claude-3-5-haiku-20241022"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
+    bet_on_n_markets_per_run = 20
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=None,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        model = "claude-3-5-sonnet-20241022"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                AnthropicModel(
+                    model,
+                    anthropic_client=AsyncAnthropic(
+                        api_key=api_keys.anthropic_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
             ),
             include_reasoning=True,
             logger=logger,
