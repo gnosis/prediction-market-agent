@@ -7114,7 +7114,7 @@ watchdog = "^3.0.0"
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
 reference = "peter/pydantic-ai"
-resolved_reference = "01f4848ced83461850ef42e91ade805d31ef7645"
+resolved_reference = "bc4ec2a2487cc6e7325320c14ef5883b40ca27b0"
 
 [[package]]
 name = "preshed"
