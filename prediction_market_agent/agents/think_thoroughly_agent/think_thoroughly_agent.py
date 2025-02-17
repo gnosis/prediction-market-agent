@@ -27,6 +27,9 @@ from prediction_market_agent_tooling.tools.utils import (
     utcnow,
 )
 from pydantic import BaseModel
+from pydantic_ai import Agent as PydanticAIAgent
+from pydantic_ai.models import KnownModelName
+from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
@@ -105,8 +108,8 @@ class TavilySearchResultsThatWillThrow(TavilySearchResults):
 
 class ThinkThoroughlyBase(ABC):
     identifier: AgentIdentifier
-    model: str
-    model_for_generate_prediction_for_one_outcome: str
+    model: KnownModelName
+    model_for_generate_prediction_for_one_outcome: KnownModelName
 
     def __init__(self, enable_langfuse: bool, memory: bool = True) -> None:
         self.enable_langfuse = enable_langfuse
@@ -226,7 +229,7 @@ class ThinkThoroughlyBase(ABC):
     @staticmethod
     def generate_prediction_for_one_outcome(
         unique_id: UUID,
-        model: str,
+        model: KnownModelName,
         scenario: str,
         original_question: str,
         previous_scenarios_and_answers: (
@@ -383,7 +386,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
     @staticmethod
     def generate_prediction_for_one_outcome(
         unique_id: UUID,
-        model: str,
+        model: KnownModelName,
         scenario: str,
         original_question: str,
         previous_scenarios_and_answers: (
@@ -450,7 +453,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     @staticmethod
     def generate_prediction_for_one_outcome(
         unique_id: UUID,
-        model: str,
+        model: KnownModelName,
         scenario: str,
         original_question: str,
         previous_scenarios_and_answers: (
@@ -471,17 +474,20 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
             max_results_per_search=5,
             min_scraped_sites=2,
-            model=model,
+            agent=PydanticAIAgent(
+                model=model, model_settings=ModelSettings(temperature=0.7)
+            ),
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
         )
         prediction = prophet_make_prediction(
             market_question=scenario,
             additional_information=research.report,
-            engine=model,
-            temperature=LLM_SUPER_LOW_TEMPERATURE,
+            agent=PydanticAIAgent(
+                model=model,
+                model_settings=ModelSettings(temperature=LLM_SUPER_LOW_TEMPERATURE),
+            ),
             include_reasoning=True,
-            api_key=api_keys.openai_api_key,
         )
 
         if prediction.outcome_prediction is None:
@@ -510,7 +516,9 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             research_report
             or prophet_research(
                 goal=question,
-                model=self.model,
+                agent=PydanticAIAgent(
+                    model=self.model, model_settings=ModelSettings(temperature=0.7)
+                ),
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
             ).report
@@ -536,12 +544,18 @@ def process_scenario(
     inputs: tuple[
         bool,
         UUID,
-        str,
+        KnownModelName,
         str,
         str,
         list[tuple[str, AnswerWithScenario]] | None,
         t.Callable[
-            [UUID, str, str, str, list[tuple[str, AnswerWithScenario]] | None],
+            [
+                UUID,
+                KnownModelName,
+                str,
+                str,
+                list[tuple[str, AnswerWithScenario]] | None,
+            ],
             AnswerWithScenario | None,
         ],
     ],
