@@ -69,7 +69,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
-from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.utils import OPENROUTER_BASE_URL, APIKeys
 
 
 class SupportedModel(str, Enum):
@@ -77,6 +77,8 @@ class SupportedModel(str, Enum):
     gpt_4o_mini = "gpt-4o-mini-2024-07-18"
     gpt_4_turbo = "gpt-4-turbo"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
+    deepseek_chat = "deepseek/deepseek-chat"
+    deepseek_r1 = "deepseek/deepseek-r1"
 
     @property
     def is_openai(self) -> bool:
@@ -85,6 +87,10 @@ class SupportedModel(str, Enum):
     @property
     def is_replicate(self) -> bool:
         return self in [SupportedModel.llama_31_instruct]
+
+    @property
+    def is_openrouter(self) -> bool:
+        return self in [SupportedModel.deepseek_chat, SupportedModel.deepseek_r1]
 
 
 def replicate_model_to_tokenizer(model: SupportedModel) -> str:
@@ -186,7 +192,6 @@ def build_agent(
     unformatted_system_prompt: str,
     functions_config: FunctionsConfig,
     enable_langfuse: bool,
-    api_base: str = "https://api.openai.com/v1",
     long_term_memory: LongTermMemoryTableHandler | None = None,
     max_tokens: int = 8196,
     allow_stop: bool = True,
@@ -197,13 +202,15 @@ def build_agent(
     generator = (
         OpenAIChatGenerator(
             model=model.value,
-            api_key=keys.openai_api_key.get_secret_value(),
-            api_base=api_base,
+            api_key=(
+                keys.openai_api_key if model.is_openai else keys.openrouter_api_key
+            ).get_secret_value(),
+            api_base=OPENROUTER_BASE_URL if model.is_openrouter else None,
             temperature=0.7,
             enable_langfuse=enable_langfuse,
             max_tokens=max_tokens,
         )
-        if model.is_openai
+        if model.is_openai or model.is_openrouter
         else (
             ReplicateLlama31ChatGenerator(
                 model=model.value,
