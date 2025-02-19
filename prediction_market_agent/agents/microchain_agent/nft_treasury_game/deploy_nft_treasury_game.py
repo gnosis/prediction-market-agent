@@ -58,7 +58,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         balance_functions=True,
         include_agent_functions=True,
     )
-    model = SupportedModel.gpt_4o
+    model = SupportedModel.deepseek_chat
 
     # Setup per-nft-agent class.
     name: str
