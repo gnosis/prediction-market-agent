@@ -14,6 +14,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Do not update to a worse or more expensive model
 DEFAULT_OPENAI_MODEL: KnownModelName = "gpt-4o-2024-08-06"
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
 
 class DBKeys(BaseSettings):
     model_config = SettingsConfigDict(
@@ -26,6 +28,7 @@ class APIKeys(APIKeysBase):
     # Don't get fooled! Serper and Serp are two different services.
     SERPER_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
+    OPENROUTER_API_KEY: t.Optional[SecretStr] = None
     ANTHROPIC_API_KEY: t.Optional[SecretStr] = None
     REPLICATE_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
@@ -46,6 +49,12 @@ class APIKeys(APIKeysBase):
     def openai_api_key(self) -> SecretStr:
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
+        )
+
+    @property
+    def openrouter_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.OPENROUTER_API_KEY, "OPENROUTER_API_KEY missing in the environment."
         )
 
     @property
