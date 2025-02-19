@@ -1,7 +1,7 @@
 from autogen_agentchat.agents import AssistantAgent, BaseChatAgent
-from autogen_agentchat.task import TextMentionTermination
+from autogen_agentchat.conditions import TextMentionTermination
 from autogen_agentchat.teams import BaseGroupChat, RoundRobinGroupChat
-from autogen_ext.models import OpenAIChatCompletionClient
+from autogen_ext.models.openai import OpenAIChatCompletionClient
 
 from prediction_market_agent.agents.blockchain_coding_agent.functions import (
     checksum_address,
