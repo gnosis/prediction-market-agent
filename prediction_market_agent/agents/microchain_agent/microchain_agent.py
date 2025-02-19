@@ -78,6 +78,7 @@ class SupportedModel(str, Enum):
     gpt_4_turbo = "gpt-4-turbo"
     llama_31_instruct = "meta/meta-llama-3.1-405b-instruct"
     deepseek_chat = "deepseek/deepseek-chat"
+    deepseek_r1 = "deepseek/deepseek-r1"
 
     @property
     def is_openai(self) -> bool:
@@ -89,7 +90,7 @@ class SupportedModel(str, Enum):
 
     @property
     def is_openrouter(self) -> bool:
-        return self in [SupportedModel.deepseek_chat]
+        return self in [SupportedModel.deepseek_chat, SupportedModel.deepseek_r1]
 
 
 def replicate_model_to_tokenizer(model: SupportedModel) -> str:
