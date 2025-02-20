@@ -58,7 +58,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         balance_functions=True,
         include_agent_functions=True,
     )
-    model = SupportedModel.deepseek_chat
+    model = SupportedModel.gemini_20_flash
 
     # Setup per-nft-agent class.
     name: str
