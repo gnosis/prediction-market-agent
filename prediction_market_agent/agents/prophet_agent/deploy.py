@@ -91,7 +91,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = (
-        2  # 20 # Increase once `get_betting_strategy` is implemented.
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
     )
     agent: PredictionProphetAgent
 
@@ -502,7 +502,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = (
-        2  # 20 # Increase once `get_betting_strategy` is implemented.
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
     )
     agent: PredictionProphetAgent
 
@@ -546,7 +546,7 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = (
-        2  # 20 # Increase once `get_betting_strategy` is implemented.
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
     )
     agent: PredictionProphetAgent
 
