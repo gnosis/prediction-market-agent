@@ -9,7 +9,6 @@ from prediction_market_agent_tooling.tools.contract import (
 )
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.parallelism import par_map
-from tabulate import tabulate
 from tenacity import retry, stop_after_attempt, wait_fixed
 from web3 import Web3
 
@@ -138,6 +137,19 @@ def calculate_nft_and_xdai_balances_diff(
     return balances_diff
 
 
+def format_markdown_table(data: list[dict[str, t.Any]]) -> str:
+    """Format data as a markdown table string."""
+    headers = list(data[0].keys())
+    header_row = "| " + " | ".join(headers) + " |"
+    separator_row = "| " + " | ".join(["---" for _ in headers]) + " |"
+
+    data_rows = []
+    for row in data:
+        data_rows.append("| " + " | ".join(str(x) for x in row.values()) + " |")
+
+    return "\n".join([header_row, separator_row] + data_rows)
+
+
 def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
     balances_diff = calculate_nft_and_xdai_balances_diff(
         rpc_url=rpc_url, initial_balance=initial_xdai_balance_per_agent
@@ -147,9 +159,8 @@ def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
         learnings_per_agent,
         final_summary,
     ) = summarize_prompts_from_all_agents()
-    balances_data = tabulate(
-        [x.values() for x in balances_diff], list(balances_diff[0].keys())
-    )
+
+    balances_data = format_markdown_table(balances_diff)
     final_summary = balances_data + "\n\n---\n" + final_summary
     store_all_learnings_in_db(
         final_summary=final_summary, learnings_per_agent=learnings_per_agent
