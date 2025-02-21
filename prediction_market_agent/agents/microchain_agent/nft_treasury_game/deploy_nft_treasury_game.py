@@ -50,7 +50,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
     sleep_between_iterations = 15
     allow_stop = False
-    import_actions_from_memory = 100
+    import_actions_from_memory = 256
     functions_config = FunctionsConfig(
         common_functions=True,
         include_messages_functions=True,
