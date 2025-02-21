@@ -90,7 +90,9 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 20
+    bet_on_n_markets_per_run = (
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
+    )
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -140,7 +142,6 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
     market since its last trade.
     """
 
-    bet_on_n_markets_per_run = 20
     trade_on_markets_created_after = DatetimeUTC(2024, 10, 31, 0)  # Date of deployment
     get_markets_sort_by = SortBy.NEWEST
     same_market_trade_interval = MarketLifetimeProportionalInterval(max_trades=4)
@@ -500,7 +501,9 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 20
+    bet_on_n_markets_per_run = (
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
+    )
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -542,7 +545,9 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 20
+    bet_on_n_markets_per_run = (
+        5  # 20 # Increase once `get_betting_strategy` is implemented.
+    )
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
