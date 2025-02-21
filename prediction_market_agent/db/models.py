@@ -109,3 +109,7 @@ class ReportNFTGame(SQLModel, table=True):
     # as well.
     learnings: str
     datetime_: DatetimeUTC
+
+    @property
+    def is_overall_report(self) -> bool:
+        return self.agent_id is None

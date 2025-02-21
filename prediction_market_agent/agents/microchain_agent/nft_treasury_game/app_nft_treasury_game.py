@@ -49,6 +49,10 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
+from prediction_market_agent.db.report_table_handler import (
+    ReportNFTGame,
+    ReportNFTGameTableHandler,
+)
 from prediction_market_agent.tools.message_utils import (
     compress_message,
     unzip_message_else_do_nothing,
@@ -74,6 +78,11 @@ def long_term_memory_table_handler(
 @st.cache_resource
 def prompt_table_handler(identifier: AgentIdentifier) -> PromptTableHandler:
     return PromptTableHandler.from_agent_identifier(identifier)
+
+
+@st.cache_resource
+def report_table_handler() -> ReportNFTGameTableHandler:
+    return ReportNFTGameTableHandler()
 
 
 @st.dialog("Send message to agent")
@@ -339,6 +348,23 @@ Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.
     )
 
 
+def reports_page() -> None:
+    handler = report_table_handler()
+    reports: t.Sequence[ReportNFTGame] = handler.sql_handler.get_all()
+    overall_reports = [report for report in reports if report.is_overall_report]
+    overall_reports.sort(key=lambda r: r.datetime_, reverse=True)
+
+    for i, report in enumerate(overall_reports):
+        game_number = len(overall_reports) - i
+        st.markdown(
+            f"""### Game {game_number}, from {report.datetime_.strftime('%Y-%m-%d %H:%M:%S')}
+{report.learnings}
+
+---
+"""
+        )
+
+
 def get_agent_page(
     nft_agent: type[DeployableAgentNFTGameAbstract],
 ) -> t.Callable[[], None]:
@@ -362,6 +388,9 @@ pg = st.navigation(
     [
         st.Page(get_agent_page(agent), title=agent.name, url_path=agent.get_url())
         for agent in DEPLOYED_NFT_AGENTS
+    ]
+    + [
+        st.Page(reports_page, title="Game Reports", url_path="game-reports"),
     ]
 )
 pg.run()
