@@ -31,6 +31,7 @@ def main(
     check_game_finished: bool = True,
     sleep: bool = True,
     do_report: bool = True,
+    set_balances: bool = True,
 ) -> None:
     if check_game_finished and not is_game_in_finished_state(rpc_url=rpc_url):
         logger.info(f"Treasury not empty, exiting.")
@@ -45,11 +46,12 @@ def main(
             rpc_url=rpc_url,
             initial_xdai_balance_per_agent=STARTING_AGENT_BALANCE,
         )
-    reset_balances(
-        rpc_url=rpc_url,
-        new_balance_agents_xdai=STARTING_AGENT_BALANCE,
-        new_balance_treasury_xdai=STARTING_TREASURY_BALANCE,
-    )
+    if set_balances:
+        reset_balances(
+            rpc_url=rpc_url,
+            new_balance_agents_xdai=STARTING_AGENT_BALANCE,
+            new_balance_treasury_xdai=STARTING_TREASURY_BALANCE,
+        )
     redistribute_nft_keys(rpc_url=rpc_url)
 
 

@@ -38,9 +38,9 @@ REQUIRED_PROMPT_ENDING_FOR_MICROCHAIN = f"""
 {{engine_help}}
 
 Only output valid Python function calls, without code formatting characters, without any other text.
-Only output a single function call per message.
 Make 'Reasoning' calls frequently - at least every other call.
 If some function errors out, include the exact function and arguments you tried to call in your follow-up reasoning call.
+ONLY output a SINGLE function call per message. More than one function call in a message will throw an error.
 """
 
 JUST_BORN_SYSTEM_PROMPT_CONFIG = SystemPromptConfig(
