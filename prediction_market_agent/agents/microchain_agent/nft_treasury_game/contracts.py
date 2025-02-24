@@ -9,9 +9,11 @@ from prediction_market_agent_tooling.gtypes import (
     Wei,
     xDai,
 )
+from prediction_market_agent_tooling.tools.balances import Balances, get_balances
 from prediction_market_agent_tooling.tools.contract import (
     ContractERC721BaseClass,
     ContractOnGnosisChain,
+    ContractOwnableERC721OnGnosisChain,
     OwnableContract,
     abi_field_validator,
 )
@@ -25,6 +27,75 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_mode
 )
 
 
+class NFTKeysContract(ContractOwnableERC721OnGnosisChain):
+    address: ChecksumAddress = Web3.to_checksum_address(
+        "0x0D7C0Bd4169D090038c6F41CFd066958fe7619D0"
+    )
+
+    @staticmethod
+    def retrieve_total_number_of_keys() -> int:
+        # We could iteratively call `owner_of` for a range of token_ids, thus finding out the max supply. However,
+        # in the current implementation, no new tokens can be created and max_supply = 5, hence hardcoding it here.
+        return 5
+
+
+class AgentRegisterContract(ContractOnGnosisChain, OwnableContract):
+    # Contract ABI taken from built https://github.com/gnosis/labs-contracts.
+    abi: ABI = abi_field_validator(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../../../abis/agentregistry.abi.json",
+        )
+    )
+
+    address: ChecksumAddress = Web3.to_checksum_address(
+        "0x8a975d8cee52d1f61fe5e3f94068b58e1c4d2f79"
+    )
+
+    def register_as_agent(
+        self,
+        api_keys: APIKeys,
+        web3: Web3 | None = None,
+    ) -> TxReceipt:
+        return self.send(
+            api_keys=api_keys,
+            function_name="registerAsAgent",
+            web3=web3,
+        )
+
+    def deregister_as_agent(
+        self,
+        api_keys: APIKeys,
+        web3: Web3 | None = None,
+    ) -> TxReceipt:
+        return self.send(
+            api_keys=api_keys,
+            function_name="deregisterAsAgent",
+            web3=web3,
+        )
+
+    def is_registered_agent(
+        self,
+        agent_address: ChecksumAddress,
+        web3: Web3 | None = None,
+    ) -> bool:
+        is_registered_agent: bool = self.call(
+            "isRegisteredAgent",
+            function_params=[agent_address],
+            web3=web3,
+        )
+        return is_registered_agent
+
+    def get_all_registered_agents(
+        self,
+        web3: Web3 | None = None,
+    ) -> t.List[ChecksumAddress]:
+        return [
+            Web3.to_checksum_address(addr)
+            for addr in self.call("getAllRegisteredAgents", web3=web3)
+        ]
+
+
 class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     # Contract ABI taken from built https://github.com/gnosis/labs-contracts.
     abi: ABI = abi_field_validator(
@@ -35,7 +106,7 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     )
 
     address: ChecksumAddress = Web3.to_checksum_address(
-        "0xe9dd78FF297DbaAbe5D0E45aE554a4B561935DE9"
+        "0xa46db91a4c786f8262621fa2dae65ba5a96bc60e"
     )
 
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:
@@ -154,6 +225,9 @@ class SimpleTreasuryContract(ContractOnGnosisChain, OwnableContract):
     address: ChecksumAddress = Web3.to_checksum_address(
         "0x624ad0db52e6b18afb4d36b8e79d0c2a74f3fc8a"
     )
+
+    def balances(self, web3: Web3 | None = None) -> Balances:
+        return get_balances(self.address, web3=web3)
 
     def required_nft_balance(self, web3: Web3 | None = None) -> int:
         min_num_of_nfts: int = self.call("requiredNFTBalance", web3=web3)

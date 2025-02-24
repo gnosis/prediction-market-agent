@@ -2,6 +2,11 @@
   {
     "inputs": [
       {
+        "internalType": "contract IAgentRegistry",
+        "name": "_agentRegistry",
+        "type": "address"
+      },
+      {
         "internalType": "address payable",
         "name": "_treasury",
         "type": "address"
@@ -15,7 +20,7 @@
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
-  { "inputs": [], "name": "MessageNotSentByAgent", "type": "error" },
+  { "inputs": [], "name": "AgentNotRegistered", "type": "error" },
   {
     "inputs": [
       { "internalType": "address", "name": "owner", "type": "address" }
@@ -90,19 +95,27 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "agentAddress", "type": "address" }
+    "inputs": [],
+    "name": "agentRegistry",
+    "outputs": [
+      {
+        "internalType": "contract IAgentRegistry",
+        "name": "",
+        "type": "address"
+      }
     ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "countMessages",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "agentAddress", "type": "address" },
-      { "internalType": "uint256", "name": "idx", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "idx", "type": "uint256" }],
     "name": "getAtIndex",
     "outputs": [
       {
@@ -142,10 +155,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "agentAddress", "type": "address" },
-      { "internalType": "uint256", "name": "idx", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "idx", "type": "uint256" }],
     "name": "popMessageAtIndex",
     "outputs": [
       {

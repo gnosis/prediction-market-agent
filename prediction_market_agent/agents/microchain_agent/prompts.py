@@ -13,6 +13,7 @@ class FunctionsConfig(BaseModel):
     include_messages_functions: bool = False
     include_nft_functions: bool = False
     balance_functions: bool = False
+    nft_game_functions: bool = False
 
     def combine(self, other: "FunctionsConfig") -> "FunctionsConfig":
         """
