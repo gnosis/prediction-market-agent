@@ -48,6 +48,9 @@ from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FU
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     MESSAGES_FUNCTIONS,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_functions import (
+    NFT_GAME_FUNCTIONS,
+)
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,
 )
@@ -183,6 +186,9 @@ def build_agent_functions(
 
     if functions_config.balance_functions:
         functions.extend(f() for f in BALANCE_FUNCTIONS)
+
+    if functions_config.nft_game_functions:
+        functions.extend(f() for f in NFT_GAME_FUNCTIONS)
 
     if long_term_memory:
         functions.extend(f(long_term_memory=long_term_memory) for f in MEMORY_FUNCTIONS)

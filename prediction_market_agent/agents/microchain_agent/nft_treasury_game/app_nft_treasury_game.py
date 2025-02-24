@@ -24,9 +24,9 @@ from prediction_market_agent.agents.microchain_agent.agent_functions import (
     UpdateMySystemPrompt,
 )
 from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    NFT_TOKEN_FACTORY,
-    TREASURY_ADDRESS,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    NFTKeysContract,
+    SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
@@ -295,7 +295,7 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
         else nft_agent.get_initial_system_prompt()
     )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
-    n_nft = BalanceOfNFT()(NFT_TOKEN_FACTORY, nft_agent.wallet_address)
+    n_nft = BalanceOfNFT()(NFTKeysContract().address, nft_agent.wallet_address)
     nft_keys_message = (
         "and does not hold any NFT keys"
         if n_nft == 0
@@ -340,7 +340,7 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
 
 @st.fragment(run_every=timedelta(seconds=10))
 def show_treasury_part() -> None:
-    treasury_xdai_balance = get_balances(TREASURY_ADDRESS).xdai
+    treasury_xdai_balance = SimpleTreasuryContract().balances().xdai
     st.markdown(
         f"""### Treasury
 Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.""",

@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    NFTKeysContract,
     SimpleTreasuryContract,
 )
 from tests_integration_with_local_chain.conftest import (
@@ -83,3 +84,11 @@ def test_withdraw(
         simple_treasury_contract.address, web3=local_web3
     ).xdai
     assert int(final_treasury_balance) == 0
+
+
+def test_nft_keys_contract_matches(
+    local_web3: Web3, simple_treasury_contract: SimpleTreasuryContract
+) -> None:
+    assert (
+        simple_treasury_contract.nft_contract().address == NFTKeysContract().address
+    ), "These should be the same!"

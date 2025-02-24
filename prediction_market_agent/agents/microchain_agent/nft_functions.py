@@ -8,9 +8,6 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
-    SimpleTreasuryContract,
-)
 
 
 class BalanceOfNFT(Function):
@@ -93,29 +90,8 @@ class SafeTransferFromNFT(Function):
         return "Token transferred successfully."
 
 
-class WithdrawFromTreasury(Function):
-    @property
-    def description(self) -> str:
-        required_balance_nft_tokens = SimpleTreasuryContract().required_nft_balance()
-        return f"Transfers the entire balance of the treasury to the caller. For the function to succeed, the caller must own {required_balance_nft_tokens} NFT tokens."
-
-    @property
-    def example_args(self) -> list[str]:
-        return []
-
-    def __call__(self) -> str:
-        keys = MicrochainAgentKeys()
-        treasury_contract = SimpleTreasuryContract()
-        logger.info(
-            f"Withdrawing from the treasury using sender {keys.bet_from_address}"
-        )
-        treasury_contract.withdraw(api_keys=keys)
-        return "Treasury successfully emptied."
-
-
 NFT_FUNCTIONS: list[type[Function]] = [
     BalanceOfNFT,
     OwnerOfNFT,
     SafeTransferFromNFT,
-    WithdrawFromTreasury,
 ]

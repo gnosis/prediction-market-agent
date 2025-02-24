@@ -88,7 +88,6 @@ def pop_message(minimum_fee: xDai, api_keys: APIKeys_PMAT) -> MessageContainer |
     return (
         agent_comm_contract.pop_message(
             api_keys=api_keys,
-            agent_address=api_keys.bet_from_address,
             index=filtered_indices_and_messages[0][0],
         )
         if filtered_indices_and_messages

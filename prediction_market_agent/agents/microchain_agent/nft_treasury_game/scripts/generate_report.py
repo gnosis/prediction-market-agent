@@ -4,9 +4,6 @@ from langchain_core.prompts import PromptTemplate
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
-from prediction_market_agent_tooling.tools.contract import (
-    ContractOwnableERC721OnGnosisChain,
-)
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.parallelism import par_map
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -17,8 +14,8 @@ from prediction_market_agent.agents.microchain_agent.memory import DatedChatMess
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     fetch_memories_from_last_run,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    NFT_TOKEN_FACTORY,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    NFTKeysContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
@@ -43,9 +40,7 @@ Memories:
 
 
 def get_nft_balance(owner_address: ChecksumAddress, web3: Web3) -> int:
-    contract = ContractOwnableERC721OnGnosisChain(
-        address=Web3.to_checksum_address(NFT_TOKEN_FACTORY)
-    )
+    contract = NFTKeysContract()
     balance: int = contract.balanceOf(
         Web3.to_checksum_address(owner_address), web3=web3
     )
