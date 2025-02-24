@@ -34,7 +34,7 @@ from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
-    bet_on_n_markets_per_run = 3
+    bet_on_n_markets_per_run = 2
 
     @property
     def model(self) -> str | None:
@@ -49,7 +49,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 20
+    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -90,9 +90,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = (
-        5  # 20 # Increase once `get_betting_strategy` is implemented.
-    )
+    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -292,7 +290,6 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
-    bet_on_n_markets_per_run = 2
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
@@ -375,7 +372,6 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
     agent: PredictionProphetAgent
-    bet_on_n_markets_per_run = 2
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -460,7 +456,6 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
 
 class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
-    bet_on_n_markets_per_run = 2
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -501,9 +496,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = (
-        5  # 20 # Increase once `get_betting_strategy` is implemented.
-    )
+    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -545,9 +538,7 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = (
-        5  # 20 # Increase once `get_betting_strategy` is implemented.
-    )
+    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
