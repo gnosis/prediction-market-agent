@@ -18,7 +18,7 @@ class InvalidAgent(DeployableTraderAgent):
     Because on Omen, after market is resolved as invalid, outcome tokens are worth equally, which means one can be profitable by buying the cheapest token.
     Also the function to mark invalid questions is based on Omen-resolution rules."""
 
-    bet_on_n_markets_per_run: int = 20
+    bet_on_n_markets_per_run: int = 10
     supported_markets = [MarketType.OMEN]
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
