@@ -49,7 +49,7 @@ class AgentRegisterContract(ContractOnGnosisChain, OwnableContract):
     )
 
     address: ChecksumAddress = Web3.to_checksum_address(
-        "0x8a975d8cee52d1f61fe5e3f94068b58e1c4d2f79"
+        "0xe8ae78b19c997b6da8189b1a644d4076f8bc880e"
     )
 
     def register_as_agent(
@@ -106,7 +106,7 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     )
 
     address: ChecksumAddress = Web3.to_checksum_address(
-        "0xa46db91a4c786f8262621fa2dae65ba5a96bc60e"
+        "0xca6c43b46febb0505d13a7704084912883eecf32"
     )
 
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:
@@ -167,7 +167,6 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     def pop_message(
         self,
         api_keys: APIKeys,
-        agent_address: ChecksumAddress,
         index: int = 0,
         web3: Web3 | None = None,
     ) -> MessageContainer:
@@ -183,14 +182,14 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
 
         # Peek the element before popping.
         message_container = self.get_at_index(
-            agent_address=agent_address, idx=index, web3=web3
+            agent_address=api_keys.bet_from_address, idx=index, web3=web3
         )
 
         # Next, pop that element and discard the transaction receipt.
         self.send(
             api_keys=api_keys,
             function_name="popMessageAtIndex",
-            function_params=[agent_address, index],
+            function_params=[index],
             web3=web3,
         )
 

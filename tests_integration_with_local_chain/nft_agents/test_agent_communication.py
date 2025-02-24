@@ -82,7 +82,7 @@ def test_pop_message(
     assert stored_message.message == HexBytes(message)
 
     # fetch latest message
-    stored_message = comm_contract.pop_message(test_keys, recipient, web3=local_web3)
+    stored_message = comm_contract.pop_message(test_keys, web3=local_web3)
     # assert message match
     assert stored_message.recipient == recipient
     assert stored_message.message == message
