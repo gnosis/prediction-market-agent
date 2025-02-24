@@ -2,12 +2,14 @@ from microchain import Function
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.contract import (
     ContractOwnableERC721OnGnosisChain,
-    SimpleTreasuryContract,
 )
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    SimpleTreasuryContract,
 )
 
 

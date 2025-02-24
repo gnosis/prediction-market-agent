@@ -1,8 +1,11 @@
 import zlib
 
 from prediction_market_agent_tooling.gtypes import HexBytes
-from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_models import (
+    MessageContainer,
+)
 
 
 def compress_message(message: str) -> bytes:

@@ -4,12 +4,16 @@ from unittest.mock import PropertyMock, patch
 import pytest
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import wei_type
-from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
-from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
 
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentCommunicationContract,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_models import (
+    MessageContainer,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
     GetUnseenMessagesInformation,
     ReceiveMessage,

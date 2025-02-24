@@ -33,7 +33,7 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = "^0.58.5"
+prediction-market-agent-tooling = "^0.59.0.dev399"
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -43,7 +43,7 @@ microchain-python = { git = "https://github.com/galatolofederico/microchain.git"
 pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
 psycopg2-binary = "^2.9.9"
 sqlmodel = "^0.0.22"
-farcaster = "^0.7.11"
+farcaster = { git = "https://github.com/gabrielfior/farcaster-py.git", branch = "update-eth-account" }
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
 streamlit = "^1.40.0"
@@ -63,6 +63,7 @@ opentelemetry-sdk = "^1.28.0"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
+ape-foundry = "^0.8.2"
 
 [build-system]
 requires = ["poetry-core"]
