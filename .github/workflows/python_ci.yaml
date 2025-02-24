@@ -24,11 +24,22 @@ jobs:
 
   pytest:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - name: Unit Tests
+            command: 'poetry run python -m pytest tests/ -p no:ape_test -vvv'
+          - name: Integration with Local Chain
+            command: 'poetry run python -m pytest tests_integration_with_local_chain/ --disable-isolation -vvv'
+    name: pytest - ${{ matrix.test.name }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/python_prepare
-      - name: Run pytest
-        run: poetry run pytest tests
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Run Tests - ${{ matrix.test.name }}
+        run: ${{ matrix.test.command }}
 
   pytest-docker:
     runs-on: ubuntu-latest

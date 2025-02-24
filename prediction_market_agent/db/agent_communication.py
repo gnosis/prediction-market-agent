@@ -3,12 +3,17 @@ from functools import cache
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import HexBytes, Wei, wei_type, xDai
-from prediction_market_agent_tooling.tools.contract import AgentCommunicationContract
-from prediction_market_agent_tooling.tools.data_models import MessageContainer
 from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import TxReceipt
+
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentCommunicationContract,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_models import (
+    MessageContainer,
+)
 
 
 class MessagesStatistics(BaseModel):

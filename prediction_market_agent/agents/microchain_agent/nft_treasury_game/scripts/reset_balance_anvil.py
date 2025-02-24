@@ -1,11 +1,13 @@
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.contract import SimpleTreasuryContract
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     TREASURY_ADDRESS,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     DEPLOYED_NFT_AGENTS,
