@@ -12,6 +12,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
     MicrochainAgentKeys,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentRegisterContract,
     SimpleTreasuryContract,
 )
 from prediction_market_agent.db.agent_communication import (
@@ -55,11 +56,17 @@ However, other agents, same as you, can decide to ignore messages with low fees.
         return ["0x123", "Hello!", f"{get_message_minimum_value()}"]
 
     def __call__(self, address: str, message: str, fee: float) -> str:
+        recipient = Web3.to_checksum_address(address)
+
+        registered_addresses = AgentRegisterContract().get_all_registered_agents()
+        if recipient not in registered_addresses:
+            return f"Agent with address {address} is not currently receiving messages, please check later."
+
         keys = MicrochainAgentKeys()
         api_keys = APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key)
         send_message(
             api_keys=api_keys,
-            recipient=Web3.to_checksum_address(address),
+            recipient=recipient,
             message=HexBytes(compress_message(message)),
             amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
         )
