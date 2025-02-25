@@ -8,6 +8,7 @@ Can also be executed locally, simply by running `python prediction_market_agent/
 
 from enum import Enum
 
+import nest_asyncio
 import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -166,6 +167,7 @@ def main(
     agent: RunnableAgent,
     market_type: MarketType,
 ) -> None:
+    nest_asyncio.apply()  # See https://github.com/pydantic/pydantic-ai/issues/889
     RUNNABLE_AGENTS[agent]().run(market_type=market_type)
 
 
