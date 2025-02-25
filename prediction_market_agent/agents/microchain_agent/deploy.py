@@ -58,6 +58,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     prompt_handler: PromptTableHandler
     agent: Agent
     goal_manager: GoalManager | None
+    api_keys: APIKeys
 
     @classmethod
     def get_description(cls) -> str:
@@ -102,6 +103,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         self.prompt_handler = self.build_prompt_handler()
         self.agent = self.build_agent(market_type=MarketType.OMEN)
         self.goal_manager = self.build_goal_manager(agent=self.agent)
+        self.api_keys = APIKeys()
 
     def run(
         self,
@@ -111,9 +113,13 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
-        self.run_general_agent(market_type=market_type)
+        try:
+            self.run_general_agent(market_type=market_type)
+        finally:
+            self.deinitialise_agent()
 
     def initialise_agent(self) -> None:
+        logger.info(f"Initialising agent {self.__class__.__name__}.")
         self.agent.reset()
         self.agent.build_initial_messages()
 
@@ -132,6 +138,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             ]
             # Inject them after the system message.
             self.agent.history[1:1] = messages_to_insert
+
+    def deinitialise_agent(self) -> None:
+        logger.info(f"Denitialising agent {self.__class__.__name__}.")
 
     @observe()
     def run_general_agent(self, market_type: MarketType) -> None:

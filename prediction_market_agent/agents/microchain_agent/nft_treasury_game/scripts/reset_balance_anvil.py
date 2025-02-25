@@ -3,9 +3,6 @@ from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
 from web3 import Web3
 
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    TREASURY_ADDRESS,
-)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     SimpleTreasuryContract,
 )
@@ -35,7 +32,7 @@ def reset_balances(
 
     set_balance(
         rpc_url=rpc_url,
-        address=TREASURY_ADDRESS,
+        address=SimpleTreasuryContract().address,
         balance=new_balance_treasury_xdai,
     )
 

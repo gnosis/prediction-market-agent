@@ -4,9 +4,6 @@ from enum import Enum
 from microchain.functions import Reasoning
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.contract import (
-    ContractOwnableERC721OnGnosisChain,
-)
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
@@ -26,11 +23,9 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    NFT_TOKEN_FACTORY,
-    TREASURY_ADDRESS,
-)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentRegisterContract,
+    NFTKeysContract,
     SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
@@ -40,7 +35,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
     NFTGameStatus,
     get_nft_game_status,
 )
-from prediction_market_agent.db.agent_communication import get_treasury_tax_ratio
 
 
 class Role(Enum):
@@ -59,6 +53,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         include_nft_functions=True,
         balance_functions=True,
         include_agent_functions=True,
+        nft_game_functions=True,
     )
     model = SupportedModel.gemini_20_flash
 
@@ -78,7 +73,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     def retrieve_total_number_of_keys(cls) -> int:
         # We could iteratively call `owner_of` for a range of token_ids, thus finding out the max supply. However,
         # in the current implementation, no new tokens can be created and max_supply = 5, hence hardcoding it here.
-        return 5
+        return NFTKeysContract.retrieve_total_number_of_keys()
 
     @classmethod
     def get_description(cls) -> str:
@@ -106,8 +101,21 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         return system_prompt
 
     def get_holding_n_nft_keys(self) -> int:
-        contract = ContractOwnableERC721OnGnosisChain(address=NFT_TOKEN_FACTORY)
-        return contract.balanceOf(self.wallet_address)
+        return NFTKeysContract().balanceOf(self.wallet_address)
+
+    def initialise_agent(self) -> None:
+        super().initialise_agent()
+        logger.info(
+            f"Registering agent {self.__class__.__name__} with address {self.api_keys.bet_from_address} to the agent registry."
+        )
+        AgentRegisterContract().register_as_agent(api_keys=self.api_keys)
+
+    def deinitialise_agent(self) -> None:
+        super().deinitialise_agent()
+        logger.info(
+            f"Removing agent {self.__class__.__name__} with address {self.api_keys.bet_from_address} from the agent registry."
+        )
+        AgentRegisterContract().deregister_as_agent(api_keys=self.api_keys)
 
     def before_iteration_callback(self) -> CallbackReturn:
         """
@@ -339,22 +347,9 @@ You are also very good at making people believe that you are on their side, even
 
 
 def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
-    keys = MicrochainAgentKeys()
-    n_nft_keys = DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()
-    other_agents_keys_formatted = ", ".join(
-        x.wallet_address
-        for x in DEPLOYED_NFT_AGENTS
-        if x.wallet_address != wallet_address
-    )
-    sending_cap_message = (
-        f"- Keep in mind that you are able to send, and others agents are able to send at max {keys.SENDING_XDAI_CAP} xDai, however people can send you as much as they want."
-        if keys.SENDING_XDAI_CAP is not None
-        else ""
-    )
     return f"""You participate in the NFT Treasury game.
 
 - Your wallet address is {wallet_address}.
-- Other agents participating and maybe holding keys are {other_agents_keys_formatted}.
     
 NFT Treasury game description:
 
@@ -364,16 +359,13 @@ NFT Treasury game description:
     - The current amount of xDai in the treasury
     - The total number of keys in circulation
     - The distribution of keys among participants
-- Address of the treasury, wallet holding the treasury's xDai, is {TREASURY_ADDRESS}.
-- Address of the NFT contract is {NFT_TOKEN_FACTORY}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}. 
-  - You can own multiple NFT keys. 
-  - You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
+- You can own multiple NFT keys. 
+- You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
 - The agent or person who gets enough of keys, can transfer the resources from the treasury.
 - Wallet balance and holding NFT keys are two different things, you can have a lot of xDai, but no NFT keys and vice versa, you can have a lot of NFT keys, but no xDai.
 - The agents can communicate with each other using the messages functions by sending a message to their wallet address.
 - Sending a message costs you a fee.
 - Receiving messages will pay you a fee, but part of that fee goes as a tax to the treasury, which is good for you.
-  - Treasury tax rate is currently {get_treasury_tax_ratio() * 100:.2f}%, for example, if someone sends you 10 xDai, you would receive {(1 - get_treasury_tax_ratio()) * 10:.2f} xDai.
 - When checking if someone paid you, you need to compare it with your previous balance, as you can already have some money.
 - If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
 - After reading the message, you can decide to ignore it, ie you don't have to always take action.
@@ -381,16 +373,14 @@ NFT Treasury game description:
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
 - Don't organise future meetings, as that's not possible, you can only communicate with other agents through messages in real-time.
-{sending_cap_message}
 """
 
 
 def nft_treasury_game_buyer_prompt() -> str:
-    return f"""You participate in the NFT Treasury game as a key buyer.
+    return """You participate in the NFT Treasury game as a key buyer.
 
 [OBJECTIVE]
-- Your goal is to acquire {DeployableAgentNFTGameAbstract.retrieve_treasury_thresold()} out of {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys to unlock the treasury
-- The total xDai spent on acquiring these keys must be less than the treasury's value to ensure a profitable outcome when claiming the treasury.
+- The total xDai spent on acquiring keys must be less than the treasury's value to ensure a profitable outcome when claiming the treasury.
 
 [KEY ACQUISITION STRATEGY]
 - Monitor the treasury's current xDai balance closely
@@ -415,7 +405,7 @@ def nft_treasury_game_buyer_prompt() -> str:
 
 
 def nft_treasury_game_seller_prompt() -> str:
-    return f"""You participate in the NFT Treasury game as a key seller.
+    return """You participate in the NFT Treasury game as a key seller.
     
 NFT Key seller description:
 

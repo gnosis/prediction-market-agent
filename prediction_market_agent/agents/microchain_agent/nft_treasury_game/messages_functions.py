@@ -4,7 +4,6 @@ from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
@@ -12,8 +11,9 @@ from web3 import Web3
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
-    TREASURY_ADDRESS,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentRegisterContract,
+    SimpleTreasuryContract,
 )
 from prediction_market_agent.db.agent_communication import (
     get_message_minimum_value,
@@ -56,11 +56,17 @@ However, other agents, same as you, can decide to ignore messages with low fees.
         return ["0x123", "Hello!", f"{get_message_minimum_value()}"]
 
     def __call__(self, address: str, message: str, fee: float) -> str:
+        recipient = Web3.to_checksum_address(address)
+
+        registered_addresses = AgentRegisterContract().get_all_registered_agents()
+        if recipient not in registered_addresses:
+            return f"Agent with address {address} is not currently receiving messages, please check later."
+
         keys = MicrochainAgentKeys()
         api_keys = APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key)
         send_message(
             api_keys=api_keys,
-            recipient=Web3.to_checksum_address(address),
+            recipient=recipient,
             message=HexBytes(compress_message(message)),
             amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
         )
@@ -140,7 +146,7 @@ class GameRoundEnd(Function):
 
     def __call__(self, reasoning: str) -> str:
         logger.info(
-            f"Agent decided to stop playing when treasury balance is {get_balances(TREASURY_ADDRESS).total}"
+            f"Agent decided to stop playing when treasury balance is {SimpleTreasuryContract().balances().xdai}"
         )
         return self.GAME_ROUND_END_OUTPUT
 
