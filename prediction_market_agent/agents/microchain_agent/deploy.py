@@ -113,7 +113,10 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         Override main 'run' method, as the all logic from the helper methods
         is handed over to the agent.
         """
-        self.run_general_agent(market_type=market_type)
+        try:
+            self.run_general_agent(market_type=market_type)
+        finally:
+            self.deinitialise_agent()
 
     def initialise_agent(self) -> None:
         logger.info(f"Initialising agent {self.__class__.__name__}.")
@@ -198,8 +201,6 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
             self.handle_goal_evaluation(
                 check_not_none(goal), initial_formatted_system_prompt
             )
-
-        self.deinitialise_agent()
 
     def save_agent_history(
         self, initial_formatted_system_prompt: str, save_last_n: int
