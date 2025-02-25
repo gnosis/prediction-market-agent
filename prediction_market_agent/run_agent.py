@@ -167,7 +167,7 @@ def main(
     agent: RunnableAgent,
     market_type: MarketType,
 ) -> None:
-    nest_asyncio.apply()  # See https://github.com/pydantic/pydantic-ai/issues/889
+    nest_asyncio.apply()  # See https://github.com/pydantic/pydantic-ai/issues/889, we had issue with Think Thoroughly that is using multiprocessing heavily.
     RUNNABLE_AGENTS[agent]().run(market_type=market_type)
 
 
