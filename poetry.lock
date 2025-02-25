@@ -4858,13 +4858,13 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "langfuse"
-version = "2.59.3"
+version = "2.59.4"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langfuse-2.59.3-py3-none-any.whl", hash = "sha256:67bebb0b1a40d160ac609a0aeaeaf0ab5dd2c139fde5da1ee6f7e8f14f84d392"},
-    {file = "langfuse-2.59.3.tar.gz", hash = "sha256:f417292b8b4b1561e07cae78bcb22380c62bc71266579b187bec19ebf0afec6a"},
+    {file = "langfuse-2.59.4-py3-none-any.whl", hash = "sha256:91ab95f57ab6c1e1461b63a6e05b6f2e1fc166011cea03aad2f9825e5e4ec836"},
+    {file = "langfuse-2.59.4.tar.gz", hash = "sha256:1833732bf42c487ba9f28fdb0ec83e458161e6ed7e66f312ce5bd065f49c951c"},
 ]
 
 [package.dependencies]
@@ -4972,13 +4972,13 @@ query-tools = ["guidance (>=0.0.64,<0.0.65)", "jsonpath-ng (>=1.6.0,<2.0.0)", "l
 
 [[package]]
 name = "logfire"
-version = "3.6.2"
+version = "3.6.4"
 description = "The best Python observability tool! 🪵🔥"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire-3.6.2-py3-none-any.whl", hash = "sha256:361f68c21a8799f605951a46ee63ee3713a74df79396744c4f7a3c8b7d9e4ac6"},
-    {file = "logfire-3.6.2.tar.gz", hash = "sha256:ebea2d1c27cf3ddbc32bd4f3cb8aa10c4f18a44253472b31a975ad2e792bffce"},
+    {file = "logfire-3.6.4-py3-none-any.whl", hash = "sha256:907cd6b7ffee4e9e9c30f620a3f5cb4fa44b81ef6d3e23c33f0fbe02fc3584fc"},
+    {file = "logfire-3.6.4.tar.gz", hash = "sha256:6933aa6ae4625a100238a37ed33f4ad03db5ea063520c28ca023fe4853429526"},
 ]
 
 [package.dependencies]
@@ -5015,13 +5015,13 @@ wsgi = ["opentelemetry-instrumentation-wsgi (>=0.42b0)"]
 
 [[package]]
 name = "logfire-api"
-version = "3.6.2"
+version = "3.6.4"
 description = "Shim for the Logfire SDK which does nothing unless Logfire is installed"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire_api-3.6.2-py3-none-any.whl", hash = "sha256:25175e188cb97d9affa3c37dd3a14a50a3ae8e9da11a396e46fdd546d1b8cc94"},
-    {file = "logfire_api-3.6.2.tar.gz", hash = "sha256:e6d7baf1c9dc57964a9dc929dddeda3bee453f0abff2b6f98d231b696a80b5f1"},
+    {file = "logfire_api-3.6.4-py3-none-any.whl", hash = "sha256:92956a82610821fdac9581717a300cac83a0cb5f00c27db21999fedb527f1a76"},
+    {file = "logfire_api-3.6.4.tar.gz", hash = "sha256:b2a3891c1112ff151bcc9274543d2ba26a8a30d40bd94c1ad3eb15fb9f4a3f08"},
 ]
 
 [[package]]
@@ -7378,13 +7378,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.59.0"
+version = "0.59.1"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.59.0-py3-none-any.whl", hash = "sha256:d543abda3f7a26169d285430dbbfca793002c448e7ca5f062997599a7593641e"},
-    {file = "prediction_market_agent_tooling-0.59.0.tar.gz", hash = "sha256:1e600095d3fd6c70fca725faa14c8511c8bec58d93002768417df9182eda3d20"},
+    {file = "prediction_market_agent_tooling-0.59.1-py3-none-any.whl", hash = "sha256:1d56bb902e261ea80ec6444d8b619b919c0908287c7f7a860cb2e48e7e7266cb"},
+    {file = "prediction_market_agent_tooling-0.59.1.tar.gz", hash = "sha256:bc72173de4bf5aa418d5a00f61a2c02cf8ab4db44c8407eb1ce6b14450f90939"},
 ]
 
 [package.dependencies]
@@ -9726,13 +9726,13 @@ doc = ["Sphinx", "sphinx-rtd-theme"]
 
 [[package]]
 name = "setuptools"
-version = "75.8.0"
+version = "75.8.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "setuptools-75.8.0-py3-none-any.whl", hash = "sha256:e3982f444617239225d675215d51f6ba05f845d4eec313da4418fdbb56fb27e3"},
-    {file = "setuptools-75.8.0.tar.gz", hash = "sha256:c5afc8f407c626b8313a86e10311dd3f661c6cd9c09d4bf8c15c0e11f9f2b0e6"},
+    {file = "setuptools-75.8.1-py3-none-any.whl", hash = "sha256:3bc32c0b84c643299ca94e77f834730f126efd621de0cc1de64119e0e17dab1f"},
+    {file = "setuptools-75.8.1.tar.gz", hash = "sha256:65fb779a8f28895242923582eadca2337285f0891c2c9e160754df917c3d2530"},
 ]
 
 [package.extras]
@@ -11833,4 +11833,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "3f8b6deaaa914e5a262289aa8e5638be7e0b0d0d3add23d8dcce0a1caf10b842"
+content-hash = "44ba40d13ea22ddcef2a72619e456ee166b0b30001ff448b1bcded56e6f0320a"
