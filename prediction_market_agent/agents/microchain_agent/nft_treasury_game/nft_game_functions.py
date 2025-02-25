@@ -14,9 +14,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 class GetAgentsInTheGame(Function):
     @property
     def description(self) -> str:
-        return (
-            f"Returns a list of all agents that are currently registered in the game."
-        )
+        return f"Returns a list of all agents that are currently registered in the game and can receive messages."
 
     @property
     def example_args(self) -> list[str]:
