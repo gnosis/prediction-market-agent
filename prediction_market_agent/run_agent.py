@@ -48,7 +48,11 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetClaude3OpusAgent,
     DeployablePredictionProphetClaude35HaikuAgent,
     DeployablePredictionProphetClaude35SonnetAgent,
+    DeployablePredictionProphetDeepSeekChat,
+    DeployablePredictionProphetDeepSeekR1,
+    DeployablePredictionProphetGemini20Flash,
     DeployablePredictionProphetGPT4oAgent,
+    DeployablePredictionProphetGPT4oAgent_B,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4ominiAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
@@ -88,6 +92,7 @@ class RunnableAgent(str, Enum):
     microchain_with_goal_manager_agent_0 = "microchain_with_goal_manager_agent_0"
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
+    prophet_gpt4o_b = "prophet_gpt4o_b"
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
@@ -96,6 +101,9 @@ class RunnableAgent(str, Enum):
     prophet_o1 = "prophet_o1"
     prophet_o3mini = "prophet_o3mini"
     prophet_gpt4omini = "prophet_gpt4omini"
+    prophet_gemini20flash = "prophet_gemini20flash"
+    prophet_deekseekchat = "prophet_deekseekchat"
+    prophet_deepseekr1 = "prophet_deepseekr1"
     olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
@@ -157,6 +165,10 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_claude3_opus: DeployablePredictionProphetClaude3OpusAgent,
     RunnableAgent.prophet_claude35_haiku: DeployablePredictionProphetClaude35HaikuAgent,
     RunnableAgent.prophet_claude35_sonnet: DeployablePredictionProphetClaude35SonnetAgent,
+    RunnableAgent.prophet_gpt4o_b: DeployablePredictionProphetGPT4oAgent_B,
+    RunnableAgent.prophet_gemini20flash: DeployablePredictionProphetGemini20Flash,
+    RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
+    RunnableAgent.prophet_deekseekchat: DeployablePredictionProphetDeepSeekChat,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
