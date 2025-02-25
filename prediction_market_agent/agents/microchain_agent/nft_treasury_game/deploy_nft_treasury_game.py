@@ -112,6 +112,9 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
     def deinitialise_agent(self) -> None:
         super().deinitialise_agent()
+        logger.info(
+            f"Removing agent {self.__class__.__name__} with address {self.api_keys.bet_from_address} from the agent registry."
+        )
         AgentRegisterContract().deregister_as_agent(api_keys=self.api_keys)
 
     def before_iteration_callback(self) -> CallbackReturn:
