@@ -29,16 +29,16 @@ from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
-from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
+from prediction_market_agent.utils import (
+    DEFAULT_OPENAI_MODEL,
+    OPENROUTER_BASE_URL,
+    APIKeys,
+)
 
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 2
-
-    @property
-    def model(self) -> str | None:
-        return self.agent.model
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         prediction = self.agent.predict(market.question)
@@ -46,6 +46,42 @@ class DeployableTraderAgentER(DeployableTraderAgent):
             f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
         )
         return prediction.outcome_prediction
+
+
+class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
+    agent: PredictionProphetAgent
+    model: str
+
+    def load(self) -> None:
+        super().load()
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            subqueries_limit=3,
+            min_scraped_sites=3,
+            research_agent=Agent(
+                OpenAIModel(
+                    self.model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openrouter_api_key.get_secret_value(),
+                        base_url=OPENROUTER_BASE_URL,
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    self.model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openrouter_api_key.get_secret_value(),
+                        base_url=OPENROUTER_BASE_URL,
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
@@ -87,6 +123,94 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
             include_reasoning=True,
             logger=logger,
         )
+
+
+class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
+    """
+    This agent is copy of `DeployablePredictionProphetGPT4oAgent` but with a less internet searches to see,
+    if it will maintain the performance, but with lower Tavily costs.
+    """
+
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.7,
+        )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            subqueries_limit=3,
+            min_scraped_sites=3,
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    model,
+                    openai_client=AsyncOpenAI(
+                        api_key=api_keys.openai_api_key.get_secret_value()
+                    ),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenRouter):
+    bet_on_n_markets_per_run = 4
+    model = "google/gemini-2.0-flash-001"
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+
+class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRouter):
+    model = "deepseek/deepseek-r1"
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+
+class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRouter):
+    model = "deepseek/deepseek-chat"
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
 
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
@@ -496,7 +620,6 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -538,7 +661,6 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
