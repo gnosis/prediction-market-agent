@@ -369,7 +369,7 @@ class ThinkThoroughlyBase(ABC):
 
             if len(scenarios_with_probs) < len(all_scenarios) / 2:
                 raise ValueError(
-                    "Too many of sub_predictions have failed, stopping the agent."
+                    f"Too many of sub_predictions have failed, stopping the agent. Got only {len(scenarios_with_probs)} out of {len(all_scenarios)}."
                 )
 
         final_answer = self.generate_final_decision(
