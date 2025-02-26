@@ -50,7 +50,7 @@ streamlit = "^1.40.0"
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "peter/subqueries_limit" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "peter/logs" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.5.0"
 autogen-agentchat = "^0.4.0"
