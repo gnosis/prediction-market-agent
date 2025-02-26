@@ -22,8 +22,8 @@ def fetch_html(url: str, timeout: int) -> Response:
 
 
 @observe()
-@db_cache(max_age=timedelta(days=1), ignore_args=["timeout"])
-def web_scrape(url: str, timeout: int = 10) -> str:
+@db_cache(max_age=timedelta(days=1), ignore_args=["timeout"], cache_none=False)
+def web_scrape(url: str, timeout: int = 10) -> str | None:
     """
     Taken from agentcoinorg/predictionprophet
 
@@ -51,8 +51,8 @@ def web_scrape(url: str, timeout: int = 10) -> str:
             return text
         else:
             logger.warning("Non-HTML content received")
-            return ""
+            return None
 
     except requests.RequestException as e:
-        logger.error(f"HTTP request failed: {e}")
-        return ""
+        logger.warning(f"HTTP request failed: {e}")
+        return None

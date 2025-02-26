@@ -230,6 +230,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcome
             previous_urls.append(result.url)
 
             scraped_content = web_scrape(url=result.url)
+            if scraped_content is None:
+                continue
+
             scraped_content = summarize_if_required(
                 content=scraped_content, model=model, question=question
             )
