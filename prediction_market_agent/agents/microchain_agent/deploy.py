@@ -172,8 +172,15 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
                 # We initialise agent manually because of inserting past history, so force resume=True, to not re-initialise it which would remove the history.
                 self.agent.run(iterations=1, resume=True)
             except Exception as e:
-                logger.error(f"Error while running microchain agent: {e}")
-                raise e
+                # It's expected that LLMs will sometime misformat the function calls, if there were at least some iterations, we don't need to alert about it.
+                if iteration > 3:
+                    logger.warning(
+                        f"Error while running microchain agent, stopping the execution: {e}"
+                    )
+                    return
+                else:
+                    logger.error(f"Error while running microchain agent, raising: {e}")
+                    raise e
             finally:
                 # Save the agent's history to the long-term memory after every iteration to keep users updated.
                 self.save_agent_history(
