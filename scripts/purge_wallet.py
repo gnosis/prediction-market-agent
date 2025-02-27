@@ -1,3 +1,5 @@
+import time
+
 import typer
 from prediction_market_agent_tooling.gtypes import private_key_type, xDai
 from prediction_market_agent_tooling.loggers import logger
@@ -6,7 +8,9 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 )
 from prediction_market_agent_tooling.markets.omen.omen_contracts import (
     WrappedxDaiContract,
-    sDaiContract,
+)
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    SAFE_COLLATERAL_TOKENS,
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.omen.sell_positions import sell_all
@@ -44,10 +48,11 @@ def main(
         f"Going to move all funds from {api_keys.bet_from_address} to {to_address}."
     )
 
+    starting_balance_of_from_eoa = get_balances(api_keys.public_key)
     starting_balance_of_from = get_balances(api_keys.bet_from_address)
     starting_balance_of_to_address = get_balances(to_address)
 
-    if starting_balance_of_from.xdai < 0.05:
+    if starting_balance_of_from_eoa.xdai < 0.01:
         logger.error(f"We need at least some funds in xDai to pay for the fees.")
         return
 
@@ -84,31 +89,24 @@ def main(
             failed_steps.append("deposit")
             logger.error(f"Failed to deposit xDai into wxDai: {e}")
 
-    # Transfer all wxDai to the new address.
-    try:
-        WrappedxDaiContract().transferFrom(
-            api_keys,
-            api_keys.bet_from_address,
-            to_address,
-            WrappedxDaiContract().balanceOf(api_keys.bet_from_address),
-        )
-    except Exception as e:
-        failed_steps.append("transferFrom")
-        logger.error(f"Failed to transfer wxDai: {e}")
-
-    # Transfer all sDai to the new address.
-    try:
-        sDaiContract().transferFrom(
-            api_keys,
-            api_keys.bet_from_address,
-            to_address,
-            sDaiContract().balanceOf(api_keys.bet_from_address),
-        )
-    except Exception as e:
-        failed_steps.append("transferFrom")
-        logger.error(f"Failed to transfer sDai: {e}")
+    # Transfer all tokens we work with to the new address.
+    for token_contract in SAFE_COLLATERAL_TOKENS:
+        try:
+            token_contract.transferFrom(
+                api_keys,
+                api_keys.bet_from_address,
+                to_address,
+                token_contract.balanceOf(api_keys.bet_from_address),
+            )
+            logger.info(
+                f"Transferred {token_contract.symbol()} from {api_keys.bet_from_address} to {to_address}."
+            )
+        except Exception as e:
+            failed_steps.append("transferFrom")
+            logger.error(f"Failed to transfer {token_contract.symbol()}: {e}")
 
     # Show the ending balances.
+    time.sleep(1)  # Othwerise we would get stale data here.
     ending_balance_of_to_address = get_balances(to_address)
     logger.warning(f"Failed steps: {failed_steps}")
     logger.info(
