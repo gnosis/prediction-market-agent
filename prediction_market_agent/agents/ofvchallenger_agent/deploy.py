@@ -29,6 +29,9 @@ from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     claim_all_bonds_on_reality,
 )
+from prediction_market_agent.agents.specialized_agent.deploy import (
+    SPECIALIZED_FOR_MARKET_CREATORS,
+)
 from prediction_market_agent.utils import APIKeys
 
 OFV_CHALLENGER_TAG = "ofv_challenger"
@@ -45,7 +48,10 @@ MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
     Web3.to_checksum_address("0x89c5cc945dd550bcffb72fe42bff002429f46fec"),
     # Olas market-creator 1.
     Web3.to_checksum_address("0xffc8029154ecd55abed15bd428ba596e7d23f557"),
-]
+] + (
+    # But also use it to challenge the specialized markets (e.g. DevConflict), as we don't have anything better.
+    SPECIALIZED_FOR_MARKET_CREATORS
+)
 
 
 class Challenge(BaseModel):
