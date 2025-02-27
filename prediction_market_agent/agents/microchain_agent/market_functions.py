@@ -11,7 +11,7 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
-    withdraw_wxdai_to_xdai_to_keep_balance,
+    send_keeping_token_to_eoa_xdai,
 )
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet_simplified,
@@ -225,7 +225,7 @@ class BuyTokens(MarketFunction):
 
         # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
         if self.market_type == MarketType.OMEN:
-            withdraw_wxdai_to_xdai_to_keep_balance(
+            send_keeping_token_to_eoa_xdai(
                 APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
             )
 
@@ -291,7 +291,7 @@ class SellTokens(MarketFunction):
     def __call__(self, market_id: str, amount: float) -> str:
         # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
         if self.market_type == MarketType.OMEN:
-            withdraw_wxdai_to_xdai_to_keep_balance(
+            send_keeping_token_to_eoa_xdai(
                 APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
             )
 
