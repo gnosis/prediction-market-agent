@@ -7382,13 +7382,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.60.0"
+version = "0.60.1"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.60.0-py3-none-any.whl", hash = "sha256:681fdb76775facb3613dc05244d3650f7cd827d578f6ba7d3947892e025faa0b"},
-    {file = "prediction_market_agent_tooling-0.60.0.tar.gz", hash = "sha256:76a882a0fd63f323c341caf4b83e1bcdbbdf9efbfbca10b0a6c86685d7691b5a"},
+    {file = "prediction_market_agent_tooling-0.60.1-py3-none-any.whl", hash = "sha256:ab2d883c122da226dfe3ff656158c8c468dee6b0e21d85894c1675e4bf07848a"},
+    {file = "prediction_market_agent_tooling-0.60.1.tar.gz", hash = "sha256:7c6b036546d952587aa025034808bbb94696199d25b3625d81d8eed07dc54d1d"},
 ]
 
 [package.dependencies]
@@ -8466,13 +8466,13 @@ pydantic = ">=2.10"
 
 [[package]]
 name = "pydantic-settings"
-version = "2.8.0"
+version = "2.8.1"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_settings-2.8.0-py3-none-any.whl", hash = "sha256:c782c7dc3fb40e97b238e713c25d26f64314aece2e91abcff592fcac15f71820"},
-    {file = "pydantic_settings-2.8.0.tar.gz", hash = "sha256:88e2ca28f6e68ea102c99c3c401d6c9078e68a5df600e97b43891c34e089500a"},
+    {file = "pydantic_settings-2.8.1-py3-none-any.whl", hash = "sha256:81942d5ac3d905f7f3ee1a70df5dfb62d5569c12f51a5a647defc1c3d9ee2e9c"},
+    {file = "pydantic_settings-2.8.1.tar.gz", hash = "sha256:d5c663dfbe9db9d5e1c646b2e161da12f0d734d422ee56f567d0ea2cee4e8585"},
 ]
 
 [package.dependencies]
@@ -11847,4 +11847,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "95fceeb8067a49cf57e344eb0acaac1c06b06ca0c9048792bd04cd5090116796"
+content-hash = "eab8d7ec1a5d08a7f5f300a832a9d4869842431e6a29672d0a66e711b3c1a38f"
