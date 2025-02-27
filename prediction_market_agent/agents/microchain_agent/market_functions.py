@@ -38,7 +38,7 @@ from prediction_market_agent.tools.prediction_prophet.research import (
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 OMEN_MIN_FEE_BALANCE = xdai_type(0.01)
-WITHDRAW_MULTIPLIER = 2
+MULTIPLIER = 2
 
 
 class MarketFunction(Function):
@@ -226,7 +226,7 @@ class BuyTokens(MarketFunction):
         # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
         if self.market_type == MarketType.OMEN:
             send_keeping_token_to_eoa_xdai(
-                APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
+                APIKeys(), OMEN_MIN_FEE_BALANCE, multiplier=MULTIPLIER
             )
 
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
@@ -292,7 +292,7 @@ class SellTokens(MarketFunction):
         # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
         if self.market_type == MarketType.OMEN:
             send_keeping_token_to_eoa_xdai(
-                APIKeys(), OMEN_MIN_FEE_BALANCE, withdraw_multiplier=WITHDRAW_MULTIPLIER
+                APIKeys(), OMEN_MIN_FEE_BALANCE, multiplier=MULTIPLIER
             )
 
         market: AgentMarket = self.market_type.market_class.get_binary_market(market_id)
