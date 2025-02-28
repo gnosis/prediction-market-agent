@@ -102,7 +102,7 @@ class RunnableAgent(str, Enum):
     prophet_o3mini = "prophet_o3mini"
     prophet_gpt4omini = "prophet_gpt4omini"
     prophet_gemini20flash = "prophet_gemini20flash"
-    prophet_deekseekchat = "prophet_deekseekchat"
+    prophet_deepseekchat = "prophet_deepseekchat"
     prophet_deepseekr1 = "prophet_deepseekr1"
     olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
@@ -168,7 +168,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4o_b: DeployablePredictionProphetGPT4oAgent_B,
     RunnableAgent.prophet_gemini20flash: DeployablePredictionProphetGemini20Flash,
     RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
-    RunnableAgent.prophet_deekseekchat: DeployablePredictionProphetDeepSeekChat,
+    RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
