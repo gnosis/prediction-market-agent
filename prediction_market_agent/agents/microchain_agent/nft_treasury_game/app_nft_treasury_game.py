@@ -34,6 +34,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     ReceiveMessage,
+    RemoveAllUnreadMessages,
     SendPaidMessageToAnotherAgent,
     SleepUntil,
 )
@@ -164,6 +165,8 @@ def customized_chat_message(
             icon = "👤"
         case SendPaidMessageToAnotherAgent.__name__:
             icon = "💸"
+        case RemoveAllUnreadMessages.__name__:
+            icon = "🗑️"
         case _:
             icon = "🤖"
 
@@ -191,6 +194,7 @@ def customized_chat_message(
             Stop.__name__,
             SendPaidMessageToAnotherAgent.__name__,
             SleepUntil.__name__,
+            RemoveAllUnreadMessages.__name__,
             UpdateMySystemPrompt.__name__,
         ):
             st.markdown(parsed_function_output_body)

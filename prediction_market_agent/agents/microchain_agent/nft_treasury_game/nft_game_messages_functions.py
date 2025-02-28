@@ -16,6 +16,9 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentRegisterContract,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    purge_all_messages,
+)
 from prediction_market_agent.db.agent_communication import (
     get_message_minimum_value,
     get_unseen_messages_statistics,
@@ -103,6 +106,21 @@ class ReceiveMessage(Function):
             if popped_message
             else "No new messages"
         )
+
+
+class RemoveAllUnreadMessages(Function):
+    @property
+    def description(self) -> str:
+        return f"Use {RemoveAllUnreadMessages.__name__} to remove all unread messages from your inbox."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> str:
+        keys = MicrochainAgentKeys()
+        purge_all_messages(keys)
+        return "All unread messages have been removed."
 
 
 class SleepUntil(Function):
