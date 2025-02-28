@@ -32,12 +32,10 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
-    BroadcastPublicMessageToHumans,
-    GameRoundEnd,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     ReceiveMessage,
     SendPaidMessageToAnotherAgent,
-    Wait,
+    SleepUntil,
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -154,16 +152,12 @@ def customized_chat_message(
             icon = "🧠"
         case Stop.__name__:
             icon = "😴"
-        case Wait.__name__:
+        case SleepUntil.__name__:
             icon = "⏳"
         case UpdateMySystemPrompt.__name__:
             icon = "📝"
-        case GameRoundEnd.__name__:
-            icon = "🏁"
         case ReceiveMessage.__name__:
             icon = "👤"
-        case BroadcastPublicMessageToHumans.__name__:
-            icon = "📣"
         case SendPaidMessageToAnotherAgent.__name__:
             icon = "💸"
         case _:
@@ -191,10 +185,8 @@ def customized_chat_message(
         if parsed_function_call_name not in (
             Reasoning.__name__,
             Stop.__name__,
-            BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
-            Wait.__name__,
-            GameRoundEnd.__name__,
+            SleepUntil.__name__,
             UpdateMySystemPrompt.__name__,
         ):
             st.markdown(parsed_function_output_body)

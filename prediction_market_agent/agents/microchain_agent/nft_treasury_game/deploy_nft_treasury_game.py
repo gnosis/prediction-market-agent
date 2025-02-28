@@ -1,24 +1,15 @@
-import time
 from enum import Enum
 
-from microchain.functions import Reasoning
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
-from prediction_market_agent.agents.microchain_agent.agent_functions import (
-    GetMyCurrentSystemPrompt,
-)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     CallbackReturn,
     DeployableMicrochainAgentAbstract,
     FunctionsConfig,
     SupportedModel,
-)
-from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    CheckAllPastActionsGivenContext,
 )
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -28,12 +19,8 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     NFTKeysContract,
     SimpleTreasuryContract,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
-    GameRoundEnd,
-)
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    NFTGameStatus,
-    get_nft_game_status,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
+    SleepUntil,
 )
 
 
@@ -118,81 +105,12 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         AgentRegisterContract().deregister_as_agent(api_keys=self.api_keys)
 
     def before_iteration_callback(self) -> CallbackReturn:
-        """
-        In following if statements, we hard-code a few special cases about the game status, to make it a bit easier on the agent logic.
-        """
-        system_prompt = self.agent.history[0] if self.agent.history else None
-        is_seller_without_keys = (
-            self.role == Role.seller and not self.get_holding_n_nft_keys()
-        )
-
-        # First, if the agent just started, but the game is not ready yet, make him sleep and stop -- until the game is ready.
-        # Otherwise, he would try to learn from past games (until he realise there are none!), he'd try to communicate, but without any money it would fail, etc.
-        if len(
-            self.agent.history
-        ) <= 1 and (  # One optional system message doesn't count.
-            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
+        # If agent used the SleepUntil function, we need to run it manually here.
+        # Thanks to it, agent will continue sleeping if server was interrupted or any other error happened.
+        if len(self.agent.history) >= 2 and SleepUntil.__name__ in (
+            call_code := self.agent.history[-2]["content"]
         ):
-            logger.info(
-                "The game is not ready yet and agent didn't have any previous interactions, sleeping and stopping."
-            )
-            time.sleep(60)
-            return CallbackReturn.STOP
-
-        # If agent did the reflection (from the later if-clause), then...
-        elif self.agent.history and GameRoundEnd.GAME_ROUND_END_OUTPUT in str(
-            self.agent.history[-1]
-        ):
-            # Either do nothing wait for the game to start again.
-            if (
-                is_seller_without_keys
-                or get_nft_game_status() == NFTGameStatus.finished
-            ):
-                # Just sleep if the last thing the agent did was being done with this game and the game is still finished.
-                # That way he won't be doing anything until the game is reset.
-                logger.info("Agent is done with the game, sleeping and stopping.")
-                time.sleep(60)
-                return CallbackReturn.STOP
-            # Or force him to start participating in the game again, including some first steps.
-            else:
-                self.agent.history = [
-                    system_prompt,  # Keep the system prompt in the new history.
-                    # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
-                    {
-                        "role": "assistant",
-                        "content": f"""{Reasoning.__name__}(reasoning='The game has started again. I will participate in the game again, using a new and better strategy than before.""",
-                    },
-                    {"role": "user", "content": "The reasoning has been recorded"},
-                ]
-                # Save this to the history so that we see it in the UI.
-                self.save_agent_history(check_not_none(system_prompt), 2)
-
-        # If this is the agent's first iteration after the game finished, force him to reflect on the past game.
-        elif not self.game_finished_already_detected and (
-            is_seller_without_keys or get_nft_game_status() == NFTGameStatus.finished
-        ):
-            logger.info("Game is finished, forcing agent to reflect on the past game.")
-            # Switch to more capable (but a lot more expensive) model so that the reflections are worth it.
-            if self.agent.llm.generator.model == SupportedModel.gpt_4o_mini.value:
-                self.agent.llm.generator.model = SupportedModel.gpt_4o.value
-            self.agent.history = [
-                system_prompt,  # Keep the system prompt in the new history.
-                # Hack-in the reasoning in a way that agent thinks it's from himself -- otherwise he could ignore it.
-                {
-                    "role": "assistant",
-                    "content": f"""{Reasoning.__name__}(reasoning='The game is finished. Now the plan is:
-
-1. I will reflect on my past actions during the game, I will use {CheckAllPastActionsGivenContext.__name__} for that.
-2. I will check my current system prompt using {GetMyCurrentSystemPrompt.__name__}.
-3. I will combine all the insights obtained with my current system prompt from and update my system prompt accordingly. System prompt is written in 3rd person. The new system prompt must contain everything from the old one, plus the new insights.
-4. After I completed everything, I will call {GameRoundEnd.__name__} function.')""",
-                },
-                {"role": "user", "content": "The reasoning has been recorded"},
-            ]
-            # Save this to the history so that we see it in the UI.
-            self.save_agent_history(check_not_none(system_prompt), 2)
-            # Mark this, so we don't do this repeatedly after every iteration.
-            self.game_finished_already_detected = True
+            SleepUntil.execute_calling_of_this_function(call_code=call_code)
 
         return CallbackReturn.CONTINUE
 
