@@ -2,10 +2,10 @@ from microchain import Function
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 
-class CurrentDateAndTime(Function):
+class TodayDate(Function):
     @property
     def description(self) -> str:
-        return "Use this function to get the current date and time."
+        return "Use this function to get the current date."
 
     @property
     def example_args(self) -> list[str]:
@@ -17,5 +17,5 @@ class CurrentDateAndTime(Function):
 
 
 COMMON_FUNCTIONS: list[type[Function]] = [
-    CurrentDateAndTime,
+    TodayDate,
 ]
