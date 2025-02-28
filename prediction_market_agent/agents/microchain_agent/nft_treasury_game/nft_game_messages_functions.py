@@ -1,5 +1,4 @@
 import time
-from datetime import datetime
 
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
@@ -7,6 +6,7 @@ from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
+from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
@@ -117,7 +117,7 @@ class SleepUntil(Function):
 
     @property
     def example_args(self) -> list[str]:
-        return ["10", "Waiting for responses."]
+        return [f"{utcnow()}", "Waiting for responses."]
 
     def __call__(self, sleep_until: str, reason: str) -> str:
         sleep_until_datetime = DatetimeUTC.to_datetime_utc(sleep_until)
@@ -128,9 +128,21 @@ class SleepUntil(Function):
         """
         Parse the calling of this function and execute the logic.
         """
-        sleep_until = call_code.split(",")[0].split("(")[1].strip()
-        reason = call_code.split(",")[1].strip()[:-1]
-        while datetime.utcnow() < DatetimeUTC.to_datetime_utc(sleep_until):
+        # Handle both positional and keyword arguments
+        if "=" in call_code:
+            # Keyword arguments
+            args = dict(
+                item.strip().split("=")
+                for item in call_code.split("(")[1][:-1].split(",")
+            )
+            sleep_until = args.get("sleep_until", "").strip()
+            reason = args.get("reason", "").strip()
+        else:
+            # Positional arguments
+            sleep_until = call_code.split(",")[0].split("(")[1].strip()
+            reason = call_code.split(",")[1].strip()[:-1]
+
+        while utcnow() < DatetimeUTC.to_datetime_utc(sleep_until):
             logger.info(f"Sleeping until {sleep_until} because {reason}.")
             time.sleep(1.0)
 
