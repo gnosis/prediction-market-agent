@@ -4,7 +4,9 @@ from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
 from prediction_market_agent_tooling.gtypes import xdai_type
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
+from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
@@ -13,7 +15,9 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentRegisterContract,
-    SimpleTreasuryContract,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    purge_all_messages,
 )
 from prediction_market_agent.db.agent_communication import (
     get_message_minimum_value,
@@ -25,21 +29,6 @@ from prediction_market_agent.tools.message_utils import (
     compress_message,
     parse_message_for_agent,
 )
-
-
-class BroadcastPublicMessageToHumans(Function):
-    OUTPUT_TEXT = "Message broadcasted to humans."
-
-    @property
-    def description(self) -> str:
-        return f"""Use {BroadcastPublicMessageToHumans.__name__} to send a message that humans can see. Use this to communicate with users that send you messages."""
-
-    @property
-    def example_args(self) -> list[str]:
-        return ["Hello!"]
-
-    def __call__(self, message: str) -> str:
-        return self.OUTPUT_TEXT
 
 
 class SendPaidMessageToAnotherAgent(Function):
@@ -119,43 +108,66 @@ class ReceiveMessage(Function):
         )
 
 
-class Wait(Function):
+class RemoveAllUnreadMessages(Function):
     @property
     def description(self) -> str:
-        return f"""Use {Wait.__name__} to wait for given amount of time in seconds and the reason for it. You can use this for example to wait for a while before checking for new messages."""
+        return f"Use {RemoveAllUnreadMessages.__name__} to remove all unread messages from your inbox."
 
     @property
     def example_args(self) -> list[str]:
-        return ["10", "Waiting for responses."]
+        return []
 
-    def __call__(self, wait: int, reason: str) -> str:
-        time.sleep(wait)
-        return f"Waited for {wait} seconds to {reason}."
+    def __call__(self) -> str:
+        keys = MicrochainAgentKeys()
+        purge_all_messages(keys)
+        return "All unread messages have been removed."
 
 
-class GameRoundEnd(Function):
-    GAME_ROUND_END_OUTPUT = "Agent decided to stop playing."
+class SleepUntil(Function):
+    """
+    This function is special, as it can not be executed in it __call___ method (because it wouldn't be shown in the UI and it wouldn't be continued if the server restarts randomly).
+    Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
+    """
 
     @property
     def description(self) -> str:
-        return f"""Use {GameRoundEnd.__name__} to indicate that you are done playing this game."""
+        return f"""Use {SleepUntil.__name__} to wait for given amount of time in seconds and the reason for it. You can use this for example to wait for a while before checking for new messages."""
 
     @property
     def example_args(self) -> list[str]:
-        return ["The game has finished and I did all necessary steps."]
+        return [f"{utcnow()}", "Waiting for responses."]
 
-    def __call__(self, reasoning: str) -> str:
-        logger.info(
-            f"Agent decided to stop playing when treasury balance is {SimpleTreasuryContract().balances().xdai}"
-        )
-        return self.GAME_ROUND_END_OUTPUT
+    def __call__(self, sleep_until: str, reason: str) -> str:
+        sleep_until_datetime = DatetimeUTC.to_datetime_utc(sleep_until)
+        return f"Sleeping until {sleep_until_datetime.strftime('%Y-%m-%d %H:%M:%S')} (UTC), because {reason}."
+
+    @staticmethod
+    def execute_calling_of_this_function(call_code: str) -> None:
+        """
+        Parse the calling of this function and execute the logic.
+        """
+        # Handle both positional and keyword arguments
+        if "=" in call_code:
+            # Keyword arguments
+            args = dict(
+                item.strip().split("=")
+                for item in call_code.split("(")[1][:-1].split(",")
+            )
+            sleep_until = args.get("sleep_until", "").strip()
+            reason = args.get("reason", "").strip()
+        else:
+            # Positional arguments
+            sleep_until = call_code.split(",")[0].split("(")[1].strip()
+            reason = call_code.split(",")[1].strip()[:-1]
+
+        while utcnow() < DatetimeUTC.to_datetime_utc(sleep_until):
+            logger.info(f"Sleeping until {sleep_until} because {reason}.")
+            time.sleep(1.0)
 
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
-    BroadcastPublicMessageToHumans,
     SendPaidMessageToAnotherAgent,
     ReceiveMessage,
     GetUnseenMessagesInformation,
-    Wait,
-    GameRoundEnd,
+    SleepUntil,
 ]

@@ -45,11 +45,11 @@ from prediction_market_agent.agents.microchain_agent.memory_functions import (
     MEMORY_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.nft_functions import NFT_FUNCTIONS
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
-    MESSAGES_FUNCTIONS,
-)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_functions import (
     NFT_GAME_FUNCTIONS,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
+    MESSAGES_FUNCTIONS,
 )
 from prediction_market_agent.agents.microchain_agent.omen_functions import (
     OMEN_FUNCTIONS,

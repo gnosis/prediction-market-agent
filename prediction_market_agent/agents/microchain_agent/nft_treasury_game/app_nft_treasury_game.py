@@ -32,12 +32,15 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.messages_functions import (
-    BroadcastPublicMessageToHumans,
-    GameRoundEnd,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     ReceiveMessage,
+    RemoveAllUnreadMessages,
     SendPaidMessageToAnotherAgent,
-    Wait,
+    SleepUntil,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    get_end_datetime_of_current_round,
+    get_start_datetime_of_next_round,
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -154,18 +157,16 @@ def customized_chat_message(
             icon = "🧠"
         case Stop.__name__:
             icon = "😴"
-        case Wait.__name__:
+        case SleepUntil.__name__:
             icon = "⏳"
         case UpdateMySystemPrompt.__name__:
             icon = "📝"
-        case GameRoundEnd.__name__:
-            icon = "🏁"
         case ReceiveMessage.__name__:
             icon = "👤"
-        case BroadcastPublicMessageToHumans.__name__:
-            icon = "📣"
         case SendPaidMessageToAnotherAgent.__name__:
             icon = "💸"
+        case RemoveAllUnreadMessages.__name__:
+            icon = "🗑️"
         case _:
             icon = "🤖"
 
@@ -191,10 +192,9 @@ def customized_chat_message(
         if parsed_function_call_name not in (
             Reasoning.__name__,
             Stop.__name__,
-            BroadcastPublicMessageToHumans.__name__,
             SendPaidMessageToAnotherAgent.__name__,
-            Wait.__name__,
-            GameRoundEnd.__name__,
+            SleepUntil.__name__,
+            RemoveAllUnreadMessages.__name__,
             UpdateMySystemPrompt.__name__,
         ):
             st.markdown(parsed_function_output_body)
@@ -341,9 +341,15 @@ Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI<
 @st.fragment(run_every=timedelta(seconds=10))
 def show_treasury_part() -> None:
     treasury_xdai_balance = SimpleTreasuryContract().balances().xdai
+    end_datetime = get_end_datetime_of_current_round()
+    start_datetime_next_round = get_start_datetime_of_next_round()
     st.markdown(
         f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.""",
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
+
+- The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}
+- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S')}
+""",
         unsafe_allow_html=True,
     )
 
