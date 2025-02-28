@@ -291,6 +291,7 @@ NFT Treasury game description:
 - Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
 - You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
 - Don't organise future meetings, as that's not possible, you can only communicate with other agents through messages in real-time.
+- After end of the game round, simply sleep until the next one starts.
 """
 
 
