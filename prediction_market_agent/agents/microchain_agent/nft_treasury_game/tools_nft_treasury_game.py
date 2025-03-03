@@ -56,19 +56,11 @@ def purge_all_messages(keys: APIKeys) -> None:
     register = AgentRegisterContract()
     logger.info(f"Purging messages for {keys.bet_from_address}.")
 
-    # Check if the agent is registered, otherwise we cannot pop messages.
-    was_registered = register.is_registered_agent(keys.bet_from_address)
-
-    if not was_registered:
-        # If not, register him.
-        register.register_as_agent(api_keys=keys)
-
     popped = 0
-    while fetch_count_unprocessed_transactions(consumer_address=keys.bet_from_address):
-        pop_message(minimum_fee=xdai_type(0), api_keys=keys)
-        popped += 1
-        logger.info(f"Popped {popped} messages.")
-
-    if not was_registered:
-        # If we registered him, we need to deregister him to keep the state clean.
-        register.deregister_as_agent(api_keys=keys)
+    with register.with_registered_agent(api_keys=keys):
+        while fetch_count_unprocessed_transactions(
+            consumer_address=keys.bet_from_address
+        ):
+            pop_message(minimum_fee=xdai_type(0), api_keys=keys)
+            popped += 1
+            logger.info(f"Popped {popped} messages.")
