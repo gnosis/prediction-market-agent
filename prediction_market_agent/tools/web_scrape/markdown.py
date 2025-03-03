@@ -26,7 +26,7 @@ def fetch_html(url: str, timeout: int) -> Response:
     max_age=timedelta(days=1),
     ignore_args=["timeout"],
     cache_none=False,
-    log_error_on_unsavable_data=False,
+    log_error_on_unsavable_data=False,  # Sometimes it returns funky data that aren't serializable.
 )
 def web_scrape(url: str, timeout: int = 10) -> str | None:
     """
