@@ -1,5 +1,6 @@
 import os
 import typing as t
+from contextlib import contextmanager
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
@@ -94,6 +95,38 @@ class AgentRegisterContract(ContractOnGnosisChain, OwnableContract):
             Web3.to_checksum_address(addr)
             for addr in self.call("getAllRegisteredAgents", web3=web3)
         ]
+
+    @contextmanager
+    def with_unregistered_agent(
+        self, api_keys: APIKeys, web3: Web3 | None = None
+    ) -> t.Generator[None, None, None]:
+        """
+        Use this context manager to temporarily deregister the agent, and then re-register it after the block, if it was registered before.
+        """
+        was_registered = self.is_registered_agent(
+            agent_address=api_keys.bet_from_address, web3=web3
+        )
+        if was_registered:
+            self.deregister_as_agent(api_keys, web3=web3)
+        yield
+        if was_registered:
+            self.register_as_agent(api_keys, web3=web3)
+
+    @contextmanager
+    def with_registered_agent(
+        self, api_keys: APIKeys, web3: Web3 | None = None
+    ) -> t.Generator[None, None, None]:
+        """
+        Use this context manager to temporarily register the agent, and then deregister it after the block, if it was not registered before.
+        """
+        was_registered = self.is_registered_agent(
+            agent_address=api_keys.bet_from_address, web3=web3
+        )
+        if not was_registered:
+            self.register_as_agent(api_keys, web3=web3)
+        yield
+        if not was_registered:
+            self.deregister_as_agent(api_keys, web3=web3)
 
 
 class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):

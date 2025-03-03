@@ -80,11 +80,9 @@ def get_unseen_messages_statistics(
 def pop_message(minimum_fee: xDai, api_keys: APIKeys_PMAT) -> MessageContainer | None:
     agent_comm_contract = AgentCommunicationContract()
     all_messages = fetch_unseen_transactions(api_keys.bet_from_address)
-    filtered_indices_and_messages = sorted(
-        [(i, m) for i, m in enumerate(all_messages) if m.value >= minimum_fee],
-        key=lambda x: x[1].value,
-        reverse=True,
-    )
+    filtered_indices_and_messages = [
+        (i, m) for i, m in enumerate(all_messages) if m.value >= minimum_fee
+    ]
     return (
         agent_comm_contract.pop_message(
             api_keys=api_keys,
