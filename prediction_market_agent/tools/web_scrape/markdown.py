@@ -22,7 +22,12 @@ def fetch_html(url: str, timeout: int) -> Response:
 
 
 @observe()
-@db_cache(max_age=timedelta(days=1), ignore_args=["timeout"], cache_none=False)
+@db_cache(
+    max_age=timedelta(days=1),
+    ignore_args=["timeout"],
+    cache_none=False,
+    log_error_on_unsavable_data=False,  # Sometimes it returns funky data that aren't serializable.
+)
 def web_scrape(url: str, timeout: int = 10) -> str | None:
     """
     Taken from agentcoinorg/predictionprophet
