@@ -24,6 +24,7 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 from pydantic_ai import Agent
+from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.models.anthropic import AnthropicModel, AsyncAnthropic
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
@@ -39,13 +40,23 @@ from prediction_market_agent.utils import (
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = False
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        prediction = self.agent.predict(market.question)
-        logger.info(
-            f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
-        )
-        return prediction.outcome_prediction
+        try:
+            prediction = self.agent.predict(market.question)
+        except UnexpectedModelBehavior as e:
+            (
+                logger.warning
+                if self.just_warn_on_unexpected_model_behavior
+                else logger.exception
+            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
+            return None
+        else:
+            logger.info(
+                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+            )
+            return prediction.outcome_prediction
 
 
 class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
@@ -189,6 +200,9 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
 
 class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRouter):
     model = "deepseek/deepseek-r1"
+    just_warn_on_unexpected_model_behavior = (
+        True  # See https://github.com/gnosis/prediction-market-agent/issues/729
+    )
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
