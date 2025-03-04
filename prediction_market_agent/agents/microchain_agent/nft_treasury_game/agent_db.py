@@ -48,9 +48,9 @@ class AgentTableHandler:
             model=AgentDB, sqlalchemy_db_url=sqlalchemy_db_url
         )
 
-    def get(self, agent_identifier: AgentIdentifier) -> AgentDB:
+    def get(self, name: str) -> AgentDB:
         return self.sql_handler.get_with_filter_and_order(
-            query_filters=[col(AgentDB.name) == agent_identifier],
+            query_filters=[col(AgentDB.name) == name],
             limit=1,
         )[0]
 
