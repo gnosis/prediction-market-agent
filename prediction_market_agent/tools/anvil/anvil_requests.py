@@ -10,7 +10,7 @@ from web3 import Web3
 from web3.types import RPCEndpoint
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(5))
 def set_balance(rpc_url: str, address: str, balance: xDai) -> None:
     balance_wei = xdai_to_wei(balance)
     data = {
