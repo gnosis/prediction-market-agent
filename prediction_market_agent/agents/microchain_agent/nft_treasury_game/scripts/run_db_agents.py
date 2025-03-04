@@ -44,7 +44,7 @@ def monitor_processes(
 ) -> None:
     while True:
         # Check for new agents
-        current_agents: dict[str, AgentDB] = {
+        current_agents: set[str] = {
             agent.name for agent in agent_table_handler.sql_handler.get_all()
         }
         existing_agents = set(processes.keys())
