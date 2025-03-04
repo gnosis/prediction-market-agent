@@ -7,7 +7,6 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
-    AgentDB,
     AgentTableHandler,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
@@ -38,8 +37,26 @@ def spawn_process(agent_name: str) -> multiprocessing.Process:
     return multiprocessing.Process(target=run_agent_in_process, args=(agent_name,))
 
 
-def monitor_processes(processes: dict[str, multiprocessing.Process]) -> None:
+def monitor_processes(
+    processes: dict[str, multiprocessing.Process],
+    agent_table_handler: AgentTableHandler,
+) -> None:
     while True:
+        # Check for new agents
+        current_agents = {
+            agent.name for agent in agent_table_handler.sql_handler.get_all()
+        }
+        existing_agents = set(processes.keys())
+
+        # Identify new agents
+        new_agents = current_agents - existing_agents
+        for new_agent in new_agents:
+            logger.info(f"New agent {new_agent} detected. Starting process...")
+            new_process = spawn_process(new_agent)
+            new_process.start()
+            processes[new_agent] = new_process
+
+        # Monitor existing processes
         for agent_name, process in processes.items():
             if not process.is_alive():
                 logger.warning(f"Agent {agent_name} has stopped. Restarting...")
@@ -58,15 +75,10 @@ def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
 
 def main() -> None:
     agent_table_handler = AgentTableHandler()
-    all_agents: list[AgentDB] = list(agent_table_handler.sql_handler.get_all())
-
     processes: dict[str, multiprocessing.Process] = {}
-    for agent in all_agents:
-        processes[agent.name] = spawn_process(agent.name)
-        processes[agent.name].start()
 
     try:
-        monitor_processes(processes)
+        monitor_processes(processes, agent_table_handler)
     except KeyboardInterrupt:
         logger.info("Stopping all agents...")
         stop_all_processes(processes)
