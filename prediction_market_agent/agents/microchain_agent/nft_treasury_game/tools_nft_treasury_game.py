@@ -37,19 +37,19 @@ def get_nft_game_is_finished(web3: Web3 | None = None) -> bool:
     return get_nft_game_status(web3=web3) == NFTGameStatus.finished
 
 
-def get_end_datetime_of_previous_round() -> DatetimeUTC:
+def get_end_datetime_of_previous_round() -> DatetimeUTC | None:
     # TODO: Dynamically from somewhere.
-    return DatetimeUTC(year=2025, month=2, day=28, hour=9)
+    return None
 
 
 def get_end_datetime_of_current_round() -> DatetimeUTC:
     # TODO: Dynamically from somewhere.
-    return DatetimeUTC(year=2025, month=3, day=1, hour=9)
+    return DatetimeUTC(year=2025, month=3, day=17, hour=9)
 
 
 def get_start_datetime_of_next_round() -> DatetimeUTC:
     # TODO: Dynamically from somewhere.
-    return DatetimeUTC(year=2025, month=3, day=3, hour=9)
+    return DatetimeUTC(year=2025, month=3, day=20, hour=9)
 
 
 def purge_all_messages(keys: APIKeys) -> None:

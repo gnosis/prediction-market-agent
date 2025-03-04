@@ -26,6 +26,7 @@ def run_agent_in_process(agent_identifier: AgentIdentifier) -> None:
         if db_agent.safe_address:
             os.environ["SAFE_ADDRESS"] = str(db_agent.safe_address)
         elif os.environ.get("SAFE_ADDRESS"):
+            # If agent doesn't specify Safe, but we have some in the env, remove it from the subprocess.
             del os.environ["SAFE_ADDRESS"]
 
         deployable_agent = DeployableAgentNFTGameAbstract.from_db(db_agent)
