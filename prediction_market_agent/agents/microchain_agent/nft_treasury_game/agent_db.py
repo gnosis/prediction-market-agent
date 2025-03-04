@@ -2,7 +2,10 @@ from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, private_key_type
 from sqlmodel import Field, SQLModel, String, col
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import (
+    AgentIdentifier,
+    build_nft_treasury_game_agent_identifier,
+)
 from prediction_market_agent.db.sql_handler import SQLHandler
 
 
@@ -22,7 +25,7 @@ class AgentDB(SQLModel, table=True):
 
     @property
     def identifier(self) -> AgentIdentifier:
-        return AgentIdentifier(self.name)
+        return build_nft_treasury_game_agent_identifier(self.name)
 
     @property
     def api_keys(self) -> APIKeys:

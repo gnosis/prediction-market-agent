@@ -14,10 +14,17 @@ MICROCHAIN_AGENT_STREAMLIT = AgentIdentifier("microchain-streamlit-app")
 MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER = AgentIdentifier(
     "trader-agent-0-with-goal-manager"
 )
-NFT_TREASURY_GAME_AGENT_1 = AgentIdentifier("nft-treasury-game-agent-1")
-NFT_TREASURY_GAME_AGENT_2 = AgentIdentifier("nft-treasury-game-agent-2")
-NFT_TREASURY_GAME_AGENT_3 = AgentIdentifier("nft-treasury-game-agent-3")
-NFT_TREASURY_GAME_AGENT_4 = AgentIdentifier("nft-treasury-game-agent-4")
-NFT_TREASURY_GAME_AGENT_5 = AgentIdentifier("nft-treasury-game-agent-5")
-NFT_TREASURY_GAME_AGENT_6 = AgentIdentifier("nft-treasury-game-agent-6")
-NFT_TREASURY_GAME_AGENT_7 = AgentIdentifier("nft-treasury-game-agent-7")
+
+
+def build_nft_treasury_game_agent_identifier(base_name: str) -> AgentIdentifier:
+    # Prefixed like this so we can identify them easily in the logs and database.
+    return AgentIdentifier(f"nft-treasury-game-agent-{base_name}")
+
+
+NFT_TREASURY_GAME_AGENT_1 = build_nft_treasury_game_agent_identifier("1")
+NFT_TREASURY_GAME_AGENT_2 = build_nft_treasury_game_agent_identifier("2")
+NFT_TREASURY_GAME_AGENT_3 = build_nft_treasury_game_agent_identifier("3")
+NFT_TREASURY_GAME_AGENT_4 = build_nft_treasury_game_agent_identifier("4")
+NFT_TREASURY_GAME_AGENT_5 = build_nft_treasury_game_agent_identifier("5")
+NFT_TREASURY_GAME_AGENT_6 = build_nft_treasury_game_agent_identifier("6")
+NFT_TREASURY_GAME_AGENT_7 = build_nft_treasury_game_agent_identifier("7")
