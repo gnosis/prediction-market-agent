@@ -7,6 +7,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
+    AgentDB,
     AgentTableHandler,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
@@ -43,7 +44,7 @@ def monitor_processes(
 ) -> None:
     while True:
         # Check for new agents
-        current_agents = {
+        current_agents: dict[str, AgentDB] = {
             agent.name for agent in agent_table_handler.sql_handler.get_all()
         }
         existing_agents = set(processes.keys())
