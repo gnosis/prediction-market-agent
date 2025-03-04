@@ -16,7 +16,11 @@ from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from prediction_market_agent_tooling.tools.web3_utils import (
+    private_key_to_public_key,
+    wei_to_xdai,
+)
+from pydantic import SecretStr
 from python_web3_wallet import wallet_component
 from streamlit_extras.stylable_container import stylable_container
 
@@ -429,19 +433,27 @@ def add_new_agent() -> None:
                 st.error("Please fill in all required fields.")
 
             else:
-                new_agent = AgentDB(
-                    name=name,
-                    initial_system_prompt=initial_system_prompt,
-                    private_key=private_key_str
-                    or generate_private_key().get_secret_value(),
+                private_key = (
+                    SecretStr(private_key_str)
+                    if private_key_str
+                    else generate_private_key()
                 )
-                table_handler.add_agent(new_agent)
+                public_key = private_key_to_public_key(private_key)
+                table_handler.add_agent(
+                    AgentDB(
+                        name=name,
+                        initial_system_prompt=initial_system_prompt,
+                        private_key=private_key.get_secret_value(),
+                    )
+                )
                 st.success(f"Agent '{name}' added successfully!")
-
                 set_balance(
                     rpc_url=RPCConfig().gnosis_rpc_url,
-                    address=new_agent.wallet_address,
+                    address=public_key,
                     balance=STARTING_AGENT_BALANCE,
+                )
+                st.success(
+                    f"Agent '{name}' balance set to {STARTING_AGENT_BALANCE} xDai."
                 )
 
 
