@@ -1,9 +1,11 @@
+import secrets
 from string import Template
 
 from langchain.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from prediction_market_agent_tooling.gtypes import PrivateKey, private_key_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.langfuse_ import (
@@ -147,3 +149,8 @@ def get_maximum_possible_bet_amount(
     trading_balance *= 0.95  # Allow to use only most of the trading balance, to keep something to pay for fees on markets where it's necessary.
     # Require bet size of at least `min_` and maximum `max_`, use available trading balance if its between.
     return min(max(min_, trading_balance), max_)
+
+
+# TODO: Move to PMAT
+def generate_private_key() -> PrivateKey:
+    return private_key_type("0x" + secrets.token_hex(32))

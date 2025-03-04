@@ -31,7 +31,11 @@ from pydantic_ai import Agent as PydanticAIAgent
 from pydantic_ai.models import KnownModelName
 from pydantic_ai.settings import ModelSettings
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import (
+    THINK_THOROUGHLY,
+    THINK_THOROUGHLY_PROPHET,
+    AgentIdentifier,
+)
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
@@ -379,7 +383,7 @@ class ThinkThoroughlyBase(ABC):
 
 
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
-    identifier = AgentIdentifier.THINK_THOROUGHLY
+    identifier = THINK_THOROUGHLY
     model = "gpt-4-turbo-2024-04-09"
     model_for_generate_prediction_for_one_outcome = "gpt-4-turbo-2024-04-09"
 
@@ -446,7 +450,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
-    identifier = AgentIdentifier.THINK_THOROUGHLY_PROPHET
+    identifier = THINK_THOROUGHLY_PROPHET
     model = "gpt-4-turbo-2024-04-09"
     model_for_generate_prediction_for_one_outcome = "gpt-4o-2024-08-06"
 

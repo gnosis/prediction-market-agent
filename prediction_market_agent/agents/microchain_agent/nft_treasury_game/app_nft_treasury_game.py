@@ -12,6 +12,7 @@ from math import ceil
 import streamlit as st
 from eth_typing import ChecksumAddress
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
@@ -24,13 +25,20 @@ from prediction_market_agent.agents.microchain_agent.agent_functions import (
     UpdateMySystemPrompt,
 )
 from prediction_market_agent.agents.microchain_agent.nft_functions import BalanceOfNFT
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
+    AgentDB,
+    AgentTableHandler,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
+    STARTING_AGENT_BALANCE,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     NFTKeysContract,
     SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
-    DEPLOYED_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
+    get_all_nft_agents,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     ReceiveMessage,
@@ -38,10 +46,15 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_
     SendPaidMessageToAnotherAgent,
     SleepUntil,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts import (
+    nft_treasury_game_base_prompt,
+    nft_treasury_game_buyer_prompt,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     get_end_datetime_of_current_round,
     get_start_datetime_of_next_round,
 )
+from prediction_market_agent.agents.utils import generate_private_key
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
     fetch_unseen_transactions,
@@ -56,6 +69,7 @@ from prediction_market_agent.db.report_table_handler import (
     ReportNFTGame,
     ReportNFTGameTableHandler,
 )
+from prediction_market_agent.tools.anvil.anvil_requests import set_balance
 from prediction_market_agent.tools.message_utils import (
     compress_message,
     unzip_message_else_do_nothing,
@@ -88,6 +102,11 @@ def report_table_handler() -> ReportNFTGameTableHandler:
     return ReportNFTGameTableHandler()
 
 
+@st.cache_resource
+def agent_table_handler() -> AgentTableHandler:
+    return AgentTableHandler()
+
+
 @st.dialog("Send message to agent")
 def send_message_via_wallet(
     recipient: ChecksumAddress, message: str, amount_to_send: float
@@ -99,7 +118,11 @@ def send_message_via_wallet(
     )
 
 
-def send_message_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
+def send_message_part(
+    nft_agent: (
+        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+    ),
+) -> None:
     message = st.text_area("Write a message to the agent")
     default_value = get_message_minimum_value()
     amount_to_send = st.number_input(
@@ -200,7 +223,11 @@ def customized_chat_message(
             st.markdown(parsed_function_output_body)
 
 
-def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
+def show_function_calls_part(
+    nft_agent: (
+        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+    ),
+) -> None:
     st.markdown(f"### Agent's actions")
 
     n_total_messages = long_term_memory_table_handler(nft_agent.identifier).count()
@@ -252,7 +279,9 @@ def show_function_calls_part(nft_agent: type[DeployableAgentNFTGameAbstract]) ->
 
 @st.fragment(run_every=timedelta(seconds=10))
 def show_function_calls_part_messages(
-    nft_agent: type[DeployableAgentNFTGameAbstract],
+    nft_agent: (
+        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+    ),
     messages_per_page: int,
     page_number: int,
 ) -> None:
@@ -283,7 +312,11 @@ def show_function_calls_part_messages(
 
 
 @st.fragment(run_every=timedelta(seconds=10))
-def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> None:
+def show_about_agent_part(
+    nft_agent: (
+        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+    ),
+) -> None:
     system_prompt = (
         system_prompt_from_db.prompt
         if (
@@ -292,7 +325,7 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
             ).fetch_latest_prompt()
         )
         is not None
-        else nft_agent.get_initial_system_prompt()
+        else nft_agent.initial_system_prompt
     )
     xdai_balance = get_balances(nft_agent.wallet_address).xdai
     n_nft = BalanceOfNFT()(NFTKeysContract().address, nft_agent.wallet_address)
@@ -305,6 +338,8 @@ def show_about_agent_part(nft_agent: type[DeployableAgentNFTGameAbstract]) -> No
         f"""### {nft_agent.name}
 
 Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> {nft_keys_message}.
+
+Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_agent.wallet_address})
 
 ---
 """,
@@ -371,8 +406,49 @@ def reports_page() -> None:
         )
 
 
+def add_new_agent() -> None:
+    table_handler = agent_table_handler()
+    prefill_prompt = st.checkbox("Prefill with default system prompt")
+
+    with st.form("add_agent_form", clear_on_submit=True):
+        name = st.text_input("Agent Name")
+        initial_system_prompt = st.text_area(
+            "Initial System Prompt",
+            value=(
+                nft_treasury_game_base_prompt() + nft_treasury_game_buyer_prompt()
+                if prefill_prompt
+                else ""
+            ),
+        )
+        private_key_str = st.text_input(
+            "Private Key (optional, will be generated if not provided)", type="password"
+        )
+        submitted = st.form_submit_button("Add Agent")
+        if submitted:
+            if not name or not initial_system_prompt:
+                st.error("Please fill in all required fields.")
+
+            else:
+                new_agent = AgentDB(
+                    name=name,
+                    initial_system_prompt=initial_system_prompt,
+                    private_key=private_key_str
+                    or generate_private_key().get_secret_value(),
+                )
+                table_handler.add_agent(new_agent)
+                st.success(f"Agent '{name}' added successfully!")
+
+                set_balance(
+                    rpc_url=RPCConfig().gnosis_rpc_url,
+                    address=new_agent.wallet_address,
+                    balance=STARTING_AGENT_BALANCE,
+                )
+
+
 def get_agent_page(
-    nft_agent: type[DeployableAgentNFTGameAbstract],
+    nft_agent: (
+        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+    ),
 ) -> t.Callable[[], None]:
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
@@ -387,16 +463,28 @@ def get_agent_page(
     return page
 
 
+def build_url(
+    agent: (
+        AgentDB | DeployableAgentNFTGameAbstract | type[DeployableAgentNFTGameAbstract]
+    ),
+) -> str:
+    return agent.identifier.lower().replace("_", "-").replace(" ", "-")
+
+
 with st.sidebar:
     show_treasury_part()
 
+
+all_agents = get_all_nft_agents()
+
 pg = st.navigation(
     [
-        st.Page(get_agent_page(agent), title=agent.name, url_path=agent.get_url())
-        for agent in DEPLOYED_NFT_AGENTS
+        st.Page(get_agent_page(agent), title=agent.name, url_path=build_url(agent))
+        for agent in all_agents
     ]
     + [
         st.Page(reports_page, title="Game Reports", url_path="game-reports"),
+        st.Page(add_new_agent, title="Add Agent", url_path="add-agent"),
     ]
 )
 pg.run()

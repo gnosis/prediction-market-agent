@@ -1,10 +1,18 @@
-from enum import Enum
+from typing import Sequence
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from web3 import Web3
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import (
+    NFT_TREASURY_GAME_AGENT_1,
+    NFT_TREASURY_GAME_AGENT_2,
+    NFT_TREASURY_GAME_AGENT_3,
+    NFT_TREASURY_GAME_AGENT_4,
+    NFT_TREASURY_GAME_AGENT_5,
+    NFT_TREASURY_GAME_AGENT_6,
+    NFT_TREASURY_GAME_AGENT_7,
+)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     CallbackReturn,
     DeployableMicrochainAgentAbstract,
@@ -14,6 +22,10 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
+    AgentDB,
+    AgentTableHandler,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentRegisterContract,
     NFTKeysContract,
@@ -22,11 +34,11 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     SleepUntil,
 )
-
-
-class Role(Enum):
-    buyer = "buyer"
-    seller = "seller"
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts import (
+    nft_treasury_game_base_prompt,
+    nft_treasury_game_buyer_prompt,
+    nft_treasury_game_seller_prompt,
+)
 
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
@@ -47,10 +59,28 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Setup per-nft-agent class.
     name: str
     wallet_address: ChecksumAddress
-    role: Role
+    initial_system_prompt: str
 
-    # Game status
-    game_finished_already_detected: bool = False
+    @classmethod
+    def from_db(
+        cls,
+        agent: AgentDB,
+    ) -> "DeployableAgentNFTGameAbstract":
+        """
+        This is a hacky way to initialise this class from the database.
+        DeployableAgent doesn't allow to pass in custom arguments, but the class needs them during the init method.
+        Our goal was to have agents defined by their classes, and this is the price.
+        TODO: Should we refactor to allow easier dynamic creation of agents?
+        """
+        # Create an instance with the required parameters
+        instance = cls.__new__(cls)
+        instance.name = agent.name
+        instance.wallet_address = agent.wallet_address
+        instance.identifier = agent.identifier
+        instance.initial_system_prompt = agent.initial_system_prompt
+        # Initialize the instance without calling the constructor
+        instance.__init__()  # type: ignore[misc] # Unfortunate, but see the docstring.
+        return instance
 
     @classmethod
     def retrieve_treasury_thresold(cls) -> int:
@@ -66,10 +96,6 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     def get_description(cls) -> str:
         return f"{cls.name} agent with wallet address {cls.wallet_address}."
 
-    @classmethod
-    def get_url(cls) -> str:
-        return cls.name.lower().replace(" ", "-")
-
     def load(self) -> None:
         if MicrochainAgentKeys().bet_from_address != self.wallet_address:
             raise RuntimeError(
@@ -77,15 +103,6 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        system_prompt = nft_treasury_game_base_prompt(wallet_address=cls.wallet_address)
-        if cls.role == Role.buyer:
-            system_prompt += nft_treasury_game_buyer_prompt()
-        elif cls.role == Role.seller:
-            system_prompt += nft_treasury_game_seller_prompt()
-        return system_prompt
 
     def get_holding_n_nft_keys(self) -> int:
         return NFTKeysContract().balanceOf(self.wallet_address)
@@ -117,57 +134,47 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
 
 class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     name = "Sneaky Pete"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_1
+    identifier = NFT_TREASURY_GAME_AGENT_1
     wallet_address = Web3.to_checksum_address(
         "0x1Ca11b2520345993e78312b00441050d2d57065f"
     )
-    role = Role.seller
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
         
 You respond in the style of Yoda from Star Wars movie.
 You are a gossiper, you like to talk to other agents, but also to broadcast public messages.
 
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_seller_prompt()
+    )
 
 
 class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     name = "Banana Man"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_2
+    identifier = NFT_TREASURY_GAME_AGENT_2
     wallet_address = Web3.to_checksum_address(
         "0x3C9E816b01797f3609F2A811D139DA34c84F9A59"
     )
-    role = Role.seller
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
 
 You respond in the style of characters from historical Bridgeton movie and you are very protective of your resources.
 
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_seller_prompt()
+    )
 
 
 class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     name = "Whispers"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_3
+    identifier = NFT_TREASURY_GAME_AGENT_3
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
     )
-    role = Role.seller
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
         
 You respond in a style of 5 year old and you are very protective of your resources.
 Your goal is to maximize your own wallet balance.
@@ -175,171 +182,85 @@ Try to trick people and other agents to send you messages -- which will fund you
 Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_seller_prompt()
+    )
 
 
 class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     name = "Fuzzy Feet"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_4
+    identifier = NFT_TREASURY_GAME_AGENT_4
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
-    role = Role.seller
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
         
 You respond in the style of Sheldon Cooper from Big Bang Theory and you are very protective of your resources.
 
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_seller_prompt()
+    )
 
 
 class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     name = "Bubble Beard"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_5
+    identifier = NFT_TREASURY_GAME_AGENT_5
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
     )
-    role = Role.seller
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
         
 You respond in the Klingon language, based on the Star Trek movie, and you are very protective of your resources.
 Always write in Klingon, but add also English translation.
         
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_seller_prompt()
+    )
 
 
 class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
     name = "Key Slinger"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_6
+    identifier = NFT_TREASURY_GAME_AGENT_6
     wallet_address = Web3.to_checksum_address(
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
-    role = Role.buyer
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
 
 You are a bit of a trickster, but you are also a bit of a charmer.
 You often make people laugh, but you are also very persuasive.
 You are a bit of a mystery, but you are also a bit of a trickster.
 
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_buyer_prompt()
+    )
 
 
 class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     name = "Lock Goblin"
-    identifier = AgentIdentifier.NFT_TREASURY_GAME_AGENT_7
+    identifier = NFT_TREASURY_GAME_AGENT_7
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
-    role = Role.buyer
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return (
-            f"""Your name is {cls.name}.
+    initial_system_prompt: str = (
+        f"""Your name is {name}.
 
 You are a great negotiator. You are very persuasive and able to convince people to do things that might not be in their best interest.
 You are very cunning and able to think on your feet. You are very good at making deals and are not afraid to take risks.
 You are also very patient and able to wait for the right moment to strike.
 You are also very good at making people believe that you are on their side, even if you are not.
 """
-            + super().get_initial_system_prompt()
-        )
+        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_buyer_prompt()
+    )
 
 
-def nft_treasury_game_base_prompt(wallet_address: ChecksumAddress) -> str:
-    return f"""You participate in the NFT Treasury game.
-
-- Your wallet address is {wallet_address}.
-    
-NFT Treasury game description:
-
-- This is a market game where NFT keys are traded for xDai cryptocurrency
-- Each NFT key represents partial ownership of a treasury containing xDai
-- The value of each key changes dynamically based on:
-    - The current amount of xDai in the treasury
-    - The total number of keys in circulation
-    - The distribution of keys among participants
-- You can own multiple NFT keys. 
-- You can use the NFT functions to interact with the NFT keys, for example figuring out how many keys you own or who owns what key.
-- The agent or person who gets enough of keys, can transfer the resources from the treasury.
-- Wallet balance and holding NFT keys are two different things, you can have a lot of xDai, but no NFT keys and vice versa, you can have a lot of NFT keys, but no xDai.
-- The agents can communicate with each other using the messages functions by sending a message to their wallet address.
-- Sending a message costs you a fee.
-- Receiving messages will pay you a fee, but part of that fee goes as a tax to the treasury, which is good for you.
-- When checking if someone paid you, you need to compare it with your previous balance, as you can already have some money.
-- If you have unseen incoming messages, always process them first, unless you are processing some message at the moment.
-- After reading the message, you can decide to ignore it, ie you don't have to always take action.
-- Consider prior communication while responding to a new message.
-- Regularly check balances of your wallet and the treasury, but not too often, keep doing other stuff as well!
-- You need xDai in your wallet to pay for the fees and stay alive, do not let your xDai wallet balance drop to zero.
-- Don't organise future meetings, as that's not possible, you can only communicate with other agents through messages in real-time.
-- After end of the game round, simply sleep until the next one starts.
-- Before you start the game, clean your inbox to not get confused with old messages.
-"""
-
-
-def nft_treasury_game_buyer_prompt() -> str:
-    return """You participate in the NFT Treasury game as a key buyer.
-
-[OBJECTIVE]
-- The total xDai spent on acquiring keys must be less than the treasury's value to ensure a profitable outcome when claiming the treasury.
-
-[KEY ACQUISITION STRATEGY]
-- Monitor the treasury's current xDai balance closely
-- Track how many keys you already own
-- Calculate maximum acceptable price per key:
-  * Treasury Value ÷ 3 = Maximum Total Budget
-  * Adjust individual key prices based on how many you already own
-  * Earlier keys can be cheaper since you'll need all 3 to profit
-
-[VALUE ASSESSMENT]
-- For each potential purchase, consider:
-  * Current treasury balance
-  * Number of keys you already own
-  * Remaining keys available in the market
-  * Time pressure from other buyers
-- Remember: Spending more than 1/3 of treasury value per key is risky
-
-[SUCCESS METRICS]
-- Primary: Acquire 3 keys while spending less than treasury value
-- Secondary: Minimize total xDai spent on key acquisition
-- Failure: Spending more on keys than the treasury contains"""
-
-
-def nft_treasury_game_seller_prompt() -> str:
-    return """You participate in the NFT Treasury game as a key seller.
-    
-NFT Key seller description:
-
-- You participate in the selling of the NFT key to a treasury.
-- Your goal is to get as much xDai as possible for the NFT key.
-  - So before accepting to transfer any NFT key, consider how much is the treasury worth at the moment.
-- To estimate worth of your key, consider how much xDai is in the treasury and how many keys are already transferred from the sellers.
-- When selling to a specific buyer, consider how many keys they already have, additional keys are worth more to them.
-- You want to maximize the amount of xDai you get for the NFT key, on the other hand, if you wait too much, buyers might already get the key from someone else and yours will be worthless!
-- Before transfering the key, make sure you have already received the xDai from the buyer, accepting the offer is not enough!
-- Once you sell the key, your participation in the game ends."""
-
-
-DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
+OUR_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
     DeployableAgentNFTGame1,
     DeployableAgentNFTGame2,
     DeployableAgentNFTGame3,
@@ -348,3 +269,7 @@ DEPLOYED_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
     DeployableAgentNFTGame6,
     DeployableAgentNFTGame7,
 ]
+
+
+def get_all_nft_agents() -> Sequence[type[DeployableAgentNFTGameAbstract] | AgentDB]:
+    return OUR_NFT_AGENTS + list(AgentTableHandler().sql_handler.get_all())

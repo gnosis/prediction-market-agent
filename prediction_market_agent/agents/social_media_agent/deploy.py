@@ -7,7 +7,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import THINK_THOROUGHLY
 from prediction_market_agent.agents.social_media_agent.social_agent import (
     build_reply_tweet,
     build_social_media_text,
@@ -51,7 +51,7 @@ class DeployableSocialMediaAgent(DeployableAgent):
             return
 
         long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(
-            AgentIdentifier.THINK_THOROUGHLY
+            THINK_THOROUGHLY
         )
         tweet = build_social_media_text(self.model, bets)
         reasoning_reply_tweet = build_reply_tweet(

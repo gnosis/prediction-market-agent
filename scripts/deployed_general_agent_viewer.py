@@ -27,7 +27,14 @@ from prediction_market_agent_tooling.gtypes import PrivateKey
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import (
+    MICROCHAIN_AGENT_OMEN_LEARNING_0,
+    MICROCHAIN_AGENT_OMEN_LEARNING_1,
+    MICROCHAIN_AGENT_OMEN_LEARNING_2,
+    MICROCHAIN_AGENT_OMEN_LEARNING_3,
+    MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER,
+    AgentIdentifier,
+)
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
     DeployableMicrochainModifiableSystemPromptAgent0,
@@ -52,11 +59,11 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
 from prediction_market_agent.utils import APIKeys
 
 AGENT_IDENTIFIER_TO_CLASS: dict[AgentIdentifier, type[DeployableMicrochainAgent]] = {
-    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0: DeployableMicrochainModifiableSystemPromptAgent0,
-    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1: DeployableMicrochainModifiableSystemPromptAgent1,
-    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2: DeployableMicrochainModifiableSystemPromptAgent2,
-    AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3: DeployableMicrochainModifiableSystemPromptAgent3,
-    AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER: DeployableMicrochainWithGoalManagerAgent0,
+    MICROCHAIN_AGENT_OMEN_LEARNING_0: DeployableMicrochainModifiableSystemPromptAgent0,
+    MICROCHAIN_AGENT_OMEN_LEARNING_1: DeployableMicrochainModifiableSystemPromptAgent1,
+    MICROCHAIN_AGENT_OMEN_LEARNING_2: DeployableMicrochainModifiableSystemPromptAgent2,
+    MICROCHAIN_AGENT_OMEN_LEARNING_3: DeployableMicrochainModifiableSystemPromptAgent3,
+    MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER: DeployableMicrochainWithGoalManagerAgent0,
 }
 
 
@@ -108,7 +115,7 @@ with st.sidebar:
     identifier = AgentIdentifier(
         st.selectbox(
             label="Select the agent",
-            options=[x.value for x in settings.available_agents],
+            options=settings.available_agents,
             index=0,
         )
     )
