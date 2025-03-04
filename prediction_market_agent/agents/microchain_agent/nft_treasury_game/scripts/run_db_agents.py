@@ -7,7 +7,6 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
-    AgentDB,
     AgentTableHandler,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
