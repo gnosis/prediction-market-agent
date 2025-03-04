@@ -10,7 +10,15 @@ from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.goal_manager import Goal, GoalManager
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import (
+    MICROCHAIN_AGENT_OMEN,
+    MICROCHAIN_AGENT_OMEN_LEARNING_0,
+    MICROCHAIN_AGENT_OMEN_LEARNING_1,
+    MICROCHAIN_AGENT_OMEN_LEARNING_2,
+    MICROCHAIN_AGENT_OMEN_LEARNING_3,
+    MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER,
+    AgentIdentifier,
+)
 from prediction_market_agent.agents.microchain_agent.memory import (
     ChatHistory,
     ChatMessage,
@@ -52,6 +60,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     allow_stop: bool = True
     identifier: AgentIdentifier
     functions_config: FunctionsConfig
+    initial_system_prompt: str
 
     # Setup during the 'load' method.
     long_term_memory: LongTermMemoryTableHandler
@@ -64,11 +73,6 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     def get_description(cls) -> str:
         return f"Microchain-based {cls.__name__}."
 
-    @classmethod
-    @abc.abstractmethod
-    def get_initial_system_prompt(cls) -> str:
-        pass
-
     def build_long_term_memory(self) -> LongTermMemoryTableHandler:
         return LongTermMemoryTableHandler.from_agent_identifier(self.identifier)
 
@@ -77,7 +81,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
     def build_agent(self, market_type: MarketType) -> Agent:
         unformatted_system_prompt = get_unformatted_system_prompt(
-            unformatted_prompt=self.get_initial_system_prompt(),
+            unformatted_prompt=self.initial_system_prompt,
             prompt_table_handler=self.prompt_handler,
         )
 
@@ -247,28 +251,22 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
 
 class DeployableMicrochainAgent(DeployableMicrochainAgentAbstract):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN
+    identifier = MICROCHAIN_AGENT_OMEN
     functions_config = TRADING_AGENT_SYSTEM_PROMPT_CONFIG.functions_config
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return TRADING_AGENT_SYSTEM_PROMPT_CONFIG.system_prompt
+    initial_system_prompt = TRADING_AGENT_SYSTEM_PROMPT_CONFIG.system_prompt
 
 
 class DeployableMicrochainModifiableSystemPromptAgentAbstract(
     DeployableMicrochainAgent
 ):
     functions_config = JUST_BORN_SYSTEM_PROMPT_CONFIG.functions_config
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return JUST_BORN_SYSTEM_PROMPT_CONFIG.system_prompt
+    initial_system_prompt = JUST_BORN_SYSTEM_PROMPT_CONFIG.system_prompt
 
 
 class DeployableMicrochainModifiableSystemPromptAgent0(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_0
+    identifier = MICROCHAIN_AGENT_OMEN_LEARNING_0
 
     @classmethod
     def get_description(cls) -> str:
@@ -278,7 +276,7 @@ class DeployableMicrochainModifiableSystemPromptAgent0(
 class DeployableMicrochainModifiableSystemPromptAgent1(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_1
+    identifier = MICROCHAIN_AGENT_OMEN_LEARNING_1
 
     @classmethod
     def get_description(cls) -> str:
@@ -288,7 +286,7 @@ class DeployableMicrochainModifiableSystemPromptAgent1(
 class DeployableMicrochainModifiableSystemPromptAgent2(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_2
+    identifier = MICROCHAIN_AGENT_OMEN_LEARNING_2
 
     @classmethod
     def get_description(cls) -> str:
@@ -298,7 +296,7 @@ class DeployableMicrochainModifiableSystemPromptAgent2(
 class DeployableMicrochainModifiableSystemPromptAgent3(
     DeployableMicrochainModifiableSystemPromptAgentAbstract
 ):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_LEARNING_3
+    identifier = MICROCHAIN_AGENT_OMEN_LEARNING_3
     model = SupportedModel.llama_31_instruct
     # Force less iterations, because Replicate's API allows at max 4096 input tokens.
     max_iterations = 10
@@ -309,13 +307,10 @@ class DeployableMicrochainModifiableSystemPromptAgent3(
 
 
 class DeployableMicrochainWithGoalManagerAgent0(DeployableMicrochainAgent):
-    identifier = AgentIdentifier.MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
+    identifier = MICROCHAIN_AGENT_OMEN_WITH_GOAL_MANAGER
     model = SupportedModel.gpt_4o
     functions_config = TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.functions_config
-
-    @classmethod
-    def get_initial_system_prompt(cls) -> str:
-        return TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.system_prompt
+    initial_system_prompt = TRADING_AGENT_SYSTEM_PROMPT_MINIMAL_CONFIG.system_prompt
 
     @classmethod
     def get_description(cls) -> str:

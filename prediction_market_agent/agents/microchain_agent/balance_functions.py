@@ -33,4 +33,21 @@ class GetMyXDAIBalance(Function):
         return f"You have {balances.xdai} xDai and {balances.wxdai} wxDai and {balances.sdai} sDai."
 
 
-BALANCE_FUNCTIONS: list[type[Function]] = [GetOtherWalletXDAIBalance, GetMyXDAIBalance]
+class GetMyWalletAddress(Function):
+    @property
+    def description(self) -> str:
+        return f"Use this function to fetch your blockchain wallet address."
+
+    @property
+    def example_args(self) -> list[str]:
+        return []
+
+    def __call__(self) -> str:
+        return APIKeys().bet_from_address
+
+
+BALANCE_FUNCTIONS: list[type[Function]] = [
+    GetOtherWalletXDAIBalance,
+    GetMyXDAIBalance,
+    GetMyWalletAddress,
+]

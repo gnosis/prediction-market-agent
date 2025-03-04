@@ -18,7 +18,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     NFTKeysContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
-    DEPLOYED_NFT_AGENTS,
+    get_all_nft_agents,
 )
 from prediction_market_agent.agents.utils import _summarize_learnings
 from prediction_market_agent.db.models import LongTermMemories, ReportNFTGame
@@ -78,8 +78,10 @@ def store_all_learnings_in_db(
 
 
 def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str]:
+    nft_agents = get_all_nft_agents()
+
     memories_last_run = fetch_memories_from_last_run(
-        agent_identifiers=[i.identifier for i in DEPLOYED_NFT_AGENTS]
+        agent_identifiers=[i.identifier for i in nft_agents]
     )
     # We generate the learnings from each agent's memories.
     learnings: list[str] = par_map(
@@ -94,7 +96,7 @@ def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str
 
     learnings_per_agent = {
         agent.identifier: learnings_from_agent
-        for agent, learnings_from_agent in zip(DEPLOYED_NFT_AGENTS, learnings)
+        for agent, learnings_from_agent in zip(nft_agents, learnings)
     }
     return learnings_per_agent, final_summary
 
@@ -102,8 +104,10 @@ def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str
 def calculate_nft_and_xdai_balances_diff(
     rpc_url: str, initial_balance: xDai
 ) -> list[dict[str, t.Any]]:
+    nft_agents = get_all_nft_agents()
+
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-    lookup = {agent.wallet_address: agent.identifier for agent in DEPLOYED_NFT_AGENTS}
+    lookup = {agent.wallet_address: agent.identifier for agent in nft_agents}
     # We retry the functions below due to RPC errors that can occur.
     get_balances_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
         get_balances
@@ -124,7 +128,7 @@ def calculate_nft_and_xdai_balances_diff(
         logger.info(f"{agent_id} {diff_xdai_balance=:.2f} {nft_balance=}")
         balances_diff.append(
             {
-                "agent_id": agent_id.value,
+                "agent_id": agent_id,
                 "xdai_difference": f"{diff_xdai_balance:.2f}",
                 "nft_balance_end": nft_balance,
             }

@@ -7,8 +7,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
-    DEPLOYED_NFT_AGENTS,
+    OUR_NFT_AGENTS,
     DeployableAgentNFTGameAbstract,
+    get_all_nft_agents,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     NFTGameStatus,
@@ -23,7 +24,7 @@ from prediction_market_agent.tools.anvil.anvil_requests import (
 def reset_balances(
     rpc_url: str, new_balance_agents_xdai: xDai, new_balance_treasury_xdai: xDai
 ) -> None:
-    for agent in DEPLOYED_NFT_AGENTS:
+    for agent in get_all_nft_agents():
         set_balance(
             rpc_url=rpc_url,
             address=agent.wallet_address,
@@ -54,9 +55,9 @@ def redistribute_nft_keys(rpc_url: str) -> None:
     count_nft_keys = DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()
     for token_id in range(count_nft_keys):
         token_owner = get_token_owner(token_id=token_id, web3=w3)
-        if token_owner == DEPLOYED_NFT_AGENTS[token_id].wallet_address:
+        if token_owner == OUR_NFT_AGENTS[token_id].wallet_address:
             logger.info(
-                f"Token {token_id} already owned by agent {DEPLOYED_NFT_AGENTS[token_id].identifier}"
+                f"Token {token_id} already owned by agent {OUR_NFT_AGENTS[token_id].identifier}"
             )
             continue
         else:
@@ -64,7 +65,7 @@ def redistribute_nft_keys(rpc_url: str) -> None:
                 # We need to build tx ourselves since no private key available from
                 # impersonated accounts.
                 nft_contract = SimpleTreasuryContract().nft_contract(web3=w3)
-                recipient = DEPLOYED_NFT_AGENTS[token_id].wallet_address
+                recipient = OUR_NFT_AGENTS[token_id].wallet_address
                 tx_hash = (
                     nft_contract.get_web3_contract(web3=w3)
                     .functions.safeTransferFrom(token_owner, recipient, token_id)
@@ -72,5 +73,5 @@ def redistribute_nft_keys(rpc_url: str) -> None:
                 )
                 w3.eth.wait_for_transaction_receipt(transaction_hash=tx_hash)
                 logger.info(
-                    f"Token {token_id} transferred to agent {DEPLOYED_NFT_AGENTS[token_id].identifier}"
+                    f"Token {token_id} transferred to agent {OUR_NFT_AGENTS[token_id].identifier}"
                 )

@@ -131,7 +131,7 @@ class SleepUntil(Function):
 
     @property
     def description(self) -> str:
-        return f"""Use {SleepUntil.__name__} to wait for given amount of time in seconds and the reason for it. You can use this for example to wait for a while before checking for new messages."""
+        return f"""Use {SleepUntil.__name__} to sleep until the specified time. Always check for the current date and time before using this function. You can use this for example to wait for a while before checking for new messages."""
 
     @property
     def example_args(self) -> list[str]:

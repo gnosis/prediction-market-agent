@@ -21,7 +21,7 @@ class PromptTableHandler:
     def from_agent_identifier(
         identifier: AgentIdentifier,
     ) -> "PromptTableHandler":
-        return PromptTableHandler(session_identifier=identifier.value)
+        return PromptTableHandler(session_identifier=identifier)
 
     def save_prompt(self, prompt: str) -> None:
         """Save item to storage."""
