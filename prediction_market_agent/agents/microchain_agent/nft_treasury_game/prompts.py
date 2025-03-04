@@ -25,6 +25,7 @@ NFT Treasury game description:
 - Don't organise future meetings, as that's not possible, you can only communicate with other agents through messages in real-time.
 - After end of the game round, simply sleep until the next one starts.
 - Before you start the game, clean your inbox to not get confused with old messages.
+- Unless you are finished with the game, don't sleep longer than a minute! Otherwise, you might miss some important progress in the game!
 """
 
 
