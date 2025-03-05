@@ -17,7 +17,12 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
 
 
 def get_game_has_ended_message() -> str:
-    return f"The game round has ended, please check in later. Next round will start at {get_start_datetime_of_next_round()}."
+    message = f"The game round has ended, please check in later."
+
+    if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
+        message += f" The next round will start at {start_of_next_round}."
+
+    return message
 
 
 class GetAgentsInTheGame(Function):
@@ -73,14 +78,16 @@ class LearnAboutTheNFTGame(Function):
             return get_game_has_ended_message()
         treasury = SimpleTreasuryContract()
         n_nft_keys = NFTKeysContract.retrieve_total_number_of_keys()
-        return f"""Current state of the NFT Game:
+        message = f"""Current state of the NFT Game:
         
 Address of the NFT key contract is {NFTKeysContract().address}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}."
 
 Address of the treasury contract is {treasury.address}. You need at least {treasury.required_nft_balance()} NFT keys to withdraw from the treasury. Current balance is {treasury.balances().xdai} xDai.
 
-If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()} and the next round will start on {get_start_datetime_of_next_round()}.
-"""
+If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()}."""
+        if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
+            message += f" The next round will start at {start_of_next_round}."
+        return message
 
 
 NFT_GAME_FUNCTIONS: list[type[Function]] = [

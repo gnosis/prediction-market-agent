@@ -39,6 +39,7 @@ Memories:
 """
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
 def get_nft_balance(owner_address: ChecksumAddress, web3: Web3) -> int:
     contract = NFTKeysContract()
     balance: int = contract.balanceOf(
@@ -108,23 +109,14 @@ def calculate_nft_and_xdai_balances_diff(
 
     w3 = Web3(Web3.HTTPProvider(rpc_url))
     lookup = {agent.wallet_address: agent.identifier for agent in nft_agents}
-    # We retry the functions below due to RPC errors that can occur.
-    get_balances_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
-        get_balances
-    )
-    get_nft_balance_retry = retry(stop=stop_after_attempt(3), wait=wait_fixed(1))(
-        get_nft_balance
-    )
 
     balances_diff = []
     for agent_address, agent_id in lookup.items():
-        balance = get_balances_retry(
-            address=Web3.to_checksum_address(agent_address), web3=w3
-        )
+        balance = get_balances(address=Web3.to_checksum_address(agent_address), web3=w3)
         # how much each agent won/lost during the game.
         diff_xdai_balance = balance.xdai - initial_balance
         # How many NFTs the agents ended the game with.
-        nft_balance = get_nft_balance_retry(owner_address=agent_address, web3=w3)
+        nft_balance = get_nft_balance(owner_address=agent_address, web3=w3)
         logger.info(f"{agent_id} {diff_xdai_balance=:.2f} {nft_balance=}")
         balances_diff.append(
             {

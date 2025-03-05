@@ -12,8 +12,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     get_all_nft_agents,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    NFTGameStatus,
-    get_nft_game_status,
+    get_nft_game_is_finished,
 )
 from prediction_market_agent.tools.anvil.anvil_requests import (
     impersonate_account,
@@ -43,11 +42,8 @@ def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
     return nft_contract.owner_of(token_id=token_id, web3=web3)
 
 
-def is_game_in_finished_state(rpc_url: str) -> bool:
-    return (
-        get_nft_game_status(web3=Web3(Web3.HTTPProvider(rpc_url)))
-        == NFTGameStatus.finished
-    )
+def get_nft_game_is_finished_rpc_url(rpc_url: str) -> bool:
+    return get_nft_game_is_finished(Web3(Web3.HTTPProvider(rpc_url)))
 
 
 def redistribute_nft_keys(rpc_url: str) -> None:

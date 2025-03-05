@@ -386,7 +386,7 @@ def show_treasury_part() -> None:
 Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
 - The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}
-- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S')}
+- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S') if start_datetime_next_round else 'No next round planned yet.'}
 """,
         unsafe_allow_html=True,
     )
