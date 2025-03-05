@@ -24,7 +24,7 @@ class LongTermMemoryTableHandler:
     def from_agent_identifier(
         identifier: AgentIdentifier,
     ) -> "LongTermMemoryTableHandler":
-        return LongTermMemoryTableHandler(task_description=identifier.value)
+        return LongTermMemoryTableHandler(task_description=identifier)
 
     def save_history(self, history: list[dict[str, t.Any]]) -> None:
         """Save item to storage. Note that score allows many types for easier handling by agent."""

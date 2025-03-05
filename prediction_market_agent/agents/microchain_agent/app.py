@@ -30,7 +30,7 @@ from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit
 from prediction_market_agent_tooling.tools.utils import utcnow
 from streamlit_extras.bottom_container import bottom
 
-from prediction_market_agent.agents.identifiers import AgentIdentifier
+from prediction_market_agent.agents.identifiers import MICROCHAIN_AGENT_STREAMLIT
 from prediction_market_agent.agents.microchain_agent.deploy import GENERAL_AGENT_TAG
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
 from prediction_market_agent.agents.microchain_agent.microchain_agent import (
@@ -58,7 +58,7 @@ from prediction_market_agent.tools.streamlit_utils import check_required_api_key
 from prediction_market_agent.utils import APIKeys
 
 MARKET_TYPE = MarketType.OMEN
-AGENT_IDENTIFIER = AgentIdentifier.MICROCHAIN_AGENT_STREAMLIT
+AGENT_IDENTIFIER = MICROCHAIN_AGENT_STREAMLIT
 ALLOW_STOP = False
 ALLOWED_CONFIGS = {
     x.name: x

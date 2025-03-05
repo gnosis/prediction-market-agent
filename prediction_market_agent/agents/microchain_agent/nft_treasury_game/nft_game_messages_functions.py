@@ -1,4 +1,5 @@
 import time
+from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
@@ -129,9 +130,17 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
+    OK_OUTPUT = "Sleeping."
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.last_sleep_until: str | None = None
+
     @property
     def description(self) -> str:
-        return f"""Use {SleepUntil.__name__} to wait for given amount of time in seconds and the reason for it. You can use this for example to wait for a while before checking for new messages."""
+        return f"""Use {SleepUntil.__name__} to sleep until the specified time.
+Before using this function, you need to know the exact time you want to sleep until.
+You can use this for example to wait for a while before checking for new messages."""
 
     @property
     def example_args(self) -> list[str]:
@@ -139,7 +148,20 @@ class SleepUntil(Function):
 
     def __call__(self, sleep_until: str, reason: str) -> str:
         sleep_until_datetime = DatetimeUTC.to_datetime_utc(sleep_until)
-        return f"Sleeping until {sleep_until_datetime.strftime('%Y-%m-%d %H:%M:%S')} (UTC), because {reason}."
+
+        if sleep_until_datetime < utcnow():
+            output = f"You can not sleep in the past. Current time is {utcnow()}."
+
+        elif (sleep_time := sleep_until_datetime - utcnow()) > timedelta(minutes=1):
+            if self.last_sleep_until == sleep_until:
+                output = self.OK_OUTPUT
+            else:
+                output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
+        else:
+            output = self.OK_OUTPUT
+
+        self.last_sleep_until = sleep_until
+        return output
 
     @staticmethod
     def execute_calling_of_this_function(call_code: str) -> None:
