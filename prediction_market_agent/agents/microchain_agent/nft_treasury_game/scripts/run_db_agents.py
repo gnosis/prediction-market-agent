@@ -72,6 +72,10 @@ def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
 
 
 def main() -> None:
+    # Spawn a whole new Python interpreter process for each agent,
+    # otherwise DB connection freaks.
+    multiprocessing.set_start_method("spawn")
+
     agent_table_handler = AgentTableHandler()
     processes: dict[str, multiprocessing.Process] = {}
 
