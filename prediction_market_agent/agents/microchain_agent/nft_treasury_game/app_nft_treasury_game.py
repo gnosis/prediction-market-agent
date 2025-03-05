@@ -220,7 +220,6 @@ def customized_chat_message(
             Reasoning.__name__,
             Stop.__name__,
             SendPaidMessageToAnotherAgent.__name__,
-            SleepUntil.__name__,
             RemoveAllUnreadMessages.__name__,
             UpdateMySystemPrompt.__name__,
         ):
