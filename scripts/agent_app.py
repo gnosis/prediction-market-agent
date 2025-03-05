@@ -8,6 +8,10 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
+import nest_asyncio
+
+nest_asyncio.apply()  # Required for streamlit to work with asyncio.
+
 from prediction_market_agent.utils import patch_sqlite3
 
 patch_sqlite3()
