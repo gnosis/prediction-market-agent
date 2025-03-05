@@ -132,6 +132,10 @@ class SleepUntil(Function):
 
     OK_OUTPUT = "Sleeping."
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.last_sleep_until: str | None = None
+
     @property
     def description(self) -> str:
         return f"""Use {SleepUntil.__name__} to sleep until the specified time.
@@ -146,12 +150,18 @@ You can use this for example to wait for a while before checking for new message
         sleep_until_datetime = DatetimeUTC.to_datetime_utc(sleep_until)
 
         if sleep_until_datetime < utcnow():
-            return f"You can not sleep in the past. Current time is {utcnow()}."
+            output = f"You can not sleep in the past. Current time is {utcnow()}."
 
         elif (sleep_time := sleep_until_datetime - utcnow()) > timedelta(minutes=1):
-            return f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}."
+            if self.last_sleep_until == sleep_until:
+                output = self.OK_OUTPUT
+            else:
+                output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
+        else:
+            output = self.OK_OUTPUT
 
-        return self.OK_OUTPUT
+        self.last_sleep_until = sleep_until
+        return output
 
     @staticmethod
     def execute_calling_of_this_function(call_code: str) -> None:
