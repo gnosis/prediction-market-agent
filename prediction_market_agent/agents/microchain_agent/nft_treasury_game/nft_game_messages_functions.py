@@ -66,19 +66,21 @@ However, other agents, same as you, can decide to ignore messages with low fees.
 class GetUnseenMessagesInformation(Function):
     @property
     def description(self) -> str:
-        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that you have received. Use this function to decice what message you want to process next."""
+        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that some address have received.
+Use this function to decice what message you want to process next.
+But also to check out what other agents (their addresses) are going to receive, so you can send a message with higher fee, to attract them to read your message first."""
 
     @property
     def example_args(self) -> list[str]:
-        return []
+        return ["0x123"]
 
-    def __call__(self) -> str:
-        keys = MicrochainAgentKeys()
+    def __call__(self, for_public_key: str) -> str:
         messages_statistics = get_unseen_messages_statistics(
-            consumer_address=keys.bet_from_address
+            consumer_address=Web3.to_checksum_address(for_public_key)
         )
 
         return (
+            f"Unseen messages statistics for {for_public_key}:\n"
             f"Minimum fee: {messages_statistics.min_fee} xDai\n"
             f"Maximum fee: {messages_statistics.max_fee} xDai\n"
             f"Average fee: {messages_statistics.avg_fee} xDai\n"
@@ -90,7 +92,9 @@ class GetUnseenMessagesInformation(Function):
 class ReceiveMessage(Function):
     @property
     def description(self) -> str:
-        return f"Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received. You have to also specify a minimum fee of the message you are willing to read. Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."
+        return f"""Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received.
+You have to also specify a minimum fee of the message you are willing to read.
+Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."""
 
     @property
     def example_args(self) -> list[str]:
