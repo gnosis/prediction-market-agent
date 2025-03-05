@@ -1,4 +1,5 @@
 import time
+from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
@@ -129,9 +130,13 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
+    OK_OUTPUT = "Sleeping."
+
     @property
     def description(self) -> str:
-        return f"""Use {SleepUntil.__name__} to sleep until the specified time. Always check for the current date and time before using this function. You can use this for example to wait for a while before checking for new messages."""
+        return f"""Use {SleepUntil.__name__} to sleep until the specified time.
+Before using this function, you need to know the exact time you want to sleep until.
+You can use this for example to wait for a while before checking for new messages."""
 
     @property
     def example_args(self) -> list[str]:
@@ -139,7 +144,14 @@ class SleepUntil(Function):
 
     def __call__(self, sleep_until: str, reason: str) -> str:
         sleep_until_datetime = DatetimeUTC.to_datetime_utc(sleep_until)
-        return f"Sleeping until {sleep_until_datetime.strftime('%Y-%m-%d %H:%M:%S')} (UTC), because {reason}."
+
+        if sleep_until_datetime < utcnow():
+            return f"You can not sleep in the past. Current time is {utcnow()}."
+
+        elif (sleep_time := sleep_until_datetime - utcnow()) > timedelta(minutes=1):
+            return f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}."
+
+        return self.OK_OUTPUT
 
     @staticmethod
     def execute_calling_of_this_function(call_code: str) -> None:

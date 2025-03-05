@@ -124,8 +124,10 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     def before_iteration_callback(self) -> CallbackReturn:
         # If agent used the SleepUntil function, we need to run it manually here.
         # Thanks to it, agent will continue sleeping if server was interrupted or any other error happened.
-        if len(self.agent.history) >= 2 and SleepUntil.__name__ in (
-            call_code := self.agent.history[-2]["content"]
+        if (
+            len(self.agent.history) >= 2
+            and SleepUntil.__name__ in (call_code := self.agent.history[-2]["content"])
+            and SleepUntil.OK_OUTPUT in self.agent.history[-1]["content"]
         ):
             SleepUntil.execute_calling_of_this_function(call_code=call_code)
 

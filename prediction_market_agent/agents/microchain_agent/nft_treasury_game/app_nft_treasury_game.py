@@ -488,15 +488,13 @@ with st.sidebar:
 
 
 all_agents = get_all_nft_agents()
+pages = [
+    st.Page(get_agent_page(agent), title=agent.name, url_path=build_url(agent))
+    for agent in all_agents
+] + [
+    st.Page(reports_page, title="Game Reports", url_path="game-reports"),
+    st.Page(add_new_agent, title="Add Agent", url_path="add-agent"),
+]
 
-pg = st.navigation(
-    [
-        st.Page(get_agent_page(agent), title=agent.name, url_path=build_url(agent))
-        for agent in all_agents
-    ]
-    + [
-        st.Page(reports_page, title="Game Reports", url_path="game-reports"),
-        st.Page(add_new_agent, title="Add Agent", url_path="add-agent"),
-    ]
-)
+pg = st.navigation(pages)  # type: ignore[arg-type] # This is just fine, all items in the pages are from st.Page!
 pg.run()
