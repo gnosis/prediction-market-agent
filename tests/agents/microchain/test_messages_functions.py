@@ -77,13 +77,14 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
         ],
     ):
         r = GetUnseenMessagesInformation()
-        statistics = r()
+        statistics = r("0x1Ca11b2520345993e78312b00441050d2d57065f")
         assert statistics == (
-            f"Minimum fee: 1e-14 xDai\n"
-            f"Maximum fee: 1e-13 xDai\n"
-            f"Average fee: 5.5e-14 xDai\n"
-            f"Number of unique senders: 1\n"
-            f"Total number of messages: 2"
+            "Unseen messages statistics for 0x1Ca11b2520345993e78312b00441050d2d57065f:\n"
+            "Minimum fee: 1e-14 xDai\n"
+            "Maximum fee: 1e-13 xDai\n"
+            "Average fee: 5.5e-14 xDai\n"
+            "Number of unique senders: 1\n"
+            "Total number of messages: 2"
         )
 
 
