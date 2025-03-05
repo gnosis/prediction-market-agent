@@ -488,7 +488,9 @@ with st.sidebar:
 
 all_agents = get_all_nft_agents()
 pages = [
-    st.Page(get_agent_page(agent), title=agent.name, url_path=build_url(agent))
+    st.Page(
+        get_agent_page(agent), title=f"Agent {agent.name}", url_path=build_url(agent)
+    )
     for agent in all_agents
 ] + [
     st.Page(reports_page, title="Game Reports", url_path="game-reports"),
