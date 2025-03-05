@@ -17,6 +17,7 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import (
+    generate_private_key,
     private_key_to_public_key,
     wei_to_xdai,
 )
@@ -58,7 +59,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
     get_end_datetime_of_current_round,
     get_start_datetime_of_next_round,
 )
-from prediction_market_agent.agents.utils import generate_private_key
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
     fetch_unseen_transactions,
