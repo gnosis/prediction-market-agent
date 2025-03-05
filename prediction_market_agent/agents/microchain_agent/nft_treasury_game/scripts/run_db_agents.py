@@ -73,7 +73,7 @@ def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
 
 def main() -> None:
     # Spawn a whole new Python interpreter process for each agent,
-    # otherwise DB connection freaks.
+    # otherwise DB connection freaks. (spawn is default on Mac, but not on Linux, so Kube job fails without this)
     multiprocessing.set_start_method("spawn")
 
     agent_table_handler = AgentTableHandler()
