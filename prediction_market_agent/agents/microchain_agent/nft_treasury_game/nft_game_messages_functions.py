@@ -59,6 +59,8 @@ You can also specify a payment to the agent."""
             api_keys=api_keys,
             recipient=recipient,
             message=HexBytes(compress_message(message)),
+            # We don't differ between fees and payments, but it helps to accept it as separate arguments,
+            # for LLM to understand how to pay for NFT keys or stuff.
             amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee + payment))),
         )
         return self.OUTPUT_TEXT
