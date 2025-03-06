@@ -149,7 +149,7 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
-    OK_OUTPUT = "Sleeping."
+    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game and your messages once you wake up!"
 
     def __init__(self) -> None:
         super().__init__()
