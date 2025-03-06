@@ -102,9 +102,6 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
 
     def __call__(self, n: int, minimum_fee: float) -> str:
         keys = MicrochainAgentKeys()
-        messages_statistics = get_unseen_messages_statistics(
-            consumer_address=keys.bet_from_address
-        )
         popped_messages = [
             message
             for _ in range(n)
@@ -118,6 +115,9 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
             )
             is not None
         ]
+        messages_statistics = get_unseen_messages_statistics(
+            consumer_address=keys.bet_from_address
+        )
         return (
             "\n\n".join(
                 parse_message_for_agent(message=message) for message in popped_messages
