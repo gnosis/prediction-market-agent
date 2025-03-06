@@ -27,6 +27,5 @@ def unzip_message_else_do_nothing(data_field: str) -> str:
 
 def parse_message_for_agent(message: MessageContainer) -> str:
     return f"""Sender: {message.sender}
-    Value: {wei_to_xdai(message.value)} xDai
-    Message: {unzip_message_else_do_nothing(message.message.hex())}
-    """
+Value: {wei_to_xdai(message.value)} xDai
+Message: {unzip_message_else_do_nothing(message.message.hex())}"""

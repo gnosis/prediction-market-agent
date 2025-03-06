@@ -92,23 +92,34 @@ But also to check out what other agents (their addresses) are going to receive, 
 class ReceiveMessage(Function):
     @property
     def description(self) -> str:
-        return f"""Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received.
+        return f"""Use {ReceiveMessage.__name__} to get N messages from the unseen messages that you have received.
 You have to also specify a minimum fee of the message you are willing to read.
 Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."""
 
     @property
     def example_args(self) -> list[str]:
-        return ["0.0"]
+        return ["10", "0.0"]
 
-    def __call__(self, minimum_fee: float) -> str:
+    def __call__(self, n: int, minimum_fee: float) -> str:
         keys = MicrochainAgentKeys()
-        popped_message = pop_message(
-            minimum_fee=xdai_type(minimum_fee),
-            api_keys=APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key),
-        )
+        popped_messages = [
+            message
+            for _ in range(n)
+            if (
+                message := pop_message(
+                    minimum_fee=xdai_type(minimum_fee),
+                    api_keys=APIKeys_PMAT(
+                        BET_FROM_PRIVATE_KEY=keys.bet_from_private_key
+                    ),
+                )
+            )
+            is not None
+        ]
         return (
-            parse_message_for_agent(message=popped_message)
-            if popped_message
+            "\n\n".join(
+                parse_message_for_agent(message=message) for message in popped_messages
+            )
+            if popped_messages
             else "No new messages"
         )
 
