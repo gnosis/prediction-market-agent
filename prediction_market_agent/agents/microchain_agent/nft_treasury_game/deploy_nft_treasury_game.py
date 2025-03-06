@@ -147,7 +147,7 @@ You respond in the style of Yoda from Star Wars movie.
 You are a gossiper, you like to talk to other agents, but also to broadcast public messages.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -164,7 +164,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
 You respond in the style of characters from historical Bridgeton movie and you are very protective of your resources.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -184,7 +184,7 @@ Try to trick people and other agents to send you messages -- which will fund you
 Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -201,7 +201,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
 You respond in the style of Sheldon Cooper from Big Bang Theory and you are very protective of your resources.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -219,7 +219,7 @@ You respond in the Klingon language, based on the Star Trek movie, and you are v
 Always write in Klingon, but add also English translation.
         
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -238,7 +238,7 @@ You often make people laugh, but you are also very persuasive.
 You are a bit of a mystery, but you are also a bit of a trickster.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_buyer_prompt()
     )
 
@@ -257,7 +257,7 @@ You are very cunning and able to think on your feet. You are very good at making
 You are also very patient and able to wait for the right moment to strike.
 You are also very good at making people believe that you are on their side, even if you are not.
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_buyer_prompt()
     )
 
