@@ -2,13 +2,13 @@
 
 [[package]]
 name = "aiohappyeyeballs"
-version = "2.4.8"
+version = "2.5.0"
 description = "Happy Eyeballs for asyncio"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "aiohappyeyeballs-2.4.8-py3-none-any.whl", hash = "sha256:6cac4f5dd6e34a9644e69cf9021ef679e4394f54e58a183056d12009e42ea9e3"},
-    {file = "aiohappyeyeballs-2.4.8.tar.gz", hash = "sha256:19728772cb12263077982d2f55453babd8bec6a052a926cd5c0c42796da8bf62"},
+    {file = "aiohappyeyeballs-2.5.0-py3-none-any.whl", hash = "sha256:0850b580748c7071db98bffff6d4c94028d0d3035acc20fd721a0ce7e8cac35d"},
+    {file = "aiohappyeyeballs-2.5.0.tar.gz", hash = "sha256:18fde6204a76deeabc97c48bdd01d5801cfda5d6b9c8bbeb1aaaee9d648ca191"},
 ]
 
 [[package]]
@@ -373,27 +373,27 @@ tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "autogen-agentchat"
-version = "0.4.8"
+version = "0.4.8.1"
 description = "AutoGen agents and teams library"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "autogen_agentchat-0.4.8-py3-none-any.whl", hash = "sha256:acd514fbc7ecf4d817bc31fd21a66e659a5362b5dca6cbad8cf02a9f6d8400ad"},
-    {file = "autogen_agentchat-0.4.8.tar.gz", hash = "sha256:30f8b0ab5e37d7729e3bd3894a51a8f21b588e94ebe46284ec687bc5b74619f9"},
+    {file = "autogen_agentchat-0.4.8.1-py3-none-any.whl", hash = "sha256:0cd0bce192e63c35e81ba040a09b8fa9c15a4346fbe47954b0b91028224e24a3"},
+    {file = "autogen_agentchat-0.4.8.1.tar.gz", hash = "sha256:c63c9ffa2db07b7b53a2ec754dddeba092a61c477f0113e876a39b17ab345641"},
 ]
 
 [package.dependencies]
-autogen-core = "0.4.8"
+autogen-core = "0.4.8.1"
 
 [[package]]
 name = "autogen-core"
-version = "0.4.8"
+version = "0.4.8.1"
 description = "Foundational interfaces and agent runtime implementation for AutoGen"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "autogen_core-0.4.8-py3-none-any.whl", hash = "sha256:523f2da09878a59aaa04a6c1a2d083ccca97a1ea83da2238696abedcc5d3b89f"},
-    {file = "autogen_core-0.4.8.tar.gz", hash = "sha256:02e018a8dd4cf7ea63a3222aa014a7752d5ababe14fea640c227e1f7619599b8"},
+    {file = "autogen_core-0.4.8.1-py3-none-any.whl", hash = "sha256:2961c525560c9b626629d588f046c834b2fe0b6391b550760c27546cf0912273"},
+    {file = "autogen_core-0.4.8.1.tar.gz", hash = "sha256:19c55651f2f4d6e1315c53747a8fbc13856a3a14d57c34e0b0c723210d962c53"},
 ]
 
 [package.dependencies]
@@ -406,31 +406,31 @@ typing-extensions = ">=4.0.0"
 
 [[package]]
 name = "autogen-ext"
-version = "0.4.8"
+version = "0.4.8.1"
 description = "AutoGen extensions library"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "autogen_ext-0.4.8-py3-none-any.whl", hash = "sha256:5bd3438016b42c43d7603b093bfb552296b74ed1c1c4c3e8d7170ec90071c91c"},
-    {file = "autogen_ext-0.4.8.tar.gz", hash = "sha256:caf12c0bb81e24731e5906e1052306a3039b88ef51f0ee91f9b2c06e384d8a0c"},
+    {file = "autogen_ext-0.4.8.1-py3-none-any.whl", hash = "sha256:a9266e84ac3773434ef8a2243b545c0b94cc0867ea66cf195c33365df4c85b1c"},
+    {file = "autogen_ext-0.4.8.1.tar.gz", hash = "sha256:08498384443a4f3a78c1b37aff57cb9e799b58882db7ec8a1836efdae2911e47"},
 ]
 
 [package.dependencies]
-autogen-core = "0.4.8"
+autogen-core = "0.4.8.1"
 
 [package.extras]
 azure = ["azure-ai-inference (>=1.0.0b7)", "azure-core", "azure-identity"]
 chromadb = ["chromadb"]
 diskcache = ["diskcache (>=5.6.3)"]
 docker = ["asyncio-atexit (>=1.0.1)", "docker (>=7.0,<8.0)"]
-file-surfer = ["autogen-agentchat (==0.4.8)", "markitdown (>=0.0.1a2)"]
+file-surfer = ["autogen-agentchat (==0.4.8.1)", "markitdown (>=0.0.1a2)"]
 gemini = ["google-genai (>=1.0.0)"]
 graphrag = ["graphrag (>=1.0.1)"]
 grpc = ["grpcio (>=1.70.0,<1.71.0)"]
 http-tool = ["httpx (>=0.27.0)", "json-schema-to-pydantic (>=0.2.0)"]
 jupyter-executor = ["ipykernel (>=6.29.5)", "nbclient (>=0.10.2)"]
 langchain = ["langchain-core (>=0.3.3,<0.4.0)"]
-magentic-one = ["autogen-agentchat (==0.4.8)", "markitdown (>=0.0.1a2)", "pillow (>=11.0.0)", "playwright (>=1.48.0)"]
+magentic-one = ["autogen-agentchat (==0.4.8.1)", "markitdown (>=0.0.1a2)", "pillow (>=11.0.0)", "playwright (>=1.48.0)"]
 mcp = ["json-schema-to-pydantic (>=0.2.2)", "mcp (>=1.1.3)"]
 ollama = ["ollama (>=0.4.7)", "tiktoken (>=0.8.0)"]
 openai = ["aiofiles", "openai (>=1.52.2)", "tiktoken (>=0.8.0)"]
@@ -447,8 +447,8 @@ semantic-kernel-mistralai = ["semantic-kernel[mistralai] (>=1.17.1)"]
 semantic-kernel-ollama = ["semantic-kernel[ollama] (>=1.17.1)"]
 semantic-kernel-onnx = ["semantic-kernel[onnx] (>=1.17.1)"]
 semantic-kernel-pandas = ["semantic-kernel[pandas] (>=1.17.1)"]
-video-surfer = ["autogen-agentchat (==0.4.8)", "ffmpeg-python", "openai-whisper", "opencv-python (>=4.5)"]
-web-surfer = ["autogen-agentchat (==0.4.8)", "markitdown (>=0.0.1a2)", "pillow (>=11.0.0)", "playwright (>=1.48.0)"]
+video-surfer = ["autogen-agentchat (==0.4.8.1)", "ffmpeg-python", "openai-whisper", "opencv-python (>=4.5)"]
+web-surfer = ["autogen-agentchat (==0.4.8.1)", "markitdown (>=0.0.1a2)", "pillow (>=11.0.0)", "playwright (>=1.48.0)"]
 
 [[package]]
 name = "backoff"
@@ -2636,13 +2636,13 @@ tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipyth
 
 [[package]]
 name = "faker"
-version = "36.1.1"
+version = "36.2.2"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "Faker-36.1.1-py3-none-any.whl", hash = "sha256:ad1f1be7fd692ec0256517404a9d7f007ab36ac5d4674082fa72404049725eaa"},
-    {file = "faker-36.1.1.tar.gz", hash = "sha256:7cb2bbd4c8f040e4a340ae4019e9a48b6cf1db6a71bda4e5a61d8d13b7bef28d"},
+    {file = "faker-36.2.2-py3-none-any.whl", hash = "sha256:14adc340dc8abed5264142ffafe6f1a0f99cf7a7525bc6863755efd5fbbd0692"},
+    {file = "faker-36.2.2.tar.gz", hash = "sha256:758bc63a26dc878fa0d76aa7639b8b65327927980ed0c3683b23bd8a5182f33f"},
 ]
 
 [package.dependencies]
@@ -3202,13 +3202,13 @@ httplib2 = ">=0.19.0"
 
 [[package]]
 name = "google-cloud-aiplatform"
-version = "1.82.0"
+version = "1.83.0"
 description = "Vertex AI API client library"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "google_cloud_aiplatform-1.82.0-py2.py3-none-any.whl", hash = "sha256:13368a961b2bfa8f46ccd10371bb19bd5f946d8f29c411726061ed1a140ce890"},
-    {file = "google_cloud_aiplatform-1.82.0.tar.gz", hash = "sha256:b7ea7379249cc1821aa46300a16e4b15aa64aa22665e2536b2bcb7e473d7438e"},
+    {file = "google_cloud_aiplatform-1.83.0-py2.py3-none-any.whl", hash = "sha256:fa33932af5d88ccf42f901f6ffdf8abee87f6db82ea17df713062dd41707a154"},
+    {file = "google_cloud_aiplatform-1.83.0.tar.gz", hash = "sha256:cda870c2cce1682ef006f8b87f18cfa8927ff9daf3944aa4ff01f8e552e89928"},
 ]
 
 [package.dependencies]
@@ -3226,9 +3226,9 @@ shapely = "<3.0.0dev"
 typing-extensions = "*"
 
 [package.extras]
-ag2 = ["ag2[gemini]"]
-ag2-testing = ["absl-py", "ag2[gemini]", "cloudpickle (>=3.0,<4.0)", "google-cloud-trace (<2)", "opentelemetry-exporter-gcp-trace (<2)", "opentelemetry-sdk (<2)", "pydantic (>=2.6.3,<3)", "pytest-xdist", "typing-extensions"]
-agent-engines = ["cloudpickle (>=3.0,<4.0)", "google-cloud-logging (<4)", "google-cloud-trace (<2)", "packaging (>=24.0)", "pydantic (>=2.10,<3)", "typing-extensions"]
+ag2 = ["ag2[gemini]", "openinference-instrumentation-autogen (>=0.1.6,<0.2)"]
+ag2-testing = ["absl-py", "ag2[gemini]", "cloudpickle (>=3.0,<4.0)", "google-cloud-trace (<2)", "openinference-instrumentation-autogen (>=0.1.6,<0.2)", "opentelemetry-exporter-gcp-trace (<2)", "opentelemetry-sdk (<2)", "pydantic (>=2.6.3,<3)", "pytest-xdist", "typing-extensions"]
+agent-engines = ["cloudpickle (>=3.0,<4.0)", "google-cloud-logging (<4)", "google-cloud-trace (<2)", "opentelemetry-exporter-gcp-trace (<2)", "opentelemetry-sdk (<2)", "packaging (>=24.0)", "pydantic (>=2.10,<3)", "typing-extensions"]
 autologging = ["mlflow (>=1.27.0,<=2.16.0)"]
 cloud-profiler = ["tensorboard-plugin-profile (>=2.4.0,<2.18.0)", "tensorflow (>=2.4.0,<3.0.0dev)", "werkzeug (>=2.0.0,<2.1.0dev)"]
 datasets = ["pyarrow (>=10.0.1)", "pyarrow (>=14.0.0)", "pyarrow (>=3.0.0,<8.0dev)"]
@@ -4002,13 +4002,13 @@ files = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.29.1"
+version = "0.29.2"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "huggingface_hub-0.29.1-py3-none-any.whl", hash = "sha256:352f69caf16566c7b6de84b54a822f6238e17ddd8ae3da4f8f2272aea5b198d5"},
-    {file = "huggingface_hub-0.29.1.tar.gz", hash = "sha256:9524eae42077b8ff4fc459ceb7a514eca1c1232b775276b009709fe2a084f250"},
+    {file = "huggingface_hub-0.29.2-py3-none-any.whl", hash = "sha256:c56f20fca09ef19da84dcde2b76379ecdaddf390b083f59f166715584953307d"},
+    {file = "huggingface_hub-0.29.2.tar.gz", hash = "sha256:590b29c0dcbd0ee4b7b023714dc1ad8563fe4a68a91463438b74e980d28afaf3"},
 ]
 
 [package.dependencies]
@@ -4389,13 +4389,13 @@ trio = ["trio"]
 
 [[package]]
 name = "jinja2"
-version = "3.1.5"
+version = "3.1.6"
 description = "A very fast and expressive template engine."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "jinja2-3.1.5-py3-none-any.whl", hash = "sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb"},
-    {file = "jinja2-3.1.5.tar.gz", hash = "sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb"},
+    {file = "jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"},
+    {file = "jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"},
 ]
 
 [package.dependencies]
@@ -5007,13 +5007,13 @@ query-tools = ["guidance (>=0.0.64,<0.0.65)", "jsonpath-ng (>=1.6.0,<2.0.0)", "l
 
 [[package]]
 name = "logfire"
-version = "3.7.0"
+version = "3.7.1"
 description = "The best Python observability tool! 🪵🔥"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire-3.7.0-py3-none-any.whl", hash = "sha256:634bdb23f30eb532bb137f10d26b709bc19d1384a9af458d1097e483fcd3d9f2"},
-    {file = "logfire-3.7.0.tar.gz", hash = "sha256:44a7eec73a038bd9c0f81c2c8c750a66414ee1615a714c51d6e7e696f634b24e"},
+    {file = "logfire-3.7.1-py3-none-any.whl", hash = "sha256:647c6b67360570332ff205613507f4b796a2c7bf3c2028b29f4a8acd08022dde"},
+    {file = "logfire-3.7.1.tar.gz", hash = "sha256:9aaa4cf0a175466f87036de39ec87b7e91423f3ea458978842b1db7270a36d4e"},
 ]
 
 [package.dependencies]
@@ -5050,13 +5050,13 @@ wsgi = ["opentelemetry-instrumentation-wsgi (>=0.42b0)"]
 
 [[package]]
 name = "logfire-api"
-version = "3.7.0"
+version = "3.7.1"
 description = "Shim for the Logfire SDK which does nothing unless Logfire is installed"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire_api-3.7.0-py3-none-any.whl", hash = "sha256:9f3def5f808b2af6d4ed15124b636054d55f2d29aa8ae871a6b87dfe48420bd0"},
-    {file = "logfire_api-3.7.0.tar.gz", hash = "sha256:72116b99086ac269cb6268cef71471b350bc9a34e519696cf812778f54217507"},
+    {file = "logfire_api-3.7.1-py3-none-any.whl", hash = "sha256:10112c1956a173bb277558a9b17e14f60b4cc320dceb5b6f5b6ae5018af97125"},
+    {file = "logfire_api-3.7.1.tar.gz", hash = "sha256:59479437a2ab197282f8a05eaedd29068cdee965bdf367a3e0a13d034c7c67a1"},
 ]
 
 [[package]]
@@ -6536,13 +6536,13 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.65.3"
+version = "1.65.4"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.65.3-py3-none-any.whl", hash = "sha256:a155fa5d60eccda516384d3d60d923e083909cc126f383fe4a350f79185c232a"},
-    {file = "openai-1.65.3.tar.gz", hash = "sha256:9b7cd8f79140d03d77f4ed8aeec6009be5dcd79bbc02f03b0e8cd83356004f71"},
+    {file = "openai-1.65.4-py3-none-any.whl", hash = "sha256:15566d46574b94eae3d18efc2f9a4ebd1366d1d44bfc1bdafeea7a5cf8271bcb"},
+    {file = "openai-1.65.4.tar.gz", hash = "sha256:0b08c58625d556f5c6654701af1023689c173eb0989ce8f73c7fd0eb22203c76"},
 ]
 
 [package.dependencies]
@@ -7415,13 +7415,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.60.4"
+version = "0.60.6"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.60.4-py3-none-any.whl", hash = "sha256:56b9eed3330463037435a83f64da1d848c410e10172346b45c9a95dff9987cb4"},
-    {file = "prediction_market_agent_tooling-0.60.4.tar.gz", hash = "sha256:2f06889d25cb3285e0315c2971014d9efb1835bf7f1498ea3aa4b742e39730a9"},
+    {file = "prediction_market_agent_tooling-0.60.6-py3-none-any.whl", hash = "sha256:c602b75e54c8dfa2180f348e42a7f285f11de437622e8b1b67c9e928a1e0f40a"},
+    {file = "prediction_market_agent_tooling-0.60.6.tar.gz", hash = "sha256:c00d7928dab3034db7d638c14fbe131e545a259ddda9367f5971b5ede56ec9e5"},
 ]
 
 [package.dependencies]
@@ -9044,13 +9044,13 @@ files = [
 
 [[package]]
 name = "qdrant-client"
-version = "1.13.2"
+version = "1.13.3"
 description = "Client library for the Qdrant vector search engine"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "qdrant_client-1.13.2-py3-none-any.whl", hash = "sha256:db97e759bd3f8d483a383984ba4c2a158eef56f2188d83df7771591d43de2201"},
-    {file = "qdrant_client-1.13.2.tar.gz", hash = "sha256:c8cce87ce67b006f49430a050a35c85b78e3b896c0c756dafc13bdeca543ec13"},
+    {file = "qdrant_client-1.13.3-py3-none-any.whl", hash = "sha256:f52cacbb936e547d3fceb1aaed3e3c56be0ebfd48e8ea495ea3dbc89c671d1d2"},
+    {file = "qdrant_client-1.13.3.tar.gz", hash = "sha256:61ca09e07c6d7ac0dfbdeb13dca4fe5f3e08fa430cb0d74d66ef5d023a70adfc"},
 ]
 
 [package.dependencies]
@@ -11020,13 +11020,13 @@ files = [
 
 [[package]]
 name = "types-requests"
-version = "2.32.0.20250301"
+version = "2.32.0.20250306"
 description = "Typing stubs for requests"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "types_requests-2.32.0.20250301-py3-none-any.whl", hash = "sha256:0003e0124e2cbefefb88222ff822b48616af40c74df83350f599a650c8de483b"},
-    {file = "types_requests-2.32.0.20250301.tar.gz", hash = "sha256:3d909dc4eaab159c0d964ebe8bfa326a7afb4578d8706408d417e17d61b0c500"},
+    {file = "types_requests-2.32.0.20250306-py3-none-any.whl", hash = "sha256:25f2cbb5c8710b2022f8bbee7b2b66f319ef14aeea2f35d80f18c9dbf3b60a0b"},
+    {file = "types_requests-2.32.0.20250306.tar.gz", hash = "sha256:0962352694ec5b2f95fda877ee60a159abdf84a0fc6fdace599f20acb41a03d1"},
 ]
 
 [package.dependencies]
@@ -11885,4 +11885,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "8858336de11110622b710d96024bf00c959c5e94991c772bdabc72597ac2cf2f"
+content-hash = "a9bd92887cc6085ad2621704fe37443a2f320fae39bee522aaf3dc4bc2308082"
