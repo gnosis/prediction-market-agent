@@ -152,8 +152,8 @@ def parse_function_and_body(
 
     if role == "assistant":
         # Microchain agent is a function calling agent, his outputs are in the form of `SendPaidMessageToAnotherAgent(address='...',message='...')`.
-        parsed_function = message.split("(")[0]
-        parsed_body = message.split("(")[1].rsplit(")")[0]
+        parsed_function = message.split("(", 1)[0]
+        parsed_body = message.split("(", 1)[1].rsplit(")", 1)[0]
     elif role == "user":
         # Responses from the individual functions are stored under `user` role.
         parsed_function = DummyFunctionName.RESPONSE_FUNCTION_NAME
