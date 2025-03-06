@@ -13,6 +13,7 @@ import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
@@ -24,7 +25,6 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 from prediction_market_agent.agents.metaculus_agent.deploy import (
     DeployableMetaculusBotTournamentAgent,
 )
-from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.microchain_agent.deploy import (
     DeployableMicrochainAgent,
     DeployableMicrochainModifiableSystemPromptAgent0,
