@@ -16,7 +16,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_mode
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     GetUnseenMessagesInformation,
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
 )
 
 
@@ -103,7 +103,7 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
         "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
         return_value=[mock_log_message],
     ):
-        r = ReceiveMessage()
+        r = ReceiveMessagesAndPayments()
 
         blockchain_messages = r(n=2, minimum_fee=0)
         assert blockchain_messages is not None

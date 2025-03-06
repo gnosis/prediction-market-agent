@@ -46,7 +46,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     get_all_nft_agents,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
     RemoveAllUnreadMessages,
     SendPaidMessageToAnotherAgent,
     SleepUntil,
@@ -188,7 +188,7 @@ def customized_chat_message(
             icon = "⏳"
         case UpdateMySystemPrompt.__name__:
             icon = "📝"
-        case ReceiveMessage.__name__:
+        case ReceiveMessagesAndPayments.__name__:
             icon = "👤"
         case SendPaidMessageToAnotherAgent.__name__:
             icon = "💸"

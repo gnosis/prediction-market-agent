@@ -89,10 +89,10 @@ But also to check out what other agents (their addresses) are going to receive, 
         )
 
 
-class ReceiveMessage(Function):
+class ReceiveMessagesAndPayments(Function):
     @property
     def description(self) -> str:
-        return f"""Use {ReceiveMessage.__name__} to get N messages from the unseen messages that you have received.
+        return f"""Use {ReceiveMessagesAndPayments.__name__} to get N messages from the unseen messages that you have received.
 You have to also specify a minimum fee of the message you are willing to read.
 Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."""
 
@@ -210,7 +210,7 @@ You can use this for example to wait for a while before checking for new message
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
     SendPaidMessageToAnotherAgent,
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
     GetUnseenMessagesInformation,
     SleepUntil,
 ]
