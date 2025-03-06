@@ -25,8 +25,6 @@ class DBKeys(BaseSettings):
 
 
 class APIKeys(APIKeysBase):
-    # Don't get fooled! Serper and Serp are two different services.
-    SERPER_API_KEY: t.Optional[SecretStr] = None
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     OPENROUTER_API_KEY: t.Optional[SecretStr] = None
     ANTHROPIC_API_KEY: t.Optional[SecretStr] = None
@@ -38,12 +36,6 @@ class APIKeys(APIKeysBase):
     TELEGRAM_BOT_KEY: t.Optional[SecretStr] = None
     GNOSISSCAN_API_KEY: t.Optional[SecretStr] = None
     DUNE_API_KEY: t.Optional[SecretStr] = None
-
-    @property
-    def serper_api_key(self) -> SecretStr:
-        return check_not_none(
-            self.SERPER_API_KEY, "SERPER_API_KEY missing in the environment."
-        )
 
     @property
     def openai_api_key(self) -> SecretStr:

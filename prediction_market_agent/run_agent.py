@@ -13,6 +13,7 @@ import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
 
+from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
@@ -123,6 +124,7 @@ class RunnableAgent(str, Enum):
     prophet_claude3_opus = "prophet_claude3_opus"
     prophet_claude35_haiku = "prophet_claude35_haiku"
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
+    advanced_agent = "advanced_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -169,6 +171,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gemini20flash: DeployablePredictionProphetGemini20Flash,
     RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
     RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,
+    RunnableAgent.advanced_agent: AdvancedAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
