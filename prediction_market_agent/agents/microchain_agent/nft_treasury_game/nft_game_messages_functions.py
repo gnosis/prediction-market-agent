@@ -39,13 +39,14 @@ class SendPaidMessageToAnotherAgent(Function):
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
 You need to send a fee of at least {get_message_minimum_value()} xDai to send the message.
-However, other agents, same as you, can decide to ignore messages with low fees."""
+However, other agents, same as you, can decide to ignore messages with low fees.
+You can also specify a payment to the agent."""
 
     @property
     def example_args(self) -> list[str | float]:
-        return ["0x123", "Hello!", get_message_minimum_value()]
+        return ["0x123", "Hello!", get_message_minimum_value(), 0.0]
 
-    def __call__(self, address: str, message: str, fee: float) -> str:
+    def __call__(self, address: str, message: str, fee: float, payment: float) -> str:
         recipient = Web3.to_checksum_address(address)
 
         registered_addresses = AgentRegisterContract().get_all_registered_agents()
@@ -58,7 +59,7 @@ However, other agents, same as you, can decide to ignore messages with low fees.
             api_keys=api_keys,
             recipient=recipient,
             message=HexBytes(compress_message(message)),
-            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
+            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee + payment))),
         )
         return self.OUTPUT_TEXT
 
