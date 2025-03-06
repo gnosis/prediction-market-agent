@@ -105,5 +105,5 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
     ):
         r = ReceiveMessage()
 
-        blockchain_message = r(minimum_fee=0)
-        assert blockchain_message is not None
+        blockchain_messages = r(n=2, minimum_fee=0)
+        assert blockchain_messages is not None
