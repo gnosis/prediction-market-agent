@@ -30,6 +30,6 @@ def parse_message_for_agent(message: MessageContainer) -> str:
     if (
         xdai_value := wei_to_xdai(message.value)
     ) > 1.0:  # Random threshold to not consider tiny fees as payments.
-        parsed += f"\Sender paid you: {xdai_value} xDai"
-    parsed += f"\nMessage: {unzip_message_else_do_nothing(message.message.hex())}"
+        parsed += f"\n\nSender paid you: {xdai_value} xDai"
+    parsed += f"\n\nMessage: {unzip_message_else_do_nothing(message.message.hex())}"
     return parsed
