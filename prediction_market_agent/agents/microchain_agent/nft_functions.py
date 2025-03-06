@@ -40,8 +40,8 @@ class OwnerOfNFT(Function):
         return "Returns the owner address of the specified NFT token ID."
 
     @property
-    def example_args(self) -> list[str]:
-        return ["0xNFTAddress", "1"]
+    def example_args(self) -> list[str | int]:
+        return ["0xNFTAddress", 1]
 
     def __call__(
         self,
@@ -61,11 +61,11 @@ class SafeTransferFromNFT(Function):
         return "Transfers the specified NFT token ID from one address to another."
 
     @property
-    def example_args(self) -> list[str]:
+    def example_args(self) -> list[str | int]:
         return [
             "0xNFTAddress",
             "0xRecipientAddress",
-            "1",
+            1,
         ]
 
     def __call__(

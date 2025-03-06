@@ -42,8 +42,8 @@ You need to send a fee of at least {get_message_minimum_value()} xDai to send th
 However, other agents, same as you, can decide to ignore messages with low fees."""
 
     @property
-    def example_args(self) -> list[str]:
-        return ["0x123", "Hello!", f"{get_message_minimum_value()}"]
+    def example_args(self) -> list[str | float]:
+        return ["0x123", "Hello!", get_message_minimum_value()]
 
     def __call__(self, address: str, message: str, fee: float) -> str:
         recipient = Web3.to_checksum_address(address)
@@ -97,8 +97,8 @@ You have to also specify a minimum fee of the message you are willing to read.
 Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."""
 
     @property
-    def example_args(self) -> list[str]:
-        return ["10", "0.0"]
+    def example_args(self) -> list[str | float | int]:
+        return [10, 0.0]
 
     def __call__(self, n: int, minimum_fee: float) -> str:
         keys = MicrochainAgentKeys()
