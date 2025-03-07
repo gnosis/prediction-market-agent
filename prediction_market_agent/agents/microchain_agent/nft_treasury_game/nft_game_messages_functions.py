@@ -127,7 +127,7 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
             else "\n\n---\n\nNo more unseen messages."
         )
         return (
-            "\n\n".join(
+            "\n\n---\n\n".join(
                 parse_message_for_agent(message=message) for message in popped_messages
             )
             + footer_message
