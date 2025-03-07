@@ -158,7 +158,7 @@ class SleepUntil(Function):
     """
 
     OK_OUTPUT = "Sleeping. Don't forget to check the status of the game and your messages once you wake up!"
-    SLEEP_THRESHOLD = timedelta(minutes=5)
+    SLEEP_THRESHOLD = timedelta(hours=1)
 
     def __init__(self) -> None:
         super().__init__()
@@ -181,10 +181,12 @@ You can use this for example to wait for a while before checking for new message
             output = f"You can not sleep in the past. Current time is {utcnow()}."
 
         elif (sleep_time := sleep_until_datetime - utcnow()) > self.SLEEP_THRESHOLD:
-            if self.last_sleep_until == sleep_until:
-                output = self.OK_OUTPUT
-            else:
-                output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
+            # TODO: Testing so the agents won't cut themselves out of the game.
+            output = f"You can not sleep for more than {self.SLEEP_THRESHOLD.seconds / 3600} hours. Current time is {utcnow()}."
+            # if self.last_sleep_until == sleep_until:
+            #     output = self.OK_OUTPUT
+            # else:
+            #     output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
         else:
             output = self.OK_OUTPUT
 
