@@ -2,6 +2,7 @@ from typing import Sequence
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import (
@@ -122,6 +123,20 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         AgentRegisterContract().deregister_as_agent(api_keys=self.api_keys)
 
     def before_iteration_callback(self) -> CallbackReturn:
+        if (prompt_to_inject := self.prompt_inject_handler.get()) is not None:
+            self.agent.history.extend(
+                [
+                    {
+                        "role": "assistant",
+                        "content": f'Reasoning(reasoning="{prompt_to_inject.prompt}")',
+                    },
+                    {"role": "user", "content": "The reasoning has been recorded"},
+                ]
+            )
+            self.prompt_inject_handler.sql_handler.remove_by_id(
+                check_not_none(prompt_to_inject.id)
+            )
+
         # If agent used the SleepUntil function, we need to run it manually here.
         # Thanks to it, agent will continue sleeping if server was interrupted or any other error happened.
         if (

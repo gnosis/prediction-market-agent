@@ -29,6 +29,17 @@ class SQLHandler:
             session.add_all(items)
             session.commit()
 
+    def remove_multiple(self, items: t.Sequence[SQLModelType]) -> None:
+        with self.db_manager.get_session() as session:
+            for item in items:
+                session.delete(item)
+            session.commit()
+
+    def remove_by_id(self, item_id: int) -> None:
+        with self.db_manager.get_session() as session:
+            session.query(self.table).filter_by(id=item_id).delete()
+            session.commit()
+
     def get_with_filter_and_order(
         self,
         query_filters: t.Sequence[ColumnElement[bool] | BinaryExpression[bool]] = (),

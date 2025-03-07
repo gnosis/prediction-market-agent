@@ -31,6 +31,9 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent import (
     get_unformatted_system_prompt,
     save_agent_history,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_prompt_inject import (
+    PromptInjectHandler,
+)
 from prediction_market_agent.agents.microchain_agent.prompts import (
     JUST_BORN_SYSTEM_PROMPT_CONFIG,
     TRADING_AGENT_SYSTEM_PROMPT_CONFIG,
@@ -65,6 +68,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     # Setup during the 'load' method.
     long_term_memory: LongTermMemoryTableHandler
     prompt_handler: PromptTableHandler
+    prompt_inject_handler: PromptInjectHandler
     agent: Agent
     goal_manager: GoalManager | None
     api_keys: APIKeys
@@ -78,6 +82,9 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
 
     def build_prompt_handler(self) -> PromptTableHandler:
         return PromptTableHandler.from_agent_identifier(self.identifier)
+
+    def build_prompt_inject_handler(self) -> PromptInjectHandler:
+        return PromptInjectHandler.from_agent_identifier(self.identifier)
 
     def build_agent(self, market_type: MarketType) -> Agent:
         unformatted_system_prompt = get_unformatted_system_prompt(
@@ -108,6 +115,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         self.prompt_handler = self.build_prompt_handler()
         self.agent = self.build_agent(market_type=MarketType.OMEN)
         self.goal_manager = self.build_goal_manager(agent=self.agent)
+        self.prompt_inject_handler = self.build_prompt_inject_handler()
 
     def run(
         self,
@@ -168,10 +176,12 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         while not self.agent.do_stop and (
             self.max_iterations is None or iteration < self.max_iterations
         ):
+            # Get history length before the callback, in case callback extends the history, we save it to the long-term memory afterwards.
+            starting_history_length = len(self.agent.history)
+
             if self.before_iteration_callback() == CallbackReturn.STOP:
                 break
 
-            starting_history_length = len(self.agent.history)
             try:
                 # We initialise agent manually because of inserting past history, so force resume=True, to not re-initialise it which would remove the history.
                 self.agent.run(iterations=1, resume=True)
