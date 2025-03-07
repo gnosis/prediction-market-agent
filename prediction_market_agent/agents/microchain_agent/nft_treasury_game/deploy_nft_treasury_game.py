@@ -20,6 +20,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     FunctionsConfig,
     SupportedModel,
 )
+from prediction_market_agent.agents.microchain_agent.memory import ChatMessage
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
@@ -126,11 +127,13 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         if (prompt_to_inject := self.prompt_inject_handler.get()) is not None:
             self.agent.history.extend(
                 [
-                    {
-                        "role": "assistant",
-                        "content": f'Reasoning(reasoning="{prompt_to_inject.prompt}")',
-                    },
-                    {"role": "user", "content": "The reasoning has been recorded"},
+                    ChatMessage(
+                        role="assistant",
+                        content=f'Reasoning(reasoning="{prompt_to_inject.prompt}")',
+                    ).model_dump(),
+                    ChatMessage(
+                        role="user", content="The reasoning has been recorded"
+                    ).model_dump(),
                 ]
             )
             self.prompt_inject_handler.sql_handler.remove_by_id(
