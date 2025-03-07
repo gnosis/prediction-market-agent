@@ -34,6 +34,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db 
     AgentDB,
     AgentTableHandler,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_prompt_inject import (
+    PromptInjectHandler,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
 )
@@ -46,7 +49,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     get_all_nft_agents,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
     RemoveAllUnreadMessages,
     SendPaidMessageToAnotherAgent,
     SleepUntil,
@@ -84,9 +87,19 @@ st.set_page_config(
 )
 
 
+AgentInputType: t.TypeAlias = (
+    type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
+)
+
+
 class DummyFunctionName(str, Enum):
     # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
     RESPONSE_FUNCTION_NAME = "Response"
+
+
+@st.cache_resource
+def prompt_inject_handler(identifier: AgentIdentifier) -> PromptInjectHandler:
+    return PromptInjectHandler.from_agent_identifier(identifier)
 
 
 @st.cache_resource
@@ -123,9 +136,7 @@ def send_message_via_wallet(
 
 
 def send_message_part(
-    nft_agent: (
-        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
-    ),
+    nft_agent: AgentInputType,
 ) -> None:
     message = st.text_area("Write a message to the agent")
     default_value = get_message_minimum_value()
@@ -145,6 +156,16 @@ def send_message_part(
         )
 
 
+def prompt_inject_part(
+    nft_agent: AgentInputType,
+) -> None:
+    handler = prompt_inject_handler(nft_agent.identifier)
+    message = st.text_area("Prompt to inject (in the form of agent's own reasoning)")
+    if st.button("Inject", disabled=not message):
+        handler.add(message)
+        st.success("Prompt injected successfully!")
+
+
 def parse_function_and_body(
     role: t.Literal["user", "assistant"], message: str
 ) -> t.Tuple[str, str]:
@@ -152,8 +173,8 @@ def parse_function_and_body(
 
     if role == "assistant":
         # Microchain agent is a function calling agent, his outputs are in the form of `SendPaidMessageToAnotherAgent(address='...',message='...')`.
-        parsed_function = message.split("(")[0]
-        parsed_body = message.split("(")[1].rsplit(")")[0]
+        parsed_function = message.split("(", 1)[0]
+        parsed_body = message.split("(", 1)[1].rsplit(")", 1)[0]
     elif role == "user":
         # Responses from the individual functions are stored under `user` role.
         parsed_function = DummyFunctionName.RESPONSE_FUNCTION_NAME
@@ -188,7 +209,7 @@ def customized_chat_message(
             icon = "⏳"
         case UpdateMySystemPrompt.__name__:
             icon = "📝"
-        case ReceiveMessage.__name__:
+        case ReceiveMessagesAndPayments.__name__:
             icon = "👤"
         case SendPaidMessageToAnotherAgent.__name__:
             icon = "💸"
@@ -227,9 +248,7 @@ def customized_chat_message(
 
 
 def show_function_calls_part(
-    nft_agent: (
-        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
-    ),
+    nft_agent: AgentInputType,
 ) -> None:
     st.markdown(f"### Agent's actions")
 
@@ -282,9 +301,7 @@ def show_function_calls_part(
 
 @st.fragment(run_every=timedelta(seconds=10))
 def show_function_calls_part_messages(
-    nft_agent: (
-        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
-    ),
+    nft_agent: AgentInputType,
     messages_per_page: int,
     page_number: int,
 ) -> None:
@@ -316,9 +333,7 @@ def show_function_calls_part_messages(
 
 @st.fragment(run_every=timedelta(seconds=10))
 def show_about_agent_part(
-    nft_agent: (
-        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
-    ),
+    nft_agent: AgentInputType,
 ) -> None:
     system_prompt = (
         system_prompt_from_db.prompt
@@ -386,7 +401,7 @@ def show_treasury_part() -> None:
 Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
 - The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}
-- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S')}
+- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S') if start_datetime_next_round else 'No next round planned yet.'}
 """,
         unsafe_allow_html=True,
     )
@@ -457,9 +472,7 @@ def add_new_agent() -> None:
 
 
 def get_agent_page(
-    nft_agent: (
-        type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
-    ),
+    nft_agent: AgentInputType,
 ) -> t.Callable[[], None]:
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
@@ -468,7 +481,10 @@ def get_agent_page(
             show_about_agent_part(nft_agent)
 
         with right:
-            send_message_part(nft_agent)
+            with st.expander("Write message to agent"):
+                send_message_part(nft_agent)
+            with st.expander("Inject prompt to agent"):
+                prompt_inject_part(nft_agent)
             show_function_calls_part(nft_agent)
 
     return page

@@ -27,8 +27,8 @@ After completion, use SubmitJobResult.
 """
 
     @property
-    def example_args(self) -> list[int]:
-        return [1]
+    def example_args(self) -> list[float]:
+        return [1.0]
 
     def __call__(self, max_bond: float) -> str:
         jobs = self.market_type.job_class.get_jobs(limit=None)
@@ -47,8 +47,8 @@ You need to submit this even if the job itself didn't ask for it explicitly, to 
 """
 
     @property
-    def example_args(self) -> list[int | str]:
-        return ["0x1", "GeneralAgent", 1, "I completed this job as described."]
+    def example_args(self) -> list[float | str]:
+        return ["0x1", "GeneralAgent", 1.0, "I completed this job as described."]
 
     def __call__(
         self, job_id: str, agent_name: str, max_bond: float, result: str
