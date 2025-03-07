@@ -103,11 +103,11 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         return None
 
     def load(self) -> None:
+        super().load()
         self.long_term_memory = self.build_long_term_memory()
         self.prompt_handler = self.build_prompt_handler()
         self.agent = self.build_agent(market_type=MarketType.OMEN)
         self.goal_manager = self.build_goal_manager(agent=self.agent)
-        self.api_keys = APIKeys()
 
     def run(
         self,
