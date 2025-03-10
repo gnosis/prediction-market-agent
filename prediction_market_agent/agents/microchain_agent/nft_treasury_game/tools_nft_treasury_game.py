@@ -1,7 +1,7 @@
 from enum import Enum
 
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import HexBytes, xdai_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -68,3 +68,7 @@ def purge_all_messages(keys: APIKeys) -> None:
             pop_message(minimum_fee=xdai_type(0), api_keys=keys)
             popped += 1
             logger.info(f"Popped {popped} messages.")
+
+
+def hash_password(password: str) -> str:
+    return HexBytes(Web3.solidity_keccak(["string"], [password])).hex()
