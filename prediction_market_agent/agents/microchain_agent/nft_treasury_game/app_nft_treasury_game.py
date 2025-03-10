@@ -61,6 +61,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts i
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     get_end_datetime_of_current_round,
     get_start_datetime_of_next_round,
+    hash_password,
 )
 from prediction_market_agent.db.agent_communication import (
     fetch_count_unprocessed_transactions,
@@ -481,7 +482,7 @@ def add_new_agent() -> None:
                         name=name,
                         initial_system_prompt=initial_system_prompt,
                         private_key=private_key.get_secret_value(),
-                        password=password,
+                        password=hash_password(password),
                     )
                 )
                 st.success(f"Agent '{name}' added successfully!")
@@ -502,7 +503,7 @@ def show_unlock_agent_part(
         with st.expander("Unlock agent's admin panel"):
             password = st.text_input("Password", type="password")
             if st.button("Unlock admin panel"):
-                st.session_state[ADMIN_PANEL_PASSWORD] = password
+                st.session_state[ADMIN_PANEL_PASSWORD] = hash_password(password)
 
 
 def get_agent_page(
