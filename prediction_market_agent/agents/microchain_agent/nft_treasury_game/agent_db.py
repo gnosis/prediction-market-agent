@@ -22,6 +22,7 @@ class AgentDB(SQLModel, table=True):
     initial_system_prompt: str
     private_key: str
     safe_address: ChecksumAddress | None = Field(sa_type=String, nullable=True)
+    password: str
 
     @property
     def identifier(self) -> AgentIdentifier:

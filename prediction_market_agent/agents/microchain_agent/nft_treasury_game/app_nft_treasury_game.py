@@ -86,6 +86,8 @@ st.set_page_config(
     page_title="Agent's NFT-locked Treasury Game", page_icon="🎮", layout="wide"
 )
 
+ADMIN_PANEL_PASSWORD = "admin_panel_password"
+
 
 AgentInputType: t.TypeAlias = (
     type[DeployableAgentNFTGameAbstract] | DeployableAgentNFTGameAbstract | AgentDB
@@ -122,6 +124,13 @@ def report_table_handler() -> ReportNFTGameTableHandler:
 @st.cache_resource
 def agent_table_handler() -> AgentTableHandler:
     return AgentTableHandler()
+
+
+def is_unlocked(nft_agent: AgentInputType) -> bool:
+    if nft_agent.password is None:
+        return False
+    unlocked: bool = st.session_state[ADMIN_PANEL_PASSWORD] == nft_agent.password
+    return unlocked
 
 
 @st.dialog("Send message to agent")
@@ -164,6 +173,16 @@ def prompt_inject_part(
     if st.button("Inject", disabled=not message):
         handler.add(message)
         st.success("Prompt injected successfully!")
+
+
+def update_system_prompt_part(
+    nft_agent: AgentInputType,
+) -> None:
+    handler = prompt_table_handler(nft_agent.identifier)
+    message = st.text_area("New system prompt")
+    if st.button("Update", disabled=not message):
+        handler.save_prompt(message)
+        st.success("System prompt updated successfully!")
 
 
 def parse_function_and_body(
@@ -368,6 +387,9 @@ Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_
         value=system_prompt,
         disabled=True,
     )
+    if is_unlocked(nft_agent):
+        with st.expander("Update agent's system prompt"):
+            update_system_prompt_part(nft_agent)
     st.markdown("---")
     with st.popover("Show unprocessed incoming messages"):
         show_n = 10
@@ -441,9 +463,10 @@ def add_new_agent() -> None:
         private_key_str = st.text_input(
             "Private Key (optional, will be generated if not provided)", type="password"
         )
+        password = st.text_input("Password (use to manage your agent)", type="password")
         submitted = st.form_submit_button("Add Agent")
         if submitted:
-            if not name or not initial_system_prompt:
+            if not name or not initial_system_prompt or not password:
                 st.error("Please fill in all required fields.")
 
             else:
@@ -458,6 +481,7 @@ def add_new_agent() -> None:
                         name=name,
                         initial_system_prompt=initial_system_prompt,
                         private_key=private_key.get_secret_value(),
+                        password=password,
                     )
                 )
                 st.success(f"Agent '{name}' added successfully!")
@@ -471,20 +495,36 @@ def add_new_agent() -> None:
                 )
 
 
+def show_unlock_agent_part(
+    nft_agent: AgentInputType,
+) -> None:
+    if nft_agent.password is not None and not is_unlocked(nft_agent):
+        with st.expander("Unlock agent's admin panel"):
+            password = st.text_input("Password", type="password")
+            if st.button("Unlock admin panel"):
+                st.session_state[ADMIN_PANEL_PASSWORD] = password
+
+
 def get_agent_page(
     nft_agent: AgentInputType,
 ) -> t.Callable[[], None]:
+    st.session_state[ADMIN_PANEL_PASSWORD] = st.session_state.get(
+        ADMIN_PANEL_PASSWORD, ""
+    )
+
     def page() -> None:
         left, _, right = st.columns([0.3, 0.05, 0.65])
 
         with left:
             show_about_agent_part(nft_agent)
+            show_unlock_agent_part(nft_agent)
 
         with right:
             with st.expander("Write message to agent"):
                 send_message_part(nft_agent)
-            with st.expander("Inject prompt to agent"):
-                prompt_inject_part(nft_agent)
+            if is_unlocked(nft_agent):
+                with st.expander("Inject prompt to agent"):
+                    prompt_inject_part(nft_agent)
             show_function_calls_part(nft_agent)
 
     return page

@@ -57,6 +57,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         nft_game_functions=True,
     )
     model = SupportedModel.gemini_20_flash
+    password: str | None = None
 
     # Setup per-nft-agent class.
     name: str
