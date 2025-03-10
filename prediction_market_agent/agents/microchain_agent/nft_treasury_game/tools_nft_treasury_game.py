@@ -48,7 +48,7 @@ def get_end_datetime_of_previous_round() -> DatetimeUTC | None:
 
 def get_end_datetime_of_current_round() -> DatetimeUTC:
     # TODO: Dynamically from somewhere.
-    return DatetimeUTC(year=2025, month=3, day=7, hour=23, minute=59, second=59)
+    return DatetimeUTC(year=2025, month=3, day=10, hour=23, minute=59, second=59)
 
 
 def get_start_datetime_of_next_round() -> DatetimeUTC | None:
