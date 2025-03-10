@@ -1,5 +1,11 @@
-def nft_treasury_game_base_prompt() -> str:
-    return f"""You participate in the NFT Treasury game.
+from prediction_market_agent_tooling.gtypes import ChecksumAddress
+
+
+def nft_treasury_game_base_prompt(
+    your_wallet_address: ChecksumAddress | None = None,
+) -> str:
+    return f"""You participate in the NFT Treasury game running on Gnosis Chain.
+{f'Your wallet address is {your_wallet_address}.' if your_wallet_address else ''}
 
 NFT Treasury game description:
 

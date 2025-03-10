@@ -51,10 +51,10 @@ You need to provide liquidity in xDai to incentivize other users to participate 
 """
 
     @property
-    def example_args(self) -> list[str]:
+    def example_args(self) -> list[str | float]:
         return [
             "Will GNO hit $1000 dollars by the end of 2024?",
-            "1.0",
+            1.0,
             "2024-12-31T23:59:59Z",
         ]
 

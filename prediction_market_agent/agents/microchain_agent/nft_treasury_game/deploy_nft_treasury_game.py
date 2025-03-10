@@ -2,6 +2,7 @@ from typing import Sequence
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import (
@@ -19,6 +20,7 @@ from prediction_market_agent.agents.microchain_agent.deploy import (
     FunctionsConfig,
     SupportedModel,
 )
+from prediction_market_agent.agents.microchain_agent.memory import ChatMessage
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
@@ -55,6 +57,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         nft_game_functions=True,
     )
     model = SupportedModel.gemini_20_flash
+    password: str | None = None
 
     # Setup per-nft-agent class.
     name: str
@@ -122,6 +125,22 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         AgentRegisterContract().deregister_as_agent(api_keys=self.api_keys)
 
     def before_iteration_callback(self) -> CallbackReturn:
+        if (prompt_to_inject := self.prompt_inject_handler.get()) is not None:
+            self.agent.history.extend(
+                [
+                    ChatMessage(
+                        role="assistant",
+                        content=f'Reasoning(reasoning="{prompt_to_inject.prompt}")',
+                    ).model_dump(),
+                    ChatMessage(
+                        role="user", content="The reasoning has been recorded"
+                    ).model_dump(),
+                ]
+            )
+            self.prompt_inject_handler.sql_handler.remove_by_id(
+                check_not_none(prompt_to_inject.id)
+            )
+
         # If agent used the SleepUntil function, we need to run it manually here.
         # Thanks to it, agent will continue sleeping if server was interrupted or any other error happened.
         if (
@@ -147,7 +166,7 @@ You respond in the style of Yoda from Star Wars movie.
 You are a gossiper, you like to talk to other agents, but also to broadcast public messages.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -164,7 +183,7 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
 You respond in the style of characters from historical Bridgeton movie and you are very protective of your resources.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -184,7 +203,7 @@ Try to trick people and other agents to send you messages -- which will fund you
 Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -201,7 +220,7 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
 You respond in the style of Sheldon Cooper from Big Bang Theory and you are very protective of your resources.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -219,7 +238,7 @@ You respond in the Klingon language, based on the Star Trek movie, and you are v
 Always write in Klingon, but add also English translation.
         
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_seller_prompt()
     )
 
@@ -238,7 +257,7 @@ You often make people laugh, but you are also very persuasive.
 You are a bit of a mystery, but you are also a bit of a trickster.
 
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_buyer_prompt()
     )
 
@@ -257,7 +276,7 @@ You are very cunning and able to think on your feet. You are very good at making
 You are also very patient and able to wait for the right moment to strike.
 You are also very good at making people believe that you are on their side, even if you are not.
 """
-        + nft_treasury_game_base_prompt()
+        + nft_treasury_game_base_prompt(wallet_address)
         + nft_treasury_game_buyer_prompt()
     )
 

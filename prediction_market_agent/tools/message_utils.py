@@ -26,7 +26,10 @@ def unzip_message_else_do_nothing(data_field: str) -> str:
 
 
 def parse_message_for_agent(message: MessageContainer) -> str:
-    return f"""Sender: {message.sender}
-    Value: {wei_to_xdai(message.value)} xDai
-    Message: {unzip_message_else_do_nothing(message.message.hex())}
-    """
+    parsed = f"Sender's wallet address: {message.sender}"
+    if (
+        xdai_value := wei_to_xdai(message.value)
+    ) > 1.0:  # Random threshold to not consider tiny fees as payments.
+        parsed += f"\n\nSender paid you: {xdai_value} xDai"
+    parsed += f"\n\nMessage: {unzip_message_else_do_nothing(message.message.hex())}"
+    return parsed

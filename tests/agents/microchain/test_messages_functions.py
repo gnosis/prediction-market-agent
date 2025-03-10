@@ -16,7 +16,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_mode
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     GetUnseenMessagesInformation,
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
 )
 
 
@@ -77,13 +77,14 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
         ],
     ):
         r = GetUnseenMessagesInformation()
-        statistics = r()
+        statistics = r("0x1Ca11b2520345993e78312b00441050d2d57065f")
         assert statistics == (
-            f"Minimum fee: 1e-14 xDai\n"
-            f"Maximum fee: 1e-13 xDai\n"
-            f"Average fee: 5.5e-14 xDai\n"
-            f"Number of unique senders: 1\n"
-            f"Total number of messages: 2"
+            "Unseen messages statistics for 0x1Ca11b2520345993e78312b00441050d2d57065f:\n"
+            "Minimum fee: 1e-14 xDai\n"
+            "Maximum fee: 1e-13 xDai\n"
+            "Average fee: 5.5e-14 xDai\n"
+            "Number of unique senders: 1\n"
+            "Total number of messages: 2"
         )
 
 
@@ -102,7 +103,7 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
         "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
         return_value=[mock_log_message],
     ):
-        r = ReceiveMessage()
+        r = ReceiveMessagesAndPayments()
 
-        blockchain_message = r(minimum_fee=0)
-        assert blockchain_message is not None
+        blockchain_messages = r(n=2, minimum_fee=0)
+        assert blockchain_messages is not None

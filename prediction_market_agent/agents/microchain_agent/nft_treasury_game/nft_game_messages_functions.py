@@ -39,13 +39,14 @@ class SendPaidMessageToAnotherAgent(Function):
     def description(self) -> str:
         return f"""Use {SendPaidMessageToAnotherAgent.__name__} to send a message to an another agent, given his wallet address.
 You need to send a fee of at least {get_message_minimum_value()} xDai to send the message.
-However, other agents, same as you, can decide to ignore messages with low fees."""
+However, other agents, same as you, can decide to ignore messages with low fees.
+You can also specify a payment to the agent."""
 
     @property
-    def example_args(self) -> list[str]:
-        return ["0x123", "Hello!", f"{get_message_minimum_value()}"]
+    def example_args(self) -> list[str | float]:
+        return ["0x123", "Hello!", get_message_minimum_value(), 0.0]
 
-    def __call__(self, address: str, message: str, fee: float) -> str:
+    def __call__(self, address: str, message: str, fee: float, payment: float) -> str:
         recipient = Web3.to_checksum_address(address)
 
         registered_addresses = AgentRegisterContract().get_all_registered_agents()
@@ -58,7 +59,9 @@ However, other agents, same as you, can decide to ignore messages with low fees.
             api_keys=api_keys,
             recipient=recipient,
             message=HexBytes(compress_message(message)),
-            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee))),
+            # We don't differ between fees and payments, but it helps to accept it as separate arguments,
+            # for LLM to understand how to pay for NFT keys or stuff.
+            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee + payment))),
         )
         return self.OUTPUT_TEXT
 
@@ -66,19 +69,21 @@ However, other agents, same as you, can decide to ignore messages with low fees.
 class GetUnseenMessagesInformation(Function):
     @property
     def description(self) -> str:
-        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that you have received. Use this function to decice what message you want to process next."""
+        return f"""Use {GetUnseenMessagesInformation.__name__} to get information about the unseen messages that some address have received.
+Use this function to decice what message you want to process next.
+But also to check out what other agents (their addresses) are going to receive, so you can send a message with higher fee, to attract them to read your message first."""
 
     @property
     def example_args(self) -> list[str]:
-        return []
+        return ["0x123"]
 
-    def __call__(self) -> str:
-        keys = MicrochainAgentKeys()
+    def __call__(self, for_public_key: str) -> str:
         messages_statistics = get_unseen_messages_statistics(
-            consumer_address=keys.bet_from_address
+            consumer_address=Web3.to_checksum_address(for_public_key)
         )
 
         return (
+            f"Unseen messages statistics for {for_public_key}:\n"
             f"Minimum fee: {messages_statistics.min_fee} xDai\n"
             f"Maximum fee: {messages_statistics.max_fee} xDai\n"
             f"Average fee: {messages_statistics.avg_fee} xDai\n"
@@ -87,24 +92,46 @@ class GetUnseenMessagesInformation(Function):
         )
 
 
-class ReceiveMessage(Function):
+class ReceiveMessagesAndPayments(Function):
     @property
     def description(self) -> str:
-        return f"Use {ReceiveMessage.__name__} to get a message from the unseen messages that you have received. You have to also specify a minimum fee of the message you are willing to read. Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."
+        return f"""Use {ReceiveMessagesAndPayments.__name__} to get N messages from the unseen messages that you have received.
+You have to also specify a minimum fee of the message you are willing to read.
+Before receiving messages, you can check with {GetUnseenMessagesInformation.__name__} for the up to date statistics of the messages."""
 
     @property
-    def example_args(self) -> list[str]:
-        return ["0.0"]
+    def example_args(self) -> list[str | float | int]:
+        return [10, 0.0]
 
-    def __call__(self, minimum_fee: float) -> str:
+    def __call__(self, n: int, minimum_fee: float) -> str:
         keys = MicrochainAgentKeys()
-        popped_message = pop_message(
-            minimum_fee=xdai_type(minimum_fee),
-            api_keys=APIKeys_PMAT(BET_FROM_PRIVATE_KEY=keys.bet_from_private_key),
+        popped_messages = [
+            message
+            for _ in range(n)
+            if (
+                message := pop_message(
+                    minimum_fee=xdai_type(minimum_fee),
+                    api_keys=APIKeys_PMAT(
+                        BET_FROM_PRIVATE_KEY=keys.bet_from_private_key
+                    ),
+                )
+            )
+            is not None
+        ]
+        messages_statistics = get_unseen_messages_statistics(
+            consumer_address=keys.bet_from_address
+        )
+        footer_message = (
+            f"\n\n---\n\nYou have another {messages_statistics.n_messages} unseen messages. Use {GetUnseenMessagesInformation.__name__} to get more information."
+            if messages_statistics.n_messages
+            else "\n\n---\n\nNo more unseen messages."
         )
         return (
-            parse_message_for_agent(message=popped_message)
-            if popped_message
+            "\n\n---\n\n".join(
+                parse_message_for_agent(message=message) for message in popped_messages
+            )
+            + footer_message
+            if popped_messages
             else "No new messages"
         )
 
@@ -130,7 +157,8 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
-    OK_OUTPUT = "Sleeping."
+    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game and your messages once you wake up!"
+    SLEEP_THRESHOLD = timedelta(hours=1)
 
     def __init__(self) -> None:
         super().__init__()
@@ -152,11 +180,13 @@ You can use this for example to wait for a while before checking for new message
         if sleep_until_datetime < utcnow():
             output = f"You can not sleep in the past. Current time is {utcnow()}."
 
-        elif (sleep_time := sleep_until_datetime - utcnow()) > timedelta(minutes=1):
-            if self.last_sleep_until == sleep_until:
-                output = self.OK_OUTPUT
-            else:
-                output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
+        elif (sleep_time := sleep_until_datetime - utcnow()) > self.SLEEP_THRESHOLD:
+            # TODO: Testing so the agents won't cut themselves out of the game.
+            output = f"You can not sleep for more than {self.SLEEP_THRESHOLD.seconds / 3600} hours. Current time is {utcnow()}."
+            # if self.last_sleep_until == sleep_until:
+            #     output = self.OK_OUTPUT
+            # else:
+            #     output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
         else:
             output = self.OK_OUTPUT
 
@@ -189,7 +219,7 @@ You can use this for example to wait for a while before checking for new message
 
 MESSAGES_FUNCTIONS: list[type[Function]] = [
     SendPaidMessageToAnotherAgent,
-    ReceiveMessage,
+    ReceiveMessagesAndPayments,
     GetUnseenMessagesInformation,
     SleepUntil,
 ]
