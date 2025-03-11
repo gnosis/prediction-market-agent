@@ -3,6 +3,8 @@ from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     KellyBettingStrategy,
+    MaxAccuracyWithKellyScaledBetsStrategy,
+    MaxExpectedValueBettingStrategy,
 )
 from prediction_market_agent_tooling.deploy.trade_interval import (
     MarketLifetimeProportionalInterval,
@@ -188,14 +190,12 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
     bet_on_n_markets_per_run = 4
     model = "google/gemini-2.0-flash-001"
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MaxExpectedValueBettingStrategy(
+            bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=2.9, trading_balance=market.get_trade_balance(APIKeys())
+            )
+        )
 
 
 class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRouter):
@@ -204,14 +204,12 @@ class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRout
         True  # See https://github.com/gnosis/prediction-market-agent/issues/729
     )
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MaxAccuracyWithKellyScaledBetsStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=4.15, trading_balance=market.get_trade_balance(APIKeys())
+            )
+        )
 
 
 class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRouter):
@@ -231,14 +229,13 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=3.5, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.86,
+        )
 
     def load(self) -> None:
         super().load()
@@ -636,14 +633,13 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=None,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=2.77, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.69,
+        )
 
     def load(self) -> None:
         super().load()
@@ -677,14 +673,13 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=None,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=1, max_=4.77, trading_balance=market.get_trade_balance(APIKeys())
+            ),
+            max_price_impact=0.63,
+        )
 
     def load(self) -> None:
         super().load()
