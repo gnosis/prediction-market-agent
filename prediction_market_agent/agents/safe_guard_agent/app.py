@@ -25,9 +25,10 @@ with st.expander("How it works"):
 2. Create a new transaction with at least 2 signers required.
 3. Copy the address of your Safe wallet and paste it in the field below.
 4. Click the "Run validation" button.
-5. The system will determine if the new transaction is malicious or not. 
-    - If not, it will sign the transaction and execute it.
-    - If yes, it will just warn you here with its reasoning. (imagine that it would have power to stop you from executing that transaction and pinging you about it!)
+5. Agent will determine if the new transaction is malicious or not. 
+    - If not, it will sign the transaction and maybe execute it. (if threshold is met)
+    - If yes, it will create a rejection transaction.
+6. Agent will also send you a signed message into Safe, with all the available details.
 """
     )
 with st.expander("Examples"):
