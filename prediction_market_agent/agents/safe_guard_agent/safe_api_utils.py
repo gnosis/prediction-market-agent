@@ -38,8 +38,10 @@ def is_valued_transaction_result(
             tx.transaction.txInfo,
             (CreationTxInfo, CancellationTxInfo),
         )
-        and tx.transaction.executionInfo is not None
-        and tx.transaction.executionInfo.nonce not in cancelled_nonces
+        and (
+            tx.transaction.executionInfo is None
+            or tx.transaction.executionInfo.nonce not in cancelled_nonces
+        )
     )
 
 
