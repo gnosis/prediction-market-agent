@@ -24,11 +24,12 @@ with st.expander("How it works"):
         f"""1. In your Safe wallet, add the following address as a signer: {APIKeys().bet_from_address}
 2. Create a new transaction with at least 2 signers required.
 3. Copy the address of your Safe wallet and paste it in the field below.
-4. Click the "Run validation" button.
-5. Agent will determine if the new transaction is malicious or not. 
+4. Choose one of the pending transactions.
+5. Click the "Run validation" button.
+6. Agent will determine if the new transaction is malicious or not. 
     - If not, it will sign the transaction and maybe execute it. (if threshold is met)
     - If yes, it will create a rejection transaction.
-6. Agent will also send you a signed message into Safe, with all the available details.
+7. Agent will also send you a signed message into Safe, with all the available details.
 """
     )
 with st.expander("Examples"):
