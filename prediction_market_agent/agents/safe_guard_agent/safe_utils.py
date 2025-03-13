@@ -1,6 +1,10 @@
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from eth_account.messages import defunct_hash_message
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import HexBytes
 from prediction_market_agent_tooling.loggers import logger
+from safe_eth.eth import EthereumNetwork
+from safe_eth.safe import Safe
+from safe_eth.safe.api.transaction_service_api import TransactionServiceApi
 from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
     EthereumNetwork,
     TransactionServiceApi,
@@ -10,21 +14,12 @@ from web3 import Web3
 
 
 def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
-    # TODO: Doesn't work atm!
-    return
-    web3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
-    message_hash = web3.keccak(text=message)
-    signed_message = web3.eth.account.signHash(
-        message_hash, private_key=api_keys.bet_from_private_key.get_secret_value()
-    )
-    signature = signed_message.signature
+    message_hash = defunct_hash_message(text=message)
+    safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
+    owner_signature = api_keys.get_account().signHash(safe_message_hash)
 
-    api = TransactionServiceApi(EthereumNetwork.GNOSIS)
-    api.post_message(
-        safe.address,
-        message,
-        signature=signature,
-    )
+    api = TransactionServiceApi(network=EthereumNetwork.GNOSIS)
+    api.post_message(safe.address, message, owner_signature.signature)
 
 
 def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
