@@ -2,10 +2,8 @@ from langfuse.openai import AsyncOpenAI
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
-from prediction_market_agent_tooling.tools.utils import LLM_SUPER_LOW_TEMPERATURE
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.settings import ModelSettings
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -87,17 +85,23 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
     sender_value = (
         tx_info.sender.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.owner if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.owner
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
     recipient_value = (
         tx_info.recipient.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.receiver if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.receiver
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
     transfer_value = (
         tx_info.transferInfo.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.sellAmount if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.sellAmount
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
 
     return (
