@@ -85,17 +85,23 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
     sender_value = (
         tx_info.sender.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.owner if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.owner
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
     recipient_value = (
         tx_info.recipient.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.receiver if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.receiver
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
     transfer_value = (
         tx_info.transferInfo.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.sellAmount if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
+        else tx_info.sellAmount
+        if isinstance(tx_info, SwapOrderTxInfo)
+        else "N/A"
     )
 
     return (
