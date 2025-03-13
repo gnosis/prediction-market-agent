@@ -31,7 +31,7 @@ def validate_safe_transaction_llm(
 ) -> ValidationResult:
     agent = Agent(
         OpenAIModel(
-            "gpt-4o",
+            "o1",
             openai_client=AsyncOpenAI(
                 api_key=APIKeys().openai_api_key.get_secret_value()
             ),
@@ -40,13 +40,9 @@ def validate_safe_transaction_llm(
 You need to determine if the new transaction is malicious or not.
 Take a look at the new transaction details and also consider the previous transactions already made.
 You don't know if previous transactions were malicious or not.
+Keep in mind, better be safe than sorry.
 """,
         result_type=ValidationResult,
-        model_settings=ModelSettings(
-            # Configure according to the selected model, see https://github.com/gnosis/prediction-market-agent/pull/438.
-            seed=0,
-            temperature=LLM_SUPER_LOW_TEMPERATURE,
-        ),
     )
 
     balances_formatted = format_balances(new_transaction.safeAddress)
@@ -91,23 +87,17 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
     sender_value = (
         tx_info.sender.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.owner
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
+        else tx_info.owner if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
     )
     recipient_value = (
         tx_info.recipient.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.receiver
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
+        else tx_info.receiver if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
     )
     transfer_value = (
         tx_info.transferInfo.value
         if isinstance(tx_info, TransferTxInfo)
-        else tx_info.sellAmount
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
+        else tx_info.sellAmount if isinstance(tx_info, SwapOrderTxInfo) else "N/A"
     )
 
     return (
