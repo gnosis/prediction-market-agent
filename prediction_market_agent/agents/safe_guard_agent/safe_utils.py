@@ -14,6 +14,8 @@ from web3 import Web3
 
 
 def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
+    logger.info(f"Posting message to Safe {safe.address}.")
+
     message_hash = defunct_hash_message(text=message)
     safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
     owner_signature = api_keys.get_account().signHash(safe_message_hash)
@@ -59,7 +61,7 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         api = TransactionServiceApi(EthereumNetwork.GNOSIS)
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
     else:
-        logger.info("Threshold met, executing the transaction.")
+        logger.info("Threshold met, executing.")
         tx.call()
         tx.execute(api_keys.bet_from_private_key.get_secret_value())
 
@@ -78,12 +80,10 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     tx.sign(api_keys.bet_from_private_key.get_secret_value())
 
     if safe.retrieve_threshold() > 1:
-        logger.info(
-            f"Safe required multiple signers, posting the transaction to the queue."
-        )
+        logger.info(f"Safe requires multiple signers, posting to the queue.")
         api = TransactionServiceApi(EthereumNetwork.GNOSIS)
         api.post_transaction(tx)
     else:
-        logger.info("Safe requires only 1 signer, executing the transaction.")
+        logger.info("Safe requires only 1 signer, executing.")
         tx.call()
         tx.execute(api_keys.bet_from_private_key.get_secret_value())
