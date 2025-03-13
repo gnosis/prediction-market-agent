@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
     SwapOrderTxInfo,
     TransferTxInfo,
+    SettingsChangeTxInfo,
 )
 
 
@@ -98,7 +99,7 @@ class DetailedTransactionResponse(BaseModel):
     txId: str
     executedAt: int | None
     txStatus: str
-    txInfo: TransferTxInfo | SwapOrderTxInfo
+    txInfo: TransferTxInfo | SwapOrderTxInfo | SettingsChangeTxInfo
     txData: TxData | None
     txHash: str | None
     detailedExecutionInfo: DetailedExecutionInfo | None

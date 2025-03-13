@@ -50,6 +50,11 @@ class CancellationTxInfo(BaseModel):
     isCancellation: Literal[True]
 
 
+class SettingsChangeTxInfo(BaseModel):
+    type: Literal["SettingsChange"]
+    humanDescription: str | None
+
+
 class SwapOrderTxInfo(BaseModel):
     type: Literal["SwapOrder"]
     uid: str
@@ -108,7 +113,13 @@ class ExecutionInfo(BaseModel):
 
 
 class Transaction(BaseModel):
-    txInfo: CreationTxInfo | TransferTxInfo | SwapOrderTxInfo | CancellationTxInfo
+    txInfo: (
+        CreationTxInfo
+        | SettingsChangeTxInfo
+        | TransferTxInfo
+        | SwapOrderTxInfo
+        | CancellationTxInfo
+    )
     id: str
     timestamp: int
     txStatus: str
