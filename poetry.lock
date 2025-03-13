@@ -3466,6 +3466,23 @@ protobuf = ">=3.20.2,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4
 grpc = ["grpcio (>=1.44.0,<2.0.0.dev0)"]
 
 [[package]]
+name = "goplus"
+version = "0.2.4"
+description = "GoPlus SDK"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "goplus-0.2.4-py3-none-any.whl", hash = "sha256:0ff6119bca773a933d0170f6c4008b66f82832f690c2a8a25ab759e3c16a2598"},
+    {file = "goplus-0.2.4.tar.gz", hash = "sha256:4eb6c6424246e6d68a2c651b4d934f0e22a90d98545822a375f0b44a122570ce"},
+]
+
+[package.dependencies]
+certifi = ">=14.05.14"
+python-dateutil = ">=2.5.3"
+six = ">=1.10"
+urllib3 = ">=1.15.1"
+
+[[package]]
 name = "gptcache"
 version = "0.1.44"
 description = "GPTCache, a powerful caching library that can be used to speed up and lower the cost of chat applications that rely on the LLM service. GPTCache works as a memcache for AIGC applications, similar to how Redis works for traditional applications."
@@ -11885,4 +11902,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "a9bd92887cc6085ad2621704fe37443a2f320fae39bee522aaf3dc4bc2308082"
+content-hash = "30d4ddf669e631cd067ec83f8b3d214dbe2f3b97d0e1de9bb5c7a1c560047ab5"

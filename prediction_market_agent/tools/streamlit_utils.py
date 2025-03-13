@@ -58,6 +58,9 @@ def loguru_streamlit_sink(log: "Message") -> None:
     elif level == "WARNING":
         st.warning(message, icon="⚠️")
 
+    elif level == "SUCCESS":
+        st.success(message, icon="✅")
+
     elif level == "DEBUG":
         pass
 
