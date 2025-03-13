@@ -21,7 +21,9 @@ This app is a PoC of a fraud detection system for Safe wallets.
 )
 with st.expander("How it works"):
     st.markdown(
-        f"""1. In your Safe wallet, add the following address as a signer: {APIKeys().bet_from_address}
+        f"""*(steps 1-3 are optional, you can use the default address provided with examples)*
+        
+1. In your Safe wallet, add the following address as a signer: {APIKeys().bet_from_address}
 2. Create a new transaction with at least 2 signers required.
 3. Copy the address of your Safe wallet and paste it in the field below.
 4. Choose one of the pending transactions.
