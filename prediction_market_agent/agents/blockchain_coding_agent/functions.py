@@ -90,7 +90,7 @@ def execute_read_function(
         Any: The result of calling the specified function on the smart contract.
 
     """
-    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
+    w3 = RPCConfig().get_web3()
     return call_function_on_contract(
         web3=w3,
         contract_address=Web3.to_checksum_address(contract_address),
@@ -106,7 +106,7 @@ def execute_write_function(
     function_name: str,
     function_params: t.List[t.Any],
 ) -> TxReceipt:
-    w3 = Web3(Web3.HTTPProvider(RPCConfig().gnosis_rpc_url))
+    w3 = RPCConfig().get_web3()
     return send_function_on_contract_tx(
         web3=w3,
         contract_address=Web3.to_checksum_address(contract_address),
