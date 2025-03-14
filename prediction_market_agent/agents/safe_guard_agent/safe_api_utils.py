@@ -1,4 +1,5 @@
 import requests
+from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from safe_eth.safe.safe import Safe, SafeTx
@@ -53,7 +54,7 @@ def get_safe_quened_transactions(
     Can we somehow listen to creation of quened transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/100/safes/{safe_address}/transactions/queued"
+        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
     transactions = [
@@ -71,7 +72,7 @@ def get_safe_detailed_transaction_info(
     TODO: Can we retrieve this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/100/transactions/{transaction_id}"
+        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/transactions/{transaction_id}"
     ).json()
     response_parsed = DetailedTransactionResponse.model_validate(response)
     return response_parsed
@@ -84,7 +85,7 @@ def get_safe_history(
     TODO: Can we get this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/100/safes/{safe_address}/transactions/history"
+        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
     transactions = [
@@ -126,7 +127,7 @@ def get_balances_usd(safe_address: ChecksumAddress) -> Balances:
     TODO: Can we get this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/100/safes/{safe_address}/balances/usd?trusted=true"
+        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/balances/usd?trusted=true"
     ).json()
     response_model = Balances.model_validate(response)
     return response_model
