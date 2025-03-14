@@ -1,5 +1,5 @@
 from eth_account.messages import defunct_hash_message
-from prediction_market_agent_tooling.config import APIKeys
+from prediction_market_agent_tooling.config import APIKeys, RPCConfig
 from prediction_market_agent_tooling.gtypes import HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumNetwork
@@ -20,7 +20,7 @@ def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
     safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
     owner_signature = api_keys.get_account().signHash(safe_message_hash)
 
-    api = TransactionServiceApi(network=EthereumNetwork.GNOSIS)
+    api = TransactionServiceApi(network=EthereumNetwork(RPCConfig().chain_id))
     api.post_message(safe.address, message, owner_signature.signature)
 
 
@@ -58,7 +58,7 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
 
     if safe.retrieve_threshold() > len(tx.signatures):
         logger.info("Threshold not met yet, just adding a sign.")
-        api = TransactionServiceApi(EthereumNetwork.GNOSIS)
+        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
     else:
         logger.info("Threshold met, executing.")
@@ -81,7 +81,7 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
 
     if safe.retrieve_threshold() > 1:
         logger.info(f"Safe requires multiple signers, posting to the queue.")
-        api = TransactionServiceApi(EthereumNetwork.GNOSIS)
+        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_transaction(tx)
     else:
         logger.info("Safe requires only 1 signer, executing.")

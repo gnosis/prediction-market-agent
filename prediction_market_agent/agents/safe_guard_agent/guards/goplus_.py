@@ -1,6 +1,7 @@
 from goplus.address import Address
 from goplus.nft import Nft
 from goplus.token import Token
+from prediction_market_agent_tooling.config import RPCConfig
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -17,7 +18,7 @@ def validate_safe_transaction_goplus_token_security(
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
     addr = new_transaction_safetx.to
-    data = Token().token_security(chain_id="100", addresses=[addr])
+    data = Token().token_security(chain_id=f"{RPCConfig().chain_id}", addresses=[addr])
     return ValidationResult(
         ok=data.message.lower() == "ok",
         reason=str(data.result),
@@ -30,7 +31,7 @@ def validate_safe_transaction_goplus_address_security(
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
     addr = new_transaction_safetx.to
-    data = Address().address_security(chain_id="100", address=addr)
+    data = Address().address_security(chain_id=f"{RPCConfig().chain_id}", address=addr)
     return ValidationResult(
         ok=data.message.lower() == "ok",
         reason=str(data.result),
@@ -43,7 +44,7 @@ def validate_safe_transaction_goplus_nft_security(
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
     addr = new_transaction_safetx.to
-    data = Nft().nft_security(chain_id="100", address=addr)
+    data = Nft().nft_security(chain_id=f"{RPCConfig().chain_id}", address=addr)
     return ValidationResult(
         ok=data.message.lower() in ("ok", "non-contract address"),
         reason=str(data.result),

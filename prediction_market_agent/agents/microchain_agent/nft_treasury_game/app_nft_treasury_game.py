@@ -554,5 +554,5 @@ pages = [
     st.Page(add_new_agent, title="Add Agent", url_path="add-agent"),
 ]
 
-pg = st.navigation(pages)  # type: ignore[arg-type] # This is just fine, all items in the pages are from st.Page!
+pg = st.navigation(pages)
 pg.run()
