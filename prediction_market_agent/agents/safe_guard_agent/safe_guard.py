@@ -72,12 +72,12 @@ def validate_safe(
     do_reject: bool,
     do_message: bool,
 ) -> None:
-    quened_transactions = safe_api_utils.get_safe_quened_transactions(safe_address)
+    queued_transactions = safe_api_utils.get_safe_quened_transactions(safe_address)
     logger.info(
-        f"Retrieved {len(quened_transactions)} quened transactions to verify for {safe_address}."
+        f"Retrieved {len(queued_transactions)} quened transactions to verify for {safe_address}."
     )
 
-    for quened_transaction in quened_transactions:
+    for quened_transaction in queued_transactions:
         validate_safe_transaction(
             safe_address,
             quened_transaction.id,
