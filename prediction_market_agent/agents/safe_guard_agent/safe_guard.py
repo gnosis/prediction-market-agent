@@ -16,6 +16,7 @@ from prediction_market_agent.agents.safe_guard_agent.guards import (
     blacklist,
     goplus_,
     llm,
+    hash_checker,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
@@ -37,6 +38,7 @@ SAFE_GUARDS: list[
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
     blacklist.validate_safe_transaction_blacklist,
+    hash_checker.validate_safe_transaction_hash,
     llm.validate_safe_transaction_llm,
     goplus_.validate_safe_transaction_goplus_address_security,
     goplus_.validate_safe_transaction_goplus_token_security,
