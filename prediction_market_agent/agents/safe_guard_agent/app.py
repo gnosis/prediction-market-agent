@@ -59,13 +59,13 @@ if not safe_address:
 safe_address_checksum = Web3.to_checksum_address(safe_address)
 
 with st.spinner("Loading queued transactions..."):
-    quened_transactions = safe_api_utils.get_safe_quened_transactions(
+    queued_transactions = safe_api_utils.get_safe_queued_transactions(
         safe_address_checksum
     )
 
 transaction_id = st.selectbox(
     "Choose one of the queued transactions",
-    [tx.id for tx in quened_transactions],
+    [tx.id for tx in queued_transactions],
 )
 
 
