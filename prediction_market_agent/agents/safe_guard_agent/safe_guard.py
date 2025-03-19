@@ -15,8 +15,8 @@ from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.guards import (
     blacklist,
     goplus_,
-    llm,
     hash_checker,
+    llm,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
