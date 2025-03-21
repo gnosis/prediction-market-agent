@@ -7,6 +7,9 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
     OMEN_DEFAULT_REALITIO_BOND_VALUE,
 )
+from prediction_market_agent_tooling.markets.omen.omen_constants import (
+    SDAI_CONTRACT_ADDRESS,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
@@ -54,6 +57,7 @@ def main(
         market_type=MarketType.MANIFOLD,  # Use only Manifold, it has generally more markets.
         n_to_replicate=n_to_replicate,
         initial_funds=USD(initial_funds_usd),
+        collateral_token_address=SDAI_CONTRACT_ADDRESS,
         close_time_before=close_time_before,
         close_time_after=close_time_after,
         auto_deposit=True,

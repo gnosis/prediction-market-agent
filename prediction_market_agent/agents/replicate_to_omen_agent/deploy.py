@@ -1,9 +1,13 @@
+import random
 from datetime import timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.gtypes import USD, xDai
+from prediction_market_agent_tooling.gtypes import USD, ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    SAFE_COLLATERAL_TOKENS_ADDRESSES,
+)
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -85,6 +89,11 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             )
             initial_funds_per_market = USD(settings.INITIAL_FUNDS)
 
+            # Randomly select the collateral token to use.
+            collateral_token_address: ChecksumAddress = random.choice(
+                SAFE_COLLATERAL_TOKENS_ADDRESSES
+            )
+
             logger.info(
                 f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
             )
@@ -92,6 +101,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 market_type=replicate_config.source,
                 n_to_replicate=replicate_config.n,
                 initial_funds=initial_funds_per_market,
+                collateral_token_address=collateral_token_address,
                 api_keys=keys,
                 close_time_before=close_time_before,
                 auto_deposit=True,

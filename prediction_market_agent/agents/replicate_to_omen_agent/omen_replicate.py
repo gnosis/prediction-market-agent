@@ -26,7 +26,6 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     omen_remove_fund_market_tx,
     redeem_from_all_user_positions,
 )
-from prediction_market_agent_tooling.markets.omen.omen_contracts import sDaiContract
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -55,6 +54,7 @@ def omen_replicate_from_tx(
     market_type: MarketType,
     n_to_replicate: int,
     initial_funds: USD,
+    collateral_token_address: ChecksumAddress,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
@@ -182,7 +182,7 @@ def omen_replicate_from_tx(
             language="en",
             outcomes=[OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME],
             auto_deposit=auto_deposit,
-            collateral_token_address=sDaiContract().address,
+            collateral_token_address=collateral_token_address,
         )
         market_address = (
             created_market.market_event.fixed_product_market_maker_checksummed
