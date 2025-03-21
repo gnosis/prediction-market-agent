@@ -98,7 +98,7 @@ def omen_replicate_from_tx(
     created_questions: set[str] = set()
 
     for market in markets_to_replicate:
-        if len(created_addresses) > n_to_replicate:
+        if len(created_addresses) >= n_to_replicate:
             logger.info(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
             )
