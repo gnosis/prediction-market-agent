@@ -326,8 +326,8 @@ with history_container:
 # Display its updated balance
 with balance_container:
     st.metric(
-        label=f"Current balance ({MARKET_TYPE.market_class.currency})",
-        value=f"{get_balance(KEYS, MARKET_TYPE).amount:.2f}",
+        label=f"Current balance (USD)",
+        value=f"{get_balance(KEYS, MARKET_TYPE):.2f}",
     )
 
 # Display its updated function list, system prompt

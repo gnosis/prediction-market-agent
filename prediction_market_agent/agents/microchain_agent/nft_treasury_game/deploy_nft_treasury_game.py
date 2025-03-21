@@ -108,7 +108,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
         super().load()
 
     def get_holding_n_nft_keys(self) -> int:
-        return NFTKeysContract().balanceOf(self.wallet_address)
+        return NFTKeysContract().balanceOf(self.wallet_address).value
 
     def initialise_agent(self) -> None:
         super().initialise_agent()

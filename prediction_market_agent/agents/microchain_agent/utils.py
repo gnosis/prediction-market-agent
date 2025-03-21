@@ -2,12 +2,12 @@ import typing as t
 
 import pandas as pd
 from microchain import Agent
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
     SortBy,
 )
-from prediction_market_agent_tooling.markets.data_models import BetAmount
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_FALSE_OUTCOME,
@@ -16,7 +16,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
 from prediction_market_agent_tooling.markets.omen.data_models import (
     get_boolean_outcome as get_omen_boolean_outcome,
 )
-from prediction_market_agent_tooling.tools.balances import get_balances
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.microchain_agent.memory import ChatHistory
@@ -53,26 +53,18 @@ def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
     return list(markets)
 
 
-def get_balance(api_keys: APIKeys, market_type: MarketType) -> BetAmount:
-    currency = market_type.market_class.currency
+def get_balance(api_keys: APIKeys, market_type: MarketType) -> USD:
     if market_type == MarketType.OMEN:
-        balances = get_balances(api_keys.bet_from_address)
-        return BetAmount(
-            amount=balances.total,
-            currency=currency,
-        )
+        return OmenAgentMarket.get_trade_balance(api_keys)
     else:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
-def get_total_asset_value(api_keys: APIKeys, market_type: MarketType) -> BetAmount:
+def get_total_asset_value(api_keys: APIKeys, market_type: MarketType) -> USD:
     balance = get_balance(api_keys, market_type)
     positions = market_type.market_class.get_positions(api_keys.bet_from_address)
-    positions_value = market_type.market_class.get_positions_value(positions)
-
-    return BetAmount(
-        amount=balance.amount + positions_value.amount,
-        currency=market_type.market_class.currency,
+    return balance + sum(
+        (sum(position.amounts_current.values()) for position in positions), start=USD(0)
     )
 
 

@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import typer
-from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
+from prediction_market_agent_tooling.gtypes import USD, private_key_type
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
@@ -24,7 +24,7 @@ def main(
     ) = None,  # This is the private key of the address that will be used to create the markets, so people can filter the markets by this address.
     test: bool = True,  # Test is on by default, so we don't accidentally create the markets.
     n_to_replicate: int = 50,
-    initial_funds_xdai: float = 0.1,  # Just a small amount to make the markets bettable, probably no need for more in hackathon.
+    initial_funds_usd: float = 0.1,  # Just a small amount to make the markets bettable, probably no need for more in hackathon.
     resolve: bool = False,
 ) -> None:
     keys = APIKeys(
@@ -53,7 +53,7 @@ def main(
         api_keys=keys,
         market_type=MarketType.MANIFOLD,  # Use only Manifold, it has generally more markets.
         n_to_replicate=n_to_replicate,
-        initial_funds=xdai_type(initial_funds_xdai),
+        initial_funds=USD(initial_funds_usd),
         close_time_before=close_time_before,
         close_time_after=close_time_after,
         auto_deposit=True,

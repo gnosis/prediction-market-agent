@@ -1,12 +1,12 @@
 from datetime import timedelta
 
 from prediction_market_agent_tooling.gtypes import (
+    USD,
     ChecksumAddress,
     HexAddress,
     HexStr,
+    Wei,
     int_to_hexbytes,
-    wei_type,
-    xDai,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
@@ -54,7 +54,7 @@ def omen_replicate_from_tx(
     api_keys: APIKeys,
     market_type: MarketType,
     n_to_replicate: int,
-    initial_funds: xDai,
+    initial_funds: USD,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
@@ -220,7 +220,7 @@ def omen_unfund_replicated_known_markets_tx(
         limit=None,
         creator=from_address,
         question_opened_before=opened_before,
-        liquidity_bigger_than=wei_type(0),
+        liquidity_bigger_than=Wei(0),
     )
 
     for idx, market in enumerate(markets):
