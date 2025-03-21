@@ -6,7 +6,6 @@ from prediction_market_agent_tooling.gtypes import (
     HexAddress,
     HexBytes,
     xDai,
-    xdai_type,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.data_models import (
@@ -253,5 +252,5 @@ def claim_all_bonds_on_reality(
 
     return ClaimResult(
         claimed_question_ids=claimed_question_ids,
-        claimed=xdai_type(balances_after_claiming.xdai - balances_before_claiming.xdai),
+        claimed=balances_after_claiming.xdai - balances_before_claiming.xdai,
     )

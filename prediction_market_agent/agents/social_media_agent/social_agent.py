@@ -9,6 +9,7 @@ from autogen_agentchat.teams._group_chat._magentic_one._prompts import (
 )
 from autogen_agentchat.ui import Console
 from autogen_ext.models.openai import OpenAIChatCompletionClient
+from prediction_market_agent_tooling.gtypes import Token
 from prediction_market_agent_tooling.markets.data_models import Bet
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
@@ -38,7 +39,7 @@ class SummaryMethod(str, Enum):
 class BetInputPrompt(BaseModel):
     title: str
     boolean_outcome: bool
-    collateral_amount: float
+    collateral_amount: Token
     creation_datetime: DatetimeUTC
 
     @staticmethod
@@ -46,7 +47,7 @@ class BetInputPrompt(BaseModel):
         return BetInputPrompt(
             title=bet.market_question,
             boolean_outcome=bet.outcome,
-            collateral_amount=bet.amount.amount,
+            collateral_amount=bet.amount,
             creation_datetime=bet.created_time,
         )
 

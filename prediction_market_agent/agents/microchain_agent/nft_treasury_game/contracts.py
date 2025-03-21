@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.gtypes import (
     TxReceipt,
     Wei,
     xDai,
+    xDaiWei,
 )
 from prediction_market_agent_tooling.tools.balances import Balances, get_balances
 from prediction_market_agent_tooling.tools.contract import (
@@ -20,7 +21,6 @@ from prediction_market_agent_tooling.tools.contract import (
 )
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import BPS_CONSTANT
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_models import (
@@ -143,8 +143,8 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     )
 
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:
-        value: Wei = self.call("minimumValueForSendingMessageInWei", web3=web3)
-        return wei_to_xdai(value)
+        value = xDaiWei(self.call("minimumValueForSendingMessageInWei", web3=web3))
+        return value.as_xdai
 
     def ratio_given_to_treasury(self, web3: Web3 | None = None) -> float:
         bps: int = self.call("pctToTreasuryInBasisPoints", web3=web3)
@@ -233,13 +233,13 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
         api_keys: APIKeys,
         agent_address: ChecksumAddress,
         message: HexBytes,
-        amount_wei: Wei,
+        amount_wei: xDaiWei,
         web3: Web3 | None = None,
     ) -> TxReceipt:
         return self.send_with_value(
             api_keys=api_keys,
             function_name="sendMessage",
-            amount_wei=amount_wei,
+            amount_wei=amount_wei.as_wei,
             function_params=[agent_address, message],
             web3=web3,
         )

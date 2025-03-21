@@ -2,13 +2,9 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import USD, OutcomeToken, xDai
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import (
-    Currency,
-    ResolvedBet,
-    TokenAmount,
-)
+from prediction_market_agent_tooling.markets.data_models import ResolvedBet
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import (
     send_keeping_token_to_eoa_xdai,
@@ -16,6 +12,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet_simplified,
 )
+from prediction_market_agent_tooling.tools.tokens.usd import get_usd_in_xdai
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_ai import Agent as Agent
 from pydantic_ai.models import KnownModelName
@@ -37,7 +34,7 @@ from prediction_market_agent.tools.prediction_prophet.research import (
 )
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
-OMEN_MIN_FEE_BALANCE = xdai_type(0.01)
+OMEN_MIN_FEE_BALANCE = xDai(0.01)
 MULTIPLIER = 2
 
 
@@ -46,10 +43,6 @@ class MarketFunction(Function):
         self.keys = keys
         self.market_type = market_type
         super().__init__()
-
-    @property
-    def currency(self) -> Currency:
-        return self.market_type.market_class.currency
 
 
 class GetMarkets(MarketFunction):
@@ -77,7 +70,7 @@ class GetMarketProbability(MarketFunction):
         return (
             f"Use this function to get the probability of a 'Yes' outcome for "
             f"a binary prediction market. This is equivalent to the price of "
-            f"the 'Yes' token in {self.currency}. Pass in the market id as a "
+            f"the 'Yes' token in market's currency. Pass in the market id as a "
             f"string."
         )
 
@@ -174,15 +167,13 @@ class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
 
     def __call__(self, market_id: str) -> str:
         # 0.01 xDai is hardcoded cost for an interaction with the mech-client
-        MECH_CALL_XDAI_LIMIT = 0.011
-        account_balance = float(
-            get_balance(self.keys, market_type=self.market_type).amount
-        )
-        if account_balance < MECH_CALL_XDAI_LIMIT:
+        mech_call_xdai_limit = xDai(0.011)
+        account_balance = get_balance(self.keys, market_type=self.market_type)
+        if get_usd_in_xdai(account_balance) < mech_call_xdai_limit:
             return (
-                f"Your balance of {self.currency} ({account_balance}) is not "
+                f"Your balance of {account_balance} is not "
                 f"large enough to make a mech call (min required "
-                f"{MECH_CALL_XDAI_LIMIT})."
+                f"{mech_call_xdai_limit})."
             )
 
         question = self.market_type.market_class.get_binary_market(
@@ -206,17 +197,16 @@ class BuyTokens(MarketFunction):
         return (
             f"Use this function to buy {self.outcome} outcome tokens of a "
             f"prediction market. The first parameter is the market id. The "
-            f"second parameter specifies how much {self.currency} you spend."
+            f"second parameter specifies how much you spend."
         )
 
     @property
     def example_args(self) -> list[t.Union[str, float]]:
         return [get_example_market_id(self.market_type), 2.3]
 
-    def __call__(self, market_id: str, amount: float) -> str:
-        account_balance = float(
-            get_balance(self.keys, market_type=self.market_type).amount
-        )
+    def __call__(self, market_id: str, amount_usd: float) -> str:
+        amount = USD(amount_usd)
+        account_balance = get_balance(self.keys, market_type=self.market_type)
         if account_balance < amount:
             return (
                 f"Your balance of {self.currency} ({account_balance}) is not "
@@ -236,13 +226,13 @@ class BuyTokens(MarketFunction):
         )
         market.buy_tokens(
             outcome=self.outcome_bool,
-            amount=TokenAmount(amount=amount, currency=self.currency),
+            amount=amount,
         )
         after_balance = market.get_token_balance(
             user_id=self.user_address,
             outcome=self.outcome,
         )
-        tokens = float(after_balance.amount - before_balance.amount)
+        tokens = float(after_balance - before_balance)
         return f"Bought {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
@@ -288,7 +278,9 @@ class SellTokens(MarketFunction):
     def example_args(self) -> list[t.Union[str, float]]:
         return [get_example_market_id(self.market_type), 2.3]
 
-    def __call__(self, market_id: str, amount: float) -> str:
+    def __call__(self, market_id: str, amount_outcome_tokens: float) -> str:
+        amount = OutcomeToken(amount_outcome_tokens)
+
         # Exchange wxdai back to xdai if the balance is getting low, so we can keep paying for fees.
         if self.market_type == MarketType.OMEN:
             send_keeping_token_to_eoa_xdai(
@@ -303,14 +295,14 @@ class SellTokens(MarketFunction):
 
         market.sell_tokens(
             outcome=self.outcome_bool,
-            amount=TokenAmount(amount=amount, currency=self.currency),
+            amount=amount,
         )
 
         after_balance = market.get_token_balance(
             user_id=self.user_address,
             outcome=self.outcome,
         )
-        tokens = float(before_balance.amount - after_balance.amount)
+        tokens = before_balance - after_balance
         return f"Sold {tokens} {self.outcome} outcome tokens of market with id: {market_id}"
 
 
@@ -335,16 +327,14 @@ class SellNo(SellTokens):
 class GetBalance(MarketFunction):
     @property
     def description(self) -> str:
-        return (
-            f"Use this function to fetch your balance, given in {self.currency} units."
-        )
+        return f"Use this function to fetch your balance, given in USD"
 
     @property
     def example_args(self) -> list[str]:
         return []
 
     def __call__(self) -> float:
-        return get_balance(self.keys, market_type=self.market_type).amount
+        return get_balance(self.keys, market_type=self.market_type).value
 
 
 class GetLiquidPositions(MarketFunction):
@@ -368,7 +358,7 @@ class GetLiquidPositions(MarketFunction):
         positions = self.market_type.market_class.get_positions(
             user_id=self.user_address,
             liquid_only=True,
-            larger_than=1e-4,  # Ignore very small positions
+            larger_than=OutcomeToken(1e-4),  # Ignore very small positions
         )
         return [str(position) for position in positions]
 
@@ -402,7 +392,7 @@ class GetKellyBet(MarketFunction):
     def description(self) -> str:
         return (
             "Use the Kelly Criterion to calculate the optimal bet size and "
-            "direction for a binary market. Pass in the market p_yes and your "
+            "direction for a binary market. Pass in the market_id and your "
             "estimated p_yes."
         )
 
@@ -412,19 +402,23 @@ class GetKellyBet(MarketFunction):
 
     def __call__(
         self,
-        market_p_yes: float,
+        market_id: str,
         estimated_p_yes: float,
     ) -> str:
         confidence = 0.5  # Until confidence score is available, be conservative
-        max_bet = float(get_balance(self.keys, market_type=self.market_type).amount)
+        agent_market = self.market_type.market_class.get_binary_market(id=market_id)
+        max_bet = agent_market.get_in_token(
+            get_balance(self.keys, market_type=self.market_type)
+        )
         kelly_bet = get_kelly_bet_simplified(
-            market_p_yes=market_p_yes,
+            market_p_yes=agent_market.current_p_yes,
             estimated_p_yes=estimated_p_yes,
             max_bet=max_bet,
             confidence=confidence,
         )
+        kelly_bet_usd = agent_market.get_in_usd(kelly_bet.size)
         return (
-            f"Bet size: {kelly_bet.size:.2f}{self.currency}, "
+            f"Bet size: {kelly_bet_usd.value:.2f} USD, "
             f"Bet direction: {kelly_bet.direction}"
         )
 

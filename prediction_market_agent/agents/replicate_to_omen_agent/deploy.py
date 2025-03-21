@@ -1,9 +1,13 @@
+import random
 from datetime import timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import USD, ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    SAFE_COLLATERAL_TOKENS_ADDRESSES,
+)
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -26,7 +30,7 @@ REPLICATOR_SAFE_ADDRESS = Web3.to_checksum_address(
     "0x55D8Dfc1e6F994079A6A7fdb9D7a2712dc1b87B2"
 )
 REPLICATOR_TAG = "replicator"
-REPLICATOR_BOND = xdai_type(10)
+REPLICATOR_BOND = xDai(10)
 
 
 class ReplicateConfig(BaseModel):
@@ -83,7 +87,12 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             close_time_before = now + timedelta(
                 days=replicate_config.close_time_up_to_n_days
             )
-            initial_funds_per_market = xdai_type(settings.INITIAL_FUNDS)
+            initial_funds_per_market = USD(settings.INITIAL_FUNDS)
+
+            # Randomly select the collateral token to use.
+            collateral_token_address: ChecksumAddress = random.choice(
+                SAFE_COLLATERAL_TOKENS_ADDRESSES
+            )
 
             logger.info(
                 f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
@@ -92,6 +101,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 market_type=replicate_config.source,
                 n_to_replicate=replicate_config.n,
                 initial_funds=initial_funds_per_market,
+                collateral_token_address=collateral_token_address,
                 api_keys=keys,
                 close_time_before=close_time_before,
                 auto_deposit=True,

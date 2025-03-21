@@ -6,14 +6,12 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSerializable
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
-    BetAmount,
     Position,
     ProbabilisticAnswer,
-    TokenAmount,
     Trade,
     TradeType,
 )
@@ -42,7 +40,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
 
     model = "gpt-4o"
     # trade amount will be divided between correlated markets.
-    total_trade_amount = BetAmount(amount=0.1, currency=OmenAgentMarket.currency)
+    total_trade_amount = USD(0.1)
     bet_on_n_markets_per_run = 5
     max_related_markets_per_market = 10
     n_markets_to_fetch = 50
@@ -154,26 +152,20 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     ) -> list[Trade]:
         # Split between main_market and related_market
         arbitrage_bet = pair.split_bet_amount_between_yes_and_no(
-            self.total_trade_amount.amount
+            self.total_trade_amount
         )
 
         main_trade = Trade(
             trade_type=TradeType.BUY,
             outcome=arbitrage_bet.main_market_bet.direction,
-            amount=TokenAmount(
-                amount=arbitrage_bet.main_market_bet.size,
-                currency=pair.main_market.currency,
-            ),
+            amount=arbitrage_bet.main_market_bet.size,
         )
 
         # related trade
         related_trade = Trade(
             trade_type=TradeType.BUY,
             outcome=arbitrage_bet.related_market_bet.direction,
-            amount=TokenAmount(
-                amount=arbitrage_bet.related_market_bet.size,
-                currency=pair.related_market.currency,
-            ),
+            amount=arbitrage_bet.related_market_bet.size,
         )
 
         trades = [main_trade, related_trade]

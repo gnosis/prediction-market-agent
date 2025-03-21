@@ -1,7 +1,7 @@
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.tools.contract import ContractOnGnosisChain
-from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
+from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
@@ -21,7 +21,7 @@ class SendXDAI(Function):
     def __call__(
         self,
         address: str,
-        amount: float,
+        amount_xdai: float,
     ) -> str:
         keys = MicrochainAgentKeys()
         web3 = ContractOnGnosisChain.get_web3()
@@ -30,9 +30,9 @@ class SendXDAI(Function):
             web3,
             keys.bet_from_private_key,
             address_checksum,
-            xdai_to_wei(keys.cap_sending_xdai(xdai_type(amount))),
+            keys.cap_sending_xdai(xDai(amount_xdai)).as_xdai_wei,
         )
-        return f"Sent {amount} xDAI to {address_checksum}."
+        return f"Sent {amount_xdai} xDAI to {address_checksum}."
 
 
 SENDING_FUNCTIONS: list[type[Function]] = [

@@ -2,7 +2,7 @@ from datetime import timedelta
 from functools import partial
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, xdai_type
+from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
@@ -41,7 +41,7 @@ OFV_CHALLENGER_EOA_ADDRESS = Web3.to_checksum_address(
 OFV_CHALLENGER_SAFE_ADDRESS = Web3.to_checksum_address(
     "0x9D0260500ba7b068b5b0f4AfA9F8864eBc0B059a"
 )
-CHALLENGE_BOND = xdai_type(10)
+CHALLENGE_BOND = xDai(10)
 # We benchmarked OFV only against Olas market-creators.
 MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
     # Olas market-creator 0.

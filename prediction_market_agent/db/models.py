@@ -1,10 +1,9 @@
 import json
 from typing import Any, Optional
 
-from prediction_market_agent_tooling.gtypes import Wei, wei_type
+from prediction_market_agent_tooling.gtypes import xDaiWei
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from sqlalchemy import Column, Numeric
 from sqlmodel import Field, SQLModel
 
@@ -85,12 +84,12 @@ class BlockchainMessage(SQLModel, table=True):
         return int(self.block)
 
     @property
-    def value_wei_parsed(self) -> Wei:
-        return wei_type(self.value_wei)
+    def value_wei_parsed(self) -> xDaiWei:
+        return xDaiWei(self.value_wei)
 
     def __str__(self) -> str:
         return f"""Sender: {self.sender_address}
-Value: {wei_to_xdai(self.value_wei_parsed)} xDai
+Value: {self.value_wei_parsed.as_xdai} xDai
 Message: {self.data_field}
 """
 

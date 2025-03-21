@@ -12,7 +12,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
     Prediction,
 )
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
@@ -44,7 +44,7 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         current_p_yes=Probability(0.5),
         created_time=utc_datetime(2024, 1, 1),
         resolution=None,
-        outcomes=["YES", "NO"],
+        outcomes=[OutcomeStr("YES"), OutcomeStr("NO")],
         outcome_token_pool=None,
         fees=MarketFees.get_zero_fees(),
     )

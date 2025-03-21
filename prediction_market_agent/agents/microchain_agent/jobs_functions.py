@@ -1,7 +1,7 @@
 import json
 
 from microchain import Function
-from prediction_market_agent_tooling.markets.data_models import Currency
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.utils import APIKeys
@@ -13,16 +13,12 @@ class JobFunction(Function):
         self.market_type = market_type
         super().__init__()
 
-    @property
-    def currency(self) -> Currency:
-        return self.market_type.market_class.currency
-
 
 class GetJobs(JobFunction):
     @property
     def description(self) -> str:
         return f"""Use this function to get available jobs in a JSON dumped format.
-You need to provide max bond value in {self.currency}, that is, how much you are willing to bond on the fact that you completed the job as required in the job description.
+You need to provide max bond value in USD, that is, how much you are willing to bond on the fact that you completed the job as required in the job description.
 After completion, use SubmitJobResult.
 """
 
@@ -30,10 +26,10 @@ After completion, use SubmitJobResult.
     def example_args(self) -> list[float]:
         return [1.0]
 
-    def __call__(self, max_bond: float) -> str:
+    def __call__(self, max_bond_usd: float) -> str:
         jobs = self.market_type.job_class.get_jobs(limit=None)
         return json.dumps(
-            [j.to_simple_job(max_bond=max_bond).model_dump() for j in jobs],
+            [j.to_simple_job(max_bond=USD(max_bond_usd)).model_dump() for j in jobs],
             indent=2,
             default=str,
         )
@@ -51,10 +47,10 @@ You need to submit this even if the job itself didn't ask for it explicitly, to 
         return ["0x1", "GeneralAgent", 1.0, "I completed this job as described."]
 
     def __call__(
-        self, job_id: str, agent_name: str, max_bond: float, result: str
+        self, job_id: str, agent_name: str, max_bond_usd: float, result: str
     ) -> str:
         job = self.market_type.job_class.get_job(id=job_id)
-        processed = job.submit_job_result(agent_name, max_bond, result)
+        processed = job.submit_job_result(agent_name, USD(max_bond_usd), result)
         return json.dumps(
             processed.model_dump(),
             indent=2,

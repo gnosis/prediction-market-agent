@@ -42,10 +42,8 @@ Memories:
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
 def get_nft_balance(owner_address: ChecksumAddress, web3: Web3) -> int:
     contract = NFTKeysContract()
-    balance: int = contract.balanceOf(
-        Web3.to_checksum_address(owner_address), web3=web3
-    )
-    return balance
+    balance = contract.balanceOf(Web3.to_checksum_address(owner_address), web3=web3)
+    return balance.value
 
 
 def summarize_past_actions_from_agent(agent_memories: list[LongTermMemories]) -> str:

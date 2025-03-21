@@ -1,5 +1,5 @@
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
     OMEN_BINARY_MARKET_OUTCOMES,
@@ -29,15 +29,12 @@ class RedeemWinningBets(Function):
         prev_balance = get_balance(keys, market_type=MarketType.OMEN)
         redeem_from_all_user_positions(keys)
         new_balance = get_balance(keys, market_type=MarketType.OMEN)
-        currency = new_balance.currency.value
-        if redeemed_amount := new_balance.amount - prev_balance.amount > 0:
+        if redeemed_amount := new_balance - prev_balance > 0:
             return (
-                f"Redeemed {redeemed_amount} {currency} in winnings. New "
-                f"balance: {new_balance.amount}{currency}."
+                f"Redeemed {redeemed_amount} USD in winnings. New "
+                f"balance: {new_balance} USD."
             )
-        return (
-            f"No winnings to redeem. Balance remains: {new_balance.amount}{currency}."
-        )
+        return f"No winnings to redeem. Balance remains: {new_balance} USD."
 
 
 class CreatePredictionMarket(Function):
@@ -47,7 +44,7 @@ class CreatePredictionMarket(Function):
 Question of the prediction market can only be binary, in the Yes/No format.
 Questions can not have violent nature.
 Question must be explicit and as clear as possible.
-You need to provide liquidity in xDai to incentivize other users to participate in the market. The bigger the liquidity, the more likely the market will be successful.
+You need to provide liquidity in USD to incentivize other users to participate in the market. The bigger the liquidity, the more likely the market will be successful.
 """
 
     @property
@@ -58,12 +55,12 @@ You need to provide liquidity in xDai to incentivize other users to participate 
             "2024-12-31T23:59:59Z",
         ]
 
-    def __call__(self, question: str, liquidity: float, closing_time: str) -> str:
+    def __call__(self, question: str, liquidity_usd: float, closing_time: str) -> str:
         keys = APIKeys()
         closing_time_date = DatetimeUTC.to_datetime_utc(closing_time)
         created_market = omen_create_market_tx(
             keys,
-            initial_funds=xdai_type(liquidity),
+            initial_funds=USD(liquidity_usd),
             question=question,
             closing_time=closing_time_date,
             category=TEST_CATEGORY,  # Force test category to not show these markets on Presagio until we know it works fine.

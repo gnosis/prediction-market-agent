@@ -1,9 +1,14 @@
 import typing as t
 
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.tools.betting_strategies.utils import SimpleBet
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
+
+
+class Bet(BaseModel):
+    direction: bool
+    size: USD
 
 
 class Correlation(BaseModel):
@@ -12,8 +17,8 @@ class Correlation(BaseModel):
 
 
 class ArbitrageBet(BaseModel):
-    main_market_bet: SimpleBet
-    related_market_bet: SimpleBet
+    main_market_bet: Bet
+    related_market_bet: Bet
 
 
 class CorrelatedMarketPair(BaseModel):
@@ -66,7 +71,7 @@ class CorrelatedMarketPair(BaseModel):
             return (True, True) if yes_yes <= no_no else (False, False)
 
     def split_bet_amount_between_yes_and_no(
-        self, total_bet_amount: float
+        self, total_bet_amount: USD
     ) -> ArbitrageBet:
         """Splits total bet amount following equations below:
         A1/p1 = A2/p2 (same profit regardless of outcome resolution)
@@ -88,9 +93,10 @@ class CorrelatedMarketPair(BaseModel):
         total_probability = p_main + p_related
         bet_main = total_bet_amount * p_main / total_probability
         bet_related = total_bet_amount * p_related / total_probability
-        main_market_bet = SimpleBet(direction=bet_direction_main, size=bet_main)
-        related_market_bet = SimpleBet(
-            direction=bet_direction_related, size=bet_related
+        main_market_bet = Bet(direction=bet_direction_main, size=bet_main)
+        related_market_bet = Bet(
+            direction=bet_direction_related,
+            size=bet_related,
         )
         return ArbitrageBet(
             main_market_bet=main_market_bet, related_market_bet=related_market_bet

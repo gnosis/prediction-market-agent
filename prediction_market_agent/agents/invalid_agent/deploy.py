@@ -3,7 +3,7 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     KellyBettingStrategy,
 )
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -39,7 +39,9 @@ class InvalidAgent(DeployableTraderAgent):
         # Keep Kelly here! See `answer_binary_market`.
         return KellyBettingStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+                min_=USD(1),
+                max_=USD(5),
+                trading_balance=market.get_trade_balance(APIKeys()),
             )
         )
 

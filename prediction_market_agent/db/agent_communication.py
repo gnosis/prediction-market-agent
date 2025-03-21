@@ -2,8 +2,7 @@ from functools import cache
 
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import HexBytes, Wei, wei_type, xDai
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from prediction_market_agent_tooling.gtypes import HexBytes, xDai, xDaiWei
 from pydantic import BaseModel
 from web3 import Web3
 from web3.types import TxReceipt
@@ -61,17 +60,19 @@ def get_unseen_messages_statistics(
 ) -> MessagesStatistics:
     messages = fetch_unseen_transactions(consumer_address)
 
-    min_fee = wei_type(min(messages, key=lambda m: m.value).value) if messages else None
-    max_fee = wei_type(max(messages, key=lambda m: m.value).value) if messages else None
+    min_fee = min(messages, key=lambda m: m.value).value if messages else None
+    max_fee = max(messages, key=lambda m: m.value).value if messages else None
     avg_fee = (
-        wei_type(sum(m.value for m in messages) / len(messages)) if messages else None
+        sum((m.value for m in messages), start=xDaiWei(0)) / len(messages)
+        if messages
+        else None
     )
     n_unique_senders = len(set(m.sender for m in messages))
 
     return MessagesStatistics(
-        min_fee=wei_to_xdai(min_fee) if min_fee is not None else None,
-        max_fee=wei_to_xdai(max_fee) if max_fee is not None else None,
-        avg_fee=wei_to_xdai(avg_fee) if avg_fee is not None else None,
+        min_fee=min_fee.as_xdai if min_fee is not None else None,
+        max_fee=max_fee.as_xdai if max_fee is not None else None,
+        avg_fee=avg_fee.as_xdai if avg_fee is not None else None,
         n_unique_senders=n_unique_senders,
         n_messages=len(messages),
     )
@@ -81,7 +82,7 @@ def pop_message(minimum_fee: xDai, api_keys: APIKeys_PMAT) -> MessageContainer |
     agent_comm_contract = AgentCommunicationContract()
     all_messages = fetch_unseen_transactions(api_keys.bet_from_address)
     filtered_indices_and_messages = [
-        (i, m) for i, m in enumerate(all_messages) if m.value >= minimum_fee
+        (i, m) for i, m in enumerate(all_messages) if m.value.as_xdai >= minimum_fee
     ]
     return (
         agent_comm_contract.pop_message(
@@ -97,7 +98,7 @@ def send_message(
     api_keys: APIKeys_PMAT,
     recipient: ChecksumAddress,
     message: HexBytes,
-    amount_wei: Wei,
+    amount_wei: xDaiWei,
     web3: Web3 | None = None,
 ) -> TxReceipt:
     agent_comm_contract = AgentCommunicationContract()

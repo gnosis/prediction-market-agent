@@ -1,7 +1,6 @@
 import zlib
 
-from prediction_market_agent_tooling.gtypes import HexBytes
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
+from prediction_market_agent_tooling.gtypes import HexBytes, xDai
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_models import (
     MessageContainer,
@@ -27,9 +26,9 @@ def unzip_message_else_do_nothing(data_field: str) -> str:
 
 def parse_message_for_agent(message: MessageContainer) -> str:
     parsed = f"Sender's wallet address: {message.sender}"
-    if (
-        xdai_value := wei_to_xdai(message.value)
-    ) > 1.0:  # Random threshold to not consider tiny fees as payments.
+    if (xdai_value := message.value.as_xdai) > xDai(
+        1.0
+    ):  # Random threshold to not consider tiny fees as payments.
         parsed += f"\n\nSender paid you: {xdai_value} xDai"
     parsed += f"\n\nMessage: {unzip_message_else_do_nothing(message.message.hex())}"
     return parsed

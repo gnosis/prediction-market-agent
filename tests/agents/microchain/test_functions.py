@@ -110,11 +110,11 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     buy_amount = 0.1
 
     def get_balances() -> tuple[float, float]:
-        wallet_balance = get_balance(keys, market_type=market_type).amount
+        wallet_balance = get_balance(keys, market_type=market_type)
         token_balance = market.get_token_balance(
             user_id=from_address,
             outcome=outcome,
-        ).amount
+        )
         return float(wallet_balance), float(token_balance)
 
     for outcome, functions in outcomes_functions.items():
@@ -209,6 +209,7 @@ def test_check_past_actions_given_context(
 
 @pytest.mark.parametrize("market_type", [MarketType.OMEN])
 def test_kelly_bet(market_type: MarketType) -> None:
+    market = get_binary_markets(market_type=market_type)[0]
     get_kelly_bet = GetKellyBet(market_type=market_type, keys=APIKeys())
-    bet = get_kelly_bet(market_p_yes=0.1, estimated_p_yes=0.1)
+    bet = get_kelly_bet(market_id=market.id, estimated_p_yes=market.current_p_yes)
     assert "Bet size: 0.0" in bet  # No 'edge', so no bet size

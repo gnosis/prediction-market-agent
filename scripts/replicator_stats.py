@@ -11,7 +11,6 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.parallelism import par_generator
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from tqdm import tqdm
 
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
@@ -55,9 +54,7 @@ def main() -> None:
         m for m in markets if m.opening_datetime > now + timedelta(days=1)
     ]
 
-    reality_balance = wei_to_xdai(
-        OmenRealitioContract().balanceOf(REPLICATOR_SAFE_ADDRESS)
-    )
+    reality_balance = OmenRealitioContract().balanceOf(REPLICATOR_SAFE_ADDRESS).as_xdai
 
     stats = {
         "reality_balance": reality_balance,
@@ -68,39 +65,39 @@ def main() -> None:
         ),
         "liquidity in open markets": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets
                 if m.is_open
             ]
         ),
         "liquidity in closed markets": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets
                 if not m.is_open
             ]
         ),
         "liquidity in open markets closing in more than 1 days": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets_closing_in_more_than_1_days
             ]
         ),
         "liquidity in open markets closing in more than 3 days": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets_closing_in_more_than_3_days
             ]
         ),
         "liquidity in open markets closing in more than 30 days": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets_closing_in_more_than_30_days
             ]
         ),
         "liquidity in open markets closing in more than 180 days": sum(
             [
-                OmenAgentMarket.from_data_model(m).get_liquidity().amount
+                OmenAgentMarket.from_data_model(m).get_liquidity()
                 for m in markets
                 if m.opening_datetime > now + timedelta(days=180)
             ]

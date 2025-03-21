@@ -100,7 +100,6 @@ class DeployedGeneralAgentSettings(BaseSettings):
 
 
 MARKET_TYPE = MarketType.OMEN
-currency = MARKET_TYPE.market_class.currency
 
 st.set_page_config(
     layout="wide",
@@ -156,8 +155,8 @@ long_term_memory = LongTermMemoryTableHandler.from_agent_identifier(identifier)
 chat_history = DatedChatHistory.from_long_term_memory(long_term_memory=long_term_memory)
 sessions = chat_history.cluster_by_session()
 
-total_asset_value = get_total_asset_value(keys, MARKET_TYPE).amount
-roi = (total_asset_value - starting_balance) * 100 / starting_balance
+total_asset_value = get_total_asset_value(keys, MARKET_TYPE)
+roi = (total_asset_value.value - starting_balance) * 100 / starting_balance
 
 with st.container(border=True):
     col1, col2 = st.columns(2)
@@ -172,10 +171,10 @@ with st.container(border=True):
         ),
     )
     col2.metric("Number of iterations", chat_history.iterations)
-    col3.metric("Starting Balance", f"{starting_balance:.2f} {currency}")
+    col3.metric("Starting Balance", f"{starting_balance:.2f} USD")
     col4.metric(
         "Total Asset Value",
-        f"{total_asset_value:.2f} {currency}",
+        f"{total_asset_value:.2f} USD",
         delta=f"{roi:.2f}% ROI",
     )
 

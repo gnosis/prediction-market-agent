@@ -3,9 +3,9 @@ from ape import accounts as ape_accounts
 from ape_test import TestAccount
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import private_key_type, xdai_type
+from prediction_market_agent_tooling.gtypes import private_key_type, xDai
 from prediction_market_agent_tooling.tools.balances import get_balances
-from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to, xdai_to_wei
+from prediction_market_agent_tooling.tools.web3_utils import send_xdai_to
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
@@ -53,13 +53,13 @@ def test_withdraw(
     simple_treasury_contract: SimpleTreasuryContract,
 ) -> None:
     executor = accounts[0]
-    amount_transferred = xdai_type(5)
+    amount_transferred = xDai(5)
     # Transfer all the balance to the treasury
     send_xdai_to(
         web3=local_web3,
         from_private_key=private_key_type(executor.private_key),
         to_address=simple_treasury_contract.address,
-        value=xdai_to_wei(amount_transferred),
+        value=amount_transferred.as_xdai_wei,
     )
     owner = simple_treasury_contract.owner(web3=local_web3)
     # Set required
@@ -83,7 +83,7 @@ def test_withdraw(
     final_treasury_balance = get_balances(
         simple_treasury_contract.address, web3=local_web3
     ).xdai
-    assert int(final_treasury_balance) == 0
+    assert final_treasury_balance == 0
 
 
 def test_nft_keys_contract_matches(

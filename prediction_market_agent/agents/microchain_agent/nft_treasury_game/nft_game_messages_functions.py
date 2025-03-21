@@ -3,12 +3,11 @@ from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
@@ -44,7 +43,7 @@ You can also specify a payment to the agent."""
 
     @property
     def example_args(self) -> list[str | float]:
-        return ["0x123", "Hello!", get_message_minimum_value(), 0.0]
+        return ["0x123", "Hello!", get_message_minimum_value().value, 0.0]
 
     def __call__(self, address: str, message: str, fee: float, payment: float) -> str:
         recipient = Web3.to_checksum_address(address)
@@ -61,7 +60,7 @@ You can also specify a payment to the agent."""
             message=HexBytes(compress_message(message)),
             # We don't differ between fees and payments, but it helps to accept it as separate arguments,
             # for LLM to understand how to pay for NFT keys or stuff.
-            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee + payment))),
+            amount_wei=keys.cap_sending_xdai(xDai(fee + payment)).as_xdai_wei,
         )
         return self.OUTPUT_TEXT
 
@@ -110,7 +109,7 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
             for _ in range(n)
             if (
                 message := pop_message(
-                    minimum_fee=xdai_type(minimum_fee),
+                    minimum_fee=xDai(minimum_fee),
                     api_keys=APIKeys_PMAT(
                         BET_FROM_PRIVATE_KEY=keys.bet_from_private_key
                     ),
