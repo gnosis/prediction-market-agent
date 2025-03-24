@@ -3,10 +3,10 @@ from datetime import timedelta
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import (
     USD,
+    CollateralToken,
     HexAddress,
     HexStr,
     IPFSCIDVersion0,
-    Token,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -77,7 +77,7 @@ class OmenCleanerAgent(DeployableAgent):
         recently_created_markets = OmenSubgraphHandler().get_omen_binary_markets(
             limit=None,
             # Get only serious markets with a reasonable liquidity.
-            liquidity_bigger_than=Token(5).as_wei,
+            liquidity_bigger_than=CollateralToken(5).as_wei,
             # Get only markets created roughly since the last run.
             created_after=utcnow() - timedelta(days=2),
         )
