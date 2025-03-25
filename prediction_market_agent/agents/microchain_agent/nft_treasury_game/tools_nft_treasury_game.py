@@ -42,17 +42,17 @@ def get_nft_game_is_finished(web3: Web3 | None = None) -> bool:
 
 
 def get_end_datetime_of_previous_round() -> DatetimeUTC | None:
-    # TODO: Dynamically from somewhere.
+    # TODO: Dynamically from somewhere and all three must be updated at the same time.
     return None
 
 
 def get_end_datetime_of_current_round() -> DatetimeUTC:
-    # TODO: Dynamically from somewhere.
-    return DatetimeUTC(year=2025, month=3, day=10, hour=23, minute=59, second=59)
+    # TODO: Dynamically from somewhere and all three must be updated at the same time.
+    return DatetimeUTC(year=2025, month=3, day=25, hour=18, minute=0, second=0)
 
 
 def get_start_datetime_of_next_round() -> DatetimeUTC | None:
-    # TODO: Dynamically from somewhere.
+    # TODO: Dynamically from somewhere and all three must be updated at the same time.
     return None
 
 

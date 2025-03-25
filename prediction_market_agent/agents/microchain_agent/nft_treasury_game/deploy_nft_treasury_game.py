@@ -287,8 +287,9 @@ OUR_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
     DeployableAgentNFTGame3,
     DeployableAgentNFTGame4,
     DeployableAgentNFTGame5,
-    DeployableAgentNFTGame6,
-    DeployableAgentNFTGame7,
+    # Temporarily commented out to have only our buyers fightning for the NFT keys.
+    # DeployableAgentNFTGame6,
+    # DeployableAgentNFTGame7,
 ]
 
 
