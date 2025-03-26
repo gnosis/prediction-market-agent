@@ -3,6 +3,7 @@ from typing import Callable
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
     EthereumNetwork,
     TransactionServiceApi,
@@ -90,6 +91,7 @@ def validate_safe(
         )
 
 
+@observe()
 def validate_safe_transaction(
     safe_address: ChecksumAddress,
     transaction: Transaction,
@@ -110,12 +112,17 @@ def validate_safe_transaction(
     logger.info(f"Processing transaction {transaction.id}.")
 
     historical_transactions = safe_api_utils.get_safe_history(safe_address)
-    detailed_historical_transactions = [
-        safe_api_utils.get_safe_detailed_transaction_info(transaction_id=tx.id)
-        for tx in historical_transactions
-        if ignore_historical_transaction_ids is None
-        or tx.id not in ignore_historical_transaction_ids
-    ]
+    detailed_historical_transactions = (
+        safe_api_utils.gather_safe_detailed_transaction_info(
+            [
+                tx.id
+                for tx in historical_transactions
+                if ignore_historical_transaction_ids is None
+                or tx.id not in ignore_historical_transaction_ids
+            ]
+        )
+    )
+
     logger.info(
         f"Retrieved {len(detailed_historical_transactions)} historical transactions."
     )
@@ -127,8 +134,35 @@ def validate_safe_transaction(
         safe, detailed_transaction_info
     )
 
-    validation_results: list[ValidationResult] = []
+    validation_results = run_safe_guards(
+        safe_tx,
+        detailed_transaction_info,
+        detailed_historical_transactions,
+    )
 
+    if all(result.ok for result in validation_results):
+        logger.success("All validations successful.")
+        if do_sign_or_execution:
+            sign_or_execute(safe, safe_tx, api_keys)
+
+    else:
+        logger.error("At least one validation failed.")
+        if do_reject:
+            reject_transaction(safe, safe_tx, api_keys)
+
+    logger.info("Done.")
+    if do_message:
+        send_message(safe, transaction.id, validation_results, api_keys)
+    return validation_results
+
+
+@observe()
+def run_safe_guards(
+    safe_tx: SafeTx,
+    detailed_transaction_info: DetailedTransactionResponse,
+    detailed_historical_transactions: list[DetailedTransactionResponse],
+) -> list[ValidationResult]:
+    validation_results: list[ValidationResult] = []
     logger.info("Running the transaction validation...")
     for safe_guard_fn in SAFE_GUARDS:
         logger.info(f"Running {safe_guard_fn.__name__}...")
@@ -146,21 +180,6 @@ def validate_safe_transaction(
             logger.error(
                 f"Validation using {safe_guard_fn.__name__} reported malicious activity."
             )
-            break
-
-    if all(result.ok for result in validation_results):
-        logger.success("All validations successful.")
-        if do_sign_or_execution:
-            sign_or_execute(safe, safe_tx, api_keys)
-
-    else:
-        logger.error("At least one validation failed.")
-        if do_reject:
-            reject_transaction(safe, safe_tx, api_keys)
-
-    logger.info("Done.")
-    if do_message:
-        send_message(safe, transaction.id, validation_results, api_keys)
     return validation_results
 
 
