@@ -2,7 +2,7 @@ import requests
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
-from safe_eth.safe.safe import Safe, SafeTx
+from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
     Balances,
@@ -11,8 +11,10 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_tr
     DetailedTransactionResponse,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
-    CancellationTxInfo,
     CreationTxInfo,
+    CustomTxInfo,
+    ModuleExecutionInfo,
+    MultisigExecutionInfo,
     Transaction,
     TransactionResponse,
     TransactionResult,
@@ -26,22 +28,28 @@ def is_valued_transaction_result(
     Filter out creation transactions (nothing to validate there) and transactions that have been already cancelled.
     """
     cancelled_nonces = [
-        item.transaction.executionInfo.nonce
-        for item in all_txs
-        if item.transaction is not None
-        and item.transaction.executionInfo is not None
-        and isinstance(item.transaction.txInfo, CancellationTxInfo)
+        tx.transaction.executionInfo.nonce
+        for tx in all_txs
+        if tx.transaction is not None
+        and tx.transaction.executionInfo is not None
+        and isinstance(tx.transaction.executionInfo, MultisigExecutionInfo)
+        and isinstance(tx.transaction.txInfo, CustomTxInfo)
+        and tx.transaction.txInfo.isCancellation
     ]
     return (
         tx.type == "TRANSACTION"
         and tx.transaction is not None
         and not isinstance(
             tx.transaction.txInfo,
-            (CreationTxInfo, CancellationTxInfo),
+            CreationTxInfo,
         )
         and (
             tx.transaction.executionInfo is None
-            or tx.transaction.executionInfo.nonce not in cancelled_nonces
+            or isinstance(tx.transaction.executionInfo, ModuleExecutionInfo)
+            or (
+                isinstance(tx.transaction.executionInfo, MultisigExecutionInfo)
+                and tx.transaction.executionInfo.nonce not in cancelled_nonces
+            )
         )
     )
 
@@ -101,24 +109,36 @@ def safe_tx_from_detailed_transaction(
     transaction_details: DetailedTransactionResponse,
 ) -> SafeTx:
     tx_data = check_not_none(transaction_details.txData)
-    exec_info = check_not_none(transaction_details.detailedExecutionInfo)
+    exec_info = transaction_details.detailedExecutionInfo
     return safe.build_multisig_tx(
         to=tx_data.to.value,
         value=int(tx_data.value),
         data=HexBytes(tx_data.hexData or "0x"),
         operation=tx_data.operation,
-        safe_tx_gas=int(exec_info.safeTxGas),
-        base_gas=int(exec_info.baseGas),
-        gas_price=int(exec_info.gasPrice),
-        gas_token=exec_info.gasToken,
-        refund_receiver=exec_info.refundReceiver.value,
-        signatures=b"".join(
-            [
-                HexBytes(confirmation.signature)
-                for confirmation in exec_info.confirmations
-            ]
+        safe_tx_gas=(
+            int(exec_info.safeTxGas) if exec_info and exec_info.safeTxGas else 0
         ),
-        safe_nonce=exec_info.nonce,
+        base_gas=int(exec_info.baseGas) if exec_info and exec_info.baseGas else 0,
+        gas_price=int(exec_info.gasPrice) if exec_info and exec_info.gasPrice else 0,
+        gas_token=(
+            exec_info.gasToken if exec_info and exec_info.gasToken else NULL_ADDRESS
+        ),
+        refund_receiver=(
+            exec_info.refundReceiver.value
+            if exec_info and exec_info.refundReceiver
+            else NULL_ADDRESS
+        ),
+        signatures=(
+            b"".join(
+                [
+                    HexBytes(confirmation.signature)
+                    for confirmation in exec_info.confirmations
+                ]
+            )
+            if exec_info and exec_info.confirmations
+            else b""
+        ),
+        safe_nonce=exec_info.nonce if exec_info else None,
     )
 
 

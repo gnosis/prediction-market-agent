@@ -1,4 +1,4 @@
-from typing import Any, List, Literal, Optional
+from typing import Any, List, Literal, Union
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from pydantic import BaseModel
@@ -7,58 +7,61 @@ from pydantic import BaseModel
 class Token(BaseModel):
     address: ChecksumAddress
     decimals: int
-    logoUri: str
-    name: str
-    symbol: str
-    trusted: bool
+    logoUri: str | None = None
+    name: str | None = None
+    symbol: str | None = None
+    trusted: bool | None = None
+    imitation: bool | None = None
 
 
-class Sender(BaseModel):
+class Address(BaseModel):
     value: str
-    name: str | None
-    logoUri: str | None
-
-
-class Recipient(BaseModel):
-    value: str
-    name: str | None
-    logoUri: str | None
+    name: str | None = None
+    logoUri: str | None = None
 
 
 class TransferInfo(BaseModel):
     type: str
-    value: str
+    value: str | None = None
+    tokenAddress: str | None = None
+    tokenId: str | None = None
+    tokenName: str | None = None
+    tokenSymbol: str | None = None
+    decimals: int | None = None
+    logoUri: str | None = None
+    trusted: bool | None = None
+    imitation: bool | None = None
 
 
 class TransferTxInfo(BaseModel):
     type: Literal["Transfer"]
-    humanDescription: str | None
-    sender: Sender
-    recipient: Recipient
+    humanDescription: str | None = None
+    sender: Address
+    recipient: Address
     direction: str
     transferInfo: TransferInfo
 
 
-class CancellationTxInfo(BaseModel):
+class CustomTxInfo(BaseModel):
     type: Literal["Custom"]
-    humanDescription: str | None
-    to: Recipient
+    humanDescription: str | None = None
+    to: Address
     dataSize: str
     value: str
-    methodName: str | None
-    actionCount: int | None
-    isCancellation: Literal[True]
+    methodName: str | None = None
+    actionCount: int | None = None
+    isCancellation: bool
 
 
 class SettingsChangeTxInfo(BaseModel):
     type: Literal["SettingsChange"]
-    humanDescription: str | None
+    humanDescription: str | None = None
 
 
 class SwapOrderTxInfo(BaseModel):
     type: Literal["SwapOrder"]
     uid: str
-    humanDescription: str | None
+    humanDescription: str | None = None
     status: str
     kind: str
     sellAmount: str
@@ -72,8 +75,8 @@ class SwapOrderTxInfo(BaseModel):
 
 class Creator(BaseModel):
     value: str
-    name: str | None
-    logoUri: str | None
+    name: str | None = None
+    logoUri: str | None = None
 
 
 class Implementation(BaseModel):
@@ -100,43 +103,48 @@ class CreationTxInfo(BaseModel):
 
 class MissingSigner(BaseModel):
     value: str
-    name: str | None
-    logoUri: str | None
+    name: str | None = None
+    logoUri: str | None = None
 
 
-class ExecutionInfo(BaseModel):
-    type: str
+class ModuleExecutionInfo(BaseModel):
+    type: Literal["MODULE"]
+    address: Address
+
+
+class MultisigExecutionInfo(BaseModel):
+    type: Literal["MULTISIG"]
     nonce: int
     confirmationsRequired: int
     confirmationsSubmitted: int
-    missingSigners: List[MissingSigner] | None
+    missingSigners: List[MissingSigner] | None = None
 
 
 class Transaction(BaseModel):
-    txInfo: (
-        CreationTxInfo
-        | SettingsChangeTxInfo
-        | TransferTxInfo
-        | SwapOrderTxInfo
-        | CancellationTxInfo
-    )
+    txInfo: Union[
+        CreationTxInfo,
+        SettingsChangeTxInfo,
+        TransferTxInfo,
+        SwapOrderTxInfo,
+        CustomTxInfo,
+    ]
     id: str
     timestamp: int
     txStatus: str
-    executionInfo: ExecutionInfo | None
-    safeAppInfo: Any
-    txHash: Any
+    executionInfo: Union[ModuleExecutionInfo, MultisigExecutionInfo] | None = None
+    safeAppInfo: Any | None = None
+    txHash: str | None = None
 
 
 class TransactionResult(BaseModel):
     type: Literal["LABEL", "DATE_LABEL", "TRANSACTION", "CONFLICT_HEADER"]
-    label: Optional[str] = None
-    transaction: Optional[Transaction] = None
-    conflictType: Optional[str] = None
+    label: str | None = None
+    transaction: Transaction | None = None
+    conflictType: str | None = None
 
 
 class TransactionResponse(BaseModel):
     count: int
-    next: Any
-    previous: Any
+    next: str | None = None
+    previous: str | None = None
     results: List[TransactionResult]
