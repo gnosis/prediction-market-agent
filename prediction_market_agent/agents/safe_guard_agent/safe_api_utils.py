@@ -1,7 +1,9 @@
 import requests
+import tenacity
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
+from pydantic import ValidationError
 from safe_eth.safe.safe import Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
@@ -46,6 +48,11 @@ def is_valued_transaction_result(
     )
 
 
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(3),
+    wait=tenacity.wait_fixed(1),
+    retry=tenacity.retry_if_not_exception_type(ValidationError),
+)
 def get_safe_quened_transactions(
     safe_address: ChecksumAddress,
 ) -> list[Transaction]:
@@ -65,6 +72,11 @@ def get_safe_quened_transactions(
     return transactions
 
 
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(3),
+    wait=tenacity.wait_fixed(1),
+    retry=tenacity.retry_if_not_exception_type(ValidationError),
+)
 def get_safe_detailed_transaction_info(
     transaction_id: str,
 ) -> DetailedTransactionResponse:
@@ -78,6 +90,11 @@ def get_safe_detailed_transaction_info(
     return response_parsed
 
 
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(3),
+    wait=tenacity.wait_fixed(1),
+    retry=tenacity.retry_if_not_exception_type(ValidationError),
+)
 def get_safe_history(
     safe_address: ChecksumAddress,
 ) -> list[Transaction]:
@@ -122,6 +139,11 @@ def safe_tx_from_detailed_transaction(
     )
 
 
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(3),
+    wait=tenacity.wait_fixed(1),
+    retry=tenacity.retry_if_not_exception_type(ValidationError),
+)
 def get_balances_usd(safe_address: ChecksumAddress) -> Balances:
     """
     TODO: Can we get this without relying on Safe's APIs?
