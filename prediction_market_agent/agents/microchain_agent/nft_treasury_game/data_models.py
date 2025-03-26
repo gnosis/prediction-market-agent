@@ -1,6 +1,6 @@
 import typing as t
 
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes, Wei
+from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes, xDaiWei
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -10,7 +10,7 @@ class MessageContainer(BaseModel):
     sender: ChecksumAddress
     recipient: ChecksumAddress = Field(alias="agentAddress")
     message: HexBytes
-    value: Wei
+    value: xDaiWei
 
     @staticmethod
     def from_tuple(values: tuple[t.Any, ...]) -> "MessageContainer":

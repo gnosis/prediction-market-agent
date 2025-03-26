@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 
@@ -35,21 +36,21 @@ def assert_bet_amounts_ok(
     main_p: float,
     related_p: float,
 ) -> None:
-    total_bet_amount = 10
+    total_bet_amount = USD(10)
     actual_bet = correlated_pair.split_bet_amount_between_yes_and_no(
         total_bet_amount=total_bet_amount
     )
     expected_bet_main = total_bet_amount * main_p / (main_p + related_p)
     expected_bet_related = total_bet_amount * related_p / (main_p + related_p)
     assert np.isclose(
-        actual_bet.main_market_bet.size,
-        expected_bet_main,
-        rtol=expected_bet_main * 0.01,
+        actual_bet.main_market_bet.size.value,
+        expected_bet_main.value,
+        rtol=expected_bet_main.value * 0.01,
     )
     assert np.isclose(
-        actual_bet.related_market_bet.size,
-        expected_bet_related,
-        rtol=expected_bet_related * 0.01,
+        actual_bet.related_market_bet.size.value,
+        expected_bet_related.value,
+        rtol=expected_bet_related.value * 0.01,
     )
 
 

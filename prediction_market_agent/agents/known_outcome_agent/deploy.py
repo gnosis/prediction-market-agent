@@ -3,6 +3,7 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     KellyBettingStrategy,
 )
+from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -22,14 +23,16 @@ from prediction_market_agent.utils import APIKeys
 
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
     model = "gpt-4-1106-preview"
-    min_liquidity = 5
+    min_liquidity = USD(5)
     bet_on_n_markets_per_run: int = 2
     supported_markets = [MarketType.OMEN]
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
             max_bet_amount=get_maximum_possible_bet_amount(
-                min_=1, max_=2, trading_balance=market.get_trade_balance(APIKeys())
+                min_=USD(1),
+                max_=USD(2),
+                trading_balance=market.get_trade_balance(APIKeys()),
             ),
             max_price_impact=0.6,
         )
@@ -50,7 +53,7 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
                 f"Skipping market {market.url} with the question '{market.question}', because it is already saturated."
             )
             return False
-        elif market.get_liquidity_in_xdai() < self.min_liquidity:
+        elif market.get_liquidity() < market.get_in_token(self.min_liquidity):
             logger.info(
                 f"Skipping market {market.url} with the question '{market.question}', because it has insufficient liquidity (at least {self.min_liquidity} required)."
             )
