@@ -2,10 +2,11 @@ from datetime import timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import (
+    USD,
+    CollateralToken,
     HexAddress,
     HexStr,
     IPFSCIDVersion0,
-    xdai_type,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -21,7 +22,6 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
@@ -77,7 +77,7 @@ class OmenCleanerAgent(DeployableAgent):
         recently_created_markets = OmenSubgraphHandler().get_omen_binary_markets(
             limit=None,
             # Get only serious markets with a reasonable liquidity.
-            liquidity_bigger_than=xdai_to_wei(xdai_type(5)),
+            liquidity_bigger_than=CollateralToken(5).as_wei,
             # Get only markets created roughly since the last run.
             created_after=utcnow() - timedelta(days=2),
         )
@@ -93,7 +93,7 @@ class OmenCleanerAgent(DeployableAgent):
                 omen_fund_market_tx(
                     api_keys,
                     agent_market,
-                    xdai_to_wei(xdai_type(0.001)),
+                    USD(0.001),
                     auto_deposit=True,
                 )
                 generated_image_mapping[market.id] = generate_and_set_image_for_market(

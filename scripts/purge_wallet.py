@@ -14,7 +14,6 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.omen.sell_positions import sell_all
-from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
@@ -52,7 +51,7 @@ def main(
     starting_balance_of_from = get_balances(api_keys.bet_from_address)
     starting_balance_of_to_address = get_balances(to_address)
 
-    if starting_balance_of_from_eoa.xdai < 0.01:
+    if starting_balance_of_from_eoa.xdai < xDai(0.01):
         logger.error(f"We need at least some funds in xDai to pay for the fees.")
         return
 
@@ -80,10 +79,10 @@ def main(
         logger.error(f"Failed to claim all bonds on Reality: {e}")
 
     # Keep a little of xDai to pay for the rest of transactions, deposit rest into wxDai.
-    if starting_balance_of_from.xdai > 0.1:
+    if starting_balance_of_from.xdai > xDai(0.1):
         try:
             WrappedxDaiContract().deposit(
-                api_keys, xdai_to_wei(xDai(starting_balance_of_from.xdai - 0.1))
+                api_keys, (starting_balance_of_from.xdai - xDai(0.1)).as_xdai_wei.as_wei
             )
         except Exception as e:
             failed_steps.append("deposit")

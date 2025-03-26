@@ -4,7 +4,6 @@ from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
-from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
@@ -33,7 +32,7 @@ def test_count_unseen_messages(local_web3: Web3, test_keys: APIKeys) -> None:
         api_keys=test_keys,
         agent_address=recipient,
         message=HexBytes(message),
-        amount_wei=xdai_to_wei(xDai(0.1)),
+        amount_wei=xDai(0.1).as_xdai_wei,
         web3=local_web3,
     )
     assert (
@@ -67,7 +66,7 @@ def test_pop_message(local_web3: Web3, test_keys: APIKeys) -> None:
         api_keys=test_keys,
         agent_address=recipient,
         message=HexBytes(message),
-        amount_wei=xdai_to_wei(xDai(0.1)),
+        amount_wei=xDai(0.1).as_xdai_wei,
         web3=local_web3,
     )
     assert (

@@ -30,8 +30,8 @@ class BalanceOfNFT(Function):
         contract = ContractOwnableERC721OnGnosisChain(
             address=Web3.to_checksum_address(nft_address)
         )
-        balance: int = contract.balanceOf(Web3.to_checksum_address(owner_address))
-        return balance
+        balance = contract.balanceOf(Web3.to_checksum_address(owner_address))
+        return balance.value
 
 
 class OwnerOfNFT(Function):

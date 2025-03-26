@@ -9,7 +9,7 @@ from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
     Prediction,
 )
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
 from prediction_market_agent_tooling.markets.markets import AgentMarket
@@ -43,7 +43,7 @@ class QuestionWithKnownOutcome(BaseModel):
             created_time=None,
             close_time=utcnow() + timedelta(days=1),
             resolution=None,
-            outcomes=["YES", "NO"],
+            outcomes=[OutcomeStr("YES"), OutcomeStr("NO")],
             outcome_token_pool=None,
             fees=MarketFees.get_zero_fees(),
         )
