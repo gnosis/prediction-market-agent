@@ -11,6 +11,7 @@ from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.guards import (
     blacklist,
     goplus_,
+    hash_checker,
     llm,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -34,6 +35,7 @@ SAFE_GUARDS: list[
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
     blacklist.validate_safe_transaction_blacklist,
+    hash_checker.validate_safe_transaction_hash,
     llm.validate_safe_transaction_llm,
     goplus_.validate_safe_transaction_goplus_address_security,
     goplus_.validate_safe_transaction_goplus_token_security,
@@ -68,15 +70,15 @@ def validate_safe(
     do_reject: bool,
     do_message: bool,
 ) -> None:
-    quened_transactions = safe_api_utils.get_safe_quened_transactions(safe_address)
+    queued_transactions = safe_api_utils.get_safe_queued_transactions(safe_address)
     logger.info(
-        f"Retrieved {len(quened_transactions)} quened transactions to verify for {safe_address}."
+        f"Retrieved {len(queued_transactions)} queued transactions to verify for {safe_address}."
     )
 
-    for quened_transaction in quened_transactions:
+    for queued_transaction in queued_transactions:
         validate_safe_transaction(
             safe_address,
-            quened_transaction.id,
+            queued_transaction.id,
             do_sign_or_execution,
             do_reject,
             do_message,
@@ -99,22 +101,22 @@ def validate_safe_transaction(
         )
         return None
 
-    quened_transactions = safe_api_utils.get_safe_quened_transactions(safe_address)
-    quened_transaction_to_process = next(
+    queued_transactions = safe_api_utils.get_safe_queued_transactions(safe_address)
+    queued_transaction_to_process = next(
         (
-            quened_transaction
-            for quened_transaction in quened_transactions
-            if quened_transaction.id == transaction_id
+            queued_transaction
+            for queued_transaction in queued_transactions
+            if queued_transaction.id == transaction_id
         ),
         None,
     )
 
-    if quened_transaction_to_process is None:
+    if queued_transaction_to_process is None:
         raise ValueError(
-            f"Transaction {transaction_id} not found in quened transactions for {safe_address}."
+            f"Transaction {transaction_id} not found in queued transactions for {safe_address}."
         )
 
-    logger.info(f"Processing quened transaction {quened_transaction_to_process.id}.")
+    logger.info(f"Processing queued transaction {queued_transaction_to_process.id}.")
 
     historical_transactions = safe_api_utils.get_safe_history(safe_address)
     detailed_historical_transactions = [
@@ -125,13 +127,13 @@ def validate_safe_transaction(
         f"Retrieved {len(detailed_historical_transactions)} historical transactions."
     )
 
-    detailed_quened_transaction_info = (
+    detailed_queued_transaction_info = (
         safe_api_utils.get_safe_detailed_transaction_info(
-            transaction_id=quened_transaction_to_process.id
+            transaction_id=queued_transaction_to_process.id
         )
     )
-    quened_safe_tx = safe_api_utils.safe_tx_from_detailed_transaction(
-        safe, detailed_quened_transaction_info
+    queued_safe_tx = safe_api_utils.safe_tx_from_detailed_transaction(
+        safe, detailed_queued_transaction_info
     )
 
     validation_results: list[ValidationResult] = []
@@ -140,8 +142,8 @@ def validate_safe_transaction(
     for safe_guard_fn in SAFE_GUARDS:
         logger.info(f"Running {safe_guard_fn.__name__}...")
         validation_result = safe_guard_fn(
-            detailed_quened_transaction_info,
-            quened_safe_tx,
+            detailed_queued_transaction_info,
+            queued_safe_tx,
             detailed_historical_transactions,
         )
         (logger.success if validation_result.ok else logger.warning)(
@@ -158,12 +160,12 @@ def validate_safe_transaction(
     if all(result.ok for result in validation_results):
         logger.success("All validations successful.")
         if do_sign_or_execution:
-            sign_or_execute(safe, quened_safe_tx, api_keys)
+            sign_or_execute(safe, queued_safe_tx, api_keys)
 
     else:
         logger.error("At least one validation failed.")
         if do_reject:
-            reject_transaction(safe, quened_safe_tx, api_keys)
+            reject_transaction(safe, queued_safe_tx, api_keys)
 
     logger.info("Done.")
     if do_message:

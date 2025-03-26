@@ -53,12 +53,12 @@ def is_valued_transaction_result(
     wait=tenacity.wait_fixed(1),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
-def get_safe_quened_transactions(
+def get_safe_queued_transactions(
     safe_address: ChecksumAddress,
 ) -> list[Transaction]:
     """
     TODO: This isn't great as we would need to call Safe's API for each guarded Safe non-stop.
-    Can we somehow listen to creation of quened transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
+    Can we somehow listen to creation of queued transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
     """
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
