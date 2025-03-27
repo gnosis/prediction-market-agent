@@ -3,9 +3,8 @@ import tenacity
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
-from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
 from pydantic import ValidationError
-from safe_eth.safe.safe import Safe, SafeTx
+from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
     Balances,
