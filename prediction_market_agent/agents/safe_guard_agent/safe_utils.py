@@ -1,3 +1,4 @@
+import tenacity
 from eth_account.messages import defunct_hash_message
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
@@ -21,6 +22,13 @@ def get_safe(safe_address: ChecksumAddress) -> Safe:
 def check_if_owner(safe_address: ChecksumAddress, maybe_owner: ChecksumAddress) -> bool:
     safe = get_safe(safe_address)
     return safe.retrieve_is_owner(maybe_owner)
+
+
+@tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
+def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
+    api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+    safes = api.get_safes_for_owner(owner)
+    return safes
 
 
 def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
