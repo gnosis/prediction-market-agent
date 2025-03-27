@@ -16,13 +16,8 @@ from prediction_market_agent_tooling.gtypes import (
     PrivateKey,
     private_key_type,
     xDai,
-    xdai_type,
 )
-from prediction_market_agent_tooling.tools.web3_utils import (
-    prepare_tx,
-    send_xdai_to,
-    xdai_to_wei,
-)
+from prediction_market_agent_tooling.tools.web3_utils import prepare_tx, send_xdai_to
 from safe_eth.eth import EthereumClient
 from web3 import Web3
 from web3.types import TxReceipt
@@ -44,7 +39,7 @@ def local_web3(
         w3 = Web3(Web3.HTTPProvider(tenderly_fork_rpc))
         print("funding test accounts on tenderly")
         fund_account_on_tenderly(
-            tenderly_fork_rpc, [a.address for a in accounts], xdai_type(1000)
+            tenderly_fork_rpc, [a.address for a in accounts], xDai(1000)
         )
         yield w3
     else:
@@ -79,7 +74,7 @@ def fund_account_on_tenderly(
     payload = {
         "jsonrpc": "2.0",
         "method": "tenderly_setBalance",
-        "params": [addresses, f"0x{xdai_to_wei(balance):X}"],
+        "params": [addresses, f"0x{balance.as_xdai_wei.value:X}"],
     }
     response = requests.post(fork_rpc, json=payload)
     response.raise_for_status()
@@ -93,7 +88,7 @@ def create_and_fund_random_account(
         web3=web3,
         from_private_key=private_key,
         to_address=fresh_account.address,
-        value=xdai_to_wei(deposit_amount),
+        value=deposit_amount.as_xdai_wei,
     )
     return fresh_account
 

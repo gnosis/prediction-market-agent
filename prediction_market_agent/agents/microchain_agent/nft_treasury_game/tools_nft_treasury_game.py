@@ -1,7 +1,7 @@
 from enum import Enum
 
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import HexBytes, xdai_type
+from prediction_market_agent_tooling.gtypes import HexBytes, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -28,7 +28,7 @@ class NFTGameStatus(str, Enum):
 def get_nft_game_status(web3: Web3 | None = None) -> NFTGameStatus:
     treasury_balance = SimpleTreasuryContract().balances(web3=web3)
 
-    if treasury_balance.total < TREASURY_THRESHOLD_BALANCE_TO_END_GAME:
+    if treasury_balance.xdai < TREASURY_THRESHOLD_BALANCE_TO_END_GAME:
         return NFTGameStatus.finished
 
     if get_end_datetime_of_current_round() < utcnow():
@@ -65,7 +65,7 @@ def purge_all_messages(keys: APIKeys) -> None:
         while fetch_count_unprocessed_transactions(
             consumer_address=keys.bet_from_address
         ):
-            pop_message(minimum_fee=xdai_type(0), api_keys=keys)
+            pop_message(minimum_fee=xDai(0), api_keys=keys)
             popped += 1
             logger.info(f"Popped {popped} messages.")
 

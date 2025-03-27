@@ -3,7 +3,7 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.gtypes import wei_type
+from prediction_market_agent_tooling.gtypes import xDaiWei
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
@@ -67,13 +67,13 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
                 sender=MOCK_SENDER,
                 recipient=MOCK_SENDER,
                 message=HexBytes("0x123"),  # dummy message
-                value=wei_type(10000),
+                value=xDaiWei(10000),
             ),
             MessageContainer(
                 sender=MOCK_SENDER,
                 recipient=MOCK_SENDER,
                 message=HexBytes("0x123"),  # dummy message
-                value=wei_type(100000),
+                value=xDaiWei(100000),
             ),
         ],
     ):
@@ -94,7 +94,7 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
         sender=MOCK_SENDER,
         recipient=MOCK_SENDER,
         message=HexBytes("0x123"),  # dummy message
-        value=wei_type(10000),
+        value=xDaiWei(10000),
     )
     with patch.object(
         AgentCommunicationContract,

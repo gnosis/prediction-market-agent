@@ -1,12 +1,12 @@
 from datetime import timedelta
 
 from prediction_market_agent_tooling.gtypes import (
+    USD,
     ChecksumAddress,
     HexAddress,
     HexStr,
+    Wei,
     int_to_hexbytes,
-    wei_type,
-    xDai,
 )
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
@@ -26,7 +26,6 @@ from prediction_market_agent_tooling.markets.omen.omen import (
     omen_remove_fund_market_tx,
     redeem_from_all_user_positions,
 )
-from prediction_market_agent_tooling.markets.omen.omen_contracts import sDaiContract
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
@@ -54,7 +53,8 @@ def omen_replicate_from_tx(
     api_keys: APIKeys,
     market_type: MarketType,
     n_to_replicate: int,
-    initial_funds: xDai,
+    initial_funds: USD,
+    collateral_token_address: ChecksumAddress,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
@@ -98,7 +98,7 @@ def omen_replicate_from_tx(
     created_questions: set[str] = set()
 
     for market in markets_to_replicate:
-        if len(created_addresses) > n_to_replicate:
+        if len(created_addresses) >= n_to_replicate:
             logger.info(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
             )
@@ -182,7 +182,7 @@ def omen_replicate_from_tx(
             language="en",
             outcomes=[OMEN_TRUE_OUTCOME, OMEN_FALSE_OUTCOME],
             auto_deposit=auto_deposit,
-            collateral_token_address=sDaiContract().address,
+            collateral_token_address=collateral_token_address,
         )
         market_address = (
             created_market.market_event.fixed_product_market_maker_checksummed
@@ -220,7 +220,7 @@ def omen_unfund_replicated_known_markets_tx(
         limit=None,
         creator=from_address,
         question_opened_before=opened_before,
-        liquidity_bigger_than=wei_type(0),
+        liquidity_bigger_than=Wei(0),
     )
 
     for idx, market in enumerate(markets):
