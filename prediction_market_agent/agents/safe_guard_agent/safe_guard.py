@@ -1,23 +1,24 @@
 from typing import Callable
 
-from eth_typing import URI
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
-from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.guards import (
     blacklist,
     goplus_,
-    hash_checker,
     llm,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
+from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
+    Transaction,
+)
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+    get_safe,
     get_safes,
     post_message,
     reject_transaction,
@@ -35,7 +36,7 @@ SAFE_GUARDS: list[
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
     blacklist.validate_safe_transaction_blacklist,
-    hash_checker.validate_safe_transaction_hash,
+    # hash_checker.validate_safe_transaction_hash,
     llm.validate_safe_transaction_llm,
     goplus_.validate_safe_transaction_goplus_address_security,
     goplus_.validate_safe_transaction_goplus_token_security,
@@ -78,7 +79,7 @@ def validate_safe(
     for queued_transaction in queued_transactions:
         validate_safe_transaction(
             safe_address,
-            queued_transaction.id,
+            queued_transaction,
             do_sign_or_execution,
             do_reject,
             do_message,
@@ -87,53 +88,39 @@ def validate_safe(
 
 def validate_safe_transaction(
     safe_address: ChecksumAddress,
-    transaction_id: str,
+    transaction: Transaction,
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    ignore_historical_transaction_ids: set[str] | None = None,
 ) -> list[ValidationResult] | None:
     api_keys = APIKeys()
-    safe = Safe(safe_address, EthereumClient(URI(RPCConfig().gnosis_rpc_url)))  # type: ignore
+    safe = get_safe(safe_address)
+    is_owner = safe.retrieve_is_owner(api_keys.bet_from_address)
 
-    if not safe.retrieve_is_owner(api_keys.bet_from_address):
-        logger.error(
-            f"{api_keys.bet_from_address} is not owner of Safe {safe_address}. Please add him as a signer and then try again."
-        )
-        return None
-
-    queued_transactions = safe_api_utils.get_safe_queued_transactions(safe_address)
-    queued_transaction_to_process = next(
-        (
-            queued_transaction
-            for queued_transaction in queued_transactions
-            if queued_transaction.id == transaction_id
-        ),
-        None,
-    )
-
-    if queued_transaction_to_process is None:
-        raise ValueError(
-            f"Transaction {transaction_id} not found in queued transactions for {safe_address}."
+    if not is_owner:
+        logger.warning(
+            f"{api_keys.bet_from_address} is not owner of Safe {safe_address}, some functionality may be limited."
         )
 
-    logger.info(f"Processing queued transaction {queued_transaction_to_process.id}.")
+    logger.info(f"Processing transaction {transaction.id}.")
 
     historical_transactions = safe_api_utils.get_safe_history(safe_address)
     detailed_historical_transactions = [
         safe_api_utils.get_safe_detailed_transaction_info(transaction_id=tx.id)
         for tx in historical_transactions
+        if ignore_historical_transaction_ids is None
+        or tx.id not in ignore_historical_transaction_ids
     ]
     logger.info(
         f"Retrieved {len(detailed_historical_transactions)} historical transactions."
     )
 
-    detailed_queued_transaction_info = (
-        safe_api_utils.get_safe_detailed_transaction_info(
-            transaction_id=queued_transaction_to_process.id
-        )
+    detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
+        transaction_id=transaction.id
     )
-    queued_safe_tx = safe_api_utils.safe_tx_from_detailed_transaction(
-        safe, detailed_queued_transaction_info
+    safe_tx = safe_api_utils.safe_tx_from_detailed_transaction(
+        safe, detailed_transaction_info
     )
 
     validation_results: list[ValidationResult] = []
@@ -142,8 +129,8 @@ def validate_safe_transaction(
     for safe_guard_fn in SAFE_GUARDS:
         logger.info(f"Running {safe_guard_fn.__name__}...")
         validation_result = safe_guard_fn(
-            detailed_queued_transaction_info,
-            queued_safe_tx,
+            detailed_transaction_info,
+            safe_tx,
             detailed_historical_transactions,
         )
         (logger.success if validation_result.ok else logger.warning)(
@@ -160,16 +147,16 @@ def validate_safe_transaction(
     if all(result.ok for result in validation_results):
         logger.success("All validations successful.")
         if do_sign_or_execution:
-            sign_or_execute(safe, queued_safe_tx, api_keys)
+            sign_or_execute(safe, safe_tx, api_keys)
 
     else:
         logger.error("At least one validation failed.")
         if do_reject:
-            reject_transaction(safe, queued_safe_tx, api_keys)
+            reject_transaction(safe, safe_tx, api_keys)
 
     logger.info("Done.")
     if do_message:
-        send_message(safe, transaction_id, validation_results, api_keys)
+        send_message(safe, transaction.id, validation_results, api_keys)
     return validation_results
 
 

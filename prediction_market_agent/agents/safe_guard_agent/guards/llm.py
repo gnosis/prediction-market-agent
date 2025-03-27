@@ -108,7 +108,7 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
         f"Transaction ID: {tx.txId} | "
         + f"Transaction type: {tx.txInfo.type} | "
         + f"Human description: {tx.txInfo.humanDescription} | "
-        + f"Time: {DatetimeUTC.to_datetime_utc(tx.detailedExecutionInfo.submittedAt) if tx.detailedExecutionInfo else 'N/A'} | "
+        + f"Time: {DatetimeUTC.to_datetime_utc(tx.detailedExecutionInfo.submittedAt) if tx.detailedExecutionInfo and tx.detailedExecutionInfo.submittedAt else 'N/A'} | "
         + f"Sender: {sender_value} | "
         + f"Recipient: {recipient_value} | "
         + (

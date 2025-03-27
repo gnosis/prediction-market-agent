@@ -3,7 +3,7 @@ from eth_account.messages import defunct_hash_message
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
-from safe_eth.eth import EthereumNetwork
+from safe_eth.eth import EthereumClient, EthereumNetwork
 from safe_eth.safe import Safe
 from safe_eth.safe.api.transaction_service_api import TransactionServiceApi
 from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
@@ -12,6 +12,16 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
 )
 from safe_eth.safe.safe import Safe, SafeTx
 from web3 import Web3
+
+
+def get_safe(safe_address: ChecksumAddress) -> Safe:
+    safe = Safe(safe_address, EthereumClient(RPCConfig().gnosis_rpc_url))  # type: ignore
+    return safe
+
+
+def check_if_owner(safe_address: ChecksumAddress, maybe_owner: ChecksumAddress) -> bool:
+    safe = get_safe(safe_address)
+    return safe.retrieve_is_owner(maybe_owner)
 
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
