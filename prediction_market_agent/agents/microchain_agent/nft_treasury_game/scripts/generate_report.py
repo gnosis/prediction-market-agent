@@ -109,16 +109,16 @@ def calculate_nft_and_xdai_balances_diff(
     lookup = {agent.wallet_address: agent.name for agent in nft_agents}
 
     balances_diff = []
-    for agent_address, agent_id in lookup.items():
+    for agent_address, agent_name in lookup.items():
         balance = get_balances(address=Web3.to_checksum_address(agent_address), web3=w3)
         # how much each agent won/lost during the game.
         diff_xdai_balance = balance.xdai - initial_balance
         # How many NFTs the agents ended the game with.
         nft_balance = get_nft_balance(owner_address=agent_address, web3=w3)
-        logger.info(f"{agent_id} {diff_xdai_balance.value=:.2f} {nft_balance=}")
+        logger.info(f"{agent_name} {diff_xdai_balance.value=:.2f} {nft_balance=}")
         balances_diff.append(
             {
-                "agent_id": agent_id,
+                "agent_name": agent_name,
                 "xdai_difference": f"{diff_xdai_balance.value:.2f}",
                 "nft_balance_end": nft_balance,
             }
