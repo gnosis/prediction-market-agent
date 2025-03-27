@@ -13,7 +13,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     get_end_datetime_of_current_round,
-    get_end_datetime_of_previous_round,
     get_nft_game_is_finished,
     get_start_datetime_of_next_round,
 )
@@ -113,11 +112,11 @@ class GetReportAboutThePreviousRound(Function):
         overall_reports.sort(key=lambda r: r.datetime_, reverse=True)
 
         if not overall_reports:
-            if get_end_datetime_of_previous_round() is not None:
-                return "There are no reports about the previous rounds of the NFT game, please try again later."
+            if not get_nft_game_is_finished():
+                return "There is no report about the previous round of the NFT game, because this is the first round and it is still active. Please participate in the game!"
 
-            elif not get_nft_game_is_finished():
-                return "There are no reports about the previous rounds of the NFT game, because this is the first round and it is still active. Please participate in the game!"
+            else:
+                return "There is no report about the previous round of the NFT game, please try again later."
 
         return f"""The report is from {overall_reports[0].datetime_}:
 
