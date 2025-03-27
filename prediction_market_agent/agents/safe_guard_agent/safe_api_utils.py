@@ -4,7 +4,6 @@ from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
-
 from pydantic import ValidationError
 from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
 

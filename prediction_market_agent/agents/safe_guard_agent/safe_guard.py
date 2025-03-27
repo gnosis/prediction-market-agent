@@ -1,16 +1,9 @@
 from typing import Callable
 
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.langfuse_ import observe
-from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
-    EthereumNetwork,
-    TransactionServiceApi,
-)
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
