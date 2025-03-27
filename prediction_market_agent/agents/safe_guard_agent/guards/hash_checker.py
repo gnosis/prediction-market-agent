@@ -1,3 +1,4 @@
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from safe_eth.safe import SafeTx
 
@@ -9,6 +10,7 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 )
 
 
+@observe()
 def validate_safe_transaction_hash(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,

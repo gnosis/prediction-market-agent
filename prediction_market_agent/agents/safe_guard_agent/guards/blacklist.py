@@ -1,3 +1,4 @@
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -8,6 +9,7 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 )
 
 
+@observe()
 def validate_safe_transaction_blacklist(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,

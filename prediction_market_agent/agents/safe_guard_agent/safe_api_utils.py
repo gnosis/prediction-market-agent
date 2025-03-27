@@ -2,6 +2,7 @@ import requests
 import tenacity
 from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import ValidationError
 from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
@@ -56,6 +57,7 @@ def is_valued_transaction_result(
     )
 
 
+@observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(3),
     wait=tenacity.wait_fixed(1),
@@ -80,6 +82,17 @@ def get_safe_queued_transactions(
     return transactions
 
 
+@observe()
+def gather_safe_detailed_transaction_info(
+    transaction_ids: list[str],
+) -> list[DetailedTransactionResponse]:
+    return [
+        get_safe_detailed_transaction_info(transaction_id)
+        for transaction_id in transaction_ids
+    ]
+
+
+@observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(3),
     wait=tenacity.wait_fixed(1),
@@ -98,6 +111,7 @@ def get_safe_detailed_transaction_info(
     return response_parsed
 
 
+@observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(3),
     wait=tenacity.wait_fixed(1),
@@ -159,6 +173,7 @@ def safe_tx_from_detailed_transaction(
     )
 
 
+@observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(3),
     wait=tenacity.wait_fixed(1),
