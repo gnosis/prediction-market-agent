@@ -124,7 +124,7 @@ class GetReportAboutThePreviousRound(Function):
 
 ---
 
-Currently, the game is {'not active' if get_nft_game_is_finished() else 'active'}"""
+Currently, the game is {'not active' if get_nft_game_is_finished() else 'active'} and you should participate!"""
 
 
 NFT_GAME_FUNCTIONS: list[type[Function]] = [
