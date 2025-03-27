@@ -106,7 +106,7 @@ def calculate_nft_and_xdai_balances_diff(
     nft_agents = get_all_nft_agents()
 
     w3 = Web3(Web3.HTTPProvider(rpc_url))
-    lookup = {agent.wallet_address: agent.identifier for agent in nft_agents}
+    lookup = {agent.wallet_address: agent.name for agent in nft_agents}
 
     balances_diff = []
     for agent_address, agent_id in lookup.items():
