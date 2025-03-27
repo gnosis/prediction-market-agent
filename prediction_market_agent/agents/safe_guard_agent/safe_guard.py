@@ -7,6 +7,7 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
     EthereumNetwork,
     TransactionServiceApi,
 )
+from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
@@ -23,6 +24,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transaction
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     get_safe,
+    get_safes,
     post_message,
     reject_transaction,
     sign_or_execute,
@@ -52,10 +54,9 @@ def validate_all(
     do_reject: bool,
     do_message: bool,
 ) -> None:
-    api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
     api_keys = APIKeys()
 
-    safes_to_verify = api.get_safes_for_owner(api_keys.bet_from_address)
+    safes_to_verify = get_safes(api_keys.bet_from_address)
     logger.info(
         f"For owner {api_keys.bet_from_address}, retrieved {safes_to_verify} safes to verify transactions for."
     )
