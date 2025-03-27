@@ -198,19 +198,23 @@ You can use this for example to wait for a while before checking for new message
         """
         Parse the calling of this function and execute the logic.
         """
+        logger.info(f"Executing {SleepUntil.__name__} with call code: `{call_code}`")
+
         # Handle both positional and keyword arguments
         if "=" in call_code:
             # Keyword arguments
             args = dict(
                 item.strip().split("=")
-                for item in call_code.split("(")[1][:-1].split(",")
+                for item in call_code.split(f"{SleepUntil.__name__}(")[1][:-1].split(
+                    ",", maxsplit=1
+                )
             )
             sleep_until = args.get("sleep_until", "").strip()
             reason = args.get("reason", "").strip()
         else:
             # Positional arguments
-            sleep_until = call_code.split(",")[0].split("(")[1].strip()
-            reason = call_code.split(",")[1].strip()[:-1]
+            sleep_until = call_code.split(",", maxsplit=1)[0].split("(")[1].strip()
+            reason = call_code.split(",", maxsplit=1)[1].strip()[:-1]
 
         while utcnow() < DatetimeUTC.to_datetime_utc(sleep_until):
             logger.info(f"Sleeping until {sleep_until} because {reason}.")
