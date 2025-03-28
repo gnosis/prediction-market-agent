@@ -41,6 +41,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts i
     nft_treasury_game_buyer_prompt,
     nft_treasury_game_seller_prompt,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    get_start_time_of_current_round,
+)
 
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
@@ -106,6 +109,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
+        self.import_actions_from_memory_from = get_start_time_of_current_round()
 
     def get_holding_n_nft_keys(self) -> int:
         return NFTKeysContract().balanceOf(self.wallet_address).value

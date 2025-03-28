@@ -17,6 +17,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     AgentRegisterContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    get_nft_game_is_finished,
     purge_all_messages,
 )
 from prediction_market_agent.db.agent_communication import (
@@ -156,12 +157,19 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
-    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game, your NFT keys balance and your messages once you wake up!"
-    SLEEP_THRESHOLD = timedelta(hours=1)
+    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game, your NFT keys balance and your messages in your next moves!"
 
     def __init__(self) -> None:
         super().__init__()
         self.last_sleep_until: str | None = None
+
+    @property
+    def sleep_threshold(self) -> timedelta:
+        return (
+            timedelta(minutes=10)
+            if get_nft_game_is_finished()
+            else timedelta(minutes=1)
+        )
 
     @property
     def description(self) -> str:
@@ -179,9 +187,9 @@ You can use this for example to wait for a while before checking for new message
         if sleep_until_datetime < utcnow():
             output = f"You can not sleep in the past. Current time is {utcnow()}."
 
-        elif (sleep_time := sleep_until_datetime - utcnow()) > self.SLEEP_THRESHOLD:
+        elif (sleep_time := sleep_until_datetime - utcnow()) > self.sleep_threshold:
             # TODO: Testing so the agents won't cut themselves out of the game.
-            output = f"You can not sleep for more than {self.SLEEP_THRESHOLD.seconds / 3600} hours. Current time is {utcnow()}."
+            output = f"You can not sleep for more than {self.sleep_threshold.seconds / 3600} hours. Current time is {utcnow()}."
             # if self.last_sleep_until == sleep_until:
             #     output = self.OK_OUTPUT
             # else:
