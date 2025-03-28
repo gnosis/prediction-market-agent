@@ -80,21 +80,21 @@ do_message = st.checkbox(
 
 
 @st.cache_data(ttl=60)
-def get_safe_queued_transactions_cached(
+def get_safe_multisig_queue_cached(
     safe_address_checksum: ChecksumAddress,
-) -> list[safe_api_utils.Transaction]:
-    return safe_api_utils.get_safe_queued_transactions(safe_address_checksum)
+) -> list[safe_api_utils.TransactionWithMultiSig]:
+    return safe_api_utils.get_safe_multisig_queue(safe_address_checksum)
 
 
 @st.cache_data(ttl=60)
-def get_safe_history_cached(
+def get_safe_multisig_history_cached(
     safe_address_checksum: ChecksumAddress,
-) -> list[safe_api_utils.Transaction]:
-    return safe_api_utils.get_safe_history(safe_address_checksum)
+) -> list[safe_api_utils.TransactionWithMultiSig]:
+    return safe_api_utils.get_safe_multisig_history(safe_address_checksum)
 
 
-queued_transactions = get_safe_queued_transactions_cached(safe_address_checksum)
-historical_transactions = get_safe_history_cached(safe_address_checksum)
+queued_transactions = get_safe_multisig_queue_cached(safe_address_checksum)
+historical_transactions = get_safe_multisig_history_cached(safe_address_checksum)
 
 queue_col, hist_col = st.columns(2)
 with queue_col:
