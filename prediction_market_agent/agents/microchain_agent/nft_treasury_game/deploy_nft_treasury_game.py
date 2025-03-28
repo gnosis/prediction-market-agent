@@ -48,7 +48,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
-    sleep_between_iterations = 15
+    sleep_between_iterations = 5
     allow_stop = False
     import_actions_from_memory = 256
     functions_config = FunctionsConfig(
