@@ -83,11 +83,10 @@ class LearnAboutTheNFTGame(Function):
     def __call__(self) -> str:
         if get_nft_game_is_finished():
             return get_game_has_ended_message()
+        keys = MicrochainAgentKeys()
         treasury = SimpleTreasuryContract()
         n_nft_keys = NFTKeysContract.retrieve_total_number_of_keys()
-        owned_nft_keys = NFTKeysContract().balanceOf(
-            MicrochainAgentKeys().bet_from_address
-        )
+        owned_nft_keys = NFTKeysContract().balanceOf(keys.bet_from_address)
         owned_nft_keys_message = (
             "You currently don't own any NFT keys."
             if not owned_nft_keys
@@ -102,6 +101,8 @@ Address of the treasury contract is {treasury.address}. You need at least {treas
 Current balance of the treasury is {treasury.balances().xdai} xDai.
 
 {owned_nft_keys_message}
+
+Your address is {keys.bet_from_address}.
 
 If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()}."""
         if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
