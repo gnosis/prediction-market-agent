@@ -1,6 +1,7 @@
 from eth_typing import ChecksumAddress
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.balances import get_balances
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
@@ -57,6 +58,13 @@ def redistribute_nft_keys(rpc_url: str) -> None:
             )
             continue
         else:
+            min_balance_for_owner = xDai(1)
+            if get_balances(token_owner, w3).xdai < min_balance_for_owner:
+                # In the case owner doesn't have xDai to pay for transfer fees, set his balance to 1 xDai.
+                set_balance(
+                    rpc_url=rpc_url, address=token_owner, balance=min_balance_for_owner
+                )
+
             with impersonate_account(w3, token_owner):
                 # We need to build tx ourselves since no private key available from
                 # impersonated accounts.
