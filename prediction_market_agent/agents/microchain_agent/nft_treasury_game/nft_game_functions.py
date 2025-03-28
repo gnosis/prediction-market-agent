@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
+from prediction_market_agent.agents.microchain_agent.nft_functions import OwnerOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentRegisterContract,
     NFTKeysContract,
@@ -84,11 +85,23 @@ class LearnAboutTheNFTGame(Function):
             return get_game_has_ended_message()
         treasury = SimpleTreasuryContract()
         n_nft_keys = NFTKeysContract.retrieve_total_number_of_keys()
+        owned_nft_keys = NFTKeysContract().balanceOf(
+            MicrochainAgentKeys().bet_from_address
+        )
+        owned_nft_keys_message = (
+            "You currently don't own any NFT keys."
+            if not owned_nft_keys
+            else f"You currently own {owned_nft_keys} NFT keys. You can use tool `{OwnerOfNFT.__name__}` to learn which keys you own."
+        )
         message = f"""Current state of the NFT Game:
         
 Address of the NFT key contract is {NFTKeysContract().address}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}."
 
-Address of the treasury contract is {treasury.address}. You need at least {treasury.required_nft_balance()} NFT keys to withdraw from the treasury. Current balance is {treasury.balances().xdai} xDai.
+Address of the treasury contract is {treasury.address}. You need at least {treasury.required_nft_balance()} NFT keys to withdraw from the treasury. 
+
+Current balance of the treasury is {treasury.balances().xdai} xDai.
+
+{owned_nft_keys_message}
 
 If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()}."""
         if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
