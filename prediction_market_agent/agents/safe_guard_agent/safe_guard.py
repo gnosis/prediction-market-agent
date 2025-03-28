@@ -18,6 +18,10 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_tr
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
     Transaction,
 )
+from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+    is_already_canceled,
+    signer_is_missing,
+)
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     get_safe,
     get_safes,
@@ -63,6 +67,7 @@ def validate_all(
             do_sign_or_execution,
             do_reject,
             do_message,
+            api_keys,
         )
 
 
@@ -71,13 +76,26 @@ def validate_safe(
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    api_keys: APIKeys,
 ) -> None:
-    queued_transactions = safe_api_utils.get_safe_queued_transactions(safe_address)
+    queued_transactions = safe_api_utils.get_safe_multisig_queue(safe_address)
     logger.info(
         f"Retrieved {len(queued_transactions)} queued transactions to verify for {safe_address}."
     )
 
     for queued_transaction in queued_transactions:
+        if is_already_canceled(queued_transaction, all_queued_txs=queued_transactions):
+            logger.info(
+                f"Skipping {queued_transaction.id=} because it already been canceled."
+            )
+            continue
+
+        if not signer_is_missing(api_keys.bet_from_address, queued_transaction):
+            logger.info(
+                f"Skipping {queued_transaction.id=} because it has already been signed by the agent {api_keys.bet_from_address} or no signer is required."
+            )
+            continue
+
         validate_safe_transaction(
             safe_address,
             queued_transaction,
@@ -107,7 +125,7 @@ def validate_safe_transaction(
 
     logger.info(f"Processing transaction {transaction.id}.")
 
-    historical_transactions = safe_api_utils.get_safe_history(safe_address)
+    historical_transactions = safe_api_utils.get_safe_multisig_history(safe_address)
     detailed_historical_transactions = (
         safe_api_utils.gather_safe_detailed_transaction_info(
             [
@@ -149,6 +167,7 @@ def validate_safe_transaction(
     logger.info("Done.")
     if do_message:
         send_message(safe, transaction.id, validation_results, api_keys)
+
     return validation_results
 
 

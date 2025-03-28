@@ -136,6 +136,14 @@ class Transaction(BaseModel):
     txHash: str | None = None
 
 
+class TransactionWithMultiSig(Transaction):
+    executionInfo: MultisigExecutionInfo
+
+    @staticmethod
+    def from_tx(tx: Transaction) -> "TransactionWithMultiSig":
+        return TransactionWithMultiSig.model_validate(tx.model_dump())
+
+
 class TransactionResult(BaseModel):
     type: Literal["LABEL", "DATE_LABEL", "TRANSACTION", "CONFLICT_HEADER"]
     label: str | None = None
