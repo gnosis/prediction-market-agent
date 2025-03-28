@@ -377,7 +377,7 @@ def show_about_agent_part(
     st.markdown(
         f"""### {nft_agent.name}
 
-Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> {nft_keys_message}.
+Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance.value:.2f} xDAI</strong></span> {nft_keys_message}.
 
 Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_agent.wallet_address})
 
@@ -423,7 +423,7 @@ def show_treasury_part() -> None:
     start_datetime_next_round = get_start_datetime_of_next_round()
     st.markdown(
         f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance.value:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
 - The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}
 - The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S') if start_datetime_next_round else 'No next round planned yet.'}

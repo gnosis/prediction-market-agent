@@ -41,11 +41,14 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts i
     nft_treasury_game_buyer_prompt,
     nft_treasury_game_seller_prompt,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    get_start_time_of_current_round,
+)
 
 
 class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
     # Agent configuration
-    sleep_between_iterations = 15
+    sleep_between_iterations = 5
     allow_stop = False
     import_actions_from_memory = 256
     functions_config = FunctionsConfig(
@@ -106,6 +109,7 @@ class DeployableAgentNFTGameAbstract(DeployableMicrochainAgentAbstract):
             )
 
         super().load()
+        self.import_actions_from_memory_from = get_start_time_of_current_round()
 
     def get_holding_n_nft_keys(self) -> int:
         return NFTKeysContract().balanceOf(self.wallet_address).value
@@ -287,8 +291,9 @@ OUR_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [
     DeployableAgentNFTGame3,
     DeployableAgentNFTGame4,
     DeployableAgentNFTGame5,
-    DeployableAgentNFTGame6,
-    DeployableAgentNFTGame7,
+    # Temporarily commented out to have only our buyers fightning for the NFT keys.
+    # DeployableAgentNFTGame6,
+    # DeployableAgentNFTGame7,
 ]
 
 

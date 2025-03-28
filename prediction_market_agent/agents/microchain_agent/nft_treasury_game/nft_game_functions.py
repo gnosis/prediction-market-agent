@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
+from prediction_market_agent.agents.microchain_agent.nft_functions import OwnerOfNFT
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentRegisterContract,
     NFTKeysContract,
@@ -13,7 +14,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     get_end_datetime_of_current_round,
-    get_end_datetime_of_previous_round,
     get_nft_game_is_finished,
     get_start_datetime_of_next_round,
 )
@@ -83,13 +83,26 @@ class LearnAboutTheNFTGame(Function):
     def __call__(self) -> str:
         if get_nft_game_is_finished():
             return get_game_has_ended_message()
+        keys = MicrochainAgentKeys()
         treasury = SimpleTreasuryContract()
         n_nft_keys = NFTKeysContract.retrieve_total_number_of_keys()
+        owned_nft_keys = NFTKeysContract().balanceOf(keys.bet_from_address)
+        owned_nft_keys_message = (
+            "You currently don't own any NFT keys."
+            if not owned_nft_keys
+            else f"You currently own {owned_nft_keys} NFT keys. You can use tool `{OwnerOfNFT.__name__}` to learn which keys you own."
+        )
         message = f"""Current state of the NFT Game:
         
 Address of the NFT key contract is {NFTKeysContract().address}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}."
 
-Address of the treasury contract is {treasury.address}. You need at least {treasury.required_nft_balance()} NFT keys to withdraw from the treasury. Current balance is {treasury.balances().xdai} xDai.
+Address of the treasury contract is {treasury.address}. You need at least {treasury.required_nft_balance()} NFT keys to withdraw from the treasury. 
+
+Current balance of the treasury is {treasury.balances().xdai} xDai.
+
+{owned_nft_keys_message}
+
+Your address is {keys.bet_from_address}.
 
 If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()}."""
         if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
@@ -113,11 +126,11 @@ class GetReportAboutThePreviousRound(Function):
         overall_reports.sort(key=lambda r: r.datetime_, reverse=True)
 
         if not overall_reports:
-            if get_end_datetime_of_previous_round() is not None:
-                return "There are no reports about the previous rounds of the NFT game, please try again later."
+            if not get_nft_game_is_finished():
+                return "There is no report about the previous round of the NFT game, because this is the first round and it is still active. Please participate in the game!"
 
-            elif not get_nft_game_is_finished():
-                return "There are no reports about the previous rounds of the NFT game, because this is the first round and it is still active. Please participate in the game!"
+            else:
+                return "There is no report about the previous round of the NFT game, please try again later."
 
         return f"""The report is from {overall_reports[0].datetime_}:
 
@@ -125,7 +138,7 @@ class GetReportAboutThePreviousRound(Function):
 
 ---
 
-Currently, the game is {'not active' if get_nft_game_is_finished() else 'active'}"""
+Currently, the game is {'not active' if get_nft_game_is_finished() else 'active'} and you should participate!"""
 
 
 NFT_GAME_FUNCTIONS: list[type[Function]] = [
