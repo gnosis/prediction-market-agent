@@ -53,7 +53,7 @@ def get_end_datetime_of_previous_round() -> DatetimeUTC | None:
 
 def get_start_time_of_current_round() -> DatetimeUTC | None:
     # TODO: Dynamically from somewhere and they must be updated in the correct order/timing.
-    return DatetimeUTC(year=2025, month=3, day=28, hour=10, minute=0, second=0)
+    return DatetimeUTC(year=2025, month=3, day=28, hour=9, minute=0, second=0)
 
 
 def get_end_datetime_of_current_round() -> DatetimeUTC:
