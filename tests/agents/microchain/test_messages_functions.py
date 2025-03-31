@@ -86,6 +86,8 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
             "Average fee: 5.5e-14 xDai\n"
             "Number of unique senders: 1\n"
             "Total number of messages: 2"
+            "\n\n---\n\n"
+            f"Use {ReceiveMessagesAndPayments.__name__} to read the messages."
         )
 
 
