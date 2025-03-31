@@ -63,6 +63,10 @@ safe_address_checksum = Web3.to_checksum_address(safe_address)
 safe = get_safe(safe_address_checksum)
 
 is_owner = safe.retrieve_is_owner(keys.bet_from_address)
+threshold = safe.retrieve_threshold()
+
+if threshold == 1:
+    st.warning("This Safe has threshold set to 1.")
 
 do_execute = st.checkbox(
     "Execute transaction if validated (possible only for Safe's owners)",
@@ -98,6 +102,10 @@ def get_safe_history_multisig_cached(
 # Load only multisig transactions here, others are not relevant for the agent to check.
 queued_transactions = get_safe_queue_multisig_cached(safe_address_checksum)
 historical_transactions = get_safe_history_multisig_cached(safe_address_checksum)
+
+if not queued_transactions and not historical_transactions:
+    st.error("No multi-sig transactions found for the Safe address.")
+    st.stop()
 
 queue_col, hist_col = st.columns(2)
 with queue_col:
