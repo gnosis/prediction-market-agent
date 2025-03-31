@@ -31,7 +31,9 @@ def get_nft_game_status(web3: Web3 | None = None) -> NFTGameStatus:
     if treasury_balance.xdai < TREASURY_THRESHOLD_BALANCE_TO_END_GAME:
         return NFTGameStatus.finished
 
-    if get_end_datetime_of_current_round() < utcnow():
+    if (
+        end_datetime := get_end_datetime_of_current_round()
+    ) is None or end_datetime < utcnow():
         return NFTGameStatus.finished
 
     return NFTGameStatus.on
@@ -56,7 +58,7 @@ def get_start_time_of_current_round() -> DatetimeUTC | None:
     return None
 
 
-def get_end_datetime_of_current_round() -> DatetimeUTC:
+def get_end_datetime_of_current_round() -> DatetimeUTC | None:
     # TODO: Dynamically from somewhere and they must be updated in the correct order/timing.
     return None
 
