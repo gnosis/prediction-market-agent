@@ -17,8 +17,8 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_tr
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
     CustomTxInfo,
     MultisigExecutionInfo,
+    Transaction,
     TransactionResponse,
-    TransactionResult,
     TransactionWithMultiSig,
 )
 
@@ -55,14 +55,12 @@ def is_already_canceled(
 
 
 def maybe_multisig_tx(
-    tx: TransactionResult,
+    tx: Transaction,
 ) -> TransactionWithMultiSig | None:
     return (
-        TransactionWithMultiSig.from_tx(tx.transaction)
-        if tx.type == "TRANSACTION"
-        and tx.transaction is not None
-        and tx.transaction.executionInfo is not None
-        and isinstance(tx.transaction.executionInfo, MultisigExecutionInfo)
+        TransactionWithMultiSig.from_tx(tx)
+        if tx.executionInfo is not None
+        and isinstance(tx.executionInfo, MultisigExecutionInfo)
         else None
     )
 
@@ -73,9 +71,9 @@ def maybe_multisig_tx(
     wait=tenacity.wait_fixed(1),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
-def get_safe_multisig_queue(
+def get_safe_queue(
     safe_address: ChecksumAddress,
-) -> list[TransactionWithMultiSig]:
+) -> list[Transaction]:
     """
     TODO: This isn't great as we would need to call Safe's API for each guarded Safe non-stop.
     Can we somehow listen to creation of queued transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
@@ -84,12 +82,19 @@ def get_safe_multisig_queue(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
-    transactions = [
+    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+
+
+def get_safe_queue_multisig(
+    safe_address: ChecksumAddress,
+) -> list[TransactionWithMultiSig]:
+    transactions = get_safe_queue(safe_address)
+    multisig_transactions = [
         multisig_tx
-        for item in response_parsed.results
+        for item in transactions
         if (multisig_tx := maybe_multisig_tx(item)) is not None
     ]
-    return transactions
+    return multisig_transactions
 
 
 @observe()
@@ -117,7 +122,14 @@ def get_safe_detailed_transaction_info(
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/transactions/{transaction_id}"
     ).json()
-    response_parsed = DetailedTransactionResponse.model_validate(response)
+    try:
+        response_parsed = DetailedTransactionResponse.model_validate(response)
+    except ValidationError:
+        import json
+
+        with open("error.json", "w") as f:
+            json.dump({"id": transaction_id, "response": response}, f, indent=4)
+            raise
     return response_parsed
 
 
@@ -127,9 +139,9 @@ def get_safe_detailed_transaction_info(
     wait=tenacity.wait_fixed(1),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
-def get_safe_multisig_history(
+def get_safe_history(
     safe_address: ChecksumAddress,
-) -> list[TransactionWithMultiSig]:
+) -> list[Transaction]:
     """
     TODO: Can we get this without relying on Safe's APIs?
     """
@@ -137,12 +149,22 @@ def get_safe_multisig_history(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
-    transactions = [
+    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+
+
+def get_safe_history_multisig(
+    safe_address: ChecksumAddress,
+) -> list[TransactionWithMultiSig]:
+    """
+    TODO: Can we get this without relying on Safe's APIs?
+    """
+    transactions = get_safe_history(safe_address)
+    multisig_transactions = [
         multisig_tx
-        for item in response_parsed.results
+        for item in transactions
         if (multisig_tx := maybe_multisig_tx(item)) is not None
     ]
-    return transactions
+    return multisig_transactions
 
 
 def safe_tx_from_detailed_transaction(

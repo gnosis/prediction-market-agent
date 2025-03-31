@@ -13,6 +13,7 @@ from prediction_market_agent.agents.safe_guard_agent.guards import (
     llm,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+    CreationTxInfo,
     DetailedTransactionResponse,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
@@ -78,7 +79,8 @@ def validate_safe(
     do_message: bool,
     api_keys: APIKeys,
 ) -> None:
-    queued_transactions = safe_api_utils.get_safe_multisig_queue(safe_address)
+    # Load only multisig transactions here, others are not relevant for the agent to check.
+    queued_transactions = safe_api_utils.get_safe_queue_multisig(safe_address)
     logger.info(
         f"Retrieved {len(queued_transactions)} queued transactions to verify for {safe_address}."
     )
@@ -125,16 +127,19 @@ def validate_safe_transaction(
 
     logger.info(f"Processing transaction {transaction.id}.")
 
-    historical_transactions = safe_api_utils.get_safe_multisig_history(safe_address)
-    detailed_historical_transactions = (
-        safe_api_utils.gather_safe_detailed_transaction_info(
-            [
-                tx.id
-                for tx in historical_transactions
-                if ignore_historical_transaction_ids is None
+    # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
+    historical_transactions = safe_api_utils.get_safe_history(safe_address)
+    detailed_historical_transactions = safe_api_utils.gather_safe_detailed_transaction_info(
+        [
+            tx.id
+            for tx in historical_transactions
+            if (
+                ignore_historical_transaction_ids is None
                 or tx.id not in ignore_historical_transaction_ids
-            ]
-        )
+            )
+            # Creation tx can not be converted to detailed transaction info and isn't needed for validation anyway.
+            and not isinstance(tx.txInfo, CreationTxInfo)
+        ]
     )
 
     logger.info(

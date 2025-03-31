@@ -9,7 +9,7 @@ from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
     validate_safe_transaction,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import check_if_owner
+from prediction_market_agent.agents.safe_guard_agent.safe_utils import get_safe
 from prediction_market_agent.tools.streamlit_utils import add_sink_to_logger
 
 nest_asyncio.apply()  # Required for streamlit to work with asyncio.
@@ -60,7 +60,15 @@ if not safe_address:
 # Get rid of potential token id
 *_, safe_address = safe_address.split(":")
 safe_address_checksum = Web3.to_checksum_address(safe_address)
-is_owner = check_if_owner(safe_address_checksum, keys.bet_from_address)
+safe = get_safe(safe_address_checksum)
+
+is_owner = safe.retrieve_is_owner(keys.bet_from_address)
+threshold = safe.retrieve_threshold()
+
+if threshold == 1:
+    st.warning(
+        "Safe has only one-signer transactions are of different type and won't be validated by the agent."
+    )
 
 do_execute = st.checkbox(
     "Execute transaction if validated (possible only for Safe's owners)",
@@ -80,32 +88,33 @@ do_message = st.checkbox(
 
 
 @st.cache_data(ttl=60)
-def get_safe_multisig_queue_cached(
+def get_safe_queue_multisig_cached(
     safe_address_checksum: ChecksumAddress,
 ) -> list[safe_api_utils.TransactionWithMultiSig]:
-    return safe_api_utils.get_safe_multisig_queue(safe_address_checksum)
+    return safe_api_utils.get_safe_queue_multisig(safe_address_checksum)
 
 
 @st.cache_data(ttl=60)
-def get_safe_multisig_history_cached(
+def get_safe_history_multisig_cached(
     safe_address_checksum: ChecksumAddress,
 ) -> list[safe_api_utils.TransactionWithMultiSig]:
-    return safe_api_utils.get_safe_multisig_history(safe_address_checksum)
+    return safe_api_utils.get_safe_history_multisig(safe_address_checksum)
 
 
-queued_transactions = get_safe_multisig_queue_cached(safe_address_checksum)
-historical_transactions = get_safe_multisig_history_cached(safe_address_checksum)
+# Load only multisig transactions here, others are not relevant for the agent to check.
+queued_transactions = get_safe_queue_multisig_cached(safe_address_checksum)
+historical_transactions = get_safe_history_multisig_cached(safe_address_checksum)
 
 queue_col, hist_col = st.columns(2)
 with queue_col:
     queue_transaction_id = st.selectbox(
-        "Choose one of the queued transactions",
+        f"Choose one of the queued transactions ({len(queued_transactions)} available)",
         [tx.id for tx in queued_transactions],
         index=None,
     )
 with hist_col:
     hist_transaction_id = st.selectbox(
-        "Or historical transaction for simulation (available if no queue transaction is selected)",
+        f"Or historical transaction for simulation (available if no queue transaction is selected, {len(historical_transactions)} available)",
         [tx.id for tx in historical_transactions],
         index=None,
         disabled=queue_transaction_id is not None,
