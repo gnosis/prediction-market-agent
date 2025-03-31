@@ -126,7 +126,7 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
         footer_message = (
             f"\n\n---\n\nYou have another {messages_statistics.n_messages} unseen messages. Use {GetUnseenMessagesInformation.__name__} to get more information."
             if messages_statistics.n_messages
-            else "\n\n---\n\Also no more unseen messages at any fee threshold."
+            else "\n\n---\n\nAlso no more unseen messages at any fee threshold."
         )
         return (
             "\n\n---\n\n".join(
