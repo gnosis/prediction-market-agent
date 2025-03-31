@@ -63,12 +63,6 @@ safe_address_checksum = Web3.to_checksum_address(safe_address)
 safe = get_safe(safe_address_checksum)
 
 is_owner = safe.retrieve_is_owner(keys.bet_from_address)
-threshold = safe.retrieve_threshold()
-
-if threshold == 1:
-    st.warning(
-        "Safe has only one signer. One-signer transactions are of different type and won't be validated by the agent."
-    )
 
 do_execute = st.checkbox(
     "Execute transaction if validated (possible only for Safe's owners)",
