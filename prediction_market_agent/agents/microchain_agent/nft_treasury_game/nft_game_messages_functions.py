@@ -89,6 +89,8 @@ But also to check out what other agents (their addresses) are going to receive, 
             f"Average fee: {messages_statistics.avg_fee} xDai\n"
             f"Number of unique senders: {messages_statistics.n_unique_senders}\n"
             f"Total number of messages: {messages_statistics.n_messages}"
+            f"\n\n---\n\n"
+            f"Use {ReceiveMessagesAndPayments.__name__} to read the messages."
         )
 
 
