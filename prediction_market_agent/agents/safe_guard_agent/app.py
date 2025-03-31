@@ -67,7 +67,7 @@ threshold = safe.retrieve_threshold()
 
 if threshold == 1:
     st.warning(
-        "Safe has only one-signer transactions are of different type and won't be validated by the agent."
+        "Safe has only one signer. One-signer transactions are of different type and won't be validated by the agent."
     )
 
 do_execute = st.checkbox(
