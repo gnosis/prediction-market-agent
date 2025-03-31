@@ -122,14 +122,7 @@ def get_safe_detailed_transaction_info(
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/transactions/{transaction_id}"
     ).json()
-    try:
-        response_parsed = DetailedTransactionResponse.model_validate(response)
-    except ValidationError:
-        import json
-
-        with open("error.json", "w") as f:
-            json.dump({"id": transaction_id, "response": response}, f, indent=4)
-            raise
+    response_parsed = DetailedTransactionResponse.model_validate(response)
     return response_parsed
 
 
