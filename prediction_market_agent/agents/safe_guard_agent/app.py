@@ -115,27 +115,15 @@ transaction_id = queue_transaction_id or hist_transaction_id
 if transaction_id is None:
     st.stop()
 
-transaction = check_not_none(
-    next(
-        (
-            tx
-            for tx in queued_transactions + historical_transactions
-            if tx.id == transaction_id
-        ),
-        None,
-    )
-)
-
 
 def run_validation() -> None:
     validate_safe_transaction(
-        safe_address_checksum,
-        transaction,
+        check_not_none(transaction_id),
         do_execute,
         do_reject,
         do_message,
         # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
-        ignore_historical_transaction_ids={transaction.id},
+        ignore_historical_transaction_ids={check_not_none(transaction_id)},
     )
 
 
