@@ -96,7 +96,6 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
             if tx.executedAt
             else ""
         )
-        + f"Status: {tx.txStatus} | "
         + format_tx_data(tx.txData)
         if tx.txData
         else ""
