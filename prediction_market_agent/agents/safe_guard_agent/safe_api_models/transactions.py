@@ -15,7 +15,7 @@ class Token(BaseModel):
 
 
 class Address(BaseModel):
-    value: str
+    value: ChecksumAddress
     name: str | None = None
     logoUri: str | None = None
 
@@ -73,38 +73,14 @@ class SwapOrderTxInfo(BaseModel):
     owner: ChecksumAddress
 
 
-class Creator(BaseModel):
-    value: str
-    name: str | None = None
-    logoUri: str | None = None
-
-
-class Implementation(BaseModel):
-    value: str
-    name: str
-    logoUri: str
-
-
-class Factory(BaseModel):
-    value: str
-    name: str
-    logoUri: str
-
-
 class CreationTxInfo(BaseModel):
     type: Literal["Creation"]
-    humanDescription: Any
-    creator: Creator
+    humanDescription: str | None = None
+    creator: Address
     transactionHash: str
-    implementation: Implementation
-    factory: Factory
+    implementation: Address
+    factory: Address
     saltNonce: str
-
-
-class MissingSigner(BaseModel):
-    value: str
-    name: str | None = None
-    logoUri: str | None = None
 
 
 class ModuleExecutionInfo(BaseModel):
@@ -117,7 +93,7 @@ class MultisigExecutionInfo(BaseModel):
     nonce: int
     confirmationsRequired: int
     confirmationsSubmitted: int
-    missingSigners: List[MissingSigner] | None = None
+    missingSigners: List[Address] | None = None
 
 
 class Transaction(BaseModel):
