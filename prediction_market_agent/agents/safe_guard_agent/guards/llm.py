@@ -2,6 +2,7 @@ from langfuse.openai import AsyncOpenAI
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from safe_eth.safe.safe import SafeTx
@@ -22,6 +23,7 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 from prediction_market_agent.utils import APIKeys
 
 
+@observe()
 def validate_safe_transaction_llm(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
@@ -108,7 +110,7 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
         f"Transaction ID: {tx.txId} | "
         + f"Transaction type: {tx.txInfo.type} | "
         + f"Human description: {tx.txInfo.humanDescription} | "
-        + f"Time: {DatetimeUTC.to_datetime_utc(tx.detailedExecutionInfo.submittedAt) if tx.detailedExecutionInfo else 'N/A'} | "
+        + f"Time: {DatetimeUTC.to_datetime_utc(tx.detailedExecutionInfo.submittedAt) if tx.detailedExecutionInfo and tx.detailedExecutionInfo.submittedAt else 'N/A'} | "
         + f"Sender: {sender_value} | "
         + f"Recipient: {recipient_value} | "
         + (
