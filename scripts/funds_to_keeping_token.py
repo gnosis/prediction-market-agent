@@ -1,7 +1,7 @@
 import time
 
 import typer
-from prediction_market_agent_tooling.gtypes import private_key_type, wei_type
+from prediction_market_agent_tooling.gtypes import private_key_type, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     SAFE_COLLATERAL_TOKENS,
@@ -11,7 +11,6 @@ from prediction_market_agent_tooling.tools.tokens.auto_withdraw import (
     auto_withdraw_collateral_token,
 )
 from prediction_market_agent_tooling.tools.tokens.main_token import KEEPING_ERC20_TOKEN
-from prediction_market_agent_tooling.tools.web3_utils import wei_to_xdai
 from web3 import Web3
 
 from prediction_market_agent.utils import APIKeys
@@ -42,7 +41,7 @@ def main(
         api_keys.bet_from_address
     )
 
-    if starting_balance_of_from_eoa.xdai < 0.01:
+    if starting_balance_of_from_eoa.xdai < xDai(0.01):
         logger.error(f"We need at least some funds in xDai to pay for the fees.")
         return
 
@@ -68,7 +67,7 @@ def main(
     # Show the ending balances.
     logger.warning(f"Failed steps: {failed_steps}")
     logger.info(
-        f"Transfered total of {wei_to_xdai(wei_type(ending_balance_keeping_token - starting_balance_keeping_token))} {KEEPING_ERC20_TOKEN.symbol_cached()}."
+        f"Transfered total of {(ending_balance_keeping_token - starting_balance_keeping_token).as_token} {KEEPING_ERC20_TOKEN.symbol_cached()}."
     )
     logger.info(
         "You might want to run this script again in the future, in case there were any locked resources."

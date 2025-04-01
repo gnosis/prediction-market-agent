@@ -3,7 +3,7 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 from eth_typing import ChecksumAddress
-from prediction_market_agent_tooling.gtypes import wei_type
+from prediction_market_agent_tooling.gtypes import xDaiWei
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from pydantic import SecretStr
 from web3 import Web3
@@ -17,6 +17,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.data_mode
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     GetUnseenMessagesInformation,
     ReceiveMessagesAndPayments,
+    SleepUntil,
 )
 
 
@@ -66,13 +67,13 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
                 sender=MOCK_SENDER,
                 recipient=MOCK_SENDER,
                 message=HexBytes("0x123"),  # dummy message
-                value=wei_type(10000),
+                value=xDaiWei(10000),
             ),
             MessageContainer(
                 sender=MOCK_SENDER,
                 recipient=MOCK_SENDER,
                 message=HexBytes("0x123"),  # dummy message
-                value=wei_type(100000),
+                value=xDaiWei(100000),
             ),
         ],
     ):
@@ -85,6 +86,8 @@ def test_message_statistics(patch_public_key: PropertyMock) -> None:
             "Average fee: 5.5e-14 xDai\n"
             "Number of unique senders: 1\n"
             "Total number of messages: 2"
+            "\n\n---\n\n"
+            f"Use {ReceiveMessagesAndPayments.__name__} to read the messages."
         )
 
 
@@ -93,7 +96,7 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
         sender=MOCK_SENDER,
         recipient=MOCK_SENDER,
         message=HexBytes("0x123"),  # dummy message
-        value=wei_type(10000),
+        value=xDaiWei(10000),
     )
     with patch.object(
         AgentCommunicationContract,
@@ -107,3 +110,15 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
 
         blockchain_messages = r(n=2, minimum_fee=0)
         assert blockchain_messages is not None
+
+
+@pytest.mark.parametrize(
+    "call_code",
+    [
+        "SleepUntil(sleep_until='2025-03-26 19:00:00+00:00', reason='Game over, sold my NFT.')",
+        "SleepUntil(sleep_until='2025-03-26 18:00:45.710960+00:00', reason='Sleeping for an hour.')",
+        "SleepUntil('2025-03-26 19:00:00+00:00', 'Game over, sold my NFT.')",
+    ],
+)
+def test_sleep_until_parsing(call_code: str) -> None:
+    SleepUntil.execute_calling_of_this_function(call_code)

@@ -3,12 +3,11 @@ from datetime import timedelta
 
 from microchain import Function
 from prediction_market_agent_tooling.config import APIKeys as APIKeys_PMAT
-from prediction_market_agent_tooling.gtypes import xdai_type
+from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import utcnow
-from prediction_market_agent_tooling.tools.web3_utils import xdai_to_wei
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
@@ -18,6 +17,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     AgentRegisterContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
+    get_nft_game_is_finished,
     purge_all_messages,
 )
 from prediction_market_agent.db.agent_communication import (
@@ -44,7 +44,7 @@ You can also specify a payment to the agent."""
 
     @property
     def example_args(self) -> list[str | float]:
-        return ["0x123", "Hello!", get_message_minimum_value(), 0.0]
+        return ["0x123", "Hello!", get_message_minimum_value().value, 0.0]
 
     def __call__(self, address: str, message: str, fee: float, payment: float) -> str:
         recipient = Web3.to_checksum_address(address)
@@ -61,7 +61,7 @@ You can also specify a payment to the agent."""
             message=HexBytes(compress_message(message)),
             # We don't differ between fees and payments, but it helps to accept it as separate arguments,
             # for LLM to understand how to pay for NFT keys or stuff.
-            amount_wei=xdai_to_wei(keys.cap_sending_xdai(xdai_type(fee + payment))),
+            amount_wei=keys.cap_sending_xdai(xDai(fee + payment)).as_xdai_wei,
         )
         return self.OUTPUT_TEXT
 
@@ -89,6 +89,8 @@ But also to check out what other agents (their addresses) are going to receive, 
             f"Average fee: {messages_statistics.avg_fee} xDai\n"
             f"Number of unique senders: {messages_statistics.n_unique_senders}\n"
             f"Total number of messages: {messages_statistics.n_messages}"
+            f"\n\n---\n\n"
+            f"Use {ReceiveMessagesAndPayments.__name__} to read the messages."
         )
 
 
@@ -110,7 +112,7 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
             for _ in range(n)
             if (
                 message := pop_message(
-                    minimum_fee=xdai_type(minimum_fee),
+                    minimum_fee=xDai(minimum_fee),
                     api_keys=APIKeys_PMAT(
                         BET_FROM_PRIVATE_KEY=keys.bet_from_private_key
                     ),
@@ -124,16 +126,15 @@ Before receiving messages, you can check with {GetUnseenMessagesInformation.__na
         footer_message = (
             f"\n\n---\n\nYou have another {messages_statistics.n_messages} unseen messages. Use {GetUnseenMessagesInformation.__name__} to get more information."
             if messages_statistics.n_messages
-            else "\n\n---\n\nNo more unseen messages."
+            else "\n\n---\n\nAlso no more unseen messages at any fee threshold."
         )
         return (
             "\n\n---\n\n".join(
                 parse_message_for_agent(message=message) for message in popped_messages
             )
-            + footer_message
             if popped_messages
-            else "No new messages"
-        )
+            else "No new messages at this fee threshold."
+        ) + footer_message
 
 
 class RemoveAllUnreadMessages(Function):
@@ -157,12 +158,18 @@ class SleepUntil(Function):
     Therefore, the logic itself is implemented in `execute_calling_of_this_function` and used in the iteration callback of the agent.
     """
 
-    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game and your messages once you wake up!"
-    SLEEP_THRESHOLD = timedelta(hours=1)
+    OK_OUTPUT = "Sleeping. Don't forget to check the status of the game, your NFT keys balance and your messages in your next moves!"
 
     def __init__(self) -> None:
         super().__init__()
-        self.last_sleep_until: str | None = None
+
+    @property
+    def sleep_threshold(self) -> timedelta:
+        return (
+            timedelta(minutes=10)
+            if get_nft_game_is_finished()
+            else timedelta(minutes=1)
+        )
 
     @property
     def description(self) -> str:
@@ -180,17 +187,12 @@ You can use this for example to wait for a while before checking for new message
         if sleep_until_datetime < utcnow():
             output = f"You can not sleep in the past. Current time is {utcnow()}."
 
-        elif (sleep_time := sleep_until_datetime - utcnow()) > self.SLEEP_THRESHOLD:
+        elif (sleep_until_datetime - utcnow()) > self.sleep_threshold:
             # TODO: Testing so the agents won't cut themselves out of the game.
-            output = f"You can not sleep for more than {self.SLEEP_THRESHOLD.seconds / 3600} hours. Current time is {utcnow()}."
-            # if self.last_sleep_until == sleep_until:
-            #     output = self.OK_OUTPUT
-            # else:
-            #     output = f"You would sleep for {sleep_time}, are you sure you want to do that? Current time is {utcnow()}. To confirm, call this function again with the exact same sleep_until argument."
+            output = f"You can not sleep for more than {self.sleep_threshold.seconds / 3600} hours. Current time is {utcnow()}."
         else:
             output = self.OK_OUTPUT
 
-        self.last_sleep_until = sleep_until
         return output
 
     @staticmethod
@@ -198,19 +200,23 @@ You can use this for example to wait for a while before checking for new message
         """
         Parse the calling of this function and execute the logic.
         """
+        logger.info(f"Executing {SleepUntil.__name__} with call code: `{call_code}`")
+
         # Handle both positional and keyword arguments
         if "=" in call_code:
             # Keyword arguments
             args = dict(
                 item.strip().split("=")
-                for item in call_code.split("(")[1][:-1].split(",")
+                for item in call_code.split(f"{SleepUntil.__name__}(")[1][:-1].split(
+                    ",", maxsplit=1
+                )
             )
             sleep_until = args.get("sleep_until", "").strip()
             reason = args.get("reason", "").strip()
         else:
             # Positional arguments
-            sleep_until = call_code.split(",")[0].split("(")[1].strip()
-            reason = call_code.split(",")[1].strip()[:-1]
+            sleep_until = call_code.split(",", maxsplit=1)[0].split("(")[1].strip()
+            reason = call_code.split(",", maxsplit=1)[1].strip()[:-1]
 
         while utcnow() < DatetimeUTC.to_datetime_utc(sleep_until):
             logger.info(f"Sleeping until {sleep_until} because {reason}.")

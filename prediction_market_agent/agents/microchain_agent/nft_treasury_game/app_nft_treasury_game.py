@@ -13,13 +13,13 @@ import streamlit as st
 from eth_typing import ChecksumAddress
 from microchain.functions import Reasoning, Stop
 from prediction_market_agent_tooling.config import RPCConfig
+from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.tools.balances import get_balances
 from prediction_market_agent_tooling.tools.hexbytes_custom import HexBytes
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_market_agent_tooling.tools.web3_utils import (
     generate_private_key,
     private_key_to_public_key,
-    wei_to_xdai,
 )
 from pydantic import SecretStr
 from python_web3_wallet import wallet_component
@@ -136,11 +136,11 @@ def is_unlocked(nft_agent: AgentInputType) -> bool:
 
 @st.dialog("Send message to agent")
 def send_message_via_wallet(
-    recipient: ChecksumAddress, message: str, amount_to_send: float
+    recipient: ChecksumAddress, message: str, amount_to_send: xDai
 ) -> None:
     wallet_component(
         recipient=recipient,
-        amount_in_ether=f"{amount_to_send:.10f}",  # formatting number as 0.0001000 instead of scientific notation
+        amount_in_ether=f"{amount_to_send.value:.10f}",  # formatting number as 0.0001000 instead of scientific notation
         data=message,
     )
 
@@ -150,11 +150,13 @@ def send_message_part(
 ) -> None:
     message = st.text_area("Write a message to the agent")
     default_value = get_message_minimum_value()
-    amount_to_send = st.number_input(
-        "Value in xDai",
-        min_value=default_value,
-        value=default_value,
-        format="%.5f",
+    amount_to_send = xDai(
+        st.number_input(
+            "Value in xDai",
+            min_value=default_value.value,
+            value=default_value.value,
+            format="%.5f",
+        )
     )
     message_compressed = HexBytes(compress_message(message)).hex() if message else ""
 
@@ -375,7 +377,7 @@ def show_about_agent_part(
     st.markdown(
         f"""### {nft_agent.name}
 
-Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance:.2f} xDAI</strong></span> {nft_keys_message}.
+Currently holds <span style='font-size: 1.1em;'><strong>{xdai_balance.value:.2f} xDAI</strong></span> {nft_keys_message}.
 
 Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_agent.wallet_address})
 
@@ -405,7 +407,7 @@ Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_
                     f"""
                     **From:** {message.sender}  
                     **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
-                    **Value:** {wei_to_xdai(message.value)} xDai
+                    **Value:** {message.value.as_xdai} xDai
                     """
                 )
                 st.divider()
@@ -421,9 +423,9 @@ def show_treasury_part() -> None:
     start_datetime_next_round = get_start_datetime_of_next_round()
     st.markdown(
         f"""### Treasury
-Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
+Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance.value:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
-- The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S')}
+- The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S') if end_datetime else 'No current round.'}
 - The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S') if start_datetime_next_round else 'No next round planned yet.'}
 """,
         unsafe_allow_html=True,
