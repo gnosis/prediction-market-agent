@@ -67,6 +67,72 @@ class TransferTxInfo(BaseModel):
         )
 
 
+class SwapTransferTxInfo(BaseModel):
+    type: Literal["SwapTransfer"]
+    humanDescription: str | None = None
+    sender: Address
+    recipient: Address
+    direction: str
+    transferInfo: TransferInfo
+    uid: str
+    status: str
+    kind: str
+    sellAmount: str
+    buyAmount: str
+    sellToken: Token
+    buyToken: Token
+    explorerUrl: str
+    receiver: ChecksumAddress
+    owner: ChecksumAddress
+
+    def format_llm(self) -> str:
+        return (
+            f"Transaction type: {self.type} | "
+            + (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"Sender: {self.sender.value} | "
+            + f"Recipient: {self.recipient.value} | "
+            + f"Direction: {self.direction} | "
+            + f"Transfer token type: {self.transferInfo.type} | "
+            + (
+                f"Transfer token address: {self.transferInfo.tokenAddress} | "
+                if self.transferInfo.tokenAddress
+                else ""
+            )
+            + (
+                f"Transfer token symbol: {self.transferInfo.tokenSymbol} | "
+                if self.transferInfo.tokenSymbol
+                else ""
+            )
+            + (
+                f"Transfer value: {self.transferInfo.value} | "
+                if self.transferInfo.value is not None
+                else ""
+            )
+            + f"Status: {self.status} | "
+            + f"Kind: {self.kind} | "
+            + f"Sell amount: {self.sellAmount} | "
+            + f"Buy amount: {self.buyAmount} | "
+            + f"Sell token address: {self.sellToken.address} | "
+            + (
+                f"Sell token symbol: {self.sellToken.symbol} | "
+                if self.sellToken.symbol
+                else ""
+            )
+            + f"Buy token address: {self.buyToken.address} | "
+            + (
+                f"Buy token symbol: {self.buyToken.symbol} | "
+                if self.buyToken.symbol
+                else ""
+            )
+            + f"Receiver: {self.receiver} | "
+            + f"Owner: {self.owner} | "
+        )
+
+
 class CustomTxInfo(BaseModel):
     type: Literal["Custom"]
     humanDescription: str | None = None
@@ -130,7 +196,7 @@ class SwapOrderTxInfo(BaseModel):
                 if self.humanDescription
                 else ""
             )
-            + f"Sender: {self.owner} | "
+            + f"Owner: {self.owner} | "
             + f"Recipient: {self.receiver} | "
             + f"Sell token address: {self.sellToken.address} | "
             + f"Sell token symbol: {self.sellToken.symbol} | "
@@ -177,6 +243,7 @@ class Transaction(BaseModel):
         TransferTxInfo,
         SwapOrderTxInfo,
         CustomTxInfo,
+        SwapTransferTxInfo,
     ]
     id: str
     timestamp: int
