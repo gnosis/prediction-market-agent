@@ -46,26 +46,43 @@ def check_required_api_keys(required_keys: list[str]) -> None:
         st.stop()
 
 
-def loguru_streamlit_sink(log: "Message") -> None:
+def loguru_streamlit_sink(
+    log: "Message", expander_if_longer_than: int = 1000, include_in_expander: int = 50
+) -> None:
     record = log.record
     level = record["level"].name
 
     message = streamlit_escape(record["message"])
 
     if level == "ERROR":
-        st.error(message, icon="❌")
+        st_func = st.error
+        st_icon = "❌"
 
     elif level == "WARNING":
-        st.warning(message, icon="⚠️")
+        st_func = st.warning
+        st_icon = "⚠️"
 
     elif level == "SUCCESS":
-        st.success(message, icon="✅")
+        st_func = st.success
+        st_icon = "✅"
 
     elif level == "DEBUG":
-        pass
+        st_func = None
+        st_icon = None
 
     else:
-        st.info(message, icon="ℹ️")
+        st_func = st.info
+        st_icon = "ℹ️"
+
+    if st_func is None:
+        pass
+
+    elif len(message) > expander_if_longer_than:
+        with st.expander(f"[Expand to see more] {message[:include_in_expander]}..."):
+            st_func(message, icon=st_icon)
+
+    else:
+        st_func(message, icon=st_icon)
 
 
 @st.cache_resource
