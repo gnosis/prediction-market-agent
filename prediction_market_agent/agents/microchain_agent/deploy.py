@@ -6,6 +6,7 @@ from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 
@@ -59,6 +60,7 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
     model = SupportedModel.gpt_4o
     max_iterations: int | None = 50
     import_actions_from_memory = 0
+    import_actions_from_memory_from: DatetimeUTC | None = None
     sleep_between_iterations = 0
     allow_stop: bool = True
     identifier: AgentIdentifier
@@ -138,7 +140,8 @@ class DeployableMicrochainAgentAbstract(DeployableAgent, metaclass=abc.ABCMeta):
         # Inject past history if wanted.
         if self.import_actions_from_memory:
             latest_saved_memories = self.long_term_memory.search(
-                limit=self.import_actions_from_memory
+                limit=self.import_actions_from_memory,
+                from_=self.import_actions_from_memory_from,
             )
             messages_to_insert = [
                 m.metadata_dict
