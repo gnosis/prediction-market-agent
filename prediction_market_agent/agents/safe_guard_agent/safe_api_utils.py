@@ -6,6 +6,7 @@ from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import ValidationError
 from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
+from web3 import Web3
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
     Balances,
@@ -14,46 +15,53 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_tr
     DetailedTransactionResponse,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
-    CreationTxInfo,
     CustomTxInfo,
-    ModuleExecutionInfo,
     MultisigExecutionInfo,
     Transaction,
     TransactionResponse,
-    TransactionResult,
+    TransactionWithMultiSig,
 )
 
 
-def is_valued_transaction_result(
-    tx: TransactionResult, all_txs: list[TransactionResult]
+def signer_is_missing(
+    signer: ChecksumAddress,
+    tx: TransactionWithMultiSig,
+) -> bool | None:
+    """
+    Check if the given signer is still missing from the given transaction.
+    """
+    missing_signers = (
+        [Web3.to_checksum_address(x.value) for x in tx.executionInfo.missingSigners]
+        if tx.executionInfo.missingSigners is not None
+        else None
+    )
+    return signer in missing_signers if missing_signers is not None else None
+
+
+def is_already_canceled(
+    tx: TransactionWithMultiSig,
+    *,
+    all_queued_txs: list[TransactionWithMultiSig],
 ) -> bool:
     """
-    Filter out creation transactions (nothing to validate there) and transactions that have been already cancelled.
+    Check if the given transaction has already been canceled (given the all other transactions for the Safe).
     """
     cancelled_nonces = [
-        tx.transaction.executionInfo.nonce
-        for tx in all_txs
-        if tx.transaction is not None
-        and tx.transaction.executionInfo is not None
-        and isinstance(tx.transaction.executionInfo, MultisigExecutionInfo)
-        and isinstance(tx.transaction.txInfo, CustomTxInfo)
-        and tx.transaction.txInfo.isCancellation
+        tx.executionInfo.nonce
+        for tx in all_queued_txs
+        if isinstance(tx.txInfo, CustomTxInfo) and tx.txInfo.isCancellation
     ]
+    return tx.executionInfo.nonce in cancelled_nonces
+
+
+def maybe_multisig_tx(
+    tx: Transaction,
+) -> TransactionWithMultiSig | None:
     return (
-        tx.type == "TRANSACTION"
-        and tx.transaction is not None
-        and not isinstance(
-            tx.transaction.txInfo,
-            CreationTxInfo,
-        )
-        and (
-            tx.transaction.executionInfo is None
-            or isinstance(tx.transaction.executionInfo, ModuleExecutionInfo)
-            or (
-                isinstance(tx.transaction.executionInfo, MultisigExecutionInfo)
-                and tx.transaction.executionInfo.nonce not in cancelled_nonces
-            )
-        )
+        TransactionWithMultiSig.from_tx(tx)
+        if tx.executionInfo is not None
+        and isinstance(tx.executionInfo, MultisigExecutionInfo)
+        else None
     )
 
 
@@ -63,7 +71,7 @@ def is_valued_transaction_result(
     wait=tenacity.wait_fixed(1),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
-def get_safe_queued_transactions(
+def get_safe_queue(
     safe_address: ChecksumAddress,
 ) -> list[Transaction]:
     """
@@ -74,12 +82,19 @@ def get_safe_queued_transactions(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
-    transactions = [
-        check_not_none(item.transaction)
-        for item in response_parsed.results
-        if is_valued_transaction_result(item, response_parsed.results)
+    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+
+
+def get_safe_queue_multisig(
+    safe_address: ChecksumAddress,
+) -> list[TransactionWithMultiSig]:
+    transactions = get_safe_queue(safe_address)
+    multisig_transactions = [
+        multisig_tx
+        for item in transactions
+        if (multisig_tx := maybe_multisig_tx(item)) is not None
     ]
-    return transactions
+    return multisig_transactions
 
 
 @observe()
@@ -127,12 +142,22 @@ def get_safe_history(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
     ).json()
     response_parsed = TransactionResponse.model_validate(response)
-    transactions = [
-        check_not_none(item.transaction)
-        for item in response_parsed.results
-        if is_valued_transaction_result(item, response_parsed.results)
+    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+
+
+def get_safe_history_multisig(
+    safe_address: ChecksumAddress,
+) -> list[TransactionWithMultiSig]:
+    """
+    TODO: Can we get this without relying on Safe's APIs?
+    """
+    transactions = get_safe_history(safe_address)
+    multisig_transactions = [
+        multisig_tx
+        for item in transactions
+        if (multisig_tx := maybe_multisig_tx(item)) is not None
     ]
-    return transactions
+    return multisig_transactions
 
 
 def safe_tx_from_detailed_transaction(
