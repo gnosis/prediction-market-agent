@@ -8,18 +8,9 @@ from pydantic_ai.models.openai import OpenAIModel
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
-    CreationTxInfo,
-    CustomTxInfo,
     DetailedExecutionInfo,
     DetailedTransactionResponse,
-    SettingsChangeTxInfo,
-    SwapOrderTxInfo,
-    TransferTxInfo,
     TxData,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
-    SwapOrderTxInfo,
-    TransferTxInfo,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
     get_balances_usd,
@@ -102,107 +93,8 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
     )
     if tx.detailedExecutionInfo is not None:
         formatted += format_detailed_execution_info(tx.detailedExecutionInfo)
-
-    tx_info = tx.txInfo
-
-    if isinstance(tx_info, CreationTxInfo):
-        formatted += format_creation_info(tx_info)
-
-    elif isinstance(tx_info, SettingsChangeTxInfo):
-        formatted += format_settings_change_info(tx_info)
-
-    elif isinstance(tx_info, TransferTxInfo):
-        formatted += format_transfer_info(tx_info)
-
-    elif isinstance(tx_info, SwapOrderTxInfo):
-        formatted += format_swap_order_info(tx_info)
-
-    elif isinstance(tx_info, CustomTxInfo):
-        formatted += format_custom_info(tx_info)
-
-    else:
-        raise ValueError(f"Unknown transaction type: {tx_info}")
-
+    formatted += tx.txInfo.format_llm()
     return formatted
-
-
-def format_creation_info(tx_info: CreationTxInfo) -> str:
-    return f"Creator address: {tx_info.creator.value} | " + (
-        f"Human description: {tx_info.humanDescription} | "
-        if tx_info.humanDescription
-        else ""
-    )
-
-
-def format_settings_change_info(tx_info: SettingsChangeTxInfo) -> str:
-    return f"Transaction type: {tx_info.type} | " + (
-        f"Human description: {tx_info.humanDescription} | "
-        if tx_info.humanDescription
-        else ""
-    )
-
-
-def format_transfer_info(tx_info: TransferTxInfo) -> str:
-    return (
-        f"Transaction type: {tx_info.type} | "
-        + (
-            f"Human description: {tx_info.humanDescription} | "
-            if tx_info.humanDescription
-            else ""
-        )
-        + f"Sender: {tx_info.sender.value} | "
-        + f"Recipient: {tx_info.recipient.value} | "
-        + f"Direction: {tx_info.direction} | "
-        + f"Transfer token type: {tx_info.transferInfo.type} | "
-        + (
-            f"Transfer token address: {tx_info.transferInfo.tokenAddress} | "
-            if tx_info.transferInfo.tokenAddress
-            else ""
-        )
-        + (
-            f"Transfer token symbol: {tx_info.transferInfo.tokenSymbol} | "
-            if tx_info.transferInfo.tokenSymbol
-            else ""
-        )
-        + f"Transfer value: {tx_info.transferInfo.value} | "
-    )
-
-
-def format_swap_order_info(tx_info: SwapOrderTxInfo) -> str:
-    return (
-        f"Transaction type: {tx_info.type} | "
-        + (
-            f"Human description: {tx_info.humanDescription} | "
-            if tx_info.humanDescription
-            else ""
-        )
-        + f"Sender: {tx_info.owner} | "
-        + f"Recipient: {tx_info.receiver} | "
-        + f"Sell token address: {tx_info.sellToken.address} | "
-        + f"Sell token symbol: {tx_info.sellToken.symbol} | "
-        + f"Buy token address: {tx_info.buyToken.address} | "
-        + f"Buy token symbol: {tx_info.buyToken.symbol} | "
-        + f"Transfer value: {tx_info.sellAmount} | "
-    )
-
-
-def format_custom_info(tx_info: CustomTxInfo) -> str:
-    return (
-        (
-            f"Human description: {tx_info.humanDescription} | "
-            if tx_info.humanDescription
-            else ""
-        )
-        + f"To address: {tx_info.to.value} | "
-        + f"Value: {tx_info.value} | "
-        + (f"Method name: {tx_info.methodName} | " if tx_info.methodName else "")
-        + (
-            f"Action count: {tx_info.actionCount} | "
-            if tx_info.actionCount is not None
-            else ""
-        )
-        + f"Is cancellation tx: {tx_info.isCancellation} | "
-    )
 
 
 def format_tx_data(tx_data: TxData) -> str:
