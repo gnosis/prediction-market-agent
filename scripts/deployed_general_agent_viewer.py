@@ -174,7 +174,7 @@ with st.container(border=True):
     col3.metric("Starting Balance", f"{starting_balance:.2f} USD")
     col4.metric(
         "Total Asset Value",
-        f"{total_asset_value:.2f} USD",
+        f"{total_asset_value.value:.2f} USD",
         delta=f"{roi:.2f}% ROI",
     )
 

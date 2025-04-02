@@ -13,6 +13,7 @@ from prediction_market_agent.agents.microchain_agent.microchain_agent_keys impor
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
     get_end_datetime_of_previous_round,
+    get_start_time_of_previous_round,
 )
 from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -116,7 +117,10 @@ def fetch_memories_from_last_run(
     entries_from_latest_run: dict[str, list[LongTermMemories]] = {}
     for agent_id in agent_identifiers:
         ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
-        entries_for_agent = ltm.search(from_=get_end_datetime_of_previous_round())
+        entries_for_agent = ltm.search(
+            from_=get_start_time_of_previous_round(),
+            to_=get_end_datetime_of_previous_round(),
+        )
         entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
         logger.info(
             f"Fetched {len(entries_for_agent)} memories from {agent_id} latest run"
