@@ -60,6 +60,7 @@ def main(
         start_time_of_next_round is not None and now >= start_time_of_next_round
     ):
         if purge_messages:
+            logger.info("Purging all messages from the AgentCommunicationContract.")
             AgentCommunicationContract().purge_all_messages(keys)
 
         if set_balances:
