@@ -48,6 +48,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nf
     DeployableAgentNFTGameAbstract,
     get_all_nft_agents,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRoundTableHandler,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.nft_game_messages_functions import (
     ReceiveMessagesAndPayments,
     RemoveAllUnreadMessages,
@@ -59,8 +62,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.prompts i
     nft_treasury_game_buyer_prompt,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    get_end_datetime_of_current_round,
-    get_start_datetime_of_next_round,
     hash_password,
 )
 from prediction_market_agent.db.agent_communication import (
@@ -98,6 +99,11 @@ AgentInputType: t.TypeAlias = (
 class DummyFunctionName(str, Enum):
     # Respones from Microchain's functions don't have a function name to show, so use this dummy one.
     RESPONSE_FUNCTION_NAME = "Response"
+
+
+@st.cache_resource
+def game_round_table_handler() -> NFTGameRoundTableHandler:
+    return NFTGameRoundTableHandler()
 
 
 @st.cache_resource
@@ -418,15 +424,16 @@ Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_
 
 @st.fragment(run_every=timedelta(seconds=10))
 def show_treasury_part() -> None:
+    game_round_handler = game_round_table_handler()
     treasury_xdai_balance = SimpleTreasuryContract().balances().xdai
-    end_datetime = get_end_datetime_of_current_round()
-    start_datetime_next_round = get_start_datetime_of_next_round()
+    current_round = game_round_handler.get_current_round()
+    next_round = game_round_handler.get_next_round()
     st.markdown(
         f"""### Treasury
 Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance.value:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
-- The current round ends at: {end_datetime.strftime('%Y-%m-%d %H:%M:%S') if end_datetime else 'No current round.'}
-- The next round starts at: {start_datetime_next_round.strftime('%Y-%m-%d %H:%M:%S') if start_datetime_next_round else 'No next round planned yet.'}
+- The current round ends at: {current_round.end_time.strftime('%Y-%m-%d %H:%M:%S') if current_round else 'No current round.'}
+- The next round starts at: {next_round.start_time.strftime('%Y-%m-%d %H:%M:%S') if next_round else 'No next round planned yet.'}
 """,
         unsafe_allow_html=True,
     )

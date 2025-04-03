@@ -7,7 +7,7 @@ Usage:
 import typer
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
@@ -16,6 +16,9 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     AgentCommunicationContract,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRoundTableHandler,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.generate_report import (
     generate_report,
 )
@@ -23,9 +26,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.r
     get_nft_game_is_finished_rpc_url,
     redistribute_nft_keys,
     reset_balances,
-)
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    get_start_datetime_of_next_round,
 )
 
 APP = typer.Typer(pretty_exceptions_enable=False)
@@ -41,24 +41,26 @@ def main(
     purge_messages: bool = True,
     force_restart: bool = False,
 ) -> None:
-    now = utcnow()
+    utcnow()
     keys = APIKeys()
 
     if check_game_finished and not get_nft_game_is_finished_rpc_url(rpc_url=rpc_url):
         logger.info(f"Game not finished yet, exiting.")
         return
 
+    game_round_table_handler = NFTGameRoundTableHandler()
+    last_round = check_not_none(game_round_table_handler.get_previous_round())
+
     if do_report:
         generate_report(
+            last_round=last_round,
             rpc_url=rpc_url,
             initial_xdai_balance_per_agent=STARTING_AGENT_BALANCE,
         )
 
     # Restart reset the keys and balances if game is to happen again.
-    start_time_of_next_round = get_start_datetime_of_next_round()
-    if force_restart or (
-        start_time_of_next_round is not None and now >= start_time_of_next_round
-    ):
+    current_round = game_round_table_handler.get_current_round()
+    if force_restart or (current_round is not None and not current_round.restarted):
         if purge_messages:
             logger.info("Purging all messages from the AgentCommunicationContract.")
             AgentCommunicationContract().purge_all_messages(keys)
@@ -72,6 +74,9 @@ def main(
 
         if redistribute_keys:
             redistribute_nft_keys(rpc_url=rpc_url)
+
+        if current_round is not None:
+            game_round_table_handler.set_as_restarted(current_round)
 
 
 if __name__ == "__main__":
