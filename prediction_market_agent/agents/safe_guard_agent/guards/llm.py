@@ -8,11 +8,9 @@ from pydantic_ai.models.openai import OpenAIModel
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+    DetailedExecutionInfo,
     DetailedTransactionResponse,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
-    SwapOrderTxInfo,
-    TransferTxInfo,
+    TxData,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
     get_balances_usd,
@@ -82,48 +80,80 @@ Is the new transaction malicious or not? Why? Output your answer in the JSON for
 
 
 def format_transaction(tx: DetailedTransactionResponse) -> str:
-    tx_info = tx.txInfo
-
-    sender_value = (
-        tx_info.sender.value
-        if isinstance(tx_info, TransferTxInfo)
-        else tx_info.owner
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
-    )
-    recipient_value = (
-        tx_info.recipient.value
-        if isinstance(tx_info, TransferTxInfo)
-        else tx_info.receiver
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
-    )
-    transfer_value = (
-        tx_info.transferInfo.value
-        if isinstance(tx_info, TransferTxInfo)
-        else tx_info.sellAmount
-        if isinstance(tx_info, SwapOrderTxInfo)
-        else "N/A"
-    )
-
-    return (
+    formatted = (
         f"Transaction ID: {tx.txId} | "
-        + f"Transaction type: {tx.txInfo.type} | "
-        + f"Human description: {tx.txInfo.humanDescription} | "
-        + f"Time: {DatetimeUTC.to_datetime_utc(tx.detailedExecutionInfo.submittedAt) if tx.detailedExecutionInfo and tx.detailedExecutionInfo.submittedAt else 'N/A'} | "
-        + f"Sender: {sender_value} | "
-        + f"Recipient: {recipient_value} | "
         + (
-            f"Sell token: {tx.txInfo.sellToken.symbol} | "
-            if isinstance(tx.txInfo, SwapOrderTxInfo)
+            f"Executed at: {DatetimeUTC.to_datetime_utc(tx.executedAt)} | "
+            if tx.executedAt
+            else ""
+        )
+        + format_tx_data(tx.txData)
+        if tx.txData
+        else ""
+    )
+    if tx.detailedExecutionInfo is not None:
+        formatted += format_detailed_execution_info(tx.detailedExecutionInfo)
+    formatted += tx.txInfo.format_llm()
+    return formatted
+
+
+def format_tx_data(tx_data: TxData) -> str:
+    return (
+        (f"Decoded TX data: {tx_data.dataDecoded} | " if tx_data.dataDecoded else "")
+        + f"To: {tx_data.to.value} | "
+        + f"Value: {tx_data.value} | "
+        + f"Operation: {tx_data.operation} | "
+        + (
+            f"Trusted delegate call target: {tx_data.trustedDelegateCallTarget} | "
+            if tx_data.trustedDelegateCallTarget
+            else ""
+        )
+    )
+
+
+def format_detailed_execution_info(exec_info: DetailedExecutionInfo) -> str:
+    return (
+        f"Type: {exec_info.type} | "
+        + (f"Address: {exec_info.address.value} | " if exec_info.address else "")
+        + (
+            f"Submitted at: {DatetimeUTC.to_datetime_utc(exec_info.submittedAt)} | "
+            if exec_info.submittedAt
+            else ""
+        )
+        + (f"Nonce: {exec_info.nonce} | " if exec_info.nonce else "")
+        + (f"Safe TX gas: {exec_info.safeTxGas} | " if exec_info.safeTxGas else "")
+        + (f"Base gas: {exec_info.baseGas} | " if exec_info.baseGas else "")
+        + (f"Gas price: {exec_info.gasPrice} | " if exec_info.gasPrice else "")
+        + (f"Gas token: {exec_info.gasToken} | " if exec_info.gasToken else "")
+        + (
+            f"Refund receiver: {exec_info.refundReceiver.value} | "
+            if exec_info.refundReceiver
+            else ""
+        )
+        + (f"Executor: {exec_info.executor.value} | " if exec_info.executor else "")
+        + (
+            f"Signers: {[s.value for s in exec_info.signers]} | "
+            if exec_info.signers
             else ""
         )
         + (
-            f"Buy token: {tx.txInfo.buyToken.symbol} | "
-            if isinstance(tx.txInfo, SwapOrderTxInfo)
+            f"Confirmations required: {exec_info.confirmationsRequired} | "
+            if exec_info.confirmationsRequired
             else ""
         )
-        + f"Transfer value: {transfer_value} ;"
+        + (
+            f"Confirmations: {[c.signer.value for c in exec_info.confirmations]} | "
+            if exec_info.confirmations
+            else ""
+        )
+        + (f"Rejectors: {exec_info.rejectors} | " if exec_info.rejectors else "")
+        + (f"Trusted: {exec_info.trusted} | " if exec_info.trusted is not None else "")
+        + (f"Proposer: {exec_info.proposer.value} | " if exec_info.proposer else "")
+        + (
+            f"Proposed by delegate: {exec_info.proposedByDelegate} | "
+            if exec_info.proposedByDelegate
+            else ""
+        )
     )
 
 
@@ -134,7 +164,7 @@ def format_balances(safe_address: ChecksumAddress) -> str:
         f"Address: {item.tokenInfo.address} | "
         f"Balance: {item.balance} | "
         f"Fiat Balance: {item.fiatBalance} USD | "
-        f"Fiat Conversion Rate: {item.fiatConversion} USD ;"
+        f"Fiat Conversion Rate: {item.fiatConversion} USD | "
         for item in balances.items
     )
     return f"Safe address: {safe_address}\n\nTotal Fiat Balance: {balances.fiatTotal} USD\n\nToken Balances:\n\n{formatted_items}"
