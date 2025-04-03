@@ -179,6 +179,22 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "purgeAllMessages",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "agentAddress", "type": "address" }
+    ],
+    "name": "purgeMessages",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "queues",
     "outputs": [

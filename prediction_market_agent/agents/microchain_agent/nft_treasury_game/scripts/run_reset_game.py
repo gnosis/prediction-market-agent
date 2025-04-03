@@ -5,12 +5,16 @@ Usage:
 """
 
 import typer
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
     STARTING_TREASURY_BALANCE,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentCommunicationContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.generate_report import (
     generate_report,
@@ -34,9 +38,11 @@ def main(
     do_report: bool = True,
     set_balances: bool = True,
     redistribute_keys: bool = True,
+    purge_messages: bool = True,
     force_restart: bool = False,
 ) -> None:
     now = utcnow()
+    keys = APIKeys()
 
     if check_game_finished and not get_nft_game_is_finished_rpc_url(rpc_url=rpc_url):
         logger.info(f"Game not finished yet, exiting.")
@@ -53,6 +59,9 @@ def main(
     if force_restart or (
         start_time_of_next_round is not None and now >= start_time_of_next_round
     ):
+        if purge_messages:
+            AgentCommunicationContract().purge_all_messages(keys)
+
         if set_balances:
             reset_balances(
                 rpc_url=rpc_url,
