@@ -20,10 +20,6 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
     is_already_canceled,
     signer_is_missing,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
-    is_already_canceled,
-    signer_is_missing,
-)
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     get_safe,
     get_safes,
