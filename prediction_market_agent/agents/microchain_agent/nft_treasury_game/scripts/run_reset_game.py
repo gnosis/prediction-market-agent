@@ -7,7 +7,6 @@ Usage:
 import typer
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
@@ -48,9 +47,9 @@ def main(
         return
 
     game_round_table_handler = NFTGameRoundTableHandler()
-    last_round = check_not_none(game_round_table_handler.get_previous_round())
+    last_round = game_round_table_handler.get_previous_round()
 
-    if do_report:
+    if do_report and last_round is not None:
         generate_report(
             last_round=last_round,
             rpc_url=rpc_url,
