@@ -37,6 +37,12 @@
   },
   {
     "anonymous": false,
+    "inputs": [],
+    "name": "AllMessagesPurged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -64,6 +70,19 @@
       }
     ],
     "name": "LogMessage",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agentAddress",
+        "type": "address"
+      }
+    ],
+    "name": "MessagesPurged",
     "type": "event"
   },
   {
@@ -175,6 +194,22 @@
         "type": "tuple"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "purgeAllMessages",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "agentAddress", "type": "address" }
+    ],
+    "name": "purgeMessages",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },

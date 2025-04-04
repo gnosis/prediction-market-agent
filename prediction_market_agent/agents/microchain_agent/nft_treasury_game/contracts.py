@@ -139,7 +139,7 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     )
 
     address: ChecksumAddress = Web3.to_checksum_address(
-        "0xca6c43b46febb0505d13a7704084912883eecf32"
+        "0x219083Fc5315fdc145eE5C0eb22CbE12d6115c53"
     )
 
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:
@@ -241,6 +241,17 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
             function_name="sendMessage",
             amount_wei=amount_wei.as_wei,
             function_params=[agent_address, message],
+            web3=web3,
+        )
+
+    def purge_all_messages(
+        self,
+        api_keys: APIKeys,
+        web3: Web3 | None = None,
+    ) -> TxReceipt:
+        return self.send(
+            api_keys=api_keys,
+            function_name="purgeAllMessages",
             web3=web3,
         )
 
