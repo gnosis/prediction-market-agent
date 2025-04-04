@@ -8,34 +8,12 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transaction
     CustomTxInfo,
     SettingsChangeTxInfo,
     SwapOrderTxInfo,
+    SwapTransferTxInfo,
     TransferTxInfo,
 )
 
 
-class Sender(BaseModel):
-    value: str
-    name: Any
-    logoUri: Any
-
-
-class Recipient(BaseModel):
-    value: str
-    name: Any
-    logoUri: Any
-
-
-class TransferInfo(BaseModel):
-    type: str
-    value: str
-
-
 class AddressInfo(BaseModel):
-    value: str
-    name: Any | None = None
-    logoUri: Any | None = None
-
-
-class To(BaseModel):
     value: ChecksumAddress
     name: Any | None = None
     logoUri: Any | None = None
@@ -43,36 +21,18 @@ class To(BaseModel):
 
 class TxData(BaseModel):
     hexData: str | None = None
-    dataDecoded: Any
-    to: To
+    dataDecoded: dict[str, Any] | None = None
+    to: AddressInfo
     value: str
     operation: int
     trustedDelegateCallTarget: Any | None = None
     addressInfoIndex: Any | None = None
 
 
-class RefundReceiver(BaseModel):
-    value: ChecksumAddress
-    name: Any | None = None
-    logoUri: Any | None = None
-
-
-class Signer(BaseModel):
-    value: str
-    name: Any | None = None
-    logoUri: Any | None = None
-
-
 class Confirmation(BaseModel):
-    signer: Signer
+    signer: AddressInfo
     signature: str
     submittedAt: int
-
-
-class Proposer(BaseModel):
-    value: str
-    name: Any | None = None
-    logoUri: Any | None = None
 
 
 class DetailedExecutionInfo(BaseModel):
@@ -84,16 +44,16 @@ class DetailedExecutionInfo(BaseModel):
     baseGas: str | None = None
     gasPrice: str | None = None
     gasToken: ChecksumAddress | None = None
-    refundReceiver: RefundReceiver | None = None
+    refundReceiver: AddressInfo | None = None
     safeTxHash: str | None = None
-    executor: Any | None = None
-    signers: List[Signer] | None = None
+    executor: AddressInfo | None = None
+    signers: List[AddressInfo] | None = None
     confirmationsRequired: int | None = None
     confirmations: List[Confirmation] | None = None
     rejectors: List[Any] | None = None
     gasTokenInfo: Any | None = None
     trusted: bool | None = None
-    proposer: Proposer | None = None
+    proposer: AddressInfo | None = None
     proposedByDelegate: Any | None = None
 
 
@@ -108,6 +68,7 @@ class DetailedTransactionResponse(BaseModel):
         TransferTxInfo,
         SwapOrderTxInfo,
         CustomTxInfo,
+        SwapTransferTxInfo,
     ]
     txData: TxData | None = None
     txHash: str | None = None

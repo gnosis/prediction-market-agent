@@ -19,11 +19,6 @@ def get_safe(safe_address: ChecksumAddress) -> Safe:
     return safe
 
 
-def check_if_owner(safe_address: ChecksumAddress, maybe_owner: ChecksumAddress) -> bool:
-    safe = get_safe(safe_address)
-    return safe.retrieve_is_owner(maybe_owner)
-
-
 @tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_fixed(1))
 def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
     api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))

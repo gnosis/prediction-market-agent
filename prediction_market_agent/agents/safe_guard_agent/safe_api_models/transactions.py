@@ -15,7 +15,7 @@ class Token(BaseModel):
 
 
 class Address(BaseModel):
-    value: str
+    value: ChecksumAddress
     name: str | None = None
     logoUri: str | None = None
 
@@ -41,6 +41,97 @@ class TransferTxInfo(BaseModel):
     direction: str
     transferInfo: TransferInfo
 
+    def format_llm(self) -> str:
+        return (
+            f"Transaction type: {self.type} | "
+            + (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"Sender: {self.sender.value} | "
+            + f"Recipient: {self.recipient.value} | "
+            + f"Direction: {self.direction} | "
+            + f"Transfer token type: {self.transferInfo.type} | "
+            + (
+                f"Transfer token address: {self.transferInfo.tokenAddress} | "
+                if self.transferInfo.tokenAddress
+                else ""
+            )
+            + (
+                f"Transfer token symbol: {self.transferInfo.tokenSymbol} | "
+                if self.transferInfo.tokenSymbol
+                else ""
+            )
+            + f"Transfer value: {self.transferInfo.value} | "
+        )
+
+
+class SwapTransferTxInfo(BaseModel):
+    type: Literal["SwapTransfer"]
+    humanDescription: str | None = None
+    sender: Address
+    recipient: Address
+    direction: str
+    transferInfo: TransferInfo
+    uid: str
+    status: str
+    kind: str
+    sellAmount: str
+    buyAmount: str
+    sellToken: Token
+    buyToken: Token
+    explorerUrl: str
+    receiver: ChecksumAddress
+    owner: ChecksumAddress
+
+    def format_llm(self) -> str:
+        return (
+            f"Transaction type: {self.type} | "
+            + (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"Sender: {self.sender.value} | "
+            + f"Recipient: {self.recipient.value} | "
+            + f"Direction: {self.direction} | "
+            + f"Transfer token type: {self.transferInfo.type} | "
+            + (
+                f"Transfer token address: {self.transferInfo.tokenAddress} | "
+                if self.transferInfo.tokenAddress
+                else ""
+            )
+            + (
+                f"Transfer token symbol: {self.transferInfo.tokenSymbol} | "
+                if self.transferInfo.tokenSymbol
+                else ""
+            )
+            + (
+                f"Transfer value: {self.transferInfo.value} | "
+                if self.transferInfo.value is not None
+                else ""
+            )
+            + f"Status: {self.status} | "
+            + f"Kind: {self.kind} | "
+            + f"Sell amount: {self.sellAmount} | "
+            + f"Buy amount: {self.buyAmount} | "
+            + f"Sell token address: {self.sellToken.address} | "
+            + (
+                f"Sell token symbol: {self.sellToken.symbol} | "
+                if self.sellToken.symbol
+                else ""
+            )
+            + f"Buy token address: {self.buyToken.address} | "
+            + (
+                f"Buy token symbol: {self.buyToken.symbol} | "
+                if self.buyToken.symbol
+                else ""
+            )
+            + f"Receiver: {self.receiver} | "
+            + f"Owner: {self.owner} | "
+        )
+
 
 class CustomTxInfo(BaseModel):
     type: Literal["Custom"]
@@ -52,10 +143,35 @@ class CustomTxInfo(BaseModel):
     actionCount: int | None = None
     isCancellation: bool
 
+    def format_llm(self) -> str:
+        return (
+            (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"To address: {self.to.value} | "
+            + f"Value: {self.value} | "
+            + (f"Method name: {self.methodName} | " if self.methodName else "")
+            + (
+                f"Action count: {self.actionCount} | "
+                if self.actionCount is not None
+                else ""
+            )
+            + f"Is cancellation tx: {self.isCancellation} | "
+        )
+
 
 class SettingsChangeTxInfo(BaseModel):
     type: Literal["SettingsChange"]
     humanDescription: str | None = None
+
+    def format_llm(self) -> str:
+        return f"Transaction type: {self.type} | " + (
+            f"Human description: {self.humanDescription} | "
+            if self.humanDescription
+            else ""
+        )
 
 
 class SwapOrderTxInfo(BaseModel):
@@ -72,39 +188,39 @@ class SwapOrderTxInfo(BaseModel):
     receiver: ChecksumAddress
     owner: ChecksumAddress
 
-
-class Creator(BaseModel):
-    value: str
-    name: str | None = None
-    logoUri: str | None = None
-
-
-class Implementation(BaseModel):
-    value: str
-    name: str
-    logoUri: str
-
-
-class Factory(BaseModel):
-    value: str
-    name: str
-    logoUri: str
+    def format_llm(self) -> str:
+        return (
+            f"Transaction type: {self.type} | "
+            + (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"Owner: {self.owner} | "
+            + f"Recipient: {self.receiver} | "
+            + f"Sell token address: {self.sellToken.address} | "
+            + f"Sell token symbol: {self.sellToken.symbol} | "
+            + f"Buy token address: {self.buyToken.address} | "
+            + f"Buy token symbol: {self.buyToken.symbol} | "
+            + f"Transfer value: {self.sellAmount} | "
+        )
 
 
 class CreationTxInfo(BaseModel):
     type: Literal["Creation"]
-    humanDescription: Any
-    creator: Creator
+    humanDescription: str | None = None
+    creator: Address
     transactionHash: str
-    implementation: Implementation
-    factory: Factory
+    implementation: Address
+    factory: Address
     saltNonce: str
 
-
-class MissingSigner(BaseModel):
-    value: str
-    name: str | None = None
-    logoUri: str | None = None
+    def format_llm(self) -> str:
+        return f"Creator address: {self.creator.value} | " + (
+            f"Human description: {self.humanDescription} | "
+            if self.humanDescription
+            else ""
+        )
 
 
 class ModuleExecutionInfo(BaseModel):
@@ -117,7 +233,7 @@ class MultisigExecutionInfo(BaseModel):
     nonce: int
     confirmationsRequired: int
     confirmationsSubmitted: int
-    missingSigners: List[MissingSigner] | None = None
+    missingSigners: List[Address] | None = None
 
 
 class Transaction(BaseModel):
@@ -127,6 +243,7 @@ class Transaction(BaseModel):
         TransferTxInfo,
         SwapOrderTxInfo,
         CustomTxInfo,
+        SwapTransferTxInfo,
     ]
     id: str
     timestamp: int
@@ -134,6 +251,14 @@ class Transaction(BaseModel):
     executionInfo: Union[ModuleExecutionInfo, MultisigExecutionInfo] | None = None
     safeAppInfo: Any | None = None
     txHash: str | None = None
+
+
+class TransactionWithMultiSig(Transaction):
+    executionInfo: MultisigExecutionInfo
+
+    @staticmethod
+    def from_tx(tx: Transaction) -> "TransactionWithMultiSig":
+        return TransactionWithMultiSig.model_validate(tx.model_dump())
 
 
 class TransactionResult(BaseModel):

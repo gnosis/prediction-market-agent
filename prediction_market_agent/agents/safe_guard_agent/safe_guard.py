@@ -10,13 +10,16 @@ from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.guards import (
     blacklist,
     goplus_,
+    hash_checker,
     llm,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+    CreationTxInfo,
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
-    Transaction,
+from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+    is_already_canceled,
+    signer_is_missing,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     get_safe,
@@ -26,7 +29,9 @@ from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     sign_or_execute,
 )
 from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+    ValidationConclusion,
     ValidationResult,
+    ValidationResultWithName,
 )
 
 SAFE_GUARDS: list[
@@ -37,7 +42,7 @@ SAFE_GUARDS: list[
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
     blacklist.validate_safe_transaction_blacklist,
-    # hash_checker.validate_safe_transaction_hash,
+    hash_checker.validate_safe_transaction_hash,
     llm.validate_safe_transaction_llm,
     goplus_.validate_safe_transaction_goplus_address_security,
     goplus_.validate_safe_transaction_goplus_token_security,
@@ -63,6 +68,7 @@ def validate_all(
             do_sign_or_execution,
             do_reject,
             do_message,
+            api_keys,
         )
 
 
@@ -71,16 +77,29 @@ def validate_safe(
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    api_keys: APIKeys,
 ) -> None:
-    queued_transactions = safe_api_utils.get_safe_queued_transactions(safe_address)
+    # Load only multisig transactions here, others are not relevant for the agent to check.
+    queued_transactions = safe_api_utils.get_safe_queue_multisig(safe_address)
     logger.info(
         f"Retrieved {len(queued_transactions)} queued transactions to verify for {safe_address}."
     )
 
     for queued_transaction in queued_transactions:
+        if is_already_canceled(queued_transaction, all_queued_txs=queued_transactions):
+            logger.info(
+                f"Skipping {queued_transaction.id=} because it already been canceled."
+            )
+            continue
+
+        if not signer_is_missing(api_keys.bet_from_address, queued_transaction):
+            logger.info(
+                f"Skipping {queued_transaction.id=} because it has already been signed by the agent {api_keys.bet_from_address} or no signer is required."
+            )
+            continue
+
         validate_safe_transaction(
-            safe_address,
-            queued_transaction,
+            queued_transaction.id,
             do_sign_or_execution,
             do_reject,
             do_message,
@@ -89,14 +108,19 @@ def validate_safe(
 
 @observe()
 def validate_safe_transaction(
-    safe_address: ChecksumAddress,
-    transaction: Transaction,
+    transaction_id: str,
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
     ignore_historical_transaction_ids: set[str] | None = None,
-) -> list[ValidationResult] | None:
+) -> ValidationConclusion:
     api_keys = APIKeys()
+
+    detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
+        transaction_id=transaction_id
+    )
+
+    safe_address = detailed_transaction_info.safeAddress
     safe = get_safe(safe_address)
     is_owner = safe.retrieve_is_owner(api_keys.bet_from_address)
 
@@ -105,27 +129,27 @@ def validate_safe_transaction(
             f"{api_keys.bet_from_address} is not owner of Safe {safe_address}, some functionality may be limited."
         )
 
-    logger.info(f"Processing transaction {transaction.id}.")
+    logger.info(f"Processing transaction {transaction_id}.")
 
+    # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
     historical_transactions = safe_api_utils.get_safe_history(safe_address)
-    detailed_historical_transactions = (
-        safe_api_utils.gather_safe_detailed_transaction_info(
-            [
-                tx.id
-                for tx in historical_transactions
-                if ignore_historical_transaction_ids is None
+    detailed_historical_transactions = safe_api_utils.gather_safe_detailed_transaction_info(
+        [
+            tx.id
+            for tx in historical_transactions
+            if (
+                ignore_historical_transaction_ids is None
                 or tx.id not in ignore_historical_transaction_ids
-            ]
-        )
+            )
+            # Creation tx can not be converted to detailed transaction info and isn't needed for validation anyway.
+            and not isinstance(tx.txInfo, CreationTxInfo)
+        ]
     )
 
     logger.info(
         f"Retrieved {len(detailed_historical_transactions)} historical transactions."
     )
 
-    detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
-        transaction_id=transaction.id
-    )
     safe_tx = safe_api_utils.safe_tx_from_detailed_transaction(
         safe, detailed_transaction_info
     )
@@ -135,8 +159,9 @@ def validate_safe_transaction(
         detailed_transaction_info,
         detailed_historical_transactions,
     )
+    ok = all(result.ok for result in validation_results)
 
-    if all(result.ok for result in validation_results):
+    if ok:
         logger.success("All validations successful.")
         if do_sign_or_execution:
             sign_or_execute(safe, safe_tx, api_keys)
@@ -148,8 +173,12 @@ def validate_safe_transaction(
 
     logger.info("Done.")
     if do_message:
-        send_message(safe, transaction.id, validation_results, api_keys)
-    return validation_results
+        send_message(safe, transaction_id, validation_results, api_keys)
+
+    return ValidationConclusion(
+        ok=ok,
+        results=validation_results,
+    )
 
 
 @observe()
@@ -157,8 +186,8 @@ def run_safe_guards(
     safe_tx: SafeTx,
     detailed_transaction_info: DetailedTransactionResponse,
     detailed_historical_transactions: list[DetailedTransactionResponse],
-) -> list[ValidationResult]:
-    validation_results: list[ValidationResult] = []
+) -> list[ValidationResultWithName]:
+    validation_results: list[ValidationResultWithName] = []
     logger.info("Running the transaction validation...")
     for safe_guard_fn in SAFE_GUARDS:
         logger.info(f"Running {safe_guard_fn.__name__}...")
@@ -167,14 +196,17 @@ def run_safe_guards(
             safe_tx,
             detailed_historical_transactions,
         )
+        validation_result_with_name = ValidationResultWithName.from_result(
+            validation_result, safe_guard_fn.__name__
+        )
         (logger.success if validation_result.ok else logger.warning)(
             f"Validation result: {validation_result}"
         )
-        validation_results.append(validation_result)
+        validation_results.append(validation_result_with_name)
 
         if not validation_result.ok:
             logger.error(
-                f"Validation using {safe_guard_fn.__name__} reported malicious activity."
+                f"Validation using {validation_result_with_name.name} reported malicious activity."
             )
 
     return validation_results
@@ -183,7 +215,7 @@ def run_safe_guards(
 def send_message(
     safe: Safe,
     transaction_id: str,
-    validation_results: list[ValidationResult],
+    validation_results: list[ValidationResultWithName],
     api_keys: APIKeys,
 ) -> None:
     ok = all(result.ok for result in validation_results)
