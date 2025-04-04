@@ -59,10 +59,6 @@ def main(
     if force_restart or (
         start_time_of_next_round is not None and now >= start_time_of_next_round
     ):
-        if purge_messages:
-            logger.info("Purging all messages from the AgentCommunicationContract.")
-            AgentCommunicationContract().purge_all_messages(keys)
-
         if set_balances:
             reset_balances(
                 rpc_url=rpc_url,
@@ -72,6 +68,10 @@ def main(
 
         if redistribute_keys:
             redistribute_nft_keys(rpc_url=rpc_url)
+
+        if purge_messages:
+            logger.info("Purging all messages from the AgentCommunicationContract.")
+            AgentCommunicationContract().purge_all_messages(keys)
 
 
 if __name__ == "__main__":
