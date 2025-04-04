@@ -1995,42 +1995,12 @@ files = [
 ]
 
 [[package]]
-name = "duckduckgo-search"
+name = "duckduckgo_search"
 version = "2025.4.1"
 description = "Search for words, documents, images, news, maps and text translation using the DuckDuckGo.com search engine."
 optional = false
-python-versions = ">=3.9"
-files = [
-    {file = "duckduckgo_search-2025.4.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:65bb955970b83e469eb67872833ebf40eeb99780cea9a44e7e9533a3ead7e33c"},
-    {file = "duckduckgo_search-2025.4.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:46831716149cd4e496ddf1026e2ac5a52a3f3a92171d18d479baba4fd5cef81a"},
-    {file = "duckduckgo_search-2025.4.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:401696729a8f458aa64673bdedc106e8163fb0b13e3ac987c0a31304b35a21e4"},
-    {file = "duckduckgo_search-2025.4.1-cp310-cp310-win_amd64.whl", hash = "sha256:0687f82ec9a794fa46f2f8a7c9128cacf2f320dfad9113f1bb88a18c0788af97"},
-    {file = "duckduckgo_search-2025.4.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:4c875834a7867e2185fb4fde254382f96f3b732beb57fec47940fef48767eced"},
-    {file = "duckduckgo_search-2025.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:706c299bfe585929f91d76d18d108299de11681387c3e25d8d5c686a83a5ebd1"},
-    {file = "duckduckgo_search-2025.4.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:53b34ffc2b1321b32e90dd5d8305e7c0ea2486b4f2b4f29a1c5a91095d11adbe"},
-    {file = "duckduckgo_search-2025.4.1-cp311-cp311-win_amd64.whl", hash = "sha256:eaa4b3f1c7bf7a71eb4f681d7dc63e9fa94c60641d0a688fbae309224e4f688f"},
-    {file = "duckduckgo_search-2025.4.1-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:a9bb66ab84bdece8c5f4f4e0368916305fe04db4118bbe2ecc2ae91cc01ffc99"},
-    {file = "duckduckgo_search-2025.4.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6ddcbfbc947fec78c07bb727a8c400e63800c4fff08d62aaee02785bb5db01cf"},
-    {file = "duckduckgo_search-2025.4.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e37a17cc07b4ba0d40701b1432464b8b246d2b1cdb2827e8b85e5b7e9c64ecd8"},
-    {file = "duckduckgo_search-2025.4.1-cp312-cp312-win_amd64.whl", hash = "sha256:2cc277230cc0c12543a5fc1b425eb327e0a8df81ea557e1649e509ae13f4ac9c"},
-    {file = "duckduckgo_search-2025.4.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:52b62e2a8d1fea6971e8d48e6308f8e88904bb542454b43a74e683b078cabd9e"},
-    {file = "duckduckgo_search-2025.4.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:65f2f87eed22d07ded999702fb6c1c811532543f98f4bf76f650b7978837eba2"},
-    {file = "duckduckgo_search-2025.4.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:859c73423f2f1ef8f85037c587272f52569ac41a88b45e53d268fd520802a140"},
-    {file = "duckduckgo_search-2025.4.1-cp313-cp313-win_amd64.whl", hash = "sha256:0f3dd62cc9605c6583569204f3e822cde548cdf6c7070e46c0676e85b0f13874"},
-    {file = "duckduckgo_search-2025.4.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:3e411c94b54a6bdaaadf6c3f056a3158658f930a2d5b1d2ef5cf3aab7fe9ba82"},
-    {file = "duckduckgo_search-2025.4.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:44e13f761635da7bfaced971d1e331b992112e23f81f8d6c388d9bc1270a9098"},
-    {file = "duckduckgo_search-2025.4.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5bcb599af33697362437ba0d34144af6e96b0fb784ca957521e99b0e47ddf0c3"},
-    {file = "duckduckgo_search-2025.4.1-cp39-cp39-win_amd64.whl", hash = "sha256:d64cd97b96364c211cc98c9ff138af00e860e670ab544873f5fd4000d3857b57"},
-]
-
-[package.dependencies]
-click = ">=8.1.8"
-lxml = ">=5.3.0"
-primp = ">=0.14.0"
-
-[package.extras]
-chat = ["stpyv8 (>=13.1.201.22)"]
-dev = ["lxml-stubs (>=0.5.1)", "mypy[mypyc] (>=1.15.0)", "orjson (>=3.10.16)", "pytest (>=8.3.4)", "pytest-dependency (>=0.6.0)", "ruff (>=0.11.2)", "types-setuptools (>=78.1.0.20250329)"]
+python-versions = "*"
+files = []
 
 [[package]]
 name = "dulwich"
@@ -7424,13 +7394,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.63.2"
+version = "0.63.3"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.63.2-py3-none-any.whl", hash = "sha256:aba7c1ea2dc61e176e4607098d328312db27862013a38c179a0f4de758766294"},
-    {file = "prediction_market_agent_tooling-0.63.2.tar.gz", hash = "sha256:f3ff342c40d960e73c8e3d1e01a75a7991e908c9e03df5872c6dbe8d89f1f652"},
+    {file = "prediction_market_agent_tooling-0.63.3-py3-none-any.whl", hash = "sha256:5a6618e4b8359f872642401b2b4b6d4c70d8ba0575b95d2c233452464a536c0b"},
+    {file = "prediction_market_agent_tooling-0.63.3.tar.gz", hash = "sha256:486d20c3590bc875faa8fcb93f30818ea8e8831fadb8ce67fe999f98faaf23e8"},
 ]
 
 [package.dependencies]
@@ -7580,27 +7550,6 @@ files = [
 [package.dependencies]
 cymem = ">=2.0.2,<2.1.0"
 murmurhash = ">=0.28.0,<1.1.0"
-
-[[package]]
-name = "primp"
-version = "0.14.0"
-description = "HTTP client that can impersonate web browsers, mimicking their headers and `TLS/JA3/JA4/HTTP2` fingerprints"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "primp-0.14.0-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:bd2dfb57feeba21a77a1128b6c6f17856605c4e73edcc05764fb134de4ff014f"},
-    {file = "primp-0.14.0-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:31eecb5316f9bd732a7994530b85eb698bf6500d2f6c5c3382dac0353f77084e"},
-    {file = "primp-0.14.0-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:11229e65aa5755fdfb535cc03fd64259a06764ad7c22e650fb3bea51400f1d09"},
-    {file = "primp-0.14.0-cp38-abi3-manylinux_2_34_aarch64.whl", hash = "sha256:8f56ca2cd63f9ac75b33bf48129b7e79ade29cf280bc253b17b052afb27d2b9e"},
-    {file = "primp-0.14.0-cp38-abi3-manylinux_2_34_armv7l.whl", hash = "sha256:3fb204f67a4b58dc53f3452143121317b474437812662ac0149d332a77ecbe1a"},
-    {file = "primp-0.14.0-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:b0b21e6a599f580137774623009c7f895afab49d6c3d6c9a28344fd2586ebe8a"},
-    {file = "primp-0.14.0-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:6549766ece3c7be19e1c16fa9029d3e50fa73628149d88601fcd964af8b44a8d"},
-    {file = "primp-0.14.0-cp38-abi3-win_amd64.whl", hash = "sha256:d3ae1ba954ec8d07abb527ccce7bb36633525c86496950ba0178e44a0ea5c891"},
-    {file = "primp-0.14.0.tar.gz", hash = "sha256:b6f23b2b694118a9d0443b3760698b90afb6f867f8447e71972530f48297992e"},
-]
-
-[package.extras]
-dev = ["certifi", "mypy (>=1.14.1)", "pytest (>=8.1.1)", "pytest-asyncio (>=0.25.3)", "ruff (>=0.9.2)", "typing-extensions"]
 
 [[package]]
 name = "prometheus-client"
@@ -11928,4 +11877,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "a12cdff65f75b6850456fa780485c79a58ff6ba155fea79afabff0bedab2ff5f"
+content-hash = "0ccbb6b195b4879db58faa203020ea6fdf98c93ae535e76810e8e7c9fe3224f5"
