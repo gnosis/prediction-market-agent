@@ -50,6 +50,7 @@ def main(
     last_round = game_round_table_handler.get_previous_round()
 
     if do_report and last_round is not None:
+        logger.info(f"Generating the report for the game {last_round}")
         generate_report(
             last_round=last_round,
             rpc_url=rpc_url,
@@ -59,6 +60,7 @@ def main(
     # Restart reset the keys and balances if game is to happen again.
     current_round = game_round_table_handler.get_current_round()
     if force_restart or (current_round is not None and not current_round.started):
+        logger.info(f"Setting the game state for {current_round}.")
         if set_balances:
             reset_balances(
                 rpc_url=rpc_url,
@@ -75,6 +77,8 @@ def main(
 
         if current_round is not None:
             game_round_table_handler.set_as_started(current_round)
+    else:
+        logger.info(f"No game to set state for.")
 
 
 if __name__ == "__main__":
