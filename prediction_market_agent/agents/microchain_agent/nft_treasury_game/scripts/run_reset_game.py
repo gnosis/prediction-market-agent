@@ -7,7 +7,7 @@ Usage:
 import typer
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
@@ -41,7 +41,6 @@ def main(
     purge_messages: bool = True,
     force_restart: bool = False,
 ) -> None:
-    now = utcnow()
     keys = APIKeys()
 
     if check_game_finished and not get_nft_game_is_finished_rpc_url(rpc_url=rpc_url):
