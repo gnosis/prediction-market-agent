@@ -7,6 +7,10 @@ from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 from sqlalchemy import Column, Numeric
 from sqlmodel import Field, SQLModel
 
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRound,
+)
+
 
 class LongTermMemories(SQLModel, table=True):
     __tablename__ = "long_term_memories"
@@ -102,6 +106,7 @@ class ReportNFTGame(SQLModel, table=True):
         "extend_existing": True,
     }
     id: Optional[int] = Field(default=None, primary_key=True)
+    game_round_id: int = Field(foreign_key=f"{NFTGameRound.__tablename__}.id")
     agent_id: Optional[
         str
     ] = None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table

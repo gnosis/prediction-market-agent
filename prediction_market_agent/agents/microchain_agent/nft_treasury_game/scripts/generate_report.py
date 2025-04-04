@@ -4,21 +4,24 @@ from langchain_core.prompts import PromptTemplate
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
-from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.parallelism import par_map
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from tenacity import retry, stop_after_attempt, wait_fixed
 from web3 import Web3
 
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatMessage
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    fetch_memories_from_last_run,
+    fetch_memories_from_game_round,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     NFTKeysContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
     get_all_nft_agents,
+)
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRound,
 )
 from prediction_market_agent.agents.utils import _summarize_learnings
 from prediction_market_agent.db.models import LongTermMemories, ReportNFTGame
@@ -58,33 +61,43 @@ def summarize_past_actions_from_agent(agent_memories: list[LongTermMemories]) ->
 
 
 def store_all_learnings_in_db(
-    final_summary: str, learnings_per_agent: dict[AgentIdentifier, str]
+    last_round: NFTGameRound,
+    final_summary: str,
+    learnings_per_agent: dict[AgentIdentifier, str],
 ) -> None:
     table_handler = ReportNFTGameTableHandler()
     for agent_id, learnings in learnings_per_agent.items():
         report = ReportNFTGame(
-            agent_id=agent_id, learnings=learnings, datetime_=DatetimeUTC.now()
+            game_round_id=check_not_none(last_round.id),
+            agent_id=agent_id,
+            learnings=learnings,
+            datetime_=utcnow(),
         )
         logger.info(f"Saving report from {agent_id}")
         table_handler.save_report(report)
 
     final_report = ReportNFTGame(
-        agent_id=None, learnings=final_summary, datetime_=DatetimeUTC.now()
+        game_round_id=check_not_none(last_round.id),
+        agent_id=None,
+        learnings=final_summary,
+        datetime_=utcnow(),
     )
 
     logger.info(f"Saving final summary")
     table_handler.save_report(final_report)
 
 
-def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str]:
+def summarize_prompts_from_all_agents(
+    round_: NFTGameRound,
+) -> tuple[dict[AgentIdentifier, str], str]:
     nft_agents = get_all_nft_agents()
 
-    memories_last_run = fetch_memories_from_last_run(
-        agent_identifiers=[i.identifier for i in nft_agents]
+    memories = fetch_memories_from_game_round(
+        round_, agent_identifiers=[i.identifier for i in nft_agents]
     )
     # We generate the learnings from each agent's memories.
     learnings: list[str] = par_map(
-        items=list(memories_last_run.values()), func=summarize_past_actions_from_agent
+        items=list(memories.values()), func=summarize_past_actions_from_agent
     )
 
     # We combine each agent's memories into a final summary.
@@ -139,7 +152,11 @@ def format_markdown_table(data: list[dict[str, t.Any]]) -> str:
     return "\n".join([header_row, separator_row] + data_rows)
 
 
-def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
+def generate_report(
+    last_round: NFTGameRound,
+    rpc_url: str,
+    initial_xdai_balance_per_agent: xDai,
+) -> None:
     balances_diff = calculate_nft_and_xdai_balances_diff(
         rpc_url=rpc_url, initial_balance=initial_xdai_balance_per_agent
     )
@@ -147,10 +164,12 @@ def generate_report(rpc_url: str, initial_xdai_balance_per_agent: xDai) -> None:
     (
         learnings_per_agent,
         final_summary,
-    ) = summarize_prompts_from_all_agents()
+    ) = summarize_prompts_from_all_agents(last_round)
 
     balances_data = format_markdown_table(balances_diff)
     final_summary = balances_data + "\n\n---\n" + final_summary
     store_all_learnings_in_db(
-        final_summary=final_summary, learnings_per_agent=learnings_per_agent
+        last_round=last_round,
+        final_summary=final_summary,
+        learnings_per_agent=learnings_per_agent,
     )

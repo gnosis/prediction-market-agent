@@ -62,6 +62,7 @@ pydantic-ai = "^0.0.24"
 opentelemetry-sdk = "^1.28.0"
 nest-asyncio = "^1.6.0"
 goplus = "^0.2.4"
+freezegun = "^1.5.1"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"

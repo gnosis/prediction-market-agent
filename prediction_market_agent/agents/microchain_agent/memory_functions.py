@@ -11,9 +11,8 @@ from prediction_market_agent.agents.microchain_agent.memory import DatedChatMess
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    get_end_datetime_of_previous_round,
-    get_start_time_of_previous_round,
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRound,
 )
 from prediction_market_agent.agents.utils import memories_to_learnings
 from prediction_market_agent.db.long_term_memory_table_handler import (
@@ -106,7 +105,8 @@ class CheckAllPastActionsGivenContext(LongTermMemoryBasedFunction):
         )
 
 
-def fetch_memories_from_last_run(
+def fetch_memories_from_game_round(
+    round_: NFTGameRound,
     agent_identifiers: list[AgentIdentifier],
 ) -> dict[str, list[LongTermMemories]]:
     """
@@ -114,20 +114,20 @@ def fetch_memories_from_last_run(
     The last run is identified by looking at "GameRoundEnd" function calls
     as part of the prompt history of each agent.
     """
-    entries_from_latest_run: dict[str, list[LongTermMemories]] = {}
+    entries: dict[str, list[LongTermMemories]] = {}
     for agent_id in agent_identifiers:
         ltm = LongTermMemoryTableHandler.from_agent_identifier(agent_id)
         entries_for_agent = ltm.search(
-            from_=get_start_time_of_previous_round(),
-            to_=get_end_datetime_of_previous_round(),
+            from_=round_.start_time,
+            to_=round_.end_time,
         )
         entries_for_agent.sort(key=lambda x: x.datetime_, reverse=True)
         logger.info(
             f"Fetched {len(entries_for_agent)} memories from {agent_id} latest run"
         )
-        entries_from_latest_run[agent_id] = entries_for_agent
+        entries[agent_id] = entries_for_agent
 
-    return entries_from_latest_run
+    return entries
 
 
 MEMORY_FUNCTIONS: list[type[LongTermMemoryBasedFunction]] = [
