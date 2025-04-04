@@ -25,4 +25,4 @@ You can use this in your applications to verify your transactions, before you si
 """
     )
 
-    components.iframe(safe_guard_api_url, height=750)
+    components.iframe(safe_guard_api_url, height=750, scrolling=True)
