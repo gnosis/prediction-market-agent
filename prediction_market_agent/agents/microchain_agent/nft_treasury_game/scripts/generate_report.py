@@ -4,9 +4,8 @@ from langchain_core.prompts import PromptTemplate
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
-from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.parallelism import par_map
-from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 from tenacity import retry, stop_after_attempt, wait_fixed
 from web3 import Web3
 
@@ -72,7 +71,7 @@ def store_all_learnings_in_db(
             game_round_id=check_not_none(last_round.id),
             agent_id=agent_id,
             learnings=learnings,
-            datetime_=DatetimeUTC.now(),
+            datetime_=utcnow(),
         )
         logger.info(f"Saving report from {agent_id}")
         table_handler.save_report(report)
@@ -81,7 +80,7 @@ def store_all_learnings_in_db(
         game_round_id=check_not_none(last_round.id),
         agent_id=None,
         learnings=final_summary,
-        datetime_=DatetimeUTC.now(),
+        datetime_=utcnow(),
     )
 
     logger.info(f"Saving final summary")
