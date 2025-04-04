@@ -17,7 +17,10 @@ from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
-from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.coinflip_agent.deploy import (
+    DeployableCoinFlipAgent,
+    DeployableCoinFlipAgentByHighestLiquidity,
+)
 from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -81,6 +84,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
 
 class RunnableAgent(str, Enum):
     coinflip = "coinflip"
+    coinflip_highest_liquidity = "coinflip_highest_liquidity"
     replicate_to_omen = "replicate_to_omen"
     think_thoroughly = "think_thoroughly"
     think_thoroughly_prophet = "think_thoroughly_prophet"
@@ -129,6 +133,7 @@ class RunnableAgent(str, Enum):
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
+    RunnableAgent.coinflip_highest_liquidity: DeployableCoinFlipAgentByHighestLiquidity,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
     RunnableAgent.think_thoroughly: DeployableThinkThoroughlyAgent,
     RunnableAgent.think_thoroughly_prophet: DeployableThinkThoroughlyProphetResearchAgent,

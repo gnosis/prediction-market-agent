@@ -41,7 +41,7 @@ def main(
     purge_messages: bool = True,
     force_restart: bool = False,
 ) -> None:
-    utcnow()
+    now = utcnow()
     keys = APIKeys()
 
     if check_game_finished and not get_nft_game_is_finished_rpc_url(rpc_url=rpc_url):
@@ -74,6 +74,10 @@ def main(
 
         if redistribute_keys:
             redistribute_nft_keys(rpc_url=rpc_url)
+
+        if purge_messages:
+            logger.info("Purging all messages from the AgentCommunicationContract.")
+            AgentCommunicationContract().purge_all_messages(keys)
 
         if current_round is not None:
             game_round_table_handler.set_as_restarted(current_round)

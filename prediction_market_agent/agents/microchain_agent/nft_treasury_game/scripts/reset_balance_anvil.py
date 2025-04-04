@@ -5,6 +5,7 @@ from prediction_market_agent_tooling.tools.balances import get_balances
 from web3 import Web3
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
+    AgentCommunicationContract,
     SimpleTreasuryContract,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.deploy_nft_treasury_game import (
@@ -35,6 +36,13 @@ def reset_balances(
         rpc_url=rpc_url,
         address=SimpleTreasuryContract().address,
         balance=new_balance_treasury_xdai,
+    )
+
+    set_balance(
+        rpc_url=rpc_url,
+        address=AgentCommunicationContract().owner(),
+        # Any value is fine, just something so he can pay for the tx fees.
+        balance=xDai(100),
     )
 
 
