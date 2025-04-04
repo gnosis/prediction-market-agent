@@ -23,7 +23,7 @@ def main(
 
     if (
         input(
-            f"Are you sure you want to add the new round {next_round} (y/n)? "
+            f"Current time is {utcnow()}. Are you sure you want to add the new round {next_round} (y/n)? "
         ).lower()
         != "y"
     ):
