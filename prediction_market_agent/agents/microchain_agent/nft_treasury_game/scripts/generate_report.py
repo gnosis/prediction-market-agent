@@ -12,7 +12,7 @@ from web3 import Web3
 from prediction_market_agent.agents.identifiers import AgentIdentifier
 from prediction_market_agent.agents.microchain_agent.memory import DatedChatMessage
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
-    fetch_memories_from_last_run,
+    fetch_memories_from_game_round,
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
     NFTKeysContract,
@@ -87,15 +87,17 @@ def store_all_learnings_in_db(
     table_handler.save_report(final_report)
 
 
-def summarize_prompts_from_all_agents() -> tuple[dict[AgentIdentifier, str], str]:
+def summarize_prompts_from_all_agents(
+    round_: NFTGameRound,
+) -> tuple[dict[AgentIdentifier, str], str]:
     nft_agents = get_all_nft_agents()
 
-    memories_last_run = fetch_memories_from_last_run(
-        agent_identifiers=[i.identifier for i in nft_agents]
+    memories = fetch_memories_from_game_round(
+        round_, agent_identifiers=[i.identifier for i in nft_agents]
     )
     # We generate the learnings from each agent's memories.
     learnings: list[str] = par_map(
-        items=list(memories_last_run.values()), func=summarize_past_actions_from_agent
+        items=list(memories.values()), func=summarize_past_actions_from_agent
     )
 
     # We combine each agent's memories into a final summary.
@@ -162,7 +164,7 @@ def generate_report(
     (
         learnings_per_agent,
         final_summary,
-    ) = summarize_prompts_from_all_agents()
+    ) = summarize_prompts_from_all_agents(last_round)
 
     balances_data = format_markdown_table(balances_diff)
     final_summary = balances_data + "\n\n---\n" + final_summary
