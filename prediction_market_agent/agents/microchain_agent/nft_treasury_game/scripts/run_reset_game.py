@@ -7,6 +7,7 @@ Usage:
 import typer
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants_nft_treasury_game import (
     STARTING_AGENT_BALANCE,
@@ -26,6 +27,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.r
     redistribute_nft_keys,
     reset_balances,
 )
+from prediction_market_agent.db.report_table_handler import ReportNFTGameTableHandler
 
 APP = typer.Typer(pretty_exceptions_enable=False)
 
@@ -46,16 +48,26 @@ def main(
         logger.info(f"Game not finished yet, exiting.")
         return
 
+    report_table_handler = ReportNFTGameTableHandler()
     game_round_table_handler = NFTGameRoundTableHandler()
-    last_round = game_round_table_handler.get_previous_round()
 
-    if do_report and last_round is not None:
+    last_round = game_round_table_handler.get_previous_round()
+    if (
+        do_report
+        and last_round is not None
+        and last_round.started
+        and not report_table_handler.get_reports_by_game_round_id(
+            check_not_none(last_round.id)
+        )
+    ):
         logger.info(f"Generating the report for the game {last_round}")
         generate_report(
             last_round=last_round,
             rpc_url=rpc_url,
             initial_xdai_balance_per_agent=STARTING_AGENT_BALANCE,
         )
+    else:
+        logger.info(f"Not generating report, as no last round was found.")
 
     # Restart reset the keys and balances if game is to happen again.
     current_round = game_round_table_handler.get_current_round()
