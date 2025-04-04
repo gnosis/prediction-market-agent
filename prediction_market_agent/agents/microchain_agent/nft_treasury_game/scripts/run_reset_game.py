@@ -59,11 +59,7 @@ def main(
 
     # Restart reset the keys and balances if game is to happen again.
     current_round = game_round_table_handler.get_current_round()
-    if force_restart or (current_round is not None and not current_round.restarted):
-        if purge_messages:
-            logger.info("Purging all messages from the AgentCommunicationContract.")
-            AgentCommunicationContract().purge_all_messages(keys)
-
+    if force_restart or (current_round is not None and not current_round.started):
         if set_balances:
             reset_balances(
                 rpc_url=rpc_url,
@@ -79,7 +75,7 @@ def main(
             AgentCommunicationContract().purge_all_messages(keys)
 
         if current_round is not None:
-            game_round_table_handler.set_as_restarted(current_round)
+            game_round_table_handler.set_as_started(current_round)
 
 
 if __name__ == "__main__":

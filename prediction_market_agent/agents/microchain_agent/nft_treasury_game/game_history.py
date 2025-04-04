@@ -15,7 +15,7 @@ class NFTGameRound(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     start_time: DatetimeUTC
     end_time: DatetimeUTC
-    restarted: bool = False
+    started: bool = False
     created_at: DatetimeUTC = Field(default_factory=utcnow)
 
 
@@ -61,8 +61,13 @@ class NFTGameRoundTableHandler:
         return next_rounds[0] if next_rounds else None
 
     def get_game_round_is_active(self) -> bool:
-        return self.get_current_round() is not None
+        round_ = self.get_current_round()
+        return (
+            round_ is not None
+            # Needs to be set as restarted so we know the treasury, balances, etc. is set.
+            and round_.started
+        )
 
-    def set_as_restarted(self, round_: NFTGameRound) -> None:
-        round_.restarted = True
+    def set_as_started(self, round_: NFTGameRound) -> None:
+        round_.started = True
         self.sql_handler.save_multiple([round_])
