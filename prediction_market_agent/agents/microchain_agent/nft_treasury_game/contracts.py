@@ -139,7 +139,7 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
     )
 
     address: ChecksumAddress = Web3.to_checksum_address(
-        "0x4A39E19718BBbe0701A85fA546B7987DD9632335"
+        "0x219083Fc5315fdc145eE5C0eb22CbE12d6115c53"
     )
 
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:

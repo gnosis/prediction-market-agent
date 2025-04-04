@@ -37,6 +37,12 @@
   },
   {
     "anonymous": false,
+    "inputs": [],
+    "name": "AllMessagesPurged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -64,6 +70,19 @@
       }
     ],
     "name": "LogMessage",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agentAddress",
+        "type": "address"
+      }
+    ],
+    "name": "MessagesPurged",
     "type": "event"
   },
   {
