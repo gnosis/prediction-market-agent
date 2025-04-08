@@ -4,7 +4,11 @@ from pydantic import BaseModel, BeforeValidator
 
 Factuality = Annotated[
     bool | None,
-    BeforeValidator(lambda v: None if v in ("Nothing to check.", "non-factual") else v),
+    BeforeValidator(
+        lambda v: (
+            None if v in ("Nothing to check.", "non-factual", "Non-factual") else v
+        )
+    ),
 ]
 
 
