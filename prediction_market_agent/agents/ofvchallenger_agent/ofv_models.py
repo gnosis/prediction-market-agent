@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import BaseModel, BeforeValidator
 
@@ -6,7 +6,9 @@ Factuality = Annotated[
     bool | None,
     BeforeValidator(
         lambda v: (
-            None if v in ("Nothing to check.", "non-factual", "Non-factual") else v
+            None
+            if str(v).lower().strip() in ("Nothing to check.", "non-factual", "none")
+            else v
         )
     ),
 ]
@@ -15,7 +17,7 @@ Factuality = Annotated[
 class FactCheckClaimDetails(BaseModel):
     claim: str
     factuality: Factuality
-    correction: str | None = None
+    correction: str | dict[str, Any] | None = None
     reference_url: str
 
 
