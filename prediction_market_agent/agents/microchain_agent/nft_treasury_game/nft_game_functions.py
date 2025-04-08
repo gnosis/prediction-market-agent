@@ -2,6 +2,7 @@ import typing as t
 
 from microchain import Function
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 
 from prediction_market_agent.agents.microchain_agent.microchain_agent_keys import (
     MicrochainAgentKeys,
@@ -12,10 +13,11 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts
     NFTKeysContract,
     SimpleTreasuryContract,
 )
+from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
+    NFTGameRoundTableHandler,
+)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.tools_nft_treasury_game import (
-    get_end_datetime_of_current_round,
     get_nft_game_is_finished,
-    get_start_datetime_of_next_round,
 )
 from prediction_market_agent.db.report_table_handler import (
     ReportNFTGame,
@@ -26,8 +28,8 @@ from prediction_market_agent.db.report_table_handler import (
 def get_game_has_ended_message() -> str:
     message = f"The game round has ended, please check in later."
 
-    if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
-        message += f" The next round will start at {start_of_next_round}."
+    if (next_round := NFTGameRoundTableHandler().get_next_round()) is not None:
+        message += f" The next round will start at {next_round.start_time}."
 
     return message
 
@@ -92,6 +94,8 @@ class LearnAboutTheNFTGame(Function):
             if not owned_nft_keys
             else f"You currently own {owned_nft_keys} NFT keys. You can use tool `{OwnerOfNFT.__name__}` to learn which keys you own."
         )
+        current_time = utcnow()
+        current_round = check_not_none(NFTGameRoundTableHandler().get_current_round())
         message = f"""Current state of the NFT Game:
         
 Address of the NFT key contract is {NFTKeysContract().address}, there are {n_nft_keys} keys, with token_id {list(range(n_nft_keys))}."
@@ -104,9 +108,11 @@ Current balance of the treasury is {treasury.balances().xdai} xDai.
 
 Your address is {keys.bet_from_address}.
 
-If no one is able to withdraw from the treasury, the game will end on {get_end_datetime_of_current_round()}."""
-        if (start_of_next_round := get_start_datetime_of_next_round()) is not None:
-            message += f" The next round will start at {start_of_next_round}."
+Current time is {current_time}.
+
+If no one is able to withdraw from the treasury, the game will end on {current_round.end_time}."""
+        if (next_round := NFTGameRoundTableHandler().get_next_round()) is not None:
+            message += f" The next round will start at {next_round.start_time}."
         return message
 
 

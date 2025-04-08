@@ -66,6 +66,7 @@ goplus = "^0.2.4"
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
 ape-foundry = "^0.8.2"
+freezegun = "^1.5.1"
 
 [build-system]
 requires = ["poetry-core"]
