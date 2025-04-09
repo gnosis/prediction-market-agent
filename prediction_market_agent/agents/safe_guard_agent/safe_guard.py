@@ -37,7 +37,7 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 SAFE_GUARDS: list[
     Callable[
         [DetailedTransactionResponse, SafeTx, list[DetailedTransactionResponse]],
-        ValidationResult,
+        ValidationResult | None,
     ]
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
@@ -196,6 +196,11 @@ def run_safe_guards(
             safe_tx,
             detailed_historical_transactions,
         )
+        if validation_result is None:
+            logger.info(
+                f"Skipping {safe_guard_fn.__name__} because it isn't supported for the given SafeTX."
+            )
+            continue
         validation_result_with_name = ValidationResultWithName.from_result(
             validation_result, safe_guard_fn.__name__
         )
@@ -220,7 +225,7 @@ def send_message(
 ) -> None:
     ok = all(result.ok for result in validation_results)
     reasons_formatted = "\n".join(
-        f"- {'OK' if result.ok else 'Failed'} -- {result.reason}"
+        f"- {result.name}: {'OK' if result.ok else 'Failed'} -- {result.reason}"
         for result in validation_results
     )
     message = f"""Your transaction with id `{transaction_id}` was {'approved' if ok else 'rejected'}.
