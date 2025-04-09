@@ -236,7 +236,7 @@ def _goplus_call(f: Callable[[], T], retry: bool = True) -> T | None:
         logger.warning(f"Goplus returns partial data even after retry.")
         return response
 
-    elif code in (2, 2020, 2021):
+    elif code in (2020, 2021):
         # Expected errors, like trying to verify non-contract address.
         return None
 
