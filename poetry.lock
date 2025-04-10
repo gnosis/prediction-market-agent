@@ -5032,13 +5032,13 @@ query-tools = ["guidance (>=0.0.64,<0.0.65)", "jsonpath-ng (>=1.6.0,<2.0.0)", "l
 
 [[package]]
 name = "logfire"
-version = "3.12.0"
+version = "3.13.0"
 description = "The best Python observability tool! 🪵🔥"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire-3.12.0-py3-none-any.whl", hash = "sha256:d1812d96e5a88d3aa364947075af7a8bc2791e6e2474893fe02ce57b2a417a69"},
-    {file = "logfire-3.12.0.tar.gz", hash = "sha256:1c8c21f33e94a63106c38bdf51c0bad554430d0581f1cfbb0e8bb1741a5bd43b"},
+    {file = "logfire-3.13.0-py3-none-any.whl", hash = "sha256:c401349a5558efa097f3f3097dcd055fe9ff4c0551fc7bc93632577e2851a3a8"},
+    {file = "logfire-3.13.0.tar.gz", hash = "sha256:335ed2b8d423df914de0bf482ac5f2596d6aeb1879167a39164d8a7ef2e73a37"},
 ]
 
 [package.dependencies]
@@ -5075,13 +5075,13 @@ wsgi = ["opentelemetry-instrumentation-wsgi (>=0.42b0)"]
 
 [[package]]
 name = "logfire-api"
-version = "3.12.0"
+version = "3.13.0"
 description = "Shim for the Logfire SDK which does nothing unless Logfire is installed"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "logfire_api-3.12.0-py3-none-any.whl", hash = "sha256:fc092c2dcb24c8462ba776f3b0c2183f82e1cd55f86e29b38cf21a048e66a17d"},
-    {file = "logfire_api-3.12.0.tar.gz", hash = "sha256:4de4ccf691d09879a9f1b8341cc0f26e06401764f10c60f15138c0d4cb22c583"},
+    {file = "logfire_api-3.13.0-py3-none-any.whl", hash = "sha256:7205f0ebcc65adedd828725999ba526c777c4976c6e27be5599f4a08a8658070"},
+    {file = "logfire_api-3.13.0.tar.gz", hash = "sha256:1567f8b4604d673d30365135bf3e2922a569b178ae1f1fba3af209c825e69faf"},
 ]
 
 [[package]]
@@ -7432,13 +7432,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.63.6"
+version = "0.63.7"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.63.6-py3-none-any.whl", hash = "sha256:f98f2b8b3950955c1c55f4196efc1fbe356f8190842b9e5871b0c1136c8c91a9"},
-    {file = "prediction_market_agent_tooling-0.63.6.tar.gz", hash = "sha256:133ed413205c732bb25a9fc18928748c829b2504837ee24df5a8acb3fda9ee45"},
+    {file = "prediction_market_agent_tooling-0.63.7-py3-none-any.whl", hash = "sha256:3e723c60f256fc59a3de6076f5bf232780667b42ef54e7804f5def55e2a95913"},
+    {file = "prediction_market_agent_tooling-0.63.7.tar.gz", hash = "sha256:a38ed8cdfe039587ef05a9191aa5c23ebe21eb6789671dd4975378ea11d95aeb"},
 ]
 
 [package.dependencies]
@@ -11941,4 +11941,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "c15395041791fafba1fb0b56f792e3a4a0d9e4a967b319d290aebc6c1b374cf4"
+content-hash = "264658a0d79e746c6d7b15a989020418dcffa11ca59605efb18b614bf6174fad"
