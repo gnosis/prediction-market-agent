@@ -6,6 +6,7 @@ from goplus.address import Address
 from goplus.nft import Nft
 from goplus.token import Token
 from prediction_market_agent_tooling.config import RPCConfig
+from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
@@ -26,68 +27,72 @@ class GoPlusError(Exception):
 def validate_safe_transaction_goplus_token_security(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
+    all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult | None:
-    addr = new_transaction_safetx.to
     data = _goplus_call(
         lambda: Token().token_security(
-            chain_id=f"{RPCConfig().chain_id}", addresses=[addr]
+            chain_id=f"{RPCConfig().chain_id}", addresses=all_addresses_from_tx
         )
     )
     if data is None or not data.result:
         return None
 
     logger.info(data.result)
-    result_for_addr = data.result[addr.lower()]
     malicious_reasons: list[str] = []
 
-    if _goplus_to_bool(result_for_addr.anti_whale_modifiable):
-        malicious_reasons.append("Token is anti-whale modifiable.")
+    for addr in all_addresses_from_tx:
+        result_for_addr = data.result.get(addr.lower())
+        if result_for_addr is None:
+            continue
 
-    if _goplus_to_bool(result_for_addr.buy_tax):
-        malicious_reasons.append("Token has buy tax.")
+        if _goplus_to_bool(result_for_addr.anti_whale_modifiable):
+            malicious_reasons.append(f"Token {addr} is anti-whale modifiable.")
 
-    if _goplus_to_bool(result_for_addr.can_take_back_ownership):
-        malicious_reasons.append("Token can take back ownership.")
+        if _goplus_to_bool(result_for_addr.buy_tax):
+            malicious_reasons.append(f"Token {addr} has buy tax.")
 
-    if _goplus_to_bool(result_for_addr.external_call):
-        malicious_reasons.append("Token has external calls implemented.")
+        if _goplus_to_bool(result_for_addr.can_take_back_ownership):
+            malicious_reasons.append(f"Token {addr} can take back ownership.")
 
-    if _goplus_to_bool(result_for_addr.fake_token):
-        malicious_reasons.append("Token is fake.")
+        if _goplus_to_bool(result_for_addr.external_call):
+            malicious_reasons.append(f"Token {addr} has external calls implemented.")
 
-    if _goplus_to_bool(result_for_addr.hidden_owner):
-        malicious_reasons.append("Token has hidden owner.")
+        if _goplus_to_bool(result_for_addr.fake_token):
+            malicious_reasons.append(f"Token {addr} is fake.")
 
-    if _goplus_to_bool(result_for_addr.is_airdrop_scam):
-        malicious_reasons.append("Token is an airdrop scam.")
+        if _goplus_to_bool(result_for_addr.hidden_owner):
+            malicious_reasons.append(f"Token {addr} has hidden owner.")
 
-    if _goplus_to_bool(result_for_addr.is_anti_whale):
-        malicious_reasons.append("Token is anti-whale.")
+        if _goplus_to_bool(result_for_addr.is_airdrop_scam):
+            malicious_reasons.append(f"Token {addr} is an airdrop scam.")
 
-    if _goplus_to_bool(result_for_addr.is_blacklisted):
-        malicious_reasons.append("Token is blacklisted.")
+        if _goplus_to_bool(result_for_addr.is_anti_whale):
+            malicious_reasons.append(f"Token {addr} is anti-whale.")
 
-    if _goplus_to_bool(result_for_addr.is_honeypot):
-        malicious_reasons.append("Token is a honeypot.")
+        if _goplus_to_bool(result_for_addr.is_blacklisted):
+            malicious_reasons.append(f"Token {addr} is blacklisted.")
 
-    if not _goplus_to_bool(result_for_addr.is_open_source):
-        malicious_reasons.append("Token contract is not open source.")
+        if _goplus_to_bool(result_for_addr.is_honeypot):
+            malicious_reasons.append(f"Token {addr} is a honeypot.")
 
-    # Direct check for `False`, because None is fine here.
-    if _goplus_to_bool(result_for_addr.is_true_token) is False:
-        malicious_reasons.append("Token is not a true token.")
+        if not _goplus_to_bool(result_for_addr.is_open_source):
+            malicious_reasons.append(f"Token {addr} contract is not open source.")
 
-    if _goplus_to_bool(result_for_addr.is_whitelisted):
-        malicious_reasons.append("Token is whitelisted.")
+        # Direct check for `False`, because None is fine here.
+        if _goplus_to_bool(result_for_addr.is_true_token) is False:
+            malicious_reasons.append(f"Token {addr} is not a true token.")
 
-    if other_potential_risks := result_for_addr.other_potential_risks:
-        malicious_reasons.append(
-            f"Token has other potential risks ({other_potential_risks})."
-        )
+        if _goplus_to_bool(result_for_addr.is_whitelisted):
+            malicious_reasons.append(f"Token {addr} is whitelisted.")
 
-    if _goplus_to_bool(result_for_addr.selfdestruct):
-        malicious_reasons.append("Token has self-destruct function.")
+        if other_potential_risks := result_for_addr.other_potential_risks:
+            malicious_reasons.append(
+                f"Token {addr} has other potential risks ({other_potential_risks})."
+            )
+
+        if _goplus_to_bool(result_for_addr.selfdestruct):
+            malicious_reasons.append(f"Token {addr} has self-destruct function.")
 
     return _build_validation_result(malicious_reasons)
 
@@ -96,75 +101,87 @@ def validate_safe_transaction_goplus_token_security(
 def validate_safe_transaction_goplus_address_security(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
+    all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult | None:
-    addr = new_transaction_safetx.to
-    data = _goplus_call(
-        lambda: Address().address_security(
-            chain_id=f"{RPCConfig().chain_id}", address=addr
-        )
-    )
-    if data is None:
-        return None
-
-    logger.info(data.result)
     malicious_reasons: list[str] = []
 
-    if _goplus_to_bool(data.result.blacklist_doubt):
-        malicious_reasons.append("Address is blacklisted.")
-
-    if _goplus_to_bool(data.result.blackmail_activities):
-        malicious_reasons.append("Address has reported blackmail activities.")
-
-    if _goplus_to_bool(data.result.cybercrime):
-        malicious_reasons.append("Address has reported cybercrime activities.")
-
-    if _goplus_to_bool(data.result.darkweb_transactions):
-        malicious_reasons.append("Address has darkweb transactions.")
-
-    if _goplus_to_bool(data.result.fake_kyc):
-        malicious_reasons.append("Address has fake KYC.")
-
-    if _goplus_to_bool(data.result.fake_standard_interface):
-        malicious_reasons.append(
-            "Address has fake standard interface (usually happens with scam assets)."
+    for addr in all_addresses_from_tx:
+        data = _goplus_call(
+            lambda: Address().address_security(
+                chain_id=f"{RPCConfig().chain_id}", address=addr
+            )
         )
+        if data is None:
+            continue
 
-    if _goplus_to_bool(data.result.fake_token):
-        malicious_reasons.append("Address has fake token.")
+        logger.info(f"Response for address {addr}: {data.result}")
 
-    if _goplus_to_bool(data.result.financial_crime):
-        malicious_reasons.append("Address has financial crime activities.")
+        if _goplus_to_bool(data.result.blacklist_doubt):
+            malicious_reasons.append(f"Address {addr} is blacklisted.")
 
-    if _goplus_to_bool(data.result.gas_abuse):
-        malicious_reasons.append("Address has gas abuse activities.")
+        if _goplus_to_bool(data.result.blackmail_activities):
+            malicious_reasons.append(
+                f"Address {addr} has reported blackmail activities."
+            )
 
-    if _goplus_to_bool(data.result.honeypot_related_address):
-        malicious_reasons.append("Address is related to a honeypot.")
+        if _goplus_to_bool(data.result.cybercrime):
+            malicious_reasons.append(
+                f"Address {addr} has reported cybercrime activities."
+            )
 
-    if _goplus_to_bool(data.result.malicious_mining_activities):
-        malicious_reasons.append("Address has malicious mining activities.")
+        if _goplus_to_bool(data.result.darkweb_transactions):
+            malicious_reasons.append(f"Address {addr} has darkweb transactions.")
 
-    if _goplus_to_bool(data.result.mixer):
-        malicious_reasons.append("Address is a mixer.")
+        if _goplus_to_bool(data.result.fake_kyc):
+            malicious_reasons.append(f"Address {addr} has fake KYC.")
 
-    if _goplus_to_bool(data.result.money_laundering):
-        malicious_reasons.append("Address has money laundering activities.")
+        if _goplus_to_bool(data.result.fake_standard_interface):
+            malicious_reasons.append(
+                f"Address {addr} has fake standard interface (usually happens with scam assets)."
+            )
 
-    if _goplus_to_bool(data.result.number_of_malicious_contracts_created):
-        malicious_reasons.append("Address has created a number of malicious contracts.")
+        if _goplus_to_bool(data.result.fake_token):
+            malicious_reasons.append(f"Address {addr} has fake token.")
 
-    if _goplus_to_bool(data.result.phishing_activities):
-        malicious_reasons.append("Address has reported phishing activities.")
+        if _goplus_to_bool(data.result.financial_crime):
+            malicious_reasons.append(f"Address {addr} has financial crime activities.")
 
-    if _goplus_to_bool(data.result.reinit):
-        malicious_reasons.append("Address could be redeployed with a different code.")
+        if _goplus_to_bool(data.result.gas_abuse):
+            malicious_reasons.append(f"Address {addr} has gas abuse activities.")
 
-    if _goplus_to_bool(data.result.sanctioned):
-        malicious_reasons.append("Address is sanctioned.")
+        if _goplus_to_bool(data.result.honeypot_related_address):
+            malicious_reasons.append(f"Address {addr} is related to a honeypot.")
 
-    if _goplus_to_bool(data.result.stealing_attack):
-        malicious_reasons.append("Address has stealing attack activities.")
+        if _goplus_to_bool(data.result.malicious_mining_activities):
+            malicious_reasons.append(f"Address {addr} has malicious mining activities.")
+
+        if _goplus_to_bool(data.result.mixer):
+            malicious_reasons.append(f"Address {addr} is a mixer.")
+
+        if _goplus_to_bool(data.result.money_laundering):
+            malicious_reasons.append(f"Address {addr} has money laundering activities.")
+
+        if _goplus_to_bool(data.result.number_of_malicious_contracts_created):
+            malicious_reasons.append(
+                f"Address {addr} has created a number of malicious contracts."
+            )
+
+        if _goplus_to_bool(data.result.phishing_activities):
+            malicious_reasons.append(
+                f"Address {addr} has reported phishing activities."
+            )
+
+        if _goplus_to_bool(data.result.reinit):
+            malicious_reasons.append(
+                f"Address {addr} could be redeployed with a different code."
+            )
+
+        if _goplus_to_bool(data.result.sanctioned):
+            malicious_reasons.append(f"Address {addr} is sanctioned.")
+
+        if _goplus_to_bool(data.result.stealing_attack):
+            malicious_reasons.append(f"Address {addr} has stealing attack activities.")
 
     return _build_validation_result(malicious_reasons)
 
@@ -173,32 +190,40 @@ def validate_safe_transaction_goplus_address_security(
 def validate_safe_transaction_goplus_nft_security(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
+    all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult | None:
-    addr = new_transaction_safetx.to
-    data = _goplus_call(
-        lambda: Nft().nft_security(chain_id=f"{RPCConfig().chain_id}", address=addr)
-    )
-    if data is None:
-        return None
-
-    logger.info(data.result)
     malicious_reasons: list[str] = []
 
-    if _goplus_to_bool(data.result.malicious_nft_contract):
-        malicious_reasons.append("Malicious NFT activity reported.")
+    for addr in all_addresses_from_tx:
+        data = _goplus_call(
+            lambda: Nft().nft_security(chain_id=f"{RPCConfig().chain_id}", address=addr)
+        )
+        if data is None:
+            continue
 
-    if not _goplus_to_bool(data.result.nft_open_source):
-        malicious_reasons.append("NFT contract is not open source.")
+        logger.info(f"Response for address {addr}: {data.result}")
 
-    if _goplus_to_bool(data.result.privileged_burn.value):
-        malicious_reasons.append("NFT contract has privileged burn function.")
+        if _goplus_to_bool(data.result.malicious_nft_contract):
+            malicious_reasons.append(
+                f"NFT contract {addr} malicious activity reported."
+            )
 
-    if _goplus_to_bool(data.result.self_destruct.value):
-        malicious_reasons.append("NFT contract has self-destruct function.")
+        if not _goplus_to_bool(data.result.nft_open_source):
+            malicious_reasons.append(f"NFT contract {addr} is not open source.")
 
-    if _goplus_to_bool(data.result.transfer_without_approval.value):
-        malicious_reasons.append("NFT contract has transfer without approval function.")
+        if _goplus_to_bool(data.result.privileged_burn.value):
+            malicious_reasons.append(
+                f"NFT contract {addr} has privileged burn function."
+            )
+
+        if _goplus_to_bool(data.result.self_destruct.value):
+            malicious_reasons.append(f"NFT contract {addr} has self-destruct function.")
+
+        if _goplus_to_bool(data.result.transfer_without_approval.value):
+            malicious_reasons.append(
+                f"NFT contract {addr} has transfer without approval function."
+            )
 
     return _build_validation_result(malicious_reasons)
 

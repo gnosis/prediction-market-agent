@@ -25,6 +25,7 @@ from prediction_market_agent.utils import APIKeys
 def validate_safe_transaction_llm(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
+    all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
     agent = Agent(

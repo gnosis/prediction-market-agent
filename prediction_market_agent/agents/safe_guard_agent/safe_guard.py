@@ -22,6 +22,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
     signer_is_missing,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+    extract_all_addresses_or_raise,
     get_safe,
     get_safes,
     post_message,
@@ -36,7 +37,12 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 
 SAFE_GUARDS: list[
     Callable[
-        [DetailedTransactionResponse, SafeTx, list[DetailedTransactionResponse]],
+        [
+            DetailedTransactionResponse,
+            SafeTx,
+            list[ChecksumAddress],
+            list[DetailedTransactionResponse],
+        ],
         ValidationResult | None,
     ]
 ] = [
@@ -119,6 +125,7 @@ def validate_safe_transaction(
     detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
         transaction_id=transaction_id
     )
+    all_addresses_from_tx = extract_all_addresses_or_raise(detailed_transaction_info)
 
     safe_address = detailed_transaction_info.safeAddress
     safe = get_safe(safe_address)
@@ -130,6 +137,9 @@ def validate_safe_transaction(
         )
 
     logger.info(f"Processing transaction {transaction_id}.")
+    logger.info(
+        f"Transaction interacts with the following addresses: {all_addresses_from_tx}"
+    )
 
     # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
     historical_transactions = safe_api_utils.get_safe_history(safe_address)
@@ -157,6 +167,7 @@ def validate_safe_transaction(
     validation_results = run_safe_guards(
         safe_tx,
         detailed_transaction_info,
+        all_addresses_from_tx,
         detailed_historical_transactions,
     )
     ok = all(result.ok for result in validation_results)
@@ -185,6 +196,7 @@ def validate_safe_transaction(
 def run_safe_guards(
     safe_tx: SafeTx,
     detailed_transaction_info: DetailedTransactionResponse,
+    all_addresses_from_tx: list[ChecksumAddress],
     detailed_historical_transactions: list[DetailedTransactionResponse],
 ) -> list[ValidationResultWithName]:
     validation_results: list[ValidationResultWithName] = []
@@ -194,6 +206,7 @@ def run_safe_guards(
         validation_result = safe_guard_fn(
             detailed_transaction_info,
             safe_tx,
+            all_addresses_from_tx,
             detailed_historical_transactions,
         )
         if validation_result is None:
