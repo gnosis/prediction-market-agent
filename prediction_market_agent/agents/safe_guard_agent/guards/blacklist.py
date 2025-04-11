@@ -1,3 +1,4 @@
+from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
@@ -13,11 +14,11 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 def validate_safe_transaction_blacklist(
     new_transaction: DetailedTransactionResponse,
     new_transaction_safetx: SafeTx,
+    all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
-    if new_transaction_safetx.to.lower() in [
-        addr.strip().lower() for addr in _BLACKLIST
-    ]:
+    lowercased_blacklist = {addr.strip().lower() for addr in _BLACKLIST if addr.strip()}
+    if any(addr.lower() in lowercased_blacklist for addr in all_addresses_from_tx):
         return ValidationResult(ok=False, reason="Blacklisted address.")
 
     return ValidationResult(ok=True, reason="Not blacklisted.")

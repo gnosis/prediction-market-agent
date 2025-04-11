@@ -1,3 +1,5 @@
+from typing import Any
+
 import tenacity
 from eth_account.messages import defunct_hash_message
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
@@ -12,6 +14,12 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
 )
 from safe_eth.safe.safe import Safe, SafeTx
 from web3 import Web3
+
+from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+    DetailedTransactionResponse,
+)
+
+NULL_ADDRESS = Web3.to_checksum_address("0x0000000000000000000000000000000000000000")
 
 
 def get_safe(safe_address: ChecksumAddress) -> Safe:
@@ -49,12 +57,8 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         safe_tx_gas=0,
         base_gas=0,
         gas_price=0,
-        gas_token=Web3.to_checksum_address(
-            "0x0000000000000000000000000000000000000000"
-        ),
-        refund_receiver=Web3.to_checksum_address(
-            "0x0000000000000000000000000000000000000000"
-        ),
+        gas_token=NULL_ADDRESS,
+        refund_receiver=NULL_ADDRESS,
         signatures=None,
         safe_nonce=tx.safe_nonce,
         safe_version=tx.safe_version,
@@ -100,3 +104,46 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         logger.info("Safe requires only 1 signer, executing.")
         tx.call()
         tx.execute(api_keys.bet_from_private_key.get_secret_value())
+
+
+def extract_all_addresses_or_raise(
+    tx: DetailedTransactionResponse,
+) -> list[ChecksumAddress]:
+    """
+    Extracts all addresses from the transaction data.
+    Useful for example when dealing with Multi-Send transaction, which is built from multiple transactions inside it.
+    Raises ValueError if no addresses are found.
+    """
+    addresses = extract_all_addresses(tx)
+    if not addresses:
+        raise ValueError("No addresses found in the transaction.")
+    return addresses
+
+
+def extract_all_addresses(tx: DetailedTransactionResponse) -> list[ChecksumAddress]:
+    """
+    Extracts all addresses from the transaction data.
+    Useful for example when dealing with Multi-Send transaction, which is built from multiple transactions inside it.
+    """
+    # Automatically remove null address as that one isn't interesting.
+    found_addresses = _find_addresses_in_nested_structure(tx.model_dump()) - {
+        NULL_ADDRESS
+    }
+    return sorted(found_addresses)
+
+
+def _find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
+    addresses = set()
+    if isinstance(value, dict):
+        for v in value.values():
+            addresses.update(_find_addresses_in_nested_structure(v))
+    elif isinstance(value, list):
+        for item in value:
+            addresses.update(_find_addresses_in_nested_structure(item))
+    elif isinstance(value, str):
+        try:
+            addresses.add(Web3.to_checksum_address(value))
+        except ValueError:
+            # Ignore if it's not a valid address.
+            pass
+    return addresses
