@@ -47,7 +47,7 @@ def check_required_api_keys(required_keys: list[str]) -> None:
 
 
 def loguru_streamlit_sink(
-    log: "Message", expander_if_longer_than: int = 1000, include_in_expander: int = 50
+    log: "Message", expander_if_longer_than: int = 500, include_in_expander: int = 50
 ) -> None:
     record = log.record
     level = record["level"].name
