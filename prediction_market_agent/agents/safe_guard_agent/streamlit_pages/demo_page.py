@@ -53,7 +53,7 @@ On this page, you can test out Safe Guard and see how it works in practice step 
 
     safe_address = st.text_input(
         "Your safe address (or keep the default one provided)",
-        value="gno:0x1275EE969cd187Fd7B9c6Aa8339d41985eFd1EF1",
+        value="gno:0xeb95D75e178e6521ff18dFEf4927893D18D1C4E9",
     )
 
     if not safe_address:
