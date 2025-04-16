@@ -105,6 +105,7 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
 
     if safe.retrieve_threshold() > len(tx.signatures):
         logger.info("Threshold not met yet, just adding a sign.")
+        _abort_on_safe_owner_post(safe, tx, api_keys)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
     else:
@@ -134,6 +135,7 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
 
     if safe.retrieve_threshold() > 1:
         logger.info(f"Safe requires multiple signers, posting to the queue.")
+        _abort_on_safe_owner_post(safe, tx, api_keys)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_transaction(tx)
     else:
@@ -189,7 +191,7 @@ def _safe_sign(
     tx: SafeTx, owner_safe_address: ChecksumAddress, private_key: str
 ) -> bytes:
     """
-    TODO: This should be proposed into safe-eth-py as a method of SafeTx.
+    TODO: This could be proposed into safe-eth-py as a method of SafeTx.
     Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L210.
 
     :param owner_safe_address:
@@ -217,3 +219,31 @@ def _safe_sign(
         )
 
     return tx.signatures
+
+
+def _abort_on_safe_owner_post(
+    safe: Safe,
+    tx: SafeTx,
+    api_keys: APIKeys,
+) -> None:
+    if api_keys.safe_address_checksum is None:
+        return
+
+    if safe.retrieve_threshold() <= len(tx.signatures):
+        return
+
+    if api_keys.safe_address_checksum.lower() in [x.lower() for x in tx.signers]:
+        raise NotImplementedError(
+            f"""On the contract level, signing Safe transaction using another Safe (which is owner of the formet Safe) is supported.
+That's why we are able to sign & execute the transaction right away in the case we have enough of signers.
+
+Unfortunatelly, support in Safe UI isn't implemented yet, and in the case that `SafeSignatureContract` is uploaded via TransactionServiceApi, 
+Safe UI will crash and show 500 Internal Server Error.
+
+To be safe, use this function to abort the transaction if you are trying to post it to their queue. We do not want to bug out users' Safe accounts.
+
+For the details, see https://ethereum.stackexchange.com/questions/168598/queued-transactions-in-safe-ui-giving-500-internal-server-error.
+
+TODO: Remove this function once Safe UI supports this.
+"""
+        )
