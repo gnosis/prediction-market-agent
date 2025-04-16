@@ -229,12 +229,8 @@ def _abort_on_safe_owner_post(
     if api_keys.safe_address_checksum is None:
         return
 
-    if safe.retrieve_threshold() <= len(tx.signatures):
-        return
-
-    if api_keys.safe_address_checksum.lower() in [x.lower() for x in tx.signers]:
-        raise NotImplementedError(
-            f"""On the contract level, signing Safe transaction using another Safe (which is owner of the formet Safe) is supported.
+    raise NotImplementedError(
+        f"""On the contract level, signing Safe transaction using another Safe (which is owner of the formet Safe) is supported.
 That's why we are able to sign & execute the transaction right away in the case we have enough of signers.
 
 Unfortunatelly, support in Safe UI isn't implemented yet, and in the case that `SafeSignatureContract` is uploaded via TransactionServiceApi, 
@@ -246,4 +242,4 @@ For the details, see https://ethereum.stackexchange.com/questions/168598/queued-
 
 TODO: Remove this function once Safe UI supports this.
 """
-        )
+    )
