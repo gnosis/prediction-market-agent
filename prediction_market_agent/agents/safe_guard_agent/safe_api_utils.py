@@ -67,8 +67,8 @@ def maybe_multisig_tx(
 
 @observe()
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(3),
-    wait=tenacity.wait_fixed(1),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=10),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_queue(
@@ -109,8 +109,8 @@ def gather_safe_detailed_transaction_info(
 
 @observe()
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(3),
-    wait=tenacity.wait_fixed(1),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=10),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_detailed_transaction_info(
@@ -128,8 +128,8 @@ def get_safe_detailed_transaction_info(
 
 @observe()
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(3),
-    wait=tenacity.wait_fixed(1),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=10),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_history(
@@ -200,8 +200,8 @@ def safe_tx_from_detailed_transaction(
 
 @observe()
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(3),
-    wait=tenacity.wait_fixed(1),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=10),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_balances_usd(safe_address: ChecksumAddress) -> Balances:

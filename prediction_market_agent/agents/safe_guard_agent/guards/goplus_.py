@@ -239,8 +239,8 @@ T = TypeVar("T")
 
 
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(3),
-    wait=tenacity.wait_fixed(1),
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=10),
     retry=tenacity.retry_if_not_exception_type(GoPlusError),
 )
 def _goplus_call(f: Callable[[], T], retry: bool = True) -> T | None:
