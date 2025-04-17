@@ -1,3 +1,4 @@
+import os
 import typing as t
 
 import pytest
@@ -23,6 +24,10 @@ from web3 import Web3
 from web3.types import TxReceipt
 
 
+def set_env_rpc_url(url: str) -> None:
+    os.environ["GNOSIS_RPC_URL"] = url
+
+
 @pytest.fixture(autouse=True, scope="session")
 def load_env() -> None:
     load_dotenv()
@@ -41,12 +46,14 @@ def local_web3(
         fund_account_on_tenderly(
             tenderly_fork_rpc, [a.address for a in accounts], xDai(1000)
         )
+        set_env_rpc_url(tenderly_fork_rpc)
         yield w3
     else:
         print("using foundry")
         with chain.network_manager.parse_network_choice(
             "gnosis:mainnet_fork:foundry"
         ) as provider:
+            set_env_rpc_url(provider.http_uri)
             w3 = Web3(Web3.HTTPProvider(provider.http_uri))
             yield w3
 
