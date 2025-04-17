@@ -16,6 +16,7 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
 from safe_eth.safe.safe import Safe, SafeTx
 from safe_eth.safe.safe_signature import SafeSignature, SafeSignatureContract
 from web3 import Web3
+from web3.types import TxParams
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
@@ -89,11 +90,10 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     post_or_execute(safe, rejection_tx, api_keys)
 
 
-def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
+def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
     """
     Use this function to sign an existing transaction and automatically either execute it (if threshold is met), or to post your signature into the transaction in the queue.
     """
-
     if api_keys.safe_address_checksum is not None:
         _safe_sign(
             tx,
@@ -103,27 +103,28 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     else:
         tx.sign(api_keys.bet_from_private_key.get_secret_value())
 
-    if safe.retrieve_threshold() > len(tx.signatures):
+    threshold = safe.retrieve_threshold()
+
+    if threshold > len(tx.signers):
         logger.info("Threshold not met yet, just adding a sign.")
         _abort_on_safe_owner_post(safe, tx, api_keys)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
+        return None
     else:
-        logger.info("Threshold met, executing.")
+        logger.info(
+            f"Threshold {threshold} met with {len(tx.signers)} signs, executing."
+        )
         tx.call()
-        tx.execute(api_keys.bet_from_private_key.get_secret_value())
+        _, tx_params = tx.execute(api_keys.bet_from_private_key.get_secret_value())
+        return tx_params
 
 
-def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
+def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
     """
     Use this function to automatically sign and execute your new transaction (in case only 1 signer is required),
     or to post it to the queue (in case more than 1 signer is required).
     """
-    if len(tx.signatures):
-        raise ValueError(
-            "Should be a fresh transaction. See `sign_or_execute` function for signing existing transaction."
-        )
-
     if api_keys.safe_address_checksum is not None:
         _safe_sign(
             tx,
@@ -133,15 +134,21 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     else:
         tx.sign(api_keys.bet_from_private_key.get_secret_value())
 
-    if safe.retrieve_threshold() > 1:
+    threshold = safe.retrieve_threshold()
+
+    if threshold > len(tx.signers):
         logger.info(f"Safe requires multiple signers, posting to the queue.")
         _abort_on_safe_owner_post(safe, tx, api_keys)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_transaction(tx)
+        return None
     else:
-        logger.info("Safe requires only 1 signer, executing.")
+        logger.info(
+            f"Threshold {threshold} met with {len(tx.signers)} signs, executing."
+        )
         tx.call()
-        tx.execute(api_keys.bet_from_private_key.get_secret_value())
+        _, tx_params = tx.execute(api_keys.bet_from_private_key.get_secret_value())
+        return tx_params
 
 
 def extract_all_addresses_or_raise(
@@ -163,10 +170,7 @@ def extract_all_addresses(tx: DetailedTransactionResponse) -> list[ChecksumAddre
     Extracts all addresses from the transaction data.
     Useful for example when dealing with Multi-Send transaction, which is built from multiple transactions inside it.
     """
-    # Automatically remove null address as that one isn't interesting.
-    found_addresses = _find_addresses_in_nested_structure(tx.model_dump()) - {
-        NULL_ADDRESS
-    }
+    found_addresses = _find_addresses_in_nested_structure(tx.model_dump())
     return sorted(found_addresses)
 
 
@@ -184,7 +188,8 @@ def _find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
         except ValueError:
             # Ignore if it's not a valid address.
             pass
-    return addresses
+    # Automatically remove null address as that one isn't interesting.
+    return addresses - {NULL_ADDRESS}
 
 
 def _safe_sign(
@@ -194,6 +199,7 @@ def _safe_sign(
     TODO: This could be proposed into safe-eth-py as a method of SafeTx.
     Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L210.
 
+    :param tx:
     :param owner_safe_address:
     :param private_key:
     :return: Signature
@@ -211,11 +217,15 @@ def _safe_sign(
         owner_safe_eoa_signature,
     )
 
-    current_signatures = SafeSignature.parse_signature(tx.signatures, tx.safe_tx_hash)
     # Insert signature sorted
     if owner_safe_address.lower() not in [x.lower() for x in tx.signers]:
+        existing_signatures = SafeSignature.parse_signature(
+            tx.signatures,
+            tx.safe_tx_hash,
+            tx.safe_tx_hash_preimage,
+        )
         tx.signatures = SafeSignature.export_signatures(
-            [owner_safe_signature, *current_signatures]
+            [owner_safe_signature, *existing_signatures]
         )
 
     return tx.signatures
