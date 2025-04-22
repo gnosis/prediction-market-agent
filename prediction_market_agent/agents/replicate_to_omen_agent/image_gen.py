@@ -1,6 +1,7 @@
 import os
 from tempfile import TemporaryDirectory
 
+import tenacity
 from pinatapy import PinataPy
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, IPFSCIDVersion0
 from prediction_market_agent_tooling.loggers import logger
@@ -17,6 +18,10 @@ from prediction_market_agent.utils import APIKeys
 
 
 @observe()
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_exponential(max=60),
+)
 def generate_and_set_image_for_market(
     market_address: ChecksumAddress,
     market_question: str,
