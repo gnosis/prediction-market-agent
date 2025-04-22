@@ -28,7 +28,7 @@ def get_safe(safe_address: ChecksumAddress) -> Safe:
 
 
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential(max=10)
+    stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential(max=60)
 )
 def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
     api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
