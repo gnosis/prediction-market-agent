@@ -1,5 +1,6 @@
 import pytest
 from pydantic import BaseModel
+
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_models import Factuality
 
 
