@@ -161,8 +161,8 @@ class OFVChallengerAgent(DeployableAgent):
             )
 
         if answer is None:
-            logger.error(
-                f"Failed to get factuality for market {market.url=}, question {market.question_title=}. Skipping."
+            logger.warning(
+                f"OFV didn't factcheck {market.url=}, question {market.question_title=}. Skipping."
             )
             return Challenge(
                 old_responses=existing_responses,

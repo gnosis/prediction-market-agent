@@ -7,7 +7,9 @@ Factuality = Annotated[
     BeforeValidator(
         lambda v: (
             None
-            if str(v).lower().strip() in ("nothing to check.", "non-factual", "none")
+            if str(v).lower().strip() in ["none"]
+            or "non-factual" in str(v).lower()
+            or "nothing to check" in str(v).lower()
             else v
         )
     ),

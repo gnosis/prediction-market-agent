@@ -5,6 +5,9 @@ from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import USD, ChecksumAddress, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen_constants import (
+    SDAI_CONTRACT_ADDRESS,
+)
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     SAFE_COLLATERAL_TOKENS_ADDRESSES,
 )
@@ -89,9 +92,17 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             )
             initial_funds_per_market = USD(settings.INITIAL_FUNDS)
 
-            # Randomly select the collateral token to use.
-            collateral_token_address: ChecksumAddress = random.choice(
-                SAFE_COLLATERAL_TOKENS_ADDRESSES
+            # Prefer sDai, but create markets in others tokens too.
+            collateral_token_address: ChecksumAddress = (
+                SDAI_CONTRACT_ADDRESS
+                if random.random() < 0.8
+                else random.choice(
+                    [
+                        address
+                        for address in SAFE_COLLATERAL_TOKENS_ADDRESSES
+                        if address != SDAI_CONTRACT_ADDRESS
+                    ]
+                )
             )
 
             logger.info(
