@@ -68,7 +68,7 @@ def maybe_multisig_tx(
 @observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
-    wait=tenacity.wait_exponential(max=10),
+    wait=tenacity.wait_exponential(max=60),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_queue(
@@ -80,8 +80,9 @@ def get_safe_queue(
     """
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
-    ).json()
-    response_parsed = TransactionResponse.model_validate(response)
+    )
+    response.raise_for_status()
+    response_parsed = TransactionResponse.model_validate(response.json())
     return [r.transaction for r in response_parsed.results if r.transaction is not None]
 
 
@@ -110,7 +111,7 @@ def gather_safe_detailed_transaction_info(
 @observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
-    wait=tenacity.wait_exponential(max=10),
+    wait=tenacity.wait_exponential(max=60),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_detailed_transaction_info(
@@ -121,15 +122,16 @@ def get_safe_detailed_transaction_info(
     """
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/transactions/{transaction_id}"
-    ).json()
-    response_parsed = DetailedTransactionResponse.model_validate(response)
+    )
+    response.raise_for_status()
+    response_parsed = DetailedTransactionResponse.model_validate(response.json())
     return response_parsed
 
 
 @observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
-    wait=tenacity.wait_exponential(max=10),
+    wait=tenacity.wait_exponential(max=60),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_safe_history(
@@ -140,8 +142,9 @@ def get_safe_history(
     """
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
-    ).json()
-    response_parsed = TransactionResponse.model_validate(response)
+    )
+    response.raise_for_status
+    response_parsed = TransactionResponse.model_validate(response.json())
     return [r.transaction for r in response_parsed.results if r.transaction is not None]
 
 
@@ -201,7 +204,7 @@ def safe_tx_from_detailed_transaction(
 @observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
-    wait=tenacity.wait_exponential(max=10),
+    wait=tenacity.wait_exponential(max=60),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
 def get_balances_usd(safe_address: ChecksumAddress) -> Balances:
@@ -210,6 +213,7 @@ def get_balances_usd(safe_address: ChecksumAddress) -> Balances:
     """
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/balances/usd?trusted=true"
-    ).json()
-    response_model = Balances.model_validate(response)
+    )
+    response.raise_for_status()
+    response_model = Balances.model_validate(response.json())
     return response_model
