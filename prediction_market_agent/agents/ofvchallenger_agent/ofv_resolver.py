@@ -2,6 +2,7 @@ from factcheck import FactCheck
 from factcheck.utils.multimodal import modal_normalization
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.caches.db_cache import db_cache
 from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.is_predictable import is_predictable_binary
 from prediction_market_agent_tooling.tools.langfuse_ import (
@@ -90,6 +91,7 @@ def most_common_fact_result(
 
 
 @observe()
+@db_cache(ignore_args=["api_keys"])
 def ofv_answer_binary_question(
     market_question: str,
     api_keys: APIKeys,
