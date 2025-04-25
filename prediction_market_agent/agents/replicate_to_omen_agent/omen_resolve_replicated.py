@@ -31,11 +31,16 @@ from prediction_market_agent_tooling.tools.is_invalid import is_invalid
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
+from web3 import Web3
 
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
     ofv_answer_binary_question,
 )
 from prediction_market_agent.utils import APIKeys
+
+# Old Replicator address with leaked key, but could still have some markets that aren't closed yet and will need to be resolved.
+# TODO: Remove some time in the future.
+OLD_REPLICATOR = Web3.to_checksum_address("0x993DFcE14768e4dE4c366654bE57C21D9ba54748")
 
 
 class ClaimResult(BaseModel):
@@ -67,7 +72,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
     get_omen_binary_markets_common_filters = partial(
         OmenSubgraphHandler().get_omen_binary_markets,
         limit=None,
-        creator=public_key,
+        creator_in=[public_key, OLD_REPLICATOR],
         # We need markets already opened for answers.
         question_opened_before=now,
     )
