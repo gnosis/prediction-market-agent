@@ -51,7 +51,7 @@ langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
 # TODO: Switch back to `main` branch once it's compatible again (being done in other branch)
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", rev = "a9e66b67953c744c8e5825beda11735701e88f12" }
+prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "main" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.5.1"
 autogen-agentchat = "^0.4.0"
