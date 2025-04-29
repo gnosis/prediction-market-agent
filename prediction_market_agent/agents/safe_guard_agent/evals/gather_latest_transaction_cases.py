@@ -21,7 +21,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
 )
 
 
-def main(n: int = 100) -> None:
+def main(n: int = 10) -> None:
     """
     Gathers testing data that should all be okay.
     It's always latest transaction from biggest Safes that there are.
