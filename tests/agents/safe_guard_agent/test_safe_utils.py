@@ -10,7 +10,7 @@ from prediction_market_agent_tooling.gtypes import (
 from web3 import Web3
 
 from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
-    _find_addresses_in_nested_structure,
+    find_addresses_in_nested_structure,
     get_safe,
     get_safes,
     post_message,
@@ -78,7 +78,7 @@ def test_post_message(
         )
 
 
-def test__find_addresses_in_nested_structure() -> None:
+def test_find_addresses_in_nested_structure() -> None:
     # Test with a nested dictionary containing valid and invalid Ethereum addresses
     nested = [
         {
@@ -105,5 +105,5 @@ def test__find_addresses_in_nested_structure() -> None:
         Web3.to_checksum_address("0xAb8483F64d9C6d1EcF9b849Ae677dD3315835Cb2"),
         Web3.to_checksum_address("0x4B0897b0513fdc7C541B6d9D7E929C4e5364D2dB"),
     }
-    found_addresses = _find_addresses_in_nested_structure(nested)
+    found_addresses = find_addresses_in_nested_structure(nested)
     assert found_addresses == expected_addresses
