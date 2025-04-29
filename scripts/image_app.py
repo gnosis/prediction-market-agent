@@ -47,7 +47,7 @@ with st.spinner("Generating image..."):
         quality="standard",
         n=1,
     )
-image_url = response.data[0].url
+image_url = response.data[0].url if response.data else None
 
 if image_url is not None:
     st.image(image_url, use_column_width=True)
