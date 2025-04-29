@@ -21,6 +21,8 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 )
 from prediction_market_agent.utils import APIKeys
 
+HISTORY_LIMIT = 25
+
 
 @observe()
 def validate_safe_transaction_llm(
@@ -29,9 +31,14 @@ def validate_safe_transaction_llm(
     all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
+    # Get the latest ones.
+    history = sorted(
+        history, key=lambda x: x.executedAt or float("-inf"), reverse=True
+    )[:HISTORY_LIMIT]
+
     agent = Agent(
         OpenAIModel(
-            "o1",
+            "gpt-4o",
             provider=OpenAIProvider(
                 openai_client=AsyncOpenAI(
                     api_key=APIKeys().openai_api_key.get_secret_value(),
@@ -75,7 +82,7 @@ The history of transactions made by this Safe is as follows:
 
 Is the new transaction malicious or not? Why? Output your answer in the JSON format with the following structure:
 
-{{"ok": bool, "reason": string}}
+{{"reason": string, "ok": bool}}
 """
     logger.info(f"Prompting LLM agent with:\n\n\n{prompt}")
 
