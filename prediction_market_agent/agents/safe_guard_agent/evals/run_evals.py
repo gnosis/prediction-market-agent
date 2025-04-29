@@ -3,11 +3,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import nest_asyncio
+import typer
+from prediction_market_agent_tooling.loggers import logger
 from pydantic_evals import Dataset
 from rich.console import Console
-import typer
 
-from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent.agents.safe_guard_agent.evals.models import (
     PydanticCase,
     SGCase,
