@@ -28,8 +28,10 @@ from prediction_prophet.benchmark.agents import (
 )
 from pydantic_ai import Agent
 from pydantic_ai.exceptions import UnexpectedModelBehavior
-from pydantic_ai.models.anthropic import AnthropicModel, AsyncAnthropic
+from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.anthropic import AnthropicProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
@@ -76,9 +78,11 @@ class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     self.model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openrouter_api_key.get_secret_value(),
-                        base_url=OPENROUTER_BASE_URL,
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openrouter_api_key.get_secret_value(),
+                            base_url=OPENROUTER_BASE_URL,
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -86,9 +90,11 @@ class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     self.model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openrouter_api_key.get_secret_value(),
-                        base_url=OPENROUTER_BASE_URL,
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openrouter_api_key.get_secret_value(),
+                            base_url=OPENROUTER_BASE_URL,
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -121,8 +127,10 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -130,8 +138,10 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -171,8 +181,10 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -180,8 +192,10 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -257,8 +271,10 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -266,8 +282,10 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -336,8 +354,10 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -345,8 +365,10 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -378,8 +400,10 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -387,8 +411,10 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -420,8 +446,10 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.5),
@@ -429,8 +457,10 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
@@ -463,8 +493,10 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -472,8 +504,10 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -506,8 +540,10 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -515,8 +551,10 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -548,8 +586,10 @@ class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -557,8 +597,10 @@ class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -590,8 +632,10 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
             research_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -599,8 +643,10 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
             prediction_agent=Agent(
                 OpenAIModel(
                     model,
-                    openai_client=AsyncOpenAI(
-                        api_key=api_keys.openai_api_key.get_secret_value()
+                    provider=OpenAIProvider(
+                        openai_client=AsyncOpenAI(
+                            api_key=api_keys.openai_api_key.get_secret_value()
+                        )
                     ),
                 ),
                 model_settings=ModelSettings(temperature=1.0),
@@ -631,7 +677,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
@@ -640,7 +686,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
@@ -673,7 +719,7 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
@@ -682,7 +728,7 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
@@ -715,7 +761,7 @@ class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
             research_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),
@@ -724,7 +770,7 @@ class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
             prediction_agent=Agent(
                 AnthropicModel(
                     model,
-                    anthropic_client=AsyncAnthropic(
+                    provider=AnthropicProvider(
                         api_key=api_keys.anthropic_api_key.get_secret_value()
                     ),
                 ),

@@ -83,7 +83,13 @@ def get_safe_queue(
     )
     response.raise_for_status()
     response_parsed = TransactionResponse.model_validate(response.json())
-    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+    transactions = [
+        r.transaction for r in response_parsed.results if r.transaction is not None
+    ]
+    # This is standard as API returns it, sorting explicitly just to be sure.
+    # The first transaction is the oldest one, as they need to be processed in order of nonces ASC.
+    transactions.sort(key=lambda x: x.timestamp, reverse=False)
+    return transactions
 
 
 def get_safe_queue_multisig(
@@ -143,9 +149,15 @@ def get_safe_history(
     response = requests.get(
         f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
     )
-    response.raise_for_status
+    response.raise_for_status()
     response_parsed = TransactionResponse.model_validate(response.json())
-    return [r.transaction for r in response_parsed.results if r.transaction is not None]
+    transactions = [
+        r.transaction for r in response_parsed.results if r.transaction is not None
+    ]
+    # This is standard as API returns it, sorting explicitly just to be sure.
+    # The first transaction is the newest one, as it's more practical to see latest transactions than always the oldest one.
+    transactions.sort(key=lambda x: x.timestamp, reverse=True)
+    return transactions
 
 
 def get_safe_history_multisig(
@@ -167,7 +179,10 @@ def safe_tx_from_detailed_transaction(
     safe: Safe,
     transaction_details: DetailedTransactionResponse,
 ) -> SafeTx:
-    tx_data = check_not_none(transaction_details.txData)
+    tx_data = check_not_none(
+        transaction_details.txData,
+        f"txData is None for {safe.address=}, {transaction_details=}",
+    )
     exec_info = transaction_details.detailedExecutionInfo
     return safe.build_multisig_tx(
         to=tx_data.to.value,

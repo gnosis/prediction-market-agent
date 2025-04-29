@@ -19,5 +19,5 @@ class ValidationResultWithName(ValidationResult):
 
 
 class ValidationConclusion(BaseModel):
-    ok: bool
+    all_ok: bool
     results: list[ValidationResultWithName]

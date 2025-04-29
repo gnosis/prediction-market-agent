@@ -5,6 +5,7 @@ from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -31,8 +32,10 @@ def validate_safe_transaction_llm(
     agent = Agent(
         OpenAIModel(
             "o1",
-            openai_client=AsyncOpenAI(
-                api_key=APIKeys().openai_api_key.get_secret_value()
+            provider=OpenAIProvider(
+                openai_client=AsyncOpenAI(
+                    api_key=APIKeys().openai_api_key.get_secret_value(),
+                )
             ),
         ),
         system_prompt="""You are fraud detection agent. 
