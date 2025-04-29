@@ -10,6 +10,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transaction
     SwapOrderTxInfo,
     SwapTransferTxInfo,
     TransferTxInfo,
+    TwapOrderInfo,
 )
 
 
@@ -69,6 +70,7 @@ class DetailedTransactionResponse(BaseModel):
         SwapOrderTxInfo,
         CustomTxInfo,
         SwapTransferTxInfo,
+        TwapOrderInfo,
     ]
     txData: TxData | None = None
     txHash: str | None = None

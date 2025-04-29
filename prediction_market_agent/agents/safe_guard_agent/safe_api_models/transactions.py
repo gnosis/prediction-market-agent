@@ -1,7 +1,7 @@
 from typing import Any, List, Literal, Union
 
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Token(BaseModel):
@@ -133,6 +133,112 @@ class SwapTransferTxInfo(BaseModel):
         )
 
 
+class FullAppData(BaseModel):
+    appCode: str
+    environment: str
+    metadata: dict[str, Any]
+    version: str
+
+
+class DurationOfPart(BaseModel):
+    durationType: str
+
+
+class StartTime(BaseModel):
+    startType: str
+
+
+class TwapOrderInfo(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["TwapOrder"]
+    humanDescription: str | None = None
+    status: str
+    kind: str
+    class_: str = Field(alias="class")
+    activeOrderUid: str | None = None
+    validUntil: int
+    sellAmount: str
+    buyAmount: str
+    executedSellAmount: str | None = None
+    executedBuyAmount: str | None = None
+    executedFee: str | None = None
+    executedFeeToken: Token | None = None
+    sellToken: Token
+    buyToken: Token
+    receiver: ChecksumAddress
+    owner: ChecksumAddress
+    fullAppData: FullAppData
+    numberOfParts: str
+    partSellAmount: str
+    minPartLimit: str
+    timeBetweenParts: int
+    durationOfPart: DurationOfPart
+    startTime: StartTime
+
+    def format_llm(self) -> str:
+        return (
+            f"Transaction type: {self.type} | "
+            + (
+                f"Human description: {self.humanDescription} | "
+                if self.humanDescription
+                else ""
+            )
+            + f"Status: {self.status} | "
+            + f"Kind: {self.kind} | "
+            + f"Class: {self.class_} | "
+            + (
+                f"Active Order UID: {self.activeOrderUid} | "
+                if self.activeOrderUid
+                else ""
+            )
+            + f"Valid Until: {self.validUntil} | "
+            + f"Sell amount: {self.sellAmount} | "
+            + f"Buy amount: {self.buyAmount} | "
+            + (
+                f"Executed Sell Amount: {self.executedSellAmount} | "
+                if self.executedSellAmount
+                else ""
+            )
+            + (
+                f"Executed Buy Amount: {self.executedBuyAmount} | "
+                if self.executedBuyAmount
+                else ""
+            )
+            + (f"Executed Fee: {self.executedFee} | " if self.executedFee else "")
+            + (
+                f"Executed Fee Token Address: {self.executedFeeToken.address} | "
+                if self.executedFeeToken and self.executedFeeToken.address
+                else ""
+            )
+            + (
+                f"Executed Fee Token Symbol: {self.executedFeeToken.symbol} | "
+                if self.executedFeeToken and self.executedFeeToken.symbol
+                else ""
+            )
+            + f"Sell token address: {self.sellToken.address} | "
+            + (
+                f"Sell token symbol: {self.sellToken.symbol} | "
+                if self.sellToken.symbol
+                else ""
+            )
+            + f"Buy token address: {self.buyToken.address} | "
+            + (
+                f"Buy token symbol: {self.buyToken.symbol} | "
+                if self.buyToken.symbol
+                else ""
+            )
+            + f"Receiver: {self.receiver} | "
+            + f"Owner: {self.owner} | "
+            + f"Number of Parts: {self.numberOfParts} | "
+            + f"Part Sell Amount: {self.partSellAmount} | "
+            + f"Min Part Limit: {self.minPartLimit} | "
+            + f"Time Between Parts: {self.timeBetweenParts} | "
+            + f"Duration of Part: {self.durationOfPart} | "
+            + f"Start Time: {self.startTime} | "
+        )
+
+
 class CustomTxInfo(BaseModel):
     type: Literal["Custom"]
     humanDescription: str | None = None
@@ -244,6 +350,7 @@ class Transaction(BaseModel):
         SwapOrderTxInfo,
         CustomTxInfo,
         SwapTransferTxInfo,
+        TwapOrderInfo,
     ]
     id: str
     timestamp: int

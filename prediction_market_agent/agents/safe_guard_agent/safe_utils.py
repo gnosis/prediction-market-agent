@@ -166,20 +166,20 @@ def extract_all_addresses(tx: DetailedTransactionResponse) -> list[ChecksumAddre
     Useful for example when dealing with Multi-Send transaction, which is built from multiple transactions inside it.
     """
     # Automatically remove null address as that one isn't interesting.
-    found_addresses = _find_addresses_in_nested_structure(tx.model_dump()) - {
+    found_addresses = find_addresses_in_nested_structure(tx.model_dump()) - {
         NULL_ADDRESS
     }
     return sorted(found_addresses)
 
 
-def _find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
+def find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
     addresses = set()
     if isinstance(value, dict):
         for v in value.values():
-            addresses.update(_find_addresses_in_nested_structure(v))
+            addresses.update(find_addresses_in_nested_structure(v))
     elif isinstance(value, list):
         for item in value:
-            addresses.update(_find_addresses_in_nested_structure(item))
+            addresses.update(find_addresses_in_nested_structure(item))
     elif isinstance(value, str):
         try:
             addresses.add(Web3.to_checksum_address(value))

@@ -1,0 +1,24 @@
+from pprint import pprint
+
+import typer
+
+from prediction_market_agent.agents.safe_guard_agent.guards.llm import format_balances
+from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+    get_safe_detailed_transaction_info,
+)
+
+
+def main(tx_id: str) -> None:
+    """
+    Helper script to print all information about multisig with given id from Safe APIs.
+    """
+    tx = get_safe_detailed_transaction_info(tx_id)
+
+    print(f"Safe's info:")
+    print(format_balances(tx.safeAddress))
+    print(f"Transaction info:")
+    pprint(tx.model_dump())
+
+
+if __name__ == "__main__":
+    typer.run(main)

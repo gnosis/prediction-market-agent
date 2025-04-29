@@ -34,6 +34,7 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
     ValidationResult,
     ValidationResultWithName,
 )
+from prediction_market_agent.agents.safe_guard_agent.whitelist import is_whitelisted
 
 SAFE_GUARDS: list[
     Callable[
@@ -120,12 +121,31 @@ def validate_safe_transaction(
     do_message: bool,
     ignore_historical_transaction_ids: set[str] | None = None,
 ) -> ValidationConclusion:
-    api_keys = APIKeys()
-
     detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
         transaction_id=transaction_id
     )
-    all_addresses_from_tx = extract_all_addresses_or_raise(detailed_transaction_info)
+    return validate_safe_transaction_obj(
+        detailed_transaction_info=detailed_transaction_info,
+        do_sign_or_execution=do_sign_or_execution,
+        do_reject=do_reject,
+        do_message=do_message,
+        ignore_historical_transaction_ids=ignore_historical_transaction_ids,
+    )
+
+
+@observe()
+def validate_safe_transaction_obj(
+    detailed_transaction_info: DetailedTransactionResponse,
+    do_sign_or_execution: bool,
+    do_reject: bool,
+    do_message: bool,
+    ignore_historical_transaction_ids: set[str] | None = None,
+) -> ValidationConclusion:
+    api_keys = APIKeys()
+
+    all_addresses_from_tx_raw = extract_all_addresses_or_raise(
+        detailed_transaction_info
+    )
 
     safe_address = detailed_transaction_info.safeAddress
     safe = get_safe(safe_address)
@@ -136,9 +156,16 @@ def validate_safe_transaction(
             f"{api_keys.bet_from_address} is not owner of Safe {safe_address}, some functionality may be limited."
         )
 
-    logger.info(f"Processing transaction {transaction_id}.")
+    logger.info(f"Processing transaction {detailed_transaction_info.txId}.")
     logger.info(
-        f"Transaction interacts with the following addresses: {all_addresses_from_tx}"
+        f"Transaction interacts with the following addresses ({len(all_addresses_from_tx_raw)}) [RAW]: {all_addresses_from_tx_raw}"
+    )
+
+    all_addresses_from_tx_not_whitelisted = [
+        addr for addr in all_addresses_from_tx_raw if not is_whitelisted(addr)
+    ]
+    logger.info(
+        f"Transaction interacts with the following addresses ({len(all_addresses_from_tx_not_whitelisted)}) [EXC. WHITELIST]: {all_addresses_from_tx_not_whitelisted}"
     )
 
     # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
@@ -167,7 +194,7 @@ def validate_safe_transaction(
     validation_results = run_safe_guards(
         safe_tx,
         detailed_transaction_info,
-        all_addresses_from_tx,
+        all_addresses_from_tx_not_whitelisted,
         detailed_historical_transactions,
     )
     ok = all(result.ok for result in validation_results)
@@ -178,16 +205,16 @@ def validate_safe_transaction(
             sign_or_execute(safe, safe_tx, api_keys)
 
     else:
-        logger.error("At least one validation failed.")
+        logger.warning("At least one validation failed.")
         if do_reject:
             reject_transaction(safe, safe_tx, api_keys)
 
     logger.info("Done.")
     if do_message:
-        send_message(safe, transaction_id, validation_results, api_keys)
+        send_message(safe, detailed_transaction_info.txId, validation_results, api_keys)
 
     return ValidationConclusion(
-        ok=ok,
+        all_ok=ok,
         results=validation_results,
     )
 
@@ -223,7 +250,7 @@ def run_safe_guards(
         validation_results.append(validation_result_with_name)
 
         if not validation_result.ok:
-            logger.error(
+            logger.warning(
                 f"Validation using {validation_result_with_name.name} reported malicious activity."
             )
 

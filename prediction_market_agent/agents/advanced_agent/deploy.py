@@ -8,6 +8,7 @@ from prediction_market_agent_tooling.tools.google_utils import search_google_ser
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
 
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.utils import APIKeys
@@ -64,8 +65,10 @@ def llm(question: str, contents: list[str]) -> tuple[float, float]:
     agent = Agent(
         OpenAIModel(
             "gpt-4o-mini",
-            openai_client=AsyncOpenAI(
-                api_key=APIKeys().openai_api_key.get_secret_value()
+            provider=OpenAIProvider(
+                openai_client=AsyncOpenAI(
+                    api_key=APIKeys().openai_api_key.get_secret_value()
+                )
             ),
         ),
         system_prompt="You are professional prediction market trading agent.",
