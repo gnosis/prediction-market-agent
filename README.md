@@ -6,12 +6,12 @@ These agents build on top of the prediction market APIs from https://github.com/
 
 ## Setup
 
-Install the project dependencies with `poetry`, using Python >=3.10:
+Install the project dependencies with `poetry`, using Python >=3.11:
 
 ```bash
-python3.10 -m pip install poetry
-python3.10 -m poetry install
-python3.10 -m poetry shell
+python3.11 -m pip install poetry
+python3.11 -m poetry install
+python3.11 -m poetry shell
 ```
 
 Create a `.env` file in the root of the repo with the following variables:
