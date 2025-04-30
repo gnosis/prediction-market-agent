@@ -7841,13 +7841,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.2.dev603"
+version = "0.64.2.dev604"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.64.2.dev603-py3-none-any.whl", hash = "sha256:5ffdd77a230f6adcbe895a294b574b83a88abccf6fcbb1d8a1649a2caab76987"},
-    {file = "prediction_market_agent_tooling-0.64.2.dev603.tar.gz", hash = "sha256:e23e29a18e54f3280d4a2516104ecbfb22deb2f5f21273a67c1a13cedaf44287"},
+    {file = "prediction_market_agent_tooling-0.64.2.dev604-py3-none-any.whl", hash = "sha256:f6a39aea899735f9467d8bc531afff6f545ee2f8ad8990bc8fd9e5f21fd593e9"},
+    {file = "prediction_market_agent_tooling-0.64.2.dev604.tar.gz", hash = "sha256:954e3172869a0c9cecd8ff12eae5dc381053948f01956386eb1989ae18459bf7"},
 ]
 
 [package.dependencies]
@@ -8216,13 +8216,13 @@ test = ["pytest", "pytest-xdist", "setuptools"]
 
 [[package]]
 name = "psycopg"
-version = "3.2.6"
+version = "3.2.7"
 description = "PostgreSQL database adapter for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "psycopg-3.2.6-py3-none-any.whl", hash = "sha256:f3ff5488525890abb0566c429146add66b329e20d6d4835662b920cbbf90ac58"},
-    {file = "psycopg-3.2.6.tar.gz", hash = "sha256:16fa094efa2698f260f2af74f3710f781e4a6f226efe9d1fd0c37f384639ed8a"},
+    {file = "psycopg-3.2.7-py3-none-any.whl", hash = "sha256:d39747d2d5b9658b69fa462ad21d31f1ba4a5722ad1d0cb952552bc0b4125451"},
+    {file = "psycopg-3.2.7.tar.gz", hash = "sha256:9afa609c7ebf139827a38c0bf61be9c024a3ed743f56443de9d38e1efc260bf3"},
 ]
 
 [package.dependencies]
@@ -8230,9 +8230,9 @@ typing-extensions = {version = ">=4.6", markers = "python_version < \"3.13\""}
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-binary = ["psycopg-binary (==3.2.6)"]
-c = ["psycopg-c (==3.2.6)"]
-dev = ["ast-comments (>=1.1.2)", "black (>=24.1.0)", "codespell (>=2.2)", "dnspython (>=2.1)", "flake8 (>=4.0)", "isort-psycopg", "isort[colors] (>=6.0)", "mypy (>=1.14)", "pre-commit (>=4.0.1)", "types-setuptools (>=57.4)", "wheel (>=0.37)"]
+binary = ["psycopg-binary (==3.2.7)"]
+c = ["psycopg-c (==3.2.7)"]
+dev = ["ast-comments (>=1.1.2)", "black (>=24.1.0)", "codespell (>=2.2)", "dnspython (>=2.1)", "flake8 (>=4.0)", "isort-psycopg", "isort[colors] (>=6.0)", "mypy (>=1.14)", "pre-commit (>=4.0.1)", "types-setuptools (>=57.4)", "types-shapely (>=2.0)", "wheel (>=0.37)"]
 docs = ["Sphinx (>=5.0)", "furo (==2022.6.21)", "sphinx-autobuild (>=2021.3.14)", "sphinx-autodoc-typehints (>=1.12)"]
 pool = ["psycopg-pool"]
 test = ["anyio (>=4.0)", "mypy (>=1.14)", "pproxy (>=2.7)", "pytest (>=6.2.5)", "pytest-cov (>=3.0)", "pytest-randomly (>=3.5)"]
@@ -12741,4 +12741,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "03382c016360d455925333892169b204123785aa7d8b16fd0e3ae971470126b5"
+content-hash = "da2a4801f6b16f1b223bac5864e127b4bf04de7261ba10615b6b74cb4a26de1e"
