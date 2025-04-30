@@ -5058,13 +5058,13 @@ dev = ["Sphinx (==8.1.3)", "build (==1.2.2)", "colorama (==0.4.5)", "colorama (=
 
 [[package]]
 name = "loky"
-version = "3.5.2"
+version = "3.5.3"
 description = "A robust implementation of concurrent.futures.ProcessPoolExecutor"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "loky-3.5.2-py3-none-any.whl", hash = "sha256:b49170b3c1be6743f0c00dfeef2b7e6ff70009455aef52e25366a7fd550a45a0"},
-    {file = "loky-3.5.2.tar.gz", hash = "sha256:f42914d8fbe55fc73ce6a240f29713fe3402aabac6c13632cf2144932c9a9700"},
+    {file = "loky-3.5.3-py3-none-any.whl", hash = "sha256:4947b21c3383ed1eb36f9609a69e1d9cebfd8770576c2f9ac4be54ad9792684e"},
+    {file = "loky-3.5.3.tar.gz", hash = "sha256:9e9c4c90d764ebb68ae06b0fab8ee460589c36a3abed9a85d6d53d0eee04e61f"},
 ]
 
 [package.dependencies]
