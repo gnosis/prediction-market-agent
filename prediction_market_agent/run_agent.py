@@ -1,6 +1,6 @@
 """
 Entrypoint for running the agent in GKE.
-If the agent adheres to PMAT standard (subclasses deployable agent), 
+If the agent adheres to PMAT standard (subclasses deployable agent),
 simply add the agent to the `RunnableAgent` enum and then `RUNNABLE_AGENTS` dict.
 
 Can also be executed locally, simply by running `python prediction_market_agent/run_agent.py <agent> <market_type>`.
@@ -21,6 +21,7 @@ from prediction_market_agent.agents.coinflip_agent.deploy import (
     DeployableCoinFlipAgent,
     DeployableCoinFlipAgentByHighestLiquidity,
 )
+from prediction_market_agent.agents.gptr_agent.deploy import GPTRAgent
 from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -129,6 +130,7 @@ class RunnableAgent(str, Enum):
     prophet_claude35_haiku = "prophet_claude35_haiku"
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
     advanced_agent = "advanced_agent"
+    gptr_agent = "gptr_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -177,6 +179,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
     RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,
     RunnableAgent.advanced_agent: AdvancedAgent,
+    RunnableAgent.gptr_agent: GPTRAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
