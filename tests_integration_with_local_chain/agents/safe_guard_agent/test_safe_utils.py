@@ -80,17 +80,11 @@ def test_post_or_execute(
                 result, dict
             ), "Should get executed, because threshold is met."
             mock_post_transaction.assert_not_called()
-        elif not use_owner_safe:
+        else:
             # In case of more signers needed, but we aren't using owner safe, it should get posted to Safe API.
             assert exp is None
             assert result is None, "Should not get executed, because threshold is >1."
             mock_post_transaction.assert_called_once_with(tx)
-        else:
-            # Otherwise, we should have raised NotImplementedError to not break the user's Safe UI (read the error message).
-            assert exp is not None
-            assert "Unfortunatelly, support in Safe UI isn't implemented yet" in str(
-                exp
-            )
 
 
 @pytest.mark.parametrize(
