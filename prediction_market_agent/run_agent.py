@@ -6,11 +6,13 @@ simply add the agent to the `RunnableAgent` enum and then `RUNNABLE_AGENTS` dict
 Can also be executed locally, simply by running `python prediction_market_agent/run_agent.py <agent> <market_type>`.
 """
 
+import warnings
 from enum import Enum
 
 import nest_asyncio
 import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
@@ -191,7 +193,35 @@ def main(
     market_type: MarketType,
 ) -> None:
     nest_asyncio.apply()  # See https://github.com/pydantic/pydantic-ai/issues/889, we had issue with Think Thoroughly that is using multiprocessing heavily.
-    RUNNABLE_AGENTS[agent]().run(market_type=market_type)
+    # RUNNABLE_AGENTS[agent]().run(market_type=market_type)
+
+    logger.info(f"Trying info log")
+    logger.warning(f"Trying warning log")
+    logger.error(f"Trying error log")
+    logger.critical(f"Trying critical log")
+    warnings.warn("Trying warning")
+    print("Trying print")
+    print(
+        """Trying 
+          
+something
+          
+over
+          
+          multi line!
+"""
+    )
+    logger.error(
+        """Trying  ERROR
+          
+something
+          
+over
+          
+          multi line!
+"""
+    )
+    raise RuntimeError("And this is the end!")
 
 
 if __name__ == "__main__":
