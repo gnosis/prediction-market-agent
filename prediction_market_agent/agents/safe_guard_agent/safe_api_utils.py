@@ -65,7 +65,6 @@ def maybe_multisig_tx(
     )
 
 
-@observe()
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
     wait=tenacity.wait_exponential(max=60),
