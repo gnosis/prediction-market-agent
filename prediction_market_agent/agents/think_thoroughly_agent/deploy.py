@@ -31,7 +31,7 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return self.agent.answer_binary_market(
-            market.question, list(market.outcomes), created_time=market.created_time
+            market.question, n_iterations=1, created_time=market.created_time
         )
 
     def before_process_markets(self, market_type: MarketType) -> None:
