@@ -7844,13 +7844,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.4"
+version = "0.64.5"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.64.4-py3-none-any.whl", hash = "sha256:147e9e0b36e531b77fbf4fbb472baf0fc234de12ae7b26901e79d46bd08611a8"},
-    {file = "prediction_market_agent_tooling-0.64.4.tar.gz", hash = "sha256:dac90c9227a9d36d522955f357b6abb2388fde58b08863aa09be3c1fcbd1dcdf"},
+    {file = "prediction_market_agent_tooling-0.64.5-py3-none-any.whl", hash = "sha256:f4277a6614e08ca67f59ef4ce697835797bd362f920d8ca49f977bf4982f7216"},
+    {file = "prediction_market_agent_tooling-0.64.5.tar.gz", hash = "sha256:36ad110f79abfc59bd0567bff6df7017dbb6663be179d83279a6a6fb9b6d4e4a"},
 ]
 
 [package.dependencies]
@@ -11978,13 +11978,13 @@ files = [
 
 [[package]]
 name = "virtualenv"
-version = "20.31.0"
+version = "20.31.1"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "virtualenv-20.31.0-py3-none-any.whl", hash = "sha256:931d8d4c1a35e4737aa9a06bc495221c7600196e9da52dae78c318904e2d2284"},
-    {file = "virtualenv-20.31.0.tar.gz", hash = "sha256:82195319e2e9394cf17ee1646780e90d8370be35065af4f98e060c9e88d2e5ba"},
+    {file = "virtualenv-20.31.1-py3-none-any.whl", hash = "sha256:f448cd2f1604c831afb9ea238021060be2c0edbcad8eb0a4e8b4e14ff11a5482"},
+    {file = "virtualenv-20.31.1.tar.gz", hash = "sha256:65442939608aeebb9284cd30baca5865fcd9f12b58bb740a24b220030df46d26"},
 ]
 
 [package.dependencies]
@@ -12759,4 +12759,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "bf341385441042418f1f2350d9af203f41285aa103b3b53d5181fea5fd2c3915"
+content-hash = "26afd999d6af6eefa6ea38a93bab129579369d351a2b7741887d066799199149"
