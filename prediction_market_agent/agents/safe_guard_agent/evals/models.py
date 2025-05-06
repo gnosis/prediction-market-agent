@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from typing import TypeAlias
 
 from prediction_market_agent_tooling.tools.utils import check_not_none
-from pydantic import BaseModel
-from pydantic_evals import Case
+from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
@@ -21,38 +20,11 @@ SGCase: TypeAlias = Case[
     ValidationConclusion,
     str,
 ]
-
-
-class PydanticCase(BaseModel):
-    """
-    For some reason, Pydantic's Evals aren't BaseModel, so use this for json de/serialization.
-    """
-
-    name: str | None
-    inputs: tuple[DetailedTransactionResponse, Balances | None]
-    expected_output: ValidationConclusion | None
-    metadata: str | None
-
-    @staticmethod
-    def from_case(
-        case: SGCase,
-    ) -> "PydanticCase":
-        return PydanticCase(
-            name=case.name,
-            inputs=case.inputs,
-            expected_output=case.expected_output,
-            metadata=case.metadata,
-        )
-
-    def to_case(
-        self,
-    ) -> SGCase:
-        return Case(
-            name=self.name,
-            inputs=self.inputs,
-            expected_output=self.expected_output,
-            metadata=self.metadata,
-        )
+SGDataset: TypeAlias = Dataset[
+    tuple[DetailedTransactionResponse, Balances | None],
+    ValidationConclusion,
+    str,
+]
 
 
 @dataclass

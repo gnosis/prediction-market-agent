@@ -1,16 +1,12 @@
-import json
-from pathlib import Path
 from unittest.mock import patch
 
 import nest_asyncio
 import typer
 from prediction_market_agent_tooling.loggers import logger
-from pydantic_evals import Dataset
 from rich.console import Console
 
 from prediction_market_agent.agents.safe_guard_agent.evals.models import (
-    PydanticCase,
-    SGCase,
+    SGDataset,
     ValidationConclusionEvaluator,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
@@ -29,19 +25,20 @@ nest_asyncio.apply()
 
 
 def main(
+    dataset_file: str,
     report_filename: str = "report.txt",
-    data_folder: str = "prediction_market_agent/agents/safe_guard_agent/evals/data",
     limit: int | None = None,
 ) -> None:
     """
-    Data folder must contain JSON files of serialized list[PydanticCase].
+    Data folder must contain YAML files with Pydantic Evals Datasets.
     Prepared eaither manually or using the scripts in this folder.
     """
-    cases = load_cases(data_folder, limit)
-    logger.info(f"Loaded {len(cases)} cases from {data_folder}.")
-
-    evaluators = [ValidationConclusionEvaluator()]
-    dataset = Dataset(cases=cases, evaluators=evaluators)
+    dataset = SGDataset.from_file(
+        dataset_file, custom_evaluator_types=[ValidationConclusionEvaluator]
+    )
+    if limit:
+        dataset.cases = dataset.cases[:limit]
+    logger.info(f"Loaded {len(dataset.cases)} cases from {dataset_file}.")
 
     report = dataset.evaluate_sync(process_case, max_concurrency=1)
     table = report.console_table(
@@ -58,17 +55,6 @@ def main(
     console = Console(width=1600, record=True)
     console.print(table, crop=False)
     console.save_text(report_filename)
-
-
-def load_cases(data_folder: str | Path, limit: int | None) -> list[SGCase]:
-    cases: list[SGCase] = []
-    for file in Path(data_folder).glob("*.json"):
-        with open(file, "r") as f:
-            data = json.load(f)
-            cases.extend(PydanticCase.model_validate(x).to_case() for x in data)
-    if limit:
-        cases = cases[:limit]
-    return cases
 
 
 async def process_case(

@@ -1,15 +1,15 @@
-import json
+from typing import Sequence
 
 import pandas as pd
 import typer
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
-from pydantic_evals import Case
 from tqdm import tqdm
 from web3 import Web3
 
 from prediction_market_agent.agents.safe_guard_agent.evals.models import (
-    PydanticCase,
     SGCase,
+    SGDataset,
+    ValidationConclusionEvaluator,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
     get_balances_usd,
@@ -34,14 +34,17 @@ def main(n: int = 10) -> None:
 
     cases = get_latest_transaction_cases(big_safes[:n])
 
-    with open(
-        "prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.json",
-        "w",
-    ) as f:
-        json.dump([PydanticCase.from_case(x).model_dump() for x in cases], f, indent=2)
+    evaluators = [ValidationConclusionEvaluator()]
+    dataset = SGDataset(cases=cases, evaluators=evaluators)
+
+    dataset.to_file(
+        "prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.yaml"
+    )
 
 
-def get_latest_transaction_cases(safe_addresses: list[ChecksumAddress]) -> list[SGCase]:
+def get_latest_transaction_cases(
+    safe_addresses: list[ChecksumAddress],
+) -> Sequence[SGCase]:
     cases: list[SGCase] = []
     for safe_address in tqdm(safe_addresses):
         multisig_history = get_safe_history_multisig(safe_address=safe_address)
@@ -50,7 +53,7 @@ def get_latest_transaction_cases(safe_addresses: list[ChecksumAddress]) -> list[
         newest_multisig_transaction = multisig_history[0]
         as_detailed = get_safe_detailed_transaction_info(newest_multisig_transaction.id)
         cases.append(
-            Case(
+            SGCase(
                 name=as_detailed.txId,
                 inputs=(as_detailed, get_balances_usd(safe_address)),
                 expected_output=ValidationConclusion(all_ok=True, results=[]),
