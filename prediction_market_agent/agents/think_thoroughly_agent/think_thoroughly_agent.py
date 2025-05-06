@@ -29,6 +29,7 @@ from prediction_market_agent_tooling.tools.utils import (
 from pydantic import BaseModel
 from pydantic_ai import Agent as PydanticAIAgent
 from pydantic_ai.models import KnownModelName
+from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.identifiers import (
@@ -494,7 +495,11 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             max_results_per_search=5,
             min_scraped_sites=2,
             agent=PydanticAIAgent(
-                model=model, model_settings=ModelSettings(temperature=0.7)
+                model=model,
+                model_settings=ModelSettings(temperature=0.7),
+                provider=OpenAIProvider(
+                    api_key=api_keys.openai_api_key.get_secret_value()
+                ),
             ),
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
@@ -514,6 +519,8 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 f"ThinkThoroughlyWithPredictionProhpetResearch didn't generate prediction for '{scenario}'."
             )
             return None
+
+        # ToDo
 
         return AnswerWithScenario(
             scenario=scenario,
