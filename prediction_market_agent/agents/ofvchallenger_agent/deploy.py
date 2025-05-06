@@ -76,7 +76,7 @@ class OFVChallengerAgent(DeployableAgent):
         claim_all_bonds_on_reality(api_keys)
 
         get_omen_binary_markets_common_filters = partial(
-            OmenSubgraphHandler().get_omen_binary_markets,
+            OmenSubgraphHandler().get_omen_markets,
             limit=None,
             creator_in=MARKET_CREATORS_TO_CHALLENGE,
             # We need markets already opened for answers.

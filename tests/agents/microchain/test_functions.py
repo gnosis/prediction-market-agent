@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from microchain import Engine
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.gtypes import OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 
@@ -16,6 +17,7 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     PredictProbabilityForQuestion,
     SellNo,
     SellYes,
+    BuyTokens,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     CheckAllPastActionsGivenContext,
@@ -94,7 +96,7 @@ def test_buy_sell_tokens(market_type: MarketType) -> None:
     keys = APIKeys()
     market = get_binary_markets(market_type=market_type)[0]
     from_address = keys.bet_from_address
-    outcomes_functions = {
+    outcomes_functions: dict[OutcomeStr, list[BuyTokens]] = {
         get_yes_outcome(market_type=market_type): [
             BuyYes(market_type=market_type, keys=APIKeys()),
             SellYes(market_type=market_type, keys=APIKeys()),

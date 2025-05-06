@@ -108,7 +108,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             },
         )
 
-        omen_markets = self.subgraph_handler.get_omen_binary_markets(
+        omen_markets = self.subgraph_handler.get_omen_markets(
             limit=len(related),
             id_in=[i.market_address for i in related if i.market_address != market.id],
             resolved=False,

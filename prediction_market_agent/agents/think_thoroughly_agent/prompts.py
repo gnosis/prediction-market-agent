@@ -52,15 +52,28 @@ Each bullet point should contain a possible outcome resulting from the provided 
 """
 
 PROBABILITY_FOR_ONE_OUTCOME_PROMPT = """
-Your task is to determine the probability of a prediction market affirmation being answered 'Yes' or 'No'.
-Use the sentence provided in 'SENTENCE' and follow these guidelines:
+Your task is to determine the probability associated to a prediction market being resolved to a given outcome. For example, if the sentence is "Who will win the US election in 2024?", you should return an object containing probabilities for each possible outcome (given in OUTCOMES).
+Use the sentence provided in 'SENTENCE' and the outcomes provided in 'OUTCOMES' and follow these guidelines:
 - Focus on the affirmation inside double quotes in 'SENTENCE'.
-- The question must have only 'Yes' or 'No' outcomes. If not, respond with "Error".
+- The question has multiple possible outcomes, separated by commas.
 - Use the tools provided to aid your estimation.
 - Evaluate recent information more heavily than older information.
 
 SENTENCE: {sentence}
+OUTCOMES: {outcomes}
 """
+
+#
+# PROBABILITY_FOR_ONE_OUTCOME_PROMPT = """
+# Your task is to determine the probability of a prediction market affirmation being answered 'Yes' or 'No'.
+# Use the sentence provided in 'SENTENCE' and follow these guidelines:
+# - Focus on the affirmation inside double quotes in 'SENTENCE'.
+# - The question must have only 'Yes' or 'No' outcomes. If not, respond with "Error".
+# - Use the tools provided to aid your estimation.
+# - Evaluate recent information more heavily than older information.
+#
+# SENTENCE: {sentence}
+# """
 
 RESEARCH_OUTCOME_PROMPT = """
 Research and report on the following sentence:

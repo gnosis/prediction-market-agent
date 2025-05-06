@@ -116,7 +116,7 @@ class PineconeHandler:
         """We use the agent's run to add embeddings of new markets that don't exist yet in the
         vector DB."""
         subgraph_handler = OmenSubgraphHandler()
-        markets = subgraph_handler.get_omen_binary_markets_simple(
+        markets = subgraph_handler.get_omen_markets_simple(
             limit=sys.maxsize,
             filter_by=FilterBy.NONE,
             sort_by=SortBy.NEWEST,

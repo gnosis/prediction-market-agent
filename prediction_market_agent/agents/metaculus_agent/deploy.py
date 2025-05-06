@@ -40,9 +40,7 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
         )
 
     def get_markets(self, market_type: MarketType) -> Sequence[AgentMarket]:  # type: ignore # TODO: Needs to be decided in https://github.com/gnosis/prediction-market-agent/pull/511#discussion_r1810034688 and then I'll implement it here.
-        markets: Sequence[
-            MetaculusAgentMarket
-        ] = MetaculusAgentMarket.get_binary_markets(
+        markets: Sequence[MetaculusAgentMarket] = MetaculusAgentMarket.get_markets(
             limit=self.bet_on_n_markets_per_run,
             tournament_id=self.tournament_id,
             filter_by=FilterBy.OPEN,
@@ -75,8 +73,12 @@ Question's fine print: {market.fine_print}
 Question's resolution criteria: {market.resolution_criteria}"""
             answer = self.agent.agent.predict(full_question).outcome_prediction
         else:
+            probabilities = {
+                outcome: Probability(1.0 / len(market.outcomes))
+                for outcome in market.outcomes
+            }
             answer = ProbabilisticAnswer(
-                p_yes=Probability(0.5),
+                probabilities=probabilities,
                 reasoning="Just a test.",
                 confidence=0.5,
             )

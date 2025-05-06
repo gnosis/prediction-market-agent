@@ -13,14 +13,21 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 
 
 class DeployableCoinFlipAgent(DeployableTraderAgent):
+    fetch_categorical_markets = False
+
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
         return True
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        decision = random.choice([True, False])
+        decision = random.choice(market.outcomes)
+        probabilities = {
+            outcome: Probability(1.0 if outcome == decision else 0.0)
+            for outcome in market.outcomes
+        }
+
         return ProbabilisticAnswer(
             confidence=0.5,
-            p_yes=Probability(float(decision)),
+            probabilities=probabilities,
             reasoning="I flipped a coin to decide.",
         )
 

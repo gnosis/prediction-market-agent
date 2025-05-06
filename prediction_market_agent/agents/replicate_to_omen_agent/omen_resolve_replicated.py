@@ -65,7 +65,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
 
     # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
     get_omen_binary_markets_common_filters = partial(
-        OmenSubgraphHandler().get_omen_binary_markets,
+        OmenSubgraphHandler().get_omen_markets,
         limit=None,
         creator=public_key,
         # We need markets already opened for answers.
@@ -112,7 +112,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
     logger.info(f"{balances_after_finalization=}")
 
     # Fetch markets that are finalized, but we didn't call `resolve` on them yet.
-    created_finalized_markets = OmenSubgraphHandler().get_omen_binary_markets(
+    created_finalized_markets = OmenSubgraphHandler().get_omen_markets(
         limit=None,
         creator=public_key,
         question_finalized_before=now,

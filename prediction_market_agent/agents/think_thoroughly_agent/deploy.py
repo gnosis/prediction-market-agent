@@ -20,17 +20,23 @@ from prediction_market_agent.utils import APIKeys
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     bet_on_n_markets_per_run = 1
+    fetch_categorical_markets = False
 
     def load(self) -> None:
         self.agent = self.agent_class(enable_langfuse=self.enable_langfuse)
 
+    # ToDo - revert
+    def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
+        return True
+
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return self.agent.answer_binary_market(
-            market.question, created_time=market.created_time
+            market.question, list(market.outcomes), created_time=market.created_time
         )
 
     def before_process_markets(self, market_type: MarketType) -> None:
-        self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
+        # ToDo - revert
+        # self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
         super().before_process_markets(market_type=market_type)
 
 

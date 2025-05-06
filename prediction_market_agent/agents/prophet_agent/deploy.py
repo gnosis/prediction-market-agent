@@ -12,7 +12,6 @@ from prediction_market_agent_tooling.deploy.trade_interval import (
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
-from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
     get_certified_relevant_news_since_cached,
@@ -47,7 +46,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = False
 
-    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
+    def answer_binary_market(self, market: AgentMarket) -> float:
         try:
             prediction = self.agent.predict(market.question)
         except UnexpectedModelBehavior as e:
