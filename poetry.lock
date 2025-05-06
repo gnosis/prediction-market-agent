@@ -5272,13 +5272,13 @@ six = "*"
 
 [[package]]
 name = "langfuse"
-version = "2.60.3"
+version = "2.60.4"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langfuse-2.60.3-py3-none-any.whl", hash = "sha256:2b866c44f24d5f06b617d7f14f75a2e42577538b530e4e26dc6ad770d6d1399e"},
-    {file = "langfuse-2.60.3.tar.gz", hash = "sha256:171c0caf07a26282bd0403c6c15886ef1f447def42d6570684c94d6d9ae61d6e"},
+    {file = "langfuse-2.60.4-py3-none-any.whl", hash = "sha256:458e685d9c924addca6a268ab01369e32777e6514694325a6dd1578a0c1e6fa6"},
+    {file = "langfuse-2.60.4.tar.gz", hash = "sha256:1fb6f1228dd6ed8ce49ffeba92eae1209bd46f0bd67fc0c6a5ec881af60ea68a"},
 ]
 
 [package.dependencies]
@@ -7844,70 +7844,73 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.5"
+version = "0.65.0"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = "<3.13,>=3.10"
-files = [
-    {file = "prediction_market_agent_tooling-0.64.5-py3-none-any.whl", hash = "sha256:f4277a6614e08ca67f59ef4ce697835797bd362f920d8ca49f977bf4982f7216"},
-    {file = "prediction_market_agent_tooling-0.64.5.tar.gz", hash = "sha256:36ad110f79abfc59bd0567bff6df7017dbb6663be179d83279a6a6fb9b6d4e4a"},
-]
+python-versions = ">=3.10,<3.13"
+files = []
+develop = false
 
 [package.dependencies]
-autoflake = ">=2.2.1,<3.0.0"
+autoflake = "^2.2.1"
 base58 = ">=1.0.2,<2.0"
 cowdao-cowpy-kongzii = "1.0.0rc2"
-cron-validator = ">=1.0.8,<2.0.0"
+cron-validator = "^1.0.8"
 eth-account = ">=0.8.0,<0.12.0"
-eth-keys = ">=0.6.1,<0.7.0"
-eth-typing = ">=3.0.0,<4.0.0"
-functions-framework = ">=3.5.0,<4.0.0"
-google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
-google-cloud-functions = ">=1.16.0,<2.0.0"
-google-cloud-resource-manager = ">=1.12.0,<2.0.0"
-google-cloud-secret-manager = ">=2.18.2,<3.0.0"
-hishel = ">=0.0.31,<0.0.32"
+eth-keys = "^0.6.1"
+eth-typing = "^3.0.0"
+functions-framework = "^3.5.0"
+google-api-python-client = {version = "2.95.0", optional = true}
+google-cloud-functions = "^1.16.0"
+google-cloud-resource-manager = "^1.12.0"
+google-cloud-secret-manager = "^2.18.2"
+hishel = "^0.0.31"
 httpx = ">=0.25.2,<1.0.0"
-isort = ">=5.13.2,<6.0.0"
-langchain = {version = ">=0.2.6,<0.3.0", optional = true, markers = "extra == \"langchain\""}
+isort = "^5.13.2"
+langchain = {version = "^0.2.6", optional = true}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = ">=0.1.0,<0.2.0", optional = true, markers = "extra == \"langchain\""}
-langfuse = ">=2.42.0,<3.0.0"
-loguru = ">=0.7.2,<0.8.0"
-loky = ">=3.4.1,<4.0.0"
-numpy = ">=1.26.4,<2.0.0"
-pinatapy-vourhey = ">=0.2.0,<0.3.0"
-prompt-toolkit = ">=3.0.43,<4.0.0"
-proto-plus = ">=1.0.0,<2.0.0"
-protobuf = ">=5.0.0,<6.0.0"
-psycopg2-binary = ">=2.9.9,<3.0.0"
-pydantic = ">=2.6.1,<3.0.0"
-pydantic-settings = ">=2.4.0,<3.0.0"
-pymongo = ">=4.8.0,<5.0.0"
-pytest-postgresql = ">=6.1.1,<7.0.0"
-python-dateutil = ">=2.9.0.post0,<3.0.0"
-python-json-logger = ">=3.3.0,<4.0.0"
-safe-cli = ">=1.0.0,<2.0.0"
-safe-eth-py = ">=6.0.0b41,<7.0.0"
-scikit-learn = ">=1.3.1,<2.0.0"
-sqlmodel = ">=0.0.22,<0.0.23"
-streamlit = ">=1.31.0,<2.0.0"
-subgrounds-gnosis = ">=1.9.2,<2.0.0"
-tabulate = ">=0.9.0,<0.10.0"
-tavily-python = ">=0.5.0,<0.6.0"
-tqdm = ">=4.66.2,<5.0.0"
+langchain-openai = {version = "^0.1.0", optional = true}
+langfuse = "^2.42.0"
+loguru = "^0.7.2"
+loky = "^3.4.1"
+numpy = "^1.26.4"
+pinatapy-vourhey = "^0.2.0"
+prompt-toolkit = "^3.0.43"
+proto-plus = "^1.0.0"
+protobuf = "^5.0.0"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.6.1"
+pydantic-settings = "^2.4.0"
+pymongo = "^4.8.0"
+pytest-postgresql = "^6.1.1"
+python-dateutil = "^2.9.0.post0"
+safe-cli = "^1.0.0"
+safe-eth-py = "^6.0.0b41"
+scikit-learn = "^1.3.1"
+sqlmodel = "^0.0.22"
+streamlit = "^1.31.0"
+subgrounds-gnosis = "^1.9.2"
+tabulate = "^0.9.0"
+tavily-python = "^0.5.0"
+tqdm = "^4.66.2"
 typer = ">=0.9.0,<1.0.0"
-types-cachetools = ">=5.5.0.20240820,<6.0.0.0"
-types-python-dateutil = ">=2.9.0.20240906,<3.0.0.0"
-types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
-types-requests = ">=2.31.0.0,<3.0.0.0"
-web3 = ">=6.15.1,<7.0.0"
+types-cachetools = "^5.5.0.20240820"
+types-python-dateutil = "^2.9.0.20240906"
+types-pytz = "^2024.1.0.20240203"
+types-requests = "^2.31.0.0"
+web3 = "^6.15.1"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.2.6,<0.3.0)", "langchain-openai (>=0.1.0,<0.2.0)"]
 openai = ["openai (>=1.0.0,<2.0.0)"]
 optuna = ["optuna (>=4.1.0,<5.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/gnosis/prediction-market-agent-tooling"
+reference = "510-support-for-arbitrary-categorical-outcomes"
+resolved_reference = "fef30f17b180e3af7dd447170f525ff2d98b05f2"
 
 [[package]]
 name = "prediction-prophet"
@@ -8295,7 +8298,6 @@ files = [
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:bb89f0a835bcfc1d42ccd5f41f04870c1b936d8507c6df12b7737febc40f0909"},
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:f0c2d907a1e102526dd2986df638343388b94c33860ff3bbe1384130828714b1"},
     {file = "psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f8157bed2f51db683f31306aa497311b560f2265998122abe1dce6428bd86567"},
-    {file = "psycopg2_binary-2.9.10-cp313-cp313-win_amd64.whl", hash = "sha256:27422aa5f11fbcd9b18da48373eb67081243662f9b46e6fd07c3eb46e4535142"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-macosx_12_0_x86_64.whl", hash = "sha256:eb09aa7f9cecb45027683bb55aebaaf45a0df8bf6de68801a6afdc7947bb09d4"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b73d6d7f0ccdad7bc43e6d34273f70d587ef62f824d7261c4ae9b8b1b6af90e8"},
     {file = "psycopg2_binary-2.9.10-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ce5ab4bf46a211a8e924d307c1b1fcda82368586a19d0a24f8ae166f5c784864"},
@@ -8602,7 +8604,6 @@ description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs 
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pyasn1-0.6.1-py3-none-any.whl", hash = "sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629"},
     {file = "pyasn1-0.6.1.tar.gz", hash = "sha256:6f580d2bdd84365380830acf45550f2511469f673cb4a5ae3857a3170128b034"},
 ]
 
@@ -8758,31 +8759,31 @@ timezone = ["tzdata"]
 
 [[package]]
 name = "pydantic-ai"
-version = "0.1.9"
+version = "0.1.10"
 description = "Agent Framework / shim to use Pydantic with LLMs"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_ai-0.1.9-py3-none-any.whl", hash = "sha256:45aefd139f24723c7410f77d65e4512a9c5895cecbe128cd48b63a2958561e5e"},
-    {file = "pydantic_ai-0.1.9.tar.gz", hash = "sha256:bf0002fc86f7cd23ab32c4be26320af386453c1b4d134fdd7b5c919442fab8a1"},
+    {file = "pydantic_ai-0.1.10-py3-none-any.whl", hash = "sha256:5441cb5e2d80239737d1990f789626d55fa7da2e0d103c3d99bc9e1152209d9c"},
+    {file = "pydantic_ai-0.1.10.tar.gz", hash = "sha256:393c27cd3d86c6c505ac7d78ba740f4a27419d737938640775929deab1c8ccf8"},
 ]
 
 [package.dependencies]
-pydantic-ai-slim = {version = "0.1.9", extras = ["anthropic", "bedrock", "cli", "cohere", "evals", "groq", "mcp", "mistral", "openai", "vertexai"]}
+pydantic-ai-slim = {version = "0.1.10", extras = ["anthropic", "bedrock", "cli", "cohere", "evals", "groq", "mcp", "mistral", "openai", "vertexai"]}
 
 [package.extras]
-examples = ["pydantic-ai-examples (==0.1.9)"]
+examples = ["pydantic-ai-examples (==0.1.10)"]
 logfire = ["logfire (>=3.11.0)"]
 
 [[package]]
 name = "pydantic-ai-slim"
-version = "0.1.9"
+version = "0.1.10"
 description = "Agent Framework / shim to use Pydantic with LLMs, slim package"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_ai_slim-0.1.9-py3-none-any.whl", hash = "sha256:2f085acf90bd0f5d39dabc84f100b7bc7ee804f579f15868bb1afa5302328e19"},
-    {file = "pydantic_ai_slim-0.1.9.tar.gz", hash = "sha256:bd8b52fc75091b5dd15617b8e2d495545b2a506f1c02d43bfb3d809f496092b4"},
+    {file = "pydantic_ai_slim-0.1.10-py3-none-any.whl", hash = "sha256:d979492640bb43debefa842728c019eb8159302fe0e9fc423c9f4c1480906f4e"},
+    {file = "pydantic_ai_slim-0.1.10.tar.gz", hash = "sha256:c8ce4e04d014a0061d1a4cf9a76006cfacf6ee7214c572458550b05e878f832d"},
 ]
 
 [package.dependencies]
@@ -8801,8 +8802,8 @@ openai = {version = ">=1.75.0", optional = true, markers = "extra == \"openai\""
 opentelemetry-api = ">=1.28.0"
 prompt-toolkit = {version = ">=3", optional = true, markers = "extra == \"cli\""}
 pydantic = ">=2.10"
-pydantic-evals = {version = "0.1.9", optional = true, markers = "extra == \"evals\""}
-pydantic-graph = "0.1.9"
+pydantic-evals = {version = "0.1.10", optional = true, markers = "extra == \"evals\""}
+pydantic-graph = "0.1.10"
 requests = {version = ">=2.32.2", optional = true, markers = "extra == \"vertexai\""}
 rich = {version = ">=13", optional = true, markers = "extra == \"cli\""}
 typing-inspection = ">=0.4.0"
@@ -8813,7 +8814,7 @@ bedrock = ["boto3 (>=1.35.74)"]
 cli = ["argcomplete (>=3.5.0)", "prompt-toolkit (>=3)", "rich (>=13)"]
 cohere = ["cohere (>=5.13.11)"]
 duckduckgo = ["duckduckgo-search (>=7.0.0)"]
-evals = ["pydantic-evals (==0.1.9)"]
+evals = ["pydantic-evals (==0.1.10)"]
 groq = ["groq (>=0.15.0)"]
 logfire = ["logfire (>=3.11.0)"]
 mcp = ["mcp (>=1.6.0)"]
@@ -8935,20 +8936,20 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-evals"
-version = "0.1.9"
+version = "0.1.10"
 description = "Framework for evaluating stochastic code execution, especially code making use of LLMs"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_evals-0.1.9-py3-none-any.whl", hash = "sha256:26253d7346455161c74175a76fdb9ad65f4e062a8a886e2d4a14d81f464036a6"},
-    {file = "pydantic_evals-0.1.9.tar.gz", hash = "sha256:923d64ba57ba1edcfaadb91a61c6ad4dc7c4a96169ca93ce04f48bcbd6777257"},
+    {file = "pydantic_evals-0.1.10-py3-none-any.whl", hash = "sha256:4a2739010120f44daa9c96117aa72ae4649584040764c34f3ecdb1065b50306e"},
+    {file = "pydantic_evals-0.1.10.tar.gz", hash = "sha256:8303242bce0f56b587126dcd60624333ca0ba18401f68935217466627fba1831"},
 ]
 
 [package.dependencies]
 anyio = ">=0"
 logfire-api = ">=1.2.0"
 pydantic = ">=2.10"
-pydantic-ai-slim = "0.1.9"
+pydantic-ai-slim = "0.1.10"
 pyyaml = ">=6.0.2"
 rich = ">=13.9.4"
 
@@ -8957,13 +8958,13 @@ logfire = ["logfire (>=2.3)"]
 
 [[package]]
 name = "pydantic-graph"
-version = "0.1.9"
+version = "0.1.10"
 description = "Graph and state machine library"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pydantic_graph-0.1.9-py3-none-any.whl", hash = "sha256:8fbbe31bb402b45d27ccb2b12b60d4bf103a9fe65e2c996fecc8eb943175ece7"},
-    {file = "pydantic_graph-0.1.9.tar.gz", hash = "sha256:bfb9efcd586fbd741fd026f57d699df13a069a3810449dde29219469de28c58d"},
+    {file = "pydantic_graph-0.1.10-py3-none-any.whl", hash = "sha256:56ba6bebe86e7e61cdc0e0ab36e07fe0a43931d949b89ec16c81cc70e2e6473c"},
+    {file = "pydantic_graph-0.1.10.tar.gz", hash = "sha256:dd7725f6a7c967d0dda8da72baba187cf4d85f1fc59f262b422591db20d738bd"},
 ]
 
 [package.dependencies]
@@ -9454,20 +9455,6 @@ files = [
 
 [package.extras]
 dev = ["black (==25.1.0)", "build (==1.2.2)", "flake8 (==7.1.1)", "mypy (==1.15.0)", "pytest (==8.3.4)", "requests (==2.32.3)", "twine (==6.1.0)"]
-
-[[package]]
-name = "python-json-logger"
-version = "3.3.0"
-description = "JSON Log Formatter for the Python Logging Package"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "python_json_logger-3.3.0-py3-none-any.whl", hash = "sha256:dd980fae8cffb24c13caf6e158d3d61c0d6d22342f932cb6e9deedab3d35eec7"},
-    {file = "python_json_logger-3.3.0.tar.gz", hash = "sha256:12b7e74b17775e7d565129296105bbe3910842d9d0eb083fc83a6a617aa8df84"},
-]
-
-[package.extras]
-dev = ["backports.zoneinfo", "black", "build", "freezegun", "mdx_truly_sane_lists", "mike", "mkdocs", "mkdocs-awesome-pages-plugin", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-material (>=8.5)", "mkdocstrings[python]", "msgspec", "mypy", "orjson", "pylint", "pytest", "tzdata", "validate-pyproject[all]"]
 
 [[package]]
 name = "python-magic"
@@ -12759,4 +12746,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "26afd999d6af6eefa6ea38a93bab129579369d351a2b7741887d066799199149"
+content-hash = "6ce4088c86e6e2eae3d5c614b24d25b6a5e6e78707e8024f83adc7bd2f9cc2ba"
