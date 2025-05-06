@@ -8,6 +8,7 @@ from safe_eth.safe.safe import Safe, SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.guards import (
+    agent,
     blacklist,
     goplus_,
     hash_checker,
@@ -48,6 +49,7 @@ SAFE_GUARDS: list[
     ]
 ] = [
     # Keep ordered from cheapest/fastest to most expensive/slowest.
+    agent.validate_do_not_remove_agent,
     blacklist.validate_safe_transaction_blacklist,
     hash_checker.validate_safe_transaction_hash,
     llm.validate_safe_transaction_llm,
