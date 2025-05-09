@@ -34,7 +34,7 @@ poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
 #prediction-market-agent-tooling = "^0.64.3"
-prediction-market-agent-tooling = {git="https://github.com/gnosis/prediction-market-agent-tooling", branch="510-support-for-arbitrary-categorical-outcomes"}
+prediction-market-agent-tooling = {git = "https://github.com/gnosis/prediction-market-agent-tooling.git", rev = "510-support-for-arbitrary-categorical-outcomes"}
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
