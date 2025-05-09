@@ -6,8 +6,10 @@ from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
+from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
 )
@@ -31,7 +33,13 @@ class GPTRAgent(DeployableTraderAgent):
         prediction = prophet_make_prediction(
             market_question=market.question,
             additional_information=report,
-            agent=Agent("gpt-4o", model_settings=ModelSettings(temperature=0)),
+            agent=Agent(
+                OpenAIModel(
+                    "gpt-4o",
+                    provider=get_openai_provider(api_key=APIKeys().openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0),
+            ),
         )
         return prediction.outcome_prediction
 

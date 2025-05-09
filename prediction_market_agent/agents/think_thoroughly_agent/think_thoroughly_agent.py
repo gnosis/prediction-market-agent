@@ -57,6 +57,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
+from prediction_market_agent.tools.openai_utils import OpenAIModel, get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
@@ -479,7 +480,11 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             max_results_per_search=5,
             min_scraped_sites=2,
             agent=PydanticAIAgent(
-                model=model, model_settings=ModelSettings(temperature=0.7)
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
@@ -488,7 +493,10 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             market_question=scenario,
             additional_information=research.report,
             agent=PydanticAIAgent(
-                model=model,
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_keys.openai_api_key),
+                ),
                 model_settings=ModelSettings(temperature=LLM_SUPER_LOW_TEMPERATURE),
             ),
             include_reasoning=True,
@@ -521,7 +529,11 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             or prophet_research(
                 goal=question,
                 agent=PydanticAIAgent(
-                    model=self.model, model_settings=ModelSettings(temperature=0.7)
+                    OpenAIModel(
+                        self.model,
+                        provider=get_openai_provider(api_keys.openai_api_key),
+                    ),
+                    model_settings=ModelSettings(temperature=0.7),
                 ),
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
