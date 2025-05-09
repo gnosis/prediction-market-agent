@@ -1,13 +1,13 @@
 import typing as t
 
-from prediction_market_agent_tooling.gtypes import USD
+from prediction_market_agent_tooling.gtypes import USD, OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
 
 class Bet(BaseModel):
-    direction: bool
+    direction: OutcomeStr
     size: USD
 
 

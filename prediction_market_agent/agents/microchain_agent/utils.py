@@ -2,7 +2,7 @@ import typing as t
 
 import pandas as pd
 from microchain import Agent
-from prediction_market_agent_tooling.gtypes import USD
+from prediction_market_agent_tooling.gtypes import USD, OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
@@ -75,14 +75,14 @@ def get_boolean_outcome(market_type: MarketType, outcome: str) -> bool:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
-def get_yes_outcome(market_type: MarketType) -> str:
+def get_yes_outcome(market_type: MarketType) -> OutcomeStr:
     if market_type == MarketType.OMEN:
         return OMEN_TRUE_OUTCOME
     else:
         raise ValueError(f"Market type '{market_type}' not supported")
 
 
-def get_no_outcome(market_type: MarketType) -> str:
+def get_no_outcome(market_type: MarketType) -> OutcomeStr:
     if market_type == MarketType.OMEN:
         return OMEN_FALSE_OUTCOME
     else:

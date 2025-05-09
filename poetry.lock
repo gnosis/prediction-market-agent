@@ -7884,6 +7884,7 @@ pydantic-settings = "^2.4.0"
 pymongo = "^4.8.0"
 pytest-postgresql = "^6.1.1"
 python-dateutil = "^2.9.0.post0"
+python-json-logger = "^3.3.0"
 safe-cli = "^1.0.0"
 safe-eth-py = "^6.0.0b41"
 scikit-learn = "^1.3.1"
@@ -7910,7 +7911,7 @@ optuna = ["optuna (>=4.1.0,<5.0.0)"]
 type = "git"
 url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
 reference = "510-support-for-arbitrary-categorical-outcomes"
-resolved_reference = "5791f6fee4be15ac7caa5f875f82ecdc72fd5576"
+resolved_reference = "4c97cce0c634e45478e9e7c2988c12b56d9201bc"
 
 [[package]]
 name = "prediction-prophet"
@@ -9455,6 +9456,20 @@ files = [
 
 [package.extras]
 dev = ["black (==25.1.0)", "build (==1.2.2)", "flake8 (==7.1.1)", "mypy (==1.15.0)", "pytest (==8.3.4)", "requests (==2.32.3)", "twine (==6.1.0)"]
+
+[[package]]
+name = "python-json-logger"
+version = "3.3.0"
+description = "JSON Log Formatter for the Python Logging Package"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python_json_logger-3.3.0-py3-none-any.whl", hash = "sha256:dd980fae8cffb24c13caf6e158d3d61c0d6d22342f932cb6e9deedab3d35eec7"},
+    {file = "python_json_logger-3.3.0.tar.gz", hash = "sha256:12b7e74b17775e7d565129296105bbe3910842d9d0eb083fc83a6a617aa8df84"},
+]
+
+[package.extras]
+dev = ["backports.zoneinfo", "black", "build", "freezegun", "mdx_truly_sane_lists", "mike", "mkdocs", "mkdocs-awesome-pages-plugin", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-material (>=8.5)", "mkdocstrings[python]", "msgspec", "mypy", "orjson", "pylint", "pytest", "tzdata", "validate-pyproject[all]"]
 
 [[package]]
 name = "python-magic"

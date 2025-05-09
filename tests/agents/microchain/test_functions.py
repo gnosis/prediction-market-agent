@@ -213,5 +213,6 @@ def test_check_past_actions_given_context(
 def test_kelly_bet(market_type: MarketType) -> None:
     market = get_binary_markets(market_type=market_type)[0]
     get_kelly_bet = GetKellyBet(market_type=market_type, keys=APIKeys())
-    bet = get_kelly_bet(market_id=market.id, estimated_p_yes=market.current_p_yes)
+    market_p_yes = market.p_yes_outcome_else_none
+    bet = get_kelly_bet(market_id=market.id, estimated_p_yes=market_p_yes)
     assert "Bet size: 0.0" in bet  # No 'edge', so no bet size

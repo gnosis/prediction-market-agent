@@ -173,7 +173,7 @@ class OFVChallengerAgent(DeployableAgent):
         new_resolution = (
             Resolution.from_bool(answer.factuality)
             if answer.factuality is not None
-            else Resolution.CANCEL
+            else Resolution(outcome=None, invalid=True)
         )
         logger.info(
             f"Challenging market {market.url=} with resolution {new_resolution=}"

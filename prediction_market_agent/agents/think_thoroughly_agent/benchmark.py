@@ -12,12 +12,15 @@ from prediction_market_agent_tooling.benchmark.utils import (
     OutcomePrediction,
     Prediction,
 )
+from prediction_market_agent_tooling.deploy.constants import (
+    YES_OUTCOME_LOWERCASE_IDENTIFIER,
+    NO_OUTCOME_LOWERCASE_IDENTIFIER,
+)
 from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
-    MarketFees,
     SortBy,
 )
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
@@ -41,7 +44,10 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         close_time=utcnow() + timedelta(days=1),
         volume=None,
         question=question,
-        current_p_yes=Probability(0.5),
+        probabilities={
+            OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER): Probability(0.5),
+            OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER): Probability(0.5),
+        },
         created_time=utc_datetime(2024, 1, 1),
         resolution=None,
         outcomes=[OutcomeStr("YES"), OutcomeStr("NO")],
@@ -59,8 +65,8 @@ class ThinkThoroughlyBenchmark(AbstractBenchmarkedAgent):
         self.agent = DeployableThinkThoroughlyAgent().agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
-    def predict(self, market_question: str) -> Prediction:
-        result = self.agent.answer_binary_market(market_question)
+    def predict(self, market: AgentMarket) -> Prediction:
+        result = self.agent.answer_binary_market(market.question)
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(
@@ -83,8 +89,8 @@ class ThinkThoroughlyProphetResearchBenchmark(AbstractBenchmarkedAgent):
         self.agent = DeployableThinkThoroughlyProphetResearchAgent().agent
         super().__init__(agent_name=agent_name, max_workers=max_workers)
 
-    def predict(self, market_question: str) -> Prediction:
-        result = self.agent.answer_binary_market(market_question)
+    def predict(self, market: AgentMarket) -> Prediction:
+        result = self.agent.answer_binary_market(market.question)
         return Prediction(
             outcome_prediction=(
                 OutcomePrediction(

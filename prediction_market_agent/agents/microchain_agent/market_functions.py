@@ -2,7 +2,7 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import USD, OutcomeToken, xDai
+from prediction_market_agent_tooling.gtypes import USD, OutcomeToken, xDai, OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ResolvedBet
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -79,13 +79,9 @@ class GetMarketProbability(MarketFunction):
         return [get_example_market_id(self.market_type)]
 
     def __call__(self, market_id: str) -> list[str]:
-        return [
-            str(
-                self.market_type.market_class.get_binary_market(
-                    id=market_id
-                ).current_p_yes
-            )
-        ]
+        market = self.market_type.market_class.get_binary_market(id=market_id)
+        market_p_yes = market.p_yes_outcome_else_none
+        return [str(market_p_yes)]
 
 
 class PredictProbabilityForQuestionBase(MarketFunction):
@@ -184,7 +180,7 @@ class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
 
 
 class BuyTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+    def __init__(self, market_type: MarketType, outcome: OutcomeStr, keys: APIKeys):
         super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(
@@ -224,8 +220,9 @@ class BuyTokens(MarketFunction):
             user_id=self.user_address,
             outcome=self.outcome,
         )
+
         market.buy_tokens(
-            outcome=self.outcome_bool,
+            outcome=self.outcome,
             amount=amount,
         )
         after_balance = market.get_token_balance(
@@ -255,7 +252,7 @@ class BuyNo(BuyTokens):
 
 
 class SellTokens(MarketFunction):
-    def __init__(self, market_type: MarketType, outcome: str, keys: APIKeys):
+    def __init__(self, market_type: MarketType, outcome: OutcomeStr, keys: APIKeys):
         super().__init__(market_type=market_type, keys=keys)
         self.outcome = outcome
         self.outcome_bool = get_boolean_outcome(

@@ -13,6 +13,10 @@ from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.utils import APIKeys
 
 
+def market_yes_probability() -> Probability:
+    return Probability(0.5)
+
+
 class InvalidAgent(DeployableTraderAgent):
     """This agent works only on Omen.
     Because on Omen, after market is resolved as invalid, outcome tokens are worth equally, which means one can be profitable by buying the cheapest token.
