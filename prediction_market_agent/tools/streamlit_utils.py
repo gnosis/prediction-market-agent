@@ -3,6 +3,7 @@ import typing as t
 
 import streamlit as st
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.caches.db_cache import DB_CACHE_LOG_PREFIX
 
 from prediction_market_agent.agents.microchain_agent.memory import (
     ChatHistory,
@@ -53,6 +54,10 @@ def loguru_streamlit_sink(
     level = record["level"].name
 
     message = streamlit_escape(record["message"])
+
+    # Ignore certain messages that aren't interesting for Streamlit user, but are in the production logs.
+    if any(x in message for x in [DB_CACHE_LOG_PREFIX]):
+        return
 
     if level == "ERROR":
         st_func = st.error
