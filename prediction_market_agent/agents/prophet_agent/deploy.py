@@ -46,14 +46,8 @@ class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = False
-    fetch_categorical_markets = False
-
-    def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        # ToDo - delete me
-        return True
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        # ToDo - Fix prophet.benchmark.agents.predict
         try:
             prediction = self.agent.predict(market.question)
         except UnexpectedModelBehavior as e:

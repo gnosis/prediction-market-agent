@@ -11,6 +11,7 @@ from enum import Enum
 import nest_asyncio
 import typer
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
+from prediction_market_agent_tooling.loggers import patch_logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
@@ -191,7 +192,7 @@ def main(
     market_type: MarketType,
 ) -> None:
     nest_asyncio.apply()  # See https://github.com/pydantic/pydantic-ai/issues/889, we had issue with Think Thoroughly that is using multiprocessing heavily.
-    # patch_logger(force_patch=True)
+    patch_logger(force_patch=True)
     RUNNABLE_AGENTS[agent]().run(market_type=market_type)
 
 

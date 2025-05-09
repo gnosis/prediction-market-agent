@@ -500,9 +500,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
         )
-        # ToDo - This does not work currently, because completion_prediction_json_to_pydantic_model
-        #  tries to parse the json as a PMAT Prediction model, which conflicts p_yes x probabilities.
-        #  Prophet adjustment needed.
+
         prediction = prophet_make_prediction(
             market_question=scenario,
             additional_information=research.report,
@@ -515,8 +513,6 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 f"ThinkThoroughlyWithPredictionProhpetResearch didn't generate prediction for '{scenario}'."
             )
             return None
-
-        # ToDo
 
         return AnswerWithScenario(
             scenario=scenario,

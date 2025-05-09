@@ -25,18 +25,13 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     def load(self) -> None:
         self.agent = self.agent_class(enable_langfuse=self.enable_langfuse)
 
-    # ToDo - revert
-    def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        return True
-
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         return self.agent.answer_binary_market(
-            market.question, n_iterations=1, created_time=market.created_time
+            market.question, created_time=market.created_time
         )
 
     def before_process_markets(self, market_type: MarketType) -> None:
-        # ToDo - revert
-        # self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
+        self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
         super().before_process_markets(market_type=market_type)
 
 

@@ -73,12 +73,8 @@ Question's fine print: {market.fine_print}
 Question's resolution criteria: {market.resolution_criteria}"""
             answer = self.agent.agent.predict(full_question).outcome_prediction
         else:
-            probabilities = {
-                outcome: Probability(1.0 / len(market.outcomes))
-                for outcome in market.outcomes
-            }
             answer = ProbabilisticAnswer(
-                probabilities=probabilities,
+                p_yes=Probability(0.5),
                 reasoning="Just a test.",
                 confidence=0.5,
             )
