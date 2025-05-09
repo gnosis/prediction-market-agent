@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent.agents.microchain_agent.market_functions import (
     MARKET_FUNCTIONS,
     BuyNo,
+    BuyTokens,
     BuyYes,
     GetBalance,
     GetKellyBet,
@@ -17,7 +18,6 @@ from prediction_market_agent.agents.microchain_agent.market_functions import (
     PredictProbabilityForQuestion,
     SellNo,
     SellYes,
-    BuyTokens,
 )
 from prediction_market_agent.agents.microchain_agent.memory_functions import (
     CheckAllPastActionsGivenContext,

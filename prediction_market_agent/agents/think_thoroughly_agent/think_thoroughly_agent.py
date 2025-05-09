@@ -20,11 +20,8 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
-from prediction_market_agent_tooling.tools.parallelism import par_map, par_generator
-from prediction_market_agent_tooling.tools.utils import (
-    DatetimeUTC,
-    utcnow,
-)
+from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from pydantic import BaseModel
 from pydantic_ai import Agent as PydanticAIAgent
 from pydantic_ai.models import KnownModelName
