@@ -1,0 +1,1750 @@
+# yaml-language-server: $schema=latest_transaction_cases_schema.json
+cases:
+- name: multisig_0x458cD345B4C05e8DF39d0A07220feb4Ec19F5e6f_0xc8b5548c1d9498072bf63fb604255088d3b4b1c1246700512f3bf7a683f6a6ae
+  inputs:
+  - safeAddress: '0x458cD345B4C05e8DF39d0A07220feb4Ec19F5e6f'
+    txId: multisig_0x458cD345B4C05e8DF39d0A07220feb4Ec19F5e6f_0xc8b5548c1d9498072bf63fb604255088d3b4b1c1246700512f3bf7a683f6a6ae
+    executedAt: 1746103080000
+    txStatus: SUCCESS
+    txInfo:
+      type: Transfer
+      humanDescription: Send 1000 GNO to 0xCdF5...8EEC
+      sender:
+        value: '0x458cD345B4C05e8DF39d0A07220feb4Ec19F5e6f'
+      recipient:
+        value: '0xCdF50be9061086e2eCfE6e4a1BF9164d43568EEC'
+      direction: OUTGOING
+      transferInfo:
+        type: ERC20
+        value: '1000000000000000000000'
+        tokenAddress: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        tokenName: Gnosis Token on xDai
+        tokenSymbol: GNO
+        decimals: 18
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+        imitation: false
+    txData:
+      hexData: '0xa9059cbb000000000000000000000000cdf50be9061086e2ecfe6e4a1bf9164d43568eec00000000000000000000000000000000000000000000003635c9adc5dea00000'
+      dataDecoded:
+        method: transfer
+        parameters:
+        - name: to
+          type: address
+          value: '0xCdF50be9061086e2eCfE6e4a1BF9164d43568EEC'
+        - name: value
+          type: uint256
+          value: '1000000000000000000000'
+        accuracy: UNKNOWN
+      to:
+        value: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        name: Gnosis Token on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+      value: '0'
+      operation: 0
+    txHash: '0x02a13d390da666592253957d4b9385d486f9843b3361c101ede8cfa377e66c1a'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1746101556552
+      nonce: 1923
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0xc8b5548c1d9498072bf63fb604255088d3b4b1c1246700512f3bf7a683f6a6ae'
+      executor:
+        value: '0x620d7E459cfFcdC56a874536dC19147De801a4A1'
+      signers:
+      - value: '0xa3a3456BC0c8ce4e0a0415B619803ee96509Ce30'
+      - value: '0x1B0C638616Ed79dB430Edbf549ad9512FF4a8ed1'
+      - value: '0x48A9d0953c8959AEb19bA55f5C04B0A54c84823C'
+      - value: '0xe9eB7DA58f6B5CE5b0a6cFD778A2fa726203AAD5'
+      - value: '0x0DA0C3e52C977Ed3cBc641fF02DD271c3ED55aFe'
+      - value: '0x8fd960F1B9D68BAD2B97bD232FB75CC1f186B064'
+      - value: '0xA1cf7F847eCD82459ce05a218EaA38a9D92E7b6b'
+      - value: '0xD68f1A882f3F9ffddaBd4D30c4F8Dfca1f9e51Ba'
+      - value: '0xE4Df0cdC9eF7e388eA906226010bBD1B9A6fFeD9'
+      - value: '0xFcf00B0fEdBc8f2F35a3B8d4B858d5805f2Bb05D'
+      confirmationsRequired: 3
+      confirmations:
+      - signer:
+          value: '0xa3a3456BC0c8ce4e0a0415B619803ee96509Ce30'
+        signature: '0x1106f29ea8de168518040a9ba9777c78235fcb8612dbe98f39a3354ca7c2115a2552064f2ecc788852a8209c542dd7aed8693234ac55fa72ee525c8b19e029b41b'
+        submittedAt: 1746101556615
+      - signer:
+          value: '0x48A9d0953c8959AEb19bA55f5C04B0A54c84823C'
+        signature: '0xb4aa3f4ce1d94ca1dd150343c8bd5dee9debddea954da59a2b26c06ce28e158065ed9a347c7cf32b4314c22c8853fa189eca21d0ab98c7adfd852833551572f31b'
+        submittedAt: 1746101885216
+      - signer:
+          value: '0x1B0C638616Ed79dB430Edbf549ad9512FF4a8ed1'
+        signature: '0x927f711e24638b59b572d0e778265884c64e7d81390baeb3c932f48446f25f580aba790bc4d19968d33e2b74cfc90fadcb64ae3dd9e502ed081353de072346b81b'
+        submittedAt: 1746102996820
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xa3a3456BC0c8ce4e0a0415B619803ee96509Ce30'
+  - fiatTotal: '64588113.43072118'
+    items:
+    - tokenInfo:
+        type: ERC20
+        address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        decimals: 18
+        symbol: GNO
+        name: Gnosis Token on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+      balance: '539990911693395494212684'
+      fiatBalance: '58778010.7378261'
+      fiatConversion: '108.85'
+    - tokenInfo:
+        type: ERC20
+        address: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+        decimals: 18
+        symbol: EURe
+        name: Monerium EUR emoney
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xcB444e90D8198415266c6a2724b7900fb12FC56E.png
+      balance: '1151579161540697523354718'
+      fiatBalance: '1301284.452540988'
+      fiatConversion: '1.13'
+    - tokenInfo:
+        type: ERC20
+        address: '0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6'
+        decimals: 18
+        symbol: wstETH
+        name: Wrapped liquid staked Ether 2.0 from Mainnet
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x6c76971f98945ae98dd7d4dfca8711ebea946ea6/logo.png
+      balance: '506563568448702842728'
+      fiatBalance: '1093488.3813961078'
+      fiatConversion: '2158.64'
+    - tokenInfo:
+        type: ERC20
+        address: '0x4d18815D14fe5c3304e87B3FA18318baa5c23820'
+        decimals: 18
+        symbol: SAFE
+        name: Safe Token from Mainnet
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0x4d18815D14fe5c3304e87B3FA18318baa5c23820.png
+      balance: '2172724273069111585612064'
+      fiatBalance: '1085241.010809652'
+      fiatConversion: '0.499484'
+    - tokenInfo:
+        type: ERC20
+        address: '0x1e2C4fb7eDE391d116E6B41cD0608260e8801D59'
+        decimals: 18
+        symbol: bCSPX
+        name: Backed CSPX Core S&P 500
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x1e2c4fb7ede391d116e6b41cd0608260e8801d59/logo.png
+      balance: '1736048640071416529287'
+      fiatBalance: '1041577.1025836478'
+      fiatConversion: '599.97'
+    - tokenInfo:
+        type: ERC20
+        address: '0x2a22f9c3b484c3629090FeED35F17Ff8F88f76F0'
+        decimals: 6
+        symbol: USDC.e
+        name: Bridged USDC (Gnosis)
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x2a22f9c3b484c3629090feed35f17ff8f88f76f0/logo.png
+      balance: '600000000000'
+      fiatBalance: '599125.2'
+      fiatConversion: '0.998542'
+    - tokenInfo:
+        type: ERC20
+        address: '0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f'
+        decimals: 18
+        symbol: OLAS
+        name: Autonolas from Mainnet
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f.png
+      balance: '1072654812348620611013419'
+      fiatBalance: '265951.8888640923'
+      fiatConversion: '0.247938'
+    - tokenInfo:
+        type: ERC20
+        address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717'
+        decimals: 18
+        symbol: BAL
+        name: Balancer on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x7ef541e2a22058048904fe5744f9c7e4c57af717/logo.png
+      balance: '166088337666476359536510'
+      fiatBalance: '168247.48605614054'
+      fiatConversion: '1.013'
+    - tokenInfo:
+        type: ERC20
+        address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1'
+        decimals: 18
+        symbol: WETH
+        name: Wrapped Ether on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1/logo.png
+      balance: '88691672168331799042'
+      fiatBalance: '159833.9231647158'
+      fiatConversion: '1802.13'
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '72535365877503975623492'
+      fiatBalance: '72370.05777866914'
+      fiatConversion: '0.997721'
+    - tokenInfo:
+        type: ERC20
+        address: '0x1509706a6c66CA549ff0cB464de88231DDBe213B'
+        decimals: 18
+        symbol: AURA
+        name: Aura
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x1509706a6c66ca549ff0cb464de88231ddbe213b/logo.png
+      balance: '64232166221903433027470'
+      fiatBalance: '13307.812894352619'
+      fiatConversion: '0.207183'
+    - tokenInfo:
+        type: ERC20
+        address: '0xC45b3C1c24d5F54E7a2cF288ac668c74Dd507a84'
+        decimals: 18
+        symbol: SYMM
+        name: Symmetric on xDai
+        logoUri: https://raw.githubusercontent.com/centfinance/assets/master/blockchains/ethereum/assets/0x57dB3FfCa78dBbE0eFa0EC745D55f62aa0Cbd345/logo.png
+      balance: '52225628495747702496042'
+      fiatBalance: '3800.4589856355606'
+      fiatConversion: '0.07277'
+    - tokenInfo:
+        type: ERC20
+        address: '0xD057604A14982FE8D88c5fC25Aac3267eA142a08'
+        decimals: 18
+        symbol: HOPR
+        name: HOPR Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xd057604a14982fe8d88c5fc25aac3267ea142a08/logo.png
+      balance: '63481445912773670979807'
+      fiatBalance: '2893.502079509079'
+      fiatConversion: '0.04558028'
+    - tokenInfo:
+        type: ERC20
+        address: '0xE2e73A1c69ecF83F464EFCE6A5be353a37cA09b2'
+        decimals: 18
+        symbol: LINK
+        name: ChainLink Token on xDai
+        logoUri: https://raw.githubusercontent.com/centfinance/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png
+      balance: '196390982939018632780'
+      fiatBalance: '2641.4587205298003'
+      fiatConversion: '13.45'
+    - tokenInfo:
+        type: ERC20
+        address: '0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252'
+        decimals: 8
+        symbol: WBTC
+        name: Wrapped BTC on xDai
+        logoUri: https://raw.githubusercontent.com/centfinance/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png
+      balance: '207886'
+      fiatBalance: '195.36710508'
+      fiatConversion: '93978'
+    - tokenInfo:
+        type: ERC20
+        address: '0x4537e328Bf7e4eFA29D05CAeA260D7fE26af9D74'
+        decimals: 18
+        symbol: UNI
+        name: Uniswap on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x4537e328bf7e4efa29d05caea260d7fe26af9d74/logo.png
+      balance: '17624064537777851159'
+      fiatBalance: '86.53415688048925'
+      fiatConversion: '4.91'
+    - tokenInfo:
+        type: ERC20
+        address: '0xb0C5f3100A4d9d9532a4CfD68c55F1AE8da987Eb'
+        decimals: 18
+        symbol: HAUS
+        name: DAOhaus Token on xDai
+        logoUri: https://assets.coingecko.com/coins/images/14551/small/jN3kkqke_400x400.png
+      balance: '228227547136716219694'
+      fiatBalance: '52.463122715411224'
+      fiatConversion: '0.229872'
+    - tokenInfo:
+        type: ERC20
+        address: '0x532801ED6f82FFfD2DAB70A19fC2d7B2772C4f4b'
+        decimals: 18
+        symbol: SWPR
+        name: Swapr on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x532801ed6f82fffd2dab70a19fc2d7b2772c4f4b/logo.jpg
+      balance: '758196789421761089056'
+      fiatBalance: '5.014751475074999'
+      fiatConversion: '0.00661405'
+    - tokenInfo:
+        type: ERC20
+        address: '0xCA5d8F8a8d49439357d3CF46Ca2e720702F132b8'
+        decimals: 18
+        symbol: GYD
+        name: Gyro Dollar
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xca5d8f8a8d49439357d3cf46ca2e720702f132b8/logo.png
+      balance: '567524620882141845'
+      fiatBalance: '0.5673685516113992'
+      fiatConversion: '0.999725'
+    - tokenInfo:
+        type: ERC20
+        address: '0x37b60f4E9A31A64cCc0024dce7D0fD07eAA0F7B3'
+        decimals: 18
+        symbol: PNK
+        name: Pinakion on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x37b60f4e9a31a64ccc0024dce7d0fd07eaa0f7b3/logo.png
+      balance: '944114998771598383'
+      fiatBalance: '0.010516336471767043'
+      fiatConversion: '0.01113883'
+    - tokenInfo:
+        type: ERC20
+        address: '0xF490c80aAE5f2616d3e3BDa2483E30C4CB21d1A0'
+        decimals: 18
+        symbol: osGNO
+        name: Staked GNO
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0/logo.png
+      balance: '2861'
+      fiatBalance: '0.00000000000033276291000000003'
+      fiatConversion: '116.31'
+    - tokenInfo:
+        type: ERC20
+        address: '0x177127622c4A00F3d409B75571e12cB3c8973d3c'
+        decimals: 18
+        symbol: COW
+        name: CoW Protocol Token from Mainnet
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0x177127622c4A00F3d409B75571e12cB3c8973d3c.png
+      balance: '25'
+      fiatBalance: '0.000000000000000006868825000000001'
+      fiatConversion: '0.274753'
+    - tokenInfo:
+        type: ERC20
+        address: '0xDf6FF92bfDC1e8bE45177DC1f4845d391D3ad8fD'
+        decimals: 18
+        symbol: COMP
+        name: Compound on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd/logo.png
+      balance: '1317414799676486498'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x7Da0bFE9D26C5b64c7580c04Bb1425364273E4b0'
+        decimals: 18
+        symbol: CVP
+        name: Concentrated Voting Power on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x7da0bfe9d26c5b64c7580c04bb1425364273e4b0/logo.jpg
+      balance: '8403796112203316562'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x712b3d230F3C1c19db860d80619288b1F0BDd0Bd'
+        decimals: 18
+        symbol: CRV
+        name: Curve DAO Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x712b3d230f3c1c19db860d80619288b1f0bdd0bd/logo.png
+      balance: '6776649642138276180463'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xFc8B2690F66B46fEC8B3ceeb95fF4Ac35a0054BC'
+        decimals: 18
+        symbol: DAI
+        name: Dai Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xfc8b2690f66b46fec8b3ceeb95ff4ac35a0054bc/logo.png
+      balance: '8002032299128857827947'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xc60e38C6352875c051B481Cbe79Dd0383AdB7817'
+        decimals: 18
+        symbol: NODE
+        name: DAppNode DAO Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xc60e38c6352875c051b481cbe79dd0383adb7817/logo.png
+      balance: '7330147502967443022749384'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xFAdc59D012Ba3c110B08A15B7755A5cb7Cbe77D7'
+        decimals: 18
+        symbol: GRT
+        name: Graph Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xfadc59d012ba3c110b08a15b7755a5cb7cbe77d7/logo.png
+      balance: '193924064550368288835'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x3C037849a8ffcf19886e2f5B04f293B7847D0377'
+        decimals: 18
+        symbol: stETH
+        name: Liquid staked Ether 2.0 on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x3c037849a8ffcf19886e2f5b04f293b7847d0377/logo.png
+      balance: '298319508066881835'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x5fd896D248fbfa54d26855C267859eb1b4DAEe72'
+        decimals: 18
+        symbol: MKR
+        name: Maker on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x5fd896d248fbfa54d26855c267859eb1b4daee72/logo.png
+      balance: '231261748677322062'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xc791240D1F2dEf5938E2031364Ff4ed887133C3d'
+        decimals: 18
+        symbol: rETH
+        name: Rocket Pool ETH from Mainnet
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xc791240d1f2def5938e2031364ff4ed887133c3d/logo.png
+      balance: '310000000000000412334'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x2995D1317DcD4f0aB89f4AE60F3f020A4F17C7CE'
+        decimals: 18
+        symbol: SUSHI
+        name: SushiToken on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x2995d1317dcd4f0ab89f4ae60f3f020a4f17c7ce/logo.png
+      balance: '9482980066697275115587'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xEddd81E0792E764501AaE206EB432399a0268DB5'
+        decimals: 18
+        symbol: TRAC
+        name: Trace Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xeddd81e0792e764501aae206eb432399a0268db5/logo.png
+      balance: '640000000000000000000'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x0116e28B43A358162B96f70B4De14C98A4465f25'
+        decimals: 18
+        symbol: UNCX
+        name: UniCrypt on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x0116e28b43a358162b96f70b4de14c98a4465f25/logo.png
+      balance: '38732422594655152873'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x8E7aB03cA7D17996b097D5866bFAA1e251c35c6a'
+        decimals: 18
+        symbol: DUCK
+        name: Unit Protocol on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x8e7ab03ca7d17996b097d5866bfaa1e251c35c6a/logo.png
+      balance: '101332317053388187615'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xD10Cc63531a514BBa7789682E487Add1f15A51E2'
+        decimals: 18
+        symbol: USDC
+        name: USD Coin on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xd10cc63531a514bba7789682e487add1f15a51e2/logo.png
+      balance: '9029201858752795096715'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xFe7ed09C4956f7cdb54eC4ffCB9818Db2D7025b8'
+        decimals: 18
+        symbol: USDP
+        name: USDP Stablecoin on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xfe7ed09c4956f7cdb54ec4ffcb9818db2d7025b8/logo.png
+      balance: '420182897786106974811'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xD4fdec44DB9D44B8f2b6d529620f9C0C7066A2c1'
+        decimals: 18
+        symbol: wxHOPR
+        name: Wrapped xHOPR Token
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xd4fdec44db9d44b8f2b6d529620f9c0c7066a2c1/logo.png
+      balance: '439720277603601495848'
+      fiatBalance: '0'
+      fiatConversion: '0'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0x10E4597fF93cbee194F4879f8f1d54a370DB6969_0x3fabab857c97736ac8be92c45df49c67a1cf274accd303b85a8ba57a81f7a18d
+  inputs:
+  - safeAddress: '0x10E4597fF93cbee194F4879f8f1d54a370DB6969'
+    txId: multisig_0x10E4597fF93cbee194F4879f8f1d54a370DB6969_0x3fabab857c97736ac8be92c45df49c67a1cf274accd303b85a8ba57a81f7a18d
+    executedAt: 1746468190000
+    txStatus: SUCCESS
+    txInfo:
+      type: Custom
+      to:
+        value: '0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2'
+        name: 'Safe: SignMessageLib 1.3.0'
+        logoUri: https://safe-transaction-assets.safe.global/contracts/logos/0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2.png
+      dataSize: '100'
+      value: '0'
+      methodName: signMessage
+      isCancellation: false
+    txData:
+      hexData: '0x85a5affe00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020961d14bcbdb90c6d6df7598059e0baa63b492998ae433165f441a153f7e0f49a'
+      dataDecoded:
+        method: signMessage
+        parameters:
+        - name: _data
+          type: bytes
+          value: '0x961d14bcbdb90c6d6df7598059e0baa63b492998ae433165f441a153f7e0f49a'
+        accuracy: UNKNOWN
+      to:
+        value: '0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2'
+        name: 'Safe: SignMessageLib 1.3.0'
+        logoUri: https://safe-transaction-assets.safe.global/contracts/logos/0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2.png
+      value: '0'
+      operation: 1
+      trustedDelegateCallTarget: true
+    txHash: '0xb2bd5e9d3c5de6b82c3c84762c6bbd6000a5c33d7cec5ff181c83ab96ba91abf'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1746165206915
+      nonce: 1614
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x3fabab857c97736ac8be92c45df49c67a1cf274accd303b85a8ba57a81f7a18d'
+      executor:
+        value: '0xba9A3c0a22bAebE8c4926227BdE32d6EdC0D5d28'
+      signers:
+      - value: '0xA4Ad9Bd6743f88ACC23bf837e5608471B2991Db4'
+      - value: '0x9BBACA21114373982c150F2505B1786906c51Dc6'
+      - value: '0xEa822774CCe5977392335B1a15B17988e8B3D974'
+      - value: '0xa08240134b74F248a0636413aEE9266BA557e74C'
+      - value: '0x78602290159C7A4bDf9529fcfF1243534d3A6Cb9'
+      - value: '0xf14bD4B064a9cAcEB5e242834318F961B5E5d139'
+      - value: '0x18F9B18242697aEf06c7A12502e91eB879555Bc3'
+      - value: '0x0af878166427cA6075979ADe8377f9a5C23bed05'
+      - value: '0xe8aA9122832AA971c4802C69D5141Ff4EEB95ec5'
+      - value: '0x9F7dfAb2222A473284205cdDF08a677726d786A0'
+      - value: '0x2408F8a0475D3823A1F4A4bfD86B2a4B80E6eDB6'
+      - value: '0xA84962dEb082d4e628E1FeE1c96efE09f56f0Bb6'
+      - value: '0x658D9B51639db19B410E61d2d26207509b994993'
+      - value: '0x5210c4dCd7eb899a1274Fd6471AdeC9896ae05AA'
+      confirmationsRequired: 3
+      confirmations:
+      - signer:
+          value: '0xa08240134b74F248a0636413aEE9266BA557e74C'
+        signature: '0x83b554fd6cf3929bcabd6dc134da33b063bdd87b8dcd396265440365ace27f83163719374989080c71a753134d761f1fd6ec95949777c859a3b7068da613718c1c'
+        submittedAt: 1746165207007
+      - signer:
+          value: '0xEa822774CCe5977392335B1a15B17988e8B3D974'
+        signature: '0x337614737cf38e92bfb5b183a0e78e09e8d5789988f6c1e489a5b50bf2d7dae24aa9d9cc49748e53df9d3d3e535dc7b0f2029e9ffe174967446d85e9565dc5a01b'
+        submittedAt: 1746181666229
+      - signer:
+          value: '0x9BBACA21114373982c150F2505B1786906c51Dc6'
+        signature: '0x449ada0610821c09f4aeab62e3350aa8787aaa1b04a94c71c454b1a6d469dcbb06657b90ed93d121c50db3a48c2e7f819129a7639f549efe49034bfda00c7c921b'
+        submittedAt: 1746468166412
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xa08240134b74F248a0636413aEE9266BA557e74C'
+  - fiatTotal: '2212677.7251747116'
+    items:
+    - tokenInfo:
+        type: ERC20
+        address: '0x2a22f9c3b484c3629090FeED35F17Ff8F88f76F0'
+        decimals: 6
+        symbol: USDC.e
+        name: Bridged USDC (Gnosis)
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x2a22f9c3b484c3629090feed35f17ff8f88f76f0/logo.png
+      balance: '1445517421919'
+      fiatBalance: '1443409.857517842'
+      fiatConversion: '0.998542'
+    - tokenInfo:
+        type: ERC20
+        address: '0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6'
+        decimals: 18
+        symbol: wstETH
+        name: Wrapped liquid staked Ether 2.0 from Mainnet
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x6c76971f98945ae98dd7d4dfca8711ebea946ea6/logo.png
+      balance: '201462072821403641928'
+      fiatBalance: '434884.0888751947'
+      fiatConversion: '2158.64'
+    - tokenInfo:
+        type: ERC20
+        address: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+        decimals: 18
+        symbol: EURe
+        name: Monerium EUR emoney
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xcB444e90D8198415266c6a2724b7900fb12FC56E.png
+      balance: '167262979869505081469327'
+      fiatBalance: '189007.16725254073'
+      fiatConversion: '1.13'
+    - tokenInfo:
+        type: ERC20
+        address: '0xaf204776c7245bF4147c2612BF6e5972Ee483701'
+        decimals: 18
+        symbol: sDAI
+        name: Savings xDAI
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xaf204776c7245bf4147c2612bf6e5972ee483701/logo.png
+      balance: '63346569588792030513643'
+      fiatBalance: '74115.48641888666'
+      fiatConversion: '1.17'
+    - tokenInfo:
+        type: ERC20
+        address: '0xFECB3F7c54E2CAAE9dC6Ac9060A822D47E053760'
+        decimals: 18
+        symbol: BRLA
+        name: BRLA Token
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xfecb3f7c54e2caae9dc6ac9060a822d47e053760/logo.png
+      balance: '398472394205589663187746'
+      fiatBalance: '69778.49331131183'
+      fiatConversion: '0.175115'
+    - tokenInfo:
+        type: ERC20
+        address: '0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC'
+        decimals: 18
+        symbol: HOP
+        name: Hop
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xc5102fe9359fd9a28f877a67e36b0f050d81a3cc/logo.png
+      balance: '178342971610643819100098'
+      fiatBalance: '1276.0457453038725'
+      fiatConversion: '0.00715501'
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '83406354555775963792'
+      fiatBalance: '83.21627147374335'
+      fiatConversion: '0.997721'
+    - tokenInfo:
+        type: ERC20
+        address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        decimals: 18
+        symbol: GNO
+        name: Gnosis Token on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+      balance: '646335518540865428'
+      fiatBalance: '70.3536211931732'
+      fiatConversion: '108.85'
+    - tokenInfo:
+        type: ERC20
+        address: '0xD057604A14982FE8D88c5fC25Aac3267eA142a08'
+        decimals: 18
+        symbol: HOPR
+        name: HOPR Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xd057604a14982fe8d88c5fc25aac3267ea142a08/logo.png
+      balance: '1163138115098023726011'
+      fiatBalance: '53.01616096484015'
+      fiatConversion: '0.04558028'
+    - tokenInfo:
+        type: ERC20
+        address: '0xc20C9C13E853fc64d054b73fF21d3636B2d97eaB'
+        decimals: 18
+        symbol: vCOW
+        name: CoW Protocol Virtual Token
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xc20C9C13E853fc64d054b73fF21d3636B2d97eaB.png
+      balance: '23604503171802109878350'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x712b3d230F3C1c19db860d80619288b1F0BDd0Bd'
+        decimals: 18
+        symbol: CRV
+        name: Curve DAO Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x712b3d230f3c1c19db860d80619288b1f0bdd0bd/logo.png
+      balance: '91336481076126647640061'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0xc60e38C6352875c051B481Cbe79Dd0383AdB7817'
+        decimals: 18
+        symbol: NODE
+        name: DAppNode DAO Token on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0xc60e38c6352875c051b481cbe79dd0383adb7817/logo.png
+      balance: '665574948665297741273100'
+      fiatBalance: '0'
+      fiatConversion: '0'
+    - tokenInfo:
+        type: ERC20
+        address: '0x2995D1317DcD4f0aB89f4AE60F3f020A4F17C7CE'
+        decimals: 18
+        symbol: SUSHI
+        name: SushiToken on xDai
+        logoUri: https://raw.githubusercontent.com/1Hive/default-token-list/master/src/assets/gnosis/0x2995d1317dcd4f0ab89f4ae60f3f020a4f17c7ce/logo.png
+      balance: '4262518570938418419487'
+      fiatBalance: '0'
+      fiatConversion: '0'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0xb1d15aC24f6dC7A9d8EA7766f8F74F97f6fd5B44_0x01f45e742a5fe5a41658a21c779276451c9db9d09734ebbbbefc1ad36442713b
+  inputs:
+  - safeAddress: '0xb1d15aC24f6dC7A9d8EA7766f8F74F97f6fd5B44'
+    txId: multisig_0xb1d15aC24f6dC7A9d8EA7766f8F74F97f6fd5B44_0x01f45e742a5fe5a41658a21c779276451c9db9d09734ebbbbefc1ad36442713b
+    executedAt: 1745602570000
+    txStatus: SUCCESS
+    txInfo:
+      type: Custom
+      to:
+        value: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'
+        name: 'Safe: MultiSendCallOnly 1.3.0'
+        logoUri: https://safe-transaction-assets.safe.global/contracts/logos/0x40A2aCCbd92BCA938b02010E17A5b8929b49130D.png
+      dataSize: '6052'
+      value: '0'
+      methodName: multiSend
+      actionCount: 55
+      isCancellation: false
+    txData:
+      hexData: '0x8d80ff0a0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000174f00cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb00000000000000000000000019ff8a03ccec1615c693c20d25d93847bbfa795000000000000000000000000000000000000000000000012f5ca7dae8ccf400000022b92b08ed838d707bde4051a98a175966b1136d0000000000000000000000000000000000000000000000f0f6c44d6173540000000000000000000000000000000000000000000000000000000000000000000000365165861d1560f459091f00cfca5e0d9b449eef0000000000000000000000000000000000000000000001247faf8f9f006d0000000000000000000000000000000000000000000000000000000000000000000000a89f669d6f4f71b9c964d19f8bc802547f119e8c0000000000000000000000000000000000000000000001860aaeeb41978c0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000009779783cab56041946019a949124bfd801e900cd00000000000000000000000000000000000000000000017ceb30bbe5150f00000078e02ed819d36cd547fab97357ef6a65c0aadaeb00000000000000000000000000000000000000000000017ccb21f7223de80000000000000000000000000000000000000000000000000000000000000000000000245da7c21d0656215d39ab74ef36482d148cf1250000000000000000000000000000000000000000000001e7e4171bf4d3a00000000000000000000000000000000000000000000000000000000000000000000000ae0cb53050114d8145f1f2062e1ff3d6f43ea28a00000000000000000000000000000000000000000000026f59a0feda3e360000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000003774e6dadaf3970137a533409321bc3670edbd290000000000000000000000000000000000000000000000e58c3e542261d1000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000abfd11d66a5d8a98771fe9f33345e500f660dbae00000000000000000000000000000000000000000000016fa9842185f70900000003bfb01897caf7d47e3de9dea6fc13d0f1e0df86000000000000000000000000000000000000000000000191a487a56f852400000000000000000000000000000000000000000000000000000000000000000000002d13e08b42823cfda8ad17d6d49c55ddaf21c69b0000000000000000000000000000000000000000000002ac4b50c47acbdc0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000008fd4a5dcf80315f5dff1677b3a13e96a86fcfdfd0000000000000000000000000000000000000000000000823d629d026bfa000000ceecce5415f029b1308aa8c0284dfa368e6ebbe5000000000000000000000000000000000000000000000197b6d79408c0e40000000000000000000000000000000000000000000000000000000000000000000000e47ee5f617861ee5093cd0ab2f8070d9bba93e3300000000000000000000000000000000000000000000015dd48e7e52760b0000000000000000000000000000000000000000000000000000000000000000000000f7073f14e86e89ecb2e43ada2f0d55949eaec9660000000000000000000000000000000000000000000000a2a15d09519be000000000000000000000000000000000000000000000000000000000000000000000003fd1de541b26723addf71da78de23df366dacec40000000000000000000000000000000000000000000000efd8544abc6f440000000000000000000000000000000000000000000000000000000000000000000000eda07e1ebfc07a4f0b8574cd680edf3c2b59be8d0000000000000000000000000000000000000000000000c3c2145d927d160000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000006e844b9d7dea3c18afd772a9ff01de04cefe3b2f0000000000000000000000000000000000000000000001aab55765a432420000002d0669db84f11a9ead41e57ce2f242d92111a58f00000000000000000000000000000000000000000000011054746fd394580000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000899f17aff91661fdb970b99db3436df8126f7f36000000000000000000000000000000000000000000000345d4d19c85e7b6000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000bf599f747b24dbd93a4bdc8e3d5ce4c8c10f066f0000000000000000000000000000000000000000000002a41cbdb1241e27000000ce5f9ba8eed11ea701108ad32d111a1adf94f2c100000000000000000000000000000000000000000000012d4a3f23685986000000000000000000000000000000000000000000000000000000000000000000000083fd548a6e3f871e035fa35c048ed8340273ceab0000000000000000000000000000000000000000000000ee86442fcd06c00000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000147620f36b47183fbea74c14f269b39c7ebeec9e000000000000000000000000000000000000000000000113187fe382ccc600000072e7197da72fbc51828fa82cba8683bf0b6acf5e0000000000000000000000000000000000000000000001860aaeeb41978c00000000000000000000000000000000000000000000000000000000000000000000009de373c1b127851169f4011cf49b6b0c0340f7a800000000000000000000000000000000000000000000028e6ca787cd83a000000000000000000000000000000000000000000000000000000000000000000000005af88c1a83980de9123d284e63c5b239e542e3c00000000000000000000000000000000000000000000001041c8a4cfe6f0d00000000000000000000000000000000000000000000000000000000000000000000009f4bf770013a51ded6521294e75332277a6e73e0000000000000000000000000000000000000000000000209dc308dfb36e60000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb00000000000000000000000052633e5f4af90e313c287bba0523906b0a14e2d20000000000000000000000000000000000000000000001af253d02fb43fb00000074af8fea32ff03934c0aaff3a21f066c1be319680000000000000000000000000000000000000000000000a85287f90143e400000000000000000000000000000000000000000000000000000000000000000000001424210ca7209ed35b7f4416f2e614800b2c75240000000000000000000000000000000000000000000001a7ec4cf7dd42b00000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000536c2604935964d10da36a3011a9dcc4533e09590000000000000000000000000000000000000000000002a16f9837b6ed1e00000002d3c6d39a0daa44610d043661b181f7fbe592bd000000000000000000000000000000000000000000000086dc777455ea0700000000000000000000000000000000000000000000000000000000000000000000003a96cbec846fa5b8eaeac581e5920c9bcfe2e3650000000000000000000000000000000000000000000000c893d09c8f51500000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000003d9154e30e2de9a55a3bf880b66157aec5d5490100000000000000000000000000000000000000000000011becc65d96b4a5000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000a72659cc3b95ce76c207eb4a6492785fb20ccc93000000000000000000000000000000000000000000000171399cddc6818c000000cd9d9ae867ed6b0401af8bc4a9250a752f42fe0d000000000000000000000000000000000000000000000195fd403a9faff6000000000000000000000000000000000000000000000000000000000000000000000028414b4e2572cf5e3effb350900b2e52d72c1ee70000000000000000000000000000000000000000000001d1cff1e1d17a88000000000000000000000000000000000000000000000000000000000000000000000062aec018206b0f3d3960211a8fe5996ac83fe98b0000000000000000000000000000000000000000000000c0a41b543864200000000000000000000000000000000000000000000000000000000000000000000000f25e7edc705dbce53df9078784ff8ed890943980000000000000000000000000000000000000000000000186d9765a5008de0000000000000000000000000000000000000000000000000000000000000000000000800ebef342410280b0a8e76c981eb7b07114e1900000000000000000000000000000000000000000000001c3c02f7b2019f500000000000000000000000000000000000000000000000000000000000000000000006d70e5b4c5a39ea4b87d55fb7065a308102db333000000000000000000000000000000000000000000000202b99861557dfc0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000005c96edc0ede2165f5c855f32c93af2e55fe25e830000000000000000000000000000000000000000000001c1274cf7f6a4fe000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000126ec9430fac22f36f408110b4790d0987c4ceb300000000000000000000000000000000000000000000017b7883c0691660000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000c7cad3dcbe43d5b3987e3c383ae200c6b71fed8c0000000000000000000000000000000000000000000001a1c66bb5bc79a3000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000818bf978d6de80b166bb779c27860c17e13f188f00000000000000000000000000000000000000000000018d4eb922228527000000dfddc02728e02a9bc952d86e5c7042161f318e450000000000000000000000000000000000000000000002a6ed6a1d01103000000000000000000000000000000000000000000000000000000000000000000000000cc45f58e215956697d1311baa598aece9a1f3770000000000000000000000000000000000000000000001a0700e437188c00000000000000000000000000000000000000000000000000000000000000000000000fbe12ceb3fcc8ff1c491aeb3f3981c07cfc8e62a000000000000000000000000000000000000000000000132498049045d0800000000000000000000000000000000000000000000000000000000000000000000009723e986ed0b91b605f991f1a78adeab5054c98000000000000000000000000000000000000000000000021e19e0c9bab2400000000000000000000000000000000000000000000000000000000000000000000000884898480d7a1223ec55cb1aba92dbd46a6437440000000000000000000000000000000000000000000000be9afeee2b30350000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000db66ffe234c41ce15e842e24a7e404c48a49235b0000000000000000000000000000000000000000000001aacbd2cb0eea64000000b9ee84ae84e22fd5d1e70a890f1cb7c9f25711330000000000000000000000000000000000000000000003b53d9d99ecb8000000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000344ed8fa2bd7575cfea885d5621e3741474e1a7b000000000000000000000000000000000000000000000398c39d1b15574e00000000000000000000000000000000000000'
+      dataDecoded:
+        method: multiSend
+        parameters:
+        - name: transactions
+          type: bytes
+          value: '0x00cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb00000000000000000000000019ff8a03ccec1615c693c20d25d93847bbfa795000000000000000000000000000000000000000000000012f5ca7dae8ccf400000022b92b08ed838d707bde4051a98a175966b1136d0000000000000000000000000000000000000000000000f0f6c44d6173540000000000000000000000000000000000000000000000000000000000000000000000365165861d1560f459091f00cfca5e0d9b449eef0000000000000000000000000000000000000000000001247faf8f9f006d0000000000000000000000000000000000000000000000000000000000000000000000a89f669d6f4f71b9c964d19f8bc802547f119e8c0000000000000000000000000000000000000000000001860aaeeb41978c0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000009779783cab56041946019a949124bfd801e900cd00000000000000000000000000000000000000000000017ceb30bbe5150f00000078e02ed819d36cd547fab97357ef6a65c0aadaeb00000000000000000000000000000000000000000000017ccb21f7223de80000000000000000000000000000000000000000000000000000000000000000000000245da7c21d0656215d39ab74ef36482d148cf1250000000000000000000000000000000000000000000001e7e4171bf4d3a00000000000000000000000000000000000000000000000000000000000000000000000ae0cb53050114d8145f1f2062e1ff3d6f43ea28a00000000000000000000000000000000000000000000026f59a0feda3e360000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000003774e6dadaf3970137a533409321bc3670edbd290000000000000000000000000000000000000000000000e58c3e542261d1000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000abfd11d66a5d8a98771fe9f33345e500f660dbae00000000000000000000000000000000000000000000016fa9842185f70900000003bfb01897caf7d47e3de9dea6fc13d0f1e0df86000000000000000000000000000000000000000000000191a487a56f852400000000000000000000000000000000000000000000000000000000000000000000002d13e08b42823cfda8ad17d6d49c55ddaf21c69b0000000000000000000000000000000000000000000002ac4b50c47acbdc0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000008fd4a5dcf80315f5dff1677b3a13e96a86fcfdfd0000000000000000000000000000000000000000000000823d629d026bfa000000ceecce5415f029b1308aa8c0284dfa368e6ebbe5000000000000000000000000000000000000000000000197b6d79408c0e40000000000000000000000000000000000000000000000000000000000000000000000e47ee5f617861ee5093cd0ab2f8070d9bba93e3300000000000000000000000000000000000000000000015dd48e7e52760b0000000000000000000000000000000000000000000000000000000000000000000000f7073f14e86e89ecb2e43ada2f0d55949eaec9660000000000000000000000000000000000000000000000a2a15d09519be000000000000000000000000000000000000000000000000000000000000000000000003fd1de541b26723addf71da78de23df366dacec40000000000000000000000000000000000000000000000efd8544abc6f440000000000000000000000000000000000000000000000000000000000000000000000eda07e1ebfc07a4f0b8574cd680edf3c2b59be8d0000000000000000000000000000000000000000000000c3c2145d927d160000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000006e844b9d7dea3c18afd772a9ff01de04cefe3b2f0000000000000000000000000000000000000000000001aab55765a432420000002d0669db84f11a9ead41e57ce2f242d92111a58f00000000000000000000000000000000000000000000011054746fd394580000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000899f17aff91661fdb970b99db3436df8126f7f36000000000000000000000000000000000000000000000345d4d19c85e7b6000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000bf599f747b24dbd93a4bdc8e3d5ce4c8c10f066f0000000000000000000000000000000000000000000002a41cbdb1241e27000000ce5f9ba8eed11ea701108ad32d111a1adf94f2c100000000000000000000000000000000000000000000012d4a3f23685986000000000000000000000000000000000000000000000000000000000000000000000083fd548a6e3f871e035fa35c048ed8340273ceab0000000000000000000000000000000000000000000000ee86442fcd06c00000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000147620f36b47183fbea74c14f269b39c7ebeec9e000000000000000000000000000000000000000000000113187fe382ccc600000072e7197da72fbc51828fa82cba8683bf0b6acf5e0000000000000000000000000000000000000000000001860aaeeb41978c00000000000000000000000000000000000000000000000000000000000000000000009de373c1b127851169f4011cf49b6b0c0340f7a800000000000000000000000000000000000000000000028e6ca787cd83a000000000000000000000000000000000000000000000000000000000000000000000005af88c1a83980de9123d284e63c5b239e542e3c00000000000000000000000000000000000000000000001041c8a4cfe6f0d00000000000000000000000000000000000000000000000000000000000000000000009f4bf770013a51ded6521294e75332277a6e73e0000000000000000000000000000000000000000000000209dc308dfb36e60000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb00000000000000000000000052633e5f4af90e313c287bba0523906b0a14e2d20000000000000000000000000000000000000000000001af253d02fb43fb00000074af8fea32ff03934c0aaff3a21f066c1be319680000000000000000000000000000000000000000000000a85287f90143e400000000000000000000000000000000000000000000000000000000000000000000001424210ca7209ed35b7f4416f2e614800b2c75240000000000000000000000000000000000000000000001a7ec4cf7dd42b00000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000536c2604935964d10da36a3011a9dcc4533e09590000000000000000000000000000000000000000000002a16f9837b6ed1e00000002d3c6d39a0daa44610d043661b181f7fbe592bd000000000000000000000000000000000000000000000086dc777455ea0700000000000000000000000000000000000000000000000000000000000000000000003a96cbec846fa5b8eaeac581e5920c9bcfe2e3650000000000000000000000000000000000000000000000c893d09c8f51500000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000003d9154e30e2de9a55a3bf880b66157aec5d5490100000000000000000000000000000000000000000000011becc65d96b4a5000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000a72659cc3b95ce76c207eb4a6492785fb20ccc93000000000000000000000000000000000000000000000171399cddc6818c000000cd9d9ae867ed6b0401af8bc4a9250a752f42fe0d000000000000000000000000000000000000000000000195fd403a9faff6000000000000000000000000000000000000000000000000000000000000000000000028414b4e2572cf5e3effb350900b2e52d72c1ee70000000000000000000000000000000000000000000001d1cff1e1d17a88000000000000000000000000000000000000000000000000000000000000000000000062aec018206b0f3d3960211a8fe5996ac83fe98b0000000000000000000000000000000000000000000000c0a41b543864200000000000000000000000000000000000000000000000000000000000000000000000f25e7edc705dbce53df9078784ff8ed890943980000000000000000000000000000000000000000000000186d9765a5008de0000000000000000000000000000000000000000000000000000000000000000000000800ebef342410280b0a8e76c981eb7b07114e1900000000000000000000000000000000000000000000001c3c02f7b2019f500000000000000000000000000000000000000000000000000000000000000000000006d70e5b4c5a39ea4b87d55fb7065a308102db333000000000000000000000000000000000000000000000202b99861557dfc0000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb0000000000000000000000005c96edc0ede2165f5c855f32c93af2e55fe25e830000000000000000000000000000000000000000000001c1274cf7f6a4fe000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000126ec9430fac22f36f408110b4790d0987c4ceb300000000000000000000000000000000000000000000017b7883c0691660000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000c7cad3dcbe43d5b3987e3c383ae200c6b71fed8c0000000000000000000000000000000000000000000001a1c66bb5bc79a3000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000818bf978d6de80b166bb779c27860c17e13f188f00000000000000000000000000000000000000000000018d4eb922228527000000dfddc02728e02a9bc952d86e5c7042161f318e450000000000000000000000000000000000000000000002a6ed6a1d01103000000000000000000000000000000000000000000000000000000000000000000000000cc45f58e215956697d1311baa598aece9a1f3770000000000000000000000000000000000000000000001a0700e437188c00000000000000000000000000000000000000000000000000000000000000000000000fbe12ceb3fcc8ff1c491aeb3f3981c07cfc8e62a000000000000000000000000000000000000000000000132498049045d0800000000000000000000000000000000000000000000000000000000000000000000009723e986ed0b91b605f991f1a78adeab5054c98000000000000000000000000000000000000000000000021e19e0c9bab2400000000000000000000000000000000000000000000000000000000000000000000000884898480d7a1223ec55cb1aba92dbd46a6437440000000000000000000000000000000000000000000000be9afeee2b30350000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000db66ffe234c41ce15e842e24a7e404c48a49235b0000000000000000000000000000000000000000000001aacbd2cb0eea64000000b9ee84ae84e22fd5d1e70a890f1cb7c9f25711330000000000000000000000000000000000000000000003b53d9d99ecb8000000000000000000000000000000000000000000000000000000000000000000000000cb444e90d8198415266c6a2724b7900fb12fc56e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000344ed8fa2bd7575cfea885d5621e3741474e1a7b000000000000000000000000000000000000000000000398c39d1b15574e0000'
+          valueDecoded:
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x19ff8a03ccEC1615c693c20D25d93847Bbfa7950'
+              - name: amount
+                type: uint256
+                value: '5596040000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb00000000000000000000000019ff8a03ccec1615c693c20d25d93847bbfa795000000000000000000000000000000000000000000000012f5ca7dae8ccf40000'
+          - operation: 0
+            value: '4445000000000000000000'
+            dataDecoded: null
+            to: '0x22B92B08ED838D707BdE4051A98a175966B1136D'
+            data: null
+          - operation: 0
+            value: '5395650000000000000000'
+            dataDecoded: null
+            to: '0x365165861D1560f459091F00CfCA5E0d9b449EeF'
+            data: null
+          - operation: 0
+            value: '7195000000000000000000'
+            dataDecoded: null
+            to: '0xA89F669D6F4F71b9C964d19f8bC802547f119e8c'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x9779783cAB56041946019A949124bFD801e900Cd'
+              - name: amount
+                type: uint256
+                value: '7026710000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000009779783cab56041946019a949124bfd801e900cd00000000000000000000000000000000000000000000017ceb30bbe5150f0000'
+          - operation: 0
+            value: '7024400000000000000000'
+            dataDecoded: null
+            to: '0x78e02ED819D36CD547FAb97357ef6A65C0AADAEb'
+            data: null
+          - operation: 0
+            value: '9000000000000000000000'
+            dataDecoded: null
+            to: '0x245dA7c21D0656215d39AB74ef36482d148CF125'
+            data: null
+          - operation: 0
+            value: '11498780000000000000000'
+            dataDecoded: null
+            to: '0xae0cb53050114D8145f1F2062E1Ff3D6F43eA28a'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x3774E6DADaF3970137A533409321Bc3670edbd29'
+              - name: amount
+                type: uint256
+                value: '4234410000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000003774e6dadaf3970137a533409321bc3670edbd290000000000000000000000000000000000000000000000e58c3e542261d10000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0xabfd11d66A5D8a98771Fe9f33345E500F660dBae'
+              - name: amount
+                type: uint256
+                value: '6782170000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000abfd11d66a5d8a98771fe9f33345e500f660dbae00000000000000000000000000000000000000000000016fa9842185f7090000'
+          - operation: 0
+            value: '7409000000000000000000'
+            dataDecoded: null
+            to: '0x03bfB01897caF7D47e3DE9DeA6Fc13D0F1e0dF86'
+            data: null
+          - operation: 0
+            value: '12623000000000000000000'
+            dataDecoded: null
+            to: '0x2d13E08b42823cFdA8aD17D6d49C55DdAf21c69b'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x8fd4A5Dcf80315F5Dff1677b3A13e96A86FcfDfD'
+              - name: amount
+                type: uint256
+                value: '2402500000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000008fd4a5dcf80315f5dff1677b3a13e96a86fcfdfd0000000000000000000000000000000000000000000000823d629d026bfa0000'
+          - operation: 0
+            value: '7521000000000000000000'
+            dataDecoded: null
+            to: '0xcEecCE5415f029b1308aa8c0284dfa368e6ebbE5'
+            data: null
+          - operation: 0
+            value: '6453230000000000000000'
+            dataDecoded: null
+            to: '0xE47ee5f617861ee5093Cd0Ab2f8070D9bba93e33'
+            data: null
+          - operation: 0
+            value: '3000000000000000000000'
+            dataDecoded: null
+            to: '0xf7073f14E86e89ECb2e43aDa2F0D55949eAec966'
+            data: null
+          - operation: 0
+            value: '4424360000000000000000'
+            dataDecoded: null
+            to: '0x3fD1De541b26723ADDF71DA78DE23df366DACec4'
+            data: null
+          - operation: 0
+            value: '3611100000000000000000'
+            dataDecoded: null
+            to: '0xEDa07E1Ebfc07A4F0b8574cd680EdF3c2B59be8D'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x6e844B9D7dEa3C18afd772a9fF01dE04cEFe3B2f'
+              - name: amount
+                type: uint256
+                value: '7871380000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000006e844b9d7dea3c18afd772a9ff01de04cefe3b2f0000000000000000000000000000000000000000000001aab55765a432420000'
+          - operation: 0
+            value: '5023600000000000000000'
+            dataDecoded: null
+            to: '0x2D0669DB84f11A9EAD41e57Ce2f242D92111a58F'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x899F17AFF91661FDb970B99Db3436Df8126F7f36'
+              - name: amount
+                type: uint256
+                value: '15455260000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000899f17aff91661fdb970b99db3436df8126f7f36000000000000000000000000000000000000000000000345d4d19c85e7b60000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0xBF599F747b24DbD93A4BDc8e3d5cE4c8C10f066F'
+              - name: amount
+                type: uint256
+                value: '12472070000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000bf599f747b24dbd93a4bdc8e3d5ce4c8c10f066f0000000000000000000000000000000000000000000002a41cbdb1241e270000'
+          - operation: 0
+            value: '5557820000000000000000'
+            dataDecoded: null
+            to: '0xCe5F9Ba8eeD11EA701108ad32d111A1adf94f2c1'
+            data: null
+          - operation: 0
+            value: '4400000000000000000000'
+            dataDecoded: null
+            to: '0x83FD548a6e3F871e035fA35c048Ed8340273Ceab'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x147620f36B47183FbEa74C14f269B39C7EBEEc9E'
+              - name: amount
+                type: uint256
+                value: '5074620000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000147620f36b47183fbea74c14f269b39c7ebeec9e000000000000000000000000000000000000000000000113187fe382ccc60000'
+          - operation: 0
+            value: '7195000000000000000000'
+            dataDecoded: null
+            to: '0x72E7197DA72FbC51828fa82CBa8683Bf0B6acf5e'
+            data: null
+          - operation: 0
+            value: '12072000000000000000000'
+            dataDecoded: null
+            to: '0x9DE373C1b127851169f4011CF49B6b0C0340F7a8'
+            data: null
+          - operation: 0
+            value: '4798210000000000000000'
+            dataDecoded: null
+            to: '0x5Af88c1A83980De9123D284e63C5B239E542e3C0'
+            data: null
+          - operation: 0
+            value: '9626620000000000000000'
+            dataDecoded: null
+            to: '0x9f4BF770013A51deD6521294E75332277A6e73e0'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x52633e5F4AF90e313c287bba0523906b0a14E2d2'
+              - name: amount
+                type: uint256
+                value: '7953230000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb00000000000000000000000052633e5f4af90e313c287bba0523906b0a14e2d20000000000000000000000000000000000000000000001af253d02fb43fb0000'
+          - operation: 0
+            value: '3105000000000000000000'
+            dataDecoded: null
+            to: '0x74Af8fEa32Ff03934C0aafF3a21f066c1be31968'
+            data: null
+          - operation: 0
+            value: '7820000000000000000000'
+            dataDecoded: null
+            to: '0x1424210Ca7209Ed35b7f4416F2e614800b2C7524'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x536c2604935964D10Da36A3011a9DCc4533e0959'
+              - name: amount
+                type: uint256
+                value: '12422700000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000536c2604935964d10da36a3011a9dcc4533e09590000000000000000000000000000000000000000000002a16f9837b6ed1e0000'
+          - operation: 0
+            value: '2487750000000000000000'
+            dataDecoded: null
+            to: '0x02D3c6D39a0DaA44610D043661B181F7fbE592bD'
+            data: null
+          - operation: 0
+            value: '3700000000000000000000'
+            dataDecoded: null
+            to: '0x3a96CbeC846fA5B8EAEaC581e5920C9BCFE2E365'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x3d9154e30E2dE9A55a3BF880b66157Aec5D54901'
+              - name: amount
+                type: uint256
+                value: '5237490000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000003d9154e30e2de9a55a3bf880b66157aec5d5490100000000000000000000000000000000000000000000011becc65d96b4a50000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0xA72659cC3b95cE76C207Eb4a6492785fb20ccc93'
+              - name: amount
+                type: uint256
+                value: '6811000000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000a72659cc3b95ce76c207eb4a6492785fb20ccc93000000000000000000000000000000000000000000000171399cddc6818c0000'
+          - operation: 0
+            value: '7489180000000000000000'
+            dataDecoded: null
+            to: '0xcd9D9AE867ED6B0401aF8bC4a9250a752F42fe0d'
+            data: null
+          - operation: 0
+            value: '8592720000000000000000'
+            dataDecoded: null
+            to: '0x28414b4e2572cF5E3EFFB350900B2e52D72c1EE7'
+            data: null
+          - operation: 0
+            value: '3553600000000000000000'
+            dataDecoded: null
+            to: '0x62aEC018206b0F3D3960211a8FE5996AC83fE98b'
+            data: null
+          - operation: 0
+            value: '7209900000000000000000'
+            dataDecoded: null
+            to: '0xF25e7EdC705dBCE53Df9078784ff8ED890943980'
+            data: null
+          - operation: 0
+            value: '8333330000000000000000'
+            dataDecoded: null
+            to: '0x800EBEf342410280b0A8E76c981Eb7B07114E190'
+            data: null
+          - operation: 0
+            value: '9495000000000000000000'
+            dataDecoded: null
+            to: '0x6d70E5b4c5A39Ea4B87D55fb7065a308102Db333'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x5C96Edc0EdE2165f5C855f32C93af2e55fE25E83'
+              - name: amount
+                type: uint256
+                value: '8285420000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb0000000000000000000000005c96edc0ede2165f5c855f32c93af2e55fe25e830000000000000000000000000000000000000000000001c1274cf7f6a4fe0000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x126ec9430faC22F36F408110b4790D0987c4CEb3'
+              - name: amount
+                type: uint256
+                value: '7000000000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000126ec9430fac22f36f408110b4790d0987c4ceb300000000000000000000000000000000000000000000017b7883c06916600000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0xc7CAd3DcBE43D5B3987E3C383AE200c6b71FeD8C'
+              - name: amount
+                type: uint256
+                value: '7706590000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000c7cad3dcbe43d5b3987e3c383ae200c6b71fed8c0000000000000000000000000000000000000000000001a1c66bb5bc79a30000'
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x818bF978D6de80b166BB779c27860C17e13F188f'
+              - name: amount
+                type: uint256
+                value: '7329030000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000818bf978d6de80b166bb779c27860c17e13f188f00000000000000000000000000000000000000000000018d4eb9222285270000'
+          - operation: 0
+            value: '12524000000000000000000'
+            dataDecoded: null
+            to: '0xDFDDC02728e02a9Bc952d86e5c7042161f318E45'
+            data: null
+          - operation: 0
+            value: '7681920000000000000000'
+            dataDecoded: null
+            to: '0x0CC45f58e215956697D1311BaA598AecE9A1F377'
+            data: null
+          - operation: 0
+            value: '5650000000000000000000'
+            dataDecoded: null
+            to: '0xfBE12CeB3fCc8Ff1C491AEb3F3981c07cfc8E62A'
+            data: null
+          - operation: 0
+            value: '10000000000000000000000'
+            dataDecoded: null
+            to: '0x9723e986ed0B91b605F991f1a78AdEAb5054c980'
+            data: null
+          - operation: 0
+            value: '3516050000000000000000'
+            dataDecoded: null
+            to: '0x884898480d7a1223ec55Cb1aBA92DBd46A643744'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0xDB66ffE234C41CE15E842E24a7e404c48A49235b'
+              - name: amount
+                type: uint256
+                value: '7873000000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000db66ffe234c41ce15e842e24a7e404c48a49235b0000000000000000000000000000000000000000000001aacbd2cb0eea640000'
+          - operation: 0
+            value: '17510400000000000000000'
+            dataDecoded: null
+            to: '0xb9Ee84AE84E22FD5D1e70a890F1CB7C9F2571133'
+            data: null
+          - operation: 0
+            value: '0'
+            dataDecoded:
+              method: transfer
+              parameters:
+              - name: to
+                type: address
+                value: '0x344ed8fa2bD7575cFea885d5621e3741474e1a7B'
+              - name: amount
+                type: uint256
+                value: '16985100000000000000000'
+            to: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+            data: '0xa9059cbb000000000000000000000000344ed8fa2bd7575cfea885d5621e3741474e1a7b000000000000000000000000000000000000000000000398c39d1b15574e0000'
+        accuracy: UNKNOWN
+      to:
+        value: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'
+        name: 'Safe: MultiSendCallOnly 1.3.0'
+        logoUri: https://safe-transaction-assets.safe.global/contracts/logos/0x40A2aCCbd92BCA938b02010E17A5b8929b49130D.png
+      value: '0'
+      operation: 1
+      trustedDelegateCallTarget: true
+      addressInfoIndex:
+        '0xcB444e90D8198415266c6a2724b7900fb12FC56E':
+          value: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+          name: Monerium EUR emoney
+          logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xcB444e90D8198415266c6a2724b7900fb12FC56E.png
+    txHash: '0x4fc8653066ba5b86526da4b74b89dd56b795ff710047cf5ead95ef968962b462'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1745576427913
+      nonce: 655
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x01f45e742a5fe5a41658a21c779276451c9db9d09734ebbbbefc1ad36442713b'
+      executor:
+        value: '0xba9A3c0a22bAebE8c4926227BdE32d6EdC0D5d28'
+      signers:
+      - value: '0x355b033362F2A22bDBE00B2C4F81dbF17ec3ADc1'
+      - value: '0x7E976df1Cc53fb950485705Da7B6220Fe21A4a65'
+      - value: '0xB89ba7E38fe87C01A0e54163eCE4eE43F05F742B'
+      - value: '0xD5dA7892819b08E3fAd702F8EdC80C2eA3aA4478'
+      - value: '0x272b8E4020C349ec6AF5D86C21d3721a8Dc5E268'
+      - value: '0x85789Fe5de7066642E433C02dDDD0118420FeA37'
+      - value: '0x9A799033CC853E803C09733f52d00e2fD9c99F57'
+      - value: '0x4f28320863d33aC2737622EB84dEB4FBca3942Aa'
+      confirmationsRequired: 2
+      confirmations:
+      - signer:
+          value: '0x85789Fe5de7066642E433C02dDDD0118420FeA37'
+        signature: '0x1d71f3a1edcefe2fe4702b98676634524186c59544a4c20bc92783f4c9cd373e26a6b8f8e49b41b45b15708780b49ac4857c96f542957fa73b7c7a2bc6a1b2dc1b'
+        submittedAt: 1745576428115
+      - signer:
+          value: '0xD5dA7892819b08E3fAd702F8EdC80C2eA3aA4478'
+        signature: '0x603f82f1572e9189158ee18666f59aa541d08431d27ced002a4db4cf941219b2693c89523fb5dda317a67a6ded6a8557cd613547d42caf3c426323ca2cd22b9e1b'
+        submittedAt: 1745602507909
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0x85789Fe5de7066642E433C02dDDD0118420FeA37'
+    safeAppInfo:
+      name: CSV Airdrop
+      url: https://schmanu.infura-cloudflare-ipfs.com/ipfs/QmTNXEN4f4r9XnFk5QUmsMz1JjvvvGp2Eudv3Y5N5qRWEv
+      logoUri: https://safe-transaction-assets.safe.global/safe_apps/33/icon.png
+  - fiatTotal: '34648.08177582472'
+    items:
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '22281998781536020862857'
+      fiatBalance: '22231.218106312903'
+      fiatConversion: '0.997721'
+    - tokenInfo:
+        type: ERC20
+        address: '0xcB444e90D8198415266c6a2724b7900fb12FC56E'
+        decimals: 18
+        symbol: EURe
+        name: Monerium EUR emoney
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xcB444e90D8198415266c6a2724b7900fb12FC56E.png
+      balance: '7164630381613075982383'
+      fiatBalance: '8096.032331222775'
+      fiatConversion: '1.13'
+    - tokenInfo:
+        type: ERC20
+        address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        decimals: 18
+        symbol: GNO
+        name: Gnosis Token on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+      balance: '25683425000000000000'
+      fiatBalance: '2795.64081125'
+      fiatConversion: '108.85'
+    - tokenInfo:
+        type: ERC20
+        address: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83'
+        decimals: 6
+        symbol: USDC
+        name: USD//C on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xddafbb505ad214d7b80b1f830fccc89b60fb7a83/logo.png
+      balance: '1528665183'
+      fiatBalance: '1525.190527039041'
+      fiatConversion: '0.997727'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0x69b4FBcfdab66d96c2F5247Be57AB9662d7737B8_0x2fb0a29fdf71183ba7242149f3dad85f5f378b1cceb91a7ce2528ee06273a490
+  inputs:
+  - safeAddress: '0x69b4FBcfdab66d96c2F5247Be57AB9662d7737B8'
+    txId: multisig_0x69b4FBcfdab66d96c2F5247Be57AB9662d7737B8_0x2fb0a29fdf71183ba7242149f3dad85f5f378b1cceb91a7ce2528ee06273a490
+    executedAt: 1741024910000
+    txStatus: SUCCESS
+    txInfo:
+      type: Custom
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      dataSize: '36'
+      value: '747209000000000000000000'
+      methodName: relayTokens
+      isCancellation: false
+    txData:
+      hexData: '0x5d1e930700000000000000000000000069b4fbcfdab66d96c2f5247be57ab9662d7737b8'
+      dataDecoded:
+        method: relayTokens
+        parameters:
+        - name: _receiver
+          type: address
+          value: '0x69b4FBcfdab66d96c2F5247Be57AB9662d7737B8'
+        accuracy: UNKNOWN
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      value: '747209000000000000000000'
+      operation: 0
+    txHash: '0xe2a5b5a7eb4f4270b2c1882a46c717df0dc8abd70b71f36e7aef083dc4a12d49'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1741024847641
+      nonce: 13
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x2fb0a29fdf71183ba7242149f3dad85f5f378b1cceb91a7ce2528ee06273a490'
+      executor:
+        value: '0xba9A3c0a22bAebE8c4926227BdE32d6EdC0D5d28'
+      signers:
+      - value: '0x402559Dab4037821b3CA4744a25Bab3130F3841D'
+      - value: '0xcd9724cBFcf7AE658F8F618b438538653Ba12F04'
+      confirmationsRequired: 2
+      confirmations:
+      - signer:
+          value: '0xcd9724cBFcf7AE658F8F618b438538653Ba12F04'
+        signature: '0x521b2494614af44682879397227f417e6461346330004b11c33d7897c2388cba09d1cda50b5d727fe3979e93125c29d457635ff38ca9f9cfe842af412694abc71c'
+        submittedAt: 1741024847730
+      - signer:
+          value: '0x402559Dab4037821b3CA4744a25Bab3130F3841D'
+        signature: '0x6069ef90080ac5e9dd6a4b58cdab3da46a38b238af8264563f04a83379b096d66a5debb41e934afe4e9766eec1e6e82e870bbda65d7dea465fe50de5855c7b1e1b'
+        submittedAt: 1741024903919
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xcd9724cBFcf7AE658F8F618b438538653Ba12F04'
+  - fiatTotal: '2.0614545632413086'
+    items:
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '2066163349514852759'
+      fiatBalance: '2.0614545632413086'
+      fiatConversion: '0.997721'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0xF2De273fA58bdb23c20b406DD6123eA726b0D5B6_0x24c7dd90b225fde8c449f2159b5d32a2f7a937a4cdf1d971dc49833d3be39696
+  inputs:
+  - safeAddress: '0xF2De273fA58bdb23c20b406DD6123eA726b0D5B6'
+    txId: multisig_0xF2De273fA58bdb23c20b406DD6123eA726b0D5B6_0x24c7dd90b225fde8c449f2159b5d32a2f7a937a4cdf1d971dc49833d3be39696
+    executedAt: 1744921535000
+    txStatus: SUCCESS
+    txInfo:
+      type: Custom
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      dataSize: '36'
+      value: '999989990000000000000000'
+      methodName: relayTokens
+      isCancellation: false
+    txData:
+      hexData: '0x5d1e930700000000000000000000000098fa77711a76fa0300e1e9df415a0ca6a6ddd05b'
+      dataDecoded:
+        method: relayTokens
+        parameters:
+        - name: _receiver
+          type: address
+          value: '0x98Fa77711a76fA0300E1E9DF415A0cA6A6Ddd05B'
+        accuracy: UNKNOWN
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      value: '999989990000000000000000'
+      operation: 0
+    txHash: '0xff8d17a3cbbc76258d6bb9301c1ecaf6c354242f73da8a4f6e4d00c5229f2dbb'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1744918834491
+      nonce: 8
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x24c7dd90b225fde8c449f2159b5d32a2f7a937a4cdf1d971dc49833d3be39696'
+      executor:
+        value: '0xc12062AaA3B41553D5dD62c9a9760d3952d7038d'
+      signers:
+      - value: '0xc12062AaA3B41553D5dD62c9a9760d3952d7038d'
+      - value: '0xed035CcE3315F65A0C08fDb67b9f8eA9a326c3f5'
+      - value: '0xae4D41df51D47C359177FC25d06f55c5Cd7B94Ae'
+      - value: '0xD4aF17faB0B8CF0A06e8fD5136D262F899A5bd8c'
+      - value: '0x88A506929FF24FE536992A8c08FB6171263255c9'
+      - value: '0x7b17479e5a570930Ec67b42c9D7601B3aBB871b6'
+      - value: '0xf0e3862F6D3bb7b7Ccd1f3E6bdEAD3FcFfFb1879'
+      confirmationsRequired: 4
+      confirmations:
+      - signer:
+          value: '0xc12062AaA3B41553D5dD62c9a9760d3952d7038d'
+        signature: '0x000000000000000000000000c12062aaa3b41553d5dd62c9a9760d3952d7038d000000000000000000000000000000000000000000000000000000000000000001'
+        submittedAt: 1744918834537
+      - signer:
+          value: '0xed035CcE3315F65A0C08fDb67b9f8eA9a326c3f5'
+        signature: '0x99efddafcc4f21eabc8e030ab502e4ff6c35524b502ba5b41a37c9cb2d14841a646c5b931283251ac7a541e60c30389659fd1f574f8a016b89f0dc2d63b44afe1b'
+        submittedAt: 1744919747525
+      - signer:
+          value: '0x88A506929FF24FE536992A8c08FB6171263255c9'
+        signature: '0x21877cacf3e6adc4e357770d88c40a344480ce57c51b3c12892877e86e16c6c1389bf34aa5177ed587823223df38239ddde42cd31a39f97cc9b1ab4bf687f6a81c'
+        submittedAt: 1744921084125
+      - signer:
+          value: '0xD4aF17faB0B8CF0A06e8fD5136D262F899A5bd8c'
+        signature: '0xcaee85759b8da877e6688732e239e2effc2213fa7f8fdb48285ffb5d5f8deff8737c96901b7f0163f4862ec0e68113cfea30dc6901e9e4cdd1fad401167e1c131b'
+        submittedAt: 1744921167828
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xc12062AaA3B41553D5dD62c9a9760d3952d7038d'
+  - fiatTotal: '1174123.900996585'
+    items:
+    - tokenInfo:
+        type: ERC20
+        address: '0xaf204776c7245bF4147c2612BF6e5972Ee483701'
+        decimals: 18
+        symbol: sDAI
+        name: Savings xDAI
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xaf204776c7245bf4147c2612bf6e5972ee483701/logo.png
+      balance: '1003524693178952842076762'
+      fiatBalance: '1174123.8910193748'
+      fiatConversion: '1.17'
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '10000000000000000'
+      fiatBalance: '0.00997721'
+      fiatConversion: '0.997721'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0x465B612a2aBa0959464BA5AAbA9E6e0D13231356_0x6b4f69ebef383dc1d57a0cbbb0b721a82ea004263205ab1980783dffce4ba8a6
+  inputs:
+  - safeAddress: '0x465B612a2aBa0959464BA5AAbA9E6e0D13231356'
+    txId: multisig_0x465B612a2aBa0959464BA5AAbA9E6e0D13231356_0x6b4f69ebef383dc1d57a0cbbb0b721a82ea004263205ab1980783dffce4ba8a6
+    executedAt: 1743714525000
+    txStatus: SUCCESS
+    txInfo:
+      type: Transfer
+      sender:
+        value: '0x465B612a2aBa0959464BA5AAbA9E6e0D13231356'
+      recipient:
+        value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+      direction: OUTGOING
+      transferInfo:
+        type: NATIVE_COIN
+        value: '17621535028128826015275'
+    txData:
+      to:
+        value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+      value: '17621535028128826015275'
+      operation: 0
+    txHash: '0x4c880358d22e681b2ba97f748f97f0247fb8e17fcc034d29a29b5b3a082578ca'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1743714502256
+      nonce: 26
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x6b4f69ebef383dc1d57a0cbbb0b721a82ea004263205ab1980783dffce4ba8a6'
+      executor:
+        value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+      signers:
+      - value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+      confirmationsRequired: 1
+      confirmations:
+      - signer:
+          value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+        signature: '0x00000000000000000000000018a27db4c8053c436efe2549182580ad5ea92664000000000000000000000000000000000000000000000000000000000000000001'
+        submittedAt: 1743714525000
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0x18a27Db4c8053c436EfE2549182580ad5Ea92664'
+  - fiatTotal: '2999575.2838720502'
+    items:
+    - tokenInfo:
+        type: ERC20
+        address: '0xaf204776c7245bF4147c2612BF6e5972Ee483701'
+        decimals: 18
+        symbol: sDAI
+        name: Savings xDAI
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0xaf204776c7245bf4147c2612bf6e5972ee483701/logo.png
+      balance: '2563739558865000106865657'
+      fiatBalance: '2999575.2838720502'
+      fiatConversion: '1.17'
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '0'
+      fiatBalance: '0'
+      fiatConversion: '0.997721'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0x8E8bc9e262B8d2d1c24d25eeD0d03bF0412Da18b_0xca2efd5ad96beb11cef8bbf9f3daa3a74f3bc30a5c861a1ac51379097511a1a5
+  inputs:
+  - safeAddress: '0x8E8bc9e262B8d2d1c24d25eeD0d03bF0412Da18b'
+    txId: multisig_0x8E8bc9e262B8d2d1c24d25eeD0d03bF0412Da18b_0xca2efd5ad96beb11cef8bbf9f3daa3a74f3bc30a5c861a1ac51379097511a1a5
+    executedAt: 1728317780000
+    txStatus: SUCCESS
+    txInfo:
+      type: Custom
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      dataSize: '36'
+      value: '474951477694912509906981'
+      methodName: relayTokens
+      isCancellation: false
+    txData:
+      hexData: '0x5d1e9307000000000000000000000000c498e8063c95b65d97fe9172bf952bf1c8d33330'
+      dataDecoded:
+        method: relayTokens
+        parameters:
+        - name: _receiver
+          type: address
+          value: '0xC498e8063C95B65d97fE9172bf952bf1C8d33330'
+        accuracy: UNKNOWN
+      to:
+        value: '0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6'
+        name: EternalStorageProxy
+      value: '474951477694912509906981'
+      operation: 0
+    txHash: '0x93706a568a47470f6b9845ce948321d1bf3f5ac71f736fbad204edce7ca4c71b'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1728314458116
+      nonce: 57
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0xca2efd5ad96beb11cef8bbf9f3daa3a74f3bc30a5c861a1ac51379097511a1a5'
+      executor:
+        value: '0xC4E7263Dd870A29f1cFe438D1A7DB48547B16888'
+      signers:
+      - value: '0x58ff4dd22C0281e3dac7f37F4Ba67A44F02ed02b'
+      - value: '0x241f697018ea444e5792faa0572edd4c47d3D825'
+      - value: '0x4B1875a8D37B35bfB624a2C4aCF12FDeA5F95a8d'
+      confirmationsRequired: 2
+      confirmations:
+      - signer:
+          value: '0x58ff4dd22C0281e3dac7f37F4Ba67A44F02ed02b'
+        signature: '0xfdee57a734a7152b70ac34953e6d25f8735b861752b51aee5e3aba07ce6ddd4642f78bec3b4970158095845b52ea2130bbcf497ec04d50982dff26be32af100c1c'
+        submittedAt: 1728314458166
+      - signer:
+          value: '0x4B1875a8D37B35bfB624a2C4aCF12FDeA5F95a8d'
+        signature: '0x2ad29e3b4fb3ea11dbdbce8636569d37dad4c94c782bab762ea356b54bb62a0f147f11b584791403698e345937115e72c6e40b32870f6d1012438cd86454e6521b'
+        submittedAt: 1728317706075
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0x58ff4dd22C0281e3dac7f37F4Ba67A44F02ed02b'
+  - fiatTotal: '0.00003814601937358568'
+    items:
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '38233152720000'
+      fiatBalance: '0.00003814601936495112'
+      fiatConversion: '0.997721'
+    - tokenInfo:
+        type: ERC20
+        address: '0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6'
+        decimals: 18
+        symbol: wstETH
+        name: Wrapped liquid staked Ether 2.0 from Mainnet
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x6c76971f98945ae98dd7d4dfca8711ebea946ea6/logo.png
+      balance: '4'
+      fiatBalance: '0.00000000000000863456'
+      fiatConversion: '2158.64'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0xd568B2b7D7EEE937A305467065f5148409296121_0x0f44be3096c7c57483c355e9d862ef710adf9c0e381edc7eab3fada2e8bc4b47
+  inputs:
+  - safeAddress: '0xd568B2b7D7EEE937A305467065f5148409296121'
+    txId: multisig_0xd568B2b7D7EEE937A305467065f5148409296121_0x0f44be3096c7c57483c355e9d862ef710adf9c0e381edc7eab3fada2e8bc4b47
+    executedAt: 1703923440000
+    txStatus: SUCCESS
+    txInfo:
+      type: Transfer
+      humanDescription: Send 1365734.469941481801544764 WXDAI to 0xCf78...6231
+      sender:
+        value: '0xd568B2b7D7EEE937A305467065f5148409296121'
+      recipient:
+        value: '0xCf7841FD47bF33004B07eDE874e7aFC714616231'
+      direction: OUTGOING
+      transferInfo:
+        type: ERC20
+        value: '1365734469941481801544764'
+        tokenAddress: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+        tokenName: Wrapped XDAI
+        tokenSymbol: WXDAI
+        decimals: 18
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d.png
+        imitation: false
+    txData:
+      hexData: '0xa9059cbb000000000000000000000000cf7841fd47bf33004b07ede874e7afc7146162310000000000000000000000000000000000000000000121349d2cf86fabd8743c'
+      dataDecoded:
+        method: transfer
+        parameters:
+        - name: dst
+          type: address
+          value: '0xCf7841FD47bF33004B07eDE874e7aFC714616231'
+        - name: wad
+          type: uint256
+          value: '1365734469941481801544764'
+        accuracy: UNKNOWN
+      to:
+        value: '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d'
+        name: Wrapped XDAI
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d.png
+      value: '0'
+      operation: 0
+    txHash: '0xe41c3a754fc935782903bbda3a6cc3b2b1caaffeab0104b2086210f2104850e0'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1703923432316
+      nonce: 10
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x0f44be3096c7c57483c355e9d862ef710adf9c0e381edc7eab3fada2e8bc4b47'
+      executor:
+        value: '0x59eD948390F079F2534C052acc3419d34975E026'
+      signers:
+      - value: '0xCf7841FD47bF33004B07eDE874e7aFC714616231'
+      confirmationsRequired: 1
+      confirmations:
+      - signer:
+          value: '0xCf7841FD47bF33004B07eDE874e7aFC714616231'
+        signature: '0xfc1a7afb9e826cf8c89f9458ff399bad75982faf287cd2e0dd987391093e26820da7fd043a9ba27a406249ff21207c268599a250a0097b28c44a1d6f7235aae21b'
+        submittedAt: 1703923432399
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xCf7841FD47bF33004B07eDE874e7aFC714616231'
+  - fiatTotal: '2.3141752843010197'
+    items:
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '2319461336687330245'
+      fiatBalance: '2.3141752843010197'
+      fiatConversion: '0.997721'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+- name: multisig_0xC4485b4F6699661844c6e54CAE7513A6D25575Aa_0x601be8f0dafd16209e0029853c6cc453a7ce97c239ef8410d5f67d6505afcdb9
+  inputs:
+  - safeAddress: '0xC4485b4F6699661844c6e54CAE7513A6D25575Aa'
+    txId: multisig_0xC4485b4F6699661844c6e54CAE7513A6D25575Aa_0x601be8f0dafd16209e0029853c6cc453a7ce97c239ef8410d5f67d6505afcdb9
+    executedAt: 1746519980000
+    txStatus: SUCCESS
+    txInfo:
+      type: Transfer
+      sender:
+        value: '0xC4485b4F6699661844c6e54CAE7513A6D25575Aa'
+      recipient:
+        value: '0xd4A4D8A53edDa4F3388e13788D713234f7d8712C'
+      direction: OUTGOING
+      transferInfo:
+        type: NATIVE_COIN
+        value: '16862000000000000000000'
+    txData:
+      to:
+        value: '0xd4A4D8A53edDa4F3388e13788D713234f7d8712C'
+      value: '16862000000000000000000'
+      operation: 0
+    txHash: '0xc3c08fc894370d910c22daf6cce411debd331d10ebabab7dfec3ea054228ebb1'
+    detailedExecutionInfo:
+      type: MULTISIG
+      submittedAt: 1746457053443
+      nonce: 168
+      safeTxGas: '0'
+      baseGas: '0'
+      gasPrice: '0'
+      gasToken: '0x0000000000000000000000000000000000000000'
+      refundReceiver:
+        value: '0x0000000000000000000000000000000000000000'
+      safeTxHash: '0x601be8f0dafd16209e0029853c6cc453a7ce97c239ef8410d5f67d6505afcdb9'
+      executor:
+        value: '0x663ec2BfB273447DC236A646d6dAAA333aAB08f7'
+      signers:
+      - value: '0xBc11295936Aa79d594139de1B2e12629414F3BDB'
+      - value: '0x663ec2BfB273447DC236A646d6dAAA333aAB08f7'
+      - value: '0x771A428b865a3984085eD49A0ca550Dd222bb60b'
+      - value: '0xb900dFd95143556a5Ce1b3dbe53C51b979558eb0'
+      confirmationsRequired: 2
+      confirmations:
+      - signer:
+          value: '0xb900dFd95143556a5Ce1b3dbe53C51b979558eb0'
+        signature: '0x0f14a1ab86883cbc8f3afafdd3c43ff6d9e21837a41f1128d067df6916aa8a03449ecc995f25464c03f51bd59519c4ada458af908f2963aba3e8cbe1d7af4ddc1c'
+        submittedAt: 1746457053507
+      - signer:
+          value: '0x663ec2BfB273447DC236A646d6dAAA333aAB08f7'
+        signature: '0x000000000000000000000000663ec2bfb273447dc236a646d6daaa333aab08f7000000000000000000000000000000000000000000000000000000000000000001'
+        submittedAt: 1746519980000
+      rejectors: []
+      trusted: true
+      proposer:
+        value: '0xb900dFd95143556a5Ce1b3dbe53C51b979558eb0'
+  - fiatTotal: '313479.2456890472'
+    items:
+    - tokenInfo:
+        type: ERC20
+        address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb'
+        decimals: 18
+        symbol: GNO
+        name: Gnosis Token on xDai
+        logoUri: https://raw.githubusercontent.com/cowprotocol/token-lists/main/src/public/images/100/0x9c58bacc331c9aa871afd802db6379a98e80cedb/logo.png
+      balance: '1407108902827025528324'
+      fiatBalance: '153163.80407272172'
+      fiatConversion: '108.85'
+    - tokenInfo:
+        type: NATIVE_TOKEN
+        address: '0x0000000000000000000000000000000000000000'
+        decimals: 18
+        symbol: XDAI
+        name: xDai
+        logoUri: https://safe-transaction-assets.safe.global/chains/100/currency_logo.png
+      balance: '139911774426639856381991'
+      fiatBalance: '139592.91549272154'
+      fiatConversion: '0.997721'
+    - tokenInfo:
+        type: ERC20
+        address: '0x177127622c4A00F3d409B75571e12cB3c8973d3c'
+        decimals: 18
+        symbol: COW
+        name: CoW Protocol Token from Mainnet
+        logoUri: https://safe-transaction-assets.safe.global/tokens/logos/0x177127622c4A00F3d409B75571e12cB3c8973d3c.png
+      balance: '75422383462979343891473'
+      fiatBalance: '20722.526123603962'
+      fiatConversion: '0.274753'
+  metadata: Latest transaction that was processed for given Safe. Assumed to be OK.
+  expected_output:
+    all_ok: true
+    results: []
+evaluators:
+- ValidationConclusionEvaluator
