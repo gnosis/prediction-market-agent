@@ -5,6 +5,7 @@ from gpt_researcher import GPTResearcher
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
@@ -17,7 +18,7 @@ from prediction_market_agent.utils import APIKeys
 
 
 class GPTRAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -44,6 +45,7 @@ class GPTRAgent(DeployableTraderAgent):
         return prediction.outcome_prediction
 
 
+@observe()
 def gptr_research_sync(query: str) -> str:
     keys = APIKeys()
     # GPTR doesn't allow to pass keys via constructor.
