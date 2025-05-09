@@ -20,7 +20,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
-from prediction_market_agent_tooling.tools.parallelism import par_map
+from prediction_market_agent_tooling.tools.parallelism import par_map, par_generator
 from prediction_market_agent_tooling.tools.utils import (
     DatetimeUTC,
     utcnow,
@@ -40,7 +40,6 @@ from prediction_market_agent.agents.identifiers import (
 from prediction_market_agent.agents.microchain_agent.memory import AnswerWithScenario
 from prediction_market_agent.agents.think_thoroughly_agent.models import (
     CorrelatedMarketInput,
-    ThinkThoroughlyPrediction,
 )
 from prediction_market_agent.agents.think_thoroughly_agent.prompts import (
     CREATE_HYPOTHETICAL_SCENARIOS_FROM_SCENARIO_PROMPT,
@@ -276,7 +275,7 @@ class ThinkThoroughlyBase(ABC):
             ),
             agent=predictor,
             expected_output=PROBABILITY_CLASS_OUTPUT,
-            output_pydantic=ThinkThoroughlyPrediction,
+            output_pydantic=ProbabilisticAnswer,
         )
 
         crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
@@ -298,7 +297,7 @@ class ThinkThoroughlyBase(ABC):
 
         inputs = {
             "scenarios_with_probabilities": "\n".join(
-                f"- Scenario '{s}' has following probabilities of each outcome happening {a.probabilities} with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
+                f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
                 for s, a in scenarios_with_probabilities
             ),
             "number_of_scenarios": len(scenarios_with_probabilities),
@@ -312,16 +311,15 @@ class ThinkThoroughlyBase(ABC):
         }
         if research_report:
             inputs["research_report"] = research_report
-        output: ThinkThoroughlyPrediction = crew.kickoff(inputs=inputs)
-        answer = output.to_probabilistic_answer()
+        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
-            answer, scenario=question, question=question
+            output, scenario=question, question=question
         )
         self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
             f"The final prediction has p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
         )
-        return answer
+        return output
 
     @observe()
     def answer_binary_market(
@@ -348,31 +346,21 @@ class ThinkThoroughlyBase(ABC):
             all_scenarios = (
                 hypothetical_scenarios.scenarios + conditional_scenarios.scenarios
             )
-            sub_predictions = []
-            for scenario in all_scenarios:
-                result = self.generate_prediction_for_one_outcome(
-                    unique_id,
-                    self.model_for_generate_prediction_for_one_outcome,
-                    scenario,
-                    question,
-                    scenarios_with_probs,
-                )
-                sub_predictions.append((scenario, result))
-            # sub_predictions = par_generator(
-            #     items=[
-            #         (
-            #             self.enable_langfuse,
-            #             unique_id,
-            #             self.model_for_generate_prediction_for_one_outcome,
-            #             scenario,
-            #             question,
-            #             scenarios_with_probs,
-            #             self.generate_prediction_for_one_outcome,
-            #         )
-            #         for scenario in all_scenarios
-            #     ],
-            #     func=process_scenario,
-            # )
+            sub_predictions = par_generator(
+                items=[
+                    (
+                        self.enable_langfuse,
+                        unique_id,
+                        self.model_for_generate_prediction_for_one_outcome,
+                        scenario,
+                        question,
+                        scenarios_with_probs,
+                        self.generate_prediction_for_one_outcome,
+                    )
+                    for scenario in all_scenarios
+                ],
+                func=process_scenario,
+            )
 
             scenarios_with_probs = []
             for scenario, prediction in sub_predictions:
@@ -381,7 +369,7 @@ class ThinkThoroughlyBase(ABC):
                     continue
                 scenarios_with_probs.append((scenario, prediction))
                 logger.info(
-                    f"'{scenario}' has prediction {prediction.probabilities}% . Reasoning is: '{prediction.reasoning}'"
+                    f"'{scenario}' has prediction {prediction.p_yes * 100:.2f}% chance of being True, because: '{prediction.reasoning}'"
                 )
                 self.save_answer_to_long_term_memory(prediction)
 
@@ -429,7 +417,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             description=PROBABILITY_FOR_ONE_OUTCOME_PROMPT,
             expected_output=PROBABILITY_CLASS_OUTPUT,
             agent=predictor,
-            output_pydantic=ThinkThoroughlyPrediction,
+            output_pydantic=ProbabilisticAnswer,
             context=[task_research_one_outcome],
         )
         crew = Crew(
@@ -446,7 +434,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
                 for s, a in previous_scenarios_and_answers
             )
 
-        output: ThinkThoroughlyPrediction = crew.kickoff(inputs=inputs)
+        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
 
         if (
             task_research_one_outcome.tools_errors > 0
@@ -457,10 +445,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
             return None
 
-        answer = output.to_probabilistic_answer()
-
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
-            answer, scenario=scenario, question=original_question
+            output, scenario=scenario, question=original_question
         )
         return answer_with_scenario
 
