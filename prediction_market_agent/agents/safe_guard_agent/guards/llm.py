@@ -1,11 +1,9 @@
-from langfuse.openai import AsyncOpenAI
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
 from safe_eth.safe.safe import SafeTx
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
@@ -19,7 +17,10 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
 from prediction_market_agent.agents.safe_guard_agent.validation_result import (
     ValidationResult,
 )
+from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import APIKeys
+
+HISTORY_LIMIT = 25
 
 
 @observe()
@@ -29,14 +30,15 @@ def validate_safe_transaction_llm(
     all_addresses_from_tx: list[ChecksumAddress],
     history: list[DetailedTransactionResponse],
 ) -> ValidationResult:
+    # Get the latest ones.
+    history = sorted(
+        history, key=lambda x: x.executedAt or float("-inf"), reverse=True
+    )[:HISTORY_LIMIT]
+
     agent = Agent(
         OpenAIModel(
-            "o1",
-            provider=OpenAIProvider(
-                openai_client=AsyncOpenAI(
-                    api_key=APIKeys().openai_api_key.get_secret_value(),
-                )
-            ),
+            "gpt-4o",
+            provider=get_openai_provider(api_key=APIKeys().openai_api_key),
         ),
         system_prompt="""You are fraud detection agent. 
 You need to determine if the new transaction is malicious or not.
@@ -75,7 +77,7 @@ The history of transactions made by this Safe is as follows:
 
 Is the new transaction malicious or not? Why? Output your answer in the JSON format with the following structure:
 
-{{"ok": bool, "reason": string}}
+{{"reason": string, "ok": bool}}
 """
     logger.info(f"Prompting LLM agent with:\n\n\n{prompt}")
 

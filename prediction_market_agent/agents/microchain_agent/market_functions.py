@@ -14,8 +14,9 @@ from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion im
 )
 from prediction_market_agent_tooling.tools.tokens.usd import get_usd_in_xdai
 from prediction_market_agent_tooling.tools.utils import utcnow
-from pydantic_ai import Agent as Agent
+from pydantic_ai import Agent
 from pydantic_ai.models import KnownModelName
+from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.microchain_agent.utils import (
@@ -28,6 +29,7 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
+from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
@@ -127,14 +129,26 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
         ).question
         research = prophet_research(
             goal=question,
-            agent=Agent(self.model, model_settings=ModelSettings(temperature=0.7)),
+            agent=Agent(
+                OpenAIModel(
+                    self.model,
+                    provider=get_openai_provider(api_key=self.keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
             openai_api_key=self.keys.openai_api_key,
             tavily_api_key=self.keys.tavily_api_key,
         )
         prediction = prophet_make_prediction(
             market_question=question,
             additional_information=research.report,
-            agent=Agent(self.model, model_settings=ModelSettings(temperature=0)),
+            agent=Agent(
+                OpenAIModel(
+                    self.model,
+                    provider=get_openai_provider(api_key=self.keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0),
+            ),
         )
         if prediction is None:
             raise ValueError("Failed to make a prediction.")

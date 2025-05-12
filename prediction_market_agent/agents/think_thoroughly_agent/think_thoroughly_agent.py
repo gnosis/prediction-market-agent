@@ -21,12 +21,14 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
+from prediction_market_agent_tooling.tools.utils import (
+    LLM_SUPER_LOW_TEMPERATURE,
+    DatetimeUTC,
+    utcnow,
+)
 from pydantic import BaseModel
 from pydantic_ai import Agent as PydanticAIAgent
 from pydantic_ai.models import KnownModelName
-from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.identifiers import (
@@ -55,6 +57,7 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
+from prediction_market_agent.tools.openai_utils import OpenAIModel, get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
@@ -291,7 +294,6 @@ class ThinkThoroughlyBase(ABC):
         logger.info(
             f"Starting to generate final decision for '{question}' based on {len(scenarios_with_probabilities)=} and {len(correlated_markets)=}."
         )
-
         inputs = {
             "scenarios_with_probabilities": "\n".join(
                 f"- Scenario '{s}' has probability of happening {a.p_yes * 100:.2f}% with confidence {a.confidence * 100:.2f}%, because {a.reasoning}"
@@ -454,21 +456,6 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     model_for_generate_prediction_for_one_outcome = "gpt-4o-2024-08-06"
 
     @staticmethod
-    def build_pydantic_ai_agent(
-        model: KnownModelName, temperature: float = 0.7
-    ) -> PydanticAIAgent:
-        api_keys = APIKeys()
-        provider = OpenAIProvider(api_key=api_keys.openai_api_key.get_secret_value())
-        
-        return PydanticAIAgent(
-            OpenAIModel(
-                model,
-                provider=provider,
-            ),
-            model_settings=ModelSettings(temperature=temperature),
-        )
-
-    @staticmethod
     def generate_prediction_for_one_outcome(
         unique_id: UUID,
         model: KnownModelName,
@@ -486,23 +473,32 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             )
 
         api_keys = APIKeys()
-        agent = ThinkThoroughlyWithPredictionProphetResearch.build_pydantic_ai_agent(
-            model=model
-        )
+
         research = prophet_research(
             goal=scenario,
             initial_subqueries_limit=0,  # This agent is making his own subqueries, so we don't need to generate another ones in the research part.
             max_results_per_search=5,
             min_scraped_sites=2,
-            agent=agent,
+            agent=PydanticAIAgent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
             openai_api_key=api_keys.openai_api_key,
             tavily_api_key=api_keys.tavily_api_key,
         )
-
         prediction = prophet_make_prediction(
             market_question=scenario,
             additional_information=research.report,
-            agent=agent,
+            agent=PydanticAIAgent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=LLM_SUPER_LOW_TEMPERATURE),
+            ),
             include_reasoning=True,
         )
 
@@ -528,14 +524,17 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         research_report: str | None = None,
     ) -> ProbabilisticAnswer:
         api_keys = APIKeys()
-        agent = ThinkThoroughlyWithPredictionProphetResearch.build_pydantic_ai_agent(
-            model=self.model
-        )
         report = (
             research_report
             or prophet_research(
                 goal=question,
-                agent=agent,
+                agent=PydanticAIAgent(
+                    OpenAIModel(
+                        self.model,
+                        provider=get_openai_provider(api_keys.openai_api_key),
+                    ),
+                    model_settings=ModelSettings(temperature=0.7),
+                ),
                 openai_api_key=api_keys.openai_api_key,
                 tavily_api_key=api_keys.tavily_api_key,
             ).report

@@ -6,4 +6,4 @@
       - id: check-added-large-files
         args: ['--maxkb=5000']
       - id: detect-web3-private-key
-        exclude: 'poetry.lock'
+        exclude: 'poetry.lock|prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.yaml'
