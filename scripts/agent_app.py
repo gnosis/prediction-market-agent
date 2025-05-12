@@ -149,9 +149,7 @@ def agent_app() -> None:
     )
 
     if not custom_question_input:
-        st.info(
-            f"Current probability {market.current_p_yes * 100:.2f}% at {market.url}."
-        )
+        st.info(f"Current probability {market.p_yes * 100:.2f}% at {market.url}.")
 
     skip_market_verification = st.checkbox(
         "Skip market verification", value=False, key="skip_market_verification"

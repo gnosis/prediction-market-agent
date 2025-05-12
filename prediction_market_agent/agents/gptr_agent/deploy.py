@@ -33,7 +33,7 @@ class GPTRAgent(DeployableTraderAgent):
             additional_information=report,
             agent=Agent("gpt-4o", model_settings=ModelSettings(temperature=0)),
         )
-        return prediction.outcome_prediction
+        return prediction
 
 
 def gptr_research_sync(query: str) -> str:

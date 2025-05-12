@@ -10,6 +10,7 @@ from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
+    CategoricalProbabilisticAnswer,
     Position,
     ProbabilisticAnswer,
     Trade,
@@ -176,7 +177,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def build_trades(
         self,
         market: AgentMarket,
-        answer: ProbabilisticAnswer,
+        answer: CategoricalProbabilisticAnswer,
         existing_position: Position | None,
     ) -> list[Trade]:
         trades = []

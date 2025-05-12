@@ -20,7 +20,6 @@ from prediction_market_agent.utils import APIKeys
 class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
     agent_class: type[ThinkThoroughlyBase]
     bet_on_n_markets_per_run = 1
-    fetch_categorical_markets = False
 
     def load(self) -> None:
         self.agent = self.agent_class(enable_langfuse=self.enable_langfuse)

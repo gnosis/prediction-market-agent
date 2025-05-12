@@ -2,7 +2,7 @@ import typing as t
 from datetime import timedelta
 
 from microchain import Function
-from prediction_market_agent_tooling.gtypes import USD, OutcomeToken, xDai, OutcomeStr
+from prediction_market_agent_tooling.gtypes import USD, OutcomeStr, OutcomeToken, xDai
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ResolvedBet
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -80,7 +80,7 @@ class GetMarketProbability(MarketFunction):
 
     def __call__(self, market_id: str) -> list[str]:
         market = self.market_type.market_class.get_binary_market(id=market_id)
-        market_p_yes = market.p_yes_outcome_else_none
+        market_p_yes = market.p_yes
         return [str(market_p_yes)]
 
 
@@ -136,10 +136,10 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
             additional_information=research.report,
             agent=Agent(self.model, model_settings=ModelSettings(temperature=0)),
         )
-        if prediction.outcome_prediction is None:
+        if prediction is None:
             raise ValueError("Failed to make a prediction.")
 
-        return str(prediction.outcome_prediction.p_yes)
+        return str(prediction.p_yes)
 
 
 class PredictProbabilityForQuestionMech(PredictProbabilityForQuestionBase):
@@ -291,7 +291,7 @@ class SellTokens(MarketFunction):
         )
 
         market.sell_tokens(
-            outcome=self.outcome_bool,
+            outcome=self.outcome,
             amount=amount,
         )
 
@@ -408,7 +408,7 @@ class GetKellyBet(MarketFunction):
             get_balance(self.keys, market_type=self.market_type)
         )
         kelly_bet = get_kelly_bet_simplified(
-            market_p_yes=agent_market.current_p_yes,
+            market_p_yes=agent_market.p_yes,
             estimated_p_yes=estimated_p_yes,
             max_bet=max_bet,
             confidence=confidence,

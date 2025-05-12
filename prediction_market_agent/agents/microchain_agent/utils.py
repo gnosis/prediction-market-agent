@@ -41,7 +41,7 @@ class MicroMarket(BaseModel):
 def get_binary_markets(market_type: MarketType) -> list[AgentMarket]:
     # Get the 15 markets that are closing soonest
     cls = market_type.market_class
-    markets: t.Sequence[AgentMarket] = cls.get_binary_markets(
+    markets: t.Sequence[AgentMarket] = cls.get_markets(
         filter_by=FilterBy.OPEN,
         sort_by=(
             SortBy.NONE
