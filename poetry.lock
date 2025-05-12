@@ -6754,13 +6754,13 @@ files = [
 
 [[package]]
 name = "narwhals"
-version = "1.38.2"
+version = "1.39.0"
 description = "Extremely lightweight compatibility layer between dataframe libraries"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "narwhals-1.38.2-py3-none-any.whl", hash = "sha256:a33a182e32f18d794a04e7828a5c401fb26ce9083f609993e7e5064aace641c7"},
-    {file = "narwhals-1.38.2.tar.gz", hash = "sha256:7c5fbc9f2b8e1d5d95f49dcef9c2d94bf17810de68c87ff195dc7d22f7b3eeb5"},
+    {file = "narwhals-1.39.0-py3-none-any.whl", hash = "sha256:50b6778f4b4249eb86c88dd17c3907dd004a16ec25b02d5effaf226a2bcfb940"},
+    {file = "narwhals-1.39.0.tar.gz", hash = "sha256:6f114def701fc6a23b0523ad53700ae545ad3f5ece041c64dc3ad59e699da43f"},
 ]
 
 [package.extras]
@@ -6987,13 +6987,13 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.78.0"
+version = "1.78.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openai-1.78.0-py3-none-any.whl", hash = "sha256:1ade6a48cd323ad8a7715e7e1669bb97a17e1a5b8a916644261aaef4bf284778"},
-    {file = "openai-1.78.0.tar.gz", hash = "sha256:254aef4980688468e96cbddb1f348ed01d274d02c64c6c69b0334bf001fb62b3"},
+    {file = "openai-1.78.1-py3-none-any.whl", hash = "sha256:7368bf147ca499804cc408fe68cdb6866a060f38dec961bbc97b04f9d917907e"},
+    {file = "openai-1.78.1.tar.gz", hash = "sha256:8b26b364531b100df1b961d03560042e5f5be11301d7d49a6cd1a2b9af824dca"},
 ]
 
 [package.dependencies]
@@ -7868,13 +7868,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.6"
+version = "0.64.7"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.64.6-py3-none-any.whl", hash = "sha256:83cf91fde47f41ebe6b3f4a9c65ea1ae9c39617f496d88db601521ffe8dfe228"},
-    {file = "prediction_market_agent_tooling-0.64.6.tar.gz", hash = "sha256:653fe86005c88b3142c042d0bfc098b0ef362e45b9ac952e7738f3c7db213f17"},
+    {file = "prediction_market_agent_tooling-0.64.7-py3-none-any.whl", hash = "sha256:e3bb40e33367258fa9ea8fd595f739c3ae049e264685e0a6b4397d2acbd024c4"},
+    {file = "prediction_market_agent_tooling-0.64.7.tar.gz", hash = "sha256:768f95ce59078f157968e5aebd2fcf159e6a283b37ba707eabc4024ec8aee3e4"},
 ]
 
 [package.dependencies]
@@ -12783,4 +12783,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "ec407bdae691cee071cb8b3128e09d565113fd0fe93b0ab3f86792214f04ffe7"
+content-hash = "0f08315f91c2832683a8d629202d89ca4268e0d11cbb28f5da037319469fdd26"
