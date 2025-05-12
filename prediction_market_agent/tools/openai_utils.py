@@ -22,6 +22,7 @@ def get_openai_provider(
     return OpenAIProvider(
         openai_client=AsyncOpenAI(
             api_key=api_key.get_secret_value(),
+            base_url=base_url,
             http_client=DefaultAsyncHttpxClient(
                 timeout=DEFAULT_TIMEOUT,
                 base_url=base_url,
