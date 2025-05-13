@@ -7,21 +7,24 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.utils import utcnow
 
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.utils import APIKeys
 
-MARKET_IDS: list[HexAddress] = [
-    HexAddress(HexStr("000000000000000000000000000000000000000000")),
-]
+MARKET_IDS: list[str] = ["000000000000000000000000000000000000000000"]
 
 
-def main() -> None:
+def main(market_ids: list[str] = MARKET_IDS) -> None:
     api_keys = APIKeys()
     agent = OFVChallengerAgent()
 
+    market_ids_hex: list[HexAddress] = [
+        HexAddress(HexStr(market_id)) for market_id in market_ids
+    ]
+
     markets = []
-    for market_id in MARKET_IDS:
+    for market_id in market_ids_hex:
         try:
             markets.append(
                 OmenSubgraphHandler().get_omen_market_by_market_id(market_id)
@@ -36,8 +39,7 @@ def main() -> None:
         logger.info(f"Market creation timestamp: {market.creation_datetime}")
         logger.info(f"Market close time: {market.close_time}")
         if market.close_time and not market.is_resolved_with_valid_answer:
-            current_time = datetime.now(timezone.utc)
-            logger.info(f"Market was closed {current_time - market.close_time}.")
+            logger.info(f"Market was closed {utcnow() - market.close_time}.")
 
             try:
                 agent.challenge_market(market, api_keys)
