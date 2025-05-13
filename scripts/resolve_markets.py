@@ -20,10 +20,14 @@ def main() -> None:
     api_keys = APIKeys()
     agent = OFVChallengerAgent()
 
-    markets = [
-        OmenSubgraphHandler().get_omen_market_by_market_id(market_id)
-        for market_id in MARKET_IDS
-    ]
+    markets = []
+    for market_id in MARKET_IDS:
+        try:
+            markets.append(
+                OmenSubgraphHandler().get_omen_market_by_market_id(market_id)
+            )
+        except Exception as e:
+            logger.error(f"Failed to retrieve market {market_id}: {e}")
 
     for market in markets:
         logger.info(
@@ -31,11 +35,14 @@ def main() -> None:
         )
         logger.info(f"Market creation timestamp: {market.creation_datetime}")
         logger.info(f"Market close time: {market.close_time}")
-        if market.close_time:
+        if market.close_time and not market.is_resolved_with_valid_answer:
             current_time = datetime.now(timezone.utc)
             logger.info(f"Market was closed {current_time - market.close_time}.")
 
-            agent.challenge_market(market, api_keys)
+            try:
+                agent.challenge_market(market, api_keys)
+            except Exception as e:
+                logger.error(f"Failed to challenge for {market.question}: {e}")
         else:
             logger.info("Market has not been closed yet.")
 
