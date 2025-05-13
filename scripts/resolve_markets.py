@@ -8,19 +8,19 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.utils import utcnow
+from web3 import Web3
 
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.utils import APIKeys
 
 MARKET_IDS: list[str] = ["000000000000000000000000000000000000000000"]
 
-
 def main(market_ids: list[str] = MARKET_IDS) -> None:
     api_keys = APIKeys()
     agent = OFVChallengerAgent()
 
     market_ids_hex: list[HexAddress] = [
-        HexAddress(HexStr(market_id)) for market_id in market_ids
+        Web3.to_checksum_address(market_id) for market_id in market_ids
     ]
 
     markets = []
