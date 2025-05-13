@@ -1,8 +1,6 @@
-from datetime import datetime, timezone
 
 import typer
 from eth_typing import HexAddress
-from eth_typing.evm import HexStr
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
@@ -13,7 +11,7 @@ from web3 import Web3
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.utils import APIKeys
 
-MARKET_IDS: list[str] = ["000000000000000000000000000000000000000000"]
+MARKET_IDS: list[str] = []  # Add market ids here if you don't want to use params for some reason
 
 def main(market_ids: list[str] = MARKET_IDS) -> None:
     api_keys = APIKeys()
