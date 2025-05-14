@@ -7929,7 +7929,7 @@ optuna = ["optuna (>=4.1.0,<5.0.0)"]
 type = "git"
 url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
 reference = "510-support-for-arbitrary-categorical-outcomes"
-resolved_reference = "22c7a4951f7d7c5c48cc4ae8dca35fe810389558"
+resolved_reference = "2a55db15fcff0235430c9d50b4bfbbcec6c3c9c6"
 
 [[package]]
 name = "prediction-prophet"
@@ -12779,4 +12779,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "c3f7ad30f01c6ec20a5ca848574a0481e72b3df137ee1951ef98b5f8c0d75eaa"
+content-hash = "b49911d1b3455ba543836c85f01f6338b3c6b3db918f6fa53c423e07a47c4011"
