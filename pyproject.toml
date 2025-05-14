@@ -46,7 +46,7 @@ sqlmodel = "^0.0.22"
 farcaster = { git = "https://github.com/gabrielfior/farcaster-py.git", branch = "update-eth-account" }
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
-streamlit = "^1.40.0"
+streamlit-nightly = "1.45.2.dev20250513" # TODO: Switch to `streamlit = "^1.45.2"` once they release it.
 langchain-pinecone = "^0.1.1"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"

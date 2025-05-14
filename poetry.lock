@@ -847,17 +847,17 @@ numpy = {version = ">=1.19.0", markers = "python_version >= \"3.9\""}
 
 [[package]]
 name = "boto3"
-version = "1.38.14"
+version = "1.38.15"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "boto3-1.38.14-py3-none-any.whl", hash = "sha256:44bc15285104683cd25dfb60abc5aac65b75d9e79b06f43094d18ed5c2739302"},
-    {file = "boto3-1.38.14.tar.gz", hash = "sha256:2cba851374c9b15facd6e7fe3adf7988c216537182d2c139e96da5c101f4cbcf"},
+    {file = "boto3-1.38.15-py3-none-any.whl", hash = "sha256:f2239b8c2816dd03a2a97297d33d5f7899f23be3a261db9a09ca691c32b7ddc2"},
+    {file = "boto3-1.38.15.tar.gz", hash = "sha256:dca60f7a3ead91c05cf471f7750e54d63b92bfc0e61fa122e2e3f5140e020a8d"},
 ]
 
 [package.dependencies]
-botocore = ">=1.38.14,<1.39.0"
+botocore = ">=1.38.15,<1.39.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.12.0,<0.13.0"
 
@@ -866,13 +866,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.38.14"
+version = "1.38.15"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "botocore-1.38.14-py3-none-any.whl", hash = "sha256:3125ed92e9ee6137c28fd32c56934a531a372346a7b13cb86de4328d7629e156"},
-    {file = "botocore-1.38.14.tar.gz", hash = "sha256:8ac91de6c33651a5c699268f1d22fadd5e99f370230dbea97d29e4164de4e5f2"},
+    {file = "botocore-1.38.15-py3-none-any.whl", hash = "sha256:9cc149ef56c3b99aff5436f26b71ad9558a45e4ac6b25b7b7046b0889279e601"},
+    {file = "botocore-1.38.15.tar.gz", hash = "sha256:6adb3b1b0739153d5dc9758e5e06f7596290999c07ed8f9167ca62a1f97c6592"},
 ]
 
 [package.dependencies]
@@ -3120,21 +3120,22 @@ vw = ["scikit-learn", "vowpalwabbit (>=8.10.0,<9.0.0)"]
 
 [[package]]
 name = "flask"
-version = "3.1.0"
+version = "3.1.1"
 description = "A simple framework for building complex web applications."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "flask-3.1.0-py3-none-any.whl", hash = "sha256:d667207822eb83f1c4b50949b1623c8fc8d51f2341d65f72e1a1815397551136"},
-    {file = "flask-3.1.0.tar.gz", hash = "sha256:5f873c5184c897c8d9d1b05df1e3d01b14910ce69607a117bd3277098a5836ac"},
+    {file = "flask-3.1.1-py3-none-any.whl", hash = "sha256:07aae2bb5eaf77993ef57e357491839f5fd9f4dc281593a81a9e4d79a24f295c"},
+    {file = "flask-3.1.1.tar.gz", hash = "sha256:284c7b8f2f58cb737f0cf1c30fd7eaf0ccfcde196099d24ecede3fc2005aa59e"},
 ]
 
 [package.dependencies]
-blinker = ">=1.9"
+blinker = ">=1.9.0"
 click = ">=8.1.3"
-itsdangerous = ">=2.2"
-Jinja2 = ">=3.1.2"
-Werkzeug = ">=3.1"
+itsdangerous = ">=2.2.0"
+jinja2 = ">=3.1.2"
+markupsafe = ">=2.1.1"
+werkzeug = ">=3.1.0"
 
 [package.extras]
 async = ["asgiref (>=3.2)"]
@@ -3752,13 +3753,13 @@ testing = ["pytest"]
 
 [[package]]
 name = "google-genai"
-version = "1.14.0"
+version = "1.15.0"
 description = "GenAI Python SDK"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "google_genai-1.14.0-py3-none-any.whl", hash = "sha256:5916ee985bf69ac7b68c4488949225db71e21579afc7ba5ecd5321173b60d3b2"},
-    {file = "google_genai-1.14.0.tar.gz", hash = "sha256:7c608de5bb173486a546f5ec4562255c26bae72d33d758a3207bb26f695d0087"},
+    {file = "google_genai-1.15.0-py3-none-any.whl", hash = "sha256:6d7f149cc735038b680722bed495004720514c234e2a445ab2f27967955071dd"},
+    {file = "google_genai-1.15.0.tar.gz", hash = "sha256:118bb26960d6343cd64f1aeb5c2b02144a36ad06716d0d1eb1fa3e0904db51f1"},
 ]
 
 [package.dependencies]
@@ -4151,26 +4152,6 @@ lint = ["black (>=22)", "flake8 (==6.0.0)", "flake8-bugbear (==23.3.23)", "isort
 test = ["eth-utils (>=1.0.1,<3)", "hypothesis (>=3.44.24,<=6.31.6)", "pytest (>=7.0.0)", "pytest-xdist (>=2.4.0)"]
 
 [[package]]
-name = "hf-xet"
-version = "1.1.1"
-description = ""
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "hf_xet-1.1.1-cp37-abi3-macosx_10_12_x86_64.whl", hash = "sha256:e39a8513f0854656116c837d387d9a41e9d78430b1a181442f04c223cbc4e8f8"},
-    {file = "hf_xet-1.1.1-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:c60cd67be384cb9e592fa6dfd29a10fddffa1feb2f3b31f53e980630d1ca0fd6"},
-    {file = "hf_xet-1.1.1-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5efc6cf15930d9b0cef25c0444e00c2f55d9e09f856f26ed8c809fd5cd1aa044"},
-    {file = "hf_xet-1.1.1-cp37-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:504bbc8341edc2aa4b3c20c1fdda818554ab34e4175730f42e2a90436cbbe706"},
-    {file = "hf_xet-1.1.1-cp37-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:87d030157a21016c2cddf757a5fd6f1f364d86afef6e190e63a37dd4dc6f6c98"},
-    {file = "hf_xet-1.1.1-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:6e9b640f0f002b3bea36739b30cf3133b3175c27a342b39315be9a9bdb0cec5b"},
-    {file = "hf_xet-1.1.1-cp37-abi3-win_amd64.whl", hash = "sha256:215a4e95009a0b9795ca3cf33db4e8d1248139593d7e1185661cd19b062d2b82"},
-    {file = "hf_xet-1.1.1.tar.gz", hash = "sha256:3e75d6e04c38c80115b640c025d68c3dc14d62f8b244011dfe547363674a1e87"},
-]
-
-[package.extras]
-tests = ["pytest"]
-
-[[package]]
 name = "hishel"
 version = "0.0.31"
 description = "Persistent cache implementation for httpx and httpcore"
@@ -4376,19 +4357,18 @@ files = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.31.1"
+version = "0.31.2"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "huggingface_hub-0.31.1-py3-none-any.whl", hash = "sha256:43f73124819b48b42d140cbc0d7a2e6bd15b2853b1b9d728d4d55ad1750cac5b"},
-    {file = "huggingface_hub-0.31.1.tar.gz", hash = "sha256:492bb5f545337aa9e2f59b75ef4c5f535a371e8958a6ce90af056387e67f1180"},
+    {file = "huggingface_hub-0.31.2-py3-none-any.whl", hash = "sha256:8138cd52aa2326b4429bb00a4a1ba8538346b7b8a808cdce30acb6f1f1bdaeec"},
+    {file = "huggingface_hub-0.31.2.tar.gz", hash = "sha256:7053561376ed7f6ffdaecf09cc54d70dc784ac6315fa4bb9b93e19662b029675"},
 ]
 
 [package.dependencies]
 filelock = "*"
 fsspec = ">=2023.5.0"
-hf-xet = {version = ">=1.1.0,<2.0.0", markers = "platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\""}
 packaging = ">=20.9"
 pyyaml = ">=5.1"
 requests = "*"
@@ -4401,7 +4381,7 @@ cli = ["InquirerPy (==0.3.4)"]
 dev = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "fastapi", "gradio (>=4.0.0)", "jedi", "libcst (==1.4.0)", "mypy (==1.5.1)", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "ruff (>=0.9.0)", "soundfile", "types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)", "urllib3 (<2.0)"]
 fastai = ["fastai (>=2.4)", "fastcore (>=1.3.27)", "toml"]
 hf-transfer = ["hf-transfer (>=0.1.4)"]
-hf-xet = ["hf-xet (>=1.1.0,<2.0.0)"]
+hf-xet = ["hf-xet (>=1.1.1,<2.0.0)"]
 inference = ["aiohttp"]
 quality = ["libcst (==1.4.0)", "mypy (==1.5.1)", "ruff (>=0.9.0)"]
 tensorflow = ["graphviz", "pydot", "tensorflow"]
@@ -7872,13 +7852,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.8"
+version = "0.64.9"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.64.8-py3-none-any.whl", hash = "sha256:3c26742ec9efde9e05ece155b1cbe25c640f226fc476f5107569ca7f188eb668"},
-    {file = "prediction_market_agent_tooling-0.64.8.tar.gz", hash = "sha256:e29eba7c2016390ea18b0252f36c9b04b6aca1a38e267a8a42e2777e6e38ce3b"},
+    {file = "prediction_market_agent_tooling-0.64.9-py3-none-any.whl", hash = "sha256:85f55c2f6c7eb14c8f0767675c8b703e94189955ed3af8834383e5ae3852ced0"},
+    {file = "prediction_market_agent_tooling-0.64.9.tar.gz", hash = "sha256:4ade385ec9d08497c39507c664ce1cc43259206437b979ec69205185ab91ae77"},
 ]
 
 [package.dependencies]
@@ -8248,13 +8228,13 @@ test = ["pytest", "pytest-xdist", "setuptools"]
 
 [[package]]
 name = "psycopg"
-version = "3.2.8"
+version = "3.2.9"
 description = "PostgreSQL database adapter for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "psycopg-3.2.8-py3-none-any.whl", hash = "sha256:0e960f1977d77de7f1ace4b54590f686b52c2f9ab1f61fff4141887fc711d9e7"},
-    {file = "psycopg-3.2.8.tar.gz", hash = "sha256:cc995d836841e400c4f615d8dea351dc39697ad29df84d428f9c38c8040222f8"},
+    {file = "psycopg-3.2.9-py3-none-any.whl", hash = "sha256:01a8dadccdaac2123c916208c96e06631641c0566b22005493f09663c7a8d3b6"},
+    {file = "psycopg-3.2.9.tar.gz", hash = "sha256:2fbb46fcd17bc81f993f28c47f1ebea38d66ae97cc2dbc3cad73b37cefbff700"},
 ]
 
 [package.dependencies]
@@ -8262,8 +8242,8 @@ typing-extensions = {version = ">=4.6", markers = "python_version < \"3.13\""}
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-binary = ["psycopg-binary (==3.2.8)"]
-c = ["psycopg-c (==3.2.8)"]
+binary = ["psycopg-binary (==3.2.9)"]
+c = ["psycopg-c (==3.2.9)"]
 dev = ["ast-comments (>=1.1.2)", "black (>=24.1.0)", "codespell (>=2.2)", "dnspython (>=2.1)", "flake8 (>=4.0)", "isort-psycopg", "isort[colors] (>=6.0)", "mypy (>=1.14)", "pre-commit (>=4.0.1)", "types-setuptools (>=57.4)", "types-shapely (>=2.0)", "wheel (>=0.37)"]
 docs = ["Sphinx (>=5.0)", "furo (==2022.6.21)", "sphinx-autobuild (>=2021.3.14)", "sphinx-autodoc-typehints (>=1.12)"]
 pool = ["psycopg-pool"]
@@ -8359,41 +8339,41 @@ files = [
 
 [[package]]
 name = "pulsar-client"
-version = "3.6.1"
+version = "3.7.0"
 description = "Apache Pulsar Python client library"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pulsar_client-3.6.1-cp310-cp310-macosx_13_0_universal2.whl", hash = "sha256:50222a8c76c38c2651e457688945dde6ce13efac933a47a0289be9ef45bab3d9"},
-    {file = "pulsar_client-3.6.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:295f41a3a69b6adaf27cb10d7d002968f928aeba6ed175dd73ba922283fd137d"},
-    {file = "pulsar_client-3.6.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:73d1ac4976bc4a2afb1847aab4fcdbb8a9859dadc144548fbfba0aac0aff69f2"},
-    {file = "pulsar_client-3.6.1-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:96f80fd494a63ea47ef970f139c0f14124b9e07183e245c3462833b06a9284ea"},
-    {file = "pulsar_client-3.6.1-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:312d0aaf6a9d08810dd9140ea615657f41560f27d736ad7fc81ece724eb69763"},
-    {file = "pulsar_client-3.6.1-cp310-cp310-win_amd64.whl", hash = "sha256:f6f7598c2491977e8bb93db13967d953ae9b615f2638bcfe9f0a6ec6d57b38e0"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-macosx_13_0_universal2.whl", hash = "sha256:10454e1bf26ae45d095e15dd3905fd0929a2e704fc8bea65762c1f85daaaf485"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:05d7334359845e385f8d36dd1fd6102c7804c4b6a4189a568dab957eb0723e4b"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:03d8ff83d825bfbddcaf6247a6ce132111718463269c4e81f7ab282de250d9e5"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:fe7f330170f72ee17a71a8d11beb324232da065b88dc56fe1b977a8ebf5cc128"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:ba2b09eb102533139fcc536c257729bf831d0e8c40e0c9e2fdc42ef950dc23b2"},
-    {file = "pulsar_client-3.6.1-cp311-cp311-win_amd64.whl", hash = "sha256:fccd3f2b6b89432368f4823393c51a0a752c68e1febd35e8474273a4e210c898"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-macosx_13_0_universal2.whl", hash = "sha256:4c6679715bd8d4b40ae58de79fe01014b1346057d2d4de78aa445f2f4b88373a"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6631988fe32d595d4df84c00c9e436d0f6144d73bacafd039bfab492d94cca71"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7b2fb7de8bdad1d1105f0784c866efc6da9bc8984f54b6c5bf6192dde1270263"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:09790b20a842a8ed4ce8e25ae534050519a82d5a4865b06eb995384c44d6d811"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:bc07b1289b03eec7034ef48e4e1b24a4758a5f0406ab89f709723b1797169eeb"},
-    {file = "pulsar_client-3.6.1-cp312-cp312-win_amd64.whl", hash = "sha256:ccecfac2a2dc7687632fa39a2c4f9f9804fbfd22bd7291d8097c2ff225d4c635"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-macosx_13_0_universal2.whl", hash = "sha256:18f9b8ea01a79f72fa456d326afa7a8894c56298ca21baadd939b155dc35e639"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:56e63beac67ad2cf67eb8f88a3ffbafbd798895975678b8e16fb22092dc670a3"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d50a6dff558b00dbb9ac859558ac6ac788d4410dc50e660d3dcbf3cf8acf98ef"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-musllinux_1_1_aarch64.whl", hash = "sha256:4c1aa7df4a1eacf49fa438b83f7999a49cd9cbc2f8768f70b6ba0da8ea6b022b"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:3fb09f9fb5510a6dc1b72831dbbf17a4298d8ec25af1f755cdaef3dba469e65d"},
-    {file = "pulsar_client-3.6.1-cp313-cp313-win_amd64.whl", hash = "sha256:b080192d0d8075b7d010e32aed597e5dcdab6dbbe31662eccb980afe8cb250fb"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-macosx_13_0_universal2.whl", hash = "sha256:1a92122d7b7ac371ecfa37962422e0529af7e6483bf2d14c4a0fa56b522949dc"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2dc2f6f6d8ef5912974f789c092a65fe35f816615694ea659c2efd4fbabd81b3"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:58f3c3d2ad3cb3c68dc13d1070898aba78320efa826858215645496f2d8b585f"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:1fc54bd29e42e2d8b7a3b8c47b28d53931c1d817dc35a3a7a60c45d8be47fa8d"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:cadbd1a6fb1d150e937fefcee67d3e65ffbde5e8b9d1be76dcdc100dbcc289c9"},
-    {file = "pulsar_client-3.6.1-cp39-cp39-win_amd64.whl", hash = "sha256:32e04901545705615f6ed7c24d664d6098dbedfb7df623d0a3786a268520f9b5"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-macosx_13_0_universal2.whl", hash = "sha256:29f628b95e161abd8646144e69de1112f9c7519f1d8b4f81e30c7707ac36023a"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:591c50128c3e21c351ebfd2d9eb60a703d89a0a905e73fa95c1f9a76aba1c52d"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:54dc7b975dc5274b21b3f279cc41f6c946d678dcbcc094564a143fa59092cbd4"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:a7a5e63bfdf5084d6b1559cd8ee7ed1db3b6902eb5cf581e3aa8f1b1a495a4e2"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:387b3ba6b0d9bae1b3f325b87bd2531315bad5c0f2389ddf78fac09d067d9298"},
+    {file = "pulsar_client-3.7.0-cp310-cp310-win_amd64.whl", hash = "sha256:d84e893cbc8757422956281526d1d055f64324f0ea28e3742b384f27a2359f89"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-macosx_13_0_universal2.whl", hash = "sha256:dbaa62fc6457ca675e2dd36d1b9a555a97373292d0f1f3f943a1374d0d12f533"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:6c92fbff9318ce4515adf599764b4289ae0aed2c27b60483ddbac0176cb89b6f"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:08a3ec2be7993ece879c6c118d6398b8eedd81060f8a8ca029fc04d17d558374"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:5bc38abd7456dcaa0b482ec541564d3714f9e6bc7267c62d9c1a0d00966d6ae2"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:e3485100f0af6d70cd1c0dee9ebd7bc0ec1c79f71ae40ae62c41fdc62f1a97f1"},
+    {file = "pulsar_client-3.7.0-cp311-cp311-win_amd64.whl", hash = "sha256:563bd003a8a31977564816d083ed07758cd19ea0a971b00045f52351accf4dcd"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-macosx_13_0_universal2.whl", hash = "sha256:5a96225904b9bd8710dcc49df8700c0cbb9e3071bf2e20bd62da35cda2bf908f"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:3b1eb4d7091f1ecb0218cb93672ac1a68b3c5fb0d739abaf15761b158ade17ff"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:76fb2f5cc106d4d732a4de2beb905bf18c029c2621e91c562cf2b3a7737b7c40"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:0e3516524f9a5e458dd85bca0bda54e62513399769833b1a3ab029484e5544f8"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:68fb5c38d38875a0984435f20469ae4281845f9a3bd864365f004ca0b639d1f0"},
+    {file = "pulsar_client-3.7.0-cp312-cp312-win_amd64.whl", hash = "sha256:5cf4401f4932452b9cf7e18d6be94ab063e94074acf661c407c20b3060502856"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-macosx_13_0_universal2.whl", hash = "sha256:7bad5f0a5fa78dae5ee43023ceb7113498f01ec23d8899fdf20bbe0a20cb91bf"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:bdcfbdeb58846065b65c611b56c336c51937e6973a1d5613ee767d35722c9535"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:93cbb720cdd51eef93f614ca5cf51b7c10220f8ccc25b594a83133b5ed5c0144"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:dd11012153d89347c30298e1e15da0cc71c919b0097813d780bbe04b7648d2cd"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:8eb0d0d6c3a7ad75ff33a81c8ae47939894a5cc2c2f8b1fe5e1ac32cd383ae87"},
+    {file = "pulsar_client-3.7.0-cp313-cp313-win_amd64.whl", hash = "sha256:66f17516b585313b0d02ed5466196745945afbcd4d1e4ada5221c8a789a8af61"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-macosx_13_0_universal2.whl", hash = "sha256:fe843eb95cbf9547e138ab7eed9be9484aee725a62d889b8b0d53aa7058d2cf6"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:3281e6ed621a96988b171fa04170c85b3f12e072b332045d29e2e01c4dac478b"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:d6b6011a193ae3b034222c3b4f5c1e151c6ce314c1d70362dc7b78b6c3265c60"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:cb2bbabbdd027acc031147e1bad7082c618812909e09d93b77f3b9a1628d8af2"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:a0e2de4f3270be34062f3ce7afa3836b7faaa2e2a4166f9b9382c3c2feddfbf8"},
+    {file = "pulsar_client-3.7.0-cp39-cp39-win_amd64.whl", hash = "sha256:ffe0486accafcf783a33a8b9042f37803f5c58d0a3cd1dadbd2c88e48ba18679"},
 ]
 
 [package.dependencies]
@@ -11115,6 +11095,40 @@ jinja2 = "*"
 streamlit = ">=1.2"
 
 [[package]]
+name = "streamlit-nightly"
+version = "1.45.2.dev20250513"
+description = "A faster way to build and share data apps"
+optional = false
+python-versions = "!=3.9.7,>=3.9"
+files = [
+    {file = "streamlit_nightly-1.45.2.dev20250513-py3-none-any.whl", hash = "sha256:5156db8c9cfe66dc5b0af1e8ba5620f924a13586a90f66c6038280e67577d45a"},
+    {file = "streamlit_nightly-1.45.2.dev20250513.tar.gz", hash = "sha256:4823e6dca72e1283786833410122f1af21825553ec5cf4622a75df26850107af"},
+]
+
+[package.dependencies]
+altair = ">=4.0,<6"
+blinker = ">=1.5.0,<2"
+cachetools = ">=4.0,<6"
+click = ">=7.0,<9"
+gitpython = ">=3.0.7,<3.1.19 || >3.1.19,<4"
+numpy = ">=1.23,<3"
+packaging = ">=20,<26"
+pandas = ">=1.4.0,<3"
+pillow = ">=7.1.0,<12"
+protobuf = ">=3.20,<7"
+pyarrow = ">=7.0"
+pydeck = ">=0.8.0b4,<1"
+requests = ">=2.27,<3"
+tenacity = ">=8.1.0,<10"
+toml = ">=0.10.1,<2"
+tornado = ">=6.0.3,<7"
+typing-extensions = ">=4.4.0,<5"
+watchdog = {version = ">=2.1.5,<7", markers = "platform_system != \"Darwin\""}
+
+[package.extras]
+snowflake = ["snowflake-connector-python (>=3.3.0)", "snowflake-snowpark-python[modin] (>=1.17.0)"]
+
+[[package]]
 name = "streamlit-toggle-switch"
 version = "1.0.2"
 description = "Creates a customizable toggle"
@@ -12787,4 +12801,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "81638553e68a1f4712f1b2e5a43f1462a12e2c4458e035a0672271e8dc9bb07e"
+content-hash = "45275966066e5f2c7afa76b6d9fc4b37bd9d1223b5a61a541344ceb56811fe59"

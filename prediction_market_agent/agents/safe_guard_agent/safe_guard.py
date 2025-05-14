@@ -1,5 +1,3 @@
-from typing import Callable
-
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
@@ -13,6 +11,9 @@ from prediction_market_agent.agents.safe_guard_agent.guards import (
     goplus_,
     hash_checker,
     llm,
+)
+from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
+    AbstractGuard,
 )
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     CreationTxInfo,
@@ -33,29 +34,20 @@ from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
 from prediction_market_agent.agents.safe_guard_agent.validation_result import (
     ValidationConclusion,
     ValidationResult,
-    ValidationResultWithName,
+)
+from prediction_market_agent.agents.safe_guard_agent.validation_summary import (
+    create_validation_summary,
 )
 from prediction_market_agent.agents.safe_guard_agent.whitelist import is_whitelisted
 
-SAFE_GUARDS: list[
-    Callable[
-        [
-            DetailedTransactionResponse,
-            SafeTx,
-            list[ChecksumAddress],
-            list[DetailedTransactionResponse],
-        ],
-        ValidationResult | None,
-    ]
-] = [
-    # Keep ordered from cheapest/fastest to most expensive/slowest.
-    agent.validate_do_not_remove_agent,
-    blacklist.validate_safe_transaction_blacklist,
-    hash_checker.validate_safe_transaction_hash,
-    llm.validate_safe_transaction_llm,
-    goplus_.validate_safe_transaction_goplus_address_security,
-    goplus_.validate_safe_transaction_goplus_token_security,
-    goplus_.validate_safe_transaction_goplus_nft_security,
+SAFE_GUARDS: list[type[AbstractGuard]] = [
+    agent.DoNotRemoveAgent,
+    blacklist.Blacklist,
+    hash_checker.HashCheck,
+    llm.LLM,
+    goplus_.GoPlusTokenSecurity,
+    goplus_.GoPlusAddressSecurity,
+    goplus_.GoPlusNftSecurity,
 ]
 
 
@@ -158,16 +150,19 @@ def validate_safe_transaction_obj(
             f"{api_keys.bet_from_address} is not owner of Safe {safe_address}, some functionality may be limited."
         )
 
-    logger.info(f"Processing transaction {detailed_transaction_info.txId}.")
     logger.info(
-        f"Transaction interacts with the following addresses ({len(all_addresses_from_tx_raw)}) [RAW]: {all_addresses_from_tx_raw}"
+        f"Processing transaction {detailed_transaction_info.txId}.", streamlit=True
+    )
+    logger.info(
+        f"The transaction interacts with the following addresses ({len(all_addresses_from_tx_raw)}): {all_addresses_from_tx_raw}"
     )
 
     all_addresses_from_tx_not_whitelisted = [
         addr for addr in all_addresses_from_tx_raw if not is_whitelisted(addr)
     ]
     logger.info(
-        f"Transaction interacts with the following addresses ({len(all_addresses_from_tx_not_whitelisted)}) [EXC. WHITELIST]: {all_addresses_from_tx_not_whitelisted}"
+        f"The transaction interacts with the following addresses that will be verified ({len(all_addresses_from_tx_not_whitelisted)}): {all_addresses_from_tx_not_whitelisted}",
+        streamlit=True,
     )
 
     # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
@@ -211,12 +206,15 @@ def validate_safe_transaction_obj(
         if do_reject:
             reject_transaction(safe, safe_tx, api_keys)
 
+    summary = create_validation_summary(detailed_transaction_info, validation_results)
+
     logger.info("Done.")
     if do_message:
         send_message(safe, detailed_transaction_info.txId, validation_results, api_keys)
 
     return ValidationConclusion(
         all_ok=ok,
+        summary=summary,
         results=validation_results,
     )
 
@@ -227,12 +225,16 @@ def run_safe_guards(
     detailed_transaction_info: DetailedTransactionResponse,
     all_addresses_from_tx: list[ChecksumAddress],
     detailed_historical_transactions: list[DetailedTransactionResponse],
-) -> list[ValidationResultWithName]:
-    validation_results: list[ValidationResultWithName] = []
+) -> list[ValidationResult]:
+    validation_results: list[ValidationResult] = []
     logger.info("Running the transaction validation...")
-    for safe_guard_fn in SAFE_GUARDS:
-        logger.info(f"Running {safe_guard_fn.__name__}...")
-        validation_result = safe_guard_fn(
+    for safe_guard_class in SAFE_GUARDS:
+        safe_guard = safe_guard_class()
+        logger.info(
+            f"Running guard {safe_guard.name} -- {safe_guard.description}",
+            streamlit=True,
+        )
+        validation_result = safe_guard.validate(
             detailed_transaction_info,
             safe_tx,
             all_addresses_from_tx,
@@ -240,20 +242,19 @@ def run_safe_guards(
         )
         if validation_result is None:
             logger.info(
-                f"Skipping {safe_guard_fn.__name__} because it isn't supported for the given SafeTX."
+                f"Skipping {safe_guard.name} because it isn't supported for the given SafeTX.",
+                streamlit=True,
             )
             continue
-        validation_result_with_name = ValidationResultWithName.from_result(
-            validation_result, safe_guard_fn.__name__
-        )
         (logger.success if validation_result.ok else logger.warning)(
-            f"Validation result: {validation_result}"
+            f"Guard {safe_guard.name} validation result: {validation_result.reason}",
+            streamlit=True,
         )
-        validation_results.append(validation_result_with_name)
+        validation_results.append(validation_result)
 
         if not validation_result.ok:
             logger.warning(
-                f"Validation using {validation_result_with_name.name} reported malicious activity."
+                f"Validation using {validation_result.name} reported malicious activity."
             )
 
     return validation_results
@@ -262,7 +263,7 @@ def run_safe_guards(
 def send_message(
     safe: Safe,
     transaction_id: str,
-    validation_results: list[ValidationResultWithName],
+    validation_results: list[ValidationResult],
     api_keys: APIKeys,
 ) -> None:
     ok = all(result.ok for result in validation_results)

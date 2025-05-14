@@ -40,7 +40,7 @@ def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
 
 
 def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
-    logger.info(f"Posting message to Safe {safe.address}.")
+    logger.info(f"Posting a message to Safe {safe.address}.", streamlit=True)
 
     message_hash = defunct_hash_message(text=message)
     target_safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
@@ -72,6 +72,7 @@ def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
 
 def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     # To reject transaction on Safe, you create a new transaction with the same nonce, but empty data.
+    logger.info("Creating a rejection transaction.", streamlit=True)
     rejection_tx = SafeTx(
         ethereum_client=tx.ethereum_client,
         safe_address=tx.safe_address,
@@ -108,13 +109,14 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
     threshold = safe.retrieve_threshold()
 
     if threshold > len(tx.signers):
-        logger.info("Threshold not met yet, just adding a sign.")
+        logger.info("Threshold not met yet, posting a signature.", stremalit=True)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
     else:
         logger.info(
-            f"Threshold {threshold} met with {len(tx.signers)} signs, executing."
+            f"Threshold {threshold} met with {len(tx.signers)} signs, executing.",
+            streamlit=True,
         )
         tx.call()
         _, tx_params = tx.execute(api_keys.bet_from_private_key.get_secret_value())

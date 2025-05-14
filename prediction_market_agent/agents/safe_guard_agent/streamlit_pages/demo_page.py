@@ -125,17 +125,19 @@ On this page, you can test out Safe Guard and see how it works in practice step 
     if transaction_id is None:
         st.stop()
 
-    def run_validation() -> None:
-        validate_safe_transaction(
-            check_not_none(transaction_id),
-            do_execute,
-            do_reject,
-            do_message,
-            # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
-            ignore_historical_transaction_ids={check_not_none(transaction_id)},
-        )
+    st.markdown("---")
 
-    st.button(
-        "Run validation",
-        on_click=run_validation,
-    )
+    st.markdown("### Summary")
+
+    with st.spinner("Validating transaction..."):
+        with st.expander("Show details...", expanded=False):
+            conclusion = validate_safe_transaction(
+                check_not_none(transaction_id),
+                do_execute,
+                do_reject,
+                do_message,
+                # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
+                ignore_historical_transaction_ids={check_not_none(transaction_id)},
+            )
+
+    (st.success if conclusion.all_ok else st.warning)(conclusion.summary)
