@@ -57,7 +57,7 @@ def get_latest_transaction_cases(
                 name=as_detailed.txId,
                 inputs=(as_detailed, get_balances_usd(safe_address)),
                 expected_output=ValidationConclusion(
-                    all_ok=True, summary="", results=[]
+                    txId=as_detailed.txId, all_ok=True, summary="", results=[]
                 ),
                 metadata="Latest transaction that was processed for given Safe. Assumed to be OK.",
             )

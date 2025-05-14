@@ -9,6 +9,7 @@ class ValidationResult(BaseModel):
 
 
 class ValidationConclusion(BaseModel):
+    txId: str
     all_ok: bool
     summary: str
     results: list[ValidationResult]

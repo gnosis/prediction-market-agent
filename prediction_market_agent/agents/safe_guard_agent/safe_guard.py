@@ -209,14 +209,18 @@ def validate_safe_transaction_obj(
     summary = create_validation_summary(detailed_transaction_info, validation_results)
 
     logger.info("Done.")
-    if do_message:
-        send_message(safe, detailed_transaction_info.txId, validation_results, api_keys)
 
-    return ValidationConclusion(
+    conclusion = ValidationConclusion(
+        txId=detailed_transaction_info.txId,
         all_ok=ok,
         summary=summary,
         results=validation_results,
     )
+
+    if do_message:
+        send_message(safe, conclusion, api_keys)
+
+    return conclusion
 
 
 @observe()
@@ -262,18 +266,11 @@ def run_safe_guards(
 
 def send_message(
     safe: Safe,
-    transaction_id: str,
-    validation_results: list[ValidationResult],
+    conclusion: ValidationConclusion,
     api_keys: APIKeys,
 ) -> None:
-    ok = all(result.ok for result in validation_results)
-    reasons_formatted = "\n".join(
-        f"- {result.name}: {'OK' if result.ok else 'Failed'} -- {result.reason}"
-        for result in validation_results
-    )
-    message = f"""Your transaction with id `{transaction_id}` was {'approved' if ok else 'rejected'}.
+    message = f"""Your transaction with id `{conclusion.txId}` was {'approved' if conclusion.all_ok else 'rejected'}.
 
-Reasons:
-{reasons_formatted}
+{conclusion.summary}
 """
     post_message(safe, message, api_keys)
