@@ -35,6 +35,9 @@ from pydantic import BaseModel
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_resolver import (
     ofv_answer_binary_question,
 )
+from prediction_market_agent.agents.utils import (
+    build_resolution_from_factuality_for_omen_market,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -65,7 +68,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
 
     # Fetch markets created by us that are already open, but no answer was submitted yet or they are challengable.
     get_omen_binary_markets_common_filters = partial(
-        OmenSubgraphHandler().get_omen_binary_markets,
+        OmenSubgraphHandler().get_omen_markets,
         limit=None,
         creator=public_key,
         # We need markets already opened for answers.
@@ -88,7 +91,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
             (
                 find_resolution_on_other_markets_or_using_resolver(m, api_keys)
                 if not is_invalid(m.question_title)
-                else Resolution.CANCEL
+                else Resolution(outcome=None, invalid=True)
             ),
         )
         for m in created_opened_markets
@@ -112,7 +115,7 @@ def omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
     logger.info(f"{balances_after_finalization=}")
 
     # Fetch markets that are finalized, but we didn't call `resolve` on them yet.
-    created_finalized_markets = OmenSubgraphHandler().get_omen_binary_markets(
+    created_finalized_markets = OmenSubgraphHandler().get_omen_markets(
         limit=None,
         creator=public_key,
         question_finalized_before=now,
@@ -151,11 +154,13 @@ def find_resolution_on_other_markets_or_using_resolver(
         )
         try:
             fact_check = ofv_answer_binary_question(market.question_title, api_keys)
-            resolution = (
-                None
-                if fact_check is None or fact_check.factuality is None
-                else Resolution.from_bool(fact_check.factuality)
+            if fact_check is None:
+                return Resolution(outcome=None, invalid=True)
+
+            resolution = build_resolution_from_factuality_for_omen_market(
+                factuality=fact_check.factuality
             )
+
         except Exception as e:
             logger.exception(
                 f"Exception while getting factuality for market {market.url=}. Skipping. Exception: {e}"

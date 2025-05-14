@@ -5,12 +5,17 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from prediction_market_agent_tooling.benchmark.agents import AbstractBenchmarkedAgent
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
-from prediction_market_agent_tooling.benchmark.utils import (
-    OutcomePrediction,
-    Prediction,
+from prediction_market_agent_tooling.benchmark.utils import Prediction
+from prediction_market_agent_tooling.deploy.constants import (
+    NO_OUTCOME_LOWERCASE_IDENTIFIER,
+    YES_OUTCOME_LOWERCASE_IDENTIFIER,
 )
 from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.markets.data_models import (
+    CategoricalProbabilisticAnswer,
+    ProbabilisticAnswer,
+)
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
 from prediction_market_agent_tooling.markets.markets import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
@@ -28,17 +33,26 @@ class QuestionWithKnownOutcome(BaseModel):
     result: Result
     notes: t.Optional[str] = None
 
+    def build_probabilities(self) -> t.Dict[OutcomeStr, Probability]:
+        probs = {}
+        if self.result is Result.YES:
+            probs[OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(1.0)
+            probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(0.0)
+        elif self.result is Result.NO:
+            probs[OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(0.0)
+            probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(1.0)
+        else:
+            probs[OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(0.5)
+            probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(1.5)
+        return probs
+
     def to_market(self) -> AgentMarket:
         return AgentMarket(
             url=self.url if self.url else "",
             id=self.question,
             question=self.question,
             description=None,
-            current_p_yes=Probability(
-                self.result.to_p_yes()
-                if self.result != Result.KNOWN_UNKNOWABLE
-                else 0.5
-            ),
+            probabilities=self.build_probabilities(),
             volume=None,
             created_time=None,
             close_time=utcnow() + timedelta(days=1),
@@ -77,10 +91,11 @@ class KnownOutcomeAgent(AbstractBenchmarkedAgent):
         else:
             return Prediction(
                 is_predictable=True,
-                outcome_prediction=OutcomePrediction(
-                    p_yes=outcome.result.to_p_yes(),
-                    confidence=1.0,
-                    info_utility=None,
+                outcome_prediction=CategoricalProbabilisticAnswer.from_probabilistic_answer(
+                    ProbabilisticAnswer(
+                        p_yes=outcome.result.to_p_yes(),
+                        confidence=1.0,
+                    ),
                 ),
             )
 

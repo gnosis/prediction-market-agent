@@ -1,13 +1,13 @@
 import typing as t
 
-from prediction_market_agent_tooling.gtypes import USD
+from prediction_market_agent_tooling.gtypes import USD, OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
 
 class Bet(BaseModel):
-    direction: bool
+    direction: OutcomeStr
     size: USD
 
 
@@ -43,15 +43,11 @@ class CorrelatedMarketPair(BaseModel):
             return 0
 
         bet_direction_main, bet_direction_related = self.bet_directions()
-        p_main = (
-            self.main_market.current_p_yes
-            if bet_direction_main
-            else self.main_market.current_p_no
-        )
+        p_main = self.main_market.p_yes if bet_direction_main else self.main_market.p_no
         p_related = (
-            self.related_market.current_p_yes
+            self.related_market.p_yes
             if bet_direction_related
-            else self.related_market.current_p_no
+            else self.related_market.p_no
         )
         denominator = p_main + p_related
         return (1 / denominator) - 1
@@ -61,13 +57,13 @@ class CorrelatedMarketPair(BaseModel):
         if correlation:
             # We compare denominators for cases YES/NO and NO/YES bets and take the most profitable (i.e. where denominator is the lowest).
             # For other cases we employ similar logic.
-            yes_no = self.main_market.current_p_yes + self.related_market.current_p_no
-            no_yes = self.main_market.current_p_no + self.related_market.current_p_yes
+            yes_no = self.main_market.p_yes + self.related_market.p_no
+            no_yes = self.main_market.p_no + self.related_market.p_yes
             return (True, False) if yes_no <= no_yes else (False, True)
 
         else:
-            yes_yes = self.main_market.current_p_yes + self.related_market.current_p_yes
-            no_no = self.main_market.current_p_no + self.related_market.current_p_no
+            yes_yes = self.main_market.p_yes + self.related_market.p_yes
+            no_no = self.main_market.p_no + self.related_market.p_no
             return (True, True) if yes_yes <= no_no else (False, False)
 
     def split_bet_amount_between_yes_and_no(
@@ -80,22 +76,24 @@ class CorrelatedMarketPair(BaseModel):
 
         bet_direction_main, bet_direction_related = self.bet_directions()
 
-        p_main = (
-            self.main_market.current_p_yes
-            if bet_direction_main
-            else self.main_market.current_p_no
-        )
+        p_main = self.main_market.p_yes if bet_direction_main else self.main_market.p_no
         p_related = (
-            self.related_market.current_p_yes
+            self.related_market.p_yes
             if bet_direction_related
-            else self.related_market.current_p_no
+            else self.related_market.p_no
         )
         total_probability = p_main + p_related
         bet_main = total_bet_amount * p_main / total_probability
         bet_related = total_bet_amount * p_related / total_probability
-        main_market_bet = Bet(direction=bet_direction_main, size=bet_main)
+        bet_direction_main_outcome = self.main_market.get_outcome_str_from_bool(
+            bet_direction_main
+        )
+        main_market_bet = Bet(direction=bet_direction_main_outcome, size=bet_main)
+        bet_direction_related_outcome = self.related_market.get_outcome_str_from_bool(
+            bet_direction_related
+        )
         related_market_bet = Bet(
-            direction=bet_direction_related,
+            direction=bet_direction_related_outcome,
             size=bet_related,
         )
         return ArbitrageBet(

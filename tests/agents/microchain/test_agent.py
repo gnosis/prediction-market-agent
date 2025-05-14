@@ -12,6 +12,10 @@ from microchain import (
     StepOutput,
 )
 from microchain.functions import Reasoning, Stop
+from prediction_market_agent_tooling.deploy.constants import (
+    YES_OUTCOME_LOWERCASE_IDENTIFIER,
+)
+from prediction_market_agent_tooling.gtypes import OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.markets import MarketType
 from pydantic import BaseModel
@@ -99,7 +103,10 @@ def test_get_probability(
     m_json = json.loads(agent.history[-3]["content"])
     m = MarketIDAndProbability.model_validate(m_json)
     market: AgentMarket = market_type.market_class.get_binary_market(m.market_id)
-    assert market.current_p_yes == m.probability
+    assert (
+        market.probabilities[OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER)]
+        == m.probability
+    )
 
 
 @pytest.mark.skipif(not RUN_PAID_TESTS, reason="This test costs money to run.")

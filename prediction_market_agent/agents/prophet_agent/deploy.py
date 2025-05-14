@@ -19,7 +19,11 @@ from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_cache import (
     RelevantNewsResponseCache,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
+from prediction_market_agent_tooling.tools.utils import (
+    DatetimeUTC,
+    check_not_none,
+    utcnow,
+)
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
@@ -60,7 +64,8 @@ class DeployableTraderAgentER(DeployableTraderAgent):
             logger.info(
                 f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
             )
-            return prediction.outcome_prediction
+            outcome_prediction = check_not_none(prediction.outcome_prediction)
+            return outcome_prediction.to_probabilistic_answer()
 
 
 class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):

@@ -22,7 +22,7 @@ def main(creator: str) -> None:
     image_contract = OmenThumbnailMapping()
     markets = [
         OmenAgentMarket.from_data_model(m)
-        for m in OmenSubgraphHandler().get_omen_binary_markets(
+        for m in OmenSubgraphHandler().get_omen_markets(
             limit=None,
             creator=HexAddress(HexStr(creator)),
             liquidity_bigger_than=Wei(0),

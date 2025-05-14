@@ -42,7 +42,7 @@ class GPTRAgent(DeployableTraderAgent):
                 model_settings=ModelSettings(temperature=0),
             ),
         )
-        return prediction.outcome_prediction
+        return prediction
 
 
 @observe()

@@ -57,7 +57,7 @@ class OmenCleanerAgent(DeployableAgent):
         logger.info("Resolving finalized markets.")
         finalized_unresolved_markets = [
             market
-            for market in OmenSubgraphHandler().get_omen_binary_markets(
+            for market in OmenSubgraphHandler().get_omen_markets(
                 limit=None,
                 question_finalized_before=utcnow(),
                 resolved=False,
@@ -74,7 +74,7 @@ class OmenCleanerAgent(DeployableAgent):
         self, api_keys: APIKeys
     ) -> dict[HexAddress, IPFSCIDVersion0 | None]:
         logger.info("Generating missing images.")
-        recently_created_markets = OmenSubgraphHandler().get_omen_binary_markets(
+        recently_created_markets = OmenSubgraphHandler().get_omen_markets(
             limit=None,
             # Get only serious markets with a reasonable liquidity.
             liquidity_bigger_than=CollateralToken(5).as_wei,

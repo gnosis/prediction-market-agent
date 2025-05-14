@@ -32,6 +32,9 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replica
 from prediction_market_agent.agents.specialized_agent.deploy import (
     SPECIALIZED_FOR_MARKET_CREATORS,
 )
+from prediction_market_agent.agents.utils import (
+    build_resolution_from_factuality_for_omen_market,
+)
 from prediction_market_agent.utils import APIKeys
 
 OFV_CHALLENGER_TAG = "ofv_challenger"
@@ -76,7 +79,7 @@ class OFVChallengerAgent(DeployableAgent):
         claim_all_bonds_on_reality(api_keys)
 
         get_omen_binary_markets_common_filters = partial(
-            OmenSubgraphHandler().get_omen_binary_markets,
+            OmenSubgraphHandler().get_omen_markets,
             limit=None,
             creator_in=MARKET_CREATORS_TO_CHALLENGE,
             # We need markets already opened for answers.
@@ -170,16 +173,15 @@ class OFVChallengerAgent(DeployableAgent):
                 reasoning="OFV failed to provide an answer.",
             )
 
-        new_resolution = (
-            Resolution.from_bool(answer.factuality)
-            if answer.factuality is not None
-            else Resolution.CANCEL
+        new_resolution = build_resolution_from_factuality_for_omen_market(
+            factuality=answer.factuality
         )
+
         logger.info(
             f"Challenging market {market.url=} with resolution {new_resolution=}"
         )
 
-        if new_resolution != Resolution.CANCEL:
+        if not new_resolution.invalid:
             omen_submit_answer_market_tx(
                 api_keys=api_keys,
                 market=market,

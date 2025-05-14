@@ -60,7 +60,7 @@ def omen_replicate_from_tx(
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
-    existing_markets = OmenSubgraphHandler().get_omen_binary_markets(limit=None)
+    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
 
     markets = get_binary_markets(
         # Polymarket is slow to get, so take only 10 candidates for him.
@@ -216,7 +216,7 @@ def omen_unfund_replicated_known_markets_tx(
 
     # Fetch markets that we created, are soon to be known,
     # and still have liquidity in them (we didn't withdraw it yet).
-    markets = OmenSubgraphHandler().get_omen_binary_markets(
+    markets = OmenSubgraphHandler().get_omen_markets(
         limit=None,
         creator=from_address,
         question_opened_before=opened_before,

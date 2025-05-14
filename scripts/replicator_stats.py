@@ -20,7 +20,7 @@ from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
 
 def main() -> None:
     now = utcnow()
-    markets = OmenSubgraphHandler().get_omen_binary_markets(
+    markets = OmenSubgraphHandler().get_omen_markets(
         limit=None,
         creator=REPLICATOR_SAFE_ADDRESS,
     )

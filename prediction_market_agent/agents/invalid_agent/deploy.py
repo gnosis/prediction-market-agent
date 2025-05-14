@@ -28,7 +28,7 @@ class InvalidAgent(DeployableTraderAgent):
             return False
 
         # If the market is new, don't bet on it as the potential profit from market invalidity is low.
-        if 0.45 <= market.current_p_yes <= 0.55:
+        if 0.45 <= market.p_yes <= 0.55:
             return False
 
         # In contrast to the parent implementation, this agent will place bets only on invalid markets,
