@@ -17,8 +17,8 @@ PERFECT_NEGATIVE_CORRELATION = Correlation(near_perfect_correlation=False, reaso
 
 def build_market(p_yes: float) -> AgentMarket:
     m1 = Mock(OmenAgentMarket, wraps=OmenAgentMarket)
-    m1.current_p_yes = p_yes
-    m1.current_p_no = 1 - m1.current_p_yes
+    m1.p_yes = p_yes
+    m1.p_no = 1 - m1.p_yes
     return m1
 
 
