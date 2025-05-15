@@ -33,7 +33,7 @@ class GoPlusTokenSecurity(AbstractGuard):
     name = "Token security"
     description = "This guard checks the security of tokens involved in the transaction using GoPlus API."
 
-    @observe(name="validate_safe_transaction_goplus_address_security")
+    @observe(name="validate_safe_transaction_goplus_token_security")
     def validate(
         self,
         new_transaction: DetailedTransactionResponse,
@@ -118,7 +118,7 @@ class GoPlusAddressSecurity(AbstractGuard):
     name = "Address security"
     description = "This guard checks the security of addresses involved in the transaction using GoPlus API."
 
-    @observe(name="validate_safe_transaction_goplus_token_security")
+    @observe(name="validate_safe_transaction_goplus_address_security")
     def validate(
         self,
         new_transaction: DetailedTransactionResponse,
