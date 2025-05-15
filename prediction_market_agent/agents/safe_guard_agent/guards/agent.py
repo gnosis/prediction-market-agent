@@ -36,7 +36,7 @@ class DoNotRemoveAgent(AbstractGuard):
                 != APIKeys().bet_from_address.lower()
             )
         ):
-            ValidationResult(
+            return ValidationResult(
                 name=self.name,
                 description=self.description,
                 ok=True,
