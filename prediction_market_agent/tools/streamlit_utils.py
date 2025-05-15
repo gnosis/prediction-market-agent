@@ -64,7 +64,7 @@ def get_loguru_streamlit_sink(
         if any(x in message for x in [DB_CACHE_LOG_PREFIX]):
             return
 
-        if explicit and STREAMLIT_SINK_EXPLICIT_FLAG not in record["extra"]:
+        if explicit and not record["extra"].get(STREAMLIT_SINK_EXPLICIT_FLAG, False):
             return
 
         if level == "ERROR":
