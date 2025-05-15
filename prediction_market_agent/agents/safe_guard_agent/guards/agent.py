@@ -26,28 +26,22 @@ class DoNotRemoveAgent(AbstractGuard):
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
     ) -> ValidationResult:
-        ok_result = ValidationResult(
-            name=self.name,
-            description=self.description,
-            ok=True,
-            reason="The transaction does not remove the agent from owners.",
-        )
-
-        if not new_transaction.txData:
-            return ok_result
-
-        if not new_transaction.txData.dataDecoded:
-            return ok_result
-
-        if new_transaction.txData.dataDecoded.get("method") != "removeOwner":
-            return ok_result
-
         if (
-            # Based on https://github.com/safe-global/safe-smart-account/blob/main/contracts/base/OwnerManager.sol#L73.
-            new_transaction.txData.dataDecoded["parameters"][1]["value"].lower()
-            != APIKeys().bet_from_address.lower()
+            not new_transaction.txData
+            or not new_transaction.txData.dataDecoded
+            or new_transaction.txData.dataDecoded.get("method") != "removeOwner"
+            or (
+                # Based on https://github.com/safe-global/safe-smart-account/blob/main/contracts/base/OwnerManager.sol#L73.
+                new_transaction.txData.dataDecoded["parameters"][1]["value"].lower()
+                != APIKeys().bet_from_address.lower()
+            )
         ):
-            return ok_result
+            ValidationResult(
+                name=self.name,
+                description=self.description,
+                ok=True,
+                reason="The transaction does not remove the agent from owners.",
+            )
 
         return ValidationResult(
             name=self.name,
