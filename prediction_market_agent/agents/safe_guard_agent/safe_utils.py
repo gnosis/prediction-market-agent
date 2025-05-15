@@ -109,7 +109,7 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
     threshold = safe.retrieve_threshold()
 
     if threshold > len(tx.signers):
-        logger.info("Threshold not met yet, posting a signature.", stremalit=True)
+        logger.info("Threshold not met yet, posting a signature.", streamlit=True)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
