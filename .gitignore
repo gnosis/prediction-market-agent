@@ -2,6 +2,7 @@
 .env.monitor
 .agents_workspace
 .cache
+.vscode
 __pycache__
 *.egg-info
 logs
