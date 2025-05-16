@@ -2,10 +2,14 @@ from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.langfuse_ import observe
+from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from safe_eth.safe.safe import SafeTx
 
+from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
+    AbstractGuard,
+)
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedExecutionInfo,
     DetailedTransactionResponse,
@@ -23,41 +27,53 @@ from prediction_market_agent.utils import APIKeys
 HISTORY_LIMIT = 25
 
 
-@observe()
-def validate_safe_transaction_llm(
-    new_transaction: DetailedTransactionResponse,
-    new_transaction_safetx: SafeTx,
-    all_addresses_from_tx: list[ChecksumAddress],
-    history: list[DetailedTransactionResponse],
-) -> ValidationResult:
-    # Get the latest ones.
-    history = sorted(
-        history, key=lambda x: x.executedAt or float("-inf"), reverse=True
-    )[:HISTORY_LIMIT]
+class LLMValidationResult(BaseModel):
+    reason: str
+    ok: bool
 
-    agent = Agent(
-        OpenAIModel(
-            "gpt-4o",
-            provider=get_openai_provider(api_key=APIKeys().openai_api_key),
-        ),
-        system_prompt="""You are fraud detection agent. 
+
+class LLM(AbstractGuard):
+    name = "LLM"
+    description = "This guard uses a large language model to analyze the transaction and determine if it is malicious."
+
+    @observe(name="validate_safe_transaction_llm")
+    def validate(
+        self,
+        new_transaction: DetailedTransactionResponse,
+        new_transaction_safetx: SafeTx,
+        all_addresses_from_tx: list[ChecksumAddress],
+        history: list[DetailedTransactionResponse],
+    ) -> ValidationResult:
+        # Get the latest ones.
+        history = sorted(
+            history, key=lambda x: x.executedAt or float("-inf"), reverse=True
+        )[:HISTORY_LIMIT]
+
+        agent = Agent(
+            OpenAIModel(
+                "gpt-4o",
+                provider=get_openai_provider(api_key=APIKeys().openai_api_key),
+            ),
+            system_prompt="""You are fraud detection agent. 
 You need to determine if the new transaction is malicious or not.
 Take a look at the new transaction details and also consider the previous transactions already made.
 You don't know if previous transactions were malicious or not.
+The number of current confirmations do not matter, don't take them into account and do not describe them in your answer.
+Consider money and wallet balance in absolute terms, not in relative terms.
 Keep in mind, better be safe than sorry.
 """,
-        result_type=ValidationResult,
-    )
+            result_type=LLMValidationResult,
+        )
 
-    balances_formatted = format_balances(new_transaction.safeAddress)
-    new_formatted = format_transaction(new_transaction)
-    history_formatted = (
-        "\n\n".join(format_transaction(tx) for tx in history)
-        if history
-        else "No historical transactions found."
-    )
+        balances_formatted = format_balances(new_transaction.safeAddress)
+        new_formatted = format_transaction(new_transaction)
+        history_formatted = (
+            "\n\n".join(format_transaction(tx) for tx in history)
+            if history
+            else "No historical transactions found."
+        )
 
-    prompt = f"""Current status of the wallet is:
+        prompt = f"""Current status of the wallet is:
 
 {balances_formatted}
 
@@ -65,7 +81,7 @@ Keep in mind, better be safe than sorry.
         
 The new transaction that is being made is as follows:
 
-{new_formatted} 
+{new_formatted}
 
 ---
 
@@ -77,12 +93,17 @@ The history of transactions made by this Safe is as follows:
 
 Is the new transaction malicious or not? Why? Output your answer in the JSON format with the following structure:
 
-{{"reason": string, "ok": bool}}
+{{"reason": string (under 500 characters), "ok": bool}}
 """
-    logger.info(f"Prompting LLM agent with:\n\n\n{prompt}")
+        logger.info(f"Prompting LLM agent with:\n\n\n{prompt}")
 
-    result = agent.run_sync(prompt)
-    return result.data
+        result = agent.run_sync(prompt).output
+        return ValidationResult(
+            name=self.name,
+            description=self.description,
+            reason=result.reason,
+            ok=result.ok,
+        )
 
 
 def format_transaction(tx: DetailedTransactionResponse) -> str:
