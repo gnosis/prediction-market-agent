@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any
 
 import tenacity
@@ -31,7 +32,11 @@ def get_safe(safe_address: ChecksumAddress) -> Safe:
 
 
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential(max=60)
+    stop=tenacity.stop_after_attempt(10),
+    wait=tenacity.wait_exponential(max=timedelta(minutes=5)),
+    after=lambda x: logger.debug(
+        f"get_safes failed, {x.attempt_number=}, {x.upcoming_sleep=}."
+    ),
 )
 def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
     api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
