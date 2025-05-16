@@ -19,6 +19,8 @@ On this page you can see the list of deployed agents that can be added as signer
 After you add one of the agents as a signer, he will monitor your Safe and verify queued transactions as they come automatically!
 
 After creation of any transaction in your Safe, just wait a bit to see if it's predicted to be legit or not.
+
+Agent will also send you a message to your Safe with the result of the validation.
 """
     )
 
