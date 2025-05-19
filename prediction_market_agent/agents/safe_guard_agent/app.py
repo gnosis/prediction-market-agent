@@ -10,8 +10,7 @@ from prediction_market_agent.tools.streamlit_utils import add_sink_to_logger
 
 nest_asyncio.apply()  # Required for streamlit to work with asyncio.
 st.set_page_config(layout="wide")
-add_sink_to_logger()
-
+add_sink_to_logger(explicit=True)
 
 st.markdown(
     f"""# Safe Guard -- Fraud Detection Agent for Safe 

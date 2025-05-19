@@ -1,6 +1,5 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
@@ -9,7 +8,6 @@ from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
 from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
     validate_safe_transaction,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import get_safe
 
 
 def demo_page() -> None:
@@ -20,22 +18,14 @@ On this page, you can test out Safe Guard and see how it works in practice step 
 """
     )
 
-    keys = APIKeys()
-
     with st.expander("How it works"):
         st.markdown(
-            f"""1. [Optional] In your Safe wallet, add the following address as a signer: {keys.bet_from_address}
-    - This step is optional, but some functionality is limited without it.
-2. [Optional] Create a new transaction with at least 2 signers required.
-    - You can also run the validation on your historical transactions as a simulation.
-3. Copy the address of your Safe wallet and paste it in the field below.
+            f"""1. [Optional] Create a new transaction with at least 2 signers required.
+    - You can also run the validation on your (or others) historical transactions as a simulation.
+2. Copy the address of your Safe wallet and paste it in the field below.
     - Or try out with the one filled by default.
-4. Choose one of the pending transactions.
-5. Click the "Run validation" button.
-6. Agent will determine if the new transaction is malicious or not. 
-    - If not, it will sign the transaction and maybe execute it. (if threshold is met)
-    - If yes, it will create a rejection transaction.
-7. Agent will also send you a signed message into Safe, with all the available details.
+3. Choose one of the transactions.
+4. Agent will determine if the new transaction is malicious or not.
 """
         )
 
@@ -62,29 +52,6 @@ On this page, you can test out Safe Guard and see how it works in practice step 
     # Get rid of potential token id
     *_, safe_address = safe_address.split(":")
     safe_address_checksum = Web3.to_checksum_address(safe_address)
-    safe = get_safe(safe_address_checksum)
-
-    is_owner = safe.retrieve_is_owner(keys.bet_from_address)
-    threshold = safe.retrieve_threshold()
-
-    if threshold == 1:
-        st.warning("This Safe has threshold set to 1.")
-
-    do_execute = st.checkbox(
-        "Execute transaction if validated (possible only for Safe's owners)",
-        value=False,
-        disabled=not is_owner,
-    )
-    do_reject = st.checkbox(
-        "Reject transaction if not validated (possible only for Safe's owners)",
-        value=False,
-        disabled=not is_owner,
-    )
-    do_message = st.checkbox(
-        "Send a message about the outcome (possible only for Safe's owners)",
-        value=False,
-        disabled=not is_owner,
-    )
 
     @st.cache_data(ttl=60)
     def get_safe_queue_multisig_cached(
@@ -125,17 +92,19 @@ On this page, you can test out Safe Guard and see how it works in practice step 
     if transaction_id is None:
         st.stop()
 
-    def run_validation() -> None:
-        validate_safe_transaction(
-            check_not_none(transaction_id),
-            do_execute,
-            do_reject,
-            do_message,
-            # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
-            ignore_historical_transaction_ids={check_not_none(transaction_id)},
-        )
+    st.markdown("---")
 
-    st.button(
-        "Run validation",
-        on_click=run_validation,
-    )
+    st.markdown("### Summary")
+
+    with st.spinner("Validating transaction..."):
+        with st.expander("Show details...", expanded=False):
+            conclusion = validate_safe_transaction(
+                check_not_none(transaction_id),
+                False,
+                False,
+                False,
+                # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
+                ignore_historical_transaction_ids={check_not_none(transaction_id)},
+            )
+
+    (st.success if conclusion.all_ok else st.warning)(conclusion.summary)
