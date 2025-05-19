@@ -1,5 +1,5 @@
-from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import Safe, SafeTx
@@ -55,10 +55,11 @@ def validate_all(
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    chain_id: ChainID,
 ) -> None:
     api_keys = APIKeys()
 
-    safes_to_verify = get_safes(api_keys.bet_from_address)
+    safes_to_verify = get_safes(api_keys.bet_from_address, chain_id)
     logger.info(
         f"For owner {api_keys.bet_from_address}, retrieved {safes_to_verify} safes to verify transactions for."
     )
@@ -70,6 +71,7 @@ def validate_all(
             do_reject,
             do_message,
             api_keys,
+            chain_id,
         )
 
 
@@ -79,9 +81,12 @@ def validate_safe(
     do_reject: bool,
     do_message: bool,
     api_keys: APIKeys,
+    chain_id: ChainID,
 ) -> None:
     # Load only multisig transactions here, others are not relevant for the agent to check.
-    queued_transactions = safe_api_utils.get_safe_queue_multisig(safe_address)
+    queued_transactions = safe_api_utils.get_safe_queue_multisig(
+        safe_address, chain_id=chain_id
+    )
     logger.info(
         f"Retrieved {len(queued_transactions)} queued transactions to verify for {safe_address}."
     )
@@ -104,6 +109,7 @@ def validate_safe(
             do_sign_or_execution,
             do_reject,
             do_message,
+            chain_id=chain_id,
         )
 
 
@@ -113,10 +119,12 @@ def validate_safe_transaction(
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    chain_id: ChainID,
     ignore_historical_transaction_ids: set[str] | None = None,
 ) -> ValidationConclusion:
     detailed_transaction_info = safe_api_utils.get_safe_detailed_transaction_info(
-        transaction_id=transaction_id
+        transaction_id=transaction_id,
+        chain_id=chain_id,
     )
     return validate_safe_transaction_obj(
         detailed_transaction_info=detailed_transaction_info,
@@ -124,6 +132,7 @@ def validate_safe_transaction(
         do_reject=do_reject,
         do_message=do_message,
         ignore_historical_transaction_ids=ignore_historical_transaction_ids,
+        chain_id=chain_id,
     )
 
 
@@ -133,6 +142,7 @@ def validate_safe_transaction_obj(
     do_sign_or_execution: bool,
     do_reject: bool,
     do_message: bool,
+    chain_id: ChainID,
     ignore_historical_transaction_ids: set[str] | None = None,
 ) -> ValidationConclusion:
     api_keys = APIKeys()
@@ -142,7 +152,7 @@ def validate_safe_transaction_obj(
     )
 
     safe_address = detailed_transaction_info.safeAddress
-    safe = get_safe(safe_address)
+    safe = get_safe(safe_address, chain_id)
     is_owner = safe.retrieve_is_owner(api_keys.bet_from_address)
 
     if not is_owner:
@@ -166,7 +176,9 @@ def validate_safe_transaction_obj(
     )
 
     # Load all historical transactions here (include non-multisig transactions, so the agent has overall overview of the Safe).
-    historical_transactions = safe_api_utils.get_safe_history(safe_address)
+    historical_transactions = safe_api_utils.get_safe_history(
+        safe_address, chain_id=chain_id
+    )
     detailed_historical_transactions = safe_api_utils.gather_safe_detailed_transaction_info(
         [
             tx.id
@@ -177,7 +189,8 @@ def validate_safe_transaction_obj(
             )
             # Creation tx can not be converted to detailed transaction info and isn't needed for validation anyway.
             and not isinstance(tx.txInfo, CreationTxInfo)
-        ]
+        ],
+        chain_id=chain_id,
     )
 
     logger.info(
@@ -193,6 +206,7 @@ def validate_safe_transaction_obj(
         detailed_transaction_info,
         all_addresses_from_tx_not_whitelisted,
         detailed_historical_transactions,
+        chain_id=chain_id,
     )
     ok = all(result.ok for result in validation_results)
 
@@ -229,6 +243,7 @@ def run_safe_guards(
     detailed_transaction_info: DetailedTransactionResponse,
     all_addresses_from_tx: list[ChecksumAddress],
     detailed_historical_transactions: list[DetailedTransactionResponse],
+    chain_id: ChainID,
 ) -> list[ValidationResult]:
     validation_results: list[ValidationResult] = []
     logger.info("Running the transaction validation...")
@@ -243,6 +258,7 @@ def run_safe_guards(
             safe_tx,
             all_addresses_from_tx,
             detailed_historical_transactions,
+            chain_id=chain_id,
         )
         if validation_result is None:
             logger.info(

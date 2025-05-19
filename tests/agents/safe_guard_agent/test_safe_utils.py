@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
+    ChainID,
     ChecksumAddress,
     HexBytes,
     private_key_type,
@@ -16,6 +17,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     post_message,
 )
 
+TESTING_CHAIN_ID = ChainID(100)
 TESTING_OWNER_EOA = Web3.to_checksum_address(
     "0xB3896D2751Fe1229B49d74820FA9205e54550d3B"
 )
@@ -29,12 +31,12 @@ DUMMY_PRIVATE_KEY = private_key_type("0x" + "1" * 64)  # web3-private-key-ok
 
 
 def test_get_safe() -> None:
-    safe = get_safe(TESTING_SAFE_ADDRESS)
+    safe = get_safe(TESTING_SAFE_ADDRESS, TESTING_CHAIN_ID)
     assert safe.address == TESTING_SAFE_ADDRESS
 
 
 def test_get_safes() -> None:
-    safes = get_safes(Web3.to_checksum_address(TESTING_OWNER_SAFE))
+    safes = get_safes(Web3.to_checksum_address(TESTING_OWNER_SAFE), TESTING_CHAIN_ID)
     assert len(safes) > 0
     assert safes[0] == TESTING_SAFE_ADDRESS
 
@@ -62,7 +64,7 @@ def test_post_message(
     """
     Due to mock later on, this test covers only process of correctly signing the message.
     """
-    safe = get_safe(TESTING_SAFE_ADDRESS)
+    safe = get_safe(TESTING_SAFE_ADDRESS, TESTING_CHAIN_ID)
     message = "Test message"
     api_keys = APIKeys(
         BET_FROM_PRIVATE_KEY=DUMMY_PRIVATE_KEY,

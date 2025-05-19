@@ -66,7 +66,7 @@ async def process_case(
     # Handy when dealing with historical data, and the current balances aren't representative (and it confuses LLM).
     with patch(
         "prediction_market_agent.agents.safe_guard_agent.guards.llm.get_balances_usd",
-        new=get_balances_usd if balances_patch is None else lambda x: balances_patch,
+        new=get_balances_usd if balances_patch is None else lambda x, y: balances_patch,
     ):
         result = validate_safe_transaction_obj(
             detailed_transaction_info=tx,

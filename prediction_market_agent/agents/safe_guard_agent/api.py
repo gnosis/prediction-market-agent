@@ -7,6 +7,7 @@ from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 
 from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+    ChainID,
     ValidationConclusion,
     validate_safe_transaction,
 )
@@ -38,7 +39,9 @@ def create_app() -> fastapi.FastAPI:
         return "pong"
 
     @app.get("/validate-transaction/")
-    def _validate_transaction(transaction_id: str) -> ValidationConclusion:
+    def _validate_transaction(
+        transaction_id: str, chain_id: ChainID
+    ) -> ValidationConclusion:
         logger.info(f"Validating transaction with id `{transaction_id}`.")
         result = validate_safe_transaction(
             transaction_id,
@@ -46,6 +49,7 @@ def create_app() -> fastapi.FastAPI:
             do_sign_or_execution=False,
             do_reject=False,
             do_message=False,
+            chain_id=chain_id,
         )
         return result
 

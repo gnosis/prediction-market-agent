@@ -1,7 +1,7 @@
 import time
 
 import typer
-from prediction_market_agent_tooling.config import APIKeys
+from prediction_market_agent_tooling.config import APIKeys, RPCConfig
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 
@@ -25,6 +25,7 @@ def main(
             do_sign_or_execution=do_sign_or_execution,
             do_reject=do_reject,
             do_message=do_message,
+            chain_id=RPCConfig().chain_id,
         )
         logger.info(
             f"Waiting for {sleep_between_validations} seconds before next validation..."

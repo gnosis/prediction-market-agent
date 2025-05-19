@@ -1,7 +1,6 @@
 import requests
 import tenacity
-from prediction_market_agent_tooling.config import RPCConfig
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import ValidationError
@@ -72,13 +71,14 @@ def maybe_multisig_tx(
 )
 def get_safe_queue(
     safe_address: ChecksumAddress,
+    chain_id: ChainID,
 ) -> list[Transaction]:
     """
     TODO: This isn't great as we would need to call Safe's API for each guarded Safe non-stop.
     Can we somehow listen to creation of queued transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/queued"
+        f"https://safe-client.safe.global/v1/chains/{chain_id}/safes/{safe_address}/transactions/queued"
     )
     response.raise_for_status()
     response_parsed = TransactionResponse.model_validate(response.json())
@@ -93,8 +93,9 @@ def get_safe_queue(
 
 def get_safe_queue_multisig(
     safe_address: ChecksumAddress,
+    chain_id: ChainID,
 ) -> list[TransactionWithMultiSig]:
-    transactions = get_safe_queue(safe_address)
+    transactions = get_safe_queue(safe_address, chain_id=chain_id)
     multisig_transactions = [
         multisig_tx
         for item in transactions
@@ -106,9 +107,10 @@ def get_safe_queue_multisig(
 @observe()
 def gather_safe_detailed_transaction_info(
     transaction_ids: list[str],
+    chain_id: ChainID,
 ) -> list[DetailedTransactionResponse]:
     return [
-        get_safe_detailed_transaction_info(transaction_id)
+        get_safe_detailed_transaction_info(transaction_id, chain_id=chain_id)
         for transaction_id in transaction_ids
     ]
 
@@ -121,12 +123,13 @@ def gather_safe_detailed_transaction_info(
 )
 def get_safe_detailed_transaction_info(
     transaction_id: str,
+    chain_id: ChainID,
 ) -> DetailedTransactionResponse:
     """
     TODO: Can we retrieve this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/transactions/{transaction_id}"
+        f"https://safe-client.safe.global/v1/chains/{chain_id}/transactions/{transaction_id}"
     )
     response.raise_for_status()
     response_parsed = DetailedTransactionResponse.model_validate(response.json())
@@ -141,12 +144,13 @@ def get_safe_detailed_transaction_info(
 )
 def get_safe_history(
     safe_address: ChecksumAddress,
+    chain_id: ChainID,
 ) -> list[Transaction]:
     """
     TODO: Can we get this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/transactions/history"
+        f"https://safe-client.safe.global/v1/chains/{chain_id}/safes/{safe_address}/transactions/history"
     )
     response.raise_for_status()
     response_parsed = TransactionResponse.model_validate(response.json())
@@ -161,11 +165,12 @@ def get_safe_history(
 
 def get_safe_history_multisig(
     safe_address: ChecksumAddress,
+    chain_id: ChainID,
 ) -> list[TransactionWithMultiSig]:
     """
     TODO: Can we get this without relying on Safe's APIs?
     """
-    transactions = get_safe_history(safe_address)
+    transactions = get_safe_history(safe_address, chain_id=chain_id)
     multisig_transactions = [
         multisig_tx
         for item in transactions
@@ -221,12 +226,12 @@ def safe_tx_from_detailed_transaction(
     wait=tenacity.wait_exponential(max=60),
     retry=tenacity.retry_if_not_exception_type(ValidationError),
 )
-def get_balances_usd(safe_address: ChecksumAddress) -> Balances:
+def get_balances_usd(safe_address: ChecksumAddress, chain_id: ChainID) -> Balances:
     """
     TODO: Can we get this without relying on Safe's APIs?
     """
     response = requests.get(
-        f"https://safe-client.safe.global/v1/chains/{RPCConfig().chain_id}/safes/{safe_address}/balances/usd?trusted=true"
+        f"https://safe-client.safe.global/v1/chains/{chain_id}/safes/{safe_address}/balances/usd?trusted=true"
     )
     response.raise_for_status()
     response_model = Balances.model_validate(response.json())

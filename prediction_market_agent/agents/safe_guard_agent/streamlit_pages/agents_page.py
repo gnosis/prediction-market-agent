@@ -1,4 +1,7 @@
+from typing import Callable
+
 import streamlit as st
+from prediction_market_agent_tooling.gtypes import ChainID
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,9 +13,10 @@ class Config(BaseSettings):
     SAFE_GUARD_AGENT_ADDRESS: str
 
 
-def agents_page() -> None:
-    st.markdown(
-        """## List of Agents
+def get_agents_page(chain_id: ChainID) -> Callable[[], None]:
+    def agents_page() -> None:
+        st.markdown(
+            """## List of Agents
     
 On this page you can see the list of deployed agents that can be added as signers to your Safe.
             
@@ -22,7 +26,11 @@ After creation of any transaction in your Safe, just wait a bit to see if it's p
 
 Agent will also send you a message to your Safe with the result of the validation.
 """
-    )
+        )
 
-    agent_address = Config().SAFE_GUARD_AGENT_ADDRESS
-    st.markdown(f"- `{agent_address}` - https://gnosisscan.io/address/{agent_address}")
+        agent_address = Config().SAFE_GUARD_AGENT_ADDRESS
+        st.markdown(
+            f"- `{agent_address}` - https://gnosisscan.io/address/{agent_address}"
+        )
+
+    return agents_page

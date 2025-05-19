@@ -4,7 +4,7 @@ import tenacity
 from eth_account import Account
 from eth_account.messages import defunct_hash_message
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient, EthereumNetwork
 from safe_eth.safe import Safe
@@ -25,16 +25,18 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_tr
 NULL_ADDRESS = Web3.to_checksum_address("0x0000000000000000000000000000000000000000")
 
 
-def get_safe(safe_address: ChecksumAddress) -> Safe:
-    safe = Safe(safe_address, EthereumClient(RPCConfig().gnosis_rpc_url))  # type: ignore
+def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
+    safe = Safe(safe_address, EthereumClient(RPCConfig().chain_id_to_rpc_url(chain_id)))  # type: ignore
     return safe
 
 
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential(max=60)
 )
-def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
-    api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+def get_safes(owner: ChecksumAddress, chain_id: ChainID) -> list[ChecksumAddress]:
+    api = TransactionServiceApi(
+        EthereumNetwork(RPCConfig().chain_id_to_rpc_url(chain_id))
+    )
     safes = api.get_safes_for_owner(owner)
     return safes
 
@@ -211,7 +213,9 @@ def _safe_sign(
     """
     account = Account.from_key(private_key)
 
-    owner_safe_message_hash = get_safe(owner_safe_address).get_message_hash(
+    owner_safe_message_hash = get_safe(
+        owner_safe_address, ChainID(tx.chain_id)
+    ).get_message_hash(
         tx.safe_tx_hash_preimage  # type: ignore # type bug, this is correct.
     )
     owner_safe_eoa_signature = account.signHash(owner_safe_message_hash)["signature"]
