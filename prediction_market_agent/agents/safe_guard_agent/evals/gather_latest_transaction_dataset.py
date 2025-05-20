@@ -38,7 +38,7 @@ def main(n: int = 10, chain_id: int = 100) -> None:
     dataset = SGDataset(cases=cases, evaluators=evaluators)
 
     dataset.to_file(
-        "prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.yaml"
+        f"prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.{chain_id}.yaml"
     )
 
 
@@ -59,7 +59,11 @@ def get_latest_transaction_cases(
         cases.append(
             SGCase(
                 name=as_detailed.txId,
-                inputs=(as_detailed, get_balances_usd(safe_address, chain_id=chain_id)),
+                inputs=(
+                    chain_id,
+                    as_detailed,
+                    get_balances_usd(safe_address, chain_id=chain_id),
+                ),
                 expected_output=ValidationConclusion(
                     txId=as_detailed.txId, all_ok=True, summary="", results=[]
                 ),

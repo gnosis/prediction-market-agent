@@ -121,7 +121,7 @@ def test_sign_or_execute(
         "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_signatures"
     ) as mock_post_signatures:
         try:
-            result = sign_or_execute(main_safe, tx, test_keys)
+            result = sign_or_execute(main_safe, tx, test_keys, allow_exec=True)
             exp: Exception | None = None
         except Exception as e:
             result = None

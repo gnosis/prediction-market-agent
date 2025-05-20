@@ -9,8 +9,9 @@ from prediction_market_agent.agents.safe_guard_agent.safe_guard import validate_
 
 
 def main(
-    do_sign_or_execution: bool = typer.Option(
-        False, help="Execute transaction if validated"
+    do_sign: bool = typer.Option(False, help="Sign the transaction if validated"),
+    do_execution: bool = typer.Option(
+        False, help="Execute the transaction if validated"
     ),
     do_reject: bool = typer.Option(False, help="Reject transaction if not validated"),
     do_message: bool = typer.Option(False, help="Send a message about the outcome"),
@@ -22,7 +23,8 @@ def main(
     start_time = time.time()
     while time.time() - start_time < run_time_limit:
         validate_all(
-            do_sign_or_execution=do_sign_or_execution,
+            do_sign=do_sign,
+            do_execution=do_execution,
             do_reject=do_reject,
             do_message=do_message,
             chain_id=RPCConfig().chain_id,

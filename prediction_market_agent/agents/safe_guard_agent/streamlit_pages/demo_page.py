@@ -112,7 +112,8 @@ On this page, you can test out Safe Guard and see how it works in practice step 
             with st.expander("Show details...", expanded=False):
                 conclusion = validate_safe_transaction(
                     check_not_none(transaction_id),
-                    do_sign_or_execution=False,
+                    do_sign=False,
+                    do_execution=False,
                     do_reject=False,
                     do_message=False,
                     chain_id=chain_id,

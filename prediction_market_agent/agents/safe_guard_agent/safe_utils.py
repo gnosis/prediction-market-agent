@@ -95,7 +95,9 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
     post_or_execute(safe, rejection_tx, api_keys)
 
 
-def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
+def sign_or_execute(
+    safe: Safe, tx: SafeTx, api_keys: APIKeys, allow_exec: bool
+) -> TxParams | None:
     """
     Use this function to sign an existing transaction and automatically either execute it (if threshold is met), or to post your signature into the transaction in the queue.
     """
@@ -110,7 +112,7 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
 
     threshold = safe.retrieve_threshold()
 
-    if threshold > len(tx.signers):
+    if threshold > len(tx.signers) or not allow_exec:
         logger.info("Threshold not met yet, posting a signature.", streamlit=True)
         api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)

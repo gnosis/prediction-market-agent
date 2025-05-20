@@ -46,7 +46,8 @@ def create_app() -> fastapi.FastAPI:
         result = validate_safe_transaction(
             transaction_id,
             # Can't do any of this via API, where it's expected that we aren't the signer.
-            do_sign_or_execution=False,
+            do_sign=False,
+            do_execution=False,
             do_reject=False,
             do_message=False,
             chain_id=chain_id,

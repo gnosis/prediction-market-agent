@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -52,7 +52,8 @@ SAFE_GUARDS: list[type[AbstractGuard]] = [
 
 
 def validate_all(
-    do_sign_or_execution: bool,
+    do_sign: bool,
+    do_execution: bool,
     do_reject: bool,
     do_message: bool,
     chain_id: ChainID,
@@ -67,17 +68,19 @@ def validate_all(
     for safe_address in safes_to_verify:
         validate_safe(
             safe_address,
-            do_sign_or_execution,
-            do_reject,
-            do_message,
-            api_keys,
-            chain_id,
+            do_sign=do_sign,
+            do_execution=do_execution,
+            do_reject=do_reject,
+            do_message=do_message,
+            api_keys=api_keys,
+            chain_id=chain_id,
         )
 
 
 def validate_safe(
     safe_address: ChecksumAddress,
-    do_sign_or_execution: bool,
+    do_sign: bool,
+    do_execution: bool,
     do_reject: bool,
     do_message: bool,
     api_keys: APIKeys,
@@ -106,9 +109,10 @@ def validate_safe(
 
         validate_safe_transaction(
             queued_transaction.id,
-            do_sign_or_execution,
-            do_reject,
-            do_message,
+            do_sign=do_sign,
+            do_execution=do_execution,
+            do_reject=do_reject,
+            do_message=do_message,
             chain_id=chain_id,
         )
 
@@ -116,7 +120,8 @@ def validate_safe(
 @observe()
 def validate_safe_transaction(
     transaction_id: str,
-    do_sign_or_execution: bool,
+    do_sign: bool,
+    do_execution: bool,
     do_reject: bool,
     do_message: bool,
     chain_id: ChainID,
@@ -128,7 +133,8 @@ def validate_safe_transaction(
     )
     return validate_safe_transaction_obj(
         detailed_transaction_info=detailed_transaction_info,
-        do_sign_or_execution=do_sign_or_execution,
+        do_sign=do_sign,
+        do_execution=do_execution,
         do_reject=do_reject,
         do_message=do_message,
         ignore_historical_transaction_ids=ignore_historical_transaction_ids,
@@ -139,7 +145,8 @@ def validate_safe_transaction(
 @observe()
 def validate_safe_transaction_obj(
     detailed_transaction_info: DetailedTransactionResponse,
-    do_sign_or_execution: bool,
+    do_sign: bool,
+    do_execution: bool,
     do_reject: bool,
     do_message: bool,
     chain_id: ChainID,
@@ -212,8 +219,8 @@ def validate_safe_transaction_obj(
 
     if ok:
         logger.success("All validations successful.")
-        if do_sign_or_execution:
-            sign_or_execute(safe, safe_tx, api_keys)
+        if do_sign or do_execution:
+            sign_or_execute(safe, safe_tx, api_keys, allow_exec=do_execution)
 
     else:
         logger.warning("At least one validation failed.")
