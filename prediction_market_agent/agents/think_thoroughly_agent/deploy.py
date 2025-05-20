@@ -30,7 +30,7 @@ class DeployableThinkThoroughlyAgentBase(DeployableTraderAgent):
         )
 
     def before_process_markets(self, market_type: MarketType) -> None:
-        self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
+        # self.agent.pinecone_handler.insert_all_omen_markets_if_not_exists()
         super().before_process_markets(market_type=market_type)
 
 
