@@ -1,6 +1,6 @@
 from unittest.mock import PropertyMock, patch
 
-from prediction_market_agent_tooling.gtypes import ChainID
+from prediction_market_agent_tooling.chains import GNOSIS_CHAIN_ID
 from web3 import Web3
 
 from prediction_market_agent.agents.safe_guard_agent.guards.agent import (
@@ -14,7 +14,7 @@ from prediction_market_agent.agents.safe_guard_agent.safe_utils import get_safe
 
 
 def test_validate_do_not_remove_agent_accepts_arbitrary_tx() -> None:
-    chain_id = ChainID(100)
+    chain_id = GNOSIS_CHAIN_ID
     safe = get_safe(
         Web3.to_checksum_address("0x8f72555D97ad3364e65d64AC5aE4103C22d3e754"), chain_id
     )
@@ -27,7 +27,7 @@ def test_validate_do_not_remove_agent_accepts_arbitrary_tx() -> None:
 
 
 def test_validate_do_not_remove_agent_accepts_removal_of_others() -> None:
-    chain_id = ChainID(100)
+    chain_id = GNOSIS_CHAIN_ID
     safe = get_safe(
         Web3.to_checksum_address("0x8f72555D97ad3364e65d64AC5aE4103C22d3e754"), chain_id
     )
@@ -40,7 +40,7 @@ def test_validate_do_not_remove_agent_accepts_removal_of_others() -> None:
 
 
 def test_validate_do_not_remove_agent_forbids_removal_of_agent_itself() -> None:
-    chain_id = ChainID(100)
+    chain_id = GNOSIS_CHAIN_ID
     with patch(
         "prediction_market_agent.agents.safe_guard_agent.guards.agent.APIKeys.bet_from_address",
         new_callable=PropertyMock,

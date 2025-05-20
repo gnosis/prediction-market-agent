@@ -2,6 +2,7 @@ from typing import Callable
 
 import streamlit as st
 import streamlit.components.v1 as components
+from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
@@ -12,8 +13,8 @@ from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
 )
 
 CHAIN_ID_TO_DUNE_QUERY: dict[ChainID, str] = {
-    ChainID(1): "https://dune.com/embeds/5144835/8476673",
-    ChainID(100): "https://dune.com/embeds/4933998/8164678",
+    ETHEREUM_ID: "https://dune.com/embeds/5144835/8476673",
+    GNOSIS_CHAIN_ID: "https://dune.com/embeds/4933998/8164678",
 }
 
 
