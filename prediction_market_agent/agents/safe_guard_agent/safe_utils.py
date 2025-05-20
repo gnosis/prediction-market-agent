@@ -50,7 +50,8 @@ def post_message(
     if api_keys.safe_address_checksum is not None:
         # In the case we are posting message from another Safe.
         # Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L184.
-        owner_safe_message_hash = get_safe(api_keys.safe_address_checksum).get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
+        owner_safe = get_safe(api_keys.safe_address_checksum, chain_id)
+        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
         owner_safe_eoa_signature = api_keys.get_account().signHash(
             owner_safe_message_hash
         )["signature"]

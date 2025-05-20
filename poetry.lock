@@ -7857,13 +7857,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.64.12.dev660"
+version = "0.64.12"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.64.12.dev660-py3-none-any.whl", hash = "sha256:e0e2cacd7746df1251e05ab4dad39890a109d62f2f649b7a3c64d5744b178af8"},
-    {file = "prediction_market_agent_tooling-0.64.12.dev660.tar.gz", hash = "sha256:c02148bace207df7645d30475f1448575f1e35a4c35ec2fde6b26b5d72b9ed62"},
+    {file = "prediction_market_agent_tooling-0.64.12-py3-none-any.whl", hash = "sha256:319c11506a74dc80aa7b8fa9de4db24b74c47d194f398285e55c28f64ec5516f"},
+    {file = "prediction_market_agent_tooling-0.64.12.tar.gz", hash = "sha256:f22928776f4d765f002071cfb8c7130e12ebf6949cee48479a9a0b60ada2bff7"},
 ]
 
 [package.dependencies]
@@ -12817,4 +12817,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "3665a6e8ae052737d1810f47543e64308300ace7c418f78361022dbb776206e4"
+content-hash = "6b45e941f8b7ee8799a46d81dc291fd27e0713917bb97f73ebf735e4a9e317d8"
