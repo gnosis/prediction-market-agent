@@ -74,7 +74,7 @@ def test_post_message(
     with patch(
         "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_message"
     ) as mock_post_message:
-        post_message(safe, message, api_keys)
+        post_message(safe, message, api_keys, TESTING_CHAIN_ID)
         mock_post_message.assert_called_once_with(
             safe.address, message, expected_signature
         )

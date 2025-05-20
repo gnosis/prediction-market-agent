@@ -239,7 +239,7 @@ def validate_safe_transaction_obj(
     )
 
     if do_message:
-        send_message(safe, conclusion, api_keys)
+        send_message(safe, conclusion, api_keys, chain_id)
 
     return conclusion
 
@@ -288,12 +288,10 @@ def run_safe_guards(
 
 
 def send_message(
-    safe: Safe,
-    conclusion: ValidationConclusion,
-    api_keys: APIKeys,
+    safe: Safe, conclusion: ValidationConclusion, api_keys: APIKeys, chain_id: ChainID
 ) -> None:
     message = f"""Your transaction with id `{conclusion.txId}` was {'approved' if conclusion.all_ok else 'rejected'}.
 
 {conclusion.summary}
 """
-    post_message(safe, message, api_keys)
+    post_message(safe, message, api_keys, chain_id)

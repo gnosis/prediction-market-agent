@@ -34,14 +34,14 @@ def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
     stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential(max=60)
 )
 def get_safes(owner: ChecksumAddress, chain_id: ChainID) -> list[ChecksumAddress]:
-    api = TransactionServiceApi(
-        EthereumNetwork(RPCConfig().chain_id_to_rpc_url(chain_id))
-    )
+    api = TransactionServiceApi(EthereumNetwork(chain_id))
     safes = api.get_safes_for_owner(owner)
     return safes
 
 
-def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
+def post_message(
+    safe: Safe, message: str, api_keys: APIKeys, chain_id: ChainID
+) -> None:
     logger.info(f"Posting a message to Safe {safe.address}.", streamlit=True)
 
     message_hash = defunct_hash_message(text=message)
@@ -68,7 +68,7 @@ def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
             "signature"
         ]
 
-    api = TransactionServiceApi(network=EthereumNetwork(RPCConfig().chain_id))
+    api = TransactionServiceApi(network=EthereumNetwork(chain_id))
     api.post_message(safe.address, message, signature)
 
 
@@ -92,7 +92,7 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         safe_version=tx.safe_version,
         chain_id=tx.chain_id,
     )
-    post_or_execute(safe, rejection_tx, api_keys)
+    post_or_execute(safe, rejection_tx, api_keys, ChainID(tx.chain_id))
 
 
 def sign_or_execute(
@@ -114,7 +114,7 @@ def sign_or_execute(
 
     if threshold > len(tx.signers) or not allow_exec:
         logger.info("Threshold not met yet, posting a signature.", streamlit=True)
-        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+        api = TransactionServiceApi(EthereumNetwork(tx.chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
     else:
@@ -127,7 +127,9 @@ def sign_or_execute(
         return tx_params
 
 
-def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
+def post_or_execute(
+    safe: Safe, tx: SafeTx, api_keys: APIKeys, chain_id: ChainID
+) -> TxParams | None:
     """
     Use this function to automatically sign and execute your new transaction (in case only 1 signer is required),
     or to post it to the queue (in case more than 1 signer is required).
@@ -145,7 +147,7 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
 
     if threshold > len(tx.signers):
         logger.info(f"Safe requires multiple signers, posting to the queue.")
-        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+        api = TransactionServiceApi(EthereumNetwork(chain_id))
         api.post_transaction(tx)
         return None
     else:

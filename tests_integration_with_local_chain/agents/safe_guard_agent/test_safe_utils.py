@@ -5,7 +5,7 @@ import pytest
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.safe import create_safe
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import SafeV141
@@ -53,6 +53,7 @@ def test_post_or_execute(
     local_ethereum_client: EthereumClient,
     test_keys: APIKeys,
 ) -> None:
+    chain_id = ChainID(local_ethereum_client.get_chain_id())
     owner_safe, _ = create_test_safe(1, local_ethereum_client, test_keys)
     test_keys = test_keys.model_copy(
         update={"SAFE_ADDRESS": owner_safe.address if use_owner_safe else None}
@@ -67,7 +68,7 @@ def test_post_or_execute(
         "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_transaction"
     ) as mock_post_transaction:
         try:
-            result = post_or_execute(main_safe, tx, test_keys)
+            result = post_or_execute(main_safe, tx, test_keys, chain_id)
             exp: Exception | None = None
         except Exception as e:
             result = None
