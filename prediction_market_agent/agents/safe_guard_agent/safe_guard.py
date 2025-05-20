@@ -62,7 +62,7 @@ def validate_all(
 
     safes_to_verify = get_safes(api_keys.bet_from_address, chain_id)
     logger.info(
-        f"For owner {api_keys.bet_from_address}, retrieved {safes_to_verify} safes to verify transactions for."
+        f"For owner {api_keys.bet_from_address}, retrieved {safes_to_verify} safes to verify transactions for, on {chain_id=}."
     )
 
     for safe_address in safes_to_verify:
