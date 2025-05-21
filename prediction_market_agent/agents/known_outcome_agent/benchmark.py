@@ -43,7 +43,7 @@ class QuestionWithKnownOutcome(BaseModel):
             probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(1.0)
         else:
             probs[OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(0.5)
-            probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(1.5)
+            probs[OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER)] = Probability(0.5)
         return probs
 
     def to_market(self) -> AgentMarket:
