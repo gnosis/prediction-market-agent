@@ -3,6 +3,13 @@ from typing import Callable
 import streamlit as st
 from prediction_market_agent_tooling.gtypes import ChainID
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
+
+
+CHAIN_ID_TO_SCAN_URL: dict[ChainID, str] = {
+    ETHEREUM_ID: "https://etherscan.io/address/{address}",
+    GNOSIS_CHAIN_ID: "https://gnosisscan.io/address/{address}",
+}
 
 
 class Config(BaseSettings):
@@ -30,7 +37,7 @@ Agent will also send you a message to your Safe with the result of the validatio
 
         agent_address = Config().SAFE_GUARD_AGENT_ADDRESS
         st.markdown(
-            f"- `{agent_address}` - https://gnosisscan.io/address/{agent_address}"
+            f"- `{agent_address}` - {CHAIN_ID_TO_SCAN_URL[chain_id].format(address=agent_address)}"
         )
 
     return agents_page
