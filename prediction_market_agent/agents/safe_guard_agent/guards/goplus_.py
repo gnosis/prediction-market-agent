@@ -6,8 +6,7 @@ import tenacity
 from goplus.address import Address
 from goplus.nft import Nft
 from goplus.token import Token
-from prediction_market_agent_tooling.config import RPCConfig
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.caches.db_cache import db_cache
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -40,11 +39,12 @@ class GoPlusTokenSecurity(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult | None:
         results = {
             addr: res
             for addr in all_addresses_from_tx
-            if (res := goplus_token_security(addr)) is not None
+            if (res := goplus_token_security(addr, chain_id)) is not None
         }
         if not results:
             return None
@@ -125,11 +125,12 @@ class GoPlusAddressSecurity(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult | None:
         malicious_reasons: list[str] = []
 
         for addr in all_addresses_from_tx:
-            result = goplus_address_security(addr)
+            result = goplus_address_security(addr, chain_id)
             if result is None:
                 continue
 
@@ -228,11 +229,12 @@ class GoPlusNftSecurity(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult | None:
         malicious_reasons: list[str] = []
 
         for addr in all_addresses_from_tx:
-            result = goplus_nft_security(addr)
+            result = goplus_nft_security(addr, chain_id)
             if result is None:
                 continue
 
@@ -286,7 +288,7 @@ def _build_validation_result(
 
 @db_cache(max_age=timedelta(days=3))
 def goplus_token_security(
-    address: ChecksumAddress, chain_id: int = RPCConfig().chain_id
+    address: ChecksumAddress, chain_id: ChainID
 ) -> dict[str, Any] | None:
     # Used per-address instead of batching the call, so we can granualy cache the results and re-use across users.
     data = _goplus_call(
@@ -300,7 +302,7 @@ def goplus_token_security(
 
 @db_cache(max_age=timedelta(days=3))
 def goplus_address_security(
-    address: ChecksumAddress, chain_id: int = RPCConfig().chain_id
+    address: ChecksumAddress, chain_id: ChainID
 ) -> dict[str, Any] | None:
     data = _goplus_call(
         lambda: Address().address_security(chain_id=f"{chain_id}", address=address)
@@ -313,7 +315,7 @@ def goplus_address_security(
 
 @db_cache(max_age=timedelta(days=3))
 def goplus_nft_security(
-    address: ChecksumAddress, chain_id: int = RPCConfig().chain_id
+    address: ChecksumAddress, chain_id: ChainID
 ) -> dict[str, Any] | None:
     data = _goplus_call(
         lambda: Nft().nft_security(chain_id=f"{chain_id}", address=address)

@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -43,6 +43,7 @@ class LLM(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult:
         # Get the latest ones.
         history = sorted(
@@ -65,7 +66,9 @@ Keep in mind, better be safe than sorry.
             result_type=LLMValidationResult,
         )
 
-        balances_formatted = format_balances(new_transaction.safeAddress)
+        balances_formatted = format_balances(
+            new_transaction.safeAddress, chain_id=chain_id
+        )
         new_formatted = format_transaction(new_transaction)
         history_formatted = (
             "\n\n".join(format_transaction(tx) for tx in history)
@@ -184,8 +187,8 @@ def format_detailed_execution_info(exec_info: DetailedExecutionInfo) -> str:
     )
 
 
-def format_balances(safe_address: ChecksumAddress) -> str:
-    balances = get_balances_usd(safe_address)
+def format_balances(safe_address: ChecksumAddress, chain_id: ChainID) -> str:
+    balances = get_balances_usd(safe_address, chain_id)
     formatted_items = "\n\n".join(
         f"Token: {item.tokenInfo.name} ({item.tokenInfo.symbol}) | "
         f"Address: {item.tokenInfo.address} | "

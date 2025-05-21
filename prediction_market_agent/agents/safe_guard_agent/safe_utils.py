@@ -5,7 +5,7 @@ import tenacity
 from eth_account import Account
 from eth_account.messages import defunct_hash_message
 from prediction_market_agent_tooling.config import APIKeys, RPCConfig
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient, EthereumNetwork
 from safe_eth.safe import Safe
@@ -17,17 +17,16 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
 from safe_eth.safe.safe import Safe, SafeTx
 from safe_eth.safe.safe_signature import SafeSignature, SafeSignatureContract
 from web3 import Web3
+from web3.constants import CHECKSUM_ADDRESSS_ZERO
 from web3.types import TxParams
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
 
-NULL_ADDRESS = Web3.to_checksum_address("0x0000000000000000000000000000000000000000")
 
-
-def get_safe(safe_address: ChecksumAddress) -> Safe:
-    safe = Safe(safe_address, EthereumClient(RPCConfig().gnosis_rpc_url))  # type: ignore
+def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
+    safe = Safe(safe_address, EthereumClient(RPCConfig().chain_id_to_rpc_url(chain_id)))  # type: ignore
     return safe
 
 
@@ -38,13 +37,15 @@ def get_safe(safe_address: ChecksumAddress) -> Safe:
         f"get_safes failed, {x.attempt_number=}, {x.upcoming_sleep=}."
     ),
 )
-def get_safes(owner: ChecksumAddress) -> list[ChecksumAddress]:
-    api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+def get_safes(owner: ChecksumAddress, chain_id: ChainID) -> list[ChecksumAddress]:
+    api = TransactionServiceApi(EthereumNetwork(chain_id))
     safes = api.get_safes_for_owner(owner)
     return safes
 
 
-def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
+def post_message(
+    safe: Safe, message: str, api_keys: APIKeys, chain_id: ChainID
+) -> None:
     logger.info(f"Posting a message to Safe {safe.address}.", streamlit=True)
 
     message_hash = defunct_hash_message(text=message)
@@ -53,7 +54,8 @@ def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
     if api_keys.safe_address_checksum is not None:
         # In the case we are posting message from another Safe.
         # Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L184.
-        owner_safe_message_hash = get_safe(api_keys.safe_address_checksum).get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
+        owner_safe = get_safe(api_keys.safe_address_checksum, chain_id)
+        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
         owner_safe_eoa_signature = api_keys.get_account().signHash(
             owner_safe_message_hash
         )["signature"]
@@ -71,7 +73,7 @@ def post_message(safe: Safe, message: str, api_keys: APIKeys) -> None:
             "signature"
         ]
 
-    api = TransactionServiceApi(network=EthereumNetwork(RPCConfig().chain_id))
+    api = TransactionServiceApi(network=EthereumNetwork(chain_id))
     api.post_message(safe.address, message, signature)
 
 
@@ -88,17 +90,19 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         safe_tx_gas=0,
         base_gas=0,
         gas_price=0,
-        gas_token=NULL_ADDRESS,
-        refund_receiver=NULL_ADDRESS,
+        gas_token=CHECKSUM_ADDRESSS_ZERO,
+        refund_receiver=CHECKSUM_ADDRESSS_ZERO,
         signatures=None,
         safe_nonce=tx.safe_nonce,
         safe_version=tx.safe_version,
         chain_id=tx.chain_id,
     )
-    post_or_execute(safe, rejection_tx, api_keys)
+    post_or_execute(safe, rejection_tx, api_keys, ChainID(tx.chain_id))
 
 
-def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
+def sign_or_execute(
+    safe: Safe, tx: SafeTx, api_keys: APIKeys, allow_exec: bool
+) -> TxParams | None:
     """
     Use this function to sign an existing transaction and automatically either execute it (if threshold is met), or to post your signature into the transaction in the queue.
     """
@@ -113,9 +117,9 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
 
     threshold = safe.retrieve_threshold()
 
-    if threshold > len(tx.signers):
+    if threshold > len(tx.signers) or not allow_exec:
         logger.info("Threshold not met yet, posting a signature.", streamlit=True)
-        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+        api = TransactionServiceApi(EthereumNetwork(tx.chain_id))
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
     else:
@@ -128,7 +132,9 @@ def sign_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
         return tx_params
 
 
-def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | None:
+def post_or_execute(
+    safe: Safe, tx: SafeTx, api_keys: APIKeys, chain_id: ChainID
+) -> TxParams | None:
     """
     Use this function to automatically sign and execute your new transaction (in case only 1 signer is required),
     or to post it to the queue (in case more than 1 signer is required).
@@ -146,7 +152,7 @@ def post_or_execute(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> TxParams | Non
 
     if threshold > len(tx.signers):
         logger.info(f"Safe requires multiple signers, posting to the queue.")
-        api = TransactionServiceApi(EthereumNetwork(RPCConfig().chain_id))
+        api = TransactionServiceApi(EthereumNetwork(chain_id))
         api.post_transaction(tx)
         return None
     else:
@@ -179,7 +185,7 @@ def extract_all_addresses(tx: DetailedTransactionResponse) -> list[ChecksumAddre
     """
     # Automatically remove null address as that one isn't interesting.
     found_addresses = find_addresses_in_nested_structure(tx.model_dump()) - {
-        NULL_ADDRESS
+        CHECKSUM_ADDRESSS_ZERO
     }
     return sorted(found_addresses)
 
@@ -199,7 +205,7 @@ def find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
             # Ignore if it's not a valid address.
             pass
     # Automatically remove null address as that one isn't interesting.
-    return addresses - {NULL_ADDRESS}
+    return addresses - {CHECKSUM_ADDRESSS_ZERO}
 
 
 def _safe_sign(
@@ -216,7 +222,9 @@ def _safe_sign(
     """
     account = Account.from_key(private_key)
 
-    owner_safe_message_hash = get_safe(owner_safe_address).get_message_hash(
+    owner_safe_message_hash = get_safe(
+        owner_safe_address, ChainID(tx.chain_id)
+    ).get_message_hash(
         tx.safe_tx_hash_preimage  # type: ignore # type bug, this is correct.
     )
     owner_safe_eoa_signature = account.signHash(owner_safe_message_hash)["signature"]

@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
@@ -24,6 +24,7 @@ class Blacklist(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult:
         lowercased_blacklist = {
             addr.strip().lower() for addr in _BLACKLIST if addr.strip()
