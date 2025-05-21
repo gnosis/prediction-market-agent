@@ -7,6 +7,11 @@ from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import Resolution
+from prediction_market_agent_tooling.markets.omen.data_models import (
+    OMEN_FALSE_OUTCOME,
+    OMEN_TRUE_OUTCOME,
+)
 from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
@@ -17,6 +22,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     DatedChatMessage,
     SimpleMemoryThinkThoroughly,
 )
+from prediction_market_agent.agents.ofvchallenger_agent.ofv_models import Factuality
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 STREAMLIT_TAG = "streamlit"
@@ -55,7 +61,7 @@ MEMORIES:
 
 
 def market_is_saturated(market: AgentMarket) -> bool:
-    return market.current_p_yes > 0.95 or market.current_p_no > 0.95
+    return market.p_yes > 0.95 or market.p_no > 0.95
 
 
 def _summarize_learnings(
@@ -146,3 +152,13 @@ def get_maximum_possible_bet_amount(min_: USD, max_: USD, trading_balance: USD) 
     trading_balance *= 0.95  # Allow to use only most of the trading balance, to keep something to pay for fees on markets where it's necessary.
     # Require bet size of at least `min_` and maximum `max_`, use available trading balance if its between.
     return min(max(min_, trading_balance), max_)
+
+
+def build_resolution_from_factuality_for_omen_market(
+    factuality: Factuality,
+) -> Resolution:
+    if factuality is None:
+        return Resolution(outcome=None, invalid=True)
+
+    outcome_str = OMEN_TRUE_OUTCOME if factuality else OMEN_FALSE_OUTCOME
+    return Resolution(outcome=outcome_str, invalid=False)

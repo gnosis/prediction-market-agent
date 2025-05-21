@@ -8,17 +8,21 @@ from prediction_market_agent_tooling.benchmark.agents import (
     RandomAgent,
 )
 from prediction_market_agent_tooling.benchmark.benchmark import Benchmarker
-from prediction_market_agent_tooling.benchmark.utils import (
-    OutcomePrediction,
-    Prediction,
+from prediction_market_agent_tooling.benchmark.utils import Prediction
+from prediction_market_agent_tooling.deploy.constants import (
+    NO_OUTCOME_LOWERCASE_IDENTIFIER,
+    YES_OUTCOME_LOWERCASE_IDENTIFIER,
 )
 from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     FilterBy,
-    MarketFees,
     SortBy,
+)
+from prediction_market_agent_tooling.markets.data_models import (
+    CategoricalProbabilisticAnswer,
+    ProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
 from prediction_market_agent_tooling.markets.markets import (
@@ -41,7 +45,10 @@ def build_binary_agent_market_from_question(question: str) -> AgentMarket:
         close_time=utcnow() + timedelta(days=1),
         volume=None,
         question=question,
-        current_p_yes=Probability(0.5),
+        probabilities={
+            OutcomeStr(YES_OUTCOME_LOWERCASE_IDENTIFIER): Probability(0.5),
+            OutcomeStr(NO_OUTCOME_LOWERCASE_IDENTIFIER): Probability(0.5),
+        },
         created_time=utc_datetime(2024, 1, 1),
         resolution=None,
         outcomes=[OutcomeStr("YES"), OutcomeStr("NO")],
@@ -61,15 +68,18 @@ class ThinkThoroughlyBenchmark(AbstractBenchmarkedAgent):
 
     def predict(self, market_question: str) -> Prediction:
         result = self.agent.answer_binary_market(market_question)
-        return Prediction(
-            outcome_prediction=(
-                OutcomePrediction(
-                    p_yes=result.p_yes,
-                    confidence=result.confidence,
-                    info_utility=None,
+        return (
+            Prediction()
+            if result is None
+            else Prediction(
+                outcome_prediction=(
+                    CategoricalProbabilisticAnswer.from_probabilistic_answer(
+                        ProbabilisticAnswer(
+                            p_yes=result.p_yes,
+                            confidence=result.confidence,
+                        )
+                    )
                 )
-                if result
-                else None
             )
         )
 
@@ -85,15 +95,19 @@ class ThinkThoroughlyProphetResearchBenchmark(AbstractBenchmarkedAgent):
 
     def predict(self, market_question: str) -> Prediction:
         result = self.agent.answer_binary_market(market_question)
-        return Prediction(
-            outcome_prediction=(
-                OutcomePrediction(
-                    p_yes=result.p_yes,
-                    confidence=result.confidence,
-                    info_utility=None,
+
+        return (
+            Prediction()
+            if result is None
+            else Prediction(
+                outcome_prediction=(
+                    CategoricalProbabilisticAnswer.from_probabilistic_answer(
+                        ProbabilisticAnswer(
+                            p_yes=result.p_yes,
+                            confidence=result.confidence,
+                        )
+                    )
                 )
-                if result
-                else None
             )
         )
 

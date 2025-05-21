@@ -17,8 +17,8 @@ PERFECT_NEGATIVE_CORRELATION = Correlation(near_perfect_correlation=False, reaso
 
 def build_market(p_yes: float) -> AgentMarket:
     m1 = Mock(OmenAgentMarket, wraps=OmenAgentMarket)
-    m1.current_p_yes = p_yes
-    m1.current_p_no = 1 - m1.current_p_yes
+    m1.p_yes = p_yes
+    m1.p_no = 1 - m1.p_yes
     return m1
 
 
@@ -71,8 +71,8 @@ def test_profit(
     correlated_pair = CorrelatedMarketPair(
         main_market=m1, related_market=m2, correlation=corr
     )
-    p_market1 = m1.current_p_yes if m1_bet_yes else m1.current_p_no
-    p_market2 = m2.current_p_yes if m2_bet_yes else m2.current_p_no
+    p_market1 = m1.p_yes if m1_bet_yes else m1.p_no
+    p_market2 = m2.p_no if m2_bet_yes else m2.p_no
 
     assert_profit(p_market1, p_market2, correlated_pair)
     assert_bet_amounts_ok(correlated_pair, p_market1, p_market2)

@@ -45,7 +45,7 @@ class GetMarketCreatorsStalkerMarkets:
     ) -> t.Sequence[OmenAgentMarket]:
         available_markets = [
             OmenAgentMarket.from_data_model(m)
-            for m in OmenSubgraphHandler().get_omen_binary_markets_simple(
+            for m in OmenSubgraphHandler().get_omen_markets_simple(
                 limit=self.n_markets_to_fetch,
                 sort_by=sort_by,
                 filter_by=filter_by,

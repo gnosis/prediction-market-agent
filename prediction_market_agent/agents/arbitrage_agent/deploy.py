@@ -10,6 +10,7 @@ from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
+    CategoricalProbabilisticAnswer,
     Position,
     ProbabilisticAnswer,
     Trade,
@@ -108,7 +109,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             },
         )
 
-        omen_markets = self.subgraph_handler.get_omen_binary_markets(
+        omen_markets = self.subgraph_handler.get_omen_markets(
             limit=len(related),
             id_in=[i.market_address for i in related if i.market_address != market.id],
             resolved=False,
@@ -178,7 +179,7 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def build_trades(
         self,
         market: AgentMarket,
-        answer: ProbabilisticAnswer,
+        answer: CategoricalProbabilisticAnswer,
         existing_position: Position | None,
     ) -> list[Trade]:
         trades = []

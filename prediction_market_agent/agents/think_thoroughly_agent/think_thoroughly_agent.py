@@ -502,7 +502,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             include_reasoning=True,
         )
 
-        if prediction.outcome_prediction is None:
+        if prediction is None:
             logger.warning(
                 f"ThinkThoroughlyWithPredictionProhpetResearch didn't generate prediction for '{scenario}'."
             )
@@ -511,9 +511,9 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
         return AnswerWithScenario(
             scenario=scenario,
             original_question=original_question,
-            p_yes=prediction.outcome_prediction.p_yes,
-            confidence=prediction.outcome_prediction.confidence,
-            reasoning=prediction.outcome_prediction.reasoning,
+            p_yes=prediction.p_yes,
+            confidence=prediction.confidence,
+            reasoning=prediction.reasoning,
         )
 
     def generate_final_decision(

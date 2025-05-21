@@ -40,9 +40,7 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
         )
 
     def get_markets(self, market_type: MarketType) -> Sequence[AgentMarket]:  # type: ignore # TODO: Needs to be decided in https://github.com/gnosis/prediction-market-agent/pull/511#discussion_r1810034688 and then I'll implement it here.
-        markets: Sequence[
-            MetaculusAgentMarket
-        ] = MetaculusAgentMarket.get_binary_markets(
+        markets: Sequence[MetaculusAgentMarket] = MetaculusAgentMarket.get_markets(
             limit=self.bet_on_n_markets_per_run,
             tournament_id=self.tournament_id,
             filter_by=FilterBy.OPEN,
@@ -62,22 +60,31 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
         # Otherwise all markets on Metaculus are fine.
         return True
 
+    def build_fixed_probabilistic_answer(
+        self, p_yes: Probability = Probability(0.5)
+    ) -> ProbabilisticAnswer:
+        return ProbabilisticAnswer(
+            p_yes=p_yes,
+            reasoning="Just a test.",
+            confidence=0.5,
+        )
+
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         assert isinstance(
             market, MetaculusAgentMarket
         ), "Just making mypy happy. It's true thanks to the check in the `run` method via `supported_markets`."
         logger.info(f"Answering market {market.id}, question: {market.question}")
-        answer: ProbabilisticAnswer | None
-        if not self.dummy_prediction:
-            full_question = f"""Question: {market.question}
+
+        if self.dummy_prediction:
+            return self.build_fixed_probabilistic_answer()
+
+        full_question = f"""Question: {market.question}
 Question's description: {market.description}
 Question's fine print: {market.fine_print} 
 Question's resolution criteria: {market.resolution_criteria}"""
-            answer = self.agent.agent.predict(full_question).outcome_prediction
-        else:
-            answer = ProbabilisticAnswer(
-                p_yes=Probability(0.5),
-                reasoning="Just a test.",
-                confidence=0.5,
-            )
-        return answer
+        prediction = self.agent.agent.predict(full_question)
+        return (
+            prediction.outcome_prediction.to_probabilistic_answer()
+            if prediction.outcome_prediction is not None
+            else None
+        )
