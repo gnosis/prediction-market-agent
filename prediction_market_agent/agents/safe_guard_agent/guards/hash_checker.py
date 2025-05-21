@@ -1,4 +1,4 @@
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from safe_eth.safe import SafeTx
@@ -25,6 +25,7 @@ class HashCheck(AbstractGuard):
         new_transaction_safetx: SafeTx,
         all_addresses_from_tx: list[ChecksumAddress],
         history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
     ) -> ValidationResult:
         """Function that checks if the safe_tx_hashes match."""
 

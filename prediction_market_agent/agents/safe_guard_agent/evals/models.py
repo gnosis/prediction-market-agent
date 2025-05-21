@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TypeAlias
 
+from prediction_market_agent_tooling.gtypes import ChainID
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext
@@ -16,12 +17,12 @@ from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
 )
 
 SGCase: TypeAlias = Case[
-    tuple[DetailedTransactionResponse, Balances | None],
+    tuple[ChainID, DetailedTransactionResponse, Balances | None],
     ValidationConclusion,
     str,
 ]
 SGDataset: TypeAlias = Dataset[
-    tuple[DetailedTransactionResponse, Balances | None],
+    tuple[ChainID, DetailedTransactionResponse, Balances | None],
     ValidationConclusion,
     str,
 ]
