@@ -83,6 +83,8 @@ Question's description: {market.description}
 Question's fine print: {market.fine_print} 
 Question's resolution criteria: {market.resolution_criteria}"""
         prediction = self.agent.agent.predict(full_question)
-        if prediction.outcome_prediction is None:
-            return self.build_fixed_probabilistic_answer()
-        return prediction.outcome_prediction.to_probabilistic_answer()
+        return (
+            prediction.outcome_prediction.to_probabilistic_answer()
+            if prediction.outcome_prediction is not None
+            else None
+        )
