@@ -120,7 +120,9 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             omen_markets, key=lambda m: related_market_addresses.index(m.id)
         )
 
-        print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
+        logger.info(
+            f"Fetched {len(omen_markets)} related markets for market {market.id}"
+        )
 
         for related_market in omen_markets:
             if related_market.id.lower() == market.id.lower():
