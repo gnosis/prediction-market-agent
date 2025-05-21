@@ -1,10 +1,9 @@
 from typing import Callable
 
 import streamlit as st
+from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
 from prediction_market_agent_tooling.gtypes import ChainID
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
-
 
 CHAIN_ID_TO_SCAN_URL: dict[ChainID, str] = {
     ETHEREUM_ID: "https://etherscan.io/address/{address}",

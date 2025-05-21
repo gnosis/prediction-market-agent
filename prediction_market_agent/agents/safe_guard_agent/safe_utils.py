@@ -17,13 +17,12 @@ from safe_eth.safe.api.transaction_service_api.transaction_service_api import (
 from safe_eth.safe.safe import Safe, SafeTx
 from safe_eth.safe.safe_signature import SafeSignature, SafeSignatureContract
 from web3 import Web3
+from web3.constants import CHECKSUM_ADDRESSS_ZERO
 from web3.types import TxParams
 
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-
-NULL_ADDRESS = Web3.to_checksum_address("0x0000000000000000000000000000000000000000")
 
 
 def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
@@ -91,8 +90,8 @@ def reject_transaction(safe: Safe, tx: SafeTx, api_keys: APIKeys) -> None:
         safe_tx_gas=0,
         base_gas=0,
         gas_price=0,
-        gas_token=NULL_ADDRESS,
-        refund_receiver=NULL_ADDRESS,
+        gas_token=CHECKSUM_ADDRESSS_ZERO,
+        refund_receiver=CHECKSUM_ADDRESSS_ZERO,
         signatures=None,
         safe_nonce=tx.safe_nonce,
         safe_version=tx.safe_version,
@@ -186,7 +185,7 @@ def extract_all_addresses(tx: DetailedTransactionResponse) -> list[ChecksumAddre
     """
     # Automatically remove null address as that one isn't interesting.
     found_addresses = find_addresses_in_nested_structure(tx.model_dump()) - {
-        NULL_ADDRESS
+        CHECKSUM_ADDRESSS_ZERO
     }
     return sorted(found_addresses)
 
@@ -206,7 +205,7 @@ def find_addresses_in_nested_structure(value: Any) -> set[ChecksumAddress]:
             # Ignore if it's not a valid address.
             pass
     # Automatically remove null address as that one isn't interesting.
-    return addresses - {NULL_ADDRESS}
+    return addresses - {CHECKSUM_ADDRESSS_ZERO}
 
 
 def _safe_sign(
