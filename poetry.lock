@@ -7794,13 +7794,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.65.3.dev683"
+version = "0.65.3"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.65.3.dev683-py3-none-any.whl", hash = "sha256:51d5423469301e3e57bb138de069e80efdae2a02ad13e012bb0a953803ac25b3"},
-    {file = "prediction_market_agent_tooling-0.65.3.dev683.tar.gz", hash = "sha256:ca07b15f51ca579af76b38eefdd81143a271834c98dfa435b62799e09825f79e"},
+    {file = "prediction_market_agent_tooling-0.65.3-py3-none-any.whl", hash = "sha256:58d0efec25e26dc8e3fe93cb45c14d44e152609bed177273381c02238609808c"},
+    {file = "prediction_market_agent_tooling-0.65.3.tar.gz", hash = "sha256:733aedb195d0ea5b2b12cb47b4d89316a317acd0c43a515054608014bf97e9bd"},
 ]
 
 [package.dependencies]
@@ -7883,7 +7883,7 @@ matplotlib = "^3.8.3"
 memory-profiler = "^0.61.0"
 openai = "^1.10.0"
 pandas = "^2.1.1"
-prediction-market-agent-tooling = {version = "0.65.3.dev683", extras = ["google", "langchain"]}
+prediction-market-agent-tooling = {version = ">=0.65.3,<1", extras = ["google", "langchain"]}
 pyautogen = "^0.3.1"
 pydantic-ai = "^0.1.3"
 pysqlite3-binary = {version = "^0.5.2.post3", markers = "sys_platform == \"linux\""}
@@ -7903,8 +7903,8 @@ watchdog = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
-reference = "peter/langchainbumps"
-resolved_reference = "8c63b2a380b03845674d97cdb7287207f0559fb5"
+reference = "main"
+resolved_reference = "5e94559917884464f37804e6e0fe667d052b2a6f"
 
 [[package]]
 name = "preshed"
@@ -12995,4 +12995,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "b038c67de5f4fed1aaf0881ffdaa52b5a3e5364854cd0b0840b6f132c0ca7d3f"
+content-hash = "08b93f721df3459eac9d0b8a07b030ba7befc1152364cc24712d823d4f84ae68"
