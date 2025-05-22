@@ -60,9 +60,11 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
         # Otherwise all markets on Metaculus are fine.
         return True
 
-    def build_random_probabilistic_answer(self) -> ProbabilisticAnswer:
+    def build_fixed_probabilistic_answer(
+        self, p_yes: Probability = Probability(0.5)
+    ) -> ProbabilisticAnswer:
         return ProbabilisticAnswer(
-            p_yes=Probability(0.5),
+            p_yes=p_yes,
             reasoning="Just a test.",
             confidence=0.5,
         )
@@ -73,14 +75,16 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
         ), "Just making mypy happy. It's true thanks to the check in the `run` method via `supported_markets`."
         logger.info(f"Answering market {market.id}, question: {market.question}")
 
-        if not self.dummy_prediction:
-            full_question = f"""Question: {market.question}
+        if self.dummy_prediction:
+            return self.build_fixed_probabilistic_answer()
+
+        full_question = f"""Question: {market.question}
 Question's description: {market.description}
 Question's fine print: {market.fine_print} 
 Question's resolution criteria: {market.resolution_criteria}"""
-            prediction = self.agent.agent.predict(full_question)
-            if prediction.outcome_prediction is None:
-                return self.build_random_probabilistic_answer()
-            return prediction.outcome_prediction.to_probabilistic_answer()
-        else:
-            return self.build_random_probabilistic_answer()
+        prediction = self.agent.agent.predict(full_question)
+        return (
+            prediction.outcome_prediction.to_probabilistic_answer()
+            if prediction.outcome_prediction is not None
+            else None
+        )

@@ -1,6 +1,7 @@
 from pprint import pprint
 
 import typer
+from prediction_market_agent_tooling.gtypes import ChainID
 
 from prediction_market_agent.agents.safe_guard_agent.guards.llm import format_balances
 from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
@@ -8,14 +9,14 @@ from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
 )
 
 
-def main(tx_id: str) -> None:
+def main(tx_id: str, chain_id: int) -> None:
     """
     Helper script to print all information about multisig with given id from Safe APIs.
     """
-    tx = get_safe_detailed_transaction_info(tx_id)
+    tx = get_safe_detailed_transaction_info(tx_id, chain_id=ChainID(chain_id))
 
     print(f"Safe's info:")
-    print(format_balances(tx.safeAddress))
+    print(format_balances(tx.safeAddress, chain_id=ChainID(chain_id)))
     print(f"Transaction info:")
     pprint(tx.model_dump())
 

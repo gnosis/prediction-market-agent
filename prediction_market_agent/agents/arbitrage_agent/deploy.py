@@ -63,8 +63,8 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def _build_chain(self) -> RunnableSerializable[t.Any, t.Any]:
         llm = ChatOpenAI(
             temperature=0,
-            model=self.model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            model_name=self.model,
+            openai_api_key=APIKeys().openai_api_key,
         )
 
         parser = PydanticOutputParser(pydantic_object=Correlation)
@@ -121,7 +121,9 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             omen_markets, key=lambda m: related_market_addresses.index(m.id)
         )
 
-        print(f"Fetched {len(omen_markets)} related markets for market {market.id}")
+        logger.info(
+            f"Fetched {len(omen_markets)} related markets for market {market.id}"
+        )
 
         for related_market in omen_markets:
             if related_market.id.lower() == market.id.lower():

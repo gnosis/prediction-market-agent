@@ -170,9 +170,9 @@ def has_question_event_happened_in_the_past(model: str, question: str) -> bool:
      if it cannot be sure (returning -1)."""
     date_str = utcnow().strftime("%Y-%m-%d %H:%M:%S %Z")
     llm = ChatOpenAI(
-        model=model,
+        model_name=model,
         temperature=0.0,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        openai_api_key=APIKeys().openai_api_key,
     )
     prompt = ChatPromptTemplate.from_template(
         template=HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT
@@ -204,9 +204,9 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcome
     date_str = datetime.now().strftime("%d %B %Y")
     previous_urls = []
     llm = ChatOpenAI(
-        model=model,
+        model_name=model,
         temperature=0.0,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        openai_api_key=APIKeys().openai_api_key,
     )
     while tries < max_tries:
         search_prompt = ChatPromptTemplate.from_template(

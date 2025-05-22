@@ -72,8 +72,8 @@ def _summarize_learnings(
     model = model if model else DEFAULT_OPENAI_MODEL
     llm = ChatOpenAI(
         temperature=0,
-        model=model,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        model_name=model,
+        openai_api_key=APIKeys().openai_api_key,
     )
     summary_chain = load_summarize_chain(
         llm=llm,
@@ -126,9 +126,9 @@ def memories_to_learnings(
 @observe()
 def get_event_date_from_question(question: str) -> DatetimeUTC | None:
     llm = ChatOpenAI(
-        model="gpt-4-turbo",
+        model_name="gpt-4-turbo",
         temperature=0.0,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        openai_api_key=APIKeys().openai_api_key,
     )
     event_date_str = str(
         llm.invoke(

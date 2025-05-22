@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import nest_asyncio
 import typer
+from prediction_market_agent_tooling.gtypes import ChainID
 from prediction_market_agent_tooling.loggers import logger
 from rich.console import Console
 
@@ -58,21 +59,23 @@ def main(
 
 
 async def process_case(
-    inputs: tuple[DetailedTransactionResponse, Balances | None],
+    inputs: tuple[ChainID, DetailedTransactionResponse, Balances | None],
 ) -> ValidationConclusion:
     # Pydantic eval doesn't allow multiple arguments, so we need to unpack it here.
-    tx, balances_patch = inputs
+    chain_id, tx, balances_patch = inputs
     # In case balances_patch was provided, we need to use it instead of the real balances.
     # Handy when dealing with historical data, and the current balances aren't representative (and it confuses LLM).
     with patch(
         "prediction_market_agent.agents.safe_guard_agent.guards.llm.get_balances_usd",
-        new=get_balances_usd if balances_patch is None else lambda x: balances_patch,
+        new=get_balances_usd if balances_patch is None else lambda x, y: balances_patch,
     ):
         result = validate_safe_transaction_obj(
             detailed_transaction_info=tx,
-            do_sign_or_execution=False,
+            do_sign=False,
+            do_execution=False,
             do_reject=False,
             do_message=False,
+            chain_id=chain_id,
             ignore_historical_transaction_ids={tx.txId},
         )
     return result

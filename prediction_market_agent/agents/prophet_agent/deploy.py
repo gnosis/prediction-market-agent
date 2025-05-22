@@ -94,8 +94,7 @@ class DeployableTraderAgentERCategorical(DeployableTraderAgent):
             logger.info(
                 f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
             )
-            outcome_prediction = check_not_none(prediction.outcome_prediction)
-            return outcome_prediction
+            return prediction.outcome_prediction
 
 
 class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):

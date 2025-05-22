@@ -14,6 +14,8 @@ from prediction_market_agent.utils import APIKeys
 if t.TYPE_CHECKING:
     from loguru import Message
 
+STREAMLIT_SINK_EXPLICIT_FLAG = "streamlit"
+
 
 def streamlit_asyncio_event_loop_hack() -> None:
     """
@@ -47,57 +49,78 @@ def check_required_api_keys(required_keys: list[str]) -> None:
         st.stop()
 
 
-def loguru_streamlit_sink(
-    log: "Message", expander_if_longer_than: int = 500, include_in_expander: int = 50
-) -> None:
-    record = log.record
-    level = record["level"].name
+def get_loguru_streamlit_sink(
+    explicit: bool,
+    expander_if_longer_than: int | None,
+    include_in_expander: int = 50,
+) -> t.Callable[["Message"], None]:
+    def loguru_streamlit_sink(log: "Message") -> None:
+        record = log.record
+        level = record["level"].name
 
-    message = streamlit_escape(record["message"])
+        message = streamlit_escape(record["message"])
 
-    # Ignore certain messages that aren't interesting for Streamlit user, but are in the production logs.
-    if any(x in message for x in [DB_CACHE_LOG_PREFIX]):
-        return
+        # Ignore certain messages that aren't interesting for Streamlit user, but are in the production logs.
+        if any(x in message for x in [DB_CACHE_LOG_PREFIX]):
+            return
 
-    if level == "ERROR":
-        st_func = st.error
-        st_icon = "❌"
+        if explicit and not record["extra"].get(STREAMLIT_SINK_EXPLICIT_FLAG, False):
+            return
 
-    elif level == "WARNING":
-        st_func = st.warning
-        st_icon = "⚠️"
+        if level == "ERROR":
+            st_func = st.error
+            st_icon = "❌"
 
-    elif level == "SUCCESS":
-        st_func = st.success
-        st_icon = "✅"
+        elif level == "WARNING":
+            st_func = st.warning
+            st_icon = "⚠️"
 
-    elif level == "DEBUG":
-        st_func = None
-        st_icon = None
+        elif level == "SUCCESS":
+            st_func = st.success
+            st_icon = "✅"
 
-    else:
-        st_func = st.info
-        st_icon = "ℹ️"
+        elif level == "DEBUG":
+            st_func = None
+            st_icon = None
 
-    if st_func is None:
-        pass
+        else:
+            st_func = st.info
+            st_icon = "ℹ️"
 
-    elif len(message) > expander_if_longer_than:
-        with st.expander(f"[Expand to see more] {message[:include_in_expander]}..."):
+        if st_func is None:
+            pass
+
+        elif (
+            expander_if_longer_than is not None
+            and len(message) > expander_if_longer_than
+        ):
+            with st.expander(
+                f"[Expand to see more] {message[:include_in_expander]}..."
+            ):
+                st_func(message, icon=st_icon)
+
+        else:
             st_func(message, icon=st_icon)
 
-    else:
-        st_func(message, icon=st_icon)
+    return loguru_streamlit_sink
 
 
 @st.cache_resource
-def add_sink_to_logger() -> None:
+def add_sink_to_logger(
+    explicit: bool = False, expander_if_longer_than: int | None = 500
+) -> None:
     """
     Adds streamlit as a sink to the loguru, so any loguru logs will be shown in the streamlit app.
 
     Needs to be behind a cache decorator, so it only runs once per streamlit session (otherwise we would see duplicated messages).
+
+    If `explicit` is set to True, only logged messages with extra attribute `streamlit` will be shown in the streamlit app.
     """
-    logger.add(loguru_streamlit_sink)
+    logger.add(
+        get_loguru_streamlit_sink(
+            explicit=explicit, expander_if_longer_than=expander_if_longer_than
+        )
+    )
 
 
 def streamlit_escape(message: str) -> str:
@@ -121,3 +144,26 @@ def display_chat_message(chat_message: ChatMessage) -> None:
 def display_chat_history(chat_history: ChatHistory) -> None:
     for m in chat_history.chat_messages:
         display_chat_message(m)
+
+
+def dict_to_point_list(d: dict[str, t.Any], indent: int = 0) -> str:
+    """
+    Helper method to convert nested dicts to a bullet point list.
+    """
+    lines = []
+    prefix = "  " * indent
+    for k, v in d.items():
+        if isinstance(v, dict):
+            lines.append(f"{prefix}- {k}:")
+            lines.append(dict_to_point_list(v, indent + 1))
+        elif isinstance(v, list):
+            lines.append(f"{prefix}- {k}:")
+            for idx, item in enumerate(v):
+                if isinstance(item, dict):
+                    lines.append(f"{prefix}  - item {idx}:")
+                    lines.append(dict_to_point_list(item, indent + 2))
+                else:
+                    lines.append(f"{prefix}  - item {idx}: {item}")
+        else:
+            lines.append(f"{prefix}- {k}: {v}")
+    return "\n".join(lines)

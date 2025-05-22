@@ -34,7 +34,7 @@ class PineconeHandler:
         self.keys = APIKeys()
         self.model = model
         self.embeddings = OpenAIEmbeddings(
-            api_key=self.keys.openai_api_key_secretstr_v1,
+            openai_api_key=self.keys.openai_api_key,
             model=model,
         )
         self.build_pinecone()
@@ -152,8 +152,9 @@ class PineconeHandler:
         limit: int,
         text: str,
         threshold: float = 0.25,
-        filter_on_metadata: dict[str, dict[str, t.Any]]
-        | None = None,  # see https://docs.pinecone.io/guides/data/filter-with-metadata#additional-filter-examples for details on the fitler parameter
+        filter_on_metadata: (
+            dict[str, dict[str, t.Any]] | None
+        ) = None,  # see https://docs.pinecone.io/guides/data/filter-with-metadata#additional-filter-examples for details on the fitler parameter
     ) -> list[PineconeMetadata]:
         # Note that pagination is not implemented in the Pinecone client.
         # Hence we set a large limit and hope we get enough results that satisfy the threshold.

@@ -1,7 +1,10 @@
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
+from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
+from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
+    AbstractGuard,
+)
 from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
@@ -10,18 +13,36 @@ from prediction_market_agent.agents.safe_guard_agent.validation_result import (
 )
 
 
-@observe()
-def validate_safe_transaction_blacklist(
-    new_transaction: DetailedTransactionResponse,
-    new_transaction_safetx: SafeTx,
-    all_addresses_from_tx: list[ChecksumAddress],
-    history: list[DetailedTransactionResponse],
-) -> ValidationResult:
-    lowercased_blacklist = {addr.strip().lower() for addr in _BLACKLIST if addr.strip()}
-    if any(addr.lower() in lowercased_blacklist for addr in all_addresses_from_tx):
-        return ValidationResult(ok=False, reason="Blacklisted address.")
+class Blacklist(AbstractGuard):
+    name = "Blacklist"
+    description = "This guard ensures that none of the addresses in the transaction are blacklisted."
 
-    return ValidationResult(ok=True, reason="Not blacklisted.")
+    @observe(name="validate_safe_transaction_blacklist")
+    def validate(
+        self,
+        new_transaction: DetailedTransactionResponse,
+        new_transaction_safetx: SafeTx,
+        all_addresses_from_tx: list[ChecksumAddress],
+        history: list[DetailedTransactionResponse],
+        chain_id: ChainID,
+    ) -> ValidationResult:
+        lowercased_blacklist = {
+            addr.strip().lower() for addr in _BLACKLIST if addr.strip()
+        }
+        if any(addr.lower() in lowercased_blacklist for addr in all_addresses_from_tx):
+            return ValidationResult(
+                name=self.name,
+                description=self.description,
+                ok=False,
+                reason="Blacklisted address.",
+            )
+
+        return ValidationResult(
+            name=self.name,
+            description=self.description,
+            ok=True,
+            reason="Not blacklisted.",
+        )
 
 
 # https://www.ic3.gov/PSA/2025/PSA250226

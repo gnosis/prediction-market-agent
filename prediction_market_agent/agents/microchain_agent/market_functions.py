@@ -150,8 +150,6 @@ class PredictProbabilityForQuestion(PredictProbabilityForQuestionBase):
                 model_settings=ModelSettings(temperature=0),
             ),
         )
-        if prediction is None:
-            raise ValueError("Failed to make a prediction.")
 
         return str(prediction.p_yes)
 
