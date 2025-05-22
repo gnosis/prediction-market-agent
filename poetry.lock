@@ -7794,70 +7794,74 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "lan
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.65.3"
+version = "0.65.4"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
-python-versions = "<3.13,>=3.10"
-files = [
-    {file = "prediction_market_agent_tooling-0.65.3-py3-none-any.whl", hash = "sha256:58d0efec25e26dc8e3fe93cb45c14d44e152609bed177273381c02238609808c"},
-    {file = "prediction_market_agent_tooling-0.65.3.tar.gz", hash = "sha256:733aedb195d0ea5b2b12cb47b4d89316a317acd0c43a515054608014bf97e9bd"},
-]
+python-versions = ">=3.10,<3.13"
+files = []
+develop = false
 
 [package.dependencies]
-autoflake = ">=2.2.1,<3.0.0"
+autoflake = "^2.2.1"
 base58 = ">=1.0.2,<2.0"
 cowdao-cowpy-kongzii = "1.0.0rc2"
-cron-validator = ">=1.0.8,<2.0.0"
+cron-validator = "^1.0.8"
 eth-account = ">=0.8.0,<0.12.0"
-eth-keys = ">=0.6.1,<0.7.0"
-eth-typing = ">=3.0.0,<4.0.0"
-functions-framework = ">=3.5.0,<4.0.0"
-google-api-python-client = {version = "2.95.0", optional = true, markers = "extra == \"google\""}
-google-cloud-functions = ">=1.16.0,<2.0.0"
-google-cloud-resource-manager = ">=1.12.0,<2.0.0"
-google-cloud-secret-manager = ">=2.18.2,<3.0.0"
-hishel = ">=0.0.31,<0.0.32"
+eth-keys = "^0.6.1"
+eth-typing = "^3.0.0"
+functions-framework = "^3.5.0"
+google-api-python-client = {version = "2.95.0", optional = true}
+google-cloud-functions = "^1.16.0"
+google-cloud-resource-manager = "^1.12.0"
+google-cloud-secret-manager = "^2.18.2"
+hishel = "^0.0.31"
 httpx = ">=0.25.2,<1.0.0"
-isort = ">=5.13.2,<6.0.0"
-langchain = {version = ">=0.3.0,<0.4.0", optional = true, markers = "extra == \"langchain\""}
+isort = "^5.13.2"
+langchain = {version = "^0.3.0", optional = true}
 langchain-community = ">=0.0.19"
-langchain-openai = {version = ">=0.3.0,<0.4.0", optional = true, markers = "extra == \"langchain\""}
-langfuse = ">=2.42.0,<3.0.0"
-loguru = ">=0.7.2,<0.8.0"
-loky = ">=3.4.1,<4.0.0"
-numpy = ">=1.26.4,<2.0.0"
-pinatapy-vourhey = ">=0.2.0,<0.3.0"
-prompt-toolkit = ">=3.0.43,<4.0.0"
-proto-plus = ">=1.0.0,<2.0.0"
-protobuf = ">=5.0.0,<6.0.0"
-psycopg2-binary = ">=2.9.9,<3.0.0"
-pydantic = ">=2.6.1,<3.0.0"
-pydantic-settings = ">=2.4.0,<3.0.0"
-pymongo = ">=4.8.0,<5.0.0"
-pytest-postgresql = ">=6.1.1,<7.0.0"
-python-dateutil = ">=2.9.0.post0,<3.0.0"
-python-json-logger = ">=3.3.0,<4.0.0"
-safe-cli = ">=1.0.0,<2.0.0"
-safe-eth-py = ">=6.0.0b41,<7.0.0"
-scikit-learn = ">=1.3.1,<2.0.0"
-sqlmodel = ">=0.0.22,<0.0.23"
-streamlit = ">=1.31.0,<2.0.0"
-subgrounds-gnosis = ">=1.9.2,<2.0.0"
-tabulate = ">=0.9.0,<0.10.0"
-tavily-python = ">=0.5.0,<0.6.0"
-tqdm = ">=4.66.2,<5.0.0"
+langchain-openai = {version = "^0.3.0", optional = true}
+langfuse = "^2.42.0"
+loguru = "^0.7.2"
+loky = "^3.4.1"
+numpy = "^1.26.4"
+pinatapy-vourhey = "^0.2.0"
+prompt-toolkit = "^3.0.43"
+proto-plus = "^1.0.0"
+protobuf = "^5.0.0"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.6.1"
+pydantic-settings = "^2.4.0"
+pymongo = "^4.8.0"
+pytest-postgresql = "^6.1.1"
+python-dateutil = "^2.9.0.post0"
+python-json-logger = "^3.3.0"
+safe-cli = "^1.0.0"
+safe-eth-py = "^6.0.0b41"
+scikit-learn = "^1.3.1"
+sqlmodel = "^0.0.22"
+streamlit = "^1.31.0"
+subgrounds-gnosis = "^1.9.2"
+tabulate = "^0.9.0"
+tavily-python = "^0.5.0"
+tqdm = "^4.66.2"
 typer = ">=0.9.0,<1.0.0"
-types-cachetools = ">=5.5.0.20240820,<6.0.0.0"
-types-python-dateutil = ">=2.9.0.20240906,<3.0.0.0"
-types-pytz = ">=2024.1.0.20240203,<2025.0.0.0"
-types-requests = ">=2.31.0.0,<3.0.0.0"
-web3 = ">=6.15.1,<7.0.0"
+types-cachetools = "^5.5.0.20240820"
+types-python-dateutil = "^2.9.0.20240906"
+types-pytz = "^2024.1.0.20240203"
+types-requests = "^2.31.0.0"
+web3 = "^6.15.1"
 
 [package.extras]
 google = ["google-api-python-client (==2.95.0)"]
 langchain = ["langchain (>=0.3.0,<0.4.0)", "langchain-openai (>=0.3.0,<0.4.0)"]
 openai = ["openai (>=1.0.0,<2.0.0)"]
 optuna = ["optuna (>=4.1.0,<5.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/gnosis/prediction-market-agent-tooling.git"
+reference = "peter/somemissingpieces"
+resolved_reference = "2ff3e2d7081c257bacd67e6c936cf8ea9b323172"
 
 [[package]]
 name = "prediction-prophet"
@@ -12995,4 +12999,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "36c62adc9209381e146201355af4c15615648453c66a474a9697d51102d8251d"
+content-hash = "89db3c5e6981a0ea4f3422826d2904db3da92d2c37eebbed630f89ae0f1fe44f"
