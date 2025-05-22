@@ -59,6 +59,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGemini20Flash,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4oAgent_B,
+    DeployablePredictionProphetGPT4oAgentCategorical,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4ominiAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
@@ -100,6 +101,7 @@ class RunnableAgent(str, Enum):
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4o_b = "prophet_gpt4o_b"
+    prophet_gpt4o_categorical = "prophet_gpt4o_categorical"
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
@@ -150,6 +152,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
+    RunnableAgent.prophet_gpt4o_categorical: DeployablePredictionProphetGPT4oAgentCategorical,
     RunnableAgent.prophet_gpt4o_new_market_trader: DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,
