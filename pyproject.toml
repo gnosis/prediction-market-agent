@@ -47,6 +47,7 @@ farcaster = { git = "https://github.com/gabrielfior/farcaster-py.git", branch = 
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
 streamlit-nightly = "1.45.2.dev20250513" # TODO: Switch to `streamlit = "^1.45.2"` once they release it.
+pinecone = "^5.0.0"
 langchain-pinecone = "^0.2.0"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"

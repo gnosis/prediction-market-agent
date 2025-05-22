@@ -5018,21 +5018,21 @@ tiktoken = ">=0.7,<1"
 
 [[package]]
 name = "langchain-pinecone"
-version = "0.2.6"
+version = "0.2.3"
 description = "An integration package connecting Pinecone and LangChain"
 optional = false
 python-versions = "<3.14,>=3.9"
 files = [
-    {file = "langchain_pinecone-0.2.6-py3-none-any.whl", hash = "sha256:dacbb9414839fb6d0ff0b2eb30864022e7f835114c2fbf6f796ded9031723e89"},
-    {file = "langchain_pinecone-0.2.6.tar.gz", hash = "sha256:be750d886a80950878bcc17bf7295ab3e128fca34225e490c9af32fe440fa672"},
+    {file = "langchain_pinecone-0.2.3-py3-none-any.whl", hash = "sha256:e47881b3e119a1254c61cfb6b9e317f3e3fcc41c59484ca0c52a8bf3a80646f8"},
+    {file = "langchain_pinecone-0.2.3.tar.gz", hash = "sha256:99d1aeea5a5bdcb887f427bda768a46d0cf53f00f73203281a4e0415ceea74ff"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.10,<3.11"
 langchain-core = ">=0.3.34,<1.0.0"
 langchain-tests = ">=0.3.7,<1.0.0"
-numpy = ">=1.26.4"
-pinecone = {version = ">=6.0.0,<7.0.0", extras = ["async"]}
+numpy = ">=1.26.4,<2.0.0"
+pinecone = ">=5.4.0,<6.0.0"
 
 [[package]]
 name = "langchain-tests"
@@ -7541,25 +7541,40 @@ requests = "*"
 
 [[package]]
 name = "pinecone"
-version = "6.0.2"
+version = "5.4.2"
 description = "Pinecone client and SDK"
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "pinecone-6.0.2-py3-none-any.whl", hash = "sha256:a85fa36d7d1451e7b7563ccfc7e3e2dadd39b33e5d53b2882468db8514ab8847"},
-    {file = "pinecone-6.0.2.tar.gz", hash = "sha256:9c2e74be8b3abe76909da9b4dae61bced49aade51f6fc39b87edb97a1f8df0e4"},
+    {file = "pinecone-5.4.2-py3-none-any.whl", hash = "sha256:1fad082c66a50a229b58cda0c3a1fa0083532dc9de8303015fe4071cb25c19a8"},
+    {file = "pinecone-5.4.2.tar.gz", hash = "sha256:23e8aaa73b400bb11a3b626c4129284fb170f19025b82f65bd89cbb0dab2b873"},
 ]
 
 [package.dependencies]
 certifi = ">=2019.11.17"
+pinecone-plugin-inference = ">=2.0.0,<4.0.0"
 pinecone-plugin-interface = ">=0.0.7,<0.0.8"
 python-dateutil = ">=2.5.3"
+tqdm = ">=4.64.1"
 typing-extensions = ">=3.7.4"
 urllib3 = {version = ">=1.26.0", markers = "python_version >= \"3.8\" and python_version < \"3.12\""}
 
 [package.extras]
-asyncio = ["aiohttp (>=3.9.0)"]
-grpc = ["googleapis-common-protos (>=1.66.0)", "grpcio (>=1.44.0)", "grpcio (>=1.59.0)", "grpcio (>=1.68.0)", "lz4 (>=3.1.3)", "protobuf (>=5.29,<6.0)", "protoc-gen-openapiv2 (>=0.0.1,<0.0.2)"]
+grpc = ["googleapis-common-protos (>=1.53.0)", "grpcio (>=1.44.0)", "grpcio (>=1.59.0)", "lz4 (>=3.1.3)", "protobuf (>=4.25,<5.0)", "protoc-gen-openapiv2 (>=0.0.1,<0.0.2)"]
+
+[[package]]
+name = "pinecone-plugin-inference"
+version = "3.1.0"
+description = "Embeddings plugin for Pinecone SDK"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "pinecone_plugin_inference-3.1.0-py3-none-any.whl", hash = "sha256:96e861527bd41e90d58b7e76abd4e713d9af28f63e76a51864dfb9cf7180e3df"},
+    {file = "pinecone_plugin_inference-3.1.0.tar.gz", hash = "sha256:eff826178e1fe448577be2ff3d8dbb072befbbdc2d888e214624523a1c37cd8d"},
+]
+
+[package.dependencies]
+pinecone-plugin-interface = ">=0.0.7,<0.0.8"
 
 [[package]]
 name = "pinecone-plugin-interface"
@@ -12980,4 +12995,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "fa44d17ddc29c1594d98b4b2e5e18911ab9870ba36ae51612b4422c39a657ddb"
+content-hash = "b038c67de5f4fed1aaf0881ffdaa52b5a3e5364854cd0b0840b6f132c0ca7d3f"
