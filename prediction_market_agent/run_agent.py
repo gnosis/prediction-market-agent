@@ -83,6 +83,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
 )
+from prediction_market_agent.agents.logprobs_agent.deploy import DeployableLogProbsAgent
 
 
 class RunnableAgent(str, Enum):
@@ -134,9 +135,10 @@ class RunnableAgent(str, Enum):
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
-
+    logprobs = "logprobs"
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
+    RunnableAgent.logprobs: DeployableLogProbsAgent,
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.coinflip_highest_liquidity: DeployableCoinFlipAgentByHighestLiquidity,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,

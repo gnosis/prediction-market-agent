@@ -1,0 +1,261 @@
+import asyncio
+import os
+import json
+from typing import Any, Literal
+from gpt_researcher import GPTResearcher
+from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.tools.langfuse_ import observe
+from pydantic_ai import Agent
+from pydantic_ai.agent import AgentRunResult
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.settings import ModelSettings
+from prediction_market_agent_tooling.loggers import logger
+from pydantic import BaseModel
+from prediction_market_agent.tools.openai_utils import get_openai_provider
+from prediction_market_agent.utils import APIKeys
+from prediction_market_agent.agents.logprobs_oai_model import LogProbsOpenAIModel
+from prediction_market_agent_tooling.tools.perplexity.perplexity_search import perplexity_search
+from prediction_market_agent_tooling.tools.perplexity.perplexity_models import PerplexityResponse
+from prediction_market_agent.tools.web_scrape.structured_summary import web_scrape_structured_and_summarized
+from prediction_market_agent_tooling.logprobs_parser import LogprobsParser, LogprobDetail, FieldLogprobs
+from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.markets import get_binary_markets
+from concurrent.futures import ThreadPoolExecutor
+from prediction_market_agent_tooling.gtypes import Probability
+
+class DecidabilityResponse(BaseModel):
+    rationale: str
+    answer: Literal["YES", "NO"]
+
+class PredictionResponse(BaseModel):
+    rationale: str
+    p_yes: float
+
+PERPLEXITY_QUERY = """
+Your goal is to provide assesment of sources for following question: {market_question}?
+
+* Find relevant information. Every time evaluate quality and relevance of your soruces.
+* Don't answer the question, just provide assesment of quality and relevance of ALL given sources.
+* Each assesment MUST start with LINK OF THE SOURCE so i can pair it with given source later.
+* In your assesment also provide critique of given source - website etc..
+* Make sure that assesment is returned in good readble format, separated by bullet points and paragraphs for each source.
+"""
+
+SUMMARY_OBJECTIVE = "Summarize all relevant information regarding the question: {market_question}."
+
+
+DECIDABILITY_QUERRY = """
+Given the question: {market_question}, critique of weak critique of sources: {weak_critique} and summaries of sources: {summary} decide if the question is solvable.
+* Your goal is not to solve the question. You need only to asses if the question is solvable.
+* It is solvable if it is possible to make prediction based on given sources, when taking cirtique in to the account.
+* You dont care about the prediction you only look on the sources and information in it.
+* Retrurn response in following format:
+* First return your rationale of why did you decided given way after field "rationale": "YOUR RATIONALE HERE",\n
+* Then return your answer, YES or NO in field "answer": "YOUR RESPONSE HERE"\n
+
+* RETURN ONLY RESPONSE CONTAINING ONLY FOLLOWING NOTHING ELSE  "rationale": "YOUR RATIONALE HERE",\n "answer": "YOUR RESPONSE HERE",\n
+"""
+
+PREDICTION_QUERRY = """
+Given the question: {market_question}, critique of sources: {critique} and summaries of sources: {summary} predict the outcome of the question.
+
+* Evaluate all relevant sources and provided information.
+* Evaluate critique of the sources to ignore ones that are not relevant or useless.
+* Predict positive outcome of the question in the filed "p_yes" in range [0, 1]
+
+* Return response in following format:
+* First return your rationale of why did you decided given way in "rationale": "YOUR RATIONALE HERE",\n
+* Then return your positive prediction percentate inside of field "p_yes": "YOUR PREDICTION  IN RANGE [0-1]"\n
+
+* Your output response must be only a single JSON object to be parsed by Python's "json.loads()".
+* RETURN ONLY RESPONSE CONTAINING ONLY FOLLOWING NOTHING ELSE  "rationale": "YOUR RATIONALE HERE",\n "p_yes": "YOUR PREDICTION  IN RANGE [0-1]",\n
+* Output only the JSON object in your response. Do not include any other contents in your response.
+
+"""
+
+class DeployableLogProbsAgent(LogProbsAgent):
+    agent: LogProbsAgentBase
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+
+class LogProbsAgentBase(DeployableTraderAgent):
+    bet_on_n_markets_per_run = 4
+    
+
+    def load(
+        self,
+        use_solvability_score: bool = False,
+        min_solvability_score: float = 0.3,
+        max_processed_markets: int = 10
+    ) -> None:
+        super().load()
+
+        self.research_agent = Agent(
+            LogProbsOpenAIModel("gpt-4o", provider=get_openai_provider(api_key=APIKeys().openai_api_key)),
+            model_settings=ModelSettings(temperature=0, extra_body={"logprobs": True, "top_logprobs": 3}),
+        )
+        self.logprobs_parser = LogprobsParser()
+        self.api_key = APIKeys()
+        # if solvability score is used,
+        self.use_solvability_score = use_solvability_score
+        self.min_solvability_score = min_solvability_score
+        # It will look at max_processed_markets markets at most but 
+        # not bet for more than bet_on_n_markets_per_run 
+
+        self.max_processed_markets = max_processed_markets 
+        # We need to keep count of how many markets we have processed (not necesarily betted on)
+        self.processed_markets = 0 
+
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
+        logger.info(f"Answering market: {market.question}")
+        
+        research_results = self._do_perplexity_search(market.question)
+        logger.info(f"Research results: {research_results.content}")
+        logger.info(f"Research results citations for links: {research_results.citations}")
+
+        summaries = self._process_links_parallel(market.question, research_results.citations, max_workers=10)
+        logger.info(f"Summaries of sources: {summaries}")
+
+        if self.use_solvability_score and self.processed_markets < self.max_processed_markets:
+            solvability_score = self._calculate_solvability_score(market.question, research_results.content, summaries)
+            logger.info(f"Solvability score: {solvability_score}")
+            if solvability_score is not None and solvability_score < self.min_solvability_score:
+                logger.info(f"Skipping market, min solvability {self.min_solvability_score} not reached")
+                self.bet_on_n_markets_per_run += 1
+                return None
+
+            self.processed_markets += 1
+
+
+        prediction_result = self._predict_market_outcome(market.question, research_results.content, summaries)
+        logger.info(f"Predicted market outcome: {prediction_result}")
+        return prediction_result
+
+    def _do_perplexity_search(self, market_question: str) -> PerplexityResponse:
+        return perplexity_search(
+            query=PERPLEXITY_QUERY.format(market_question=market_question),
+            api_keys=self.api_key
+        )
+
+    def _process_links_parallel(self, market_question: str, links: list[str], max_workers: int = 10) -> list[str]:
+        summaries: list[str] = []
+
+        def process_single_link(link: str) -> str | None:
+            try:
+                return link + " \n " + web_scrape_structured_and_summarized(
+                    SUMMARY_OBJECTIVE.format(market_question=market_question),
+                    link,
+                    remove_a_links=True
+                )
+            except Exception as e:
+                logger.warning(f"Error processing link {link}: {e}")
+                return None
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = list(executor.map(process_single_link, links))
+        
+        return [result for result in results if result is not None]
+
+    def _calculate_solvability_score(self, market_question: str, critique: str, crawl_summaries: list[str]) -> float | None:
+        solvability_response = self.research_agent.run_sync(DECIDABILITY_QUERRY.format(market_question=market_question, weak_critique=critique, summary=crawl_summaries))
+        
+        raw_logprobs = self.get_logprobs(solvability_response)
+        if raw_logprobs is None:
+            return None
+
+        # Get probabilities for "YES" and "NO" tokens in the answer field
+        probs = self._extract_token_probabilities(
+            raw_logprobs=raw_logprobs, 
+            model_type=DecidabilityResponse, 
+            field_key="answer", 
+            expected_tokens=["YES", "NO"]
+        )
+        
+        yes_prob = probs.get("yes", 0)
+        no_prob = probs.get("no", 0)
+        
+        # Return YES probability if it's higher, otherwise inverse of NO probability
+        if yes_prob > no_prob:
+            return yes_prob
+        elif no_prob > 0:
+            return 1 - no_prob
+            
+        return None
+
+    def _extract_token_probabilities(
+        self, 
+        raw_logprobs: list[dict[str, Any]], 
+        model_type: type, 
+        field_key: str, 
+        expected_tokens: list[str] | None = None,
+    ) -> dict[str, float]:
+        
+        field_logprobs = [
+            logprob for logprob in self.logprobs_parser.parse_logprobs(raw_logprobs, model_type)
+            if logprob.key == field_key
+        ]
+        
+        top_logprobs = field_logprobs[0].logprobs if field_logprobs else []
+        
+        return {
+            logprob.token.lower(): logprob.prob
+            for logprob in top_logprobs
+            if not expected_tokens or logprob.token.upper() in expected_tokens
+        }
+
+    def get_logprobs(self, result: AgentRunResult) -> list[dict[str, Any]] | None:
+        logprobs = None
+        messages = result.all_messages()
+        if messages and hasattr(messages[-1], 'vendor_details'):
+            vendor_details = messages[-1].vendor_details
+            if vendor_details:
+                logprobs = vendor_details.get("logprobs", None)
+
+        return logprobs
+
+
+    def _predict_market_outcome(self, market_question: str, critique: str, crawl_summaries: list[str]) -> ProbabilisticAnswer | None:
+        prediction = self.research_agent.run_sync(
+            PREDICTION_QUERRY.format(market_question=market_question, critique=critique, summary=crawl_summaries)
+        )
+        raw_logprobs = self.get_logprobs(prediction)
+        if raw_logprobs is None:
+            return None
+            
+        confidence = self._extract_token_probabilities(
+            raw_logprobs=raw_logprobs, 
+            model_type=PredictionResponse, 
+            field_key="p_yes", 
+        )
+        p_yes: str = max(confidence.items(), key=lambda item: item[1])[0]
+        response_json = clean_json_response(prediction.data)
+
+        if p_yes == None:
+            return None
+
+        return ProbabilisticAnswer(
+            p_yes = Probability(float(p_yes)),
+            confidence = confidence[p_yes],
+            reasoning = response_json.get("rationale", None)
+        )
+
+
+def clean_json_response(response_str: str) -> dict[str, Any]:
+    if "```json" in response_str:
+        start_idx = response_str.find("```json") + 7
+        end_idx = response_str.rfind("```")
+        json_str = response_str[start_idx:end_idx].strip()
+    else:
+        json_str = response_str
+    
+    result : dict[str, Any] = json.loads(json_str)
+    return result
