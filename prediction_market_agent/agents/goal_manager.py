@@ -189,8 +189,8 @@ class GoalManager:
         latest_evaluated_goals_str = self.evaluated_goals_to_str(latest_evaluated_goals)
         llm = ChatOpenAI(
             temperature=0,
-            model=self.model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            model_name=self.model,
+            openai_api_key=APIKeys().openai_api_key,
         )
         chain = prompt | llm | parser
 
@@ -287,8 +287,8 @@ class GoalManager:
         )
         llm = ChatOpenAI(
             temperature=0,
-            model=self.model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            model_name=self.model,
+            openai_api_key=APIKeys().openai_api_key,
         )
         chain = prompt | llm | parser
 

@@ -63,8 +63,8 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
     def _build_chain(self) -> RunnableSerializable[t.Any, t.Any]:
         llm = ChatOpenAI(
             temperature=0,
-            model=self.model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            model_name=self.model,
+            openai_api_key=APIKeys().openai_api_key,
         )
 
         parser = PydanticOutputParser(pydantic_object=Correlation)
