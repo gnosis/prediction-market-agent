@@ -19,10 +19,10 @@ def llm_random_numbers(
     trial: int,  # Used to invalidate cache between runs.
 ) -> list[int]:
     llm = ChatOpenAI(
-        model=engine,
+        model_name=engine,
         temperature=temperature,
         seed=seed,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        openai_api_key=APIKeys().openai_api_key,
     )
     prompt_template = "Generate {n} random numbers between 1 and 100. Return only them, no additional text, write them comma-separated."
     prompt = ChatPromptTemplate.from_template(template=prompt_template)

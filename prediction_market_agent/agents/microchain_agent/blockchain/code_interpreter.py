@@ -55,8 +55,8 @@ class CodeInterpreter:
         )
         llm = ChatOpenAI(
             temperature=0,
-            model=self.summarization_model,
-            api_key=APIKeys().openai_api_key_secretstr_v1,
+            model_name=self.summarization_model,
+            openai_api_key=APIKeys().openai_api_key,
         )
 
         self.prompt_and_model = prompt | llm | parser

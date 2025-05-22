@@ -9,7 +9,7 @@ readme = "README.md"
 python = "~3.11.0"
 python-dotenv = "*"
 openai = "*"
-langchain = "^0.2.6"
+langchain = "^0.3.0"
 langchain-experimental = "*"
 langchain-community = "*"
 langchain-openai = "*"
@@ -20,7 +20,7 @@ google-search-results = "*"
 pytest = "*"
 llama-index = "~0.9.0"
 duckduckgo-search = "*"
-crewai = "^0.36.1"
+crewai = "^0.98.0"
 replicate = "*"
 typer = ">=0.9.0,<1.0.0"
 web3 = "^6.14.0"
@@ -47,10 +47,10 @@ farcaster = { git = "https://github.com/gabrielfior/farcaster-py.git", branch = 
 streamlit-extras = "^0.4.2"
 tweepy = "^4.14.0"
 streamlit-nightly = "1.45.2.dev20250513" # TODO: Switch to `streamlit = "^1.45.2"` once they release it.
-langchain-pinecone = "^0.1.1"
+pinecone = "^5.0.0"
+langchain-pinecone = "^0.2.0"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-# TODO: Switch back to `main` branch once it's compatible again (being done in other branch)
 prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "main" }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.5.2"
@@ -64,7 +64,9 @@ opentelemetry-sdk = "^1.28.0"
 nest-asyncio = "^1.6.0"
 goplus = "^0.2.4"
 pydantic-evals = "^0.1.3"
-gpt-researcher = "^0.13.3"
+# TODO: Switch back to package install of gpt-researcher once they release the fix.
+# gpt-researcher = "^0.13.3"
+gpt-researcher = { git = "https://github.com/kongzii/gpt-researcher.git", branch = "peter/fix-return-in-pdf-scraper" }
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"

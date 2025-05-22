@@ -80,9 +80,7 @@ class CheckAllPastActionsGivenContext(LongTermMemoryBasedFunction):
         all_memories = self.long_term_memory.search()
 
         collection = Chroma(
-            embedding_function=OpenAIEmbeddings(
-                api_key=keys.openai_api_key_secretstr_v1
-            )
+            embedding_function=OpenAIEmbeddings(openai_api_key=keys.openai_api_key)
         )
         collection.add_texts(
             texts=[

@@ -35,8 +35,8 @@ class TwitterHandler(AbstractSocialMediaHandler):
 
         self.llm = ChatOpenAI(
             temperature=0,
-            model=model,
-            api_key=keys.openai_api_key_secretstr_v1,
+            model_name=model,
+            openai_api_key=keys.openai_api_key,
         )
 
     @observe()

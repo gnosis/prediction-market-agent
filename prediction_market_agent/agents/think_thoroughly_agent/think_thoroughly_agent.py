@@ -11,7 +11,6 @@ from langchain_core.callbacks import (
     CallbackManagerForToolRun,
 )
 from langchain_core.language_models import BaseChatModel
-from langchain_core.pydantic_v1 import SecretStr
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
@@ -173,8 +172,7 @@ class ThinkThoroughlyBase(ABC):
 
     @staticmethod
     def _build_tavily_search() -> TavilySearchResultsThatWillThrow:
-        api_key = SecretStr(APIKeys().tavily_api_key.get_secret_value())
-        api_wrapper = TavilySearchAPIWrapper(tavily_api_key=api_key)
+        api_wrapper = TavilySearchAPIWrapper(tavily_api_key=APIKeys().tavily_api_key)
         return TavilySearchResultsThatWillThrow(api_wrapper=api_wrapper)
 
     @staticmethod
@@ -183,8 +181,8 @@ class ThinkThoroughlyBase(ABC):
         # ToDo - Add Langfuse callback handler here once integration becomes clear (see
         #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = ChatOpenAI(
-            model=model,
-            api_key=keys.openai_api_key_secretstr_v1,
+            model_name=model,
+            openai_api_key=keys.openai_api_key,
             temperature=0.0,
         )
         return llm

@@ -53,7 +53,7 @@ def rewrite_as_sentence(
     `Former Trump Organization CFO Allen Weisselberg was sentenced to jail by 15 April 2024.`
     """
     llm = ChatOpenAI(
-        model=model, temperature=0.0, api_key=api_keys.openai_api_key_secretstr_v1
+        model_name=model, temperature=0.0, openai_api_key=api_keys.openai_api_key
     )
 
     prompt = f"""

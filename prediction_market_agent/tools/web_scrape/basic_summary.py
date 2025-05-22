@@ -13,8 +13,8 @@ def _summary(
 ) -> str:
     llm = ChatOpenAI(
         temperature=0,
-        model=DEFAULT_OPENAI_MODEL,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        model_name=DEFAULT_OPENAI_MODEL,
+        openai_api_key=APIKeys().openai_api_key,
     )
     text_splitter = RecursiveCharacterTextSplitter(
         separators=separators, chunk_size=10000, chunk_overlap=500
