@@ -27,6 +27,7 @@ from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.logprobs_agent.deploy import DeployableLogProbsAgent
 from prediction_market_agent.agents.metaculus_agent.deploy import (
     DeployableMetaculusBotTournamentAgent,
 )
@@ -82,7 +83,6 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
 )
-from prediction_market_agent.agents.logprobs_agent.deploy import DeployableLogProbsAgent
 
 
 class RunnableAgent(str, Enum):
@@ -134,6 +134,7 @@ class RunnableAgent(str, Enum):
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
     logprobs = "logprobs"
+
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.logprobs: DeployableLogProbsAgent,

@@ -260,11 +260,13 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
             model_type=PredictionResponse,
             field_key="p_yes",
         )
+
+        if not confidence:
+            logger.warning("No confidence scores found in logprobs")
+            return None
+
         confidence_key: str = max(confidence.items(), key=lambda item: item[1])[0]
         response = clean_json_response(prediction.data)
-
-        if confidence_key == None:
-            return None
 
         return ProbabilisticAnswer(
             p_yes=Probability(round(float(response.p_yes), 2)),
