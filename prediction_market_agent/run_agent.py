@@ -22,7 +22,10 @@ from prediction_market_agent.agents.coinflip_agent.deploy import (
     DeployableCoinFlipAgent,
     DeployableCoinFlipAgentByHighestLiquidity,
 )
-from prediction_market_agent.agents.gptr_agent.deploy import GPTRAgent
+from prediction_market_agent.agents.gptr_agent.deploy import (
+    GPTRAgent,
+    GPTRHighestLiquidityAgent,
+)
 from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -132,6 +135,7 @@ class RunnableAgent(str, Enum):
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
+    gptr_agent_highest_liquidity = "gptr_agent_highest_liquidity"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -181,6 +185,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,
     RunnableAgent.advanced_agent: AdvancedAgent,
     RunnableAgent.gptr_agent: GPTRAgent,
+    RunnableAgent.gptr_agent_highest_liquidity: GPTRHighestLiquidityAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
