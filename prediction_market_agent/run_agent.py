@@ -135,11 +135,11 @@ class RunnableAgent(str, Enum):
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
-    logprobs = "logprobs"
+    logprobs_agent = "logprobs_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
-    RunnableAgent.logprobs: DeployableLogProbsAgent,
+    RunnableAgent.logprobs_agent: DeployableLogProbsAgent,
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.coinflip_highest_liquidity: DeployableCoinFlipAgentByHighestLiquidity,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
