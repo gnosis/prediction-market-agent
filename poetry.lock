@@ -4212,13 +4212,13 @@ files = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.32.0"
+version = "0.32.1"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "huggingface_hub-0.32.0-py3-none-any.whl", hash = "sha256:e56e94109649ce6ebdb59b4e393ee3543ec0eca2eab4f41b269e1d885c88d08c"},
-    {file = "huggingface_hub-0.32.0.tar.gz", hash = "sha256:dd66c9365ea43049ec9b939bdcdb21a0051e1bd70026fc50304e4fb1bb6a15ba"},
+    {file = "huggingface_hub-0.32.1-py3-none-any.whl", hash = "sha256:b7e644f8ba6c6ad975c436960eacc026c83ba2c2bc5ae8b4e3f7ce2b292e6b11"},
+    {file = "huggingface_hub-0.32.1.tar.gz", hash = "sha256:770acdae5ad973447074e10a98044306e567ff36012419ae80c051f446156551"},
 ]
 
 [package.dependencies]
@@ -5183,13 +5183,13 @@ six = "*"
 
 [[package]]
 name = "langfuse"
-version = "2.60.5"
+version = "2.60.6"
 description = "A client library for accessing langfuse"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langfuse-2.60.5-py3-none-any.whl", hash = "sha256:fd27d52017f36d6fa5ca652615213a2535dc93dd88c3375eeb811af26384d285"},
-    {file = "langfuse-2.60.5.tar.gz", hash = "sha256:a33ecddc98cf6d12289372e63071b77b72230e7bc8260ee349f1465d53bf425b"},
+    {file = "langfuse-2.60.6-py3-none-any.whl", hash = "sha256:fb7c92ef5abdb628a755cc0efbd0a8acdbea5f862f4ae767eacc306699467023"},
+    {file = "langfuse-2.60.6.tar.gz", hash = "sha256:3d956db5af050ed42f7e6219e1cd00de7673f37c3cbfcf04195ba611c45dcdc0"},
 ]
 
 [package.dependencies]
@@ -5599,11 +5599,8 @@ files = [
     {file = "lxml-5.4.0-cp36-cp36m-win_amd64.whl", hash = "sha256:7ce1a171ec325192c6a636b64c94418e71a1964f56d002cc28122fceff0b6121"},
     {file = "lxml-5.4.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:795f61bcaf8770e1b37eec24edf9771b307df3af74d1d6f27d812e15a9ff3872"},
     {file = "lxml-5.4.0-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:29f451a4b614a7b5b6c2e043d7b64a15bd8304d7e767055e8ab68387a8cacf4e"},
-    {file = "lxml-5.4.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:891f7f991a68d20c75cb13c5c9142b2a3f9eb161f1f12a9489c82172d1f133c0"},
     {file = "lxml-5.4.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4aa412a82e460571fad592d0f93ce9935a20090029ba08eca05c614f99b0cc92"},
-    {file = "lxml-5.4.0-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:ac7ba71f9561cd7d7b55e1ea5511543c0282e2b6450f122672a2694621d63b7e"},
     {file = "lxml-5.4.0-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:c5d32f5284012deaccd37da1e2cd42f081feaa76981f0eaa474351b68df813c5"},
-    {file = "lxml-5.4.0-cp37-cp37m-musllinux_1_2_aarch64.whl", hash = "sha256:ce31158630a6ac85bddd6b830cffd46085ff90498b397bd0a259f59d27a12188"},
     {file = "lxml-5.4.0-cp37-cp37m-musllinux_1_2_x86_64.whl", hash = "sha256:31e63621e073e04697c1b2d23fcb89991790eef370ec37ce4d5d469f40924ed6"},
     {file = "lxml-5.4.0-cp37-cp37m-win32.whl", hash = "sha256:be2ba4c3c5b7900246a8f866580700ef0d538f2ca32535e991027bdaba944063"},
     {file = "lxml-5.4.0-cp37-cp37m-win_amd64.whl", hash = "sha256:09846782b1ef650b321484ad429217f5154da4d6e786636c38e434fa32e94e49"},
@@ -7875,13 +7872,13 @@ test = ["anthropic", "coverage", "django", "flake8", "freezegun (==1.5.1)", "goo
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.65.5"
+version = "0.65.6"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.65.5-py3-none-any.whl", hash = "sha256:e974f186c1c94e8955c7f64b4a37e025a52db8b8a56c971495b48bb38fdead39"},
-    {file = "prediction_market_agent_tooling-0.65.5.tar.gz", hash = "sha256:4b62f8cbdf3ac11dd8abf6f1184a71cc3cdda33f2813d4e46e3447a62d6924ed"},
+    {file = "prediction_market_agent_tooling-0.65.6-py3-none-any.whl", hash = "sha256:bd6246269e8c6ee3ac762d3520cc226405c2590e30b213712f249bf693352a61"},
+    {file = "prediction_market_agent_tooling-0.65.6.tar.gz", hash = "sha256:76b455633caecaf0797225fddfb7ff71c5300ad33196b1c518812b217793eecd"},
 ]
 
 [package.dependencies]
@@ -13076,4 +13073,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "40bd5a6571708635d8d6011b78fe2a7ef95aeb0027240a0c80ee4ef3393bb3ab"
+content-hash = "8f4a559e1127efc98c407a7042a8da57822671a3881ca13eb8edd3c719500ccb"

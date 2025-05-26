@@ -27,6 +27,7 @@ from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.logprobs_agent.deploy import DeployableLogProbsAgent
 from prediction_market_agent.agents.metaculus_agent.deploy import (
     DeployableMetaculusBotTournamentAgent,
 )
@@ -134,9 +135,11 @@ class RunnableAgent(str, Enum):
     prophet_claude35_sonnet = "prophet_claude35_sonnet"
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
+    logprobs_agent = "logprobs_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
+    RunnableAgent.logprobs_agent: DeployableLogProbsAgent,
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.coinflip_highest_liquidity: DeployableCoinFlipAgentByHighestLiquidity,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
