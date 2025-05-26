@@ -6,7 +6,7 @@ from crewai import Agent, Crew, Process, Task
 from crewai.llm import LLM
 from crewai.tools import tool
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
-from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.loggers import logger, patch_logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
@@ -552,6 +552,8 @@ def process_scenario(
     ) = inputs
     # Reset Langfuse, as this is executed as a separate process and Langfuse isn't thread-safe.
     initialize_langfuse(enable_langfuse)
+    # Same for patching logger. Force patch, because while our logger is forked patched, LiteLLM still needs patching.
+    patch_logger(force_patch=True)
     try:
         result = observe(name="process_scenario")(process_function)(
             unique_id, model, scenario, original_question, scenarios_with_probs
