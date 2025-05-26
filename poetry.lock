@@ -7984,8 +7984,8 @@ watchdog = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
-reference = "peter/categorical-prophet"
-resolved_reference = "e5a9f0b4d57ff3831092d8de1320fbd7cca08742"
+reference = "main"
+resolved_reference = "eec186c3ba79781a6b34becf15dfe0bf139922a0"
 
 [[package]]
 name = "preshed"
@@ -13076,4 +13076,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "557557bf776ac593aa2112ac556e413f8edf49cf6a55683680e16a6ba7314e25"
+content-hash = "40bd5a6571708635d8d6011b78fe2a7ef95aeb0027240a0c80ee4ef3393bb3ab"
