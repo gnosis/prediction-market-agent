@@ -4,7 +4,10 @@ from typing import Any, Literal
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.logprobs_parser import LogprobsParser
+from prediction_market_agent_tooling.logprobs_parser import (
+    FieldLogprobs,
+    LogprobsParser,
+)
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.perplexity.perplexity_models import (
@@ -183,23 +186,22 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
 
         raw_logprobs = self.get_logprobs(solvability_response)
         if raw_logprobs is None:
-            return None
+            raise ValueError("No logprobs found in solvability response")
 
         # Get probabilities for "YES" and "NO" tokens in the answer field
-        probs = self._extract_token_probabilities(
+        probs, _ = self._extract_token_probabilities(
             raw_logprobs=raw_logprobs,
             model_type=DecidabilityResponse,
             field_key="answer",
             expected_tokens=["YES", "NO"],
         )
 
-        yes_prob = probs.get("yes", 0)
-        no_prob = probs.get("no", 0)
+        yes_prob = probs.get("YES", None)
+        no_prob = probs.get("NO", None)
 
-        # Return YES probability if it's higher, otherwise inverse of NO probability
-        if yes_prob > no_prob:
+        if yes_prob and no_prob and yes_prob > no_prob:
             return yes_prob
-        elif no_prob > 0:
+        elif no_prob and no_prob > 0:
             return 1 - no_prob
 
         return None
@@ -210,11 +212,12 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
         model_type: type,
         field_key: str,
         expected_tokens: list[str] | None = None,
-    ) -> dict[str, float]:
+    ) -> tuple[dict[str, float], list[FieldLogprobs]]:
+        raw_field_logprobs = self.logprobs_parser.parse_logprobs(
+            raw_logprobs, model_type
+        )
         field_logprobs = [
-            logprob
-            for logprob in self.logprobs_parser.parse_logprobs(raw_logprobs, model_type)
-            if logprob.key == field_key
+            logprob for logprob in raw_field_logprobs if logprob.key == field_key
         ]
 
         top_logprobs = (
@@ -226,10 +229,10 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
             logger.warning(f"No logprobs found for field {field_key}")
 
         return {
-            logprob.token.lower(): logprob.prob
+            logprob.token.upper(): logprob.prob
             for logprob in top_logprobs
             if not expected_tokens or logprob.token.upper() in expected_tokens
-        }
+        }, raw_field_logprobs
 
     def get_logprobs(self, result: AgentRunResult) -> list[dict[str, Any]] | None:
         logprobs = None
@@ -253,34 +256,33 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
         )
         raw_logprobs = self.get_logprobs(prediction)
         if raw_logprobs is None:
-            return None
+            raise ValueError("No logprobs found in prediction")
 
-        confidence = self._extract_token_probabilities(
+        confidence, raw_field_logprobs = self._extract_token_probabilities(
             raw_logprobs=raw_logprobs,
             model_type=PredictionResponse,
             field_key="p_yes",
         )
 
         if not confidence:
-            logger.warning("No confidence scores found in logprobs")
-            return None
+            raise ValueError("No confidence scores found in logprobs")
 
-        confidence_key: str = max(confidence.items(), key=lambda item: item[1])[0]
+        max_confidence_key: str = max(confidence.items(), key=lambda item: item[1])[0]
         response = clean_json_response(prediction.data)
 
         return ProbabilisticAnswer(
             p_yes=Probability(round(float(response.p_yes), 2)),
-            confidence=round(confidence[confidence_key], 2),
+            confidence=round(confidence[max_confidence_key], 2),
             reasoning=response.rationale,
+            logprobs=raw_field_logprobs,
         )
 
 
 def clean_json_response(response_str: str) -> PredictionResponse:
-    if "```json" in response_str:
-        start_idx = response_str.find("```json") + 7
-        end_idx = response_str.rfind("```")
-        json_str = response_str[start_idx:end_idx].strip()
-    else:
-        json_str = response_str
+    response_str = response_str.strip().replace("\n", " ")
+    response_str = " ".join(response_str.split())
+    start_index = response_str.find("{")
+    end_index = response_str.rfind("}")
+    response_str = response_str[start_index : end_index + 1]
 
-    return PredictionResponse.model_validate_json(json_str)
+    return PredictionResponse.model_validate_json(response_str)
