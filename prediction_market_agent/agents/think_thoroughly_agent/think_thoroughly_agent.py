@@ -73,7 +73,7 @@ def tavily_search_tool(query: str) -> list[dict[str, str]]:
         {
             "title": r.title,
             "url": r.url,
-            "content ": r.content,
+            "content": r.content,
         }
         for r in output.results
     ]
