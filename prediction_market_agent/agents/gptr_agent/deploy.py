@@ -1,9 +1,14 @@
 import asyncio
 import os
+from datetime import timedelta
 
 from gpt_researcher import GPTResearcher
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.deploy.trade_interval import (
+    FixedInterval,
+    TradeInterval,
+)
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
@@ -43,6 +48,12 @@ class GPTRAgent(DeployableTraderAgent):
             ),
         )
         return prediction
+
+
+class GPTRHighestLiquidityAgent(GPTRAgent):
+    get_markets_sort_by = SortBy.HIGHEST_LIQUIDITY
+    bet_on_n_markets_per_run = 2
+    same_market_trade_interval: TradeInterval = FixedInterval(timedelta(days=7))
 
 
 @observe()

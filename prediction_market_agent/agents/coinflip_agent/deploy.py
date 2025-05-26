@@ -26,7 +26,6 @@ class DeployableCoinFlipAgent(DeployableTraderAgent):
 
 
 class DeployableCoinFlipAgentByHighestLiquidity(DeployableCoinFlipAgent):
-    n_markets_to_fetch = 10
     get_markets_sort_by = SortBy.HIGHEST_LIQUIDITY
     bet_on_n_markets_per_run = 2
     same_market_trade_interval: TradeInterval = FixedInterval(timedelta(days=14))
