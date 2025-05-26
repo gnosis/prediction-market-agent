@@ -30,6 +30,7 @@ from prediction_market_agent.agents.invalid_agent.deploy import InvalidAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
+from prediction_market_agent.agents.logprobs_agent.deploy import DeployableLogProbsAgent
 from prediction_market_agent.agents.metaculus_agent.deploy import (
     DeployableMetaculusBotTournamentAgent,
 )
@@ -62,6 +63,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGemini20Flash,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4oAgent_B,
+    DeployablePredictionProphetGPT4oAgentCategorical,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4ominiAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
@@ -103,6 +105,7 @@ class RunnableAgent(str, Enum):
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4o_b = "prophet_gpt4o_b"
+    prophet_gpt4o_categorical = "prophet_gpt4o_categorical"
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
     prophet_gpt4_final = "prophet_gpt4_final"
@@ -136,9 +139,11 @@ class RunnableAgent(str, Enum):
     advanced_agent = "advanced_agent"
     gptr_agent = "gptr_agent"
     gptr_agent_highest_liquidity = "gptr_agent_highest_liquidity"
+    logprobs_agent = "logprobs_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
+    RunnableAgent.logprobs_agent: DeployableLogProbsAgent,
     RunnableAgent.coinflip: DeployableCoinFlipAgent,
     RunnableAgent.coinflip_highest_liquidity: DeployableCoinFlipAgentByHighestLiquidity,
     RunnableAgent.replicate_to_omen: DeployableReplicateToOmenAgent,
@@ -154,6 +159,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.social_media: DeployableSocialMediaAgent,
     RunnableAgent.metaculus_bot_tournament_agent: DeployableMetaculusBotTournamentAgent,
     RunnableAgent.prophet_gpt4o: DeployablePredictionProphetGPT4oAgent,
+    RunnableAgent.prophet_gpt4o_categorical: DeployablePredictionProphetGPT4oAgentCategorical,
     RunnableAgent.prophet_gpt4o_new_market_trader: DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     RunnableAgent.prophet_gpt4: DeployablePredictionProphetGPT4TurboPreviewAgent,
     RunnableAgent.prophet_gpt4_final: DeployablePredictionProphetGPT4TurboFinalAgent,

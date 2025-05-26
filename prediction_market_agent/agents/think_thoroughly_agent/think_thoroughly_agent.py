@@ -2,24 +2,18 @@ import typing as t
 from abc import ABC
 from uuid import UUID, uuid4
 
-import tenacity
 from crewai import Agent, Crew, Process, Task
-from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
-from langchain_core.callbacks import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
-from langchain_core.language_models import BaseChatModel
-from langchain_openai import ChatOpenAI
+from crewai.llm import LLM
+from crewai.tools import tool
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
-from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.loggers import logger, patch_logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
+from prediction_market_agent_tooling.tools.tavily.tavily_search import tavily_search
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     DatetimeUTC,
@@ -68,46 +62,21 @@ class Scenarios(BaseModel):
     scenarios: list[str]
 
 
-class TavilySearchResultsThatWillThrow(TavilySearchResults):
-    @tenacity.retry(
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(1),
-        reraise=True,
-    )
-    def _run(
-        self,
-        query: str,
-        run_manager: CallbackManagerForToolRun | None = None,
-    ) -> tuple[list[dict[str, str]] | str, dict[t.Hashable, t.Any]]:
-        """
-        Use the tool.
-        Throws an exception if it occurs, instead stringifying it.
-        """
-        raw_results = self.api_wrapper.raw_results(
-            query,
-            self.max_results,
-        )
-        return self.api_wrapper.clean_results(raw_results["results"]), raw_results
-
-    @tenacity.retry(
-        stop=tenacity.stop_after_attempt(3),
-        wait=tenacity.wait_fixed(1),
-        reraise=True,
-    )
-    async def _arun(
-        self,
-        query: str,
-        run_manager: AsyncCallbackManagerForToolRun | None = None,
-    ) -> tuple[list[dict[str, str]] | str, dict[t.Hashable, t.Any]]:
-        """
-        Use the tool asynchronously.
-        Throws an exception if it occurs, instead stringifying it.
-        """
-        raw_results = await self.api_wrapper.raw_results_async(
-            query,
-            self.max_results,
-        )
-        return self.api_wrapper.clean_results(raw_results["results"]), raw_results
+@tool
+@observe()
+def tavily_search_tool(query: str) -> list[dict[str, str]]:
+    """
+    Given a search query, returns a list of dictionaries with results from internet search using Tavily.
+    """
+    output = tavily_search(query=query)
+    return [
+        {
+            "title": r.title,
+            "url": r.url,
+            "content": r.content,
+        }
+        for r in output.results
+    ]
 
 
 class ThinkThoroughlyBase(ABC):
@@ -152,7 +121,7 @@ class ThinkThoroughlyBase(ABC):
             backstory=f"Current date is {ThinkThoroughlyBase._get_current_date()}. You are a senior research analyst who is adept at researching and reporting on future events.",
             verbose=True,
             allow_delegation=False,
-            tools=[ThinkThoroughlyBase._build_tavily_search()],
+            tools=[tavily_search_tool],
             llm=ThinkThoroughlyBase._build_llm(model),
             callbacks=[langfuse_callback] if langfuse_callback else None,
         )
@@ -171,19 +140,14 @@ class ThinkThoroughlyBase(ABC):
         )
 
     @staticmethod
-    def _build_tavily_search() -> TavilySearchResultsThatWillThrow:
-        api_wrapper = TavilySearchAPIWrapper(tavily_api_key=APIKeys().tavily_api_key)
-        return TavilySearchResultsThatWillThrow(api_wrapper=api_wrapper)
-
-    @staticmethod
-    def _build_llm(model: str) -> BaseChatModel:
+    def _build_llm(model: str) -> LLM:
         keys = APIKeys()
         # ToDo - Add Langfuse callback handler here once integration becomes clear (see
         #  https://github.com/gnosis/prediction-market-agent/issues/107)
-        llm = ChatOpenAI(
-            model_name=model,
-            openai_api_key=keys.openai_api_key,
-            temperature=0.0,
+        llm = LLM(
+            model=model,
+            api_key=keys.openai_api_key.get_secret_value(),
+            temperature=0,
         )
         return llm
 
@@ -199,9 +163,8 @@ class ThinkThoroughlyBase(ABC):
         )
 
         report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
-        scenarios: Scenarios = report_crew.kickoff(
-            inputs={"scenario": question, "n_scenarios": 3}
-        )
+        output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
+        scenarios: Scenarios = output.pydantic
 
         logger.info(f"Created conditional scenarios: {scenarios.scenarios}")
         return scenarios
@@ -218,9 +181,8 @@ class ThinkThoroughlyBase(ABC):
         )
 
         report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
-        scenarios: Scenarios = report_crew.kickoff(
-            inputs={"scenario": question, "n_scenarios": 5}
-        )
+        output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
+        scenarios: Scenarios = output.pydantic
 
         # Add the original question if it wasn't included by the LLM.
         if question not in scenarios.scenarios:
@@ -276,7 +238,7 @@ class ThinkThoroughlyBase(ABC):
             output_pydantic=ProbabilisticAnswer,
         )
 
-        crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=2)
+        crew = Crew(agents=[predictor], tasks=[task_final_decision], verbose=True)
 
         correlated_markets = self.get_correlated_markets(question)
 
@@ -308,15 +270,16 @@ class ThinkThoroughlyBase(ABC):
         }
         if research_report:
             inputs["research_report"] = research_report
-        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
+        output = crew.kickoff(inputs=inputs)
+        answer: ProbabilisticAnswer = output.pydantic
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
-            output, scenario=question, question=question
+            answer, scenario=question, question=question
         )
         self.save_answer_to_long_term_memory(answer_with_scenario)
         logger.info(
-            f"The final prediction has p_yes={output.p_yes}, p_no={output.p_no}, and confidence={output.confidence}"
+            f"The final prediction has p_yes={answer.p_yes}, p_no={answer.p_no}, and confidence={answer.confidence}"
         )
-        return output
+        return answer
 
     @observe()
     def answer_binary_market(
@@ -420,7 +383,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
         crew = Crew(
             agents=[researcher, predictor],
             tasks=[task_research_one_outcome, task_create_probability_for_one_outcome],
-            verbose=2,
+            verbose=True,
             process=Process.sequential,
         )
 
@@ -431,7 +394,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
                 for s, a in previous_scenarios_and_answers
             )
 
-        output: ProbabilisticAnswer = crew.kickoff(inputs=inputs)
+        output = crew.kickoff(inputs=inputs)
+        answer: ProbabilisticAnswer = output.pydantic
 
         if (
             task_research_one_outcome.tools_errors > 0
@@ -443,7 +407,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             return None
 
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
-            output, scenario=scenario, question=original_question
+            answer, scenario=scenario, question=original_question
         )
         return answer_with_scenario
 
@@ -588,6 +552,8 @@ def process_scenario(
     ) = inputs
     # Reset Langfuse, as this is executed as a separate process and Langfuse isn't thread-safe.
     initialize_langfuse(enable_langfuse)
+    # Same for patching logger. Force patch, because while our logger is forked patched, LiteLLM still needs patching.
+    patch_logger(force_patch=True)
     try:
         result = observe(name="process_scenario")(process_function)(
             unique_id, model, scenario, original_question, scenarios_with_probs
