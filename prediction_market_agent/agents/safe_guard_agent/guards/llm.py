@@ -1,3 +1,6 @@
+from copy import deepcopy
+from typing import Any
+
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
@@ -94,11 +97,19 @@ The history of transactions made by this Safe is as follows:
 
 ---
 
-Is the new transaction malicious or not? Why? Output your answer in the JSON format with the following structure:
+Is the new transaction malicious or not? Why? If you find the transaction to be malicious, give a precise answer about what exactly is malicious about it. DO NOT just say it's too complex or something.
+
+Output your answer in the JSON format with the following structure:
 
 {{"reason": string (under 500 characters), "ok": bool}}
 """
-        logger.info(f"Prompting LLM agent with:\n\n\n{prompt}")
+        logger.info(
+            f"Prompting LLM agent with:\n\n\n"
+            + prompt.replace("{", "{{").replace(
+                "}", "}}"
+            ),  # Replace to fix Loguru's formatting.
+            streamlit=True,
+        )
 
         result = agent.run_sync(prompt).output
         return ValidationResult(
@@ -129,7 +140,11 @@ def format_transaction(tx: DetailedTransactionResponse) -> str:
 
 def format_tx_data(tx_data: TxData) -> str:
     return (
-        (f"Decoded TX data: {tx_data.dataDecoded} | " if tx_data.dataDecoded else "")
+        (
+            f"Decoded TX data: {trim_long_string_values(tx_data.dataDecoded, max_length=1000)} | "
+            if tx_data.dataDecoded
+            else ""
+        )
         + f"To: {tx_data.to.value} | "
         + f"Value: {tx_data.value} | "
         + f"Operation: {tx_data.operation} | "
@@ -198,3 +213,18 @@ def format_balances(safe_address: ChecksumAddress, chain_id: ChainID) -> str:
         for item in balances.items
     )
     return f"Safe address: {safe_address}\n\nTotal Fiat Balance: {balances.fiatTotal} USD\n\nToken Balances:\n\n{formatted_items}"
+
+
+def trim_long_string_values(x: Any, max_length: int) -> Any:
+    x = deepcopy(x)
+
+    if isinstance(x, dict):
+        for key, val in x.items():
+            x[key] = trim_long_string_values(val, max_length=max_length)
+        return x
+    elif isinstance(x, list):
+        return [trim_long_string_values(item, max_length) for item in x]
+    elif isinstance(x, str):
+        return x if len(x) <= max_length else "N/A (max value length exceeded)"
+    else:
+        return x
