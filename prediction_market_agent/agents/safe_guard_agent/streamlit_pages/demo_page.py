@@ -99,6 +99,7 @@ On this page, you can test out Safe Guard and see how it works in practice step 
                 [tx.id for tx in historical_transactions],
                 index=None,
                 disabled=queue_transaction_id is not None,
+                accept_new_options=True,
             )
 
         transaction_id = queue_transaction_id or hist_transaction_id
