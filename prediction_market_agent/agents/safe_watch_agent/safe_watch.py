@@ -4,26 +4,16 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import Safe, SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
-from prediction_market_agent.agents.safe_guard_agent.guards import (
-    agent,
-    blacklist,
-    goplus_,
-    hash_checker,
-    llm,
-)
-from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
-    AbstractGuard,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent import safe_api_utils
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     CreationTxInfo,
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     is_already_canceled,
     signer_is_missing,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     extract_all_addresses_or_raise,
     get_safe,
     get_safes,
@@ -31,16 +21,26 @@ from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
     reject_transaction,
     sign_or_execute,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationConclusion,
     ValidationResult,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_summary import (
+from prediction_market_agent.agents.safe_watch_agent.validation_summary import (
     create_validation_summary,
 )
-from prediction_market_agent.agents.safe_guard_agent.whitelist import is_whitelisted
+from prediction_market_agent.agents.safe_watch_agent.watchers import (
+    agent,
+    blacklist,
+    goplus_,
+    hash_checker,
+    llm,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
+    AbstractWatch,
+)
+from prediction_market_agent.agents.safe_watch_agent.whitelist import is_whitelisted
 
-SAFE_GUARDS: list[type[AbstractGuard]] = [
+safe_watchS: list[type[AbstractWatch]] = [
     agent.DoNotRemoveAgent,
     blacklist.Blacklist,
     hash_checker.HashCheck,
@@ -208,7 +208,7 @@ def validate_safe_transaction_obj(
         safe, detailed_transaction_info
     )
 
-    validation_results = run_safe_guards(
+    validation_results = run_safe_watchs(
         safe_tx,
         detailed_transaction_info,
         all_addresses_from_tx_not_whitelisted,
@@ -245,7 +245,7 @@ def validate_safe_transaction_obj(
 
 
 @observe()
-def run_safe_guards(
+def run_safe_watchs(
     safe_tx: SafeTx,
     detailed_transaction_info: DetailedTransactionResponse,
     all_addresses_from_tx: list[ChecksumAddress],
@@ -254,13 +254,13 @@ def run_safe_guards(
 ) -> list[ValidationResult]:
     validation_results: list[ValidationResult] = []
     logger.info("Running the transaction validation...")
-    for safe_guard_class in SAFE_GUARDS:
-        safe_guard = safe_guard_class()
+    for safe_watch_class in safe_watchS:
+        safe_watch = safe_watch_class()
         logger.info(
-            f"Running guard {safe_guard.name} -- {safe_guard.description}",
+            f"Running watch {safe_watch.name} -- {safe_watch.description}",
             streamlit=True,
         )
-        validation_result = safe_guard.validate(
+        validation_result = safe_watch.validate(
             detailed_transaction_info,
             safe_tx,
             all_addresses_from_tx,
@@ -269,12 +269,12 @@ def run_safe_guards(
         )
         if validation_result is None:
             logger.info(
-                f"Skipping {safe_guard.name} because it isn't supported for the given SafeTX.",
+                f"Skipping {safe_watch.name} because it isn't supported for the given SafeTX.",
                 streamlit=True,
             )
             continue
         (logger.success if validation_result.ok else logger.warning)(
-            f"Guard {safe_guard.name} validation result: {validation_result.reason}",
+            f"Watch {safe_watch.name} validation result: {validation_result.reason}",
             streamlit=True,
         )
         validation_results.append(validation_result)

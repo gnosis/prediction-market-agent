@@ -3,14 +3,14 @@ from unittest.mock import PropertyMock, patch
 from prediction_market_agent_tooling.chains import GNOSIS_CHAIN_ID
 from web3 import Web3
 
-from prediction_market_agent.agents.safe_guard_agent.guards.agent import (
-    DoNotRemoveAgent,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     get_safe_detailed_transaction_info,
     safe_tx_from_detailed_transaction,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import get_safe
+from prediction_market_agent.agents.safe_watch_agent.safe_utils import get_safe
+from prediction_market_agent.agents.safe_watch_agent.watchers.agent import (
+    DoNotRemoveAgent,
+)
 
 
 def test_validate_do_not_remove_agent_accepts_arbitrary_tx() -> None:
@@ -42,7 +42,7 @@ def test_validate_do_not_remove_agent_accepts_removal_of_others() -> None:
 def test_validate_do_not_remove_agent_forbids_removal_of_agent_itself() -> None:
     chain_id = GNOSIS_CHAIN_ID
     with patch(
-        "prediction_market_agent.agents.safe_guard_agent.guards.agent.APIKeys.bet_from_address",
+        "prediction_market_agent.agents.safe_watch_agent.watchers.agent.APIKeys.bet_from_address",
         new_callable=PropertyMock,
     ) as mock_bet_from_address:
         # Simulate that APIKeys holds the address that is being removed in that transaction.

@@ -10,7 +10,7 @@ from prediction_market_agent_tooling.tools.safe import create_safe
 from safe_eth.eth import EthereumClient
 from safe_eth.safe.safe import SafeV141
 
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     post_or_execute,
     sign_or_execute,
 )
@@ -65,7 +65,7 @@ def test_post_or_execute(
         to=test_keys.bet_from_address, value=0, data=HexBytes("0x")
     )
     with patch(
-        "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_transaction"
+        "prediction_market_agent.agents.safe_watch_agent.safe_utils.TransactionServiceApi.post_transaction"
     ) as mock_post_transaction:
         try:
             result = post_or_execute(main_safe, tx, test_keys, chain_id)
@@ -119,7 +119,7 @@ def test_sign_or_execute(
     # here we simulate that someone created and signed the transaction already.
     tx.sign(main_safe_owners[0].key)
     with patch(
-        "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_signatures"
+        "prediction_market_agent.agents.safe_watch_agent.safe_utils.TransactionServiceApi.post_signatures"
     ) as mock_post_signatures:
         try:
             result = sign_or_execute(main_safe, tx, test_keys, allow_exec=True)

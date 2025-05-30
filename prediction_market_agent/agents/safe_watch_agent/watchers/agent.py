@@ -3,20 +3,20 @@ from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
-    AbstractGuard,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
+    AbstractWatch,
 )
 
 
-class DoNotRemoveAgent(AbstractGuard):
+class DoNotRemoveAgent(AbstractWatch):
     name = "Agent remains owner"
-    description = "This guard ensures that the transaction doesn't remove the agent itself from the owners of the Safe."
+    description = "This watch ensures that the transaction doesn't remove the agent itself from the owners of the Safe."
 
     @observe(name="validate_do_not_remove_agent")
     def validate(

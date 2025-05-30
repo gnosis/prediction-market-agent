@@ -10,19 +10,19 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from safe_eth.safe.safe import SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
-    AbstractGuard,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedExecutionInfo,
     DetailedTransactionResponse,
     TxData,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     get_balances_usd,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
+    AbstractWatch,
 )
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import APIKeys
@@ -35,9 +35,9 @@ class LLMValidationResult(BaseModel):
     ok: bool
 
 
-class LLM(AbstractGuard):
+class LLM(AbstractWatch):
     name = "LLM"
-    description = "This guard uses a large language model to analyze the transaction and determine if it is malicious."
+    description = "This watch uses a large language model to analyze the transaction and determine if it is malicious."
 
     @observe(name="validate_safe_transaction_llm")
     def validate(

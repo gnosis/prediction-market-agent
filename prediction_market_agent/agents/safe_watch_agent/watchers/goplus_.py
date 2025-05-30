@@ -12,14 +12,14 @@ from prediction_market_agent_tooling.tools.caches.db_cache import db_cache
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from safe_eth.safe.safe import SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
-    AbstractGuard,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
+    AbstractWatch,
 )
 from prediction_market_agent.tools.streamlit_utils import dict_to_point_list
 
@@ -28,9 +28,9 @@ class GoPlusError(Exception):
     pass
 
 
-class GoPlusTokenSecurity(AbstractGuard):
+class GoPlusTokenSecurity(AbstractWatch):
     name = "Token security"
-    description = "This guard checks the security of tokens involved in the transaction using GoPlus API."
+    description = "This watch checks the security of tokens involved in the transaction using GoPlus API."
 
     @observe(name="validate_safe_transaction_goplus_token_security")
     def validate(
@@ -114,9 +114,9 @@ class GoPlusTokenSecurity(AbstractGuard):
         return _build_validation_result(self.name, self.description, malicious_reasons)
 
 
-class GoPlusAddressSecurity(AbstractGuard):
+class GoPlusAddressSecurity(AbstractWatch):
     name = "Address security"
-    description = "This guard checks the security of addresses involved in the transaction using GoPlus API."
+    description = "This watch checks the security of addresses involved in the transaction using GoPlus API."
 
     @observe(name="validate_safe_transaction_goplus_address_security")
     def validate(
@@ -218,9 +218,9 @@ class GoPlusAddressSecurity(AbstractGuard):
         return _build_validation_result(self.name, self.description, malicious_reasons)
 
 
-class GoPlusNftSecurity(AbstractGuard):
+class GoPlusNftSecurity(AbstractWatch):
     name = "NFT security"
-    description = "This guard checks the security of NFTs involved in the transaction using GoPlus API."
+    description = "This watch checks the security of NFTs involved in the transaction using GoPlus API."
 
     @observe(name="validate_safe_transaction_goplus_nft_security")
     def validate(

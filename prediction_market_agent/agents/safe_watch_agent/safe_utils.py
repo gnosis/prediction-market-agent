@@ -20,7 +20,7 @@ from web3 import Web3
 from web3.constants import CHECKSUM_ADDRESSS_ZERO
 from web3.types import TxParams
 
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
 
