@@ -6,18 +6,18 @@ from prediction_market_agent_tooling.gtypes import ChainID
 from prediction_market_agent_tooling.loggers import logger
 from rich.console import Console
 
-from prediction_market_agent.agents.safe_guard_agent.evals.models import (
+from prediction_market_agent.agents.safe_watch_agent.evals.models import (
     SGDataset,
     ValidationConclusionEvaluator,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.balances import (
     Balances,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     DetailedTransactionResponse,
     get_balances_usd,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+from prediction_market_agent.agents.safe_watch_agent.safe_watch import (
     ValidationConclusion,
     validate_safe_transaction_obj,
 )
@@ -66,7 +66,7 @@ async def process_case(
     # In case balances_patch was provided, we need to use it instead of the real balances.
     # Handy when dealing with historical data, and the current balances aren't representative (and it confuses LLM).
     with patch(
-        "prediction_market_agent.agents.safe_guard_agent.guards.llm.get_balances_usd",
+        "prediction_market_agent.agents.safe_watch_agent.watchers.llm.get_balances_usd",
         new=get_balances_usd if balances_patch is None else lambda x, y: balances_patch,
     ):
         result = validate_safe_transaction_obj(

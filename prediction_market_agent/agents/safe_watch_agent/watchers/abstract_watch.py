@@ -3,24 +3,24 @@ from abc import ABC, abstractmethod
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from safe_eth.safe.safe import SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
 )
 
 
-class AbstractGuard(ABC):
+class AbstractWatch(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """Name of the guard."""
+        """Name of the watch."""
 
     @property
     @abstractmethod
     def description(self) -> str:
-        """Description of the guard."""
+        """Description of the watch."""
 
     @abstractmethod
     def validate(

@@ -6,7 +6,7 @@ from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger
 
-from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+from prediction_market_agent.agents.safe_watch_agent.safe_watch import (
     ChainID,
     ValidationConclusion,
     validate_safe_transaction,
@@ -60,7 +60,7 @@ def create_app() -> fastapi.FastAPI:
 if __name__ == "__main__":
     config = Config()
     uvicorn.run(
-        "prediction_market_agent.agents.safe_guard_agent.api:create_app",
+        "prediction_market_agent.agents.safe_watch_agent.api:create_app",
         factory=True,
         host=config.HOST,
         port=config.PORT,

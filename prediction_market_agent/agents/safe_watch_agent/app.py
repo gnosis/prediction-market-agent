@@ -2,7 +2,7 @@ import nest_asyncio
 import streamlit as st
 from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
 
-from prediction_market_agent.agents.safe_guard_agent.streamlit_pages import (
+from prediction_market_agent.agents.safe_watch_agent.streamlit_pages import (
     agents_page,
     api_page,
     demo_page,
@@ -14,9 +14,9 @@ st.set_page_config(layout="wide")
 add_sink_to_logger(explicit=True)
 
 st.markdown(
-    f"""# Safe Guard -- Fraud Detection Agent for Safe 
+    f"""# Safe Watch -- Fraud Detection Agent for Safe 
 
-This app is entry point for the Safe Guard. 
+This app is entry point for the Safe Watch. 
 
 On the left panel, you can select pages where you can:
 

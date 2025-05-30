@@ -3,20 +3,20 @@ from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from safe_eth.safe import SafeTx
 
-from prediction_market_agent.agents.safe_guard_agent.guards.abstract_guard import (
-    AbstractGuard,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
+    AbstractWatch,
 )
 
 
-class HashCheck(AbstractGuard):
+class HashCheck(AbstractWatch):
     name = "Hash check"
-    description = "This guard ensures that the hash delivered from Safe API and the hash calculated by the agent match."
+    description = "This watch ensures that the hash delivered from Safe API and the hash calculated by the agent match."
 
     @observe(name="validate_safe_transaction_hash")
     def validate(

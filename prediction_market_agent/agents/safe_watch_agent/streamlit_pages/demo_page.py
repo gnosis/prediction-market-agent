@@ -7,8 +7,8 @@ from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from web3 import Web3
 
-from prediction_market_agent.agents.safe_guard_agent import safe_api_utils
-from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+from prediction_market_agent.agents.safe_watch_agent import safe_api_utils
+from prediction_market_agent.agents.safe_watch_agent.safe_watch import (
     validate_safe_transaction,
 )
 
@@ -23,7 +23,7 @@ def get_demo_page(chain_id: ChainID) -> Callable[[], None]:
         st.markdown(
             """## Demo Preview
 
-On this page, you can test out Safe Guard and see how it works in practice step by step.           
+On this page, you can test out Safe Watch and see how it works in practice step by step.           
     """
         )
 

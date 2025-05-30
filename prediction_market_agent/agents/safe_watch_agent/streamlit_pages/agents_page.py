@@ -16,7 +16,7 @@ class Config(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    SAFE_GUARD_AGENT_ADDRESS: str
+    SAFE_WATCH_AGENT_ADDRESS: str
 
 
 def get_agents_page(chain_id: ChainID) -> Callable[[], None]:
@@ -34,7 +34,7 @@ Agent will also send you a message to your Safe with the result of the validatio
 """
         )
 
-        agent_address = Config().SAFE_GUARD_AGENT_ADDRESS
+        agent_address = Config().SAFE_WATCH_AGENT_ADDRESS
         st.markdown(
             f"- `{agent_address}` - {CHAIN_ID_TO_SCAN_URL[chain_id].format(address=agent_address)}"
         )

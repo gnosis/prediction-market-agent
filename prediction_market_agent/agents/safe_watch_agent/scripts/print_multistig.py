@@ -3,10 +3,10 @@ from pprint import pprint
 import typer
 from prediction_market_agent_tooling.gtypes import ChainID
 
-from prediction_market_agent.agents.safe_guard_agent.guards.llm import format_balances
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     get_safe_detailed_transaction_info,
 )
+from prediction_market_agent.agents.safe_watch_agent.watchers.llm import format_balances
 
 
 def main(tx_id: str, chain_id: int) -> None:

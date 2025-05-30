@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 
 import typer
 
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     find_addresses_in_nested_structure,
 )
 

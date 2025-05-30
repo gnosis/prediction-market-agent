@@ -10,7 +10,7 @@ from prediction_market_agent_tooling.gtypes import (
 )
 from web3 import Web3
 
-from prediction_market_agent.agents.safe_guard_agent.safe_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     find_addresses_in_nested_structure,
     get_safe,
     get_safes,
@@ -72,7 +72,7 @@ def test_post_message(
     )
     # Patch so we don't actually call the API and spam the messages.
     with patch(
-        "prediction_market_agent.agents.safe_guard_agent.safe_utils.TransactionServiceApi.post_message"
+        "prediction_market_agent.agents.safe_watch_agent.safe_utils.TransactionServiceApi.post_message"
     ) as mock_post_message:
         post_message(safe, message, api_keys, TESTING_CHAIN_ID)
         mock_post_message.assert_called_once_with(

@@ -6,13 +6,13 @@ from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EvaluationReason, Evaluator, EvaluatorContext
 
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.balances import (
     Balances,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+from prediction_market_agent.agents.safe_watch_agent.safe_watch import (
     ValidationConclusion,
 )
 

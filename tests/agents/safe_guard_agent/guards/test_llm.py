@@ -1,4 +1,4 @@
-from prediction_market_agent.agents.safe_guard_agent.guards.llm import (
+from prediction_market_agent.agents.safe_watch_agent.watchers.llm import (
     trim_long_string_values,
 )
 

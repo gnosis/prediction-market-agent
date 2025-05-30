@@ -6,17 +6,17 @@ from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from tqdm import tqdm
 from web3 import Web3
 
-from prediction_market_agent.agents.safe_guard_agent.evals.models import (
+from prediction_market_agent.agents.safe_watch_agent.evals.models import (
     SGCase,
     SGDataset,
     ValidationConclusionEvaluator,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_utils import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_utils import (
     get_balances_usd,
     get_safe_detailed_transaction_info,
     get_safe_history_multisig,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_guard import (
+from prediction_market_agent.agents.safe_watch_agent.safe_watch import (
     ValidationConclusion,
 )
 
@@ -28,7 +28,7 @@ def main(n: int = 10, chain_id: int = 100) -> None:
     """
     # Downloaded from https://dune.com/queries/4933998/8164678.
     data = pd.read_csv(
-        "prediction_market_agent/agents/safe_guard_agent/evals/data/big_safes.csv"
+        "prediction_market_agent/agents/safe_watch_agent/evals/data/big_safes.csv"
     )
     big_safes = [Web3.to_checksum_address(addr) for addr in data["safe_address"]]
 
@@ -38,7 +38,7 @@ def main(n: int = 10, chain_id: int = 100) -> None:
     dataset = SGDataset(cases=cases, evaluators=evaluators)
 
     dataset.to_file(
-        f"prediction_market_agent/agents/safe_guard_agent/evals/data/latest_transaction_cases.{chain_id}.yaml"
+        f"prediction_market_agent/agents/safe_watch_agent/evals/data/latest_transaction_cases.{chain_id}.yaml"
     )
 
 

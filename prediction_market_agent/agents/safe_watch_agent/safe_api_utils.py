@@ -7,13 +7,13 @@ from pydantic import ValidationError
 from safe_eth.safe.safe import NULL_ADDRESS, Safe, SafeTx
 from web3 import Web3
 
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.balances import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.balances import (
     Balances,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.transactions import (
     CustomTxInfo,
     MultisigExecutionInfo,
     Transaction,
@@ -74,7 +74,7 @@ def get_safe_queue(
     chain_id: ChainID,
 ) -> list[Transaction]:
     """
-    TODO: This isn't great as we would need to call Safe's API for each guarded Safe non-stop.
+    TODO: This isn't great as we would need to call Safe's API for each watched Safe non-stop.
     Can we somehow listen to creation of queued transactions? Are they emited as events or something? And ideally without relying on Safe's APIs? Project Zero maybe?
     """
     response = requests.get(

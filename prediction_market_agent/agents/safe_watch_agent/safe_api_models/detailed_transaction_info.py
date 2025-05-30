@@ -3,7 +3,7 @@ from typing import Any, List, Union
 from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from pydantic import BaseModel
 
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.transactions import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.transactions import (
     CreationTxInfo,
     CustomTxInfo,
     SettingsChangeTxInfo,

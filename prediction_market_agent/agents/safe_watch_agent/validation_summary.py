@@ -1,14 +1,14 @@
 from prediction_market_agent_tooling.config import APIKeys
 from pydantic_ai import Agent
 
-from prediction_market_agent.agents.safe_guard_agent.guards.llm import (
-    format_transaction,
-)
-from prediction_market_agent.agents.safe_guard_agent.safe_api_models.detailed_transaction_info import (
+from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
-from prediction_market_agent.agents.safe_guard_agent.validation_result import (
+from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
+)
+from prediction_market_agent.agents.safe_watch_agent.watchers.llm import (
+    format_transaction,
 )
 from prediction_market_agent.tools.openai_utils import OpenAIModel, get_openai_provider
 
