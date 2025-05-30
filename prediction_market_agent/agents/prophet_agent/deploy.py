@@ -67,8 +67,12 @@ class DeployableTraderAgentER(DeployableTraderAgent):
             logger.info(
                 f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
             )
-            outcome_prediction = check_not_none(prediction.outcome_prediction)
-            return outcome_prediction.to_probabilistic_answer()
+            outcome_prediction = prediction.outcome_prediction
+            return (
+                outcome_prediction.to_probabilistic_answer()
+                if outcome_prediction is not None
+                else None
+            )
 
 
 class DeployableTraderAgentERCategorical(DeployableTraderAgent):
