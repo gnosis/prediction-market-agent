@@ -11,12 +11,12 @@ class Config(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    safe_watch_API_URL: str
+    SAFE_WATCH_API_URL: str
 
 
 def get_api_page(chain_id: ChainID) -> Callable[[], None]:
     def api_page() -> None:
-        safe_watch_api_url = Config().safe_watch_API_URL
+        safe_watch_api_url = Config().SAFE_WATCH_API_URL
 
         st.markdown(
             f"""## API Documentation
