@@ -5,6 +5,8 @@ import streamlit.components.v1 as components
 from prediction_market_agent_tooling.chains import ETHEREUM_ID, GNOSIS_CHAIN_ID
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.tools.utils import check_not_none
+from requests import HTTPError
+from tenacity import RetryError
 from web3 import Web3
 
 from prediction_market_agent.agents.safe_watch_agent import safe_api_utils
@@ -89,13 +91,13 @@ On this page, you can test out Safe Watch and see how it works in practice step 
         queue_col, hist_col = st.columns(2)
         with queue_col:
             queue_transaction_id = st.selectbox(
-                f"Choose one of the queued transactions ({len(queued_transactions)} available)",
+                f"Choose one of the queued transactions id ({len(queued_transactions)} available)",
                 [tx.id for tx in queued_transactions],
                 index=None,
             )
         with hist_col:
             hist_transaction_id = st.selectbox(
-                f"Or historical transaction for simulation (available if no queue transaction is selected, {len(historical_transactions)} available)",
+                f"Or historical transaction id for simulation (available if no queue transaction is selected, {len(historical_transactions)} available)",
                 [tx.id for tx in historical_transactions],
                 index=None,
                 disabled=queue_transaction_id is not None,
@@ -110,19 +112,39 @@ On this page, you can test out Safe Watch and see how it works in practice step 
 
         st.markdown("### Summary")
 
-        with st.spinner("Validating transaction..."):
-            with st.expander("Show details...", expanded=False):
-                conclusion = validate_safe_transaction(
-                    check_not_none(transaction_id),
-                    do_sign=False,
-                    do_execution=False,
-                    do_reject=False,
-                    do_message=False,
-                    chain_id=chain_id,
-                    # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
-                    ignore_historical_transaction_ids={check_not_none(transaction_id)},
-                )
+        try:
+            with st.spinner("Validating transaction..."):
+                with st.expander("Show details...", expanded=False):
+                    conclusion = validate_safe_transaction(
+                        check_not_none(transaction_id),
+                        do_sign=False,
+                        do_execution=False,
+                        do_reject=False,
+                        do_message=False,
+                        chain_id=chain_id,
+                        # In the case user selected historical transaction, we want to ignore it in the history for better simulation.
+                        ignore_historical_transaction_ids={
+                            check_not_none(transaction_id)
+                        },
+                    )
 
-        (st.success if conclusion.all_ok else st.warning)(conclusion.summary)
+            (st.success if conclusion.all_ok else st.warning)(conclusion.summary)
+
+        except BaseException as e:
+            if (
+                isinstance(e, RetryError)
+                and (exp_from_retry := e.last_attempt.exception()) is not None
+            ):
+                e = exp_from_retry
+                if isinstance(e, HTTPError):
+                    if e.response.status_code == 404:
+                        st.error(
+                            f"Multisig transaction with id `{transaction_id}`, on the chain with id `{chain_id}` wasn't found:\n\n{e}"
+                        )
+                        return
+
+            st.error(
+                f"Unknown error happened, please contact the Gnosis AI team:\n\n{e}"
+            )
 
     return demo_page
