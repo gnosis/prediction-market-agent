@@ -22,8 +22,8 @@ class InvalidAgent(DeployableTraderAgent):
     supported_markets = [MarketType.OMEN]
 
     def verify_market(self, market_type: MarketType, market: AgentMarket) -> bool:
-        if self.have_bet_on_market_since(
-            market, since=self.same_market_trade_interval.get(market=market)
+        if market.have_bet_on_market_since(
+            APIKeys(), since=self.same_market_trade_interval.get(market=market)
         ):
             return False
 

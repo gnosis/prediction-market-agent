@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
@@ -10,6 +9,7 @@ from prediction_market_agent_tooling.logprobs_parser import (
 )
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.perplexity.perplexity_models import (
     PerplexityResponse,
 )
@@ -117,9 +117,12 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
             f"Research results citations for links: {research_results.citations}"
         )
 
-        summaries = self._process_links_parallel(
-            market.question, research_results.citations, max_workers=10
-        )
+        summaries = [
+            summary
+            for citation in research_results.citations
+            if (summary := self.process_single_link(market.question, citation))
+            is not None
+        ]
         logger.info(f"Summaries of sources: {summaries}")
 
         if self.use_solvability_score:
@@ -148,30 +151,22 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
             api_keys=self.api_key,
         )
 
-    def _process_links_parallel(
-        self, market_question: str, links: list[str], max_workers: int = 10
-    ) -> list[str]:
-        summaries: list[str] = []
-
-        def process_single_link(link: str) -> str | None:
-            try:
-                return (
-                    link
-                    + " \n "
-                    + web_scrape_structured_and_summarized(
-                        SUMMARY_OBJECTIVE.format(market_question=market_question),
-                        link,
-                        remove_a_links=True,
-                    )
+    @staticmethod
+    @observe()
+    def process_single_link(market_question: str, link: str) -> str | None:
+        try:
+            return (
+                link
+                + " \n "
+                + web_scrape_structured_and_summarized(
+                    SUMMARY_OBJECTIVE.format(market_question=market_question),
+                    link,
+                    remove_a_links=True,
                 )
-            except Exception as e:
-                logger.warning(f"Error processing link {link}: {e}")
-                return None
-
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            results = list(executor.map(process_single_link, links))
-
-        return [result for result in results if result is not None]
+            )
+        except Exception as e:
+            logger.warning(f"Error processing link {link}: {e}")
+            return None
 
     def _calculate_solvability_score(
         self, market_question: str, critique: str, crawl_summaries: list[str]

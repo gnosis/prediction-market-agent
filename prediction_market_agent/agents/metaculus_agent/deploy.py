@@ -39,7 +39,7 @@ class DeployableMetaculusBotTournamentAgent(DeployablePredictionAgent):
             enable_langfuse=self.enable_langfuse
         )
 
-    def get_markets(self, market_type: MarketType) -> Sequence[AgentMarket]:  # type: ignore # TODO: Needs to be decided in https://github.com/gnosis/prediction-market-agent/pull/511#discussion_r1810034688 and then I'll implement it here.
+    def get_markets(self, market_type: MarketType) -> Sequence[AgentMarket]:
         markets: Sequence[MetaculusAgentMarket] = MetaculusAgentMarket.get_markets(
             limit=self.bet_on_n_markets_per_run,
             tournament_id=self.tournament_id,
