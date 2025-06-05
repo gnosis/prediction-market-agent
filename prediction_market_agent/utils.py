@@ -36,6 +36,7 @@ class APIKeys(APIKeysBase):
     TELEGRAM_BOT_KEY: t.Optional[SecretStr] = None
     GNOSISSCAN_API_KEY: t.Optional[SecretStr] = None
     DUNE_API_KEY: t.Optional[SecretStr] = None
+    CYVERS_API_KEY: t.Optional[SecretStr] = None
 
     @property
     def openai_api_key(self) -> SecretStr:
@@ -101,6 +102,12 @@ class APIKeys(APIKeysBase):
     def dune_api_key(self) -> SecretStr:
         return check_not_none(
             self.DUNE_API_KEY, "DUNE_API_KEY missing in the environment."
+        )
+
+    @property
+    def cyvers_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.CYVERS_API_KEY, "CYVERS_API_KEY missing in the environment."
         )
 
 

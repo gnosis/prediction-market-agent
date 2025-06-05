@@ -31,6 +31,7 @@ from prediction_market_agent.agents.safe_watch_agent.validation_summary import (
 from prediction_market_agent.agents.safe_watch_agent.watchers import (
     agent,
     blacklist,
+    cyvers,
     goplus_,
     hash_checker,
     llm,
@@ -48,6 +49,8 @@ safe_watchS: list[type[AbstractWatch]] = [
     goplus_.GoPlusTokenSecurity,
     goplus_.GoPlusAddressSecurity,
     goplus_.GoPlusNftSecurity,
+    cyvers.CyversAddressReputation,
+    cyvers.CyversSimulateSafeTX,
 ]
 
 

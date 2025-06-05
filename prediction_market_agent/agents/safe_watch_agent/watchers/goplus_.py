@@ -286,6 +286,7 @@ def _build_validation_result(
     )
 
 
+@observe()
 @db_cache(max_age=timedelta(days=3))
 def goplus_token_security(
     address: ChecksumAddress, chain_id: ChainID
@@ -300,6 +301,7 @@ def goplus_token_security(
     return result
 
 
+@observe()
 @db_cache(max_age=timedelta(days=3))
 def goplus_address_security(
     address: ChecksumAddress, chain_id: ChainID
@@ -313,6 +315,7 @@ def goplus_address_security(
     return result
 
 
+@observe()
 @db_cache(max_age=timedelta(days=3))
 def goplus_nft_security(
     address: ChecksumAddress, chain_id: ChainID
