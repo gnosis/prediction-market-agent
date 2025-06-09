@@ -50,9 +50,7 @@ class CyversAddressReputation(AbstractWatch):
             )
 
             if (risk_score := result_for_addr["data"]["risk_score"].lower()) != "low":
-                malicious_reasons.append(
-                    f"Address {addr} has high risk score {risk_score}."
-                )
+                malicious_reasons.append(f"Address {addr} has risk score {risk_score}.")
 
         return _build_validation_result(self.name, self.description, malicious_reasons)
 
