@@ -94,7 +94,9 @@ def cyvers_address_reputation(address: str) -> dict[str, Any]:
     }
     response = requests.get(url, headers=headers)
     response.raise_for_status()
-    response_json: dict[str, Any] = response.json()
+    response_json: dict[str, Any] | None = response.json()
+    if response_json is None:
+        raise ValueError(f"Invalid output `None` from {url}.")
     return response_json
 
 
@@ -116,5 +118,7 @@ def cyvers_simulate_safe_tx(
     }
     response = requests.post(url, json=payload, headers=headers)
     response.raise_for_status()
-    response_json: dict[str, Any] = response.json()
+    response_json: dict[str, Any] | None = response.json()
+    if response_json is None:
+        raise ValueError(f"Invalid output `None` from {url}.")
     return response_json
