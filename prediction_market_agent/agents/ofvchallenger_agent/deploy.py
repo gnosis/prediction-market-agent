@@ -9,6 +9,7 @@ from prediction_market_agent_tooling.markets.omen.data_models import (
     OmenMarket,
     RealityResponse,
 )
+from prediction_market_agent_tooling.markets.omen.omen_contracts import MetriSuperGroup
 from prediction_market_agent_tooling.markets.omen.omen_resolving import (
     Resolution,
     omen_submit_answer_market_tx,
@@ -55,6 +56,10 @@ MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] = [
     # But also use it to challenge the specialized markets (e.g. DevConflict), as we don't have anything better.
     SPECIALIZED_FOR_MARKET_CREATORS
 )
+COLLATERAL_TOKENS_TO_CHALLENGE_FROM_ANY_MARKET_CREATOR: list[ChecksumAddress] = [
+    # We challenge any market creators that use Metri/Circles, because we love Circles!
+    MetriSuperGroup().address,
+]
 
 
 class Challenge(BaseModel):
@@ -78,21 +83,42 @@ class OFVChallengerAgent(DeployableAgent):
         # Claim the bonds as first thing, to have funds for the new challenges.
         claim_all_bonds_on_reality(api_keys)
 
-        get_omen_binary_markets_common_filters = partial(
+        get_omen_binary_markets_common_filters_with_limit_and_question_opened = partial(
             OmenSubgraphHandler().get_omen_markets,
             limit=None,
-            creator_in=MARKET_CREATORS_TO_CHALLENGE,
             # We need markets already opened for answers.
             question_opened_before=utcnow(),
         )
-        markets_open_for_answers = get_omen_binary_markets_common_filters(
-            # With a little bandwidth for the market to be finalized,
-            # so we have time for processing it without erroring out at the end.
-            question_finalized_after=utcnow()
-            + timedelta(minutes=30),
-        ) + get_omen_binary_markets_common_filters(
-            # And also markets without any answer at all yet.
-            question_with_answers=False,
+        get_omen_binary_markets_common_filters_with_market_creators = partial(
+            get_omen_binary_markets_common_filters_with_limit_and_question_opened,
+            creator_in=MARKET_CREATORS_TO_CHALLENGE,
+        )
+        markets_open_for_answers = (
+            get_omen_binary_markets_common_filters_with_market_creators(
+                # With a little bandwidth for the market to be finalized,
+                # so we have time for processing it without erroring out at the end.
+                question_finalized_after=utcnow()
+                + timedelta(minutes=30),
+            )
+            + get_omen_binary_markets_common_filters_with_market_creators(
+                # And also markets without any answer at all yet.
+                question_with_answers=False,
+            )
+            + get_omen_binary_markets_common_filters_with_limit_and_question_opened(
+                # With a little bandwidth for the market to be finalized,
+                # so we have time for processing it without erroring out at the end.
+                question_finalized_after=utcnow() + timedelta(minutes=30),
+                collateral_token_address_in=tuple(
+                    COLLATERAL_TOKENS_TO_CHALLENGE_FROM_ANY_MARKET_CREATOR
+                ),
+            )
+            + get_omen_binary_markets_common_filters_with_limit_and_question_opened(
+                # And also markets without any answer at all yet.
+                question_with_answers=False,
+                collateral_token_address_in=tuple(
+                    COLLATERAL_TOKENS_TO_CHALLENGE_FROM_ANY_MARKET_CREATOR
+                ),
+            )
         )
         logger.info(f"Found {len(markets_open_for_answers)} markets to challenge.")
 
