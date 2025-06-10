@@ -78,7 +78,7 @@ class CyversSimulateSafeTX(AbstractWatch):
 
         if risk_level.lower() != "low":
             malicious_reasons.append(
-                f"Safe TX has a high risk level {risk_level}, because of {risk_description}."
+                f"Safe TX has a risk level {risk_level}, because of {risk_description}."
             )
 
         return _build_validation_result(self.name, self.description, malicious_reasons)
