@@ -1,4 +1,3 @@
-from prediction_market_agent.utils import APIKeys
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -40,6 +39,7 @@ from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch imp
     AbstractWatch,
 )
 from prediction_market_agent.agents.safe_watch_agent.whitelist import is_whitelisted
+from prediction_market_agent.utils import APIKeys
 
 SAFE_WATCHES: list[type[AbstractWatch]] = [
     agent.DoNotRemoveAgent,
