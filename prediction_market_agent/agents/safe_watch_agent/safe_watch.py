@@ -1,4 +1,3 @@
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.langfuse_ import observe
@@ -31,6 +30,7 @@ from prediction_market_agent.agents.safe_watch_agent.validation_summary import (
 from prediction_market_agent.agents.safe_watch_agent.watchers import (
     agent,
     blacklist,
+    cyvers,
     goplus_,
     hash_checker,
     llm,
@@ -39,8 +39,9 @@ from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch imp
     AbstractWatch,
 )
 from prediction_market_agent.agents.safe_watch_agent.whitelist import is_whitelisted
+from prediction_market_agent.utils import APIKeys
 
-safe_watchS: list[type[AbstractWatch]] = [
+SAFE_WATCHES: list[type[AbstractWatch]] = [
     agent.DoNotRemoveAgent,
     blacklist.Blacklist,
     hash_checker.HashCheck,
@@ -49,6 +50,11 @@ safe_watchS: list[type[AbstractWatch]] = [
     goplus_.GoPlusAddressSecurity,
     goplus_.GoPlusNftSecurity,
 ]
+if APIKeys().CYVERS_API_KEY is not None:
+    SAFE_WATCHES += [
+        cyvers.CyversAddressReputation,
+        cyvers.CyversSimulateSafeTX,
+    ]
 
 
 def validate_all(
@@ -254,7 +260,7 @@ def run_safe_watchs(
 ) -> list[ValidationResult]:
     validation_results: list[ValidationResult] = []
     logger.info("Running the transaction validation...")
-    for safe_watch_class in safe_watchS:
+    for safe_watch_class in SAFE_WATCHES:
         safe_watch = safe_watch_class()
         logger.info(
             f"Running watch {safe_watch.name} -- {safe_watch.description}",
