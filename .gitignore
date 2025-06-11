@@ -9,6 +9,8 @@ logs
 .mypy_cache
 .pytest_cache
 .venv
+.history/
+resources/
 log
 
 # Created on mech-client `interact` call
