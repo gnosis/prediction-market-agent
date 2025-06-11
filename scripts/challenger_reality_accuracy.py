@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import typer
 from matplotlib.dates import AutoDateLocator, DateFormatter
+from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.markets.omen.data_models import (
     HexBytes,
     RealityResponse,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenSubgraphHandler
 from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
 
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import (
     MARKET_CREATORS_TO_CHALLENGE,
@@ -19,12 +20,15 @@ from prediction_market_agent.agents.ofvchallenger_agent.deploy import (
 )
 
 
-def main(since_days: int) -> None:
+def main(
+    since_days: int,
+    challenger: ChecksumAddress = OFV_CHALLENGER_SAFE_ADDRESS,
+    market_creators: list[ChecksumAddress] | None = None,
+) -> None:
+    market_creators = check_not_none(market_creators or MARKET_CREATORS_TO_CHALLENGE)
     since = timedelta(days=since_days)
-    ofv_challenger_accuracy = reality_accuracy(OFV_CHALLENGER_SAFE_ADDRESS, since)
-    olas_accuracies = {
-        addr: reality_accuracy(addr, since) for addr in MARKET_CREATORS_TO_CHALLENGE
-    }
+    ofv_challenger_accuracy = reality_accuracy(challenger, since)
+    olas_accuracies = {addr: reality_accuracy(addr, since) for addr in market_creators}
 
     print(
         f"OFVChallenger accuracy: {ofv_challenger_accuracy.accuracy*100:.2f}% out of {ofv_challenger_accuracy.total}"
@@ -37,10 +41,10 @@ def main(since_days: int) -> None:
         else:
             print(f"Olas {idx} accuracy: no answers found")
 
-    plot_number_of_challenges(since)
+    plot_number_of_challenges(challenger, since)
 
 
-def plot_number_of_challenges(since: timedelta) -> None:
+def plot_number_of_challenges(challenger: ChecksumAddress, since: timedelta) -> None:
     all_responses_on_challenged_questions = OmenSubgraphHandler().get_responses(
         limit=None,
         question_id_in=list(
@@ -48,7 +52,7 @@ def plot_number_of_challenges(since: timedelta) -> None:
                 r.question.questionId
                 for r in OmenSubgraphHandler().get_responses(
                     limit=None,
-                    user=OFV_CHALLENGER_SAFE_ADDRESS,
+                    user=challenger,
                     question_finalized_before=utcnow(),
                     question_finalized_after=utcnow() - since,
                 )
