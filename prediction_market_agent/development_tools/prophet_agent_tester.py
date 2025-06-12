@@ -4,11 +4,6 @@ from functools import partial
 from typing import Sequence
 
 import pandas as pd
-from prediction_prophet.autonolas.research import Prediction as PredictionProphet
-from prediction_prophet.functions.research import Research
-from pydantic import BaseModel
-from pydantic_ai import Agent
-
 from prediction_market_agent_tooling.benchmark.utils import Prediction
 from prediction_market_agent_tooling.deploy.betting_strategy import BettingStrategy
 from prediction_market_agent_tooling.gtypes import Probability
@@ -21,6 +16,10 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none
+from prediction_prophet.autonolas.research import Prediction as PredictionProphet
+from prediction_prophet.functions.research import Research
+from pydantic import BaseModel
+from pydantic_ai import Agent
 
 
 class ProphetTestResult(BaseModel):
