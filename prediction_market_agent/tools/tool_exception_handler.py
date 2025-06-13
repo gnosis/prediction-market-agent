@@ -5,7 +5,7 @@ F = t.TypeVar("F", bound=t.Callable[..., t.Any])
 
 
 def tool_exception_handler(
-    map_exception_to_output: dict[t.Type[Exception], str]
+    map_exception_to_output: dict[t.Type[Exception], str],
 ) -> t.Callable[[F], F]:
     """
     Example usage:
