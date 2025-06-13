@@ -1,4 +1,5 @@
 from eth_typing import ChecksumAddress
+from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.balances import get_balances
@@ -53,6 +54,20 @@ def get_token_owner(token_id: int, web3: Web3) -> ChecksumAddress:
 
 def get_nft_game_is_finished_rpc_url(rpc_url: str) -> bool:
     return get_nft_game_is_finished(Web3(Web3.HTTPProvider(rpc_url)))
+
+
+def purge_all_messages(rpc_url: str, keys: APIKeys) -> None:
+    w3 = Web3(Web3.HTTPProvider(rpc_url))
+    com_contract = AgentCommunicationContract()
+    com_owner = com_contract.owner(web3=w3)
+    with impersonate_account(w3, com_owner):
+        # We need to build tx ourselves since no private key available from impersonated accounts.
+        tx_hash = (
+            com_contract.get_web3_contract(web3=w3)
+            .functions.purgeAllMessages()
+            .transact({"from": com_owner})
+        )
+        w3.eth.wait_for_transaction_receipt(transaction_hash=tx_hash)
 
 
 def redistribute_nft_keys(rpc_url: str) -> None:

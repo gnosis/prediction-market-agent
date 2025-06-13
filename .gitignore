@@ -12,6 +12,7 @@ logs
 .history/
 resources/
 log
+*.dump
 
 # Created on mech-client `interact` call
 acn_cert.txt

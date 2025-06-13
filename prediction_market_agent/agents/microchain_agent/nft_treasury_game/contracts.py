@@ -142,6 +142,10 @@ class AgentCommunicationContract(ContractOnGnosisChain, OwnableContract):
         "0x219083Fc5315fdc145eE5C0eb22CbE12d6115c53"
     )
 
+    def owner(self, web3: Web3 | None = None) -> ChecksumAddress:
+        owner = Web3.to_checksum_address(self.call("owner", web3=web3))
+        return owner
+
     def minimum_message_value(self, web3: Web3 | None = None) -> xDai:
         value = xDaiWei(self.call("minimumValueForSendingMessageInWei", web3=web3))
         return value.as_xdai
