@@ -10,6 +10,7 @@ logs
 .pytest_cache
 .venv
 log
+*.dump
 
 # Created on mech-client `interact` call
 acn_cert.txt

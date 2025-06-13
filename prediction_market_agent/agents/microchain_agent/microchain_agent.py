@@ -267,8 +267,9 @@ def build_agent(
 
     agent.max_tries = 3
 
-    agent.system_prompt = unformatted_system_prompt.format(
-        engine_help=agent.engine.help
+    # Use replace instead of `format`, because otherwise it fails if they put into the prompt {values_in_brackets}.
+    agent.system_prompt = unformatted_system_prompt.replace(
+        "{engine_help}", agent.engine.help
     )
     if bootstrap:
         agent.bootstrap.append(bootstrap)

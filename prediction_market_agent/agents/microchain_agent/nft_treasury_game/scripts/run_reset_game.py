@@ -13,9 +13,6 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.constants
     STARTING_AGENT_BALANCE,
     STARTING_TREASURY_BALANCE,
 )
-from prediction_market_agent.agents.microchain_agent.nft_treasury_game.contracts import (
-    AgentCommunicationContract,
-)
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.game_history import (
     NFTGameRoundTableHandler,
 )
@@ -24,6 +21,7 @@ from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.g
 )
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.scripts.reset_balance_anvil import (
     get_nft_game_is_finished_rpc_url,
+    purge_all_messages,
     redistribute_nft_keys,
     reset_balances,
 )
@@ -85,7 +83,7 @@ def main(
 
         if purge_messages:
             logger.info("Purging all messages from the AgentCommunicationContract.")
-            AgentCommunicationContract().purge_all_messages(keys)
+            purge_all_messages(rpc_url=rpc_url, keys=keys)
 
         if current_round is not None:
             game_round_table_handler.set_as_started(current_round)

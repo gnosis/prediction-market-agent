@@ -432,8 +432,8 @@ def show_treasury_part() -> None:
         f"""### Treasury
 Currently holds <span style='font-size: 1.1em;'><strong>{treasury_xdai_balance.value:.2f} xDAI</strong></span>. There are {DeployableAgentNFTGameAbstract.retrieve_total_number_of_keys()} NFT keys.
 
-- The current round ends at: {current_round.end_time.strftime('%Y-%m-%d %H:%M:%S') if current_round else 'No current round.'}
-- The next round starts at: {next_round.start_time.strftime('%Y-%m-%d %H:%M:%S') if next_round else 'No next round planned yet.'}
+- The current round ends at [UTC]: {current_round.end_time.strftime('%Y-%m-%d %H:%M:%S') if current_round else 'No current round.'}
+- The next round starts at [UTC]: {next_round.start_time.strftime('%Y-%m-%d %H:%M:%S') if next_round else 'No next round planned yet.'}
 """,
         unsafe_allow_html=True,
     )
@@ -473,11 +473,26 @@ def add_new_agent() -> None:
         private_key_str = st.text_input(
             "Private Key (optional, will be generated if not provided)", type="password"
         )
-        password = st.text_input("Password (use to manage your agent)", type="password")
+        password = st.text_input(
+            "Password (use to manage your agent, stored encrypted and can not be recovered)",
+            type="password",
+        )
+        confirm_password = st.text_input(
+            "Confirm Password",
+            type="password",
+        )
         submitted = st.form_submit_button("Add Agent")
         if submitted:
-            if not name or not initial_system_prompt or not password:
+            if (
+                not name
+                or not initial_system_prompt
+                or not password
+                or not confirm_password
+            ):
                 st.error("Please fill in all required fields.")
+
+            elif password != confirm_password:
+                st.error("Passwords do not match.")
 
             else:
                 private_key = (
@@ -554,13 +569,16 @@ with st.sidebar:
 
 all_agents = get_all_nft_agents()
 pages = [
+    st.Page(add_new_agent, title="Add Agent", url_path="add-agent", icon="➕"),
+    st.Page(reports_page, title="Game Reports", url_path="game-reports", icon="📊"),
+] + [
     st.Page(
-        get_agent_page(agent), title=f"Agent {agent.name}", url_path=build_url(agent)
+        get_agent_page(agent),
+        title=f"Agent {agent.name}",
+        url_path=build_url(agent),
+        icon="🔥" if isinstance(agent, AgentDB) else "🏛️",
     )
     for agent in all_agents
-] + [
-    st.Page(reports_page, title="Game Reports", url_path="game-reports"),
-    st.Page(add_new_agent, title="Add Agent", url_path="add-agent"),
 ]
 
 pg = st.navigation(pages)
