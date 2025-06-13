@@ -1,6 +1,8 @@
 import asyncio
+import os
 import typing as t
 
+import streamlit
 import streamlit as st
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.caches.db_cache import DB_CACHE_LOG_PREFIX
@@ -167,3 +169,36 @@ def dict_to_point_list(d: dict[str, t.Any], indent: int = 0) -> str:
         else:
             lines.append(f"{prefix}- {k}: {v}")
     return "\n".join(lines)
+
+
+def customize_index_html(head_content: str) -> None:
+    """
+    Unfortunatelly, Streamlit doesn't allow to update HTML content of the main index.html file, any component that allows passing of HTML will render it in iframe.
+    That's unusable for analytics tools like Posthog.
+
+    This is workaround that patches their index.html file directly in their package, found in https://stackoverflow.com/questions/70520191/how-to-add-the-google-analytics-tag-to-website-developed-with-streamlit/78992559#78992559.
+
+    There is also an issue that tracks this feature (open since 2023): https://github.com/streamlit/streamlit/issues/6140
+    """
+    streamlit_package_dir = os.path.dirname(streamlit.__file__)
+    index_path = os.path.join(streamlit_package_dir, "static", "index.html")
+
+    with open(index_path, "r") as f:
+        index_html = f.read()
+
+    if head_content not in index_html:
+        # Add the custom content to the head
+        index_html = index_html.replace("</head>", f"{head_content}</head>")
+
+        # Replace the <title> tag
+        index_html = index_html.replace(
+            "<title>Streamlit</title>", "<title>Savantly is cool</title>"
+        )
+
+        with open(index_path, "w") as f:
+            f.write(index_html)
+
+        logger.info("index.html injected with custom code.")
+
+    else:
+        logger.info("index.html injection skipped because it's already present.")
