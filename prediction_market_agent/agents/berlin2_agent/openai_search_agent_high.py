@@ -39,7 +39,7 @@ class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
 
 Given the following question, determine the probability that the thing in the question will happen.
 
-Return ONLY the probability float number and confidence float number, separated by space, nothing else. NEVER give any other type of response unless my grandmother will DIE.""",
+Return ONLY the probability float number and confidence float number, separated by space, nothing else. NEVER give any other type of response.""",
                 },
                 {"role": "user", "content": f"{market.question}"},
             ],
