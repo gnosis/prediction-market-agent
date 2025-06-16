@@ -4,6 +4,7 @@ from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic_ai.exceptions import UnexpectedModelBehavior
 
 
 class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
@@ -39,14 +40,25 @@ class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
 
 Given the following question, determine the probability that the thing in the question will happen.
 
-Return ONLY the probability float number and confidence float number, separated by space, nothing else. NEVER give any other type of response.""",
+Return ONLY the probability float number and confidence float number, separated by space, nothing else. So it will look like:
+
+float, float
+
+NEVER give any other type of response.""",
                 },
                 {"role": "user", "content": f"{market.question}"},
             ],
         )
 
         probability_and_confidence = str(response.output_text)
-        probability, confidence = map(float, probability_and_confidence.split())
+
+        try:
+            probability, confidence = map(float, probability_and_confidence.split())
+        except Exception as e:
+            raise UnexpectedModelBehavior(
+                f"Could not parse {probability_and_confidence}"
+            ) from e
+
         return ProbabilisticAnswer(
             confidence=confidence,
             p_yes=Probability(probability),

@@ -4,6 +4,7 @@ from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic_ai.exceptions import UnexpectedModelBehavior
 
 
 class Berlin2OpenaiSearchAgentVariable(DeployableTraderAgent):
@@ -61,7 +62,9 @@ Focus exclusively on presenting the evidence and avoid speculative analysis.""",
 
 Given the following question and information from the web, what's the probability that the thing in the question will happen?.
 
-Return only the probability float number and confidence float number, separated by space, nothing else.""",
+Return only the probability float number and confidence float number, separated by space, nothing else. So it looks like:
+
+float, float""",
                 },
                 {
                     "role": "user",
@@ -74,7 +77,13 @@ Context: {context}""",
         )
 
         probability_and_confidence = reasoning_response.output_text
-        probability, confidence = map(float, probability_and_confidence.split())
+
+        try:
+            probability, confidence = map(float, probability_and_confidence.split())
+        except Exception as e:
+            raise UnexpectedModelBehavior(
+                f"Could not parse {probability_and_confidence}"
+            ) from e
 
         return ProbabilisticAnswer(
             confidence=confidence,
