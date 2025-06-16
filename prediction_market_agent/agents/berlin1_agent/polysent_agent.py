@@ -113,6 +113,7 @@ def split_scraped_content(content: str) -> list[str]:
     return text_splitter.split_text(content)
 
 
+@observe()
 def get_polymarket_history(market_question: str) -> list[dict[str, Any]]:
     # Construct the URL with your API key
     url = f"https://gateway.thegraph.com/api/{APIKeys().graph_api_key.get_secret_value()}/subgraphs/id/81Dm16JjuFSrqz813HysXoUPvzTwE7fsfPk2RTf66nyC"
