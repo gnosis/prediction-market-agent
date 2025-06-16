@@ -19,7 +19,7 @@ class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
     #     )
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        client = OpenAI()
+        client = OpenAI(api_key=self.api_keys.openai_api_key.get_secret_value())
 
         today = utcnow()
 
