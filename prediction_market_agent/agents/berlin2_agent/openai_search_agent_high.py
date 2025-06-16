@@ -50,5 +50,4 @@ Return ONLY the probability float number and confidence float number, separated 
         return ProbabilisticAnswer(
             confidence=confidence,
             p_yes=Probability(probability),
-            reasoning="I asked Google and LLM to do it!",
         )
