@@ -78,8 +78,6 @@ class Berlin1PolySentAgent(DeployableTraderAgent):
 
 
 def train_calibration_model(path: Path) -> IsotonicRegression:
-    path.mkdir(exist_ok=True, parents=True)
-
     X, y = [], []
 
     with open(path, "r") as f:
