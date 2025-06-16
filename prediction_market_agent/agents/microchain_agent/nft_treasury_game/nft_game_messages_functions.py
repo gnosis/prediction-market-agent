@@ -227,5 +227,5 @@ MESSAGES_FUNCTIONS: list[type[Function]] = [
     SendPaidMessageToAnotherAgent,
     ReceiveMessagesAndPayments,
     GetUnseenMessagesInformation,
-    SleepUntil,
+    # SleepUntil, # TODO: Commented to make workshop more interactive.
 ]

@@ -470,9 +470,6 @@ def add_new_agent() -> None:
                 else ""
             ),
         )
-        private_key_str = st.text_input(
-            "Private Key (optional, will be generated if not provided)", type="password"
-        )
         password = st.text_input(
             "Password (use to manage your agent, stored encrypted and can not be recovered)",
             type="password",
@@ -480,6 +477,9 @@ def add_new_agent() -> None:
         confirm_password = st.text_input(
             "Confirm Password",
             type="password",
+        )
+        private_key_str = st.text_input(
+            "Private Key (optional, will be generated if not provided)", type="password"
         )
         submitted = st.form_submit_button("Add Agent")
         if submitted:
@@ -545,8 +545,9 @@ def get_agent_page(
             show_unlock_agent_part(nft_agent)
 
         with right:
-            with st.expander("Write message to agent"):
-                send_message_part(nft_agent)
+            # TODO: Currently Gnosis Fork doesn't work with sending messages logic.
+            # with st.expander("Write message to agent"):
+            #     send_message_part(nft_agent)
             if is_unlocked(nft_agent):
                 with st.expander("Inject prompt to agent"):
                     prompt_inject_part(nft_agent)
