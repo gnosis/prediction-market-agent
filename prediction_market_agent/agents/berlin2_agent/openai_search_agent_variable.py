@@ -64,7 +64,7 @@ Given the following question and information from the web, what's the probabilit
 
 Return only the probability float number and confidence float number, separated by space, nothing else. So it looks like:
 
-float, float""",
+float float""",
                 },
                 {
                     "role": "user",

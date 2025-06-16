@@ -42,7 +42,7 @@ Given the following question, determine the probability that the thing in the qu
 
 Return ONLY the probability float number and confidence float number, separated by space, nothing else. So it will look like:
 
-float, float
+float float
 
 NEVER give any other type of response.""",
                 },
