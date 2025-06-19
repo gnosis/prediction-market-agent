@@ -2,9 +2,6 @@ from functools import partial
 
 import pandas as pd
 import typer
-from prediction_market_agent_tooling.agent.development_tools.prophet_agent_tester import (
-    ProphetAgentTester,
-)
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     MultiCategoricalMaxAccuracyBettingStrategy,
 )
@@ -17,6 +14,9 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
+from prediction_market_agent.development_tools.prophet_agent_tester import (
+    ProphetAgentTester,
+)
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import APIKeys
 
@@ -106,10 +106,10 @@ def test_single_agent(
         delay_between_trades=delay_between_trades,
     )
 
-    test_results = tester.test_prophet_agent(
+    test_results, _ = tester.test_prophet_agent(
         agent_data, research_agent, prediction_agent
     )
-    tester.evaluate_results(test_results, print_individual_metrics=True)
+    tester.evaluate_results(test_results)
 
     trades_processed = len(test_results)
     logger.info(

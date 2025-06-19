@@ -4,12 +4,6 @@ from functools import partial
 
 import pandas as pd
 import typer
-from prediction_market_agent_tooling.agent.development_tools.prophet_agent_tester import (
-    ProphetAgentTester,
-)
-from prediction_market_agent_tooling.agent.development_tools.test_single_agent import (
-    execute_prophet_research,
-)
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.betting_strategy import KellyBettingStrategy
 from prediction_market_agent_tooling.gtypes import USD
@@ -33,6 +27,12 @@ from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.logprobs_oai_model import LogProbsOpenAIModel
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
+from prediction_market_agent.development_tools.prophet_agent_tester import (
+    ProphetAgentTester,
+)
+from prediction_market_agent.development_tools.test_single_agent import (
+    execute_prophet_research,
+)
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 
 app = typer.Typer()
@@ -187,10 +187,10 @@ def test_logprobs_agent(
         delay_between_trades=delay_between_trades,
     )
 
-    logprobs_test_results = logprobs_tester.test_prophet_agent(
+    logprobs_test_results, _ = logprobs_tester.test_prophet_agent(
         dataset, research_agent, prediction_agent
     )
-    standard_4o_test_results = standard_4o_tester.test_prophet_agent(
+    standard_4o_test_results, _ = standard_4o_tester.test_prophet_agent(
         dataset, research_agent, prediction_agent
     )
 
