@@ -18,6 +18,15 @@ from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
+from prediction_market_agent.agents.berlin1_agent.polysent_agent import (
+    Berlin1PolySentAgent,
+)
+from prediction_market_agent.agents.berlin2_agent.openai_search_agent_high import (
+    Berlin2OpenaiSearchAgentHigh,
+)
+from prediction_market_agent.agents.berlin2_agent.openai_search_agent_variable import (
+    Berlin2OpenaiSearchAgentVariable,
+)
 from prediction_market_agent.agents.coinflip_agent.deploy import (
     DeployableCoinFlipAgent,
     DeployableCoinFlipAgentByHighestLiquidity,
@@ -140,6 +149,9 @@ class RunnableAgent(str, Enum):
     gptr_agent = "gptr_agent"
     gptr_agent_highest_liquidity = "gptr_agent_highest_liquidity"
     logprobs_agent = "logprobs_agent"
+    berlin1_polysent_agent = "berlin1_polysent_agent"
+    berlin2_search_high = "berlin2_search_high"
+    berlin2_search_var = "berlin2_search_var"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -192,6 +204,9 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.advanced_agent: AdvancedAgent,
     RunnableAgent.gptr_agent: GPTRAgent,
     RunnableAgent.gptr_agent_highest_liquidity: GPTRHighestLiquidityAgent,
+    RunnableAgent.berlin1_polysent_agent: Berlin1PolySentAgent,
+    RunnableAgent.berlin2_search_high: Berlin2OpenaiSearchAgentHigh,
+    RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
