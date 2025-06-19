@@ -325,7 +325,7 @@ class ProphetAgentTester:
         y_pred_label = []
         y_pred_weight = []
         for result in valid_results:
-            probs = result.prediction.outcome_prediction.probabilities  # type: ignore
+            probs = check_not_none(result.prediction.outcome_prediction).probabilities
             max_outcome = max(probs, key=lambda k: probs[k])
             y_pred_label.append(max_outcome.lower())
             y_pred_weight.append(probs[max_outcome])
