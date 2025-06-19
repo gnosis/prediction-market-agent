@@ -78,7 +78,7 @@ def monitor_processes(
                 new_process.start()
                 processes[agent_name] = new_process
 
-        time.sleep(5)
+        time.sleep(30)
 
 
 def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
