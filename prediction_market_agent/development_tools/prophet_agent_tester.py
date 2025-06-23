@@ -1,25 +1,39 @@
 import json
 import time
 from functools import partial
-from typing import Sequence
+from typing import Literal
 
 import pandas as pd
+import tenacity
+from eth_typing import HexAddress, HexStr
 from prediction_market_agent_tooling.benchmark.utils import Prediction
 from prediction_market_agent_tooling.deploy.betting_strategy import BettingStrategy
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
+    USD,
     CategoricalProbabilisticAnswer,
     ProbabilisticAnswer,
+    ResolvedBet,
     Trade,
 )
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.markets.omen.omen_contracts import (
+    OmenConditionalTokenContract,
+)
+from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
+    get_omen_market_by_market_id_cached,
+)
+from prediction_market_agent_tooling.tools.transaction_cache import (
+    TransactionBlockCache,
+)
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from prediction_prophet.autonolas.research import Prediction as PredictionProphet
 from prediction_prophet.functions.research import Research
 from pydantic import BaseModel
 from pydantic_ai import Agent
+from web3.exceptions import TransactionNotFound
 
 
 class ProphetTestResult(BaseModel):
@@ -29,7 +43,7 @@ class ProphetTestResult(BaseModel):
     prediction: Prediction
     trades: list[Trade]
     market_resolution: str
-    market_outcomes: Sequence[str]
+    profit_usd: USD | Literal[0] | None
 
 
 class ProphetTestMetrics(BaseModel):
@@ -38,6 +52,23 @@ class ProphetTestMetrics(BaseModel):
     weighted_prediction_accuracy: float
     prediction_brier_score: float
     binary_trade_accuracy: float | None
+    investment_usd: USD | Literal[0] | None
+    profit_usd: USD | Literal[0] | None
+    roi: float | None
+
+
+class TradeLog(BaseModel):
+    index: int
+    market_question: str
+    market_id: str
+    market: str
+    research: Research
+    prediction: Prediction
+    trades: list[Trade]
+    market_resolution: str
+    received_outcome_tokens: float | None
+    profit_outcome_token: float | None
+    profit_usd: USD | None
 
 
 class ProphetAgentTester:
@@ -53,6 +84,8 @@ class ProphetAgentTester:
         run_name: str = "test_prophet_agent_baseline",
         delay_between_trades: float = 0.5,
         simulate_trades: bool = True,
+        bet_only: bool = True,
+        only_xdai_bets: bool = True,
     ):
         self.prophet_research = prophet_research
         self.prophet_predict = prophet_predict
@@ -63,11 +96,17 @@ class ProphetAgentTester:
         self.use_old_prediction = use_old_prediction
         self.run_name = run_name
         self.delay_between_trades = delay_between_trades
+
         self.simulate_trades = simulate_trades
+        self.tx_block_cache = TransactionBlockCache(
+            web3=OmenConditionalTokenContract().get_web3()
+        )
+        self.bet_only = bet_only
+        self.only_xdai_bets = only_xdai_bets
 
     def test_prophet_agent(
         self, dataset: pd.DataFrame, research_agent: Agent, prediction_agent: Agent
-    ) -> list[ProphetTestResult]:
+    ) -> tuple[list[ProphetTestResult], list[TradeLog]]:
         filtered_dataset = dataset[dataset["agent_name"] == self.mocked_agent_name]
         available_trades = len(filtered_dataset)
         trades_to_process = min(self.max_trades_to_test_on, available_trades)
@@ -76,11 +115,14 @@ class ProphetAgentTester:
             f"Found {available_trades} trades for {self.mocked_agent_name}, processing {trades_to_process}"
         )
 
-        results = []
+        results, trade_logs = [], []
 
-        for index, (_, item) in enumerate(
-            filtered_dataset.head(self.max_trades_to_test_on).iterrows()
-        ):
+        if self.bet_only:
+            filtered_dataset = filtered_dataset[filtered_dataset["bet_json"].notna()]
+
+        filtered_dataset = filtered_dataset.head(self.max_trades_to_test_on)
+
+        for index, (_, item) in enumerate(filtered_dataset.iterrows()):
             logger.info(
                 f"Processing trade {index + 1}/{trades_to_process}: {item['market_question']}"
             )
@@ -100,6 +142,72 @@ class ProphetAgentTester:
                     prediction_agent=prediction_agent,
                 )
 
+                if self.simulate_trades:
+                    bet = ResolvedBet.model_validate_json(item["bet_json"])
+
+                    try:
+                        bet_tx_block_number = self.tx_block_cache.get_block_number(
+                            bet.id
+                        )
+                    except tenacity.RetryError as e:
+                        if isinstance(e.last_attempt.exception(), TransactionNotFound):
+                            logger.warning(
+                                f"Transaction not found for trace {item['trace_id']} and bet {bet.id}, skipping trade..."
+                            )
+                        continue
+
+                    market_before_placing_bet = get_omen_market_by_market_id_cached(
+                        HexAddress(HexStr(market.id)),
+                        block_number=bet_tx_block_number - 1,
+                    )
+                    omen_agent_market_before_placing_bet = (
+                        OmenAgentMarket.from_data_model(market_before_placing_bet)
+                    )
+
+                    buy_trade_in_tokes = (
+                        omen_agent_market_before_placing_bet.get_in_token(
+                            trades[0].amount
+                        )
+                    )
+                    probs = check_not_none(prediction.outcome_prediction).probabilities
+                    predicted = max(probs, key=lambda k: probs[k])
+
+                    actual_resolution = item["market_resolution"].lower()
+
+                    received_outcome_tokens = None
+                    if trades[0].outcome.lower() != actual_resolution:
+                        profit_outcome_token = -buy_trade_in_tokes
+
+                    else:
+                        received_outcome_tokens = (
+                            omen_agent_market_before_placing_bet.get_buy_token_amount(
+                                trades[0].amount, outcome=trades[0].outcome
+                            )
+                        )
+                        profit_outcome_token = (
+                            received_outcome_tokens.as_token - buy_trade_in_tokes
+                        )
+
+                    profit_usd = omen_agent_market_before_placing_bet.get_token_in_usd(
+                        profit_outcome_token
+                    )
+
+                trade_log = TradeLog(
+                    index=index,
+                    market_question=item["market_question"],
+                    market_id=market.id,
+                    market=market.question,
+                    research=research,
+                    prediction=prediction,
+                    trades=trades,
+                    market_resolution=item["market_resolution"],
+                    received_outcome_tokens=float(received_outcome_tokens.as_token)
+                    if received_outcome_tokens
+                    else None,
+                    profit_outcome_token=float(profit_outcome_token),
+                    profit_usd=profit_usd if profit_usd else None,
+                )
+
                 test_result = ProphetTestResult(
                     run_name=self.run_name,
                     market_question=item["market_question"],
@@ -107,16 +215,17 @@ class ProphetAgentTester:
                     prediction=prediction,
                     trades=trades,
                     market_resolution=item["market_resolution"],
-                    market_outcomes=market.outcomes,
+                    profit_usd=profit_usd if profit_usd else None,
                 )
                 results.append(test_result)
+                trade_logs.append(trade_log)
             except Exception as e:
                 logger.error(f"Error processing trade {index + 1}: {e}")
                 continue
         logger.info(
             f"Completed processing {len(results)} trades for {self.mocked_agent_name}"
         )
-        return results
+        return results, trade_logs
 
     def to_research_output(self, research_output: str) -> Research:
         return Research(
@@ -148,12 +257,14 @@ class ProphetAgentTester:
         prediction_agent: Agent,
     ) -> tuple[list[Trade], Prediction, Research]:
         research = (
-            self.prophet_research(research_agent, market.question)
+            self.prophet_research(research_agent, market.question, market)
             if not self.use_old_research
             else self.to_research_output(research_output)
         )
         prediction_prophet: PredictionProphet = (
-            self.prophet_predict(prediction_agent, market.question, research.report)
+            self.prophet_predict(
+                prediction_agent, market.question, research.report, market
+            )
             if not self.use_old_prediction
             else self.to_prediction_output(prediction_output)
         )
@@ -260,6 +371,9 @@ class ProphetAgentTester:
                 result.trades[0].outcome.lower() if result.trades else None
                 for result in valid_results
             ]
+            trade_investments = [
+                result.trades[0].amount for result in valid_results if result.trades
+            ]
             binary_trade_accuracy = [
                 1 if true_val == trade_val else 0
                 for true_val, trade_val in zip(y_true, y_trade_outcome)
@@ -271,17 +385,35 @@ class ProphetAgentTester:
                 else 0
             )
 
+        sum_profit_usd = (
+            sum(
+                result.profit_usd
+                for result in valid_results
+                if result.profit_usd is not None
+            )
+            if valid_results
+            else None
+        )
+        sum_investment_usd = sum(trade_investments) if trade_investments else None
+
         metrics = ProphetTestMetrics(
             total_trades=total_trades,
             binary_prediction_accuracy=avg_binary_prediction_accuracy,
             weighted_prediction_accuracy=avg_weighted_prediction_accuracy,
             binary_trade_accuracy=avg_binary_trade_accuracy,
             prediction_brier_score=avg_brier_score,
+            profit_usd=sum_profit_usd,
+            investment_usd=sum_investment_usd,
+            roi=(
+                (sum_profit_usd / (sum_investment_usd + USD(0.000001))) * 100
+                if sum_investment_usd and sum_profit_usd
+                else None
+            ),
         )
 
         if print_individual_metrics:
             logger.info("\n" + "=" * 50)
-            logger.info("EVALUATION METRICS")
+            logger.info(f"EVALUATION METRICS {self.run_name}")
             logger.info("=" * 50)
             logger.info(f"Total Trades: {total_trades}")
             logger.info(
@@ -294,5 +426,8 @@ class ProphetAgentTester:
 
             if self.simulate_trades:
                 logger.info(f"Binary Trade Accuracy: {avg_binary_trade_accuracy:.4f}")
+                logger.info(f"Profit USD: {metrics.profit_usd}")
+                logger.info(f"Investment USD: {metrics.investment_usd}")
+                logger.info(f"ROI: {metrics.roi:.4f}%")
 
         return metrics

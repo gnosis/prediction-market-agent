@@ -72,6 +72,13 @@ gpt-researcher = { git = "https://github.com/kongzii/gpt-researcher.git", branch
 langchain-chroma = "^0.1.2"
 ape-foundry = "^0.8.2"
 freezegun = "^1.5.1"
+jupyter = "^1.0.0"
+jupyterlab = "^4.0.0"
+notebook = "^7.0.0"
+ipykernel = "^6.0.0"
+matplotlib = "^3.8.0"
+seaborn = "^0.13.0"
+numpy = "^1.26.0"
 
 [build-system]
 requires = ["poetry-core"]
