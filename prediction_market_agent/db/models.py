@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from typing import Any, Optional
 
 from prediction_market_agent_tooling.gtypes import xDaiWei
@@ -20,7 +21,7 @@ class LongTermMemories(SQLModel, table=True):
     metadata_: Optional[str] = None
     datetime_: DatetimeUTC
 
-    @property
+    @cached_property
     def metadata_dict(self) -> dict[str, Any] | None:
         try:
             out: dict[str, Any] | None = (
@@ -107,9 +108,9 @@ class ReportNFTGame(SQLModel, table=True):
     }
     id: Optional[int] = Field(default=None, primary_key=True)
     game_round_id: int = Field(foreign_key=f"{NFTGameRound.__tablename__}.id")
-    agent_id: Optional[
-        str
-    ] = None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table
+    agent_id: Optional[str] = (
+        None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table
+    )
     # as well.
     learnings: str
     datetime_: DatetimeUTC
