@@ -15,6 +15,10 @@ from safe_eth.safe.safe import SafeTx
 from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
+from prediction_market_agent.agents.safe_watch_agent.utils import (
+    is_erc20_contract,
+    is_nft_contract,
+)
 from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
 )
@@ -44,7 +48,8 @@ class GoPlusTokenSecurity(AbstractWatch):
         results = {
             addr: res
             for addr in all_addresses_from_tx
-            if (res := goplus_token_security(addr, chain_id)) is not None
+            if is_erc20_contract(addr)
+            and (res := goplus_token_security(addr, chain_id)) is not None
         }
         if not results:
             return None
@@ -234,6 +239,9 @@ class GoPlusNftSecurity(AbstractWatch):
         malicious_reasons: list[str] = []
 
         for addr in all_addresses_from_tx:
+            if not is_nft_contract(addr):
+                continue
+
             result = goplus_nft_security(addr, chain_id)
             if result is None:
                 continue
