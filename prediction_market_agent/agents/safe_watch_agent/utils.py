@@ -1,7 +1,7 @@
-from web3 import Web3
-from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.config import RPCConfig
+from prediction_market_agent_tooling.gtypes import ChecksumAddress
 from prediction_market_agent_tooling.tools.contract import contract_implements_function
+from web3 import Web3
 
 
 def is_erc20_contract(address: ChecksumAddress, web3: Web3 | None = None) -> bool:

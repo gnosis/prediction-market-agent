@@ -1,14 +1,15 @@
-from prediction_market_agent.agents.safe_watch_agent.utils import (
-    is_erc20_contract,
-    is_nft_contract,
-    ChecksumAddress,
+import pytest
+from prediction_market_agent_tooling.markets.omen.omen_contracts import (
+    SDAI_CONTRACT_ADDRESS,
+    WRAPPED_XDAI_CONTRACT_ADDRESS,
 )
 from web3 import Web3
-from prediction_market_agent_tooling.markets.omen.omen_contracts import (
-    WRAPPED_XDAI_CONTRACT_ADDRESS,
-    SDAI_CONTRACT_ADDRESS,
+
+from prediction_market_agent.agents.safe_watch_agent.utils import (
+    ChecksumAddress,
+    is_erc20_contract,
+    is_nft_contract,
 )
-import pytest
 
 
 @pytest.mark.parametrize(

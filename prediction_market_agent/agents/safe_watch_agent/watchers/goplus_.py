@@ -15,15 +15,15 @@ from safe_eth.safe.safe import SafeTx
 from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
+from prediction_market_agent.agents.safe_watch_agent.utils import (
+    is_erc20_contract,
+    is_nft_contract,
+)
 from prediction_market_agent.agents.safe_watch_agent.validation_result import (
     ValidationResult,
 )
 from prediction_market_agent.agents.safe_watch_agent.watchers.abstract_watch import (
     AbstractWatch,
-)
-from prediction_market_agent.agents.safe_watch_agent.utils import (
-    is_erc20_contract,
-    is_nft_contract,
 )
 from prediction_market_agent.tools.streamlit_utils import dict_to_point_list
 
