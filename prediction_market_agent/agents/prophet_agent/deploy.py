@@ -14,6 +14,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket, So
 from prediction_market_agent_tooling.markets.data_models import (
     CategoricalProbabilisticAnswer,
     ProbabilisticAnswer,
+    ScalarProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
@@ -213,6 +214,69 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
             logger=logger,
         )
 
+class DeployableTraderAgentERScalar(DeployableTraderAgent):
+    agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = False
+
+    def answer_scalar_market(
+        self, market: AgentMarket
+    ) -> ScalarProbabilisticAnswer | None:
+        try:
+            prediction = self.agent.predict_scalar(
+                market.question, market.upper_bound, market.lower_bound
+            )
+        except UnexpectedModelBehavior as e:
+            (
+                logger.warning
+                if self.just_warn_on_unexpected_model_behavior
+                else logger.exception
+            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
+            return None
+        else:
+            logger.info(
+                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+            )
+            return prediction.outcome_prediction
+
+class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(1),
+    #             max_=USD(5),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
 
 class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     """
