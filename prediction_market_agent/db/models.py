@@ -108,9 +108,9 @@ class ReportNFTGame(SQLModel, table=True):
     }
     id: Optional[int] = Field(default=None, primary_key=True)
     game_round_id: int = Field(foreign_key=f"{NFTGameRound.__tablename__}.id")
-    agent_id: Optional[str] = (
-        None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table
-    )
+    agent_id: Optional[
+        str
+    ] = None  # we keep it optional to allow for the final summary (involving all agents) to be stored in this table
     # as well.
     learnings: str
     datetime_: DatetimeUTC
