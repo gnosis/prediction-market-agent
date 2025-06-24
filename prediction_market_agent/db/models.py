@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from typing import Any, Optional
 
 from prediction_market_agent_tooling.gtypes import xDaiWei
@@ -20,7 +21,7 @@ class LongTermMemories(SQLModel, table=True):
     metadata_: Optional[str] = None
     datetime_: DatetimeUTC
 
-    @property
+    @cached_property
     def metadata_dict(self) -> dict[str, Any] | None:
         try:
             out: dict[str, Any] | None = (

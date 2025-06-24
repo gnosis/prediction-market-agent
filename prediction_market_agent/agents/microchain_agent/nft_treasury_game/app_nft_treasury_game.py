@@ -327,7 +327,7 @@ def show_function_calls_part(
     )
 
 
-@st.fragment(run_every=timedelta(seconds=10))
+@st.fragment(run_every=timedelta(seconds=15))
 def show_function_calls_part_messages(
     nft_agent: AgentInputType,
     messages_per_page: int,
@@ -359,7 +359,7 @@ def show_function_calls_part_messages(
             customized_chat_message(function_call, function_output)
 
 
-@st.fragment(run_every=timedelta(seconds=10))
+@st.fragment(run_every=timedelta(seconds=15))
 def show_about_agent_part(
     nft_agent: AgentInputType,
 ) -> None:
@@ -422,7 +422,7 @@ Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_
                 st.write(f"... and another {n_messages - show_n} unprocessed messages.")
 
 
-@st.fragment(run_every=timedelta(seconds=10))
+@st.fragment(run_every=timedelta(seconds=15))
 def show_treasury_part() -> None:
     game_round_handler = game_round_table_handler()
     treasury_xdai_balance = SimpleTreasuryContract().balances().xdai

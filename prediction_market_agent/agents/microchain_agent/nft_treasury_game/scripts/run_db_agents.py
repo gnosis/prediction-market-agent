@@ -5,6 +5,7 @@ import time
 import typer
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.tools.utils import check_not_none
 
 from prediction_market_agent.agents.microchain_agent.nft_treasury_game.agent_db import (
     AgentDB,
@@ -41,10 +42,25 @@ def spawn_process(agent_name: str) -> multiprocessing.Process:
 def monitor_processes(
     processes: dict[str, multiprocessing.Process],
     agent_table_handler: AgentTableHandler,
+    agent_group_idx: int | None = None,
+    n_groups: int | None = None,
 ) -> None:
     while True:
         # Check for new agents
         current_agents: list[AgentDB] = list(agent_table_handler.sql_handler.get_all())
+
+        if agent_group_idx is not None and n_groups is not None:
+            # Only run agents whose belong to the specified group.
+            logger.info(
+                f"Filtering for agents in the group {agent_group_idx} / {n_groups}."
+            )
+            current_agents = [
+                agent
+                for agent in current_agents
+                if check_not_none(agent.id) % n_groups == agent_group_idx
+            ]
+
+        logger.info(f"Running agents with ids {[a.id for a in current_agents]}")
 
         # Identify new agents
         new_agents = {agent.name for agent in current_agents} - set(processes.keys())
@@ -62,7 +78,7 @@ def monitor_processes(
                 new_process.start()
                 processes[agent_name] = new_process
 
-        time.sleep(5)
+        time.sleep(30)
 
 
 def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
@@ -71,7 +87,15 @@ def stop_all_processes(processes: dict[str, multiprocessing.Process]) -> None:
     logger.info("All agents have been stopped.")
 
 
-def main() -> None:
+def main(agent_group_idx: int | None = None, n_groups: int | None = None) -> None:
+    """
+    If `agent_group_idx` and `n_groups` are specified, script will run agents belonging only to that group, based on their id.
+    """
+    if (agent_group_idx is None) != (n_groups is None):
+        raise ValueError(
+            "Both agent_group_idx and n_groups must be set, or neither of them."
+        )
+
     # Spawn a whole new Python interpreter process for each agent,
     # otherwise DB connection freaks. (spawn is default on Mac, but not on Linux, so Kube job fails without this)
     multiprocessing.set_start_method("spawn")
@@ -80,7 +104,12 @@ def main() -> None:
     processes: dict[str, multiprocessing.Process] = {}
 
     try:
-        monitor_processes(processes, agent_table_handler)
+        monitor_processes(
+            processes,
+            agent_table_handler,
+            agent_group_idx=agent_group_idx,
+            n_groups=n_groups,
+        )
     except KeyboardInterrupt:
         logger.info("Stopping all agents...")
         stop_all_processes(processes)
