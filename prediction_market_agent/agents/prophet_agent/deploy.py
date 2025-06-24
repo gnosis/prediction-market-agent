@@ -219,9 +219,35 @@ class DeployableTraderAgentERScalar(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = False
 
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+    
     def answer_scalar_market(
         self, market: AgentMarket
     ) -> ScalarProbabilisticAnswer | None:
+        if market.upper_bound is None or market.lower_bound is None:
+            raise ValueError("Market upper and lower bounds must be set")
         try:
             prediction = self.agent.predict_scalar(
                 market.question, market.upper_bound, market.lower_bound
@@ -237,7 +263,10 @@ class DeployableTraderAgentERScalar(DeployableTraderAgent):
             logger.info(
                 f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
             )
-            return prediction.outcome_prediction
+            outcome_prediction = prediction.outcome_prediction
+            if not isinstance(outcome_prediction, ScalarProbabilisticAnswer):
+                return None
+            return outcome_prediction
 
 class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
     bet_on_n_markets_per_run = 4
