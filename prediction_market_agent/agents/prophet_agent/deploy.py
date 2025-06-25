@@ -36,6 +36,7 @@ from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.settings import ModelSettings
 
+from prediction_market_agent.agents.top_n_oai_model import TopNOpenAINModel
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import (
@@ -214,6 +215,7 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
             logger=logger,
         )
 
+
 class DeployableTraderAgentERScalar(DeployableTraderAgent):
     agent: PredictionProphetAgent
     bet_on_n_markets_per_run = 2
@@ -242,7 +244,19 @@ class DeployableTraderAgentERScalar(DeployableTraderAgent):
             include_reasoning=True,
             logger=logger,
         )
-    
+
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
+        logger.warning("Binary markets are not supported for scalar agents for now")
+        return None
+
+    def answer_categorical_market(
+        self, market: AgentMarket
+    ) -> CategoricalProbabilisticAnswer | None:
+        logger.warning(
+            "Categorical markets are not supported for scalar agents for now"
+        )
+        return None
+
     def answer_scalar_market(
         self, market: AgentMarket
     ) -> ScalarProbabilisticAnswer | None:
@@ -267,6 +281,7 @@ class DeployableTraderAgentERScalar(DeployableTraderAgent):
             if not isinstance(outcome_prediction, ScalarProbabilisticAnswer):
                 return None
             return outcome_prediction
+
 
 class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
     bet_on_n_markets_per_run = 4
@@ -297,15 +312,17 @@ class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar)
                 model_settings=ModelSettings(temperature=0.7),
             ),
             prediction_agent=Agent(
-                OpenAIModel(
+                TopNOpenAINModel(
                     model,
+                    n=5,
                     provider=get_openai_provider(api_key=api_keys.openai_api_key),
                 ),
-                model_settings=ModelSettings(temperature=0.0),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             include_reasoning=True,
             logger=logger,
         )
+
 
 class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     """
