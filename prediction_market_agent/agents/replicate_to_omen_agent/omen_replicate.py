@@ -3,6 +3,7 @@ from datetime import timedelta
 from prediction_market_agent_tooling.gtypes import (
     USD,
     ChecksumAddress,
+    CollateralToken,
     HexAddress,
     HexStr,
     Wei,
@@ -53,22 +54,21 @@ def omen_replicate_from_tx(
     api_keys: APIKeys,
     market_type: MarketType,
     n_to_replicate: int,
-    initial_funds: USD,
+    initial_funds: USD | CollateralToken,
     collateral_token_address: ChecksumAddress,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
-    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
+    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=10)
 
     markets = get_binary_markets(
-        # Polymarket is slow to get, so take only 10 candidates for him.
-        10 if market_type == MarketType.POLYMARKET else 1000,
+        500 if market_type == MarketType.POLYMARKET else 1000,
         market_type,
         filter_by=FilterBy.OPEN,
         sort_by=(
-            SortBy.NONE
+            SortBy.HIGHEST_LIQUIDITY
             if market_type == MarketType.POLYMARKET
             else SortBy.CLOSING_SOONEST
         ),

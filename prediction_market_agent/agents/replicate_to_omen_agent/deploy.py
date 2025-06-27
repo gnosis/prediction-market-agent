@@ -2,7 +2,12 @@ import random
 from datetime import timedelta
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.gtypes import USD, ChecksumAddress, xDai
+from prediction_market_agent_tooling.gtypes import (
+    USD,
+    ChecksumAddress,
+    CollateralToken,
+    xDai,
+)
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen_constants import (
@@ -11,6 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen_constants import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     SAFE_COLLATERAL_TOKENS_ADDRESSES,
 )
+from prediction_market_agent_tooling.tools.contract import ContractERC20OnGnosisChain
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -19,10 +25,6 @@ from web3 import Web3
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
-    omen_unfund_replicated_known_markets_tx,
-)
-from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
-    omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -43,6 +45,8 @@ class ReplicateConfig(BaseModel):
     )
     every_n_days: int  # This configuration should execute every N days.
     source: MarketType
+    collateral_token: str | None = None
+    initial_funds_in_token: int | None = None
 
 
 class ReplicateSettings(BaseSettings):
@@ -52,6 +56,10 @@ class ReplicateSettings(BaseSettings):
 
     REPLICATE: list[ReplicateConfig]
     INITIAL_FUNDS: str
+
+    @property
+    def initial_funds_usd(self) -> USD:
+        return USD(self.INITIAL_FUNDS)
 
 
 class DeployableReplicateToOmenAgent(DeployableAgent):
@@ -73,14 +81,14 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         logger.info(
             f"Unfunding soon to be known markets replicated by {keys.bet_from_address}."
         )
-        omen_unfund_replicated_known_markets_tx(keys, saturation_above_threshold=0.9)
+        # omen_unfund_replicated_known_markets_tx(keys, saturation_above_threshold=0.9)
 
         logger.info(
             f"Finalising, resolving and claiming back xDai from existing markets replicated by {keys.bet_from_address}."
         )
-        omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
-            keys, realitio_bond=REPLICATOR_BOND
-        )
+        # omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
+        #    keys, realitio_bond=REPLICATOR_BOND
+        # )
 
         for replicate_config in settings.REPLICATE:
             if now.timetuple().tm_yday % replicate_config.every_n_days:
@@ -90,20 +98,39 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             close_time_before = now + timedelta(
                 days=replicate_config.close_time_up_to_n_days
             )
-            initial_funds_per_market = USD(settings.INITIAL_FUNDS)
-
-            # Prefer sDai, but create markets in others tokens too.
-            collateral_token_address: ChecksumAddress = (
-                SDAI_CONTRACT_ADDRESS
-                if random.random() < 0.8
-                else random.choice(
-                    [
-                        address
-                        for address in SAFE_COLLATERAL_TOKENS_ADDRESSES
-                        if address != SDAI_CONTRACT_ADDRESS
-                    ]
-                )
+            # Use the initial funds from market, otherwise use the global initial_funds variable.
+            initial_funds_per_market: USD | CollateralToken = (
+                CollateralToken(replicate_config.initial_funds_in_token)
+                if replicate_config.initial_funds_in_token
+                else settings.initial_funds_usd
             )
+
+            if replicate_config.collateral_token:
+                collateral_token_address = Web3.to_checksum_address(
+                    replicate_config.collateral_token
+                )
+                # make sure it's ERC20
+                try:
+                    ContractERC20OnGnosisChain(
+                        address=collateral_token_address
+                    ).symbol()
+                except Exception as e:
+                    raise ValueError(
+                        f"Collateral token {collateral_token_address} is not an ERC20. {e=}"
+                    )
+            else:
+                # Prefer sDai, but create markets in others tokens too.
+                collateral_token_address: ChecksumAddress = (
+                    SDAI_CONTRACT_ADDRESS
+                    if random.random() < 0.8
+                    else random.choice(
+                        [
+                            address
+                            for address in SAFE_COLLATERAL_TOKENS_ADDRESSES
+                            if address != SDAI_CONTRACT_ADDRESS
+                        ]
+                    )
+                )
 
             logger.info(
                 f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
