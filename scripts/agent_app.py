@@ -131,7 +131,8 @@ def agent_app() -> None:
             [market_source.value for market_source in MarketType],
         )
     )
-    markets = get_binary_markets(1, market_source)
+    fetch_scalar_markets = st.checkbox("Fetch scalar markets", value=False)
+    markets = get_binary_markets(42, market_source, fetch_scalar_markets=fetch_scalar_markets)
 
     # Ask the user to provide a question.
     custom_question_input = st.checkbox("Provide a custom question", value=False)
@@ -154,7 +155,7 @@ def agent_app() -> None:
     if not custom_question_input and market.is_binary:
         st.info(f"Current probability {market.p_yes * 100:.2f}% at {market.url}.")
     elif not custom_question_input and market.is_scalar:
-        st.info(f"Current probability {market.p_up * 100:.2f}% at {market.url}.")
+        st.info(f"Current UP probability {market.p_up * 100:.2f}% at {market.url}.")
     else:
         st.info(f"Current question {market.question} at {market.url}.")
 
