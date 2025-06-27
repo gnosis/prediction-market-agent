@@ -75,6 +75,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGPT4oAgent_C,
     DeployablePredictionProphetGPT4oAgentCategorical,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
+    DeployablePredictionProphetGPT4oAgentScalar,
     DeployablePredictionProphetGPT4ominiAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
@@ -154,6 +155,7 @@ class RunnableAgent(str, Enum):
     berlin1_polysent_agent = "berlin1_polysent_agent"
     berlin2_search_high = "berlin2_search_high"
     berlin2_search_var = "berlin2_search_var"
+    prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -210,6 +212,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin1_polysent_agent: Berlin1PolySentAgent,
     RunnableAgent.berlin2_search_high: Berlin2OpenaiSearchAgentHigh,
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
+    RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
