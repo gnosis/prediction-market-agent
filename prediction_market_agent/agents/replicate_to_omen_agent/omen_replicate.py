@@ -41,6 +41,7 @@ from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
 )
+from prediction_market_agent.agents.replicate_to_omen_agent.llm import rephrase
 from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
@@ -132,9 +133,19 @@ def omen_replicate_from_tx(
         # Do as the last steps, because it calls OpenAI (costly & slow).
         if is_invalid(market.question):
             logger.info(
-                f"Skipping `{market.question}` because it seems to be an invalid question."
+                f"Skipping `{market.question}` was marked as invalid. Trying to rephrase and make it valid."
             )
-            continue
+            new_question = rephrase(market.question)
+            logger.info(f"Rephrased `{market.question}` to `{new_question}`.")
+
+            # Reinsert at the beginning of the list to reprocess with the new question
+            if is_invalid(new_question):
+                logger.info(
+                    f"Skipping `{new_question}` because it could not be rephrased into a valid question."
+                )
+                continue
+            else:
+                market.question = new_question
 
         if not is_predictable_binary(market.question):
             logger.info(
@@ -142,7 +153,8 @@ def omen_replicate_from_tx(
             )
             continue
 
-        if market.description and not is_predictable_without_description(
+        # We don't check this for Polymarket because, if is_predictable is false, we rephrase the question.
+        if market_type == MarketType.MANIFOLD and market.description and not is_predictable_without_description(
             market.question, market.description
         ):
             logger.info(

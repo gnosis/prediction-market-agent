@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "~3.11.0"
 python-dotenv = "*"
-openai = "*"
+openai = "<=1.91.0" # langchain needs path openai.resources.beta.chat
 langchain = "^0.3.0"
 langchain-experimental = "*"
 langchain-community = "*"
