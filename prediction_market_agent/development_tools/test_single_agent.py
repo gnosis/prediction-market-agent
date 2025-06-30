@@ -93,7 +93,7 @@ def test_single_agent(
         model_settings=ModelSettings(temperature=0.0),
     )
 
-    strategy = MultiCategoricalMaxAccuracyBettingStrategy(bet_amount=USD(10))
+    strategy = MultiCategoricalMaxAccuracyBettingStrategy(max_position_amount=USD(10))
     tester = ProphetAgentTester(
         prophet_research=execute_prophet_research(),
         prophet_predict=execute_prophet_predict(),
