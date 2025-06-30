@@ -72,6 +72,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGemini20Flash,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4oAgent_B,
+    DeployablePredictionProphetGPT4oAgent_C,
     DeployablePredictionProphetGPT4oAgentCategorical,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
     DeployablePredictionProphetGPT4ominiAgent,
@@ -114,6 +115,7 @@ class RunnableAgent(str, Enum):
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4o_b = "prophet_gpt4o_b"
+    prophet_gpt4o_c = "prophet_gpt4o_c"
     prophet_gpt4o_categorical = "prophet_gpt4o_categorical"
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
@@ -198,6 +200,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_claude35_haiku: DeployablePredictionProphetClaude35HaikuAgent,
     RunnableAgent.prophet_claude35_sonnet: DeployablePredictionProphetClaude35SonnetAgent,
     RunnableAgent.prophet_gpt4o_b: DeployablePredictionProphetGPT4oAgent_B,
+    RunnableAgent.prophet_gpt4o_c: DeployablePredictionProphetGPT4oAgent_C,
     RunnableAgent.prophet_gemini20flash: DeployablePredictionProphetGemini20Flash,
     RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
     RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,

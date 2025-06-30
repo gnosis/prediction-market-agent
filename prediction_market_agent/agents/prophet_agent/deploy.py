@@ -260,6 +260,53 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
         )
 
 
+class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
+    """
+    This agent is copy of `DeployablePredictionProphetGPT4oAgent_B`, but with a take_profit set to False, to see,
+    if it will maintain the performance, but with lower Tavily costs.
+    """
+
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_bet_amount=get_maximum_possible_bet_amount(
+                min_=USD(1),
+                max_=USD(5),
+                trading_balance=market.get_trade_balance(APIKeys()),
+                take_profit=False,
+            ),
+            max_price_impact=0.7,
+        )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            subqueries_limit=3,
+            min_scraped_sites=3,
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
 class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenRouter):
     bet_on_n_markets_per_run = 4
     model = "google/gemini-2.0-flash-001"
