@@ -263,7 +263,7 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
 class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
     """
     This agent is copy of `DeployablePredictionProphetGPT4oAgent_B`, but with a take_profit set to False, to see,
-    if it will maintain the performance, but with lower Tavily costs.
+    if it will increase the profits due to the larger final payout after market is resolved.
     """
 
     bet_on_n_markets_per_run = 4
