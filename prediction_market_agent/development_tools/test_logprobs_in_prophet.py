@@ -157,7 +157,7 @@ def test_logprobs_agent(
     )
 
     strategy = KellyBettingStrategy(
-        max_bet_amount=get_maximum_possible_bet_amount(
+        max_position_amount=get_maximum_possible_bet_amount(
             min_=USD(1),
             max_=USD(5),
             trading_balance=USD(10),
