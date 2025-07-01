@@ -271,13 +271,13 @@ class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
-                take_profit=False,
             ),
             max_price_impact=0.7,
+            take_profit=False,
         )
 
     def load(self) -> None:
