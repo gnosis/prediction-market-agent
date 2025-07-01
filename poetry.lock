@@ -9482,15 +9482,15 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.66.2"
+version = "0.66.3"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 markers = "implementation_name == \"cpython\" or implementation_name == \"pypy\""
 files = [
-    {file = "prediction_market_agent_tooling-0.66.2-py3-none-any.whl", hash = "sha256:eef1755f2ebf6b6f4e327904c3d94dc07ba0e15e8f163236e2b7bf3d818328dc"},
-    {file = "prediction_market_agent_tooling-0.66.2.tar.gz", hash = "sha256:958abfb6ec6c414f58a5f7e1e8a78244f37c977f57e11efe566c936046c39790"},
+    {file = "prediction_market_agent_tooling-0.66.3-py3-none-any.whl", hash = "sha256:304bd4a0393c1ba4328f724715048d9258d212685903eb421e771c8cdd4b32e0"},
+    {file = "prediction_market_agent_tooling-0.66.3.tar.gz", hash = "sha256:539b8e9b53708b2e6fa95a1619246c74c31ec98a918c1a00aa0e2b8a1cc6c87b"},
 ]
 
 [package.dependencies]
@@ -15470,4 +15470,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.11.0"
-content-hash = "c7b48184baecea0e2471a191e3a181fcf1c0900cbf216635fe13bea7d149463b"
+content-hash = "b4ce7327ab650ffc18b225738eaf123e1d072de8e5273da80cfc2b6e917a5abc"
