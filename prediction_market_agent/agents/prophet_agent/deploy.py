@@ -14,6 +14,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket, So
 from prediction_market_agent_tooling.markets.data_models import (
     CategoricalProbabilisticAnswer,
     ProbabilisticAnswer,
+    ScalarProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
@@ -35,6 +36,7 @@ from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.settings import ModelSettings
 
+from prediction_market_agent.agents.top_n_oai_model import TopNOpenAINModel
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import (
@@ -208,6 +210,78 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
                     provider=get_openai_provider(api_key=api_keys.openai_api_key),
                 ),
                 model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployableTraderAgentERScalar(DeployableTraderAgent):
+    agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = False
+
+    def answer_scalar_market(
+        self, market: AgentMarket
+    ) -> ScalarProbabilisticAnswer | None:
+        if market.upper_bound is None or market.lower_bound is None:
+            raise ValueError("Market upper and lower bounds must be set")
+        try:
+            prediction = self.agent.predict_scalar(
+                market.question, market.upper_bound, market.lower_bound
+            )
+        except UnexpectedModelBehavior as e:
+            (
+                logger.warning
+                if self.just_warn_on_unexpected_model_behavior
+                else logger.exception
+            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
+            return None
+        else:
+            logger.info(
+                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+            )
+            outcome_prediction = prediction.outcome_prediction
+            if not isinstance(outcome_prediction, ScalarProbabilisticAnswer):
+                return None
+            return outcome_prediction
+
+
+class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(1),
+    #             max_=USD(5),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                TopNOpenAINModel(
+                    model,
+                    n=5,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
             ),
             include_reasoning=True,
             logger=logger,
