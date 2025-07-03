@@ -9479,15 +9479,15 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.66.4"
+version = "0.66.5"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 markers = "implementation_name == \"cpython\" or implementation_name == \"pypy\""
 files = [
-    {file = "prediction_market_agent_tooling-0.66.4-py3-none-any.whl", hash = "sha256:5066c01cd29052daaa1428adf947cdf8b63c876ac306b4bebd1958cf48b42a30"},
-    {file = "prediction_market_agent_tooling-0.66.4.tar.gz", hash = "sha256:069613ef96f234f6204ebc8e31ef13a95c88aa8d979cfc78b3c95e77fc39009d"},
+    {file = "prediction_market_agent_tooling-0.66.5-py3-none-any.whl", hash = "sha256:fd3f222c7e85a73d9d240a42451a95b284b82a35a563b21eef795264500fe0f0"},
+    {file = "prediction_market_agent_tooling-0.66.5.tar.gz", hash = "sha256:ef3f31c28cf48a6e939ca55b6c4ca11650452b6d72abc0458d549f4e55bc0bc4"},
 ]
 
 [package.dependencies]
@@ -9572,7 +9572,7 @@ matplotlib = "^3.8.3"
 memory-profiler = "^0.61.0"
 openai = "^1.10.0"
 pandas = "^2.1.1"
-prediction-market-agent-tooling = {version = ">=0.65.3,<1", extras = ["google", "langchain"]}
+prediction-market-agent-tooling = {version = ">=0.66.4,<1", extras = ["google", "langchain"]}
 pyautogen = "^0.3.1"
 pydantic-ai = "^0.1.3"
 pysqlite3-binary = {version = "^0.5.2.post3", markers = "sys_platform == \"linux\""}
@@ -9593,7 +9593,7 @@ watchdog = "^3.0.0"
 type = "git"
 url = "https://github.com/agentcoinorg/predictionprophet.git"
 reference = "main"
-resolved_reference = "711fae233b5b3d442cca89541c05da1dfc61f58f"
+resolved_reference = "c4c3ab68ff60cd8ba00542449474d0ce307e76b8"
 
 [[package]]
 name = "preshed"
@@ -15467,4 +15467,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.11.0"
-content-hash = "a1c04c7623d9a683f2ebb288817235013f21ee0f3859ddb8d88f8749f6715bf7"
+content-hash = "30907ea8b93111bb917439ae4edd970927c6b52953ee5c3ce54a25cdbc82fa68"
