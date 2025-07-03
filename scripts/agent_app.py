@@ -132,7 +132,9 @@ def agent_app() -> None:
         )
     )
     fetch_scalar_markets = st.checkbox("Fetch scalar markets", value=False)
-    markets = get_binary_markets(42, market_source, fetch_scalar_markets=fetch_scalar_markets)
+    markets = get_binary_markets(
+        42, market_source, fetch_scalar_markets=fetch_scalar_markets
+    )
 
     # Ask the user to provide a question.
     custom_question_input = st.checkbox("Provide a custom question", value=False)
