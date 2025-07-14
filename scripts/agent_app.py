@@ -21,6 +21,9 @@ import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import (
+    MarketType as AgentMarketType,
+)
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -133,7 +136,11 @@ def agent_app() -> None:
     )
     fetch_scalar_markets = st.checkbox("Fetch scalar markets", value=False)
     markets = get_binary_markets(
-        42, market_source, fetch_scalar_markets=fetch_scalar_markets
+        42,
+        market_source,
+        agent_market_type=AgentMarketType.SCALAR
+        if fetch_scalar_markets
+        else AgentMarketType.BINARY,
     )
 
     # Ask the user to provide a question.
