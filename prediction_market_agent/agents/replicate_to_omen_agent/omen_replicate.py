@@ -42,6 +42,10 @@ from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.rephrase import rephrase
+from prediction_market_agent.db.models import ReplicatedMarket
+from prediction_market_agent.db.replicated_markets_table_handler import (
+    ReplicatedMarketsTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
@@ -57,12 +61,25 @@ def omen_replicate_from_tx(
     n_to_replicate: int,
     initial_funds: USD | CollateralToken,
     collateral_token_address: ChecksumAddress,
+    replicated_market_table_handler: ReplicatedMarketsTableHandler,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
-    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=10)
+    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
+
+    replicated_markets = (
+        replicated_market_table_handler.get_replicated_markets_from_market(
+            parent_market_type=market_type
+        )
+    )
+
+    excluded_questions = set(
+        [m.question_title for m in existing_markets]
+        + [i.parent_market_title for i in replicated_markets]
+        + [i.child_market_title for i in replicated_markets]
+    )
 
     markets = get_binary_markets(
         500 if market_type == MarketType.POLYMARKET else 1000,
@@ -73,7 +90,7 @@ def omen_replicate_from_tx(
             if market_type == MarketType.POLYMARKET
             else SortBy.CLOSING_SOONEST
         ),
-        excluded_questions=set(m.question_title for m in existing_markets),
+        excluded_questions=excluded_questions,
     )
     markets_sorted = sorted(
         markets,
@@ -85,6 +102,7 @@ def omen_replicate_from_tx(
         for m in markets_sorted
         if close_time_before is None
         or (m.close_time is not None and m.close_time <= close_time_before)
+        or m.question in excluded_questions
     ]
     if not markets_to_replicate:
         logger.info(f"No markets found for {market_type}")
@@ -97,8 +115,13 @@ def omen_replicate_from_tx(
 
     created_addresses: list[ChecksumAddress] = []
     created_questions: set[str] = set()
+    new_replicated_markets: list[ReplicatedMarket] = []
 
     for market in markets_to_replicate:
+        parent_market_question = market.question
+        # We initially consider that market does not need to be rephrased.
+        was_rephrased = False
+
         if len(created_addresses) >= n_to_replicate:
             logger.info(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
@@ -145,6 +168,7 @@ def omen_replicate_from_tx(
                 continue
             else:
                 market.question = new_question
+                was_rephrased = True
 
         if not is_predictable_binary(market.question):
             logger.info(
@@ -152,9 +176,9 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # We don't check this for Polymarket because, if is_predictable is false, we rephrase the question and re-assess it.
+        # We don't check this for the was_rephrased case because the question was already considered predictable.
         if (
-            market_type == MarketType.MANIFOLD
+            not was_rephrased
             and market.description
             and not is_predictable_without_description(
                 market.question, market.description
@@ -204,6 +228,17 @@ def omen_replicate_from_tx(
         )
         created_addresses.append(market_address)
         created_questions.add(market.question)
+
+        new_replicated_markets.append(
+            ReplicatedMarket(
+                parent_market_type=market_type.value,
+                parent_market_id=market.id,
+                child_market_id=market_address,
+                parent_market_title=parent_market_question,
+                child_market_title=market.question,
+            )
+        )
+
         logger.info(
             f"Created `{created_market.url}` for `{market.question}` in category {category} out of {market.url}."
         )
@@ -214,6 +249,8 @@ def omen_replicate_from_tx(
             api_keys,
         )
 
+    # We save replicated markets so that we don't replicate the same market twice.
+    replicated_market_table_handler.save_replicated_markets(new_replicated_markets)
     return created_addresses
 
 

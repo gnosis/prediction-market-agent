@@ -16,7 +16,6 @@ from prediction_market_agent_tooling.markets.omen.omen_constants import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     SAFE_COLLATERAL_TOKENS_ADDRESSES,
 )
-from prediction_market_agent_tooling.tools.contract import ContractERC20OnGnosisChain
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -29,6 +28,10 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
 )
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
+)
+from prediction_market_agent.agents.safe_watch_agent.utils import is_erc20_contract
+from prediction_market_agent.db.replicated_markets_table_handler import (
+    ReplicatedMarketsTableHandler,
 )
 from prediction_market_agent.utils import APIKeys
 
@@ -115,13 +118,10 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                     replicate_config.collateral_token
                 )
                 # make sure it's ERC20
-                try:
-                    ContractERC20OnGnosisChain(
-                        address=collateral_token_address
-                    ).symbol()
-                except Exception as e:
+
+                if not is_erc20_contract(address=collateral_token_address):
                     raise ValueError(
-                        f"Collateral token {collateral_token_address} is not an ERC20. {e=}"
+                        f"Collateral token {collateral_token_address} is not an ERC20."
                     )
             else:
                 # Prefer sDai, but create markets in others tokens too.
@@ -140,6 +140,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             logger.info(
                 f"Replicating {replicate_config.n} from {replicate_config.source} markets closing in {replicate_config.close_time_up_to_n_days} days."
             )
+
             omen_replicate_from_tx(
                 market_type=replicate_config.source,
                 n_to_replicate=replicate_config.n,
@@ -147,6 +148,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 collateral_token_address=collateral_token_address,
                 api_keys=keys,
                 close_time_before=close_time_before,
+                replicated_market_table_handler=ReplicatedMarketsTableHandler(),
                 auto_deposit=True,
             )
 
