@@ -24,10 +24,6 @@ from web3 import Web3
 
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate import (
     omen_replicate_from_tx,
-    omen_unfund_replicated_known_markets_tx,
-)
-from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
-    omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
 )
 from prediction_market_agent.agents.safe_watch_agent.utils import is_erc20_contract
 from prediction_market_agent.db.replicated_markets_table_handler import (
@@ -53,7 +49,7 @@ class ReplicateConfig(BaseModel):
     every_n_days: int  # This configuration should execute every N days.
     source: MarketType
     collateral_token: str | None = None
-    initial_funds_in_token: int | None = None
+    initial_funds_in_token: CollateralToken | None = None
 
 
 class ReplicateSettings(BaseSettings):
@@ -88,14 +84,14 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
         logger.info(
             f"Unfunding soon to be known markets replicated by {keys.bet_from_address}."
         )
-        omen_unfund_replicated_known_markets_tx(keys, saturation_above_threshold=0.9)
+        # omen_unfund_replicated_known_markets_tx(keys, saturation_above_threshold=0.9)
 
         logger.info(
             f"Finalising, resolving and claiming back xDai from existing markets replicated by {keys.bet_from_address}."
         )
-        omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
-            keys, realitio_bond=REPLICATOR_BOND
-        )
+        # omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
+        #     keys, realitio_bond=REPLICATOR_BOND
+        # )
 
         for replicate_config in settings.REPLICATE:
             if now.timetuple().tm_yday % replicate_config.every_n_days:
@@ -107,7 +103,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             )
             # Use the initial funds from market, otherwise use the global initial_funds variable.
             initial_funds_per_market: USD | CollateralToken = (
-                CollateralToken(replicate_config.initial_funds_in_token)
+                replicate_config.initial_funds_in_token
                 if replicate_config.initial_funds_in_token
                 else settings.initial_funds_usd
             )

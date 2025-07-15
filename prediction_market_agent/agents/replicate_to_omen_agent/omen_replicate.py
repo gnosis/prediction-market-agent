@@ -67,7 +67,7 @@ def omen_replicate_from_tx(
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
-    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
+    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=50)
 
     replicated_markets = (
         replicated_market_table_handler.get_replicated_markets_from_market(
@@ -184,10 +184,18 @@ def omen_replicate_from_tx(
                 market.question, market.description
             )
         ):
+            # We try rephrasing the question to combine elements of the description into the question.
+            new_question = rephrase(market.question + market.description)
             logger.info(
-                f"Skipping `{market.question}` because it seems to not be predictable without the description `{market.description}`."
+                f"Rephrased `{market.question}` to `{new_question}` with the description `{market.description}`."
             )
-            continue
+            if not is_predictable_without_description(new_question, market.description):
+                logger.info(
+                    f"Skipping `{market.question}` because it could not be rephrased into a valid question without the description `{market.description}`. The rephrased question was `{new_question}`."
+                )
+                continue
+            else:
+                market.question = new_question
 
         category = infer_category(market.question, existing_categories)
         # Realitio will allow new categories or misformated categories, so double check that the LLM got it right.
