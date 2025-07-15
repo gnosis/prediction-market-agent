@@ -38,7 +38,7 @@ class InvalidAgent(DeployableTraderAgent):
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         # Keep Kelly here! See `answer_binary_market`.
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),

@@ -21,6 +21,9 @@ import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import (
+    MarketType as AgentMarketType,
+)
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
     get_binary_markets,
@@ -33,6 +36,7 @@ from prediction_market_agent.agents.known_outcome_agent.deploy import (
 from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployableOlasEmbeddingOAAgent,
     DeployablePredictionProphetGPT4oAgent,
+    DeployablePredictionProphetGPT4oAgentScalar,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
     DeployablePredictionProphetGPTo1MiniAgent,
@@ -55,6 +59,7 @@ SupportedAgentType: t.TypeAlias = (
     | type[DeployablePredictionProphetGPT4TurboPreviewAgent]
     | type[DeployablePredictionProphetGPT4TurboFinalAgent]
     | type[DeployableOlasEmbeddingOAAgent]
+    | type[DeployablePredictionProphetGPT4oAgentScalar]
     | type[DeployablePredictionProphetGPTo1PreviewAgent]
     | type[DeployablePredictionProphetGPTo1MiniAgent]
 )
@@ -67,6 +72,7 @@ AGENTS: list[SupportedAgentType] = [
     DeployablePredictionProphetGPT4TurboPreviewAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployableOlasEmbeddingOAAgent,
+    DeployablePredictionProphetGPT4oAgentScalar,
     DeployablePredictionProphetGPTo1PreviewAgent,
     DeployablePredictionProphetGPTo1MiniAgent,
 ]
@@ -128,7 +134,14 @@ def agent_app() -> None:
             [market_source.value for market_source in MarketType],
         )
     )
-    markets = get_binary_markets(42, market_source)
+    fetch_scalar_markets = st.checkbox("Fetch scalar markets", value=False)
+    markets = get_binary_markets(
+        42,
+        market_source,
+        agent_market_type=AgentMarketType.SCALAR
+        if fetch_scalar_markets
+        else AgentMarketType.BINARY,
+    )
 
     # Ask the user to provide a question.
     custom_question_input = st.checkbox("Provide a custom question", value=False)
@@ -148,8 +161,12 @@ def agent_app() -> None:
         else markets[0].model_copy(update={"question": question, "current_p_yes": 0.5})
     )
 
-    if not custom_question_input:
+    if not custom_question_input and market.is_binary:
         st.info(f"Current probability {market.p_yes * 100:.2f}% at {market.url}.")
+    elif not custom_question_input and market.is_scalar:
+        st.info(f"Current UP probability {market.p_up * 100:.2f}% at {market.url}.")
+    else:
+        st.info(f"Current question {market.question} at {market.url}.")
 
     skip_market_verification = st.checkbox(
         "Skip market verification", value=False, key="skip_market_verification"

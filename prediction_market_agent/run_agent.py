@@ -72,8 +72,10 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
     DeployablePredictionProphetGemini20Flash,
     DeployablePredictionProphetGPT4oAgent,
     DeployablePredictionProphetGPT4oAgent_B,
+    DeployablePredictionProphetGPT4oAgent_C,
     DeployablePredictionProphetGPT4oAgentCategorical,
     DeployablePredictionProphetGPT4oAgentNewMarketTrader,
+    DeployablePredictionProphetGPT4oAgentScalar,
     DeployablePredictionProphetGPT4ominiAgent,
     DeployablePredictionProphetGPT4TurboFinalAgent,
     DeployablePredictionProphetGPT4TurboPreviewAgent,
@@ -114,6 +116,7 @@ class RunnableAgent(str, Enum):
     metaculus_bot_tournament_agent = "metaculus_bot_tournament_agent"
     prophet_gpt4o = "prophet_gpt4o"
     prophet_gpt4o_b = "prophet_gpt4o_b"
+    prophet_gpt4o_c = "prophet_gpt4o_c"
     prophet_gpt4o_categorical = "prophet_gpt4o_categorical"
     prophet_gpt4o_new_market_trader = "prophet_gpt4o_new_market_trader"
     prophet_gpt4 = "prophet_gpt4"
@@ -152,6 +155,7 @@ class RunnableAgent(str, Enum):
     berlin1_polysent_agent = "berlin1_polysent_agent"
     berlin2_search_high = "berlin2_search_high"
     berlin2_search_var = "berlin2_search_var"
+    prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -198,6 +202,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_claude35_haiku: DeployablePredictionProphetClaude35HaikuAgent,
     RunnableAgent.prophet_claude35_sonnet: DeployablePredictionProphetClaude35SonnetAgent,
     RunnableAgent.prophet_gpt4o_b: DeployablePredictionProphetGPT4oAgent_B,
+    RunnableAgent.prophet_gpt4o_c: DeployablePredictionProphetGPT4oAgent_C,
     RunnableAgent.prophet_gemini20flash: DeployablePredictionProphetGemini20Flash,
     RunnableAgent.prophet_deepseekr1: DeployablePredictionProphetDeepSeekR1,
     RunnableAgent.prophet_deepseekchat: DeployablePredictionProphetDeepSeekChat,
@@ -207,6 +212,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin1_polysent_agent: Berlin1PolySentAgent,
     RunnableAgent.berlin2_search_high: Berlin2OpenaiSearchAgentHigh,
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
+    RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

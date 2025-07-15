@@ -14,6 +14,7 @@ from prediction_market_agent_tooling.markets.agent_market import AgentMarket, So
 from prediction_market_agent_tooling.markets.data_models import (
     CategoricalProbabilisticAnswer,
     ProbabilisticAnswer,
+    ScalarProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
@@ -35,6 +36,7 @@ from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.settings import ModelSettings
 
+from prediction_market_agent.agents.top_n_oai_model import TopNOpenAINModel
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import (
@@ -139,7 +141,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -181,7 +183,7 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
     #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #         max_position_amount=get_maximum_possible_bet_amount(
     #             min_=USD(1),
     #             max_=USD(5),
     #             trading_balance=market.get_trade_balance(APIKeys()),
@@ -214,6 +216,78 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
         )
 
 
+class DeployableTraderAgentERScalar(DeployableTraderAgent):
+    agent: PredictionProphetAgent
+    bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = False
+
+    def answer_scalar_market(
+        self, market: AgentMarket
+    ) -> ScalarProbabilisticAnswer | None:
+        if market.upper_bound is None or market.lower_bound is None:
+            raise ValueError("Market upper and lower bounds must be set")
+        try:
+            prediction = self.agent.predict_scalar(
+                market.question, market.upper_bound, market.lower_bound
+            )
+        except UnexpectedModelBehavior as e:
+            (
+                logger.warning
+                if self.just_warn_on_unexpected_model_behavior
+                else logger.exception
+            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
+            return None
+        else:
+            logger.info(
+                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+            )
+            outcome_prediction = prediction.outcome_prediction
+            if not isinstance(outcome_prediction, ScalarProbabilisticAnswer):
+                return None
+            return outcome_prediction
+
+
+class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    # TODO: Uncomment and configure after we get some historic bet data
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return KellyBettingStrategy(
+    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(1),
+    #             max_=USD(5),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.7,
+    #     )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                TopNOpenAINModel(
+                    model,
+                    n=5,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
 class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     """
     This agent is copy of `DeployablePredictionProphetGPT4oAgent` but with a less internet searches to see,
@@ -225,12 +299,59 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
             ),
             max_price_impact=0.7,
+        )
+
+    def load(self) -> None:
+        super().load()
+        model = "gpt-4o-2024-08-06"
+        api_keys = APIKeys()
+
+        self.agent = PredictionProphetAgent(
+            subqueries_limit=3,
+            min_scraped_sites=3,
+            research_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.7),
+            ),
+            prediction_agent=Agent(
+                OpenAIModel(
+                    model,
+                    provider=get_openai_provider(api_key=api_keys.openai_api_key),
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+            ),
+            include_reasoning=True,
+            logger=logger,
+        )
+
+
+class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
+    """
+    This agent is copy of `DeployablePredictionProphetGPT4oAgent_B`, but with a take_profit set to False, to see,
+    if it will increase the profits due to the larger final payout after market is resolved.
+    """
+
+    bet_on_n_markets_per_run = 4
+    agent: PredictionProphetAgent
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return KellyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(1),
+                max_=USD(5),
+                trading_balance=market.get_trade_balance(APIKeys()),
+            ),
+            max_price_impact=0.7,
+            take_profit=False,
         )
 
     def load(self) -> None:
@@ -266,7 +387,7 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(6.5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -283,7 +404,7 @@ class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRout
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MultiCategoricalMaxAccuracyBettingStrategy(
-            bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(6.5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -297,7 +418,7 @@ class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRo
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
     #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #         max_position_amount=get_maximum_possible_bet_amount(
     #             min_=USD(1), max_=USD(5), trading_balance=market.get_trade_balance(APIKeys())
     #         ),
     #         max_price_impact=0.7,
@@ -310,7 +431,7 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(3.5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -385,7 +506,7 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -423,7 +544,7 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -461,7 +582,7 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(5),
                 max_=USD(25),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -499,7 +620,7 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(2),
                 max_=USD(6),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -538,7 +659,7 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -578,7 +699,7 @@ class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
     #     return KellyBettingStrategy(
-    #         max_bet_amount=get_maximum_possible_bet_amount(
+    #         max_position_amount=get_maximum_possible_bet_amount(
     #             min_=USD(1), max_=USD(5), trading_balance=market.get_trade_balance(APIKeys())
     #         ),
     #         max_price_impact=None,
@@ -615,7 +736,7 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MaxExpectedValueBettingStrategy(
-            bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(0.5),
                 max_=USD(1),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -653,7 +774,7 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(0.5),
                 max_=USD(1),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -695,7 +816,7 @@ class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(2.77),
                 trading_balance=market.get_trade_balance(APIKeys()),
@@ -737,7 +858,7 @@ class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(
-            max_bet_amount=get_maximum_possible_bet_amount(
+            max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(4.77),
                 trading_balance=market.get_trade_balance(APIKeys()),
