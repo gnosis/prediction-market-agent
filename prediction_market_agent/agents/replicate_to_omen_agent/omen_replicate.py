@@ -41,7 +41,7 @@ from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
 )
-from prediction_market_agent.agents.replicate_to_omen_agent.llm import rephrase
+from prediction_market_agent.agents.replicate_to_omen_agent.rephrase import rephrase
 from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
@@ -135,10 +135,9 @@ def omen_replicate_from_tx(
             logger.info(
                 f"Skipping `{market.question}` was marked as invalid. Trying to rephrase and make it valid."
             )
+            # We try rephrasing the question to make it valid, and run the validity check again.
             new_question = rephrase(market.question)
             logger.info(f"Rephrased `{market.question}` to `{new_question}`.")
-
-            # Reinsert at the beginning of the list to reprocess with the new question
             if is_invalid(new_question):
                 logger.info(
                     f"Skipping `{new_question}` because it could not be rephrased into a valid question."
@@ -153,9 +152,13 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # We don't check this for Polymarket because, if is_predictable is false, we rephrase the question.
-        if market_type == MarketType.MANIFOLD and market.description and not is_predictable_without_description(
-            market.question, market.description
+        # We don't check this for Polymarket because, if is_predictable is false, we rephrase the question and re-assess it.
+        if (
+            market_type == MarketType.MANIFOLD
+            and market.description
+            and not is_predictable_without_description(
+                market.question, market.description
+            )
         ):
             logger.info(
                 f"Skipping `{market.question}` because it seems to not be predictable without the description `{market.description}`."
