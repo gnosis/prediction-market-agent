@@ -595,8 +595,8 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
-        # o1-preview supports only temperature=1.0
-        model = "o1-preview-2024-09-12"
+        # o3 supports only temperature=1.0
+        model = "o3"  # Originally, this agent used o1-preview, but they deprecated it and removing from APIs.
         api_keys = APIKeys()
 
         self.agent = PredictionProphetAgent(
