@@ -30,7 +30,6 @@ from prediction_prophet.benchmark.agents import (
     PredictionProphetAgent,
 )
 from pydantic_ai import Agent
-from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
