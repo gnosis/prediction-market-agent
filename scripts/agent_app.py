@@ -20,9 +20,9 @@ import time
 import typing as t
 
 from prediction_market_agent_tooling.config import APIKeys
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.agent_market import (
-    MarketType as AgentMarketType,
+    AgentMarket,
+    QuestionType,
 )
 from prediction_market_agent_tooling.markets.markets import (
     MarketType,
@@ -138,9 +138,9 @@ def agent_app() -> None:
     markets = get_binary_markets(
         42,
         market_source,
-        agent_market_type=AgentMarketType.SCALAR
-        if fetch_scalar_markets
-        else AgentMarketType.BINARY,
+        question_type=(
+            QuestionType.SCALAR if fetch_scalar_markets else QuestionType.BINARY
+        ),
     )
 
     # Ask the user to provide a question.
