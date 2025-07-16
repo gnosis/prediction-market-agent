@@ -49,54 +49,32 @@ from prediction_market_agent.utils import (
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
     bet_on_n_markets_per_run = 2
-    just_warn_on_unexpected_model_behavior = False
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        try:
-            prediction = self.agent.predict(market.question)
-        except UnexpectedModelBehavior as e:
-            (
-                logger.warning
-                if self.just_warn_on_unexpected_model_behavior
-                else logger.exception
-            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
-            return None
-        else:
-            logger.info(
-                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
-            )
-            outcome_prediction = prediction.outcome_prediction
-            return (
-                outcome_prediction.to_probabilistic_answer()
-                if outcome_prediction is not None
-                else None
-            )
+        prediction = self.agent.predict(market.question)
+        logger.info(
+            f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+        )
+        outcome_prediction = prediction.outcome_prediction
+        return (
+            outcome_prediction.to_probabilistic_answer()
+            if outcome_prediction is not None
+            else None
+        )
 
 
 class DeployableTraderAgentERCategorical(DeployableTraderAgent):
     agent: PredictionProphetAgent
     bet_on_n_markets_per_run = 2
-    just_warn_on_unexpected_model_behavior = False
 
     def answer_categorical_market(
         self, market: AgentMarket
     ) -> CategoricalProbabilisticAnswer | None:
-        try:
-            prediction = self.agent.predict_categorical(
-                market.question, market.outcomes
-            )
-        except UnexpectedModelBehavior as e:
-            (
-                logger.warning
-                if self.just_warn_on_unexpected_model_behavior
-                else logger.exception
-            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
-            return None
-        else:
-            logger.info(
-                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
-            )
-            return prediction.outcome_prediction
+        prediction = self.agent.predict_categorical(market.question, market.outcomes)
+        logger.info(
+            f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+        )
+        return prediction.outcome_prediction
 
 
 class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
@@ -219,32 +197,20 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
 class DeployableTraderAgentERScalar(DeployableTraderAgent):
     agent: PredictionProphetAgent
     bet_on_n_markets_per_run = 2
-    just_warn_on_unexpected_model_behavior = False
 
     def answer_scalar_market(
         self, market: AgentMarket
     ) -> ScalarProbabilisticAnswer | None:
         if market.upper_bound is None or market.lower_bound is None:
             raise ValueError("Market upper and lower bounds must be set")
-        try:
-            prediction = self.agent.predict_scalar(
-                market.question, market.upper_bound, market.lower_bound
-            )
-        except UnexpectedModelBehavior as e:
-            (
-                logger.warning
-                if self.just_warn_on_unexpected_model_behavior
-                else logger.exception
-            )(f"Unexpected model behaviour in {self.__class__.__name__}: {e}")
-            return None
-        else:
-            logger.info(
-                f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
-            )
-            outcome_prediction = prediction.outcome_prediction
-            if not isinstance(outcome_prediction, ScalarProbabilisticAnswer):
-                return None
-            return outcome_prediction
+        prediction = self.agent.predict_scalar(
+            market.question, market.upper_bound, market.lower_bound
+        )
+        logger.info(
+            f"Answering '{market.question}' with '{prediction.outcome_prediction}'."
+        )
+        outcome_prediction = prediction.outcome_prediction
+        return outcome_prediction
 
 
 class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
