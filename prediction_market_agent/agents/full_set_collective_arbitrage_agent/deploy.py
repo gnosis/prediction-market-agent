@@ -8,20 +8,28 @@ from prediction_market_agent_tooling.markets.probabilistic_answer import Probabi
 from prediction_market_agent_tooling.markets.probability import Probability
 from prediction_market_agent_tooling.markets.data_models import CategoricalProbabilisticAnswer, Trade, PlacedTrade, TradeType, USD
 from prediction_market_agent_tooling.tools.tokens.slippage import get_slippage_tolerance_per_token
-from prediction_market_agent_tooling.gtypes import CollateralToken, OutcomeToken
+from prediction_market_agent_tooling.gtypes import CollateralToken, OutcomeToken, Wei, ChecksumAddress
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.config import APIKeys
+from prediction_market_agent_tooling.markets.seer.seer import SeerAgentMarket
+from prediction_market_agent_tooling.markets.seer.seer_contracts import SwaprRouterContract
+from prediction_market_agent_tooling.markets.seer.data_models import ExactInputSingleParams
+from prediction_market_agent_tooling.tools.contract import ContractERC20OnGnosisChain
+from web3 import Web3
 
 
 class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
+    supported_markets = [MarketType.SEER]
+
     def __init__(self):
         super().__init__()
         self.epsilon = 0.003  # 0.3% error margin for probabilities as rounding error
+        self.swapr_router = SwaprRouterContract()
 
     def run(self, market_type: MarketType) -> None:
-        if market_type != MarketType.OMEN:
+        if market_type not in self.supported_markets:
             raise RuntimeError(
-                "Can arbitrage only on Omen since related markets embeddings available only for Omen markets."
+                f"Can arbitrage only on {self.supported_markets} markets."
             )
         super().run(market_type=market_type)
 
@@ -29,16 +37,124 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         self,
         market_type: MarketType,
     ) -> t.Sequence[AgentMarket]:
-        cls = market_type.market_class
 
         # Fetch all markets to choose from
-        available_markets = cls.get_markets(
+        available_markets = SeerAgentMarket.get_markets(
             limit=self.n_markets_to_fetch,
             sort_by=self.get_markets_sort_by,
             filter_by=self.get_markets_filter_by,
             created_after=self.trade_on_markets_created_after,
+            include_conditional_markets=True,
         )
         return available_markets
+
+    def _ensure_allowance(
+        self,
+        token_address: ChecksumAddress,
+        spender_address: ChecksumAddress,
+        amount_wei: Wei,
+        api_keys: APIKeys,
+        web3: Web3 | None = None,
+    ) -> None:
+
+        erc20_token = ContractERC20OnGnosisChain(address=token_address)
+        current_allowance = erc20_token.allowance(
+            owner=api_keys.bet_from_address,
+            for_address=spender_address,
+            web3=web3,
+        )
+        
+        if current_allowance < amount_wei:
+            logger.info(f"Insufficient allowance for {token_address}. Current: {current_allowance.value}, needed: {amount_wei.value}. Approving...")
+            erc20_token.approve(
+                api_keys=api_keys,
+                for_address=spender_address,
+                amount_wei=amount_wei,
+                web3=web3,
+            )
+            logger.info(f"Approved {amount_wei.value} tokens for {spender_address}")
+        else:
+            logger.debug(f"Sufficient allowance already exists: {current_allowance.value} >= {amount_wei.value}")
+
+    def _get_buy_price(
+        self, 
+        market: SeerAgentMarket, 
+        outcome: OutcomeStr, 
+        amount_to_spend: Wei,
+        from_address: ChecksumAddress,
+        api_keys: APIKeys | None = None
+    ) -> Wei | None:
+        """
+        Use SwaprRouter's calc_exact_input_single to get accurate price without approximations.
+        Similar to Omen's calcBuyAmount function.
+        
+        Args:
+            market: The Seer market
+            outcome: The outcome to buy
+            amount_to_spend: Amount of collateral to spend in Wei
+            from_address: Address to simulate the call from
+            api_keys: API keys for allowance management
+            
+        Returns:
+            Amount of outcome tokens that would be received, or None if calculation fails
+        """
+        try:
+            outcome_token_address = market.get_wrapped_token_for_outcome(outcome)
+            collateral_token_address = market.collateral_token_contract_address_checksummed
+            
+            params = ExactInputSingleParams(
+                token_in=collateral_token_address,
+                token_out=outcome_token_address,
+                recipient=from_address,
+                amount_in=amount_to_spend,
+                amount_out_minimum=Wei(0),  # We just want to simulate, not enforce minimum
+            )
+            
+            # Use provided api_keys or create new ones
+            keys = api_keys or APIKeys()
+            
+            return self.swapr_router.calc_exact_input_single(
+                params=params,
+                from_address=from_address,
+                api_keys=keys
+            )
+            
+        except Exception as e:
+            logger.warning(f"Failed to get accurate buy price for {outcome}: {e}")
+            return None
+
+    def _get_sell_price(
+        self, 
+        market: SeerAgentMarket, 
+        outcome: OutcomeStr, 
+        tokens_to_sell: Wei,
+        from_address: ChecksumAddress,
+        api_keys: APIKeys | None = None
+    ) -> Wei | None:
+        try:
+            outcome_token_address = market.get_wrapped_token_for_outcome(outcome)
+            collateral_token_address = market.collateral_token_contract_address_checksummed
+            
+            params = ExactInputSingleParams(
+                token_in=outcome_token_address,
+                token_out=collateral_token_address,
+                recipient=from_address,
+                amount_in=tokens_to_sell,
+                amount_out_minimum=Wei(0),  
+            )
+            
+            # Use provided api_keys or create new ones
+            keys = api_keys or APIKeys()
+            
+            return self.swapr_router.calc_exact_input_single(
+                params=params,
+                from_address=from_address,
+                api_keys=keys
+            )
+            
+        except Exception as e:
+            logger.warning(f"Failed to get accurate sell price for {outcome}: {e}")
+            return None
 
     def process_market(
         self,
@@ -62,17 +178,17 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 return None
             
         prob_summed = sum(market.probabilities.values())
-        over_estimated_prob = prob_summed > 1 + self.epsilon
-        under_estimated_prob = prob_summed < 1 - self.epsilon
+        overestimated_prob = prob_summed > 1 + self.epsilon
+        underestimated_prob = prob_summed < 1 - self.epsilon
 
-        if over_estimated_prob or under_estimated_prob:
+        if overestimated_prob or underestimated_prob:
             logger.info(f"Market '{market.question}' has probabilities that don't sum to 1. Sum: {prob_summed}")
 
             try:
                 placed_trades: list[PlacedTrade] = []
                 arbitrage_type = ""
                 
-                if under_estimated_prob:
+                if underestimated_prob:
                     logger.info("Under-estimated probabilities detected - buy low, sell high arbitrage")
                     arbitrage_type = "under-estimated"
                     max_sets_to_arbitrage = self.max_sets_to_buy(market)
@@ -86,7 +202,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                             sell_trades = self._sell_complete_sets(market, max_sets_to_arbitrage)
                             placed_trades.extend(sell_trades)
 
-                if over_estimated_prob:
+                if overestimated_prob:
                     logger.info("Over-estimated probabilities detected - mint and sell arbitrage")
                     arbitrage_type = "over-estimated"
                     # For over-estimated: mint complete sets (cost 1.0) then sell (get > 1.0)
@@ -113,45 +229,25 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         return None
                 
     def max_sets_to_buy(self, market: AgentMarket) -> int:
-        """
-        Calculate the maximum number of complete sets to buy before arbitrage opportunity disappears.
-        
-        For under-estimated probabilities (sum < 1), we can buy complete sets for less than 1 unit
-        but they always pay out 1 unit, creating risk-free profit.
-        
-        This function accounts for:
-        1. Market impact (slippage) as we buy more tokens
-        2. Fees
-        3. Limited liquidity in outcome token pools
-        
-        Note: This assumes outcome_token_pool has been validated in process_market
-        """
+
         quantity = 0
         
         while True:
-            # Calculate marginal cost of buying the (quantity+1)-th complete set
+            # Calculate marginal cost of buying the (quantity+1)-th complete set using accurate pricing
             marginal_cost = 0
             
             for outcome in market.outcomes:
+                # Amount to spend on this outcome for one more complete set
                 prob = market.probabilities[outcome]
-                pool_size = market.outcome_token_pool[outcome].value
+                amount_to_spend = Wei(int(prob * 10**18))  # 1 token worth proportional to probability
                 
-                # Check if there's enough liquidity - if not, raise error - it does not make sense to mint
-                # because price will be 1 and we will loose edge that we have for this arbitrage opportunity
-                if pool_size <= quantity + 1:
-                    raise ValueError(f"Insufficient liquidity for outcome '{outcome}' (pool size: {pool_size}, needed: {quantity + 1})")
-                
-                slippage_tolerance = get_slippage_tolerance_per_token(
-                    market.collateral_token_contract_address_checksummed, 
-                    outcome
+                # Get accurate price from SwaprRouter
+                api_keys = APIKeys()
+                tokens_received = self._get_buy_price(
+                    market, outcome, amount_to_spend, api_keys.bet_from_address, api_keys
                 )
                 
-                # Calculate price impact: buying (quantity+1) tokens from a pool
-                # Using constant product market maker formula approximation
-                price_with_slippage = prob * (1 + slippage_tolerance)
-                price_impact = price_with_slippage * (pool_size / (pool_size - (quantity + 1)))
-                
-                marginal_cost += price_impact
+                marginal_cost += amount_to_spend.value / tokens_received.value
             
             # Add fees to marginal cost
             marginal_cost *= (1 + market.fees.bet_proportion)
@@ -168,46 +264,26 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 logger.warning("Hit safety limit of 1000 sets")
                 break
                 
+        logger.info(f"Using accurate pricing: can buy {quantity} complete sets profitably")
         return quantity
     
     def max_sets_to_mint(self, market: AgentMarket) -> int:
-        """
-        Calculate the optimal number of complete sets to mint for over-estimated arbitrage.
-        
-        For over-estimated probabilities (sum > 1), we:
-        1. Mint complete sets (cost: quantity * 1.0)
-        2. Sell all outcome tokens (revenue: quantity * sum(probabilities) - slippage)
-        3. Profit = revenue - cost
-        
-        Returns optimal quantity where marginal profit = marginal cost increase
-        """
         quantity = 0
         
         while True:
-            # Calculate marginal revenue from selling the (quantity+1)-th complete set
             marginal_revenue = 0
             
             for outcome in market.outcomes:
+                # Amount of tokens to sell for this outcome
                 prob = market.probabilities[outcome]
-                pool_size = market.outcome_token_pool[outcome].value
+                tokens_to_sell = Wei(int(prob * 10**18))  # 1 token worth proportional to probability
                 
-                # Check liquidity constraint - we need to be able to sell tokens
-                if pool_size <= quantity + 1:
-                    logger.warning(f"Insufficient sell liquidity for outcome '{outcome}' (pool size: {pool_size}, trying to sell: {quantity + 1})")
-                    raise ValueError("Insufficient sell liquidity")
-                
-                # Calculate price impact when selling (quantity+1) tokens to the pool
-                slippage_tolerance = get_slippage_tolerance_per_token(
-                    market.collateral_token_contract_address_checksummed, 
-                    outcome
+                # Get accurate sell price from SwaprRouter
+                api_keys = APIKeys()
+                collateral_received = self._get_sell_price(
+                    market, outcome, tokens_to_sell, api_keys.bet_from_address, api_keys
                 )
-                
-                # For selling, price decreases as we dump more tokens into the pool
-                # Using AMM formula: selling reduces the price we get
-                base_price = prob
-                price_impact = base_price * (1 - slippage_tolerance) * (pool_size / (pool_size + (quantity + 1)))
-                
-                marginal_revenue += price_impact
+                marginal_revenue += collateral_received.value / 10**18  # Convert from Wei
             
             # Subtract selling fees from marginal revenue
             marginal_revenue *= (1 - market.fees.bet_proportion)
@@ -227,6 +303,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 logger.warning("Hit safety limit of 1000 sets for minting")
                 break
                 
+        logger.info(f"Using accurate pricing: can mint {quantity} complete sets profitably")
         return quantity
 
     def _buy_complete_sets(self, market: AgentMarket, quantity: int) -> list[PlacedTrade]:
@@ -234,6 +311,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         
         placed_trades: list[PlacedTrade] = []
         try:
+            api_keys = APIKeys()
             for outcome in market.outcomes:
                 probability = market.probabilities[outcome]
                 amount_for_outcome = USD(quantity * probability)
@@ -247,7 +325,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 )
                 
                 if expected_profit > slippage_cost:
-                    logger.info(f"Buying {amount_for_outcome} worth of '{outcome}' tokens (profit: {expected_profit}, costs: {total_costs})")
+                    logger.info(f"Buying {amount_for_outcome} worth of '{outcome}' tokens (profit: {expected_profit}, costs: {slippage_cost})")
                     trade_id = market.buy_tokens(outcome=outcome, amount=amount_for_outcome)
                     
                     placed_trade = PlacedTrade(
@@ -332,7 +410,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 amount=mint_amount,
                 api_keys=api_keys
             )
-            tokens_to_sell = OutcomeToken(mint_amount.value) # TODO: check if this is correct
+            tokens_to_sell = OutcomeToken(mint_amount.value)
             placed_trades.extend(self._sell_complete_sets(market, optimal_sets))
             
             return placed_trades
