@@ -118,3 +118,18 @@ class ReportNFTGame(SQLModel, table=True):
     @property
     def is_overall_report(self) -> bool:
         return self.agent_id is None
+
+
+class ReplicatedMarket(SQLModel, table=True):
+    __tablename__ = "replicated_market"
+    __table_args__ = {
+        "extend_existing": True,
+    }
+    id: Optional[int] = Field(default=None, primary_key=True)
+    original_market_type: str = Field(nullable=False)
+    original_market_id: str = Field(nullable=False)
+    copied_market_id: str = Field(nullable=False)
+    original_market_title: str = Field(
+        unique=True, nullable=False
+    )  # We don't replicate the parent market, not even across multiple platforms.
+    copied_market_title: str = Field(nullable=False)

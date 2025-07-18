@@ -18,6 +18,9 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
 )
+from prediction_market_agent.db.replicated_markets_table_handler import (
+    ReplicatedMarketsTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
 
 
@@ -61,6 +64,7 @@ def main(
         close_time_before=close_time_before,
         close_time_after=close_time_after,
         auto_deposit=True,
+        replicated_market_table_handler=ReplicatedMarketsTableHandler(),
         test=test,
     )
     logger.info(f"Created {len(addresses)} markets: {addresses}")
