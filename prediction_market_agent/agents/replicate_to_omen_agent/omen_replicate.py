@@ -173,7 +173,6 @@ def omen_replicate_from_tx(
             )
             continue
 
-        # We don't check this for the was_rephrased case because the question was already considered predictable.
         if market.description and not is_predictable_without_description(
             market.question, market.description
         ):
