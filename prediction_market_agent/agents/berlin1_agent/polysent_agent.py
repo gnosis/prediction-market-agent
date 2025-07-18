@@ -23,6 +23,7 @@ from sklearn.isotonic import IsotonicRegression
 
 class Berlin1PolySentAgent(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = True
 
     LOG_PATH: Path | None = None
 
