@@ -126,10 +126,10 @@ class ReplicatedMarket(SQLModel, table=True):
         "extend_existing": True,
     }
     id: Optional[int] = Field(default=None, primary_key=True)
-    parent_market_type: str = Field(nullable=False)
-    parent_market_id: str = Field(nullable=False)
-    child_market_id: str = Field(nullable=False)
-    parent_market_title: str = Field(
+    original_market_type: str = Field(nullable=False)
+    original_market_id: str = Field(nullable=False)
+    copied_market_id: str = Field(nullable=False)
+    original_market_title: str = Field(
         unique=True, nullable=False
     )  # We don't replicate the parent market, not even across multiple platforms.
-    child_market_title: str = Field(nullable=False)
+    copied_market_title: str = Field(nullable=False)

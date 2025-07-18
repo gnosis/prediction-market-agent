@@ -77,8 +77,8 @@ def omen_replicate_from_tx(
 
     excluded_questions = set(
         [m.question_title for m in existing_markets]
-        + [i.parent_market_title for i in replicated_markets]
-        + [i.child_market_title for i in replicated_markets]
+        + [i.original_market_title for i in replicated_markets]
+        + [i.copied_market_title for i in replicated_markets]
     )
 
     markets = get_binary_markets(
@@ -115,12 +115,10 @@ def omen_replicate_from_tx(
 
     created_addresses: list[ChecksumAddress] = []
     created_questions: set[str] = set()
-    new_replicated_markets: list[ReplicatedMarket] = []
 
     for market in markets_to_replicate:
-        parent_market_question = market.question
+        original_market_question = market.question
         # We initially consider that market does not need to be rephrased.
-        was_rephrased = False
 
         if len(created_addresses) >= n_to_replicate:
             logger.info(
@@ -168,7 +166,6 @@ def omen_replicate_from_tx(
                 continue
             else:
                 market.question = new_question
-                was_rephrased = True
 
         if not is_predictable_binary(market.question):
             logger.info(
@@ -177,12 +174,8 @@ def omen_replicate_from_tx(
             continue
 
         # We don't check this for the was_rephrased case because the question was already considered predictable.
-        if (
-            not was_rephrased
-            and market.description
-            and not is_predictable_without_description(
-                market.question, market.description
-            )
+        if market.description and not is_predictable_without_description(
+            market.question, market.description
         ):
             # We try rephrasing the question to combine elements of the description into the question.
             new_question = rephrase(market.question + market.description)
@@ -237,15 +230,14 @@ def omen_replicate_from_tx(
         created_addresses.append(market_address)
         created_questions.add(market.question)
 
-        new_replicated_markets.append(
-            ReplicatedMarket(
-                parent_market_type=market_type.value,
-                parent_market_id=market.id,
-                child_market_id=market_address,
-                parent_market_title=parent_market_question,
-                child_market_title=market.question,
-            )
+        replicated_market = ReplicatedMarket(
+            original_market_type=market_type.value,
+            original_market_id=market.id,
+            copied_market_id=market_address,
+            original_market_title=original_market_question,
+            copied_market_title=market.question,
         )
+        replicated_market_table_handler.save_replicated_markets([replicated_market])
 
         logger.info(
             f"Created `{created_market.url}` for `{market.question}` in category {category} out of {market.url}."
@@ -257,8 +249,6 @@ def omen_replicate_from_tx(
             api_keys,
         )
 
-    # We save replicated markets so that we don't replicate the same market twice.
-    replicated_market_table_handler.save_replicated_markets(new_replicated_markets)
     return created_addresses
 
 
