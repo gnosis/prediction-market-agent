@@ -4,7 +4,7 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     MultiCategoricalMaxAccuracyBettingStrategy,
 )
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -19,8 +19,8 @@ class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MultiCategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=1,
-                max_=25,
+                min_=USD(1),
+                max_=USD(25),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )

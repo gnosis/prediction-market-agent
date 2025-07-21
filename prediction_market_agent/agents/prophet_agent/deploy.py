@@ -160,8 +160,8 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MultiCategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=1,
-                max_=25,
+                min_=USD(1),
+                max_=USD(25),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
