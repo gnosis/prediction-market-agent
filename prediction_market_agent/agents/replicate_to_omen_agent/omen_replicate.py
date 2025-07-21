@@ -71,7 +71,7 @@ def omen_replicate_from_tx(
 
     replicated_markets = (
         replicated_market_table_handler.get_replicated_markets_from_market(
-            parent_market_type=market_type
+            original_market_type=market_type
         )
     )
 
