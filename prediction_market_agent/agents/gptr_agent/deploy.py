@@ -46,6 +46,7 @@ class GPTRAgent(DeployableTraderAgent):
                 ),
                 model_settings=ModelSettings(temperature=0),
             ),
+            include_reasoning=True,
         )
         return prediction
 
