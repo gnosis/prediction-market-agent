@@ -621,6 +621,7 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
 
 class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
+    just_warn_on_unexpected_model_behavior = True
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return KellyBettingStrategy(

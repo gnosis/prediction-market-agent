@@ -9,6 +9,7 @@ from pydantic_ai.exceptions import UnexpectedModelBehavior
 
 class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
+    just_warn_on_unexpected_model_behavior = True
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
