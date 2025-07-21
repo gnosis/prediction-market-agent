@@ -22,6 +22,6 @@ class ReplicatedMarketsTableHandler:
     ) -> list[ReplicatedMarket]:
         return self.sql_handler.get_with_filter_and_order(
             query_filters=[
-                col(ReplicatedMarket.original_market_type) == parent_market_type
+                col(ReplicatedMarket.original_market_type) == original_market_type
             ],
         )
