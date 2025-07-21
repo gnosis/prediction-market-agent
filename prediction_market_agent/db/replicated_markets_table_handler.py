@@ -18,7 +18,7 @@ class ReplicatedMarketsTableHandler:
         self.sql_handler.save_multiple(markets)
 
     def get_replicated_markets_from_market(
-        self, parent_market_type: str
+        self, original_market_type: str
     ) -> list[ReplicatedMarket]:
         return self.sql_handler.get_with_filter_and_order(
             query_filters=[
