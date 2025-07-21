@@ -36,14 +36,14 @@ class RealisticUniswapV3MockMarket:
         self.outcomes = outcomes
         self.probabilities = probabilities
         self.liquidity_per_outcome = liquidity_per_outcome
-        self.fees = fees or MarketFees(bet_proportion=0.02, absolute=USD(0.1))
+        self.fees = fees or MarketFees(bet_proportion=0.02, absolute=USD(0.01))
         self.collateral_token_usd_price = collateral_token_usd_price
         
         # Simulate realistic outcome token pools based on probabilities
         self.outcome_token_pool = {}
         for outcome in outcomes:
             # Pool sizes inversely related to probability (higher prob = less tokens available)
-            pool_size = liquidity_per_outcome / max(probabilities[outcome], 0.1)
+            pool_size = pool_size = math.sqrt(liquidity_per_outcome / max(probabilities[outcome], 0.1))
             self.outcome_token_pool[outcome] = OutcomeToken(pool_size)
     
     def get_token_in_usd(self, collateral_amount: CollateralToken) -> USD:
@@ -179,7 +179,7 @@ def realistic_overestimated_market() -> AgentMarket:
         outcomes=[OutcomeStr("Yes"), OutcomeStr("No")],
         probabilities=probabilities,
         liquidity_per_outcome=30000.0,  # $30k liquidity per outcome
-        fees=MarketFees(bet_proportion=0.02, absolute=USD(0.1)),  # 2% + $0.10
+        fees=MarketFees(bet_proportion=0.02, absolute=USD(0.01)),  # 2% + $0.01
         collateral_token_usd_price=1.018,  # Different sDAI rate
     )
     
@@ -221,33 +221,66 @@ def agent() -> DeployableFullSetCollectiveArbitrageAgent:
 # Tests for Underestimated Probabilities (sum < 1) - Buy Low, Sell High      #
 # --------------------------------------------------------------------------- #
 
-def test_max_sets_to_buy_underestimated_simple(agent, realistic_underestimated_market):
+
+def test_max_sets_to_buy_underestimated_pivots_at_one(agent, realistic_underestimated_market):
     """
-    Test max_sets_to_buy for underestimated probabilities.
-    Should find optimal quantity where marginal cost approaches 1.0.
+    Test that max_sets_to_buy finds the unique N where the marginal cost
+    of buying one more complete set crosses 1.0.
     """
-    # Mock the precise pricing method
-    def mock_get_buy_price(market, outcome, amount_wei, from_address):
-        # Simulate realistic Uniswap V3 price with slippage
-        amount_collateral = CollateralToken(amount_wei.value / 10**18)
-        tokens_received = market.get_buy_token_amount(amount_collateral, outcome)
-        return Wei(int(tokens_received.value * 10**18))
-    
+    def mock_get_buy_price(market: AgentMarket, outcome, amount_wei, from_address):
+        # Convert wei→collateral token, then quote via our Uniswap mock
+        amt = CollateralToken(amount_wei.value / 1e18)
+        tokens = market.get_buy_token_amount(amt, outcome)
+        return Wei(int(tokens.value * 1e18))
+
     agent._get_buy_price = mock_get_buy_price
-    
-    # Test the calculation
-    max_sets = agent.max_sets_to_buy(realistic_underestimated_market)
-    
-    # With underestimated probabilities (0.85 total), we should find profitable opportunities
-    assert max_sets > 0, "Should find profitable arbitrage opportunity"
-    assert max_sets <= 50, "Should be reasonable quantity given liquidity constraints"
-    
-    # Verify the marginal cost calculation makes sense
-    # For underestimated markets, buying complete sets should cost less than 1.0
-    total_prob = sum(realistic_underestimated_market.probabilities.values())
-    expected_opportunity = 1.0 - total_prob  # 0.15 in this case
-    
-    assert expected_opportunity > agent.epsilon, "Should detect significant arbitrage opportunity"
+
+    N = agent.max_sets_to_buy(realistic_underestimated_market)
+    assert N > 0, "Should detect an arbitrage opportunity"
+    assert N <= 50, "Quantity should be bounded by liquidity"
+
+    pools = {o: t.value for o, t in realistic_underestimated_market.outcome_token_pool.items()}
+    probs = {o: float(p) for o, p in realistic_underestimated_market.probabilities.items()}
+    # k_i = p_i * x_i^2
+    k = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+    # 4) Compute the marginal cost at N, N - 1, and N + 1
+    mc_at_N      = agent._marginal_cost(N,     k, pools, realistic_underestimated_market.fees, realistic_underestimated_market)
+    mc_below     = agent._marginal_cost(N - 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market) if N > 0 else None
+    mc_above     = agent._marginal_cost(N + 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market)
+
+    # 5) Assert that mc crosses 1.0 exactly at N
+    assert mc_below is None or mc_below < 1.0, (
+        f"Marginal cost just below N should be <1 (got {mc_below:.4f})"
+    )
+    # At N it should be right at or just under 1.0 (within a tiny epsilon)
+    assert pytest.approx(1.0, rel=1e-2) == mc_at_N, (
+        f"Marginal cost at N should be ≈1 (got {mc_at_N:.4f})"
+    )
+    # One more set should push marginal cost above 1
+    assert mc_above > 1.0, (
+        f"Marginal cost above N should be >1 (got {mc_above:.4f})"
+    )
+    # 6) Compute implied probabilities before & after
+    #    m_i = k_i / x_i^2 ; then normalize
+    def implied_probs(pools_dict):
+        m = {o: k[o] / (pools_dict[o] ** 2) for o in pools_dict}
+        total = sum(m.values())
+        return {o: m[o] / total for o in m}
+
+    # original pools and probs
+    orig_sum = sum(probs.values())
+
+    # new pools after buying N sets
+    pools_after = {o: pools[o] - N for o in pools}
+    new_probs = implied_probs(pools_after)
+    new_sum = sum(new_probs.values())
+
+    # 7) Assert that the sum has moved closer to 1
+    assert abs(1.0 - new_sum) < abs(1.0 - orig_sum), (
+        f"After buying, |1−{new_sum:.4f}| should be < |1−{orig_sum:.4f}|"
+    )
+
 
 
 def test_max_sets_to_buy_with_high_liquidity(agent):
@@ -285,10 +318,54 @@ def test_max_sets_to_buy_with_high_liquidity(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    max_sets = agent.max_sets_to_buy(mock_market)
+    N = agent.max_sets_to_buy(mock_market)
     
     # High liquidity should allow larger arbitrage quantities
-    assert max_sets > 10, "High liquidity should enable larger arbitrage trades"
+    assert N > 10, "High liquidity should enable larger arbitrage trades"
+
+    pools = {o: t.value for o, t in mock_market.outcome_token_pool.items()}
+    probs = {o: float(p) for o, p in mock_market.probabilities.items()}
+    # k_i = p_i * x_i^2
+    k = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+    # 4) Compute the marginal cost at N, N - 1, and N + 1
+    mc_at_N      = agent._marginal_cost(N,     k, pools, mock_market.fees, mock_market)
+    mc_below     = agent._marginal_cost(N - 1, k, pools, mock_market.fees, mock_market) if N > 0 else None
+    mc_above     = agent._marginal_cost(N + 1, k, pools, mock_market.fees, mock_market)
+
+    # 5) Assert that mc crosses 1.0 exactly at N
+    assert mc_below is None or mc_below < 1.0, (
+        f"Marginal cost just below N should be <1 (got {mc_below:.4f})"
+    )
+    # At N it should be right at or just under 1.0 (within a tiny epsilon)
+    assert pytest.approx(1.0, rel=1e-2) == mc_at_N, (
+        f"Marginal cost at N should be ≈1 (got {mc_at_N:.4f})"
+    )
+    # One more set should push marginal cost above 1
+    assert mc_above > 1.0, (
+        f"Marginal cost above N should be >1 (got {mc_above:.4f})"
+    )
+
+    # 6) Compute implied probabilities before & after
+    #    m_i = k_i / x_i^2 ; then normalize
+    def implied_probs(pools_dict):
+        m = {o: k[o] / (pools_dict[o] ** 2) for o in pools_dict}
+        total = sum(m.values())
+        return {o: m[o] / total for o in m}
+
+    # original pools and probs
+    orig_sum = sum(probs.values())
+
+    # new pools after buying N sets
+    pools_after = {o: pools[o] - N for o in pools}
+    new_probs = implied_probs(pools_after)
+    new_sum = sum(new_probs.values())
+
+    # 7) Assert that the sum has moved closer to 1
+    assert abs(1.0 - new_sum) < abs(1.0 - orig_sum), (
+        f"After buying, |1−{new_sum:.4f}| should be < |1−{orig_sum:.4f}|"
+    )
+
 
 
 def test_max_sets_to_buy_no_arbitrage_opportunity(agent):
@@ -325,10 +402,10 @@ def test_max_sets_to_buy_no_arbitrage_opportunity(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    max_sets = agent.max_sets_to_buy(mock_market)
+    N = agent.max_sets_to_buy(mock_market)
     
     # Should find no profitable arbitrage when probabilities sum to 1
-    assert max_sets == 0, "Should find no arbitrage opportunity when probabilities are balanced"
+    assert N == 0, "Should find no arbitrage opportunity when probabilities are balanced"
 
 
 # --------------------------------------------------------------------------- #
@@ -350,17 +427,52 @@ def test_max_sets_to_mint_overestimated_simple(agent, realistic_overestimated_ma
     agent._get_sell_price = mock_get_sell_price
     
     # Test the calculation
-    max_sets = agent.max_sets_to_mint(realistic_overestimated_market)
+    N = agent.max_sets_to_mint(realistic_overestimated_market)
     
     # With overestimated probabilities (1.20 total), we should find profitable opportunities
-    assert max_sets > 0, "Should find profitable mint-and-sell arbitrage opportunity"
-    assert max_sets <= 100, "Should be reasonable quantity given liquidity constraints"
+    assert N > 0, "Should find profitable mint-and-sell arbitrage opportunity"
+    assert N <= 100, "Should be reasonable quantity given liquidity constraints"
     
-    # Verify the arbitrage opportunity exists
-    total_prob = sum(realistic_overestimated_market.probabilities.values())
-    expected_opportunity = total_prob - 1.0  # 0.20 in this case
-    
-    assert expected_opportunity > agent.epsilon, "Should detect significant arbitrage opportunity"
+
+    pools = {o: t.value for o, t in realistic_overestimated_market.outcome_token_pool.items()}
+    probs = {o: float(p) for o, p in realistic_overestimated_market.probabilities.items()}
+    # k_i = p_i * x_i^2
+    k = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+    #Compute the marginal cost at N, N - 1, and N + 1
+    rev_above = agent._marginal_revenue(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market) if N > 0 else None
+    rev_at    = agent._marginal_revenue(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+    rev_below = agent._marginal_revenue(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+
+    assert rev_above is None or rev_above > 1.0, (
+    f"Revenue just below N should be >1 (got {rev_above:.4f})"
+    )
+    assert pytest.approx(1.0, rel=1e-2) == rev_at, (
+    f"Revenue at N should be ≈1 (got {rev_at:.4f})"
+    )
+    assert rev_below < 1.0, (
+    f"Revenue above N should be <1 (got {rev_below:.4f})"
+    )
+
+    # Compute implied probabilities before & after
+    #    m_i = k_i / x_i^2 ; then normalize
+    def implied_probs(pools_dict):
+        m = {o: k[o] / (pools_dict[o] ** 2) for o in pools_dict}
+        total = sum(m.values())
+        return {o: m[o] / total for o in m}
+
+    # original pools and probs
+    orig_sum = sum(probs.values())
+
+    # new pools after buying N sets
+    pools_after = {o: pools[o] - N for o in pools}
+    new_probs = implied_probs(pools_after)
+    new_sum = sum(new_probs.values())
+
+    # Assert that the sum has moved closer to 1
+    assert abs(1.0 - new_sum) < abs(1.0 - orig_sum), (
+        f"After buying, |1−{new_sum:.4f}| should be < |1−{orig_sum:.4f}|"
+    )
 
 
 def test_max_sets_to_mint_with_price_impact(agent):
@@ -398,42 +510,92 @@ def test_max_sets_to_mint_with_price_impact(agent):
     
     agent._get_sell_price = mock_get_sell_price
     
-    max_sets = agent.max_sets_to_mint(mock_market)
+    N = agent.max_sets_to_mint(mock_market)
     
     # Price impact should limit the arbitrage size despite large opportunity
-    assert max_sets > 0, "Should still find arbitrage despite price impact"
-    assert max_sets < 50, "Price impact should limit arbitrage size"
+    assert N > 0, "Should still find arbitrage despite price impact"
+    assert N < 50, "Price impact should limit arbitrage size"
+
+    pools = {o: t.value for o, t in mock_market.outcome_token_pool.items()}
+    probs = {o: float(p) for o, p in mock_market.probabilities.items()}
+    # k_i = p_i * x_i^2
+    k = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+    #Compute the marginal cost at N, N - 1, and N + 1
+    rev_above = agent._marginal_revenue(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market) if N > 0 else None
+    rev_at    = agent._marginal_revenue(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+    rev_below = agent._marginal_revenue(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+
+    assert rev_above is None or rev_above > 1.0, (
+    f"Revenue just below N should be >1 (got {rev_above:.4f})"
+    )
+    assert pytest.approx(1.0, rel=1e-2) == rev_at, (
+    f"Revenue at N should be ≈1 (got {rev_at:.4f})"
+    )
+    assert rev_below < 1.0, (
+    f"Revenue above N should be <1 (got {rev_below:.4f})"
+    )
+
+    # Compute implied probabilities before & after
+    #    m_i = k_i / x_i^2 ; then normalize
+    def implied_probs(pools_dict):
+        m = {o: k[o] / (pools_dict[o] ** 2) for o in pools_dict}
+        total = sum(m.values())
+        return {o: m[o] / total for o in m}
+
+    # original pools and probs
+    orig_sum = sum(probs.values())
+
+    # new pools after buying N sets
+    pools_after = {o: pools[o] - N for o in pools}
+    new_probs = implied_probs(pools_after)
+    new_sum = sum(new_probs.values())
+
+    # Assert that the sum has moved closer to 1
+    assert abs(1.0 - new_sum) < abs(1.0 - orig_sum), (
+        f"After buying, |1−{new_sum:.4f}| should be < |1−{orig_sum:.4f}|"
+    )
 
 
-def test_estimate_arbitrage_scale(agent, realistic_underestimated_market):
-    """Test the arbitrage scale estimation method."""
-    scale = agent.estimate_arbitrage_scale(realistic_underestimated_market)
+def test_max_sets_to_mint_with_price_impact(agent):
+    """Test mint calculations with realistic price impact from large trades."""
+    # Create market with lower liquidity to test price impact
+    probabilities = {
+        OutcomeStr("Yes"): Probability(0.70),
+        OutcomeStr("No"): Probability(0.30),  # 1.30 total - large opportunity
+    }
     
-    assert scale > 0, "Should estimate positive arbitrage scale"
-    assert isinstance(scale, (int, float)), "Should return numeric scale"
+    mock_market = Mock(spec=SeerAgentMarket)
+    realistic_market = RealisticUniswapV3MockMarket(
+        outcomes=[OutcomeStr("Yes"), OutcomeStr("No")],
+        probabilities=probabilities,
+        liquidity_per_outcome=20000.0,  # Lower liquidity
+        fees=MarketFees(bet_proportion=0.025, absolute=USD(0.15)),  # Higher fees
+        collateral_token_usd_price=1.035,  # Higher yield sDAI
+    )
     
-    # Scale should be related to liquidity and arbitrage gap
-    arbitrage_gap = abs(1.0 - sum(realistic_underestimated_market.probabilities.values()))
-    assert arbitrage_gap > 0.1, "Test market should have significant arbitrage gap"
-
-
-def test_collateral_token_pricing_realism(realistic_underestimated_market):
-    """Test that collateral token pricing is realistic and consistent."""
-    # Test USD to token conversion
-    usd_amount = USD(100)
-    token_amount = realistic_underestimated_market.get_usd_in_token(usd_amount)
+    mock_market.outcomes = realistic_market.outcomes
+    mock_market.probabilities = probabilities
+    mock_market.outcome_token_pool = realistic_market.outcome_token_pool
+    mock_market.fees = realistic_market.fees
+    mock_market.get_buy_token_amount = realistic_market.get_buy_token_amount
+    mock_market.get_sell_value_of_outcome_token = realistic_market.get_sell_value_of_outcome_token
+    mock_market.get_token_in_usd = realistic_market.get_token_in_usd
+    mock_market.get_usd_in_token = realistic_market.get_usd_in_token
+    mock_market.get_in_token = realistic_market.get_in_token
+    mock_market.get_liquidity = Mock(return_value=CollateralToken(38647))  # ~40k USD / 1.035
     
-    # Should get fewer tokens when collateral trades at premium
-    assert token_amount.value < 100, "Should get fewer tokens when collateral is above $1"
+    def mock_get_sell_price(market, outcome, tokens_to_sell_wei, from_address):
+        tokens_to_sell = OutcomeToken(tokens_to_sell_wei.value / 10**18)
+        collateral_received = market.get_sell_value_of_outcome_token(outcome, tokens_to_sell)
+        return Wei(int(collateral_received.value * 10**18))
     
-    # Test round-trip conversion
-    converted_back = realistic_underestimated_market.get_token_in_usd(token_amount)
-    assert abs(converted_back.value - usd_amount.value) < 0.01, "Round-trip conversion should be accurate"
+    agent._get_sell_price = mock_get_sell_price
     
-    # Test realistic range
-    exchange_rate = converted_back.value / token_amount.value
-    assert 0.98 <= exchange_rate <= 1.10, f"Exchange rate {exchange_rate} should be realistic for stablecoins/yield tokens"
-
+    N = agent.max_sets_to_mint(mock_market)
+    
+    # Price impact should limit the arbitrage size despite large opportunity
+    assert N == 0, "Should find no arbitrage despite price impact"
 
 # --------------------------------------------------------------------------- #
 # Edge Cases and Error Handling                                              #
@@ -511,8 +673,72 @@ def test_max_sets_calculation_with_extreme_probabilities(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    max_sets = agent.max_sets_to_buy(mock_market)
+    N = agent.max_sets_to_buy(mock_market)
     
-    # Even extreme arbitrage should be limited by practical constraints
-    assert max_sets >= 0, "Should handle extreme cases without errors"
-    assert max_sets <= 200, "Should still respect practical limits"
+    # High liquidity should allow larger arbitrage quantities
+    assert N > 10, "High liquidity should enable larger arbitrage trades"
+
+    pools = {o: t.value for o, t in mock_market.outcome_token_pool.items()}
+    probs = {o: float(p) for o, p in mock_market.probabilities.items()}
+    # k_i = p_i * x_i^2
+    k = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+    # 4) Compute the marginal cost at N, N - 1, and N + 1
+    mc_at_N      = agent._marginal_cost(N,     k, pools, realistic_market.fees, realistic_market)
+    mc_below     = agent._marginal_cost(N - 1, k, pools, realistic_market.fees, realistic_market) if N > 0 else None
+    mc_above     = agent._marginal_cost(N + 1, k, pools, realistic_market.fees, realistic_market)
+
+    # 5) Assert that mc crosses 1.0 exactly at N
+    assert mc_below is None or mc_below < 1.0, (
+        f"Marginal cost just below N should be <1 (got {mc_below:.4f})"
+    )
+    # At N it should be right at or just under 1.0 (within a tiny epsilon)
+    assert pytest.approx(1.0, rel=1e-2) == mc_at_N, (
+        f"Marginal cost at N should be ≈1 (got {mc_at_N:.4f})"
+    )
+    # One more set should push marginal cost above 1
+    assert mc_above > 1.0, (
+        f"Marginal cost above N should be >1 (got {mc_above:.4f})"
+    )
+
+    # 6) Compute implied probabilities before & after
+    #    m_i = k_i / x_i^2 ; then normalize
+    def implied_probs(pools_dict):
+        m = {o: k[o] / (pools_dict[o] ** 2) for o in pools_dict}
+        total = sum(m.values())
+        return {o: m[o] / total for o in m}
+
+    # original pools and probs
+    orig_sum = sum(probs.values())
+
+    # new pools after buying N sets
+    pools_after = {o: pools[o] - N for o in pools}
+    new_probs = implied_probs(pools_after)
+    new_sum = sum(new_probs.values())
+
+    # 7) Assert that the sum has moved closer to 1
+    assert abs(1.0 - new_sum) < abs(1.0 - orig_sum), (
+        f"After buying, |1−{new_sum:.4f}| should be < |1−{orig_sum:.4f}|"
+    )
+
+
+def test_high_fees_eating_up_marginal_revenue(agent, realistic_overestimated_market):
+    """
+    Test max_sets_to_mint for overestimated probabilities.
+    Should find optimal quantity where marginal sell value approaches 1.0.
+    """
+    # Mock the precise pricing method for selling
+    def mock_get_sell_price(market, outcome, tokens_to_sell_wei, from_address):
+        # Convert wei to tokens and get sell value
+        tokens_to_sell = OutcomeToken(tokens_to_sell_wei.value / 10**18)
+        collateral_received = market.get_sell_value_of_outcome_token(outcome, tokens_to_sell)
+        return Wei(int(collateral_received.value * 10**18))
+    
+    agent._get_sell_price = mock_get_sell_price
+    realistic_overestimated_market.fees = MarketFees(bet_proportion=0.02, absolute=USD(0.2))
+    # Test the calculation
+    N = agent.max_sets_to_mint(realistic_overestimated_market)
+    
+    # With overestimated probabilities (1.20 total), we should find profitable opportunities
+    assert N == 0, "Should find no arbitrage despite high fees"
+

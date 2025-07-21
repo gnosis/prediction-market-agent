@@ -33,11 +33,6 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         self.swapr_router = SwaprRouterContract()
         self.api_keys = APIKeys()
 
-        # Expose slippage curvature (alpha) so it can be tuned per deployment.
-        # 0.8 matches our current empirical estimate but is **not** hard-coded in
-        # the pricing logic – override `self.slippage_alpha` for different pools.
-        self.slippage_alpha: float = 0.8
-
     def run(self, market_type: MarketType) -> None:
         if market_type not in self.supported_markets:
             raise RuntimeError(
@@ -129,142 +124,47 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         
         return None
 
-    def estimate_arbitrage_scale(self, market: AgentMarket) -> float:
-        liquidity_usd = market.get_token_in_usd(market.get_liquidity())
-        arbitrage_gap = abs(1.0 - sum(market.probabilities.values()))
-        arbitrage_gap_scaled=(arbitrage_gap * liquidity_usd.value) * (arbitrage_gap / (arbitrage_gap + self.epsilon))
-
-        return 10 ** math.floor(math.log10(arbitrage_gap_scaled))
-
-    def _calculate_cost_to_buy_token(
+    def _marginal_cost(
         self,
-        *,
-        pool_size: float,
-        probability: float,
-        tokens_to_buy: float,
-        fees: MarketFees | None = None,
-        alpha: float | None = None,
-    ) -> float | None:
-        """
-        Estimate collateral (USD-denominated) needed to purchase `tokens_to_buy`
-        from a pool with `pool_size` tokens priced at `probability`.
-
-        Uses the same Uniswap V3-style curve as the test helper:
-            tokens_out = P * (1 - (P / (P + amount / prob)) ** alpha)
-
-        The formula is inverted to solve for `amount`. Returns `None` when the
-        """
-        # Use provided alpha or fall back to the agent-level default.
-        alpha = alpha if alpha is not None else self.slippage_alpha
-
-        # Normalise fees – treat missing fees as zeroes.
-        fees = fees or MarketFees.get_zero_fees()
-
-        if tokens_to_buy <= 0 or tokens_to_buy >= 0.95 * pool_size:
-            return None
-
-        # Invert the pricing curve used by Uniswap-V3-style pools.
-        denominator = (1.0 - tokens_to_buy / pool_size) ** (1.0 / alpha)
-        amount_before_fee = probability * (pool_size / denominator - pool_size)
-        if amount_before_fee <= 0:
-            return None
-
-
-        if fees.bet_proportion > 0:
-            amount_before_fee /= 1.0 - fees.bet_proportion
-        if fees.absolute > 0:
-            amount_before_fee += fees.absolute
-
-        return amount_before_fee
-
-    def _calculate_revenue_from_sell_token(
-        self,
-        *,
-        pool_size: float,
-        probability: float,
-        tokens_to_sell: float,
-        fees: MarketFees | None = None,
-        alpha: float | None = None,
-    ) -> float | None:
-        """Estimate collateral received when dumping `tokens_to_sell` into the
-        pool. Mirrors `_calculate_cost_to_buy_token` but for the sell side.
-
-        We model Uniswap-V3 slippage by assuming the *price impact* is the same
-        functional form, i.e. the marginal price decreases with
-        `(tokens_to_sell / pool_size)` raised to `alpha`.
-        """
-
-        alpha = alpha if alpha is not None else self.slippage_alpha
-        fees = fees or MarketFees.get_zero_fees()
-
-        if tokens_to_sell <= 0:
-            return None
-
-        # Approximate average price obtained when selling `tokens_to_sell`.
-        # We integrate marginal price from 0..tokens_to_sell under the same
-        # functional form as the buy curve.
-        # Closed-form: revenue = prob * pool * (1 - (1 + x / pool) ^ -alpha )
-        # where x = tokens_to_sell.
-        revenue_after_fee = probability * pool_size * (1 - (1 + tokens_to_sell / pool_size) ** -alpha)
-
-        # Add fees (the pool *subtracts* them, so we need to subtract here).
-        revenue_before_fee = revenue_after_fee * (1 - fees.bet_proportion)
-        if fees.absolute:
-            revenue_before_fee -= fees.absolute
-
-        return max(revenue_before_fee, 0.0)
-
+        n: float,
+        k: dict[OutcomeStr, float],
+        pools: dict[OutcomeStr, float],
+        fees: MarketFees,
+        market: AgentMarket
+    ) -> float:
+        # Base marginal cost without fees
+        base_cost = sum(k[o] / (pools[o] - n) ** 2 for o in pools)
+        # Proportional fee adjustment
+        cost_with_prop = base_cost / (1 - fees.bet_proportion)
+        # Absolute fee per swap -> per outcome
+        abs_fee_per = market.get_usd_in_token(fees.absolute).value
+        total_abs = abs_fee_per * len(pools)
+        return cost_with_prop + total_abs
 
     def max_sets_to_buy(self, market: AgentMarket) -> int:
-        """
-        Simulate buying complete sets one-by-one, updating an in-memory copy of
-        the pools. Stop when the marginal cost of the next set is ≥ 1 USD
-        (i.e. no more arbitrage).
-        """
         if not market.outcome_token_pool:
             return 0
-
-        # Local copy of pool sizes (floats for quick maths)
-        pools: dict[OutcomeStr, float] = {
-            o: t.value for o, t in market.outcome_token_pool.items()
-        }
+        pools = {o: tkn.value for o, tkn in market.outcome_token_pool.items()}
+        # zero-liquidity guard
+        if any(v <= 0 for v in pools.values()):
+            return 0
         probs = {o: float(p) for o, p in market.probabilities.items()}
-
-        quantity      = 0
-        MAX_QUANTITY  = 500  # safety guard
-
-        while quantity < MAX_QUANTITY:
-            marginal_cost = 0.0
-
-            # Estimate cost of ONE additional complete set at current state
-            for outcome in market.outcomes:
-                cost = self._calculate_cost_to_buy_token(
-                    pool_size     = pools[outcome],
-                    probability   = probs[outcome],
-                    tokens_to_buy = 1,
-                    fees          = market.fees,
-                )
-                if cost is None:
-                    marginal_cost = None
-                    break
-                marginal_cost += cost
-
-            # Pricing failed or insufficient liquidity
-            if marginal_cost is None:
-                break
-
-            # No more profit if cost ≥ payoff
-            if marginal_cost >= 1.0 - self.epsilon:
-                break
-
-            # “Buy” the set – update simulated pools
-            for outcome in market.outcomes:
-                pools[outcome] -= 1
-
-            quantity += 1
-
-        logger.info(f"Optimal complete sets to buy: {quantity}")
-        return quantity
+        if sum(probs.values()) >= 1.0 - self.epsilon:
+            return 0
+        k = {o: probs[o] * pools[o] ** 2 for o in pools}
+        fees = market.fees
+        # initial break-even
+        if self._marginal_cost(0.0, k, pools, fees, market) >= 1.0:
+            return 0
+        max_trade = min(pools.values()) * 0.999_999
+        low, high = 0.0, max_trade
+        for _ in range(64):
+            mid = (low + high) / 2.0
+            if self._marginal_cost(mid, k, pools, fees, market) < 1.0:
+                low = mid
+            else:
+                high = mid
+        return max(int(math.floor(low + self.epsilon)), 0)
     
     def _buy_complete_sets(self, market: AgentMarket, quantity: int) -> list[PlacedTrade]:
         logger.info(f"Buying {quantity} complete sets for market {market.question}")
@@ -364,52 +264,43 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         
         return placed_trades
 
-    def max_sets_to_mint(self, market: AgentMarket) -> int:
-        """Find how many complete sets we can *mint & immediately sell* while
-        each additional set still yields > 1 USD after slippage and fees."""
+    def _marginal_revenue(
+        self,
+        n: float,
+        k: dict[OutcomeStr, float],
+        pools: dict[OutcomeStr, float],
+        fees: MarketFees,
+        market: AgentMarket
+    ) -> float:
+        base_rev = sum(k[o] / (pools[o] + n) ** 2 for o in pools)
+        rev_after_prop = base_rev * (1 - fees.bet_proportion)
+        abs_fee_per = market.get_usd_in_token(fees.absolute).value
+        total_abs = abs_fee_per * len(pools)
+        return max(rev_after_prop - total_abs, 0.0)
 
+    def max_sets_to_mint(self, market: AgentMarket) -> int:
         if not market.outcome_token_pool:
             return 0
-
-        pools: dict[OutcomeStr, float] = {
-            o: t.value for o, t in market.outcome_token_pool.items()
-        }
+        pools = {o: tkn.value for o, tkn in market.outcome_token_pool.items()}
         probs = {o: float(p) for o, p in market.probabilities.items()}
-
-        quantity = 0
-        MAX_QUANTITY = 500
-
-        while quantity < MAX_QUANTITY:
-            marginal_revenue = 0.0
-
-            # Revenue from dumping one more complete set into the pool.
-            for outcome in market.outcomes:
-                revenue = self._calculate_revenue_from_sell_token(
-                    pool_size      = pools[outcome],
-                    probability    = probs[outcome],
-                    tokens_to_sell = 1,
-                    fees           = market.fees,
-                )
-                if revenue is None:
-                    marginal_revenue = None
-                    break
-                marginal_revenue += revenue
-
-            if marginal_revenue is None:
-                break
-
-            # No profit once selling a set brings ≤ 1 USD.
-            if marginal_revenue <= 1.0 + self.epsilon:
-                break
-
-            # “Sell” the set – enlarge simulated pools.
-            for outcome in market.outcomes:
-                pools[outcome] += 1
-
-            quantity += 1
-
-        logger.info(f"Optimal complete sets to mint: {quantity}")
-        return quantity
+        
+        if sum(probs.values()) <= 1.0 + self.epsilon:
+            return 0
+        k = {o: probs[o] * pools[o] ** 2 for o in pools}
+        fees = market.fees
+        
+        if self._marginal_revenue(0.0, k, pools, fees, market) <= 1.0:
+            return 0
+        low, high = 0.0, 1.0
+        while self._marginal_revenue(high, k, pools, fees, market) > 1.0 and high < 1e6:
+            low, high = high, high * 2.0
+        for _ in range(64):
+            mid = (low + high) / 2.0
+            if self._marginal_revenue(mid, k, pools, fees, market) > 1.0:
+                low = mid
+            else:
+                high = mid
+        return max(int(math.floor(high + self.epsilon)), 0)
 
     def _sell_complete_sets(self, market: AgentMarket, quantity: int) -> list[PlacedTrade]:
         logger.info(f"Selling {quantity} complete sets to realize arbitrage profit")
