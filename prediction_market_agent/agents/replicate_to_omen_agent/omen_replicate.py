@@ -3,6 +3,7 @@ from datetime import timedelta
 from prediction_market_agent_tooling.gtypes import (
     USD,
     ChecksumAddress,
+    CollateralToken,
     HexAddress,
     HexStr,
     Wei,
@@ -40,6 +41,11 @@ from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
 from prediction_market_agent.agents.replicate_to_omen_agent.image_gen import (
     generate_and_set_image_for_market,
 )
+from prediction_market_agent.agents.replicate_to_omen_agent.rephrase import rephrase
+from prediction_market_agent.db.models import ReplicatedMarket
+from prediction_market_agent.db.replicated_markets_table_handler import (
+    ReplicatedMarketsTableHandler,
+)
 from prediction_market_agent.utils import APIKeys
 
 # According to Omen's recommendation, closing time of the market should be at least 6 days after the outcome is known.
@@ -53,8 +59,9 @@ def omen_replicate_from_tx(
     api_keys: APIKeys,
     market_type: MarketType,
     n_to_replicate: int,
-    initial_funds: USD,
+    initial_funds: USD | CollateralToken,
     collateral_token_address: ChecksumAddress,
+    replicated_market_table_handler: ReplicatedMarketsTableHandler,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
@@ -62,17 +69,28 @@ def omen_replicate_from_tx(
 ) -> list[ChecksumAddress]:
     existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
 
+    replicated_markets = (
+        replicated_market_table_handler.get_replicated_markets_from_market(
+            original_market_type=market_type
+        )
+    )
+
+    excluded_questions = set(
+        [m.question_title for m in existing_markets]
+        + [i.original_market_title for i in replicated_markets]
+        + [i.copied_market_title for i in replicated_markets]
+    )
+
     markets = get_binary_markets(
-        # Polymarket is slow to get, so take only 10 candidates for him.
-        10 if market_type == MarketType.POLYMARKET else 1000,
+        500 if market_type == MarketType.POLYMARKET else 1000,
         market_type,
         filter_by=FilterBy.OPEN,
         sort_by=(
-            SortBy.NONE
+            SortBy.HIGHEST_LIQUIDITY
             if market_type == MarketType.POLYMARKET
             else SortBy.CLOSING_SOONEST
         ),
-        excluded_questions=set(m.question_title for m in existing_markets),
+        excluded_questions=excluded_questions,
     )
     markets_sorted = sorted(
         markets,
@@ -98,6 +116,9 @@ def omen_replicate_from_tx(
     created_questions: set[str] = set()
 
     for market in markets_to_replicate:
+        original_market_question = market.question
+        # We initially consider that market does not need to be rephrased.
+
         if len(created_addresses) >= n_to_replicate:
             logger.info(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
@@ -132,9 +153,18 @@ def omen_replicate_from_tx(
         # Do as the last steps, because it calls OpenAI (costly & slow).
         if is_invalid(market.question):
             logger.info(
-                f"Skipping `{market.question}` because it seems to be an invalid question."
+                f"Skipping `{market.question}` was marked as invalid. Trying to rephrase and make it valid."
             )
-            continue
+            # We try rephrasing the question to make it valid, and run the validity check again.
+            new_question = rephrase(market.question)
+            logger.info(f"Rephrased `{market.question}` to `{new_question}`.")
+            if is_invalid(new_question):
+                logger.info(
+                    f"Skipping `{new_question}` because it could not be rephrased into a valid question."
+                )
+                continue
+            else:
+                market.question = new_question
 
         if not is_predictable_binary(market.question):
             logger.info(
@@ -145,10 +175,18 @@ def omen_replicate_from_tx(
         if market.description and not is_predictable_without_description(
             market.question, market.description
         ):
+            # We try rephrasing the question to combine elements of the description into the question.
+            new_question = rephrase(market.question + market.description)
             logger.info(
-                f"Skipping `{market.question}` because it seems to not be predictable without the description `{market.description}`."
+                f"Rephrased `{market.question}` to `{new_question}` with the description `{market.description}`."
             )
-            continue
+            if not is_predictable_without_description(new_question, market.description):
+                logger.info(
+                    f"Skipping `{market.question}` because it could not be rephrased into a valid question without the description `{market.description}`. The rephrased question was `{new_question}`."
+                )
+                continue
+            else:
+                market.question = new_question
 
         category = infer_category(market.question, existing_categories)
         # Realitio will allow new categories or misformated categories, so double check that the LLM got it right.
@@ -189,6 +227,16 @@ def omen_replicate_from_tx(
         )
         created_addresses.append(market_address)
         created_questions.add(market.question)
+
+        replicated_market = ReplicatedMarket(
+            original_market_type=market_type.value,
+            original_market_id=market.id,
+            copied_market_id=market_address,
+            original_market_title=original_market_question,
+            copied_market_title=market.question,
+        )
+        replicated_market_table_handler.save_replicated_markets([replicated_market])
+
         logger.info(
             f"Created `{created_market.url}` for `{market.question}` in category {category} out of {market.url}."
         )
