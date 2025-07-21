@@ -102,7 +102,6 @@ def omen_replicate_from_tx(
         for m in markets_sorted
         if close_time_before is None
         or (m.close_time is not None and m.close_time <= close_time_before)
-        or m.question in excluded_questions
     ]
     if not markets_to_replicate:
         logger.info(f"No markets found for {market_type}")
