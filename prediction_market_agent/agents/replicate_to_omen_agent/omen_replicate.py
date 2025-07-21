@@ -67,7 +67,7 @@ def omen_replicate_from_tx(
     auto_deposit: bool = False,
     test: bool = False,
 ) -> list[ChecksumAddress]:
-    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=50)
+    existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
 
     replicated_markets = (
         replicated_market_table_handler.get_replicated_markets_from_market(
