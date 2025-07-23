@@ -3,7 +3,7 @@ import hashlib
 from enum import Enum
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket, ProcessedTradedMarket
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket, ProcessedTradedMarket, SortBy
 from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer, CategoricalProbabilisticAnswer, Trade, PlacedTrade, TradeType, USD
 from prediction_market_agent_tooling.tools.tokens.slippage import get_slippage_tolerance_per_token
@@ -17,21 +17,26 @@ from prediction_market_agent_tooling.tools.contract import ContractERC20OnGnosis
 from web3 import Web3
 import math
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
-
+from prediction_market_agent_tooling.tools.tokens.auto_deposit import mint_full_set_for_market
 
 class ArbitrageType(Enum):
     UNDER_ESTIMATED = "underestimated"
     OVER_ESTIMATED = "overestimated"
 
+class CalculationType(Enum):
+    COST = "cost"
+    REVENUE = "revenue"
 
 class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
     supported_markets = [MarketType.SEER]
 
     def load(self) -> None:
         super().load()
-        self.epsilon = 0.015  # 1.5% error margin for probabilities as rounding error
+        self.epsilon = 0.02  # 1.5% error margin for probabilities as rounding error
         self.swapr_router = SwaprRouterContract()
         self.api_keys = APIKeys()
+        self.max_mint_ammout_dollars = 0.5 # Minting is done per 1$ per set
+        self.max_merge_ammout_dollars = 1 # Buying is done per 1$ per set of outcomes that can cost less
 
     def run(self, market_type: MarketType) -> None:
         if market_type not in self.supported_markets:
@@ -47,11 +52,10 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
 
         # Fetch all markets to choose from
         available_markets = SeerAgentMarket.get_markets(
-            limit=self.n_markets_to_fetch,
+            limit=100,
             sort_by=self.get_markets_sort_by,
             filter_by=self.get_markets_filter_by,
             created_after=self.trade_on_markets_created_after,
-            include_conditional_markets=True,
         )
         return available_markets
 
@@ -69,7 +73,12 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         if not market.outcome_token_pool:
             logger.info(f"Market '{market.question}' has no outcome token pool data - skipping")
             return None
-            
+
+        #Multiresult markets are not supported
+        if market.is_multiresult:
+            logger.info(f"Market '{market.question}' is a multiresult market - skipping")
+            return None
+        
         # Check if all outcomes are present in the outcome token pool
         for outcome in market.outcomes:
             if outcome not in market.outcome_token_pool:
@@ -90,16 +99,8 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 if underestimated_prob:
                     logger.info("Under-estimated probabilities detected - buy low, sell high arbitrage")
                     arbitrage_type = ArbitrageType.UNDER_ESTIMATED
-                    max_sets_to_arbitrage = self.max_sets_to_buy(market)
-                    if max_sets_to_arbitrage > 0:
-                        # Buy underpriced outcome tokens
-                        buy_trades = self._buy_complete_sets(market, max_sets_to_arbitrage)
-                        if buy_trades:
-                            placed_trades.extend(buy_trades)
-                            
-                            # Immediately sell those tokens to realize profit
-                            sell_trades = self._sell_complete_sets(market, max_sets_to_arbitrage)
-                            placed_trades.extend(sell_trades)
+                    trades = self.merge(market)
+                    placed_trades.extend(trades)
 
                 if overestimated_prob:
                     logger.info("Over-estimated probabilities detected - mint and sell arbitrage")
@@ -124,106 +125,17 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         
         return None
 
-    def _marginal_cost(
-        self,
-        n: float,
-        k: dict[OutcomeStr, float],
-        pools: dict[OutcomeStr, float],
-        fees: MarketFees,
-        market: AgentMarket
-    ) -> float:
-        # Base marginal cost without fees
-        base_cost = sum(k[o] / (pools[o] - n) ** 2 for o in pools)
-        # Proportional fee adjustment
-        cost_with_prop = base_cost / (1 - fees.bet_proportion)
-        # Absolute fee per swap -> per outcome
-        abs_fee_per = market.get_usd_in_token(fees.absolute).value
-        total_abs = abs_fee_per * len(pools)
-        return cost_with_prop + total_abs
-
-    def max_sets_to_buy(self, market: AgentMarket) -> int:
-        if not market.outcome_token_pool:
-            return 0
-        pools = {o: tkn.value for o, tkn in market.outcome_token_pool.items()}
-        # zero-liquidity guard
-        if any(v <= 0 for v in pools.values()):
-            return 0
-        probs = {o: float(p) for o, p in market.probabilities.items()}
-        if sum(probs.values()) >= 1.0 - self.epsilon:
-            return 0
-        k = {o: probs[o] * pools[o] ** 2 for o in pools}
-        fees = market.fees
-        # initial break-even
-        if self._marginal_cost(0.0, k, pools, fees, market) >= 1.0:
-            return 0
-        max_trade = min(pools.values()) * 0.999_999
-        low, high = 0.0, max_trade
-        for _ in range(64):
-            mid = (low + high) / 2.0
-            if self._marginal_cost(mid, k, pools, fees, market) < 1.0:
-                low = mid
-            else:
-                high = mid
-        return max(int(math.floor(low + self.epsilon)), 0)
-    
-    def _buy_complete_sets(self, market: AgentMarket, quantity: int) -> list[PlacedTrade]:
-        logger.info(f"Buying {quantity} complete sets for market {market.question}")
-        
+    def merge(self, market: AgentMarket) -> list[PlacedTrade]:
         placed_trades: list[PlacedTrade] = []
-        try:
-            for outcome in market.outcomes:
-                probability = market.probabilities[outcome]
-                amount_for_outcome = USD(quantity * probability)
-                
-                expected_tokens = market.get_buy_token_amount(amount_for_outcome, outcome)
-                expected_profit = USD(float(expected_tokens.value)) - amount_for_outcome
-
-                logger.info(f"Buying {amount_for_outcome} worth of '{outcome}' tokens (profit: {expected_profit:.6f})")
-                trade_id = market.buy_tokens(outcome=outcome, amount=amount_for_outcome)
-
-                placed_trade = PlacedTrade(
-                    trade_type=TradeType.BUY,
-                    outcome=outcome,
-                    amount=amount_for_outcome,
-                    id=trade_id
-                )
-                placed_trades.append(placed_trade)
-                logger.info(f"Trade executed with ID: {trade_id}")
-
-        except Exception as e:
-            logger.error(f"Failed to buy complete sets: {e}")
-            raise ValueError(f"Failed to execute complete set purchase: {e}")
+        max_sets_to_arbitrage = self._max_sets(market, CalculationType.COST)
+        max_sets_to_arbitrage = min(max_sets_to_arbitrage, self.max_merge_ammout_dollars)
         
-        return placed_trades
+        if max_sets_to_arbitrage > 0:
+            placed_trades.extend(self._trade_complete_sets(market, max_sets_to_arbitrage, TradeType.BUY))
+            if len(placed_trades) > 0:
+                placed_trades.extend(self._trade_complete_sets(market, max_sets_to_arbitrage, TradeType.SELL))
 
-    def _get_buy_price(
-        self, 
-        market: SeerAgentMarket, 
-        outcome: OutcomeStr, 
-        amount_to_spend: Wei,
-        from_address: ChecksumAddress,
-    ) -> Wei | None:
-        try:
-            outcome_token_address = market.get_wrapped_token_for_outcome(outcome)
-            collateral_token_address = market.collateral_token_contract_address_checksummed
-            
-            params = ExactInputSingleParams(
-                token_in=collateral_token_address,
-                token_out=outcome_token_address,
-                recipient=from_address,
-                amount_in=amount_to_spend,
-                amount_out_minimum=Wei(0),  # We just want to simulate, not enforce minimum
-            )
-            
-            return self.swapr_router.calc_exact_input_single(
-                params=params,
-                from_address=from_address,
-                api_keys=self.api_keys
-            )
-            
-        except Exception as e:
-            logger.warning(f"Failed to get accurate buy price for {outcome}: {e}")
-            return None
+        return placed_trades
 
     def _arbitrage_overestimated(self, market: AgentMarket) -> list[PlacedTrade]:
         logger.info("Executing mint-and-sell arbitrage for over-estimated probabilities")
@@ -231,7 +143,10 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         placed_trades: list[PlacedTrade] = []
         
         try:
-            optimal_sets = self.max_sets_to_mint(market)
+            optimal_sets = self._max_sets(market, CalculationType.REVENUE)
+            # Minting is done per 1$ per set
+            optimal_sets = min(float(optimal_sets), self.max_mint_ammout_dollars)
+
             if optimal_sets <= 0:
                 logger.info("No profitable minting opportunity found")
                 return placed_trades
@@ -245,16 +160,22 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 affordable_sets = int(available_balance.value)
                 if affordable_sets <= 0:
                     return placed_trades
-                mint_amount = CollateralToken(affordable_sets)
+                mint_amount = affordable_sets
                 logger.info(f"Scaling down to affordable amount: {affordable_sets} sets")
-            
+            else:
+                mint_amount = optimal_sets
+
             logger.info(f"Minting {mint_amount.value} complete sets for arbitrage")
-            mint_receipt = market.mint_full_set_of_outcome_tokens(
-                amount=mint_amount,
-                api_keys=self.api_keys
+            collateral_token_address = Web3.to_checksum_address(market.get_collateral_token_contract().address)
+            mint_full_set_for_market(
+                market_collateral_token=collateral_token_address,
+                market_id=Web3.to_checksum_address(market.id),
+                collateral_amount_wei=mint_amount.as_wei,
+                api_keys=self.api_keys,
+                web3=None
             )
-            tokens_to_sell = OutcomeToken(mint_amount.value)
-            placed_trades.extend(self._sell_complete_sets(market, optimal_sets))
+            # TODDO MINT SHOULD RETURN SOMETHING FOR PLACED TRADES
+            placed_trades.extend(self._trade_complete_sets(market, mint_amount, TradeType.SELL))
             
             return placed_trades
                 
@@ -264,102 +185,132 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         
         return placed_trades
 
-    def _marginal_revenue(
+    def _max_sets(
+        self,
+        market: AgentMarket,
+        calc_type: CalculationType,
+        target: float = 1.0,
+        max_expand: float = 1e6,
+    ) -> int:
+        """
+        Largest integer n such that the *marginal* quote is still profitable vs `target` USD.
+
+        COST    -> marginal_cost(n)  < target
+        REVENUE -> marginal_revenue(n) > target
+        """
+
+        pools = {o: t.value for o, t in market.outcome_token_pool.items() if t.value > 0}
+        probs = {o: float(p) for o, p in market.probabilities.items() if p > 0}
+        k     = {o: probs[o] * pools[o] ** 2 for o in pools}
+
+        if len(pools) == 0 or len(probs) == 0 or sum(probs.values()) == 0 or sum(pools.values()) == 0:
+            return 0
+
+        mq0 = self._get_marginal_quote(0.0, k, pools, market.fees, market, calc_type)
+
+        if calc_type == CalculationType.COST:
+            # Need marginal cost < 1 to be worth buying
+            if mq0 >= target:
+                return 0
+            low = 0.0
+            # You cannot buy more than the smallest pool has (denominator would hit zero)
+            high = min(pools.values()) - 1e-12
+            good = lambda q: q < target
+        else:  # REVENUE
+            # Need marginal revenue > 1 to be worth minting/selling
+            if mq0 <= target:
+                return 0
+            low, high = 0.0, 1.0
+            while self._get_marginal_quote(high, k, pools, market.fees, market, calc_type) > target and high < max_expand:
+                low, high = high, high * 2.0
+            good = lambda q: q > target
+
+        # --- Binary search ---
+        for _ in range(64):
+            mid = (low + high) / 2.0
+            if good(self._get_marginal_quote(mid, k, pools, market.fees, market, calc_type)):
+                low = mid
+            else:
+                high = mid
+
+        return max(int(math.floor(low + self.epsilon)), 0)
+
+
+    def _get_marginal_quote(
         self,
         n: float,
         k: dict[OutcomeStr, float],
         pools: dict[OutcomeStr, float],
         fees: MarketFees,
-        market: AgentMarket
+        market: AgentMarket,
+        calc_type: CalculationType,
     ) -> float:
-        base_rev = sum(k[o] / (pools[o] + n) ** 2 for o in pools)
-        rev_after_prop = base_rev * (1 - fees.bet_proportion)
-        abs_fee_per = market.get_usd_in_token(fees.absolute).value
-        total_abs = abs_fee_per * len(pools)
-        return max(rev_after_prop - total_abs, 0.0)
+        """
+        Return the *marginal* USD value of trading one more complete set at depth n.
+        COST  -> how much you must pay
+        REVENUE -> how much you will receive
+        """
 
-    def max_sets_to_mint(self, market: AgentMarket) -> int:
-        if not market.outcome_token_pool:
-            return 0
-        pools = {o: tkn.value for o, tkn in market.outcome_token_pool.items()}
-        probs = {o: float(p) for o, p in market.probabilities.items()}
-        
-        if sum(probs.values()) <= 1.0 + self.epsilon:
-            return 0
-        k = {o: probs[o] * pools[o] ** 2 for o in pools}
-        fees = market.fees
-        
-        if self._marginal_revenue(0.0, k, pools, fees, market) <= 1.0:
-            return 0
-        low, high = 0.0, 1.0
-        while self._marginal_revenue(high, k, pools, fees, market) > 1.0 and high < 1e6:
-            low, high = high, high * 2.0
-        for _ in range(64):
-            mid = (low + high) / 2.0
-            if self._marginal_revenue(mid, k, pools, fees, market) > 1.0:
-                low = mid
-            else:
-                high = mid
-        return max(int(math.floor(high + self.epsilon)), 0)
+        if calc_type == CalculationType.COST:
+            if any(n >= pools[o] for o in pools):
+                return float("inf")
+            gross = sum(k[o] / (pools[o] - n) ** 2 for o in pools)
 
-    def _sell_complete_sets(self, market: AgentMarket, quantity: int) -> list[PlacedTrade]:
-        logger.info(f"Selling {quantity} complete sets to realize arbitrage profit")
+            if fees.bet_proportion > 0:
+                gross = gross / (1 - fees.bet_proportion)
+            return gross + fees.absolute
+
+        else:
+            gross = sum(k[o] / (pools[o] + n) ** 2 for o in pools)
+            if fees.bet_proportion > 0:
+                gross = gross * (1 - fees.bet_proportion)
+            return max(gross - fees.absolute, 0.0)
+
+    def _trade_complete_sets(self, market: AgentMarket, quantity: int, trade_type: TradeType) -> list[PlacedTrade]:
+        """
+        Execute trades for complete sets of outcome tokens.
+        
+        Args:
+            market: The market to trade on
+            quantity: Number of complete sets to trade
+            trade_type: BUY or SELL
+        """
+        action = "Buying" if trade_type == TradeType.BUY else "Selling"
+        logger.info(f"{action} {quantity} complete sets for market {market.question}")
         
         placed_trades: list[PlacedTrade] = []
         
         try:
-            user_id = market.get_user_id(self.api_keys)
-            current_position = market.get_position(user_id)
-
             for outcome in market.outcomes:
-                tokens_to_sell = OutcomeToken(quantity * market.probabilities[outcome])
-                expected_sell_value = market.get_sell_value_of_outcome_token(outcome, tokens_to_sell)
-                
-                amount_usd = market.get_in_usd(expected_sell_value)
-                logger.info(f"Selling {tokens_to_sell} '{outcome}' tokens for {amount_usd}")
-                trade_id = market.sell_tokens(outcome=outcome, amount=tokens_to_sell)
-                
-                placed_trade = PlacedTrade(
-                    trade_type=TradeType.SELL,
-                    outcome=outcome,
-                    amount=amount_usd,
-                    id=trade_id
-                )
-                placed_trades.append(placed_trade)
+                if market.probabilities[outcome] == 0:
+                    continue
 
+                if trade_type == TradeType.BUY:
+                    placed_trade = PlacedTrade(
+                        trade_type=TradeType.BUY,
+                        outcome=outcome,
+                        amount=USD(quantity),
+                        id=market.buy_tokens(outcome=outcome, amount=USD(quantity))
+                    )
+                else: 
+                    user_id = market.get_user_id(self.api_keys)
+                    current_position = market.get_position(user_id)
+                    
+                    tokens_to_sell = min(OutcomeToken(quantity), current_position.amounts_ot[outcome])
+                    amount_usd = market.get_in_usd(market.get_sell_value_of_outcome_token(outcome, tokens_to_sell))                    
+                    placed_trade = PlacedTrade(
+                        trade_type=TradeType.SELL,
+                        outcome=outcome,
+                        amount=amount_usd,
+                        id=market.sell_tokens(outcome=outcome, amount=tokens_to_sell)
+                    )
+                
+                placed_trades.append(placed_trade)
+                logger.info(f"Trade executed with ID: {placed_trade.id}")
 
         except Exception as e:
-            logger.warning(f"Failed to sell complete sets immediately: {e}")
-            raise ValueError(f"Failed to realize arbitrage profit: {e}")
+            action_lower = action.lower()
+            logger.error(f"Failed to {action_lower} complete sets: {e}")
+            raise ValueError(f"Failed to execute complete set {action_lower}: {e}")
         
         return placed_trades
-
-    def _get_sell_price(
-        self, 
-        market: SeerAgentMarket, 
-        outcome: OutcomeStr, 
-        tokens_to_sell: Wei,
-        from_address: ChecksumAddress,
-    ) -> Wei | None:
-        try:
-            outcome_token_address = market.get_wrapped_token_for_outcome(outcome)
-            collateral_token_address = market.collateral_token_contract_address_checksummed
-            
-            params = ExactInputSingleParams(
-                token_in=outcome_token_address,
-                token_out=collateral_token_address,
-                recipient=from_address,
-                amount_in=tokens_to_sell,
-                amount_out_minimum=Wei(0),  
-            )
-            
-
-            return self.swapr_router.calc_exact_input_single(
-                params=params,
-                from_address=from_address,
-                api_keys=self.api_keys
-            )
-            
-        except Exception as e:
-            logger.warning(f"Failed to get accurate sell price for {outcome}: {e}")
-            return None

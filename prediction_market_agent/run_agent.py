@@ -15,6 +15,9 @@ from prediction_market_agent_tooling.loggers import patch_logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
+from prediction_market_agent.agents.full_set_collective_arbitrage_agent.deploy import (
+    DeployableFullSetCollectiveArbitrageAgent,
+)
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
@@ -158,7 +161,7 @@ class RunnableAgent(str, Enum):
     berlin2_search_var = "berlin2_search_var"
     prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
     skew_agent = "skew_agent"
-
+    full_set_collective_arbitrage_agent = "full_set_collective_arbitrage_agent"
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.logprobs_agent: DeployableLogProbsAgent,
@@ -216,6 +219,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
+    RunnableAgent.full_set_collective_arbitrage_agent: DeployableFullSetCollectiveArbitrageAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

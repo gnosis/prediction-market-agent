@@ -12,6 +12,7 @@ from prediction_market_agent_tooling.markets.seer.seer import SeerAgentMarket
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent.agents.full_set_collective_arbitrage_agent.deploy import (
     DeployableFullSetCollectiveArbitrageAgent,
+    CalculationType,
 )
 
 
@@ -235,7 +236,7 @@ def test_max_sets_to_buy_underestimated_pivots_at_one(agent, realistic_underesti
 
     agent._get_buy_price = mock_get_buy_price
 
-    N = agent.max_sets_to_buy(realistic_underestimated_market)
+    N = agent._max_sets(realistic_underestimated_market, CalculationType.COST)
     assert N > 0, "Should detect an arbitrage opportunity"
     assert N <= 50, "Quantity should be bounded by liquidity"
 
@@ -245,9 +246,9 @@ def test_max_sets_to_buy_underestimated_pivots_at_one(agent, realistic_underesti
     k = {o: probs[o] * pools[o] ** 2 for o in pools}
 
     # 4) Compute the marginal cost at N, N - 1, and N + 1
-    mc_at_N      = agent._marginal_cost(N,     k, pools, realistic_underestimated_market.fees, realistic_underestimated_market)
-    mc_below     = agent._marginal_cost(N - 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market) if N > 0 else None
-    mc_above     = agent._marginal_cost(N + 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market)
+    mc_at_N      = agent._get_marginal_quote(N,     k, pools, realistic_underestimated_market.fees, realistic_underestimated_market, CalculationType.COST)
+    mc_below     = agent._get_marginal_quote(N - 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market, CalculationType.COST) if N > 0 else None
+    mc_above     = agent._get_marginal_quote(N + 1, k, pools, realistic_underestimated_market.fees, realistic_underestimated_market, CalculationType.COST)
 
     # 5) Assert that mc crosses 1.0 exactly at N
     assert mc_below is None or mc_below < 1.0, (
@@ -318,7 +319,7 @@ def test_max_sets_to_buy_with_high_liquidity(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    N = agent.max_sets_to_buy(mock_market)
+    N = agent._max_sets(mock_market, CalculationType.COST)
     
     # High liquidity should allow larger arbitrage quantities
     assert N > 10, "High liquidity should enable larger arbitrage trades"
@@ -329,9 +330,9 @@ def test_max_sets_to_buy_with_high_liquidity(agent):
     k = {o: probs[o] * pools[o] ** 2 for o in pools}
 
     # 4) Compute the marginal cost at N, N - 1, and N + 1
-    mc_at_N      = agent._marginal_cost(N,     k, pools, mock_market.fees, mock_market)
-    mc_below     = agent._marginal_cost(N - 1, k, pools, mock_market.fees, mock_market) if N > 0 else None
-    mc_above     = agent._marginal_cost(N + 1, k, pools, mock_market.fees, mock_market)
+    mc_at_N      = agent._get_marginal_quote(N,     k, pools, mock_market.fees, mock_market, CalculationType.COST)
+    mc_below     = agent._get_marginal_quote(N - 1, k, pools, mock_market.fees, mock_market, CalculationType.COST) if N > 0 else None
+    mc_above     = agent._get_marginal_quote(N + 1, k, pools, mock_market.fees, mock_market, CalculationType.COST)
 
     # 5) Assert that mc crosses 1.0 exactly at N
     assert mc_below is None or mc_below < 1.0, (
@@ -402,7 +403,7 @@ def test_max_sets_to_buy_no_arbitrage_opportunity(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    N = agent.max_sets_to_buy(mock_market)
+    N = agent._max_sets(mock_market, CalculationType.COST)
     
     # Should find no profitable arbitrage when probabilities sum to 1
     assert N == 0, "Should find no arbitrage opportunity when probabilities are balanced"
@@ -427,7 +428,7 @@ def test_max_sets_to_mint_overestimated_simple(agent, realistic_overestimated_ma
     agent._get_sell_price = mock_get_sell_price
     
     # Test the calculation
-    N = agent.max_sets_to_mint(realistic_overestimated_market)
+    N = agent._max_sets(realistic_overestimated_market, CalculationType.REVENUE)
     
     # With overestimated probabilities (1.20 total), we should find profitable opportunities
     assert N > 0, "Should find profitable mint-and-sell arbitrage opportunity"
@@ -440,9 +441,9 @@ def test_max_sets_to_mint_overestimated_simple(agent, realistic_overestimated_ma
     k = {o: probs[o] * pools[o] ** 2 for o in pools}
 
     #Compute the marginal cost at N, N - 1, and N + 1
-    rev_above = agent._marginal_revenue(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market) if N > 0 else None
-    rev_at    = agent._marginal_revenue(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
-    rev_below = agent._marginal_revenue(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+    rev_above = agent._get_marginal_quote(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE) if N > 0 else None
+    rev_at    = agent._get_marginal_quote(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE)
+    rev_below = agent._get_marginal_quote(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE)
 
     assert rev_above is None or rev_above > 1.0, (
     f"Revenue just below N should be >1 (got {rev_above:.4f})"
@@ -510,7 +511,7 @@ def test_max_sets_to_mint_with_price_impact(agent):
     
     agent._get_sell_price = mock_get_sell_price
     
-    N = agent.max_sets_to_mint(mock_market)
+    N = agent._max_sets(mock_market, CalculationType.REVENUE)
     
     # Price impact should limit the arbitrage size despite large opportunity
     assert N > 0, "Should still find arbitrage despite price impact"
@@ -522,9 +523,9 @@ def test_max_sets_to_mint_with_price_impact(agent):
     k = {o: probs[o] * pools[o] ** 2 for o in pools}
 
     #Compute the marginal cost at N, N - 1, and N + 1
-    rev_above = agent._marginal_revenue(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market) if N > 0 else None
-    rev_at    = agent._marginal_revenue(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
-    rev_below = agent._marginal_revenue(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market)
+    rev_above = agent._get_marginal_quote(N - 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE) if N > 0 else None
+    rev_at    = agent._get_marginal_quote(N,     k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE)
+    rev_below = agent._get_marginal_quote(N + 1, k, pools, realistic_overestimated_market.fees, realistic_overestimated_market, CalculationType.REVENUE)
 
     assert rev_above is None or rev_above > 1.0, (
     f"Revenue just below N should be >1 (got {rev_above:.4f})"
@@ -592,7 +593,7 @@ def test_max_sets_to_mint_with_price_impact(agent):
     
     agent._get_sell_price = mock_get_sell_price
     
-    N = agent.max_sets_to_mint(mock_market)
+    N = agent._max_sets(mock_market, CalculationType.REVENUE)
     
     # Price impact should limit the arbitrage size despite large opportunity
     assert N == 0, "Should find no arbitrage despite price impact"
@@ -633,7 +634,7 @@ def test_max_sets_to_buy_zero_liquidity(agent):
     
     agent._get_buy_price = Mock(return_value=Wei(0))
     
-    max_sets = agent.max_sets_to_buy(mock_market)
+    max_sets = agent._max_sets(mock_market, CalculationType.COST)
     
     # Should handle zero liquidity gracefully
     assert max_sets == 0, "Should return 0 for markets with no liquidity"
@@ -673,7 +674,7 @@ def test_max_sets_calculation_with_extreme_probabilities(agent):
     
     agent._get_buy_price = mock_get_buy_price
     
-    N = agent.max_sets_to_buy(mock_market)
+    N = agent._max_sets(mock_market, CalculationType.COST)
     
     # High liquidity should allow larger arbitrage quantities
     assert N > 10, "High liquidity should enable larger arbitrage trades"
@@ -684,9 +685,9 @@ def test_max_sets_calculation_with_extreme_probabilities(agent):
     k = {o: probs[o] * pools[o] ** 2 for o in pools}
 
     # 4) Compute the marginal cost at N, N - 1, and N + 1
-    mc_at_N      = agent._marginal_cost(N,     k, pools, realistic_market.fees, realistic_market)
-    mc_below     = agent._marginal_cost(N - 1, k, pools, realistic_market.fees, realistic_market) if N > 0 else None
-    mc_above     = agent._marginal_cost(N + 1, k, pools, realistic_market.fees, realistic_market)
+    mc_at_N      = agent._get_marginal_quote(N,     k, pools, realistic_market.fees, realistic_market, CalculationType.COST)
+    mc_below     = agent._get_marginal_quote(N - 1, k, pools, realistic_market.fees, realistic_market, CalculationType.COST) if N > 0 else None
+    mc_above     = agent._get_marginal_quote(N + 1, k, pools, realistic_market.fees, realistic_market, CalculationType.COST)
 
     # 5) Assert that mc crosses 1.0 exactly at N
     assert mc_below is None or mc_below < 1.0, (
@@ -737,7 +738,7 @@ def test_high_fees_eating_up_marginal_revenue(agent, realistic_overestimated_mar
     agent._get_sell_price = mock_get_sell_price
     realistic_overestimated_market.fees = MarketFees(bet_proportion=0.02, absolute=USD(0.2))
     # Test the calculation
-    N = agent.max_sets_to_mint(realistic_overestimated_market)
+    N = agent._max_sets(realistic_overestimated_market, CalculationType.REVENUE)
     
     # With overestimated probabilities (1.20 total), we should find profitable opportunities
     assert N == 0, "Should find no arbitrage despite high fees"
