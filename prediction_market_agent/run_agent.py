@@ -87,6 +87,7 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
 from prediction_market_agent.agents.replicate_to_omen_agent.deploy import (
     DeployableReplicateToOmenAgent,
 )
+from prediction_market_agent.agents.skew_agent.deploy import SkewAgent
 from prediction_market_agent.agents.social_media_agent.deploy import (
     DeployableSocialMediaAgent,
 )
@@ -156,6 +157,7 @@ class RunnableAgent(str, Enum):
     berlin2_search_high = "berlin2_search_high"
     berlin2_search_var = "berlin2_search_var"
     prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
+    skew_agent = "skew_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -213,6 +215,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin2_search_high: Berlin2OpenaiSearchAgentHigh,
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
+    RunnableAgent.skew_agent: SkewAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
