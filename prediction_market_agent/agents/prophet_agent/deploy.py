@@ -161,7 +161,7 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
         return MultiCategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
-                max_=USD(25),
+                max_=USD(5),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
@@ -382,7 +382,7 @@ class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRo
         return MultiCategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
-                max_=USD(25),
+                max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
             ),
         )
@@ -663,7 +663,7 @@ class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
         return MultiCategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
-                max_=USD(25),
+                max_=USD(5),
                 trading_balance=market.get_trade_balance(APIKeys()),
             ),
         )
