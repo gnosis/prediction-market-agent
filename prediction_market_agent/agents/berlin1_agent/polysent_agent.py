@@ -9,7 +9,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.deploy.betting_strategy import (
+    BettingStrategy,
+    MultiCategoricalMaxAccuracyBettingStrategy,
+)
+from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -20,12 +24,23 @@ from prediction_prophet.functions.web_scrape import web_scrape
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from sklearn.isotonic import IsotonicRegression
 
+from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
+
 
 class Berlin1PolySentAgent(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = True
 
     LOG_PATH: Path | None = None
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MultiCategoricalMaxAccuracyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(1),
+                max_=USD(5),
+                trading_balance=market.get_trade_balance(APIKeys()),
+            ),
+        )
 
     def load(self) -> None:
         self.calibration_model = (
