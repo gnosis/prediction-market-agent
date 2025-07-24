@@ -13,7 +13,7 @@ from prediction_market_agent_tooling.deploy.trade_interval import (
 )
 from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
