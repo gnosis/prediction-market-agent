@@ -69,11 +69,9 @@ def omen_replicate_from_tx(
 ) -> list[ChecksumAddress]:
     existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
 
-    replicated_markets = (
-        replicated_market_table_handler.get_replicated_markets_from_market(
-            original_market_type=market_type
-        )
-    )
+    # We fetch all replicated markets, independently of the market_type,
+    # because we don't want to replicate the same market twice on Omen.
+    replicated_markets = replicated_market_table_handler.get_all()
 
     excluded_questions = set(
         [m.question_title for m in existing_markets]
@@ -121,7 +119,7 @@ def omen_replicate_from_tx(
 
         if market.question in excluded_questions:
             logger.info(
-                f"Skipping `{market.question}` because it was already replicated."
+                f"Skipping `{market.question}` because it was already replicated. Excluded questions: {excluded_questions}"
             )
             continue
 
