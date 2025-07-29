@@ -119,6 +119,12 @@ def omen_replicate_from_tx(
         original_market_question = market.question
         # We initially consider that market does not need to be rephrased.
 
+        if market.question in excluded_questions:
+            logger.info(
+                f"Skipping `{market.question}` because it was already replicated."
+            )
+            continue
+
         if len(created_addresses) >= n_to_replicate:
             logger.info(
                 f"Replicated {len(created_addresses)} from {market_type}, breaking."
