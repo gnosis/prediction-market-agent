@@ -49,12 +49,14 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
 
     def load(self) -> None:
         super().load()
-        self.epsilon = 0.02  # 1.5% error margin for probabilities as rounding error
+        self.epsilon = 0.02  # 2% error margin for probabilities as rounding error
         self.swapr_router = SwaprRouterContract()
         self.api_keys = APIKeys()
-        self.max_mint_ammout_dollars: float = 0.5  # Minting is done per 1$ per set
-        self.max_merge_ammout_dollars: float = (
-            0.5  # Buying is done per 1$ per set of outcomes that can cost less
+        self.max_mint_amount_dollars: float = (
+            0.5  # Minting is done per 0.5$ outcome set
+        )
+        self.max_merge_amount_dollars: float = (
+            0.5  # Buying is done per 0.5$ outcome set
         )
 
     def run(self, market_type: MarketType) -> None:
@@ -160,7 +162,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         placed_trades: list[PlacedTrade] = []
         max_sets_to_arbitrage = self._max_sets(market, CalculationType.COST)
         max_sets_to_arbitrage = min(
-            max_sets_to_arbitrage, self.max_merge_ammout_dollars
+            max_sets_to_arbitrage, self.max_merge_amount_dollars
         )
 
         if max_sets_to_arbitrage > 0:
@@ -186,7 +188,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         try:
             optimal_sets = self._max_sets(market, CalculationType.REVENUE)
             # Minting is done per 1$ per set
-            optimal_sets = min(float(optimal_sets), self.max_mint_ammout_dollars)
+            optimal_sets = min(float(optimal_sets), self.max_mint_amount_dollars)
 
             if optimal_sets <= 0:
                 logger.info("No profitable minting opportunity found")
@@ -230,7 +232,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
 
         except Exception as e:
             logger.error(f"Over-estimated arbitrage failed: {e}")
-            raise ValueError(f"Failed to execute over-estimated arbitrage: {e}")
+            raise ValueError(f"Failed to execute over-estimated arbitrage: {e}") from e
 
         return placed_trades
 
@@ -412,6 +414,8 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
         except Exception as e:
             action_lower = action.lower()
             logger.error(f"Failed to {action_lower} complete sets: {e}")
-            raise ValueError(f"Failed to execute complete set {action_lower}: {e}")
+            raise ValueError(
+                f"Failed to execute complete set {action_lower}: {e}"
+            ) from e
 
         return placed_trades
