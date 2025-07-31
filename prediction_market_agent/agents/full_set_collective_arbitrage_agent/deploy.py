@@ -1,5 +1,4 @@
 import math
-import typing as t
 from enum import Enum
 
 from prediction_market_agent_tooling.config import APIKeys
@@ -14,7 +13,6 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import (
     AgentMarket,
     ProcessedTradedMarket,
-    SortBy,
 )
 from prediction_market_agent_tooling.markets.data_models import (
     USD,
@@ -66,26 +64,12 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
             )
         super().run(market_type=market_type)
 
-    def get_markets(
-        self,
-        market_type: MarketType,
-    ) -> t.Sequence[SeerAgentMarket]:
-        # Fetch all markets to choose from
-        available_markets = SeerAgentMarket.get_markets(
-            limit=5,
-            # sort_by=self.get_markets_sort_by,
-            sort_by=SortBy.HIGHEST_LIQUIDITY,
-            filter_by=self.get_markets_filter_by,
-            created_after=self.trade_on_markets_created_after,
-        )
-        return available_markets
+    def before_process_market(
+        self, market_type: MarketType, market: AgentMarket
+    ) -> None:
+        super().before_process_market(market_type, market)
+        self.check_min_required_balance_to_trade(market)
 
-    def process_market(
-        self,
-        market_type: MarketType,
-        market: AgentMarket,
-        verify_market: bool = True,
-    ) -> ProcessedTradedMarket | None:
         if not isinstance(market, SeerAgentMarket):
             raise ValueError(
                 f"This agent only supports SeerAgentMarket, got {type(market)}"
@@ -112,6 +96,17 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                     f"Market '{market.question}' missing outcome '{outcome}' in token pool - skipping market"
                 )
                 return None
+
+    def process_market(
+        self,
+        market_type: MarketType,
+        market: AgentMarket,
+        verify_market: bool = True,
+    ) -> ProcessedTradedMarket | None:
+        if not isinstance(market, SeerAgentMarket):
+            raise ValueError(
+                f"This agent only supports SeerAgentMarket, got {type(market)}"
+            )
 
         prob_summed = sum(market.probabilities.values())
         overestimated_prob = prob_summed > 1 + self.epsilon
@@ -223,7 +218,7 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
                 api_keys=self.api_keys,
                 web3=None,
             )
-            # TODDO MINT SHOULD RETURN SOMETHING FOR PLACED TRADES
+            # Tokens will be minted by Autodeposit inside of place_bet method in seer.py
             placed_trades.extend(
                 self._trade_complete_sets(market, mint_amount.value, TradeType.SELL)
             )
