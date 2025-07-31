@@ -26,9 +26,6 @@ from prediction_market_agent_tooling.markets.seer.seer import SeerAgentMarket
 from prediction_market_agent_tooling.markets.seer.seer_contracts import (
     SwaprRouterContract,
 )
-from prediction_market_agent_tooling.tools.tokens.auto_deposit import (
-    mint_full_set_for_market,
-)
 from web3 import Web3
 
 
@@ -210,13 +207,6 @@ class DeployableFullSetCollectiveArbitrageAgent(DeployableTraderAgent):
             logger.info(f"Minting {mint_amount.value} complete sets for arbitrage")
             collateral_token_address = Web3.to_checksum_address(
                 market.get_collateral_token_contract().address
-            )
-            mint_full_set_for_market(
-                market_collateral_token=collateral_token_address,
-                market_id=Web3.to_checksum_address(market.id),
-                collateral_amount_wei=mint_amount.as_outcome_wei.as_wei,
-                api_keys=self.api_keys,
-                web3=None,
             )
             # Tokens will be minted by Autodeposit inside of place_bet method in seer.py
             placed_trades.extend(

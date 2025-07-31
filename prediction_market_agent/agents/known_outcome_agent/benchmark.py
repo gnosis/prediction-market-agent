@@ -17,8 +17,9 @@ from prediction_market_agent_tooling.markets.data_models import (
     ProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.market_fees import MarketFees
-from prediction_market_agent_tooling.markets.markets import AgentMarket
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.tools.utils import check_not_none, utcnow
+from prediction_market_agent.utils.test_markets import TestAgentMarket
 from pydantic import BaseModel
 
 from prediction_market_agent.agents.known_outcome_agent.known_outcome_agent import (
@@ -47,7 +48,7 @@ class QuestionWithKnownOutcome(BaseModel):
         return probs
 
     def to_market(self) -> AgentMarket:
-        return AgentMarket(
+        return TestAgentMarket(
             url=self.url if self.url else "",
             id=self.question,
             question=self.question,

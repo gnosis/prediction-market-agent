@@ -30,6 +30,7 @@ from prediction_market_agent_tooling.markets.markets import (
     get_binary_markets,
 )
 from prediction_market_agent_tooling.tools.utils import utc_datetime, utcnow
+from prediction_market_agent.utils.test_markets import TestAgentMarket
 
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
@@ -38,7 +39,7 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
 
 
 def build_binary_agent_market_from_question(question: str) -> AgentMarket:
-    return AgentMarket(
+    return TestAgentMarket(
         id=question,
         description=None,
         url=question,
