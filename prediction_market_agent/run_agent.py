@@ -31,6 +31,9 @@ from prediction_market_agent.agents.coinflip_agent.deploy import (
     DeployableCoinFlipAgent,
     DeployableCoinFlipAgentByHighestLiquidity,
 )
+from prediction_market_agent.agents.full_set_collective_arbitrage_agent.deploy import (
+    DeployableFullSetCollectiveArbitrageAgent,
+)
 from prediction_market_agent.agents.gptr_agent.deploy import (
     GPTRAgent,
     GPTRHighestLiquidityAgent,
@@ -158,6 +161,7 @@ class RunnableAgent(str, Enum):
     berlin2_search_var = "berlin2_search_var"
     prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
     skew_agent = "skew_agent"
+    full_set_collective_arbitrage_agent = "full_set_collective_arbitrage_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -216,6 +220,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
+    RunnableAgent.full_set_collective_arbitrage_agent: DeployableFullSetCollectiveArbitrageAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
