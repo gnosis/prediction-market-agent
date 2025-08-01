@@ -33,8 +33,8 @@ poetry = "^1.7.1"
 poetry-plugin-export = "^1.6.0"
 functions-framework = "^3.5.0"
 cron-validator = "^1.0.8"
-prediction-market-agent-tooling = {git="https://github.com/gnosis/prediction-market-agent-tooling", branch="797-fix-trading-on-polymarket"}
-#prediction-market-agent-tooling = { path = "../prediction-market-agent-tooling", develop = true }
+#prediction-market-agent-tooling = {git="https://github.com/gnosis/prediction-market-agent-tooling", branch="797-fix-trading-on-polymarket"}
+prediction-market-agent-tooling = { path = "../prediction-market-agent-tooling", develop = true }
 pydantic-settings = "^2.1.0"
 autoflake = "^2.2.1"
 isort = "^5.13.2"
@@ -52,7 +52,8 @@ pinecone = "^5.0.0"
 langchain-pinecone = "^0.2.0"
 pinatapy-vourhey = "^0.2.0"
 plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "gabriel/bumped-pmat-for-polymarket" }
+#prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "gabriel/bumped-pmat-for-polymarket" }
+prediction-prophet = { path = "/Users/gabrielfior/code/gnosis/predictionprophet", develop = true }
 transformers = "^4.43.3"
 openfactverification-kongzii = "^0.5.2"
 autogen-agentchat = "^0.4.0"
