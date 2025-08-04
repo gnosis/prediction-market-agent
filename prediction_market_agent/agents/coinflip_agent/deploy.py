@@ -1,5 +1,3 @@
-import random
-
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
@@ -23,7 +21,8 @@ class DeployableCoinFlipAgent(DeployableTraderAgent):
         return True
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        decision = random.choice([True, False])
+        # decision = random.choice([True, False])
+        decision = True
         return ProbabilisticAnswer(
             confidence=0.5,
             p_yes=Probability(float(decision)),
