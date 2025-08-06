@@ -68,7 +68,8 @@ def eoa_accounts() -> list[TestAccount]:
     # If we were using anvil standard accounts, we would have to filter out smart accounts.
     # For example, anvil's acc 1 (https://gnosisscan.io/address/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266) delegated access to a smart contract, which sweeps all funds sent to it.
     # Hence we prefer to use EOA accounts from a different mnemonic than to rely on anvil's standard accounts.
-    return ape_accounts.test_accounts
+    test_accounts: list[TestAccount] = ape_accounts.test_accounts
+    return test_accounts
 
 
 @pytest.fixture(scope="module")
