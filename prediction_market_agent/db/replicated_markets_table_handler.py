@@ -1,5 +1,3 @@
-from sqlmodel import col
-
 from prediction_market_agent.db.models import ReplicatedMarket
 from prediction_market_agent.db.sql_handler import SQLHandler
 
@@ -17,11 +15,5 @@ class ReplicatedMarketsTableHandler:
         """Save item to storage."""
         self.sql_handler.save_multiple(markets)
 
-    def get_replicated_markets_from_market(
-        self, original_market_type: str
-    ) -> list[ReplicatedMarket]:
-        return self.sql_handler.get_with_filter_and_order(
-            query_filters=[
-                col(ReplicatedMarket.original_market_type) == original_market_type
-            ],
-        )
+    def get_all(self) -> list[ReplicatedMarket]:
+        return list(self.sql_handler.get_all())
