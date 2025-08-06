@@ -114,6 +114,8 @@ def omen_replicate_from_tx(
     created_questions: set[str] = set()
 
     for market in markets_to_replicate:
+        logger.info(f"Going to replicate {market.question} from {market_type}.")
+
         original_market_question = market.question
         # We initially consider that market does not need to be rephrased.
 
