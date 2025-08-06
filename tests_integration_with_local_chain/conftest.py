@@ -66,13 +66,28 @@ def local_ethereum_client(local_web3: Web3) -> EthereumClient:
 
 
 @pytest.fixture(scope="session")
-def test_keys(accounts: list[TestAccount]) -> APIKeys:
-    account = accounts[0]
+def many_test_keys(local_web3: Web3) -> list[APIKeys]:
+    # Create fresh EOA accounts and fund them from one of the ape's testing accounts.
+    fund_from_account = ape_accounts.test_accounts[0]
 
-    # Using a standard Anvil account with enough xDAI.
-    return APIKeys(
-        BET_FROM_PRIVATE_KEY=private_key_type(account.private_key), SAFE_ADDRESS=None
-    )
+    accounts = [
+        create_and_fund_random_account(
+            local_web3, private_key_type(fund_from_account.private_key)
+        )
+        for _ in range(10)
+    ]
+
+    return [
+        APIKeys(
+            BET_FROM_PRIVATE_KEY=private_key_type(account.key.hex()), SAFE_ADDRESS=None
+        )
+        for account in accounts
+    ]
+
+
+@pytest.fixture(scope="session")
+def test_keys(many_test_keys: list[APIKeys]) -> APIKeys:
+    return many_test_keys[0]
 
 
 def fund_account_on_tenderly(
