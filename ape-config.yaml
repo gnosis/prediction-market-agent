@@ -10,14 +10,13 @@ node:
     mainnet:
       uri: https://rpc.gnosischain.com
 
-
 networks:
   custom:
-     - name: mainnet                   # Required
-       chain_id: 100                   # Required
-       ecosystem: gnosis
-       base_ecosystem_plugin: ethereum
-       default_provider: node
+    - name: mainnet # Required
+      chain_id: 100 # Required
+      ecosystem: gnosis
+      base_ecosystem_plugin: ethereum
+      default_provider: node
 
 gnosis:
   default_network: gnosis_fork
@@ -28,3 +27,7 @@ foundry:
     gnosis:
       mainnet:
         upstream_provider: node
+
+test:
+  mnemonic: forward cable rack type refuse first early bargain glad tail hen impulse
+  number_of_accounts: 10
