@@ -1,7 +1,7 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    KellyBettingStrategy,
+    BinaryKellyBettingStrategy,
 )
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -38,7 +38,7 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithItsOwnResearch
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -52,7 +52,7 @@ class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAge
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),

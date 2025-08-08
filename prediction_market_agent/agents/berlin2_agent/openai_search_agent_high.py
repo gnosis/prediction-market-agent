@@ -11,9 +11,9 @@ class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = True
 
-    # TODO: Uncomment and configure after we get some historic bet data
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
+    #     return BinaryKellyBettingStrategy(
     #         max_position_amount=get_maximum_possible_bet_amount(
     #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
     #         ),

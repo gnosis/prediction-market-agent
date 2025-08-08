@@ -3,7 +3,7 @@ from functools import partial
 import pandas as pd
 import typer
 from prediction_market_agent_tooling.deploy.betting_strategy import (
-    MultiCategoricalMaxAccuracyBettingStrategy,
+    CategoricalMaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
@@ -93,7 +93,7 @@ def test_single_agent(
         model_settings=ModelSettings(temperature=0.0),
     )
 
-    strategy = MultiCategoricalMaxAccuracyBettingStrategy(max_position_amount=USD(10))
+    strategy = CategoricalMaxAccuracyBettingStrategy(max_position_amount=USD(10))
     tester = ProphetAgentTester(
         prophet_research=execute_prophet_research(),
         prophet_predict=execute_prophet_predict(),

@@ -5,7 +5,7 @@ from datetime import timedelta
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    MultiCategoricalMaxAccuracyBettingStrategy,
+    CategoricalMaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.deploy.trade_interval import (
     FixedInterval,
@@ -82,7 +82,7 @@ class SkewAgent(DeployableTraderAgent):
         max_position_amount = max(
             USD(0.01), market.get_trade_balance(self.api_keys) / 100
         )
-        return MultiCategoricalMaxAccuracyBettingStrategy(
+        return CategoricalMaxAccuracyBettingStrategy(
             max_position_amount=max_position_amount,
         )
 

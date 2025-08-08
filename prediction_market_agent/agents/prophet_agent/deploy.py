@@ -1,9 +1,10 @@
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    KellyBettingStrategy,
+    BinaryKellyBettingStrategy,
+    CategoricalKellyBettingStrategy,
+    CategoricalMaxAccuracyBettingStrategy,
     MaxExpectedValueBettingStrategy,
-    MultiCategoricalMaxAccuracyBettingStrategy,
 )
 from prediction_market_agent_tooling.deploy.trade_interval import (
     MarketLifetimeProportionalInterval,
@@ -117,7 +118,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -157,16 +158,18 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
     bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=USD(1),
-    #             max_=USD(5),
-    #             trading_balance=market.get_trade_balance(APIKeys()),
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return CategoricalKellyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(0.01),
+                max_=USD(0.75),
+                trading_balance=market.get_trade_balance(APIKeys()),
+            ),
+            max_price_impact=0.068,
+            allow_multiple_bets=False,
+            allow_shorting=False,
+            multicategorical=False,
+        )
 
     def load(self) -> None:
         super().load()
@@ -218,7 +221,7 @@ class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar)
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
+    #     return BinaryKellyBettingStrategy(
     #         max_bet_amount=get_maximum_possible_bet_amount(
     #             min_=USD(1),
     #             max_=USD(5),
@@ -263,7 +266,7 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -309,7 +312,7 @@ class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -351,7 +354,7 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
     model = "google/gemini-2.0-flash-001"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(6.5),
@@ -362,13 +365,17 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
 
 
 class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRouter):
+    """
+    Warning: This agent went out of funds and is now suspended.
+    """
+
     model = "deepseek/deepseek-r1"
     just_warn_on_unexpected_model_behavior = (
         True  # See https://github.com/gnosis/prediction-market-agent/issues/729
     )
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return MultiCategoricalMaxAccuracyBettingStrategy(
+        return CategoricalMaxAccuracyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(6.5),
@@ -380,14 +387,15 @@ class DeployablePredictionProphetDeepSeekR1(DeployableTraderAgentProphetOpenRout
 class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRouter):
     model = "deepseek/deepseek-chat"
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=USD(1), max_=USD(5), trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return BinaryKellyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(1),
+                max_=USD(5),
+                trading_balance=market.get_trade_balance(APIKeys()),
+            ),
+            max_price_impact=0.7,
+        )
 
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
@@ -395,7 +403,7 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(3.5),
@@ -470,7 +478,7 @@ class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -508,7 +516,7 @@ class DeployablePredictionProphetGPT4TurboFinalAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -546,7 +554,7 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
     agent: OlasAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(5),
                 max_=USD(25),
@@ -584,7 +592,7 @@ class DeployablePredictionProphetGPTo1PreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(2),
                 max_=USD(6),
@@ -624,7 +632,7 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
     just_warn_on_unexpected_model_behavior = True
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(5),
@@ -662,14 +670,15 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetGPTo1(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    # TODO: Uncomment and configure after we get some historic bet data
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return KellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=USD(1), max_=USD(5), trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=None,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return BinaryKellyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(1),
+                max_=USD(4),
+                trading_balance=market.get_trade_balance(APIKeys()),
+            ),
+            max_price_impact=0.418,
+        )
 
     def load(self) -> None:
         super().load()
@@ -738,15 +747,16 @@ class DeployablePredictionProphetGPTo3mini(DeployableTraderAgentER):
 class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.5),
-                max_=USD(1),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.174,
-        )
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return BinaryKellyBettingStrategy(
+    #         max_position_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(0.5),
+    #             max_=USD(1),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.174,
+    #     )
 
     def load(self) -> None:
         super().load()
@@ -780,15 +790,16 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(1),
-                max_=USD(2.77),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.69,
-        )
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return BinaryKellyBettingStrategy(
+    #         max_position_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(1),
+    #             max_=USD(2.77),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.69,
+    #     )
 
     def load(self) -> None:
         super().load()
@@ -823,7 +834,7 @@ class DeployablePredictionProphetClaude35SonnetAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return KellyBettingStrategy(
+        return BinaryKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
                 max_=USD(4.77),
