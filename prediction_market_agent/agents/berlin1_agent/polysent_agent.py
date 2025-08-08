@@ -27,6 +27,16 @@ class Berlin1PolySentAgent(DeployableTraderAgent):
 
     LOG_PATH: Path | None = None
 
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return CategoricalMaxAccuracyBettingStrategy(
+    #         max_position_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(1),
+    #             max_=USD(5),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #     )
+
     def load(self) -> None:
         self.calibration_model = (
             train_calibration_model(self.LOG_PATH) if self.LOG_PATH else None
