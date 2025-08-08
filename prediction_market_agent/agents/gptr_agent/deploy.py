@@ -15,6 +15,7 @@ from prediction_market_agent_tooling.deploy.trade_interval import (
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
@@ -32,14 +33,18 @@ class GPTRAgent(DeployableTraderAgent):
     bet_on_n_markets_per_run = 4
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return BinaryKellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.1),
-                max_=USD(8),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.57,
-        )
+        return (
+            BinaryKellyBettingStrategy(
+                max_position_amount=get_maximum_possible_bet_amount(
+                    min_=USD(0.1),
+                    max_=USD(8),
+                    trading_balance=market.get_trade_balance(APIKeys()),
+                ),
+                max_price_impact=0.57,
+            )
+            if isinstance(market, OmenAgentMarket)
+            else super().get_betting_strategy(market)
+        )  # Default to parent's tiny bet on other market types, as full kely isn't implemented properly yet. TODO: https://github.com/gnosis/prediction-market-agent-tooling/issues/830
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         report = gptr_research_sync(market.question)

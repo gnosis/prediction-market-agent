@@ -18,6 +18,7 @@ from prediction_market_agent_tooling.markets.data_models import (
     ScalarProbabilisticAnswer,
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
     get_certified_relevant_news_since_cached,
 )
@@ -159,17 +160,21 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return CategoricalKellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.01),
-                max_=USD(0.75),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.068,
-            allow_multiple_bets=False,
-            allow_shorting=False,
-            multicategorical=False,
-        )
+        return (
+            CategoricalKellyBettingStrategy(
+                max_position_amount=get_maximum_possible_bet_amount(
+                    min_=USD(0.01),
+                    max_=USD(0.75),
+                    trading_balance=market.get_trade_balance(APIKeys()),
+                ),
+                max_price_impact=0.068,
+                allow_multiple_bets=False,
+                allow_shorting=False,
+                multicategorical=False,
+            )
+            if isinstance(market, OmenAgentMarket)
+            else super().get_betting_strategy(market)
+        )  # Default to parent's tiny bet on other market types, as full kely isn't implemented properly yet. TODO: https://github.com/gnosis/prediction-market-agent-tooling/issues/830
 
     def load(self) -> None:
         super().load()
@@ -266,14 +271,18 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return BinaryKellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(1),
-                max_=USD(5),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.7,
-        )
+        return (
+            BinaryKellyBettingStrategy(
+                max_position_amount=get_maximum_possible_bet_amount(
+                    min_=USD(1),
+                    max_=USD(5),
+                    trading_balance=market.get_trade_balance(APIKeys()),
+                ),
+                max_price_impact=0.7,
+            )
+            if isinstance(market, OmenAgentMarket)
+            else super().get_betting_strategy(market)
+        )  # Default to parent's tiny bet on other market types, as full kely isn't implemented properly yet. TODO: https://github.com/gnosis/prediction-market-agent-tooling/issues/830
 
     def load(self) -> None:
         super().load()
