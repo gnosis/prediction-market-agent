@@ -635,8 +635,8 @@ class DeployablePredictionProphetGPTo1MiniAgent(DeployableTraderAgentER):
 
     def load(self) -> None:
         super().load()
-        # o1-mini supports only temperature=1.0
-        model = "o1-mini-2024-09-12"
+        # o4-mini supports only temperature=1.0
+        model = "o4-mini"  # Originally, this agent used o1-mini, but they deprecated it and removing from APIs.
         api_keys = APIKeys()
 
         self.agent = PredictionProphetAgent(
