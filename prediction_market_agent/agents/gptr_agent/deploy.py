@@ -8,15 +8,10 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     BinaryKellyBettingStrategy,
 )
-from prediction_market_agent_tooling.deploy.betting_strategy import (
-    BettingStrategy,
-    BinaryKellyBettingStrategy,
-)
 from prediction_market_agent_tooling.deploy.trade_interval import (
     FixedInterval,
     TradeInterval,
 )
-from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket, SortBy
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -26,7 +21,6 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.settings import ModelSettings
 
-from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (

@@ -2,7 +2,6 @@ from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     BinaryKellyBettingStrategy,
-    BinaryKellyBettingStrategy,
 )
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
