@@ -227,7 +227,6 @@ class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar)
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
     #     return BinaryKellyBettingStrategy(
-    #     return BinaryKellyBettingStrategy(
     #         max_bet_amount=get_maximum_possible_bet_amount(
     #             min_=USD(1),
     #             max_=USD(5),
@@ -767,16 +766,6 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
     #         ),
     #         max_price_impact=0.174,
     #     )
-    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return BinaryKellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=USD(0.5),
-    #             max_=USD(1),
-    #             trading_balance=market.get_trade_balance(APIKeys()),
-    #         ),
-    #         max_price_impact=0.174,
-    #     )
 
     def load(self) -> None:
         super().load()
@@ -810,16 +799,6 @@ class DeployablePredictionProphetClaude3OpusAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetClaude35HaikuAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return BinaryKellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=USD(1),
-    #             max_=USD(2.77),
-    #             trading_balance=market.get_trade_balance(APIKeys()),
-    #         ),
-    #         max_price_impact=0.69,
-    #     )
     # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
     #     return BinaryKellyBettingStrategy(
