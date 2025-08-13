@@ -68,6 +68,7 @@ posthog = ">=2.4.0,<6.0.0" # Version mismatch with ChromaDB that causes spam of 
 # TODO: Switch back to package install of gpt-researcher once they release the fix.
 # gpt-researcher = "^0.13.3"
 gpt-researcher = { git = "https://github.com/kongzii/gpt-researcher.git", branch = "peter/fix-return-in-pdf-scraper" }
+dune-client = "^1.7"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^0.1.2"
