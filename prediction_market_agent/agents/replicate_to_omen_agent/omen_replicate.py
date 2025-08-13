@@ -294,11 +294,16 @@ def omen_unfund_replicated_known_markets_tx(
         logger.info(
             f"[{idx+1}/{len(markets)}] Unfunding market `{market.liquidityParameter=} {market.question=} {market.url=}`."
         )
-        omen_remove_fund_market_tx(
-            api_keys=api_keys,
-            market=OmenAgentMarket.from_data_model(market),
-            shares=None,
-        )
+
+        try:
+            omen_remove_fund_market_tx(
+                api_keys=api_keys,
+                market=OmenAgentMarket.from_data_model(market),
+                shares=None,
+            )
+        except Exception as e:
+            logger.error(f"Failed to unfund market {market.url}: {e}")
+            continue
 
     logger.info("Redeeming funds from unfunded markets.")
     redeem_from_all_user_positions(api_keys)
