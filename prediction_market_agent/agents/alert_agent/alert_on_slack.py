@@ -1,14 +1,10 @@
 import logging
-import os
 import time
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 import requests
 from dune_client.client import DuneClient
-from dune_client.models import ResultsResponse
 from dune_client.query import QueryBase, QueryParameter
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.markets.markets import MarketType
@@ -17,7 +13,7 @@ PERFORMANCE_QUERY_ID = 4244657
 PRECISION_QUERY_ID = 5620557
 MAX_WAIT_MINUTES = 30
 POLL_INTERVAL_SECONDS = 30
-SAFE_SLACK_MESSAGE_LENGTH = 39000
+SAFE_SLACK_MESSAGE_LENGTH = 500
 
 
 class PerformanceAlertAgent(DeployableAgent):
@@ -38,39 +34,46 @@ class PerformanceAlertAgent(DeployableAgent):
             PRECISION_QUERY_ID, "Agents Precision For last week", "Last Month", "PMA"
         )
 
-        performance_result = self._get_latest_result(
-            performance_query.query_id
-        ) or self._process_new_querry(performance_query)
-        precision_result = self._get_latest_result(
-            precision_query.query_id
-        ) or self._process_new_querry(precision_query)
+        performance_result = self._get_latest_result(performance_query.query_id)
+        if performance_result is None:
+            performance_result = self._process_new_querry(performance_query)
+
+        precision_result = self._get_latest_result(precision_query.query_id)
+        if precision_result is None:
+            precision_result = self._process_new_querry(precision_query)
 
         return performance_result, precision_result
 
-    def _wait_for_dune_execution(self, query_id: int) -> ResultsResponse | None:
+    def _wait_for_dune_execution(self, query_id: int) -> pd.DataFrame | None:
         start_time = time.time()
         while time.time() < start_time + MAX_WAIT_MINUTES * 60:
             res = self._get_latest_result(query_id)
             if res:
-                return res
+                return pd.DataFrame(res.get("rows", []))
             time.sleep(POLL_INTERVAL_SECONDS)
         res = self._get_latest_result(query_id)
         if res:
             return res
         raise RuntimeError(f"No result available for query {query_id}")
 
-    def _process_new_querry(self, query: QueryBase) -> ResultsResponse | None:
+    def _process_new_querry(self, query: QueryBase) -> pd.DataFrame | None:
         try:
-            return self.dune.run_query(query, ping_frequency=POLL_INTERVAL_SECONDS)
+            res = self.dune.run_query(query, ping_frequency=POLL_INTERVAL_SECONDS)
+            if res.result and res.result.rows:
+                return pd.DataFrame(res.result.rows)
+            return None
         except Exception:
             logging.error(
                 f"Querry timed out {query.query_id}, waiting for {MAX_WAIT_MINUTES} minutes for it to finish"
             )
             return self._wait_for_dune_execution(query.query_id)
 
-    def _get_latest_result(self, query_id: int) -> ResultsResponse | None:
+    def _get_latest_result(self, query_id: int) -> pd.DataFrame | None:
         try:
-            return self.dune.get_latest_result(query_id, max_age_hours=8)
+            res = self.dune.get_latest_result(query_id, max_age_hours=8)
+            if res.result and res.result.rows:
+                return pd.DataFrame(res.result.rows)
+            return None
         except Exception:
             return None
 
@@ -210,10 +213,10 @@ class PerformanceAlertAgent(DeployableAgent):
         return "n/a" if pd.isna(v) else f"{int(max(float(v), 0))}"
 
     def _get_performance_report(
-        self, accuracy_df: pd.DataFrame, profit_df: pd.DataFrame
+        self, performance_df: pd.DataFrame, precision_df: pd.DataFrame
     ) -> pd.DataFrame:
-        weekly_cumulative_profit = self._weekly_cumulative_profit(profit_df)
-        accuracy = self._prepare_precision_daily(accuracy_df)
+        weekly_cumulative_profit = self._weekly_cumulative_profit(performance_df)
+        accuracy = self._prepare_precision_daily(precision_df)
 
         # Merge weekly performance with accuracy
         weekly_combined = pd.merge_asof(
@@ -268,7 +271,7 @@ class PerformanceAlertAgent(DeployableAgent):
                 num = float(val_str.replace("%", ""))
             else:
                 num = float(val_str) * 100.0
-            if num >= 80:
+            if num >= 70:
                 return "🟢"
             if num >= 50:
                 return "🟡"
@@ -277,7 +280,7 @@ class PerformanceAlertAgent(DeployableAgent):
             return ""
 
     def _format_agent_block(self, label: str, g: pd.DataFrame) -> str:
-        lines: list[str] = [f"**{str(label)[:30]}**"]
+        lines: list[str] = [f"{str(label)}"]
         prev_profit_num: float | None = None
 
         for _, r in g.iterrows():
@@ -319,7 +322,9 @@ class PerformanceAlertAgent(DeployableAgent):
         lines.append("")  # spacer
         return "\n".join(lines)
 
-    def _prepare_report_string(self, combined_report: pd.DataFrame) -> tuple[str, list[str], str]:
+    def _prepare_report_string(
+        self, combined_report: pd.DataFrame
+    ) -> tuple[str, list[str]]:
         combined_report["block_date"] = pd.to_datetime(
             combined_report["block_date"], utc=True, errors="coerce"
         )
@@ -335,24 +340,18 @@ class PerformanceAlertAgent(DeployableAgent):
             f"Total Agents: {total_agents}\n"
             f"Total Weeks: {total_weeks}\n\n"
             f"Performance data grouped by agent...\n"
+            f"Legend:\n"
+            f"Date | Resolved Count (>0 or 0) | Profit (trends: 📈📉➡️) | "
+            f"Accuracy (🟢≥70% 🟡50-79% 🔴<50%)\n\n"
         )
 
         body = [
             self._format_agent_block(label, g)
             for label, g in combined_report.groupby("label", sort=False)
         ]
+        return header, body
 
-        footer = (
-            "Legend:\n"
-            "Date | Resolved Count (>0 or 0) | Profit (trends: 📈📉➡️) | "
-            "Accuracy (🟢≥80% 🟡50-79% 🔴<50%)\n\n"
-            "Report complete!"
-        )
-
-        return header, body, footer
-
-
-    def _send_report_to_slack(self, header: str, body: list[str], footer: str) -> None:
+    def _send_report_to_slack(self, header: str, body: list[str]) -> None:
         # Send header first
         if header:
             requests.post(self.slack_webhook, json={"text": header}, timeout=10)
@@ -382,17 +381,13 @@ class PerformanceAlertAgent(DeployableAgent):
             # Send any remaining content
             if current_message:
                 requests.post(
-                    self.slack_webhook, json={"text": current_message.rstrip()}, timeout=10
+                    self.slack_webhook,
+                    json={"text": current_message.rstrip()},
+                    timeout=10,
                 )
 
-        # Send footer last
-        if footer:
-            requests.post(self.slack_webhook, json={"text": footer}, timeout=10)
-
     def run(self, market_type: MarketType) -> None:
-        accuracy_df, profit_df = self._get_performance_data_from_dune(
-            market_type
-        )
-        combined_report = self._get_performance_report(accuracy_df, profit_df)
-        header, body, footer = self._prepare_report_string(combined_report)
-        self._send_report_to_slack(header, body, footer)
+        performance_df, precision_df = self._get_performance_data_from_dune(market_type)
+        combined_report = self._get_performance_report(performance_df, precision_df)
+        header, body = self._prepare_report_string(combined_report)
+        self._send_report_to_slack(header, body)
