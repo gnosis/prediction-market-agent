@@ -1,6 +1,7 @@
 import typing as t
 from datetime import timedelta
 
+from cachetools import TTLCache
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSerializable
@@ -11,6 +12,7 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
     CategoricalProbabilisticAnswer,
+    PlacedTrade,
     Position,
     ProbabilisticAnswer,
     Trade,
@@ -30,10 +32,29 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from prediction_market_agent.agents.arbitrage_agent.data_models import (
     CorrelatedMarketPair,
     Correlation,
+    MarketTrade,
 )
 from prediction_market_agent.agents.arbitrage_agent.prompt import PROMPT_TEMPLATE
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
 from prediction_market_agent.utils import APIKeys
+
+# Cache of recently traded market ids so we do not trade the corresponding
+# related market shortly after. Kept very simple on purpose.
+# TTL set to 3 hours by default.
+RECENTLY_TRADED_MARKET_IDS: TTLCache[str, bool] = TTLCache(
+    maxsize=10000, ttl=3 * 60 * 60
+)
+
+
+def was_market_recently_traded(market_id: str) -> bool:
+    """Return True if `market_id` was marked as traded within TTL window."""
+    return market_id.lower() in RECENTLY_TRADED_MARKET_IDS
+
+
+def mark_markets_traded(primary_market_id: str, related_market_id: str) -> None:
+    """Mark both primary and related market ids as traded within TTL window."""
+    RECENTLY_TRADED_MARKET_IDS[primary_market_id.lower()] = True
+    RECENTLY_TRADED_MARKET_IDS[related_market_id.lower()] = True
 
 
 class DeployableArbitrageAgent(DeployableTraderAgent):
@@ -133,42 +154,50 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
                 continue
             result: Correlation = self.chain.invoke(
                 {
-                    "main_market_question": market,
-                    "related_market_question": related_market,
+                    "main_market_question": market.question,
+                    "related_market_question": related_market.question,
                 },
                 config=get_langfuse_langchain_config(),
             )
             if result.near_perfect_correlation is not None:
                 related_agent_market = OmenAgentMarket.from_data_model(related_market)
-                correlated_markets.append(
-                    CorrelatedMarketPair(
-                        main_market=market,
-                        related_market=related_agent_market,
-                        correlation=result,
+                # Double check that we're not pairing a market with itself
+                if market.id.lower() != related_agent_market.id.lower():
+                    correlated_markets.append(
+                        CorrelatedMarketPair(
+                            main_market=market,
+                            related_market=related_agent_market,
+                            correlation=result,
+                        )
                     )
-                )
+                else:
+                    logger.warning(
+                        f"Skipping same market pair: {market.id} == {related_agent_market.id}"
+                    )
         return correlated_markets
 
     @observe()
     def build_trades_for_correlated_markets(
         self, pair: CorrelatedMarketPair
-    ) -> list[Trade]:
+    ) -> list[MarketTrade]:
         # Split between main_market and related_market
         arbitrage_bet = pair.split_bet_amount_between_yes_and_no(
             self.total_trade_amount
         )
 
-        main_trade = Trade(
+        main_trade = MarketTrade(
             trade_type=TradeType.BUY,
             outcome=arbitrage_bet.main_market_bet.direction,
             amount=arbitrage_bet.main_market_bet.size,
+            market=pair.main_market,
         )
 
         # related trade
-        related_trade = Trade(
+        related_trade = MarketTrade(
             trade_type=TradeType.BUY,
             outcome=arbitrage_bet.related_market_bet.direction,
             amount=arbitrage_bet.related_market_bet.size,
+            market=pair.related_market,
         )
 
         trades = [main_trade, related_trade]
@@ -182,9 +211,21 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
         answer: CategoricalProbabilisticAnswer,
         existing_position: Position | None,
     ) -> list[Trade]:
-        trades = []
+        trades: list[Trade] = []
         correlated_markets = self.get_correlated_markets(market=market)
         for pair in correlated_markets:
+            # Skip if either of the markets was traded recently to avoid
+            # placing the symmetric leg minutes later when processing
+            # the other market.
+            if was_market_recently_traded(
+                pair.main_market.id
+            ) or was_market_recently_traded(pair.related_market.id):
+                logger.info(
+                    "Skipping pair due to recent trade TTL cache: main=%s related=%s",
+                    pair.main_market.id,
+                    pair.related_market.id,
+                )
+                continue
             if pair.main_market_and_related_market_equal:
                 logger.info(
                     "Skipping market pair since related- and main market are the same."
@@ -194,5 +235,26 @@ class DeployableArbitrageAgent(DeployableTraderAgent):
             if pair.potential_profit_per_bet_unit() > 0.005:
                 trades_for_pair = self.build_trades_for_correlated_markets(pair)
                 trades.extend(trades_for_pair)
+                if trades_for_pair:
+                    # Mark both markets as traded within TTL window to avoid
+                    # re-trading when the related market is processed next.
+                    mark_markets_traded(
+                        primary_market_id=pair.main_market.id,
+                        related_market_id=pair.related_market.id,
+                    )
 
         return trades
+
+    def execute_trades(
+        self, market: AgentMarket, trades: list[Trade]
+    ) -> list[PlacedTrade]:
+        placed_trades: list[PlacedTrade] = []
+        for trade in trades:
+            if isinstance(trade, MarketTrade):
+                market_trade: MarketTrade = trade
+                placed_trades.extend(
+                    super().execute_trades(market_trade.market, [market_trade])
+                )
+            else:
+                raise TypeError(f"Expected MarketTrade, got {type(trade)}")
+        return placed_trades

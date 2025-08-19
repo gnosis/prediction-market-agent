@@ -2,6 +2,7 @@ import typing as t
 
 from prediction_market_agent_tooling.gtypes import USD, OutcomeStr
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import Trade
 from prediction_market_agent_tooling.tools.utils import check_not_none
 from pydantic import BaseModel
 
@@ -99,3 +100,7 @@ class CorrelatedMarketPair(BaseModel):
         return ArbitrageBet(
             main_market_bet=main_market_bet, related_market_bet=related_market_bet
         )
+
+
+class MarketTrade(Trade):
+    market: AgentMarket
