@@ -15,6 +15,9 @@ from prediction_market_agent_tooling.loggers import patch_logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 
 from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
+from prediction_market_agent.agents.alert_agent.alert_on_slack import (
+    PerformanceAlertAgent,
+)
 from prediction_market_agent.agents.arbitrage_agent.deploy import (
     DeployableArbitrageAgent,
 )
@@ -158,6 +161,7 @@ class RunnableAgent(str, Enum):
     berlin2_search_var = "berlin2_search_var"
     prophet_gpt4o_scalar = "prophet_gpt4o_scalar"
     skew_agent = "skew_agent"
+    performance_alert = "performance_alert"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -216,6 +220,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.berlin2_search_var: Berlin2OpenaiSearchAgentVariable,
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
+    RunnableAgent.performance_alert: PerformanceAlertAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)
