@@ -24,23 +24,23 @@ class PerformanceAlertAgent(DeployableAgent):
     def _get_performance_data_from_dune(
         self, market_type: MarketType
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        performance_query = self._querry(
+        performance_query = self._query(
             PERFORMANCE_QUERY_ID,
             "Agents Performance For last week",
             "Last Month",
             "PMA",
         )
-        precision_query = self._querry(
+        precision_query = self._query(
             PRECISION_QUERY_ID, "Agents Precision For last week", "Last Month", "PMA"
         )
 
         performance_result = self._get_latest_result(performance_query.query_id)
         if performance_result is None:
-            performance_result = self._process_new_querry(performance_query)
+            performance_result = self._process_new_query(performance_query)
 
         precision_result = self._get_latest_result(precision_query.query_id)
         if precision_result is None:
-            precision_result = self._process_new_querry(precision_query)
+            precision_result = self._process_new_query(precision_query)
 
         return performance_result, precision_result
 
@@ -48,15 +48,15 @@ class PerformanceAlertAgent(DeployableAgent):
         start_time = time.time()
         while time.time() < start_time + MAX_WAIT_MINUTES * 60:
             res = self._get_latest_result(query_id)
-            if res:
+            if res is not None and res:
                 return pd.DataFrame(res.get("rows", []))
             time.sleep(POLL_INTERVAL_SECONDS)
         res = self._get_latest_result(query_id)
-        if res:
+        if res is not None and res:
             return res
         raise RuntimeError(f"No result available for query {query_id}")
 
-    def _process_new_querry(self, query: QueryBase) -> pd.DataFrame | None:
+    def _process_new_query(self, query: QueryBase) -> pd.DataFrame | None:
         try:
             res = self.dune.run_query(query, ping_frequency=POLL_INTERVAL_SECONDS)
             if res.result and res.result.rows:
@@ -77,7 +77,7 @@ class PerformanceAlertAgent(DeployableAgent):
         except Exception:
             return None
 
-    def _querry(
+    def _query(
         self, query_id: int, name: str, range_value: str, ranking_value: str
     ) -> QueryBase:
         return QueryBase(
