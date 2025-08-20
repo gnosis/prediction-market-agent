@@ -6,7 +6,7 @@ import pandas as pd
 import typer
 from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.deploy.betting_strategy import (
-    BinaryKellyBettingStrategy,
+    FullBinaryKellyBettingStrategy,
 )
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
@@ -158,7 +158,7 @@ def test_logprobs_agent(
         ),
     )
 
-    strategy = BinaryKellyBettingStrategy(
+    strategy = FullBinaryKellyBettingStrategy(
         max_position_amount=get_maximum_possible_bet_amount(
             min_=USD(1),
             max_=USD(5),

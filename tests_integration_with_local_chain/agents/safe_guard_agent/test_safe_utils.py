@@ -117,7 +117,7 @@ def test_sign_or_execute(
     )
     # Add one standard EOA signature right away. In contrast to `post_or_execute` test,
     # here we simulate that someone created and signed the transaction already.
-    tx.sign(main_safe_owners[0].key)
+    tx.sign(main_safe_owners[0].key)  # type: ignore # This works, bad type in their library.
     with patch(
         "prediction_market_agent.agents.safe_watch_agent.safe_utils.TransactionServiceApi.post_signatures"
     ) as mock_post_signatures:

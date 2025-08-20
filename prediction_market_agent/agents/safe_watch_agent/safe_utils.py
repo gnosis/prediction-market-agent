@@ -49,14 +49,14 @@ def post_message(
     logger.info(f"Posting a message to Safe {safe.address}.", streamlit=True)
 
     message_hash = defunct_hash_message(text=message)
-    target_safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
+    target_safe_message_hash = safe.get_message_hash(message_hash)
 
     if api_keys.safe_address_checksum is not None:
         # In the case we are posting message from another Safe.
         # Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L184.
         owner_safe = get_safe(api_keys.safe_address_checksum, chain_id)
-        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
-        owner_safe_eoa_signature = api_keys.get_account().signHash(
+        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)
+        owner_safe_eoa_signature = api_keys.get_account().unsafe_sign_hash(
             owner_safe_message_hash
         )["signature"]
 
@@ -64,14 +64,16 @@ def post_message(
             api_keys.safe_address_checksum,
             target_safe_message_hash,
             message_hash,
-            owner_safe_eoa_signature,
+            bytes(owner_safe_eoa_signature),
         )
         signature = SafeSignature.export_signatures([owner_safe_signature])
     else:
         # Otherwise normal signature directly using EOA.
-        signature = api_keys.get_account().signHash(target_safe_message_hash)[
-            "signature"
-        ]
+        signature = HexBytes(
+            api_keys.get_account().unsafe_sign_hash(target_safe_message_hash)[
+                "signature"
+            ]
+        )
 
     api = TransactionServiceApi(network=EthereumNetwork(chain_id))
     api.post_message(safe.address, message, signature)
@@ -224,10 +226,10 @@ def _safe_sign(
 
     owner_safe_message_hash = get_safe(
         owner_safe_address, ChainID(tx.chain_id)
-    ).get_message_hash(
-        tx.safe_tx_hash_preimage  # type: ignore # type bug, this is correct.
-    )
-    owner_safe_eoa_signature = account.signHash(owner_safe_message_hash)["signature"]
+    ).get_message_hash(tx.safe_tx_hash_preimage)
+    owner_safe_eoa_signature = account.unsafe_sign_hash(owner_safe_message_hash)[
+        "signature"
+    ]
     owner_safe_signature = SafeSignatureContract.from_values(
         owner_safe_address,
         tx.safe_tx_hash,
