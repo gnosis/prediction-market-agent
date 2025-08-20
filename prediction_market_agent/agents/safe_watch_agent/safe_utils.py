@@ -4,7 +4,7 @@ from typing import Any
 import tenacity
 from eth_account import Account
 from eth_account.messages import defunct_hash_message
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient, EthereumNetwork
@@ -23,6 +23,7 @@ from web3.types import TxParams
 from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
@@ -38,7 +39,10 @@ def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
     ),
 )
 def get_safes(owner: ChecksumAddress, chain_id: ChainID) -> list[ChecksumAddress]:
-    api = TransactionServiceApi(EthereumNetwork(chain_id))
+    api = TransactionServiceApi(
+        EthereumNetwork(chain_id),
+        api_key=APIKeys().safe_transaction_service_api_key.get_secret_value(),
+    )
     safes = api.get_safes_for_owner(owner)
     return safes
 
@@ -49,14 +53,14 @@ def post_message(
     logger.info(f"Posting a message to Safe {safe.address}.", streamlit=True)
 
     message_hash = defunct_hash_message(text=message)
-    target_safe_message_hash = safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
+    target_safe_message_hash = safe.get_message_hash(message_hash)
 
     if api_keys.safe_address_checksum is not None:
         # In the case we are posting message from another Safe.
         # Based on https://github.com/safe-global/safe-eth-py/blob/v6.4.0/safe_eth/safe/tests/test_safe_signature.py#L184.
         owner_safe = get_safe(api_keys.safe_address_checksum, chain_id)
-        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)  # type: ignore # type bug, it's iffed to work correctly inside the function.
-        owner_safe_eoa_signature = api_keys.get_account().signHash(
+        owner_safe_message_hash = owner_safe.get_message_hash(message_hash)
+        owner_safe_eoa_signature = api_keys.get_account().unsafe_sign_hash(
             owner_safe_message_hash
         )["signature"]
 
@@ -64,16 +68,21 @@ def post_message(
             api_keys.safe_address_checksum,
             target_safe_message_hash,
             message_hash,
-            owner_safe_eoa_signature,
+            bytes(owner_safe_eoa_signature),
         )
         signature = SafeSignature.export_signatures([owner_safe_signature])
     else:
         # Otherwise normal signature directly using EOA.
-        signature = api_keys.get_account().signHash(target_safe_message_hash)[
-            "signature"
-        ]
+        signature = HexBytes(
+            api_keys.get_account().unsafe_sign_hash(target_safe_message_hash)[
+                "signature"
+            ]
+        )
 
-    api = TransactionServiceApi(network=EthereumNetwork(chain_id))
+    api = TransactionServiceApi(
+        network=EthereumNetwork(chain_id),
+        api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+    )
     api.post_message(safe.address, message, signature)
 
 
@@ -119,7 +128,10 @@ def sign_or_execute(
 
     if threshold > len(tx.signers) or not allow_exec:
         logger.info("Threshold not met yet, posting a signature.", streamlit=True)
-        api = TransactionServiceApi(EthereumNetwork(tx.chain_id))
+        api = TransactionServiceApi(
+            EthereumNetwork(tx.chain_id),
+            api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+        )
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
     else:
@@ -152,7 +164,10 @@ def post_or_execute(
 
     if threshold > len(tx.signers):
         logger.info(f"Safe requires multiple signers, posting to the queue.")
-        api = TransactionServiceApi(EthereumNetwork(chain_id))
+        api = TransactionServiceApi(
+            EthereumNetwork(chain_id),
+            api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+        )
         api.post_transaction(tx)
         return None
     else:
@@ -224,10 +239,10 @@ def _safe_sign(
 
     owner_safe_message_hash = get_safe(
         owner_safe_address, ChainID(tx.chain_id)
-    ).get_message_hash(
-        tx.safe_tx_hash_preimage  # type: ignore # type bug, this is correct.
-    )
-    owner_safe_eoa_signature = account.signHash(owner_safe_message_hash)["signature"]
+    ).get_message_hash(tx.safe_tx_hash_preimage)
+    owner_safe_eoa_signature = account.unsafe_sign_hash(owner_safe_message_hash)[
+        "signature"
+    ]
     owner_safe_signature = SafeSignatureContract.from_values(
         owner_safe_address,
         tx.safe_tx_hash,

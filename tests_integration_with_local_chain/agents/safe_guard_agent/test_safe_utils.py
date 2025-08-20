@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pytest
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.safe import create_safe
 from safe_eth.eth import EthereumClient
@@ -14,6 +13,7 @@ from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     post_or_execute,
     sign_or_execute,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 def create_test_safe(
@@ -117,7 +117,7 @@ def test_sign_or_execute(
     )
     # Add one standard EOA signature right away. In contrast to `post_or_execute` test,
     # here we simulate that someone created and signed the transaction already.
-    tx.sign(main_safe_owners[0].key)
+    tx.sign(main_safe_owners[0].key)  # type: ignore # This works, bad type in their library.
     with patch(
         "prediction_market_agent.agents.safe_watch_agent.safe_utils.TransactionServiceApi.post_signatures"
     ) as mock_post_signatures:

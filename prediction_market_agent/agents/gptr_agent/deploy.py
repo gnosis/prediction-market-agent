@@ -6,7 +6,7 @@ from gpt_researcher import GPTResearcher
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
-    BinaryKellyBettingStrategy,
+    FullBinaryKellyBettingStrategy,
 )
 from prediction_market_agent_tooling.deploy.trade_interval import (
     FixedInterval,
@@ -34,7 +34,7 @@ class GPTRAgent(DeployableTraderAgent):
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return (
-            BinaryKellyBettingStrategy(
+            FullBinaryKellyBettingStrategy(
                 max_position_amount=get_maximum_possible_bet_amount(
                     min_=USD(0.1),
                     max_=USD(8),

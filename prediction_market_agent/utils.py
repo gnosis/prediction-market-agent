@@ -37,6 +37,7 @@ class APIKeys(APIKeysBase):
     GNOSISSCAN_API_KEY: t.Optional[SecretStr] = None
     DUNE_API_KEY: t.Optional[SecretStr] = None
     CYVERS_API_KEY: t.Optional[SecretStr] = None
+    SAFE_TRANSACTION_SERVICE_API_KEY: t.Optional[SecretStr] = None
 
     @property
     def openai_api_key(self) -> SecretStr:
@@ -108,6 +109,13 @@ class APIKeys(APIKeysBase):
     def cyvers_api_key(self) -> SecretStr:
         return check_not_none(
             self.CYVERS_API_KEY, "CYVERS_API_KEY missing in the environment."
+        )
+
+    @property
+    def safe_transaction_service_api_key(self) -> SecretStr:
+        return check_not_none(
+            self.SAFE_TRANSACTION_SERVICE_API_KEY,
+            "SAFE_TRANSACTION_SERVICE_API_KEY missing in the environment.",
         )
 
 
