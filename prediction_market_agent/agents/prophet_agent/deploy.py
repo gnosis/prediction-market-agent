@@ -363,13 +363,16 @@ class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenR
     model = "google/gemini-2.0-flash-001"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return FullBinaryKellyBettingStrategy(
+        return FullCategoricalKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(1),
-                max_=USD(6.5),
+                max_=USD(5.95),
                 trading_balance=market.get_trade_balance(APIKeys()),
             ),
-            max_price_impact=0.85,
+            max_price_impact=1.38,
+            allow_multiple_bets=False,
+            allow_shorting=False,
+            multicategorical=False,
         )
 
 
@@ -411,15 +414,16 @@ class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
     bet_on_n_markets_per_run = 4
     agent: PredictionProphetAgent
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return FullBinaryKellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(1),
-                max_=USD(3.5),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.86,
-        )
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later. See the PR
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return FullBinaryKellyBettingStrategy(
+    #         max_position_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(0.1),
+    #             max_=USD(2.88),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=1.483,
+    #     )
 
     def load(self) -> None:
         super().load()
@@ -486,15 +490,16 @@ class DeployablePredictionProphetGPT4oAgentNewMarketTrader(
 class DeployablePredictionProphetGPT4TurboPreviewAgent(DeployableTraderAgentER):
     agent: PredictionProphetAgent
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return FullBinaryKellyBettingStrategy(
-            max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(1),
-                max_=USD(5),
-                trading_balance=market.get_trade_balance(APIKeys()),
-            ),
-            max_price_impact=0.5,
-        )
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later. See the PR
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return FullBinaryKellyBettingStrategy(
+    #         max_position_amount=get_maximum_possible_bet_amount(
+    #             min_=USD(0.1),
+    #             max_=USD(10),
+    #             trading_balance=market.get_trade_balance(APIKeys()),
+    #         ),
+    #         max_price_impact=0.014097885153547948,
+    #     )
 
     def load(self) -> None:
         super().load()
@@ -563,13 +568,16 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
     agent: OlasAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return FullBinaryKellyBettingStrategy(
+        return FullCategoricalKellyBettingStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(5),
-                max_=USD(25),
+                min_=USD(0.1),
+                max_=USD(6),
                 trading_balance=market.get_trade_balance(APIKeys()),
             ),
-            max_price_impact=0.5,
+            max_price_impact=0.7333271417580082,
+            allow_multiple_bets=False,
+            allow_shorting=False,
+            multicategorical=False,
         )
 
     def load(self) -> None:

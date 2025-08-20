@@ -56,19 +56,20 @@ class DeployableThinkThoroughlyAgent(DeployableThinkThoroughlyAgentBase):
 class DeployableThinkThoroughlyProphetResearchAgent(DeployableThinkThoroughlyAgentBase):
     agent_class = ThinkThoroughlyWithPredictionProphetResearch
 
-    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-        return (
-            FullBinaryKellyBettingStrategy(
-                max_position_amount=get_maximum_possible_bet_amount(
-                    min_=USD(1),
-                    max_=USD(5),
-                    trading_balance=market.get_trade_balance(APIKeys()),
-                ),
-                max_price_impact=0.4,
-            )
-            if isinstance(market, OmenAgentMarket)
-            else super().get_betting_strategy(market)
-        )  # Default to parent's tiny bet on other market types, as full kely isn't implemented properly yet. TODO: https://github.com/gnosis/prediction-market-agent-tooling/issues/830
+    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later. See the PR
+    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+    #     return (
+    #         FullBinaryKellyBettingStrategy(
+    #             max_position_amount=get_maximum_possible_bet_amount(
+    #                 min_=USD(1),
+    #                 max_=USD(5),
+    #                 trading_balance=market.get_trade_balance(APIKeys()),
+    #             ),
+    #             max_price_impact=0.4,
+    #         )
+    #         if isinstance(market, OmenAgentMarket)
+    #         else super().get_betting_strategy(market)
+    #     )  # Default to parent's tiny bet on other market types, as full kely isn't implemented properly yet. TODO: https://github.com/gnosis/prediction-market-agent-tooling/issues/830
 
 
 if __name__ == "__main__":
