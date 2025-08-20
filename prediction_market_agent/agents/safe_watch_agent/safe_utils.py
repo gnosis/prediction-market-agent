@@ -4,7 +4,7 @@ from typing import Any
 import tenacity
 from eth_account import Account
 from eth_account.messages import defunct_hash_message
-from prediction_market_agent_tooling.config import APIKeys, RPCConfig
+from prediction_market_agent_tooling.config import RPCConfig
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.loggers import logger
 from safe_eth.eth import EthereumClient, EthereumNetwork
@@ -23,6 +23,7 @@ from web3.types import TxParams
 from prediction_market_agent.agents.safe_watch_agent.safe_api_models.detailed_transaction_info import (
     DetailedTransactionResponse,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
@@ -38,7 +39,10 @@ def get_safe(safe_address: ChecksumAddress, chain_id: ChainID) -> Safe:
     ),
 )
 def get_safes(owner: ChecksumAddress, chain_id: ChainID) -> list[ChecksumAddress]:
-    api = TransactionServiceApi(EthereumNetwork(chain_id))
+    api = TransactionServiceApi(
+        EthereumNetwork(chain_id),
+        api_key=APIKeys().safe_transaction_service_api_key.get_secret_value(),
+    )
     safes = api.get_safes_for_owner(owner)
     return safes
 
@@ -75,7 +79,10 @@ def post_message(
             ]
         )
 
-    api = TransactionServiceApi(network=EthereumNetwork(chain_id))
+    api = TransactionServiceApi(
+        network=EthereumNetwork(chain_id),
+        api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+    )
     api.post_message(safe.address, message, signature)
 
 
@@ -121,7 +128,10 @@ def sign_or_execute(
 
     if threshold > len(tx.signers) or not allow_exec:
         logger.info("Threshold not met yet, posting a signature.", streamlit=True)
-        api = TransactionServiceApi(EthereumNetwork(tx.chain_id))
+        api = TransactionServiceApi(
+            EthereumNetwork(tx.chain_id),
+            api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+        )
         api.post_signatures(tx.safe_tx_hash, tx.signatures)
         return None
     else:
@@ -154,7 +164,10 @@ def post_or_execute(
 
     if threshold > len(tx.signers):
         logger.info(f"Safe requires multiple signers, posting to the queue.")
-        api = TransactionServiceApi(EthereumNetwork(chain_id))
+        api = TransactionServiceApi(
+            EthereumNetwork(chain_id),
+            api_key=api_keys.safe_transaction_service_api_key.get_secret_value(),
+        )
         api.post_transaction(tx)
         return None
     else:

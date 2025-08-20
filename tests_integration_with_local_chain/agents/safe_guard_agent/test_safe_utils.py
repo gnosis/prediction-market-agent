@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pytest
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import ChainID, ChecksumAddress, HexBytes
 from prediction_market_agent_tooling.tools.safe import create_safe
 from safe_eth.eth import EthereumClient
@@ -14,6 +13,7 @@ from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     post_or_execute,
     sign_or_execute,
 )
+from prediction_market_agent.utils import APIKeys
 
 
 def create_test_safe(

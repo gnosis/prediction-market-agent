@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 from prediction_market_agent_tooling.chains import GNOSIS_CHAIN_ID
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
     ChecksumAddress,
     HexBytes,
@@ -16,6 +15,7 @@ from prediction_market_agent.agents.safe_watch_agent.safe_utils import (
     get_safes,
     post_message,
 )
+from prediction_market_agent.utils import APIKeys
 
 TESTING_CHAIN_ID = GNOSIS_CHAIN_ID
 TESTING_OWNER_EOA = Web3.to_checksum_address(

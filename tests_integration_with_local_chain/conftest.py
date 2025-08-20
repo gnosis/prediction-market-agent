@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from eth_typing import URI, ChecksumAddress
-from prediction_market_agent_tooling.config import APIKeys
 from prediction_market_agent_tooling.gtypes import (
     ABI,
     HexAddress,
@@ -22,6 +21,8 @@ from prediction_market_agent_tooling.tools.web3_utils import prepare_tx, send_xd
 from safe_eth.eth import EthereumClient
 from web3 import Web3
 from web3.types import TxReceipt
+
+from prediction_market_agent.utils import APIKeys
 
 
 def set_env_rpc_url(url: str) -> None:
