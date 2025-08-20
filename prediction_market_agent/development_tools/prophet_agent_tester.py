@@ -8,7 +8,7 @@ import tenacity
 from eth_typing import HexAddress, HexStr
 from prediction_market_agent_tooling.benchmark.utils import Prediction
 from prediction_market_agent_tooling.deploy.betting_strategy import BettingStrategy
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.gtypes import CollateralToken, Probability
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import (
@@ -210,6 +210,8 @@ class ProphetAgentTester:
                         actual_resolution = item["market_resolution"].lower()
                         total_profit_usd = USD(0)
                         total_investment_usd = USD(0)
+                        total_received_outcome_tokens = 0.0
+                        total_profit_outcome_tokens = 0.0
 
                         for t in trades:
                             total_investment_usd = total_investment_usd + t.amount
@@ -217,17 +219,22 @@ class ProphetAgentTester:
 
                             try:
                                 if t.outcome.lower() != actual_resolution:
-                                    trade_profit_token = -buy_in_tokens
+                                    trade_profit_token = -buy_in_tokens.value
+                                    received_ot_tokens = 0.0
                                 else:
                                     received_ot = omen_at_bet.get_buy_token_amount(
                                         t.amount, outcome=t.outcome
                                     )
+                                    received_ot_tokens = received_ot.value
                                     trade_profit_token = (
-                                        received_ot.as_token - buy_in_tokens
+                                        received_ot.value - buy_in_tokens.value
                                     )
 
+                                total_received_outcome_tokens += received_ot_tokens
+                                total_profit_outcome_tokens += trade_profit_token
+
                                 trade_profit_usd = omen_at_bet.get_token_in_usd(
-                                    trade_profit_token
+                                    CollateralToken(trade_profit_token)
                                 )
                                 total_profit_usd = total_profit_usd + trade_profit_usd
                             except ValueError as ex:
@@ -240,6 +247,8 @@ class ProphetAgentTester:
                             total_investment_usd if total_investment_usd else None
                         )
                         profit_usd = total_profit_usd if total_profit_usd else None
+                        profit_outcome_token = total_profit_outcome_tokens
+                        received_outcome_tokens = total_received_outcome_tokens
 
                 trade_log = TradeLog(
                     index=index,
@@ -250,8 +259,12 @@ class ProphetAgentTester:
                     prediction=prediction,
                     trades=trades,
                     market_resolution=item["market_resolution"],
-                    received_outcome_tokens=None,
-                    profit_outcome_token=profit_outcome_token,
+                    received_outcome_tokens=float(received_outcome_tokens)
+                    if received_outcome_tokens is not None
+                    else None,
+                    profit_outcome_token=float(profit_outcome_token)
+                    if profit_outcome_token is not None
+                    else None,
                     profit_usd=profit_usd if profit_usd else None,
                 )
 
