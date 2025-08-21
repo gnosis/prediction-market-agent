@@ -1,24 +1,30 @@
 from openai import OpenAI
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.deploy.betting_strategy import (
+    BettingStrategy,
+    SimpleBinaryKellyBettingStrategy,
+)
+from prediction_market_agent_tooling.gtypes import USD, Probability
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_ai.exceptions import UnexpectedModelBehavior
+
+from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 
 
 class Berlin2OpenaiSearchAgentHigh(DeployableTraderAgent):
     bet_on_n_markets_per_run = 2
     just_warn_on_unexpected_model_behavior = True
 
-    # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later.
-    # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
-    #     return BinaryKellyBettingStrategy(
-    #         max_position_amount=get_maximum_possible_bet_amount(
-    #             min_=1, max_=5, trading_balance=market.get_trade_balance(APIKeys())
-    #         ),
-    #         max_price_impact=0.7,
-    #     )
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return SimpleBinaryKellyBettingStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(0.1),
+                max_=USD(3.3),
+                trading_balance=market.get_trade_balance(self.api_keys),
+            ),
+        )
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         client = OpenAI(api_key=self.api_keys.openai_api_key.get_secret_value())
