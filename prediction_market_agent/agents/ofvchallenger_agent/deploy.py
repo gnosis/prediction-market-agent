@@ -1,8 +1,9 @@
+import time
 from datetime import timedelta
 from functools import partial
 
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
-from prediction_market_agent_tooling.gtypes import ChecksumAddress, xDai
+from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.data_models import (
@@ -17,6 +18,7 @@ from prediction_market_agent_tooling.markets.omen.omen_resolving import (
 )
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
+    RealityResponse,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
@@ -134,6 +136,24 @@ class OFVChallengerAgent(DeployableAgent):
             f"Last weeks accuracy is {last_week_accuracy.accuracy} on {last_week_accuracy.total} questions."
         )
 
+    def get_responses_until_available(
+        self,
+        market_id: HexBytes,
+    ) -> list[RealityResponse]:
+        # We have a bug where subgraph sometimes return empty list of responses, even though there already are some.
+        # Try to retry fetching responses multiple time, to see if some appear.
+        for i in range(1, 4):
+            responses = OmenSubgraphHandler().get_responses(
+                limit=None, question_id=market_id
+            )
+            if responses:
+                logger.info(
+                    f"Found {responses} for {market_id.to_0x_hex()} on {i}. attempt."
+                )
+                return responses
+            time.sleep(i)
+        return []
+
     @observe()
     def challenge_market(
         self,
@@ -144,9 +164,7 @@ class OFVChallengerAgent(DeployableAgent):
         logger.info(f"Challenging market {market.url=}")
         langfuse_context.update_current_observation(metadata={"url": market.url})
 
-        existing_responses = OmenSubgraphHandler().get_responses(
-            limit=None, question_id=market.question.id
-        )
+        existing_responses = self.get_responses_until_available(market.question.id)
         logger.info(
             f"{market.url=}'s responses and bonds: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
         )
