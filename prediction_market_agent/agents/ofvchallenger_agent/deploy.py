@@ -138,7 +138,7 @@ class OFVChallengerAgent(DeployableAgent):
     @retry_until_true(
         # We have a bug where subgraph sometimes return empty list of responses, even though there already are some.
         # Try to retry fetching responses multiple time, to see if some appear.
-        lambda responses: len(responses)
+        lambda _, responses: len(responses)
         > 0
     )
     def get_responses_until_available(
