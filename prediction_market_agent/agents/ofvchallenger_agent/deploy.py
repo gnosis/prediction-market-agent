@@ -1,4 +1,3 @@
-import time
 from datetime import timedelta
 from functools import partial
 
@@ -22,7 +21,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
-from prediction_market_agent_tooling.tools.utils import utcnow
+from prediction_market_agent_tooling.tools.utils import retry_until_true, utcnow
 from pydantic import BaseModel
 from web3 import Web3
 
@@ -136,23 +135,17 @@ class OFVChallengerAgent(DeployableAgent):
             f"Last weeks accuracy is {last_week_accuracy.accuracy} on {last_week_accuracy.total} questions."
         )
 
-    def get_responses_until_available(
-        self,
-        market_id: HexBytes,
-    ) -> list[RealityResponse]:
+    @retry_until_true(
         # We have a bug where subgraph sometimes return empty list of responses, even though there already are some.
         # Try to retry fetching responses multiple time, to see if some appear.
-        for i in range(1, 4):
-            responses = OmenSubgraphHandler().get_responses(
-                limit=None, question_id=market_id
-            )
-            if responses:
-                logger.info(
-                    f"Found {responses} for {market_id.to_0x_hex()} on {i}. attempt."
-                )
-                return responses
-            time.sleep(i)
-        return []
+        lambda responses: len(responses)
+        > 0
+    )
+    def get_responses_until_available(
+        self,
+        question_id: HexBytes,
+    ) -> list[RealityResponse]:
+        return OmenSubgraphHandler().get_responses(limit=None, question_id=question_id)
 
     @observe()
     def challenge_market(
@@ -164,7 +157,9 @@ class OFVChallengerAgent(DeployableAgent):
         logger.info(f"Challenging market {market.url=}")
         langfuse_context.update_current_observation(metadata={"url": market.url})
 
-        existing_responses = self.get_responses_until_available(market.question.id)
+        existing_responses = self.get_responses_until_available(
+            question_id=market.question.question_id
+        )
         logger.info(
             f"{market.url=}'s responses and bonds: {[(r.answer, r.bond_xdai) for r in existing_responses]}"
         )
