@@ -8799,13 +8799,13 @@ test = ["anthropic", "coverage", "django", "freezegun (==1.5.1)", "google-genai"
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.3"
+version = "0.69.4.dev1072"
 description = "Tools to benchmark, deploy and monitor prediction market agents."
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "prediction_market_agent_tooling-0.69.3-py3-none-any.whl", hash = "sha256:6f498ce133daa8f87a30756743c5f48435ee5a8d5a25eb1eadbe3ec9ed8bda89"},
-    {file = "prediction_market_agent_tooling-0.69.3.tar.gz", hash = "sha256:dc9725accea3d08447308f140e1ade9dc97e9f33a96cad61026fdef589440824"},
+    {file = "prediction_market_agent_tooling-0.69.4.dev1072-py3-none-any.whl", hash = "sha256:c9d2d370259a0ef512f6b5b84a83286146f96e4b380f229eba8cd760917cb4b1"},
+    {file = "prediction_market_agent_tooling-0.69.4.dev1072.tar.gz", hash = "sha256:7f614f926030eadf979a337606be1f8957ff88f4e7fbbca08c6d5a365e1835e7"},
 ]
 
 [package.dependencies]
@@ -13114,13 +13114,13 @@ test = ["hypothesis (>=6.56.4,<7)", "pycryptodome", "pytest (>=7.0.0)", "pytest-
 
 [[package]]
 name = "trove-classifiers"
-version = "2025.8.6.13"
+version = "2025.8.26.11"
 description = "Canonical source for classifiers on PyPI (pypi.org)."
 optional = false
 python-versions = "*"
 files = [
-    {file = "trove_classifiers-2025.8.6.13-py3-none-any.whl", hash = "sha256:c4e7fc83012770d80b3ae95816111c32b085716374dccee0d3fbf5c235495f9f"},
-    {file = "trove_classifiers-2025.8.6.13.tar.gz", hash = "sha256:5a0abad839d2ed810f213ab133d555d267124ddea29f1d8a50d6eca12a50ae6e"},
+    {file = "trove_classifiers-2025.8.26.11-py3-none-any.whl", hash = "sha256:887fb0a402bdbecd4415a52c06e6728f8bdaa506a7143372d2b893e2c5e2d859"},
+    {file = "trove_classifiers-2025.8.26.11.tar.gz", hash = "sha256:e73efff317c492a7990092f9c12676c705bf6cfe40a258a93f63f4b4c9941432"},
 ]
 
 [[package]]
@@ -14565,4 +14565,4 @@ cffi = ["cffi (>=1.17)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11.0"
-content-hash = "9aaf45aa5fa6ebd91fa6177fae237e999a151c006a44c09340019e9ca257d6c0"
+content-hash = "06e0b67107530c752fda93d646a536c393046c99b8dde77d392821857779a844"

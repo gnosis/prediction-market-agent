@@ -77,7 +77,7 @@ class OmenCleanerAgent(DeployableAgent):
         recently_created_markets = OmenSubgraphHandler().get_omen_markets(
             limit=None,
             # Get only serious markets with a reasonable liquidity.
-            liquidity_bigger_than=CollateralToken(5).as_wei,
+            liquidity_bigger_than=CollateralToken(0.05).as_wei,
             # Get only markets created roughly since the last run.
             created_after=utcnow() - timedelta(days=2),
         )

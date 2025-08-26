@@ -46,13 +46,20 @@ OFV_CHALLENGER_EOA_ADDRESS = Web3.to_checksum_address(
 OFV_CHALLENGER_SAFE_ADDRESS = Web3.to_checksum_address(
     "0x9D0260500ba7b068b5b0f4AfA9F8864eBc0B059a"
 )
-CHALLENGE_BOND = xDai(10)
+NORMAL_CHALLENGE_BOND = xDai(10)
+SMALL_CHALLENGE_BOND = xDai(0.01)
+INFINITE_GAMES_MARKET_CREATOR = Web3.to_checksum_address(
+    "0xecfd8717deada8ccfb925a3f7ea31d47cbb4f37f"
+)
 # We benchmarked OFV only against Olas market-creators.
 MARKET_CREATORS_TO_CHALLENGE: list[ChecksumAddress] | None = [
     # Olas market-creator 0.
     Web3.to_checksum_address("0x89c5cc945dd550bcffb72fe42bff002429f46fec"),
     # Olas market-creator 1.
     Web3.to_checksum_address("0xffc8029154ecd55abed15bd428ba596e7d23f557"),
+    INFINITE_GAMES_MARKET_CREATOR,
+    # Some old market creator.
+    Web3.to_checksum_address("0x92f869018b5f954a4197a15feb951cf9260c54a8"),
 ] + (
     # But also use it to challenge the specialized markets (e.g. DevConflict), as we don't have anything better.
     SPECIALIZED_FOR_MARKET_CREATORS
@@ -125,6 +132,16 @@ class OFVChallengerAgent(DeployableAgent):
         logger.info(f"Found {len(markets_open_for_answers)} markets to challenge.")
 
         for market in markets_open_for_answers:
+            if (
+                market.creator_checksum == INFINITE_GAMES_MARKET_CREATOR
+                and market.question.answerFinalizedTimestamp is None
+                and (utcnow() - market.close_time) < timedelta(days=3)
+            ):
+                logger.info(
+                    f"Skipping resolution of {market.url=} for now, to give them time to post the first answer."
+                )
+                continue
+
             self.challenge_market(market, api_keys)
 
         # Compute accuracy on Reality and report as error if it goes down too much.
@@ -157,6 +174,21 @@ class OFVChallengerAgent(DeployableAgent):
         logger.info(f"Challenging market {market.url=}")
         langfuse_context.update_current_observation(metadata={"url": market.url})
 
+        # Use just a small bond on questions that are either finalized too quickly (might not receive corrections in time),
+        # or finalized in too much in the future (not worth locking significant funds there).
+        if (
+            timedelta(hours=23)
+            <= market.question.timeout_timedelta
+            <= timedelta(days=7)
+        ):
+            bond = NORMAL_CHALLENGE_BOND
+        else:
+            bond = SMALL_CHALLENGE_BOND
+
+        logger.info(
+            f"Using {bond=} for {market.url=} with timeout {market.question.timeout_timedelta=}."
+        )
+
         existing_responses = self.get_responses_until_available(
             question_id=market.question.question_id
         )
@@ -179,16 +211,14 @@ class OFVChallengerAgent(DeployableAgent):
             )
 
         # Next bond needs to be at least double the previous one.
-        if any(
-            response.bond_xdai >= CHALLENGE_BOND / 2 for response in existing_responses
-        ):
+        if any(response.bond_xdai >= bond / 2 for response in existing_responses):
             logger.info(
-                f"Market {market.url=} already challenged with bond > {CHALLENGE_BOND} / 2. Skipping."
+                f"Market {market.url=} already challenged with bond > {bond} / 2. Skipping."
             )
             return Challenge(
                 old_responses=existing_responses,
                 new_resolution=None,
-                reasoning=f"Already challenged with bond > {CHALLENGE_BOND} / 2.",
+                reasoning=f"Already challenged with bond > {bond} / 2.",
             )
 
         try:
@@ -226,12 +256,12 @@ class OFVChallengerAgent(DeployableAgent):
                 api_keys=api_keys,
                 market=market,
                 resolution=new_resolution,
-                bond=CHALLENGE_BOND,
+                bond=bond,
                 web3=web3,
             )
         else:
             omen_submit_invalid_answer_market_tx(
-                api_keys=api_keys, market=market, bond=CHALLENGE_BOND, web3=web3
+                api_keys=api_keys, market=market, bond=bond, web3=web3
             )
 
         return Challenge(
