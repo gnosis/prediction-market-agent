@@ -1,12 +1,9 @@
 from datetime import timedelta
 
 import typer
-from prediction_market_agent_tooling.gtypes import USD, private_key_type
+from prediction_market_agent_tooling.gtypes import USD, private_key_type, xDai
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.markets.omen.omen import (
-    OMEN_DEFAULT_REALITIO_BOND_VALUE,
-)
 from prediction_market_agent_tooling.markets.omen.omen_constants import (
     SDAI_CONTRACT_ADDRESS,
 )
@@ -32,6 +29,7 @@ def main(
     n_to_replicate: int = 50,
     initial_funds_usd: float = 0.1,  # Just a small amount to make the markets bettable, probably no need for more in hackathon.
     resolve: bool = False,
+    bond_xdai: float = 0.01,
 ) -> None:
     keys = APIKeys(
         BET_FROM_PRIVATE_KEY=(
@@ -46,7 +44,7 @@ def main(
 
     if resolve:
         omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx(
-            keys, realitio_bond=OMEN_DEFAULT_REALITIO_BOND_VALUE
+            keys, realitio_bond=xDai(bond_xdai)
         )
         return
 
