@@ -96,6 +96,9 @@ class OFVChallengerAgent(DeployableAgent):
             limit=None,
             # We need markets already opened for answers.
             question_opened_before=utcnow(),
+            # OFVChallenger can handle only Yes/No markets.
+            include_categorical_markets=False,
+            include_scalar_markets=False,
         )
         markets_open_for_answers: list[OmenMarket] = []
 
