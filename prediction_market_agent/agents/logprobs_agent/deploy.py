@@ -10,6 +10,7 @@ from prediction_market_agent_tooling.logprobs_parser import (
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.langfuse_ import observe
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_market_agent_tooling.tools.perplexity.perplexity_models import (
     PerplexityResponse,
 )
@@ -22,7 +23,6 @@ from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.logprobs_oai_model import LogProbsOpenAIModel
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.web_scrape.structured_summary import (
     web_scrape_structured_and_summarized,
 )

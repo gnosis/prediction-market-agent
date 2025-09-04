@@ -29,6 +29,10 @@ from prediction_market_agent_tooling.markets.markets import (
     get_binary_markets,
 )
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
+from prediction_market_agent_tooling.tools.streamlit_utils import (
+    add_sink_to_logger,
+    streamlit_escape,
+)
 
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
@@ -45,10 +49,6 @@ from prediction_market_agent.agents.prophet_agent.deploy import (
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
-)
-from prediction_market_agent.tools.streamlit_utils import (
-    add_sink_to_logger,
-    streamlit_escape,
 )
 
 SupportedAgentType: t.TypeAlias = (

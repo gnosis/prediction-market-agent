@@ -4,11 +4,11 @@ from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.tools.google_utils import search_google_serper
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.web_scrape.markdown import web_scrape
 from prediction_market_agent.utils import APIKeys
 

@@ -3,6 +3,7 @@ from functools import partial
 import pandas as pd
 import typer
 from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_prophet.autonolas.research import Prediction as PredictionProphet
 from prediction_prophet.autonolas.research import make_prediction
 from prediction_prophet.functions.research import Research, research
@@ -13,7 +14,6 @@ from pydantic_ai.settings import ModelSettings
 from prediction_market_agent.development_tools.prophet_agent_tester import (
     ProphetAgentTester,
 )
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import APIKeys
 
 app = typer.Typer()

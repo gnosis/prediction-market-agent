@@ -12,6 +12,7 @@ from prediction_market_agent_tooling.markets.omen.omen import (
 from prediction_market_agent_tooling.tools.betting_strategies.kelly_criterion import (
     get_kelly_bet_simplified,
 )
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_market_agent_tooling.tools.tokens.usd import get_usd_in_xdai
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic_ai import Agent
@@ -29,7 +30,6 @@ from prediction_market_agent.agents.microchain_agent.utils import (
     get_yes_outcome,
 )
 from prediction_market_agent.tools.mech.utils import MechResponse, MechTool
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
