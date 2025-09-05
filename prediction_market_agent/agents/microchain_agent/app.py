@@ -4,14 +4,16 @@ PYTHONPATH=. streamlit run prediction_market_agent/agents/microchain_agent/app.p
 Tip: if you specify PYTHONPATH=., streamlit will watch for the changes in all files, instead of just this one.
 """
 
+from prediction_market_agent_tooling.tools.streamlit_utils import (
+    streamlit_asyncio_event_loop_hack,
+)
+
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 
 # Imports using asyncio (in this case mech_client) cause issues with Streamlit
 from prediction_market_agent.tools.streamlit_utils import (  # isort:skip
     display_chat_history,
-    streamlit_asyncio_event_loop_hack,
 )
-
 
 streamlit_asyncio_event_loop_hack()
 
@@ -27,6 +29,9 @@ from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
+from prediction_market_agent_tooling.tools.streamlit_utils import (
+    check_required_api_keys,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
 from streamlit_extras.bottom_container import bottom
 
@@ -54,7 +59,6 @@ from prediction_market_agent.agents.utils import STREAMLIT_TAG
 from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
-from prediction_market_agent.tools.streamlit_utils import check_required_api_keys
 from prediction_market_agent.utils import APIKeys
 
 MARKET_TYPE = MarketType.OMEN
@@ -202,8 +206,8 @@ st.set_page_config(
 st.title("Agent")
 with st.sidebar:
     streamlit_login()
-check_required_api_keys(["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 KEYS = APIKeys()
+check_required_api_keys(KEYS, ["OPENAI_API_KEY", "BET_FROM_PRIVATE_KEY"])
 ENABLE_LANGFUSE = KEYS.default_enable_langfuse
 maybe_initialize_long_term_memory()
 

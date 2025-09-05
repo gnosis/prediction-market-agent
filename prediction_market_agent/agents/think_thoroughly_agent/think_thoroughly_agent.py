@@ -12,6 +12,10 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
 from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.openai_utils import (
+    OpenAIModel,
+    get_openai_provider,
+)
 from prediction_market_agent_tooling.tools.parallelism import par_generator, par_map
 from prediction_market_agent_tooling.tools.tavily.tavily_search import tavily_search
 from prediction_market_agent_tooling.tools.utils import (
@@ -50,7 +54,6 @@ from prediction_market_agent.db.long_term_memory_table_handler import (
     LongTermMemoryTableHandler,
 )
 from prediction_market_agent.db.pinecone_handler import PineconeHandler
-from prediction_market_agent.tools.openai_utils import OpenAIModel, get_openai_provider
 from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,

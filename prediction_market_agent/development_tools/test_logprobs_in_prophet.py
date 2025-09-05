@@ -11,6 +11,7 @@ from prediction_market_agent_tooling.deploy.betting_strategy import (
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_prophet.autonolas.research import (
     FIELDS_DESCRIPTIONS,
     PREDICTION_PROMPT,
@@ -35,7 +36,6 @@ from prediction_market_agent.development_tools.prophet_agent_tester import (
 from prediction_market_agent.development_tools.test_single_agent import (
     execute_prophet_research,
 )
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 
 app = typer.Typer()
 

@@ -19,6 +19,7 @@ from prediction_market_agent_tooling.markets.data_models import (
 )
 from prediction_market_agent_tooling.markets.markets import MarketType
 from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.tools.openai_utils import get_openai_provider
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
     get_certified_relevant_news_since_cached,
 )
@@ -39,7 +40,6 @@ from pydantic_ai.settings import ModelSettings
 
 from prediction_market_agent.agents.top_n_oai_model import TopNOpenAINModel
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
-from prediction_market_agent.tools.openai_utils import get_openai_provider
 from prediction_market_agent.utils import (
     DEFAULT_OPENAI_MODEL,
     OPENROUTER_BASE_URL,

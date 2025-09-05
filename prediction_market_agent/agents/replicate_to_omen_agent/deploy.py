@@ -16,6 +16,7 @@ from prediction_market_agent_tooling.markets.omen.omen_constants import (
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     SAFE_COLLATERAL_TOKENS_ADDRESSES,
 )
+from prediction_market_agent_tooling.tools.contract_utils import is_erc20_contract
 from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.utils import utcnow
 from pydantic import BaseModel
@@ -29,7 +30,6 @@ from prediction_market_agent.agents.replicate_to_omen_agent.omen_replicate impor
 from prediction_market_agent.agents.replicate_to_omen_agent.omen_resolve_replicated import (
     omen_finalize_and_resolve_and_claim_back_all_replicated_markets_tx,
 )
-from prediction_market_agent.agents.safe_watch_agent.utils import is_erc20_contract
 from prediction_market_agent.db.replicated_markets_table_handler import (
     ReplicatedMarketsTableHandler,
 )
