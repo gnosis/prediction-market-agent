@@ -20,7 +20,14 @@ Create a `.env` file in the root of the repo with the following variables:
 MANIFOLD_API_KEY=...
 BET_FROM_PRIVATE_KEY=...
 OPENAI_API_KEY=...
+GRAPH_API_KEY=...
 ```
+
+**Note:** The `GRAPH_API_KEY` is required for agents that interact with Omen markets. You can obtain one for free from [The Graph](https://thegraph.com).
+
+**Important:** When running agents on Omen (Gnosis Chain), your wallet address (derived from `BET_FROM_PRIVATE_KEY`) must have some xDai to pay for transaction fees. Without xDai, you'll encounter a `CantPayForGasError`. You can either:
+- Send xDai to your wallet address, or
+- Set `GNOSIS_RPC_URL` environment variable to a local chain (e.g., `anvil`) where you have test funds.
 
 Depending on the agent you want to run, you may require additional variables. See an exhaustive list in `.env.example`.
 
@@ -72,6 +79,29 @@ Execute `prediction_market_agent/run_agent.py`, specifying the ID of the 'runnab
 │ --help                        Show this message and exit.                                                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
+
+## Troubleshooting
+
+### Testing Agent Prediction Logic Without Full Setup
+
+If you want to test just the prediction logic of an agent without needing all the environment variables or xDai funds, you can do this:
+
+```python
+from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket, SortBy
+
+agent = DeployableCoinFlipAgent()
+markets = OmenAgentMarket.get_binary_markets(limit=1, sort_by=SortBy.CLOSING_SOONEST)
+prediction = agent.answer_binary_market(markets[0])
+```
+
+This will skip any blockchain transactions and balance checks, allowing you to test the prediction part only. You can also initialize `OmenAgentMarket` manually with your own question to avoid needing the `GRAPH_API_KEY`.
+
+### Common Errors
+
+**`CantPayForGasError`**: Your wallet (from `BET_FROM_PRIVATE_KEY`) has insufficient xDai on Gnosis Chain to pay transaction fees. Either fund your wallet or use a local testnet.
+
+**Missing API Key errors**: Different agents require different API keys. Check `.env.example` for the full list and ensure you have the keys for the specific agent you're trying to run.
 
 ## Deploying
 
