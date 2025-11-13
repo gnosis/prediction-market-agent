@@ -1,3 +1,5 @@
+import time
+
 from prediction_market_agent.db.prompt_table_handler import PromptTableHandler
 
 SQLITE_DB_URL = "sqlite://"
@@ -19,6 +21,7 @@ def test_load_latest_prompt(prompt_table_handler: PromptTableHandler) -> None:
     prompt_text_second = "prompt_text_second"
 
     prompt_table_handler.save_prompt(prompt_text_first)
+    time.sleep(0.01)
     prompt_table_handler.save_prompt(prompt_text_second)
 
     # assert latest prompt is there
