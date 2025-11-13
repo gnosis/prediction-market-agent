@@ -2,16 +2,19 @@ import typing as t
 from abc import ABC
 from uuid import UUID, uuid4
 
+import langfuse
 from crewai import Agent, Crew, Process, Task
 from crewai.llm import LLM
 from crewai.tools import tool
+from openinference.instrumentation.crewai import CrewAIInstrumentor
+from openinference.instrumentation.litellm import LiteLLMInstrumentor
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.loggers import logger, patch_logger
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.openai_utils import (
     OpenAIModel,
     get_openai_provider,
@@ -21,6 +24,7 @@ from prediction_market_agent_tooling.tools.tavily.tavily_search import tavily_se
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     DatetimeUTC,
+    infer_model,
     utcnow,
 )
 from pydantic import BaseModel
@@ -58,14 +62,14 @@ from prediction_market_agent.tools.prediction_prophet.research import (
     prophet_make_prediction,
     prophet_research,
 )
-from prediction_market_agent.utils import APIKeys, disable_crewai_telemetry
+from prediction_market_agent.utils import APIKeys
 
 
 class Scenarios(BaseModel):
     scenarios: list[str]
 
 
-@tool
+@tool("tavily_search_tool")
 @observe()
 def tavily_search_tool(query: str) -> list[dict[str, str]]:
     """
@@ -98,8 +102,6 @@ class ThinkThoroughlyBase(ABC):
             else None
         )
 
-        disable_crewai_telemetry()  # To prevent telemetry from being sent to CrewAI
-
     @staticmethod
     def _get_current_date() -> str:
         return utcnow().strftime("%Y-%m-%d")
@@ -116,8 +118,11 @@ class ThinkThoroughlyBase(ABC):
         self._long_term_memory.save_answer_with_scenario(answer_with_scenario)
 
     @staticmethod
-    def _get_researcher(model: str) -> Agent:
-        langfuse_callback = langfuse_context.get_current_langchain_handler()
+    def _get_researcher(model: KnownModelName) -> Agent:
+        # If not already, configures Langfuse instrumentation for CrewAI
+        CrewAIInstrumentor().instrument(skip_dep_check=True)
+        LiteLLMInstrumentor().instrument()
+
         return Agent(
             role="Research Analyst",
             goal="Research and report on some future event, giving high quality and nuanced analysis",
@@ -126,12 +131,14 @@ class ThinkThoroughlyBase(ABC):
             allow_delegation=False,
             tools=[tavily_search_tool],
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=[langfuse_callback] if langfuse_callback else None,
         )
 
     @staticmethod
-    def _get_predictor(model: str) -> Agent:
-        langfuse_callback = langfuse_context.get_current_langchain_handler()
+    def _get_predictor(model: KnownModelName) -> Agent:
+        # If not already, configures Langfuse instrumentation for CrewAI
+        CrewAIInstrumentor().instrument(skip_dep_check=True)
+        LiteLLMInstrumentor().instrument()
+
         return Agent(
             role="Professional Gambler",
             goal="Predict, based on some research you are presented with, whether or not a given event will occur",
@@ -139,16 +146,13 @@ class ThinkThoroughlyBase(ABC):
             verbose=True,
             allow_delegation=False,
             llm=ThinkThoroughlyBase._build_llm(model),
-            callbacks=[langfuse_callback] if langfuse_callback else None,
         )
 
     @staticmethod
-    def _build_llm(model: str) -> LLM:
+    def _build_llm(model: KnownModelName) -> LLM:
         keys = APIKeys()
-        # ToDo - Add Langfuse callback handler here once integration becomes clear (see
-        #  https://github.com/gnosis/prediction-market-agent/issues/107)
         llm = LLM(
-            model=model,
+            model=infer_model(model),
             api_key=keys.openai_api_key.get_secret_value(),
             temperature=0,
         )
@@ -167,7 +171,8 @@ class ThinkThoroughlyBase(ABC):
 
         report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
         output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
-        scenarios: Scenarios = output.pydantic
+        scenarios = output.pydantic
+        assert isinstance(scenarios, Scenarios)
 
         logger.info(f"Created conditional scenarios: {scenarios.scenarios}")
         return scenarios
@@ -185,7 +190,8 @@ class ThinkThoroughlyBase(ABC):
 
         report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
         output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
-        scenarios: Scenarios = output.pydantic
+        scenarios = output.pydantic
+        assert isinstance(scenarios, Scenarios)
 
         # Add the original question if it wasn't included by the LLM.
         if question not in scenarios.scenarios:
@@ -274,7 +280,8 @@ class ThinkThoroughlyBase(ABC):
         if research_report:
             inputs["research_report"] = research_report
         output = crew.kickoff(inputs=inputs)
-        answer: ProbabilisticAnswer = output.pydantic
+        answer = output.pydantic
+        assert isinstance(answer, ProbabilisticAnswer)
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
             answer, scenario=question, question=question
         )
@@ -349,8 +356,8 @@ class ThinkThoroughlyBase(ABC):
 
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
     identifier = THINK_THOROUGHLY
-    model = "gpt-4-turbo-2024-04-09"
-    model_for_generate_prediction_for_one_outcome = "gpt-4-turbo-2024-04-09"
+    model = "openai:gpt-4-turbo-2024-04-09"
+    model_for_generate_prediction_for_one_outcome = "openai:gpt-4-turbo-2024-04-09"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
@@ -398,7 +405,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
 
         output = crew.kickoff(inputs=inputs)
-        answer: ProbabilisticAnswer = output.pydantic
+        answer = output.pydantic
+        assert isinstance(answer, ProbabilisticAnswer)
 
         if (
             task_research_one_outcome.tools_errors > 0
@@ -417,8 +425,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     identifier = THINK_THOROUGHLY_PROPHET
-    model = "gpt-4-turbo-2024-04-09"
-    model_for_generate_prediction_for_one_outcome = "gpt-4o-2024-08-06"
+    model = "openai:gpt-4-turbo-2024-04-09"
+    model_for_generate_prediction_for_one_outcome = "openai:gpt-4o-2024-08-06"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
@@ -446,7 +454,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             min_scraped_sites=2,
             agent=PydanticAIAgent(
                 OpenAIModel(
-                    model,
+                    infer_model(model),
                     provider=get_openai_provider(api_keys.openai_api_key),
                 ),
                 model_settings=ModelSettings(temperature=0.7),
@@ -459,7 +467,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
             additional_information=research.report,
             agent=PydanticAIAgent(
                 OpenAIModel(
-                    model,
+                    infer_model(model),
                     provider=get_openai_provider(api_keys.openai_api_key),
                 ),
                 model_settings=ModelSettings(temperature=LLM_SUPER_LOW_TEMPERATURE),
@@ -495,7 +503,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
                 goal=question,
                 agent=PydanticAIAgent(
                     OpenAIModel(
-                        self.model,
+                        infer_model(self.model),
                         provider=get_openai_provider(api_keys.openai_api_key),
                     ),
                     model_settings=ModelSettings(temperature=0.7),
@@ -514,11 +522,7 @@ class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
 
 def observe_unique_id(unique_id: UUID) -> None:
     # Used to mark the parent procses and its children with the same unique_id, so that we can link them together in Langfuse.
-    langfuse_context.update_current_observation(
-        metadata={
-            "unique_id": str(unique_id),
-        }
-    )
+    langfuse.get_client().update_current_trace(metadata={"unique_id": str(unique_id)})
 
 
 def process_scenario(

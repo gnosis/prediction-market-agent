@@ -1,6 +1,7 @@
 from datetime import timedelta
 from functools import partial
 
+import langfuse
 from prediction_market_agent_tooling.deploy.agent import DeployableAgent
 from prediction_market_agent_tooling.gtypes import ChecksumAddress, HexBytes, xDai
 from prediction_market_agent_tooling.loggers import logger
@@ -19,7 +20,7 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenSubgraphHandler,
     RealityResponse,
 )
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.omen.reality_accuracy import reality_accuracy
 from prediction_market_agent_tooling.tools.utils import retry_until_true, utcnow
 from pydantic import BaseModel
@@ -175,7 +176,7 @@ class OFVChallengerAgent(DeployableAgent):
         web3: Web3 | None = None,
     ) -> Challenge:
         logger.info(f"Challenging market {market.url=}")
-        langfuse_context.update_current_observation(metadata={"url": market.url})
+        langfuse.get_client().update_current_trace(metadata={"url": market.url})
 
         # Use just a small bond on questions that are either finalized too quickly (might not receive corrections in time),
         # or finalized in too much in the future (not worth locking significant funds there).

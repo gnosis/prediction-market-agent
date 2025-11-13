@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.gtypes import Probability
 from prediction_market_agent_tooling.loggers import logger
@@ -66,7 +66,7 @@ class KnownOutcomeOutput(BaseModel):
 
 
 HAS_QUESTION_HAPPENED_IN_THE_PAST_PROMPT = """
-The current date is {date_str}. Your goal is to assert if a QUESTION references an event that is already finished (according to the current date and time) or if it will still take place in a later date. 
+The current date is {date_str}. Your goal is to assert if a QUESTION references an event that is already finished (according to the current date and time) or if it will still take place in a later date.
 
 For example, you should return 1 if given the event "Will Bitcoin have reached the price of $100 by 30 March 2023?", since the event ends on a data prior to the current date.
 

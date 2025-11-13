@@ -4,6 +4,13 @@ from typing import Annotated, Any, Union
 
 import pydantic
 from openai.types import chat
+from openai.types.chat.chat_completion_message_custom_tool_call import (
+    ChatCompletionMessageCustomToolCall,
+)
+from openai.types.chat.chat_completion_message_function_tool_call import (
+    ChatCompletionMessageFunctionToolCall,
+)
+from pydantic_ai import UnexpectedModelBehavior
 from pydantic_ai.messages import (
     ModelRequest,
     ModelResponse,
@@ -30,7 +37,12 @@ class LogProbsOpenAIModel(OpenAIModel):
     def __init__(self, model: str, provider: OpenAIProvider):
         super().__init__(model, provider=provider)
 
-    def _process_response(self, response: chat.ChatCompletion) -> ModelResponse:
+    def _process_response(self, response: chat.ChatCompletion | str) -> ModelResponse:
+        if not isinstance(response, chat.ChatCompletion):
+            raise UnexpectedModelBehavior(
+                "Invalid response from OpenAI chat completions endpoint, expected JSON data"
+            )
+
         timestamp = datetime.fromtimestamp(response.created, tz=timezone.utc)
         choice = response.choices[0]
         items: list[ModelResponsePart] = []
@@ -60,12 +72,23 @@ class LogProbsOpenAIModel(OpenAIModel):
         if choice.message.content is not None:
             items.append(TextPart(choice.message.content))
         if choice.message.tool_calls is not None:
-            for c in choice.message.tool_calls:
-                items.append(
-                    ToolCallPart(
-                        c.function.name, c.function.arguments, tool_call_id=c.id
+            for call in choice.message.tool_calls:
+                if isinstance(call, ChatCompletionMessageFunctionToolCall):
+                    part = ToolCallPart(
+                        call.function.name,
+                        call.function.arguments,
+                        tool_call_id=call.id,
                     )
-                )
+                elif isinstance(
+                    call, ChatCompletionMessageCustomToolCall
+                ):  # pragma: no cover
+                    # NOTE: Custom tool calls are not supported.
+                    # See <https://github.com/pydantic/pydantic-ai/issues/2513> for more details.
+                    raise RuntimeError("Custom tool calls are not supported")
+                else:
+                    assert False
+
+                items.append(part)
         return LogProbsModelResponse(
             items,
             model_name=response.model,

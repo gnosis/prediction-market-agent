@@ -1,6 +1,6 @@
 from string import Template
 
-from langchain.chains.summarize import load_summarize_chain
+from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI

@@ -263,7 +263,7 @@ class DeployableLogProbsAgent(DeployableTraderAgent):
             raise ValueError("No confidence scores found in logprobs")
 
         max_confidence_key: str = max(confidence.items(), key=lambda item: item[1])[0]
-        response = clean_json_response(prediction.data)
+        response = clean_json_response(prediction.output)
 
         return ProbabilisticAnswer(
             p_yes=Probability(round(float(response.p_yes), 2)),

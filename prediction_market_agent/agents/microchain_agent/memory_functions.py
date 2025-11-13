@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from langchain.vectorstores.chroma import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from microchain import Function
 from prediction_market_agent_tooling.loggers import logger

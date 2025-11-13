@@ -1,4 +1,4 @@
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.tools.is_invalid import QUESTION_IS_INVALID_PROMPT
 from prediction_market_agent_tooling.tools.utils import (
