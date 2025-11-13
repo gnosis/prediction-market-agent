@@ -1,6 +1,6 @@
-# Install Poetry and create venv in the builder step,
-# then copy the venv to the runtime image, so that the runtime image is as small as possible.
-FROM --platform=linux/amd64 python:3.11.9-bookworm AS builder
+FROM --platform=linux/amd64 python:3.11.9-bookworm
+
+RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6
 
 RUN pip install poetry==1.8.2
 
@@ -15,20 +15,11 @@ COPY pyproject.toml poetry.lock ./
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
-FROM --platform=linux/amd64 python:3.11.9-bookworm AS runtime
-
-RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6
-
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-WORKDIR /app
-
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
-COPY pyproject.toml poetry.lock ./
-COPY prediction_market_agent prediction_market_agent 
-COPY scripts scripts 
+COPY prediction_market_agent prediction_market_agent
+COPY scripts scripts
 COPY tests tests
 COPY tokenizers tokenizers
 
