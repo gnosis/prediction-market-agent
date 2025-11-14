@@ -22,12 +22,12 @@ from prediction_market_agent.utils import patch_sqlite3  # isort:skip
 
 patch_sqlite3()
 
-
+import langfuse
 import streamlit as st
 from microchain import Agent
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.markets.markets import MarketType
-from prediction_market_agent_tooling.tools.langfuse_ import langfuse_context, observe
+from prediction_market_agent_tooling.tools.langfuse_ import observe
 from prediction_market_agent_tooling.tools.streamlit_user_login import streamlit_login
 from prediction_market_agent_tooling.tools.streamlit_utils import (
     check_required_api_keys,
@@ -83,7 +83,7 @@ st.session_state.session_id = st.session_state.get(
 def run_general_agent_streamlit(
     agent: Agent, iterations: int, model: SupportedModel
 ) -> None:
-    langfuse_context.update_current_trace(
+    langfuse.get_client().update_current_trace(
         tags=[GENERAL_AGENT_TAG, STREAMLIT_TAG], session_id=st.session_state.session_id
     )
     maybe_initialize_long_term_memory()

@@ -1,9 +1,9 @@
 import bs4
 import requests
-from langchain.chains.summarize import load_summarize_chain
-from langchain.prompts import PromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_classic.chains.summarize.chain import load_summarize_chain
+from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 

@@ -3,10 +3,17 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from openai import NOT_GIVEN, APIStatusError, AsyncStream
+from openai import APIStatusError, AsyncStream
+from openai._types import not_given, omit
 from openai.types import chat
 from openai.types.chat import ChatCompletionChunk
-from pydantic_ai import ModelHTTPError
+from openai.types.chat.chat_completion_message_custom_tool_call import (
+    ChatCompletionMessageCustomToolCall,
+)
+from openai.types.chat.chat_completion_message_function_tool_call import (
+    ChatCompletionMessageFunctionToolCall,
+)
+from pydantic_ai import ModelHTTPError, UnexpectedModelBehavior
 from pydantic_ai.messages import (
     ModelMessage,
     ModelResponse,
@@ -17,8 +24,8 @@ from pydantic_ai.messages import (
 from pydantic_ai.models import get_user_agent
 from pydantic_ai.models.openai import (
     ModelRequestParameters,
+    OpenAIChatModelSettings,
     OpenAIModel,
-    OpenAIModelSettings,
 )
 
 
@@ -34,7 +41,7 @@ class TopNOpenAINModel(OpenAIModel):
         self,
         messages: list[ModelMessage],
         stream: bool,
-        model_settings: OpenAIModelSettings,
+        model_settings: OpenAIChatModelSettings,
         model_request_parameters: ModelRequestParameters,
     ) -> chat.ChatCompletion | AsyncStream[ChatCompletionChunk]:
         tools = self._get_tools(model_request_parameters)
@@ -46,7 +53,7 @@ class TopNOpenAINModel(OpenAIModel):
         else:
             tool_choice = "auto"
 
-        openai_messages = await self._map_messages(messages)
+        openai_messages = await self._map_messages(messages, model_request_parameters)
 
         extra_headers = model_settings.get("extra_headers", {})
         extra_headers.setdefault("User-Agent", get_user_agent())
@@ -56,26 +63,22 @@ class TopNOpenAINModel(OpenAIModel):
                 model=self._model_name,
                 messages=openai_messages,
                 n=self._n,
-                parallel_tool_calls=model_settings.get(
-                    "parallel_tool_calls", NOT_GIVEN
-                ),
-                tools=tools or NOT_GIVEN,
-                tool_choice=tool_choice or NOT_GIVEN,
+                parallel_tool_calls=model_settings.get("parallel_tool_calls", omit),
+                tools=tools or omit,
+                tool_choice=tool_choice or omit,
                 stream=stream,
-                stream_options={"include_usage": True} if stream else NOT_GIVEN,
-                stop=model_settings.get("stop_sequences", NOT_GIVEN),
-                max_completion_tokens=model_settings.get("max_tokens", NOT_GIVEN),
-                temperature=model_settings.get("temperature", NOT_GIVEN),
-                top_p=model_settings.get("top_p", NOT_GIVEN),
-                timeout=model_settings.get("timeout", NOT_GIVEN),
-                seed=model_settings.get("seed", NOT_GIVEN),
-                presence_penalty=model_settings.get("presence_penalty", NOT_GIVEN),
-                frequency_penalty=model_settings.get("frequency_penalty", NOT_GIVEN),
-                logit_bias=model_settings.get("logit_bias", NOT_GIVEN),
-                reasoning_effort=model_settings.get(
-                    "openai_reasoning_effort", NOT_GIVEN
-                ),
-                user=model_settings.get("openai_user", NOT_GIVEN),
+                stream_options={"include_usage": True} if stream else omit,
+                stop=model_settings.get("stop_sequences", omit),
+                max_completion_tokens=model_settings.get("max_tokens", omit),
+                temperature=model_settings.get("temperature", omit),
+                top_p=model_settings.get("top_p", omit),
+                timeout=model_settings.get("timeout", not_given),
+                seed=model_settings.get("seed", omit),
+                presence_penalty=model_settings.get("presence_penalty", omit),
+                frequency_penalty=model_settings.get("frequency_penalty", omit),
+                logit_bias=model_settings.get("logit_bias", omit),
+                reasoning_effort=model_settings.get("openai_reasoning_effort", omit),
+                user=model_settings.get("openai_user", omit),
                 extra_headers=extra_headers,
                 extra_body=model_settings.get("extra_body"),
             )
@@ -86,7 +89,12 @@ class TopNOpenAINModel(OpenAIModel):
                 ) from e
             raise
 
-    def _process_response(self, response: chat.ChatCompletion) -> ModelResponse:
+    def _process_response(self, response: chat.ChatCompletion | str) -> ModelResponse:
+        if not isinstance(response, chat.ChatCompletion):
+            raise UnexpectedModelBehavior(
+                "Invalid response from OpenAI chat completions endpoint, expected JSON data"
+            )
+
         timestamp = datetime.fromtimestamp(response.created, tz=timezone.utc)
         items: list[ModelResponsePart] = []
 
@@ -96,12 +104,21 @@ class TopNOpenAINModel(OpenAIModel):
 
             if choice.message.tool_calls:
                 for call in choice.message.tool_calls:
-                    items.append(
-                        ToolCallPart(
+                    if isinstance(call, ChatCompletionMessageFunctionToolCall):
+                        part = ToolCallPart(
                             call.function.name,
                             call.function.arguments,
                             tool_call_id=call.id,
                         )
-                    )
+                    elif isinstance(
+                        call, ChatCompletionMessageCustomToolCall
+                    ):  # pragma: no cover
+                        # NOTE: Custom tool calls are not supported.
+                        # See <https://github.com/pydantic/pydantic-ai/issues/2513> for more details.
+                        raise RuntimeError("Custom tool calls are not supported")
+                    else:
+                        assert False
+
+                    items.append(part)
 
         return ModelResponse(items, model_name=response.model, timestamp=timestamp)

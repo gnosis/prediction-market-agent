@@ -27,8 +27,8 @@ WORKDIR /app
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY pyproject.toml poetry.lock ./
-COPY prediction_market_agent prediction_market_agent 
-COPY scripts scripts 
+COPY prediction_market_agent prediction_market_agent
+COPY scripts scripts
 COPY tests tests
 COPY tokenizers tokenizers
 

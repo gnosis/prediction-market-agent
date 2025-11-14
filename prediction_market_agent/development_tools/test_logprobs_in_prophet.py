@@ -72,7 +72,7 @@ def make_prediction_local(
     )
     result = agent.run_sync(prediction_prompt)
 
-    completion = result.data
+    completion = result.output
 
     logger.info(f"Completion: {completion}")
     completion_clean = clean_completion_json(completion)

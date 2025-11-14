@@ -26,7 +26,7 @@ from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_
 from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_cache import (
     RelevantNewsResponseCache,
 )
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC, utcnow
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC, infer_model, utcnow
 from prediction_prophet.benchmark.agents import (
     EmbeddingModel,
     OlasAgent,
@@ -588,14 +588,14 @@ class DeployableOlasEmbeddingOAAgent(DeployableTraderAgentER):
         self.agent = OlasAgent(
             research_agent=Agent(
                 OpenAIModel(
-                    model,
+                    infer_model(model),
                     provider=get_openai_provider(api_key=api_keys.openai_api_key),
                 ),
                 model_settings=ModelSettings(temperature=0.5),
             ),
             prediction_agent=Agent(
                 OpenAIModel(
-                    model,
+                    infer_model(model),
                     provider=get_openai_provider(api_key=api_keys.openai_api_key),
                 ),
                 model_settings=ModelSettings(temperature=0.0),

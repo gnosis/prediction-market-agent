@@ -1,5 +1,4 @@
 import pytest
-from crewai import Task
 from prediction_market_agent_tooling.gtypes import USD
 
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
@@ -7,16 +6,6 @@ from prediction_market_agent.tools.message_utils import (
     compress_message,
     decompress_message,
 )
-from prediction_market_agent.utils import disable_crewai_telemetry
-
-
-def test_disable_crewai_telemetry() -> None:
-    disable_crewai_telemetry()
-    t = Task(
-        description="foo",
-        expected_output="bar",
-    )
-    assert not t._telemetry.task_started(task=t)
 
 
 @pytest.mark.parametrize(

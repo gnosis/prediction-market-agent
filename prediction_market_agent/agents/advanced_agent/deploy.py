@@ -78,6 +78,6 @@ Question: {question}
 Content: {contents}
 
 Return only the probability float number and confidence float number, separated by space, nothing else."""
-    ).data
+    ).output
     probability, confidence = map(float, result.split())
     return probability, confidence
