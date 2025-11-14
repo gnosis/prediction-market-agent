@@ -76,7 +76,6 @@ langfuse = "^3.9.3"
 openinference-instrumentation-crewai = "^0.1.16"
 openinference-instrumentation-litellm = "^0.1.28"
 litellm = "^1.79.3"
-torch = "^2.9.1"
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^1.0.0"

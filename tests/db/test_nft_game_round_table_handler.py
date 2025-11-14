@@ -41,7 +41,12 @@ def nft_game_round_table_handler() -> Generator[NFTGameRoundTableHandler, None, 
     yield prompt_handler
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=20))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=20),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_current_round_none(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:
@@ -49,7 +54,12 @@ def test_find_current_round_none(
     assert round_ is None
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=5))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=5),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_current_round_success(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:
@@ -58,7 +68,12 @@ def test_find_current_round_success(
     assert round_.id == 2
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=1))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=1),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_prev_round_none(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:
@@ -66,7 +81,12 @@ def test_find_prev_round_none(
     assert round_ is None
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=5))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=5),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_prev_round_success(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:
@@ -75,7 +95,12 @@ def test_find_prev_round_success(
     assert round_.id == 1
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=10))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=10),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_next_round_none(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:
@@ -83,7 +108,12 @@ def test_find_next_round_none(
     assert round_ is None
 
 
-@freeze_time(DatetimeUTC(year=2025, month=10, day=5))
+@freeze_time(
+    DatetimeUTC(year=2025, month=10, day=5),
+    ignore=[
+        "transformers",  # Due to bug in Transformers library that imports torch even if not installed.
+    ],
+)
 def test_find_next_round_success(
     nft_game_round_table_handler: NFTGameRoundTableHandler,
 ) -> None:

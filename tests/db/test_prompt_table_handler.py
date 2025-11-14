@@ -21,7 +21,7 @@ def test_load_latest_prompt(prompt_table_handler: PromptTableHandler) -> None:
     prompt_text_second = "prompt_text_second"
 
     prompt_table_handler.save_prompt(prompt_text_first)
-    time.sleep(0.01)
+    time.sleep(0.1)
     prompt_table_handler.save_prompt(prompt_text_second)
 
     # assert latest prompt is there
