@@ -56,6 +56,18 @@ class BlockRunChatLLM(BaseChatModel):
         arbitrary_types_allowed = True
 
     def __init__(self, **kwargs):
+        """Initialize BlockRun LLM client.
+
+        Args:
+            **kwargs: Configuration options including:
+                - model: Model name (default: "openai/gpt-4o")
+                - temperature: Sampling temperature (default: 0.0)
+                - max_tokens: Maximum tokens (default: 4096)
+                - private_key: Wallet private key (or use BLOCKRUN_WALLET_KEY env)
+
+        Raises:
+            ValueError: If BLOCKRUN_WALLET_KEY is not set and no private_key provided.
+        """
         super().__init__(**kwargs)
         # Normalize model name
         self.model = MODEL_MAP.get(self.model, self.model)
@@ -72,6 +84,7 @@ class BlockRunChatLLM(BaseChatModel):
 
     @property
     def _llm_type(self) -> str:
+        """Return the type of LLM for LangChain compatibility."""
         return "blockrun"
 
     def _convert_messages(self, messages: List[BaseMessage]) -> List[Dict[str, str]]:
