@@ -76,6 +76,7 @@ langfuse = "^3.9.3"
 openinference-instrumentation-crewai = "^0.1.16"
 openinference-instrumentation-litellm = "^0.1.28"
 litellm = "^1.79.3"
+blockrun-llm = "^0.2.0"  # x402 pay-per-request LLM access
 
 [tool.poetry.group.dev.dependencies]
 langchain-chroma = "^1.0.0"

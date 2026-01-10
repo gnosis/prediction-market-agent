@@ -27,6 +27,7 @@ class DBKeys(BaseSettings):
 class APIKeys(APIKeysBase):
     OPENAI_API_KEY: t.Optional[SecretStr] = None
     OPENROUTER_API_KEY: t.Optional[SecretStr] = None
+    BLOCKRUN_WALLET_KEY: t.Optional[SecretStr] = None  # BlockRun x402 pay-per-request
     ANTHROPIC_API_KEY: t.Optional[SecretStr] = None
     REPLICATE_API_KEY: t.Optional[SecretStr] = None
     TAVILY_API_KEY: t.Optional[SecretStr] = None
@@ -44,6 +45,11 @@ class APIKeys(APIKeysBase):
         return check_not_none(
             self.OPENAI_API_KEY, "OPENAI_API_KEY missing in the environment."
         )
+
+    @property
+    def blockrun_wallet_key(self) -> t.Optional[SecretStr]:
+        """BlockRun wallet key for x402 pay-per-request (optional)."""
+        return self.BLOCKRUN_WALLET_KEY
 
     @property
     def openrouter_api_key(self) -> SecretStr:

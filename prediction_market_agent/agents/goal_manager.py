@@ -1,6 +1,5 @@
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
@@ -13,6 +12,7 @@ from prediction_market_agent.db.evaluated_goal_table_handler import (
     EvaluatedGoalTableHandler,
 )
 from prediction_market_agent.db.models import EvaluatedGoalModel
+from prediction_market_agent.connectors import get_chat_llm
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 GENERATE_GOAL_PROMPT_TEMPLATE = """
@@ -187,9 +187,9 @@ class GoalManager:
             partial_variables={"format_instructions": parser.get_format_instructions()},
         )
         latest_evaluated_goals_str = self.evaluated_goals_to_str(latest_evaluated_goals)
-        llm = ChatOpenAI(
+        llm = get_chat_llm(
+            model=self.model,
             temperature=0,
-            model_name=self.model,
             openai_api_key=APIKeys().openai_api_key,
         )
         chain = prompt | llm | parser
@@ -285,9 +285,9 @@ class GoalManager:
             input_variables=["goal_prompt", "chat_history"],
             partial_variables={"format_instructions": parser.get_format_instructions()},
         )
-        llm = ChatOpenAI(
+        llm = get_chat_llm(
+            model=self.model,
             temperature=0,
-            model_name=self.model,
             openai_api_key=APIKeys().openai_api_key,
         )
         chain = prompt | llm | parser

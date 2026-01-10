@@ -3,7 +3,6 @@ from string import Template
 from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.gtypes import USD
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
@@ -23,6 +22,7 @@ from prediction_market_agent.agents.microchain_agent.memory import (
     SimpleMemoryThinkThoroughly,
 )
 from prediction_market_agent.agents.ofvchallenger_agent.ofv_models import Factuality
+from prediction_market_agent.connectors import get_chat_llm
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 STREAMLIT_TAG = "streamlit"
@@ -70,9 +70,9 @@ def _summarize_learnings(
     model: str = DEFAULT_OPENAI_MODEL,
 ) -> str:
     model = model if model else DEFAULT_OPENAI_MODEL
-    llm = ChatOpenAI(
+    llm = get_chat_llm(
+        model=model,
         temperature=0,
-        model_name=model,
         openai_api_key=APIKeys().openai_api_key,
     )
     summary_chain = load_summarize_chain(
@@ -125,8 +125,8 @@ def memories_to_learnings(
 
 @observe()
 def get_event_date_from_question(question: str) -> DatetimeUTC | None:
-    llm = ChatOpenAI(
-        model_name="gpt-4-turbo",
+    llm = get_chat_llm(
+        model="gpt-4-turbo",
         temperature=0.0,
         openai_api_key=APIKeys().openai_api_key,
     )

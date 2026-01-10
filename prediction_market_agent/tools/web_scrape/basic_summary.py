@@ -2,18 +2,18 @@ import bs4
 import requests
 from langchain_classic.chains.summarize.chain import load_summarize_chain
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from prediction_market_agent.connectors import get_chat_llm
 from prediction_market_agent.utils import DEFAULT_OPENAI_MODEL, APIKeys
 
 
 def _summary(
     objective: str, content: str, separators: list[str] = ["\n\n", "\n"]
 ) -> str:
-    llm = ChatOpenAI(
+    llm = get_chat_llm(
+        model=DEFAULT_OPENAI_MODEL,
         temperature=0,
-        model_name=DEFAULT_OPENAI_MODEL,
         openai_api_key=APIKeys().openai_api_key,
     )
     text_splitter = RecursiveCharacterTextSplitter(
