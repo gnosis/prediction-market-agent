@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 import langfuse
 from crewai import Agent, Crew, Process, Task
+from crewai.crews.crew_output import CrewOutput
 from crewai.llm import LLM
 from crewai.tools import tool
 from openinference.instrumentation.crewai import CrewAIInstrumentor
@@ -171,6 +172,7 @@ class ThinkThoroughlyBase(ABC):
 
         report_crew = Crew(agents=[researcher], tasks=[create_required_conditions])
         output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 3})
+        assert isinstance(output, CrewOutput)
         scenarios = output.pydantic
         assert isinstance(scenarios, Scenarios)
 
@@ -190,6 +192,7 @@ class ThinkThoroughlyBase(ABC):
 
         report_crew = Crew(agents=[researcher], tasks=[create_scenarios_task])
         output = report_crew.kickoff(inputs={"scenario": question, "n_scenarios": 5})
+        assert isinstance(output, CrewOutput)
         scenarios = output.pydantic
         assert isinstance(scenarios, Scenarios)
 
@@ -280,6 +283,7 @@ class ThinkThoroughlyBase(ABC):
         if research_report:
             inputs["research_report"] = research_report
         output = crew.kickoff(inputs=inputs)
+        assert isinstance(output, CrewOutput)
         answer = output.pydantic
         assert isinstance(answer, ProbabilisticAnswer)
         answer_with_scenario = AnswerWithScenario.build_from_probabilistic_answer(
@@ -405,6 +409,7 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
             )
 
         output = crew.kickoff(inputs=inputs)
+        assert isinstance(output, CrewOutput)
         answer = output.pydantic
         assert isinstance(answer, ProbabilisticAnswer)
 
