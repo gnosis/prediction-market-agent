@@ -34,6 +34,8 @@ from prediction_market_agent_tooling.tools.streamlit_utils import (
     streamlit_escape,
 )
 
+from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
+from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
 from prediction_market_agent.agents.known_outcome_agent.deploy import (
     DeployableKnownOutcomeAgent,
 )
@@ -62,6 +64,8 @@ SupportedAgentType: t.TypeAlias = (
     | type[DeployablePredictionProphetGPT4oAgentScalar]
     | type[DeployablePredictionProphetGPTo1PreviewAgent]
     | type[DeployablePredictionProphetGPTo1MiniAgent]
+    | type[DeployableCoinFlipAgent]
+    | type[AdvancedAgent]
 )
 
 AGENTS: list[SupportedAgentType] = [
@@ -75,6 +79,8 @@ AGENTS: list[SupportedAgentType] = [
     DeployablePredictionProphetGPT4oAgentScalar,
     DeployablePredictionProphetGPTo1PreviewAgent,
     DeployablePredictionProphetGPTo1MiniAgent,
+    DeployableCoinFlipAgent,
+    AdvancedAgent,
 ]
 
 add_sink_to_logger()
