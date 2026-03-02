@@ -86,7 +86,7 @@ python scripts/simple_benchmark.py --n 10
 
 1. Sometimes, the best thing is to manually observe what's going on -- print any outputs you can and observe what the agent is doing for some question.
 
-For this, you can also use provided Streamlit demo, run it using `streamlit run src/app.py`.
+For this, you can also use provided Streamlit demo, run it using `streamlit run scripts/agent_app.py`.
 
 ### Will this be used in the end?
 
