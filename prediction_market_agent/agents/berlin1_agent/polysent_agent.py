@@ -5,9 +5,10 @@ from typing import Any
 
 import httpx
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from prediction_market_agent_tooling.config import APIKeys
+
+from prediction_market_agent.connectors import get_chat_llm
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
@@ -190,10 +191,10 @@ def summarize_history(history_data: list[dict[str, Any]]) -> str:
 
 @observe()
 def extract_sentiment(contents: list[str]) -> str:
-    llm = ChatOpenAI(
-        model_name="gpt-4o-mini",
-        openai_api_key=APIKeys().openai_api_key,
+    llm_client = get_chat_llm(
+        model="gpt-4o-mini",
         temperature=0,
+        openai_api_key=APIKeys().openai_api_key,
     )
 
     prompt = ChatPromptTemplate(
@@ -220,7 +221,7 @@ Content:
 
     merged_content = "\n".join(contents[:10])
     messages = prompt.format_messages(content=merged_content)
-    response = llm.invoke(messages, max_tokens=16)
+    response = llm_client.invoke(messages, max_tokens=16)
 
     return str(response.content).strip()
 
@@ -232,10 +233,10 @@ def llm(
     history_summary: str = "",
     sentiment: str = "Neutral",
 ) -> tuple[float, float]:
-    llm = ChatOpenAI(
-        model_name="gpt-4o-mini",
-        openai_api_key=APIKeys().openai_api_key,
+    llm_client = get_chat_llm(
+        model="gpt-4o-mini",
         temperature=0.5,
+        openai_api_key=APIKeys().openai_api_key,
     )
 
     prompt = ChatPromptTemplate(
@@ -295,7 +296,7 @@ Market Sentiment:
         history=history_summary,
         sentiment=sentiment,
     )
-    response = llm.invoke(messages, max_tokens=1024)
+    response = llm_client.invoke(messages, max_tokens=1024)
     content = str(response.content)
 
     match = re.search(

@@ -1,11 +1,11 @@
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from prediction_market_agent_tooling.tools.is_invalid import QUESTION_IS_INVALID_PROMPT
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     utcnow,
 )
 
+from prediction_market_agent.connectors import get_chat_llm
 from prediction_market_agent.utils import APIKeys
 
 REPHRASE_PROMPT = """
@@ -22,8 +22,8 @@ Output only the rephrased question and nothing else.
 
 
 def rephrase(question: str, engine: str = "gpt-4.1-mini-2025-04-14") -> str:
-    llm = ChatOpenAI(
-        model_name=engine,
+    llm = get_chat_llm(
+        model=engine,
         temperature=LLM_SUPER_LOW_TEMPERATURE,
         openai_api_key=APIKeys().openai_api_key,
     )
