@@ -17,3 +17,7 @@ tmp
 
 # Created on mech-client `interact` call
 acn_cert.txt
+data/open_omen_markets_*
+outputs/
+*.csv
+!data/sample_open_markets.csv
