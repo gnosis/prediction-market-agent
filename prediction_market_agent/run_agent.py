@@ -103,6 +103,9 @@ from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyProphetResearchAgent,
 )
 from prediction_market_agent.agents.multi_persona_agent.deploy import (
+    MultiPersonaAgent,
+)  
+from prediction_market_agent.agents.multi_persona_ensemble_agent.deploy import (
     MultiPersonaEnsembleAgent,
 )   
     
@@ -168,6 +171,7 @@ class RunnableAgent(str, Enum):
     skew_agent = "skew_agent"
     performance_alert = "performance_alert"
     multi_persona_agent = "multi_persona_agent"
+    multi_persona_ensemble_agent = "multi_persona_ensemble_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -227,7 +231,8 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
     RunnableAgent.performance_alert: PerformanceAlertAgent,
-    RunnableAgent.multi_persona_agent: MultiPersonaEnsembleAgent,
+    RunnableAgent.multi_persona_agent: MultiPersonaAgent,
+    RunnableAgent.multi_persona_ensemble_agent: MultiPersonaEnsembleAgent,
 }
 
 

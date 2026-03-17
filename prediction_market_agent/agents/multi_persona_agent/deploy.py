@@ -12,8 +12,8 @@ from prediction_market_agent_tooling.gtypes import Probability
 load_dotenv()
 
 
-class MultiPersonaEnsembleAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 2
+class MultiPersonaAgent(DeployableTraderAgent):
+    bet_on_n_markets_per_run = 1
 
     def load(self) -> None:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
