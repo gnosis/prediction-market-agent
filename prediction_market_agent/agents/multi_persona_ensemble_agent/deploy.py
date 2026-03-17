@@ -3,7 +3,9 @@ import re
 from dotenv import load_dotenv
 from openai import OpenAI
 from tavily import TavilyClient
-
+import csv
+from datetime import datetime, timezone
+from pathlib import Path
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
@@ -18,6 +20,51 @@ class MultiPersonaEnsembleAgent(DeployableTraderAgent):
     EDGE_THRESHOLD = 0.05
     MAX_DISAGREEMENT = 0.25
 
+    def log_forecast(
+        self,
+        market: AgentMarket,
+        market_prob: float,
+        final_prob: float,
+        confidence: float,
+        disagreement: float,
+        traded: bool,
+        trade_side: str,
+    ) -> None:
+        log_path = Path("forecast_log.csv")
+        file_exists = log_path.exists()
+
+        with log_path.open("a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+
+            if not file_exists:
+                writer.writerow([
+                    "timestamp_utc",
+                    "agent_name",
+                    "market_id",
+                    "question",
+                    "market_prob",
+                    "final_prob",
+                    "confidence",
+                    "disagreement",
+                    "traded",
+                    "trade_side",
+                    "outcome",
+                ])
+
+            writer.writerow([
+                datetime.now(timezone.utc).isoformat(),
+                "multi_persona_ensemble_agent",
+                str(market.id),
+                market.question,
+                round(market_prob, 6),
+                round(final_prob, 6),
+                round(confidence, 6),
+                round(disagreement, 6),
+                int(traded),
+                trade_side,
+                "",  # fill in later when market resolves
+            ])
+    
     def load(self) -> None:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
@@ -173,17 +220,76 @@ Skip: [[YES]] or [[NO]]
         print(f"Edge:           {edge:.3f}")
         print(f"Risk skip vote: {should_skip}")
 
+        
+        
+        # if should_skip:
+        #     print("Skipping: risk-manager veto / skip vote.")
+        #     return None
+
+        # if disagreement > self.MAX_DISAGREEMENT:
+        #     print("Skipping: personas disagree too much.")
+        #     return None
+
+        # if edge < self.EDGE_THRESHOLD:
+        #     print("Skipping: edge too small.")
+        #     return None
+
+        # return ProbabilisticAnswer(
+        #     p_yes=Probability(final_prob),
+        #     confidence=final_conf,
+        #     reasoning=reasoning,
+        # )
+
+        trade_side = "YES" if final_prob > market_prob else "NO"
+
         if should_skip:
             print("Skipping: risk-manager veto / skip vote.")
+            self.log_forecast(
+                market=market,
+                market_prob=market_prob,
+                final_prob=final_prob,
+                confidence=final_conf,
+                disagreement=disagreement,
+                traded=False,
+                trade_side="SKIP_RISK",
+            )
             return None
 
         if disagreement > self.MAX_DISAGREEMENT:
             print("Skipping: personas disagree too much.")
+            self.log_forecast(
+                market=market,
+                market_prob=market_prob,
+                final_prob=final_prob,
+                confidence=final_conf,
+                disagreement=disagreement,
+                traded=False,
+                trade_side="SKIP_DISAGREEMENT",
+            )
             return None
 
         if edge < self.EDGE_THRESHOLD:
             print("Skipping: edge too small.")
+            self.log_forecast(
+                market=market,
+                market_prob=market_prob,
+                final_prob=final_prob,
+                confidence=final_conf,
+                disagreement=disagreement,
+                traded=False,
+                trade_side="SKIP_EDGE",
+            )
             return None
+
+        self.log_forecast(
+            market=market,
+            market_prob=market_prob,
+            final_prob=final_prob,
+            confidence=final_conf,
+            disagreement=disagreement,
+            traded=True,
+            trade_side=trade_side,
+        )
 
         return ProbabilisticAnswer(
             p_yes=Probability(final_prob),
