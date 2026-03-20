@@ -12,7 +12,10 @@ jobs:
             - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
             - uses: ./.github/actions/python_prepare
             - name: Extract requirements from Poetry
-              run: poetry run pip freeze > requirements.txt
+              run: |
+                  poetry run pip freeze \
+                      | grep -Ev '^(prediction-market-agent)\s*@\s*(git\+|file:)' \
+                      > requirements.txt
             - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
               with:
                   inputs: requirements.txt
