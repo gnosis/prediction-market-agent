@@ -1,0 +1,36 @@
+name: Security Gate
+
+on:
+    pull_request:
+
+jobs:
+    pip-audit:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+            - uses: ./.github/actions/python_prepare
+            - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
+
+    security:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+            - name: Checkout private action
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+              with:
+                  repository: gnosis/github-security-action
+                  token: ${{ secrets.GSA_GH_TOKEN }}
+                  path: .github/actions/github-security-action
+                  sparse-checkout-cone-mode: false
+                  sparse-checkout: |
+                      /*
+                      !/test*
+
+            - name: Run security action
+              uses: ./.github/actions/github-security-action
+              with:
+                  ai_api_key: ${{ secrets.GSA_AI_API_KEY }}
+                  gh_token: ${{ secrets.GSA_GH_TOKEN }}
