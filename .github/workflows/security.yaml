@@ -11,15 +11,12 @@ jobs:
         steps:
             - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
             - uses: ./.github/actions/python_prepare
-            - name: Extract requirements from Poetry
-              run: |
-                  poetry run pip freeze \
-                    | grep -Eiv '(prediction-market-agent|predictionprophet)' \
-                    > requirements.txt
+            - name: Resolve Poetry virtual environment path
+              id: poetry-venv
+              run: echo "path=$(poetry env info --path)" >> "$GITHUB_OUTPUT"
             - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
               with:
-                  inputs: requirements.txt
-                  no-deps: true
+                  virtual-environment: ${{ steps.poetry-venv.outputs.path }}
 
     security:
         runs-on: ubuntu-latest
