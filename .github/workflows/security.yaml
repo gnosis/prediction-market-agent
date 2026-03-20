@@ -14,8 +14,8 @@ jobs:
             - name: Extract requirements from Poetry
               run: |
                   poetry run pip freeze \
-                      | grep -Ev '^(prediction-market-agent)\s*@\s*(git\+|file:)' \
-                      > requirements.txt
+                    | grep -Eiv '(prediction-market-agent)' \
+                    > requirements.txt
             - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
               with:
                   inputs: requirements.txt
