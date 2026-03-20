@@ -15,7 +15,7 @@ load_dotenv()
 
 
 class MultiPersonaEnsembleAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 1
+    bet_on_n_markets_per_run = 3
 
     EDGE_THRESHOLD = 0.05
     MAX_DISAGREEMENT = 0.25
