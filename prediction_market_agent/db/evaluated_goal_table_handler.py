@@ -23,12 +23,12 @@ class EvaluatedGoalTableHandler:
 
     def get_latest_evaluated_goals(self, limit: int) -> list[EvaluatedGoalModel]:
         column_to_order: str = EvaluatedGoalModel.datetime_.key  # type: ignore
-        items: t.Sequence[
-            EvaluatedGoalModel
-        ] = self.sql_handler.get_with_filter_and_order(
-            query_filters=[col(EvaluatedGoalModel.agent_id) == self.agent_id],
-            order_by_column_name=column_to_order,
-            order_desc=True,
-            limit=limit,
+        items: t.Sequence[EvaluatedGoalModel] = (
+            self.sql_handler.get_with_filter_and_order(
+                query_filters=[col(EvaluatedGoalModel.agent_id) == self.agent_id],
+                order_by_column_name=column_to_order,
+                order_desc=True,
+                limit=limit,
+            )
         )
         return list(items)

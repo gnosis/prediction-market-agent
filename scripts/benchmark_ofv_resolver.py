@@ -46,12 +46,10 @@ def full(data_path: str) -> None:
     # Calculate the accuracy.
     accuracy_current = sum(df["resolution"] == df["my_resolution"]) / len(df)
     accuracy_ofv = sum(df["ofv_resolution"] == df["my_resolution"]) / len(df)
-    print(
-        f"""
+    print(f"""
 Current accuracy: {accuracy_current*100:.2f}%
 OFV's accuracy: {accuracy_ofv*100:.2f}%
-"""
-    )
+""")
 
 
 @APP.command()

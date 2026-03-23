@@ -41,10 +41,10 @@ def get_first(
     order_by_column_name: str,
     order_desc: bool,
 ) -> Prompt | None:
-    items: t.Sequence[
-        Prompt
-    ] = prompt_table_handler.sql_handler.get_with_filter_and_order(
-        order_by_column_name=order_by_column_name, order_desc=order_desc, limit=1
+    items: t.Sequence[Prompt] = (
+        prompt_table_handler.sql_handler.get_with_filter_and_order(
+            order_by_column_name=order_by_column_name, order_desc=order_desc, limit=1
+        )
     )
     return items[0] if items else None
 
@@ -76,10 +76,10 @@ def test_get_with_filter(
 ) -> None:
     session_identifier = example_prompts[0].session_identifier
     prompt_table_handler.sql_handler.save_multiple(example_prompts)
-    results: t.Sequence[
-        Prompt
-    ] = prompt_table_handler.sql_handler.get_with_filter_and_order(
-        query_filters=[col(Prompt.session_identifier) == session_identifier]
+    results: t.Sequence[Prompt] = (
+        prompt_table_handler.sql_handler.get_with_filter_and_order(
+            query_filters=[col(Prompt.session_identifier) == session_identifier]
+        )
     )
     assert len(results) == 1
     assert results[0].session_identifier == session_identifier
