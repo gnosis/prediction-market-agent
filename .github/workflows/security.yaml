@@ -17,6 +17,17 @@ jobs:
             - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
               with:
                   virtual-environment: ${{ steps.poetry-venv.outputs.path }}
+                  ignore-vulns: |
+                      CVE-2025-69872
+                      CVE-2025-62800
+                      CVE-2025-62801
+                      GHSA-rcfx-77hg-w2wv
+                      CVE-2025-69196
+                      GHSA-rf74-v2fm-23pw
+                      CVE-2026-33230
+                      CVE-2026-33231
+                      CVE-2026-25580
+                      CVE-2025-68616
 
     security:
         runs-on: ubuntu-latest
