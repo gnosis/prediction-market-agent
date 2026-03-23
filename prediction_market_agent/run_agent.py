@@ -98,6 +98,10 @@ from prediction_market_agent.agents.specialized_agent.deploy import (
     MarketCreatorsStalkerAgent1,
     MarketCreatorsStalkerAgent2,
 )
+
+from prediction_market_agent.agents.superforecaster_agent.deploy import (
+    SuperforecasterAgent,
+)
 from prediction_market_agent.agents.think_thoroughly_agent.deploy import (
     DeployableThinkThoroughlyAgent,
     DeployableThinkThoroughlyProphetResearchAgent,
@@ -136,6 +140,7 @@ class RunnableAgent(str, Enum):
     olas_embedding_oa = "olas_embedding_oa"
     # Social media (Farcaster + Twitter)
     social_media = "social_media"
+    superforecaster = "superforecaster"
     omen_cleaner = "omen_cleaner"
     ofv_challenger = "ofv_challenger"
     arbitrage = "arbitrage"
@@ -221,6 +226,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
     RunnableAgent.performance_alert: PerformanceAlertAgent,
+    RunnableAgent.superforecaster: SuperforecasterAgent,
 }
 
 APP = typer.Typer(pretty_exceptions_enable=False)

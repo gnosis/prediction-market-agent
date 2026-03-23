@@ -36,6 +36,9 @@ from web3 import Web3
 
 from prediction_market_agent.agents.advanced_agent.deploy import AdvancedAgent
 from prediction_market_agent.agents.coinflip_agent.deploy import DeployableCoinFlipAgent
+from prediction_market_agent.agents.superforecaster_agent.deploy import (
+    SuperforecasterAgent,
+)
 
 
 def main(
