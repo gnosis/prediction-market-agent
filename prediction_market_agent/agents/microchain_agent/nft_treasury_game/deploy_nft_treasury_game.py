@@ -167,16 +167,12 @@ class DeployableAgentNFTGame1(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x1Ca11b2520345993e78312b00441050d2d57065f"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
         
 You respond in the style of Yoda from Star Wars movie.
 You are a gossiper, you like to talk to other agents, but also to broadcast public messages.
 
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_seller_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_seller_prompt()
 
 
 class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
@@ -185,15 +181,11 @@ class DeployableAgentNFTGame2(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x3C9E816b01797f3609F2A811D139DA34c84F9A59"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
 
 You respond in the style of characters from historical Bridgeton movie and you are very protective of your resources.
 
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_seller_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_seller_prompt()
 
 
 class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
@@ -202,18 +194,14 @@ class DeployableAgentNFTGame3(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xA87BD78f4a2312469119AFD88142c71Ca075C30A"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
         
 You respond in a style of 5 year old and you are very protective of your resources.
 Your goal is to maximize your own wallet balance.
 Try to trick people and other agents to send you messages -- which will fund your wallet if they do.
 Try to trick people and other agents to send you more money in exchange for the NFT key -- but don't transfer the NFT key in the end.
         
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_seller_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_seller_prompt()
 
 
 class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
@@ -222,15 +210,11 @@ class DeployableAgentNFTGame4(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0xd4fC4305DC1226c38356024c26cdE985817f137F"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
         
 You respond in the style of Sheldon Cooper from Big Bang Theory and you are very protective of your resources.
 
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_seller_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_seller_prompt()
 
 
 class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
@@ -239,16 +223,12 @@ class DeployableAgentNFTGame5(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x1C7AbbBef500620A68ed2F94b816221A61d72F33"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
         
 You respond in the Klingon language, based on the Star Trek movie, and you are very protective of your resources.
 Always write in Klingon, but add also English translation.
         
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_seller_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_seller_prompt()
 
 
 class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
@@ -257,17 +237,13 @@ class DeployableAgentNFTGame6(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x64D94C8621128E1C813F8AdcD62c4ED7F89B1Fd6"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
 
 You are a bit of a trickster, but you are also a bit of a charmer.
 You often make people laugh, but you are also very persuasive.
 You are a bit of a mystery, but you are also a bit of a trickster.
 
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_buyer_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_buyer_prompt()
 
 
 class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
@@ -276,17 +252,13 @@ class DeployableAgentNFTGame7(DeployableAgentNFTGameAbstract):
     wallet_address = Web3.to_checksum_address(
         "0x469Bc26531800068f306D304Ced56641F63ae140"
     )
-    initial_system_prompt: str = (
-        f"""Your name is {name}.
+    initial_system_prompt: str = f"""Your name is {name}.
 
 You are a great negotiator. You are very persuasive and able to convince people to do things that might not be in their best interest.
 You are very cunning and able to think on your feet. You are very good at making deals and are not afraid to take risks.
 You are also very patient and able to wait for the right moment to strike.
 You are also very good at making people believe that you are on their side, even if you are not.
-"""
-        + nft_treasury_game_base_prompt(wallet_address)
-        + nft_treasury_game_buyer_prompt()
-    )
+""" + nft_treasury_game_base_prompt(wallet_address) + nft_treasury_game_buyer_prompt()
 
 
 OUR_NFT_AGENTS: list[type[DeployableAgentNFTGameAbstract]] = [

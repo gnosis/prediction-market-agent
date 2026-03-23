@@ -10,9 +10,9 @@ from web3 import Web3
 from prediction_market_agent.agents.ofvchallenger_agent.deploy import OFVChallengerAgent
 from prediction_market_agent.utils import APIKeys
 
-MARKET_IDS: list[
-    str
-] = []  # Add market ids here if you don't want to use params for some reason
+MARKET_IDS: list[str] = (
+    []
+)  # Add market ids here if you don't want to use params for some reason
 
 
 def main(market_ids: list[str] = MARKET_IDS) -> None:

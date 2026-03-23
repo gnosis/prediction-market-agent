@@ -259,12 +259,16 @@ class ProphetAgentTester:
                     prediction=prediction,
                     trades=trades,
                     market_resolution=item["market_resolution"],
-                    received_outcome_tokens=float(received_outcome_tokens)
-                    if received_outcome_tokens is not None
-                    else None,
-                    profit_outcome_token=float(profit_outcome_token)
-                    if profit_outcome_token is not None
-                    else None,
+                    received_outcome_tokens=(
+                        float(received_outcome_tokens)
+                        if received_outcome_tokens is not None
+                        else None
+                    ),
+                    profit_outcome_token=(
+                        float(profit_outcome_token)
+                        if profit_outcome_token is not None
+                        else None
+                    ),
                     profit_usd=profit_usd if profit_usd else None,
                 )
 

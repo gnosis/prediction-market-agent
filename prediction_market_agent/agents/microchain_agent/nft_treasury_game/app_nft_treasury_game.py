@@ -409,13 +409,11 @@ Wallet address: [{nft_agent.wallet_address}](https://gnosisscan.io/address/{nft_
             st.info("No unprocessed messages")
         else:
             for message in messages:
-                st.markdown(
-                    f"""
+                st.markdown(f"""
                     **From:** {message.sender}  
                     **Message:** {unzip_message_else_do_nothing(message.message.hex())}  
                     **Value:** {message.value.as_xdai} xDai
-                    """
-                )
+                    """)
                 st.divider()
 
             if n_messages > show_n:

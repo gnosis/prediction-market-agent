@@ -29,13 +29,11 @@ st.title("Blockchain agent")
 
 with st.container():
     st.subheader("How to interact with the agent")
-    st.markdown(
-        """You have 2 options:
+    st.markdown("""You have 2 options:
         
     1. Enter a custom prompt in the text input OR
     2. Load one of the predefined prompts (Read, Write).
-    """
-    )
+    """)
     st.divider()
     user_input = st.text_input(label="Enter a new prompt if so desired", key="prompt")
     prompt_option = st.selectbox(

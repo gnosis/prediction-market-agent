@@ -28,7 +28,7 @@ def redirect_stdout_to_print() -> Iterator[None]:
 
 
 async def streamlit_console(
-    stream: AsyncGenerator[AgentEvent | ChatMessage | TaskResult, None]
+    stream: AsyncGenerator[AgentEvent | ChatMessage | TaskResult, None],
 ) -> None:
     """
     Displays stream of messages as Streamlit st.info elements.
