@@ -10,12 +10,18 @@ from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
 from prediction_market_agent_tooling.markets.agent_market import AgentMarket
 from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
 from prediction_market_agent_tooling.gtypes import Probability
+from prediction_market_agent_tooling.deploy.betting_strategy import (
+    BettingStrategy,
+    MaxAccuracyWithKellyScaledBetsStrategy,
+)
+from prediction_market_agent_tooling.gtypes import USD, Probability
+from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 
 load_dotenv()
 
 
 class MultiPersonaEnsembleAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 3
+    bet_on_n_markets_per_run = 4
 
     EDGE_THRESHOLD = 0.05
     MAX_DISAGREEMENT = 0.25
@@ -295,4 +301,13 @@ Skip: [[YES]] or [[NO]]
             p_yes=Probability(final_prob),
             confidence=final_conf,
             reasoning=reasoning,
+        )
+
+    def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
+        return MaxAccuracyWithKellyScaledBetsStrategy(
+            max_position_amount=get_maximum_possible_bet_amount(
+                min_=USD(0.01),
+                max_=USD(0.05),
+                trading_balance=market.get_trade_balance(self.api_keys),
+            ),
         )
