@@ -1,7 +1,7 @@
 [project]
 name = "prediction-market-agent"
 version = "0.1.0"
-description = ""
+description = "Prediction Market Agents"
 readme = "README.md"
 requires-python = ">=3.11.0,<3.12.0"
 dependencies = [
