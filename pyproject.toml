@@ -28,7 +28,7 @@ dependencies = [
     "functions-framework>=3.5.0",
     "cron-validator>=1.0.8",
     # prediction-market-agent-tooling=">=0.69.24"
-    "prediction-market-agent-tooling @ git+https://github.com/gnosis/prediction-market-agent-tooling.git@version-bumps2",
+    "prediction-market-agent-tooling @ git+https://github.com/gnosis/prediction-market-agent-tooling.git@8b72ef0fb606c56e114b9d7652f1c408d5257a0c",
     "pydantic-settings>=2.1.0",
     "markdownify>=1.0.0",
     "tavily-python>=0.5.0",
@@ -71,6 +71,7 @@ dependencies = [
     "litellm>=1.79.3",
     "pypdf>=6.7.3",
     "pillow>=12.0.0",
+    "aiohttp>=3.13.3",
 ]
 
 [dependency-groups]

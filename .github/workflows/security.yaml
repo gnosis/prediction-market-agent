@@ -27,6 +27,8 @@ jobs:
                       CVE-2026-33231
                       CVE-2026-25580
                       CVE-2025-68616
+                      CVE-2026-4539
+                      CVE-2026-25645
 
     security:
         runs-on: ubuntu-latest
