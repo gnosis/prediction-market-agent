@@ -164,5 +164,7 @@ def build_tweet(model: str, task: str) -> str:
     team = build_team(model)
 
     task_result = asyncio.run(Console(team.run_stream(task=task)))
-    reply_tweet = task_result.messages[-1].content  # Last message is critic's approval
+    reply_tweet = task_result.messages[
+        -1
+    ].to_text()  # Last message is critic's approval
     return str(reply_tweet)
