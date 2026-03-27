@@ -1,101 +1,106 @@
-[tool.poetry]
+[project]
 name = "prediction-market-agent"
 version = "0.1.0"
 description = ""
-authors = ["Gnosis"]
 readme = "README.md"
+requires-python = ">=3.11.0,<3.12.0"
+dependencies = [
+    "python-dotenv",
+    "openai>=2.0.0",
+    "anthropic>=0.80.0",
+    "langchain>=1.0.0",
+    "langchain-experimental",
+    "langchain-community",
+    "langchain-openai",
+    "numexpr",
+    "flaml>=2.2.0,<2.3.0",  # Bug in newer version, because they started importing xgboost, without requiring it as a dependency.
+    "beautifulsoup4>=4,<4.13",  # Bug in typing of newer version
+    "google-search-results",
+    "llama-index>=0.14.0",
+    "duckduckgo-search",
+    "crewai>=1.0.0",
+    "replicate",
+    "typer>=0.9.0,<1.0.0",
+    "web3>=6,<8",
+    "types-requests>=2.31.0.0",
+    "google-cloud-functions>=1.16.0",
+    "google-cloud-resource-manager>=1.12.0",
+    "functions-framework>=3.5.0",
+    "cron-validator>=1.0.8",
+    # prediction-market-agent-tooling=">=0.69.24"
+    "prediction-market-agent-tooling @ git+https://github.com/gnosis/prediction-market-agent-tooling.git@version-bumps2",
+    "pydantic-settings>=2.1.0",
+    "markdownify>=1.0.0",
+    "tavily-python>=0.5.0",
+    "microchain-python @ git+https://github.com/galatolofederico/microchain.git@de75f1d4a073b7c54f824b409733f4f70d40a61b",
+    "pysqlite3-binary>=0.5.2.post3; sys_platform == 'linux'",
+    "psycopg2-binary>=2.9.9",
+    "sqlmodel",
+    "farcaster @ git+https://github.com/kongzii/farcaster-py@update-eth-account",
+    "streamlit-extras>=0.4.2",
+    "tweepy>=4.14.0",
+    "streamlit>=1.49.1",
+    "pinecone>=5.0.0",
+    "langchain-pinecone>=0.2.0",
+    "pinatapy-vourhey>=0.2.0",
+    "plotly>=5.22.0",
+    "prediction-prophet @ git+https://github.com/agentcoinorg/predictionprophet.git@version-bumps",
+    "transformers>=4.43.3",
+    "openfactverification-kongzii>=0.6.0",
+    "autogen-agentchat>=0.4.0",
+    "autogen-core>=0.4.0",
+    "autogen-ext>=0.4.0",
+    "python-web3-wallet==0.0.17",
+    "types-tabulate>=0.9.0.20241207",
+    "pydantic-ai-slim[openai,anthropic,logfire]>=1.61.0",
+    "opentelemetry-sdk>=1.28.0",
+    "nest-asyncio>=1.6.0",
+    "goplus>=0.2.4",
+    "pydantic-evals>=1.0.0",
+    "posthog>=2.4.0,<6.0.0",  # Version mismatch with ChromaDB that causes spam of error logs
+    # TODO: The github repo/branch corresponds with 0.14.5,
+    # but with some package versions loosened to be compatible with us.
+    # Warning: Their package versioning is pretty messy, they even have conflict versions in their own repo.
+    # gpt-researcher=">=0.14.5"
+    "gpt-researcher @ git+https://github.com/kongzii/gpt-researcher.git@kongzii-patch-1",
+    "dune-client>=1.7",
+    "langchain-text-splitters>=1.0.0",
+    "langfuse>=3.9.3",
+    "openinference-instrumentation-crewai>=0.1.16",
+    "openinference-instrumentation-litellm>=0.1.28",
+    "litellm>=1.79.3",
+    "pypdf>=6.7.3",
+    "pillow>=12.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "~3.11.0"
-python-dotenv = "*"
-openai = "^1.91.0"
-langchain = "^1.0.0"
-langchain-experimental = "*"
-langchain-community = "*"
-langchain-openai = "*"
-numexpr = "*"
-flaml = "^2.2.0,<2.3.0" # Bug in newer version, because they started importing xgboost, without requiring it as a dependency.
-beautifulsoup4 = "^4,<4.13" # Bug in typing of newer version
-google-search-results = "*"
-pytest = "*"
-llama-index = "^0.14.0"
-duckduckgo-search = "*"
-crewai = "^1.0.0"
-replicate = "*"
-typer = ">=0.9.0,<1.0.0"
-web3 = ">=6,<8"
-mypy = "^1.8.0"
-types-requests = "^2.31.0.0"
-black = "^26.0.0"
-google-cloud-functions = "^1.16.0"
-google-cloud-resource-manager = "^1.12.0"
-poetry = "^1.7.1"
-poetry-plugin-export = "^1.6.0"
-functions-framework = "^3.5.0"
-cron-validator = "^1.0.8"
-prediction-market-agent-tooling ="^0.69.24"
-pydantic-settings = "^2.1.0"
-autoflake = "^2.2.1"
-isort = "^5.13.2"
-markdownify = "^1.0.0"
-tavily-python = "^0.5.0"
-microchain-python = { git = "https://github.com/galatolofederico/microchain.git", rev = "de75f1d4a073b7c54f824b409733f4f70d40a61b" }
-pysqlite3-binary = {version="^0.5.2.post3", markers = "sys_platform == 'linux'"}
-psycopg2-binary = "^2.9.9"
-sqlmodel = "^0.0.22"
-farcaster = { git = "https://github.com/kongzii/farcaster-py", branch = "update-eth-account" }
-streamlit-extras = "^0.4.2"
-tweepy = "^4.14.0"
-streamlit = "^1.49.1"
-pinecone = ">=5.0.0"
-langchain-pinecone = "^0.2.0"
-pinatapy-vourhey = "^0.2.0"
-plotly = "^5.22.0"
-prediction-prophet = { git = "https://github.com/agentcoinorg/predictionprophet.git", branch = "bumps" }
-transformers = "^4.43.3"
-openfactverification-kongzii = "^0.5.3"
-autogen-agentchat = "^0.4.0"
-autogen-core = "^0.4.0"
-autogen-ext = "^0.4.0"
-python-web3-wallet = "0.0.17"
-types-tabulate = "^0.9.0.20241207"
-pydantic-ai = "^1.0.0"
-opentelemetry-sdk = "^1.28.0"
-nest-asyncio = "^1.6.0"
-goplus = "^0.2.4"
-pydantic-evals = "^1.0.0"
-posthog = ">=2.4.0,<6.0.0" # Version mismatch with ChromaDB that causes spam of error logs, see https://github.com/vanna-ai/vanna/issues/917#issuecomment-3036668545 for details.
-# TODO: The github repo/branch coresponds with 0.14.5,
-# but with some package versions losen to be complatible with us.
-# Warning: Their package versioning is pretty messy, they even have conflicts versions in their own repo.
-# gpt-researcher = "^0.14.5"
-gpt-researcher = { git = "https://github.com/kongzii/gpt-researcher.git", branch = "kongzii-patch-1" }
-dune-client = "^1.7"
-langchain-text-splitters = "^1.0.0"
-langfuse = "^3.9.3"
-openinference-instrumentation-crewai = "^0.1.16"
-openinference-instrumentation-litellm = "^0.1.28"
-litellm = "^1.79.3"
-pypdf = "^6.7.3"
-pillow = "^12.0.0"
+[dependency-groups]
+dev = [
+    "langchain-chroma>=1.0.0",
+    "ape-foundry>=0.8.2",
+    "eth-ape>=0.8.48",
+    "freezegun>=1.5.1",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "notebook>=7.0.0",
+    "ipykernel>=6.0.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    "numpy>=1.26.0",
+    "pytest",
+    "mypy>=1.8.0",
+    "black>=26.0.0",
+    "autoflake>=2.2.1",
+    "isort>=5.13.2",
+]
 
-[tool.poetry.group.dev.dependencies]
-langchain-chroma = "^1.0.0"
-ape-foundry = "^0.8.2"
-freezegun = "^1.5.1"
-jupyter = "^1.0.0"
-jupyterlab = "^4.0.0"
-notebook = "^7.0.0"
-ipykernel = "^6.0.0"
-matplotlib = "^3.8.0"
-seaborn = "^0.13.0"
-numpy = "^1.26.0"
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[[tool.poetry.source]]
+[[tool.uv.index]]
 name = "test-pypi"
 url = "https://test.pypi.org/simple/"
-priority = "explicit"
+explicit = true

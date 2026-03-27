@@ -1,19 +1,25 @@
-# Install Poetry and create venv in the builder step,
+# Install uv and create venv in the builder step,
 # then copy the venv to the runtime image, so that the runtime image is as small as possible.
 FROM --platform=linux/amd64 python:3.11.9-bookworm AS builder
 
-RUN pip install poetry==1.8.2
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+# Set to "true" to include dev dependencies (e.g., for running tests in Docker)
+ARG INSTALL_DEV=false
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
+RUN --mount=type=cache,target=/root/.cache/uv \
+    if [ "$INSTALL_DEV" = "true" ]; then \
+    uv sync --frozen --no-install-project; \
+    else \
+    uv sync --frozen --no-install-project --no-dev; \
+    fi
 
 FROM --platform=linux/amd64 python:3.11.9-bookworm AS runtime
 
@@ -26,7 +32,7 @@ WORKDIR /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 COPY prediction_market_agent prediction_market_agent
 COPY scripts scripts
 COPY tests tests
