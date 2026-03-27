@@ -72,6 +72,7 @@ dependencies = [
     "pypdf>=6.7.3",
     "pillow>=12.0.0",
     "aiohttp>=3.13.3",
+    "asyncio-atexit>=1.0.1",
 ]
 
 [dependency-groups]
