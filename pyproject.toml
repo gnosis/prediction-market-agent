@@ -27,8 +27,7 @@ dependencies = [
     "google-cloud-resource-manager>=1.12.0",
     "functions-framework>=3.5.0",
     "cron-validator>=1.0.8",
-    # prediction-market-agent-tooling=">=0.69.24"
-    "prediction-market-agent-tooling @ git+https://github.com/gnosis/prediction-market-agent-tooling.git@8b72ef0fb606c56e114b9d7652f1c408d5257a0c",
+    "prediction-market-agent-tooling>=0.69.33",
     "pydantic-settings>=2.1.0",
     "markdownify>=1.0.0",
     "tavily-python>=0.5.0",
@@ -44,7 +43,7 @@ dependencies = [
     "langchain-pinecone>=0.2.0",
     "pinatapy-vourhey>=0.2.0",
     "plotly>=5.22.0",
-    "prediction-prophet @ git+https://github.com/agentcoinorg/predictionprophet.git@version-bumps",
+    "prediction-prophet @ git+https://github.com/agentcoinorg/predictionprophet.git@main",
     "transformers>=4.43.3",
     "openfactverification-kongzii>=0.6.0",
     "autogen-agentchat>=0.4.0",

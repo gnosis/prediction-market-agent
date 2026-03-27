@@ -5042,8 +5042,8 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=8b72ef0fb606c56e114b9d7652f1c408d5257a0c" },
-    { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=version-bumps" },
+    { name = "prediction-market-agent-tooling", specifier = ">=0.69.33" },
+    { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
     { name = "pydantic-evals", specifier = ">=1.0.0" },
@@ -5087,8 +5087,8 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.32"
-source = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=8b72ef0fb606c56e114b9d7652f1c408d5257a0c#8b72ef0fb606c56e114b9d7652f1c408d5257a0c" }
+version = "0.69.33"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoflake" },
     { name = "base58" },
@@ -5141,6 +5141,10 @@ dependencies = [
     { name = "types-requests" },
     { name = "web3" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/95/91/b6e8822daf8a7feae4de5cd9780518830a22ca9d006be2bef9558c2c71c5/prediction_market_agent_tooling-0.69.33.tar.gz", hash = "sha256:a48da4e846997126361df0fcc86b74fc42c32638dfc9eeca14c30365c69d0074", size = 190880, upload-time = "2026-03-27T15:13:16.857Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/22/0a25ea161c90312a60709b59f54fb42cf8a17ca6f881c377f22b196b177b/prediction_market_agent_tooling-0.69.33-py3-none-any.whl", hash = "sha256:72d14ff319738f2f1a69c7c3212107acaf1b0fbcfcffb0a1aef9b12a94515382", size = 254437, upload-time = "2026-03-27T15:13:18.499Z" },
+]
 
 [package.optional-dependencies]
 google = [
@@ -5154,7 +5158,7 @@ langchain = [
 [[package]]
 name = "prediction-prophet"
 version = "0.1.11"
-source = { git = "https://github.com/agentcoinorg/predictionprophet.git?rev=version-bumps#e6cfa8c2338f4740ab0a35a0068ab4a4b5613763" }
+source = { git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main#f691e1711c5af6ecb744fc65aeb851b39f5136e3" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "chromadb" },
