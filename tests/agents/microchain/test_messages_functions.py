@@ -47,13 +47,16 @@ MOCK_SENDER = Web3.to_checksum_address(
 def patch_public_key(
     account2_address: ChecksumAddress, account2_private_key: SecretStr
 ) -> Generator[PropertyMock, None, None]:
-    with patch(
-        "prediction_market_agent.agents.microchain_agent.microchain_agent_keys.MicrochainAgentKeys.public_key",
-        new_callable=PropertyMock,
-    ) as mock_public_key, patch(
-        "prediction_market_agent.agents.microchain_agent.microchain_agent_keys.MicrochainAgentKeys.bet_from_private_key",
-        new_callable=PropertyMock,
-    ) as mock_private_key:
+    with (
+        patch(
+            "prediction_market_agent.agents.microchain_agent.microchain_agent_keys.MicrochainAgentKeys.public_key",
+            new_callable=PropertyMock,
+        ) as mock_public_key,
+        patch(
+            "prediction_market_agent.agents.microchain_agent.microchain_agent_keys.MicrochainAgentKeys.bet_from_private_key",
+            new_callable=PropertyMock,
+        ) as mock_private_key,
+    ):
         mock_public_key.return_value = account2_address
         mock_private_key.return_value = account2_private_key
         yield mock_public_key
@@ -98,13 +101,16 @@ def test_receive_message_call(patch_public_key: PropertyMock) -> None:
         message=HexBytes("0x123"),  # dummy message
         value=xDaiWei(10000),
     )
-    with patch.object(
-        AgentCommunicationContract,
-        "pop_message",
-        return_value=mock_log_message,
-    ), patch(
-        "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
-        return_value=[mock_log_message],
+    with (
+        patch.object(
+            AgentCommunicationContract,
+            "pop_message",
+            return_value=mock_log_message,
+        ),
+        patch(
+            "prediction_market_agent.db.agent_communication.fetch_unseen_transactions",
+            return_value=[mock_log_message],
+        ),
     ):
         r = ReceiveMessagesAndPayments()
 
