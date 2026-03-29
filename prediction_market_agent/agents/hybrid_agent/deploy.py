@@ -1,6 +1,7 @@
 import os
 import re
 import csv
+import pandas as pd
 import joblib
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -40,7 +41,7 @@ class HybridAgent(DeployableTraderAgent):
 
     EDGE_THRESHOLD = 0.05
     MIN_CONFIDENCE = 0.50
-    MAX_LLM_ADJUSTMENT = 0.08
+    MAX_LLM_ADJUSTMENT = 0.05
 
     def load(self) -> None:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -50,6 +51,8 @@ class HybridAgent(DeployableTraderAgent):
         # This should be something like logistic regression, random forest, etc.
         # trained on the exact same features returned by build_features().
         self.ml_model = joblib.load("ml_model.joblib")
+
+        self.calibration_model = joblib.load("market_calibrator.joblib")
 
         # Optional:
         # If you later train a calibration model such as isotonic regression,
@@ -127,63 +130,52 @@ class HybridAgent(DeployableTraderAgent):
 
         This reflects your finding that high YES probabilities may be somewhat inflated.
         """
-        if p_market >= 0.85:
-            p_cal = p_market - 0.08
-        elif p_market >= 0.70:
-            p_cal = p_market - 0.05
-        elif p_market >= 0.55:
-            p_cal = p_market - 0.03
-        else:
-            p_cal = p_market
+        # if p_market >= 0.85:
+        #     p_cal = p_market - 0.08
+        # elif p_market >= 0.70:
+        #     p_cal = p_market - 0.05
+        # elif p_market >= 0.55:
+        #     p_cal = p_market - 0.03
+        # else:
+        #     p_cal = p_market
 
+        # return max(0.01, min(0.99, p_cal))
+
+        p_cal = float(self.calibration_model.predict([p_market])[0])
         return max(0.01, min(0.99, p_cal))
 
         # If using a real calibration model later, do this instead:
         # p_cal = float(self.calibration_model.predict([[p_market]])[0])
         # return max(0.01, min(0.99, p_cal))
 
-    def build_features(
-        self,
-        market: AgentMarket,
-        p_market: float,
-        p_cal: float,
-    ) -> list[float]:
-        """
-        IMPORTANT:
-        The feature order here must exactly match how your ML model was trained.
-        """
+    def build_features(self, market, p_market, p_cal) -> dict:
+        volume = float(getattr(market, "volume", 0.0) or 0.0)
 
-        liquidity = float(getattr(market, "liquidity", 0.0) or 0.0)
+        created_time = getattr(market, "created_time", None) or getattr(market, "creation_datetime", None)
+        close_time = getattr(market, "close_time", None)
 
-        close_time = getattr(market, "close_time", None) or getattr(
-            market, "resolution_time", None
-        )
-
-        if close_time is not None:
-            now = datetime.now(timezone.utc)
+        duration_hours = 0.0
+        if created_time is not None and close_time is not None:
+            if created_time.tzinfo is None:
+                created_time = created_time.replace(tzinfo=timezone.utc)
             if close_time.tzinfo is None:
                 close_time = close_time.replace(tzinfo=timezone.utc)
-            days_to_close = max((close_time - now).total_seconds() / 86400, 0.0)
-        else:
-            days_to_close = 0.0
+            duration_hours = max((close_time - created_time).total_seconds() / 3600, 0.0)
 
-        features = [
-            p_market,
-            p_cal,
-            liquidity,
-            days_to_close,
-        ]
+        category = getattr(market, "category", None) or "unknown"
 
-        return features
+        return {
+            "prob_at_close": p_market,
+            "calibrated_prob": p_cal,
+            "volume": volume,
+            "duration_hours": duration_hours,
+            "category": category,
+        }
 
-    def get_ml_baseline(
-        self,
-        market: AgentMarket,
-        p_market: float,
-        p_cal: float,
-    ) -> float:
-        features = self.build_features(market, p_market, p_cal)
-        p_ml = float(self.ml_model.predict_proba([features])[0][1])
+    def get_ml_baseline(self, market, p_market, p_cal) -> float:
+        feature_dict = self.build_features(market, p_market, p_cal)
+        X = pd.DataFrame([feature_dict])
+        p_ml = float(self.ml_model.predict_proba(X)[0][1])
         return max(0.01, min(0.99, p_ml))
 
     def get_llm_overlay(
@@ -266,7 +258,7 @@ Skip: [[YES]] or [[NO]]
         Stable backbone = calibrated market + ML baseline
         LLM only nudges the result.
         """
-        p_base = 0.4 * p_cal + 0.6 * p_ml
+        p_base = 0.5 * p_cal + 0.5 * p_ml
 
         # Confidence-scaled LLM overlay
         scaled_adjustment = llm_adjustment * llm_confidence
@@ -400,3 +392,19 @@ Skip: [[YES]] or [[NO]]
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
+
+"""
+A few important things you’ll still need to do:
+
+Train and save ml_model.joblib
+even a simple logistic regression is fine for version 1
+Make sure build_features() matches exactly how the model was trained
+Update the agent registration / run command so this new class is the one being called
+Your current calibration is just a placeholder, so later you’ll probably want isotonic regression or a learned calibration map
+
+The easiest way to test this before your real ML model is ready is to temporarily replace get_ml_baseline() with:
+
+def get_ml_baseline(self, market, p_market, p_cal):
+    return p_cal
+
+"""
