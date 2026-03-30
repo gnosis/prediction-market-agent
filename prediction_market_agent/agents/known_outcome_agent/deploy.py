@@ -22,7 +22,7 @@ from prediction_market_agent.utils import APIKeys
 
 
 class DeployableKnownOutcomeAgent(DeployableTraderAgent):
-    model = "gpt-4-1106-preview"
+    model = "gpt-5.4"
     min_liquidity = USD(5)
     bet_on_n_markets_per_run: int = 2
     supported_markets = [MarketType.OMEN]

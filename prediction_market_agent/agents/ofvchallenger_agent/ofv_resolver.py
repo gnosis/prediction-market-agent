@@ -17,7 +17,7 @@ from prediction_market_agent.agents.ofvchallenger_agent.ofv_models import (
 )
 from prediction_market_agent.utils import APIKeys
 
-DEFAULT_OPENAI_MODEL = "gpt-4-0125-preview"
+DEFAULT_OPENAI_MODEL = "gpt-5.4"
 
 
 @observe()
@@ -57,17 +57,17 @@ def rewrite_as_sentence(
     )
 
     prompt = f"""
-Rewrite the question into a simple announcement sentence stating a fact or prediction like it is already known.  
+Rewrite the question into a simple announcement sentence stating a fact or prediction like it is already known.
 Make future tense into past tense.
 For future questions that ask if something will happen "by" some date, rewrite it to "before" that date or any time sooner.
 For future questions that ask if something will happen "on" some date, rewrite it to "on" that date.
 If the question is both "on" and "by" some date, rewrite it as "before or any time sooner than" that date.
-If the question is about exact date, keep it exact. 
+If the question is about exact date, keep it exact.
 If the question is about a date range, keep it a range.
-Always keep the same meaning.                          
-Never negate the sentence into opposite meaning of the question.                  
+Always keep the same meaning.
+Never negate the sentence into opposite meaning of the question.
 Question: {question}
-Sentence:                                         
+Sentence:
 """
     completion = str(
         llm.invoke(
