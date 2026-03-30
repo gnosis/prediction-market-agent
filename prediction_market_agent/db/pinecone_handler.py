@@ -6,7 +6,7 @@ from typing import Optional
 from langchain_core.vectorstores import VectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 from pinecone.db_data.index import Index
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.agent_market import FilterBy, SortBy
@@ -43,6 +43,15 @@ class PineconeHandler:
 
     def build_pinecone(self) -> None:
         self.pc = Pinecone(api_key=self.keys.pinecone_api_key.get_secret_value())
+
+        if not self.pc.has_index(INDEX_NAME):
+            self.pc.create_index(
+                name=INDEX_NAME,
+                dimension=3072,
+                metric="cosine",
+                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+            )
+
         self.index = self.pc.Index(INDEX_NAME)
 
     def build_vectorstore(self) -> None:

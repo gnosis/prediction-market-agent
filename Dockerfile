@@ -46,4 +46,4 @@ ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 ENV LANGFUSE_DEPLOYMENT_VERSION=none
 
-CMD ["bash", "-c", "python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]
+CMD ["bash", "-c", "${VIRTUAL_ENV}/bin/python prediction_market_agent/run_agent.py ${runnable_agent_name} ${market_type}"]
