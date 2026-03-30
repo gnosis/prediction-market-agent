@@ -100,19 +100,8 @@ class BlockRunChatLLM(BaseChatModel):
         """Convert LangChain messages to blockrun-llm format."""
         result = []
         for msg in messages:
+            # Use LangChain's standard type attribute for role detection
             role = "user"  # default
-
-            # Check class name
-            if hasattr(msg, "__class__"):
-                class_name = msg.__class__.__name__.lower()
-                if "system" in class_name:
-                    role = "system"
-                elif "human" in class_name or "user" in class_name:
-                    role = "user"
-                elif "ai" in class_name or "assistant" in class_name:
-                    role = "assistant"
-
-            # Check type attribute (LangChain uses this)
             if hasattr(msg, "type"):
                 msg_type = msg.type.lower()
                 if msg_type == "human":
