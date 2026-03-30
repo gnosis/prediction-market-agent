@@ -23,6 +23,10 @@ from pydantic import Field
 logger = logging.getLogger(__name__)
 
 
+class MissingWalletKeyError(ValueError):
+    """Raised when BLOCKRUN_WALLET_KEY is not configured."""
+
+
 # Model mapping: consolidate deprecated/variant names to currently supported BlockRun models.
 # Older identifiers are mapped to their closest modern equivalents.
 MODEL_MAP = {
@@ -84,7 +88,7 @@ class BlockRunChatLLM(BaseChatModel):
 
         key = self.private_key or os.getenv("BLOCKRUN_WALLET_KEY")
         if not key:
-            raise ValueError("BLOCKRUN_WALLET_KEY not set")
+            raise MissingWalletKeyError("BLOCKRUN_WALLET_KEY not set")
 
         self._client = LLMClient(private_key=key)
         # Clear key from instance after client is initialized
