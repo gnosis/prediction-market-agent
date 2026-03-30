@@ -23,14 +23,16 @@ from pydantic import Field
 logger = logging.getLogger(__name__)
 
 
-# Model mapping: common model names -> blockrun model names
+# Model mapping: consolidate deprecated/variant names to currently supported BlockRun models.
+# Older identifiers are mapped to their closest modern equivalents.
 MODEL_MAP = {
     "gpt-4o": "openai/gpt-4o",
     "gpt-4o-mini": "openai/gpt-4o-mini",
-    "gpt-4o-2024-08-06": "openai/gpt-4o",
-    "gpt-4-turbo": "openai/gpt-4o",
-    "gpt-4-1106-preview": "openai/gpt-4o",
-    "gpt-3.5-turbo-16k": "openai/gpt-4o-mini",
+    "gpt-4o-2024-08-06": "openai/gpt-4o",   # dated snapshot -> latest gpt-4o
+    "gpt-4-turbo": "openai/gpt-4o",          # legacy turbo -> gpt-4o
+    "gpt-4-1106-preview": "openai/gpt-4o",   # legacy preview -> gpt-4o
+    "gpt-3.5-turbo-16k": "openai/gpt-4o-mini",  # 3.5-turbo family -> gpt-4o-mini
+    "gpt-4.1-mini-2025-04-14": "openai/gpt-4o-mini",  # gpt-4.1-mini -> gpt-4o-mini
     "claude-3-5-sonnet": "anthropic/claude-sonnet-4",
     "claude-3-5-haiku": "anthropic/claude-haiku-4.5",
     "openai:gpt-4o-2024-08-06": "openai/gpt-4o",
@@ -71,8 +73,11 @@ class BlockRunChatLLM(BaseChatModel):
             ValueError: If BLOCKRUN_WALLET_KEY is not set and no private_key provided.
         """
         super().__init__(**kwargs)
-        # Normalize model name
+        # Normalize model name, log if remapped so callers know what was actually used
+        original_model = self.model
         self.model = MODEL_MAP.get(self.model, self.model)
+        if original_model != self.model:
+            logger.info(f"Model remapped: {original_model} -> {self.model}")
 
         # Initialize blockrun-llm SDK client
         from blockrun_llm import LLMClient
@@ -138,12 +143,15 @@ class BlockRunChatLLM(BaseChatModel):
                 model=self.model,
                 messages=converted_messages,
                 max_tokens=self.max_tokens,
-                temperature=self.temperature if self.temperature > 0 else None,
+                temperature=self.temperature if self.temperature >= 0 else None,
             )
         except Exception as e:
+            logger.error(f"BlockRun API call failed (model={self.model}): {e}")
             raise RuntimeError(
                 f"BlockRun API call failed (model={self.model}): {e}"
             ) from e
+        if not result.choices:
+            raise ValueError(f"BlockRun API returned no choices (model={self.model})")
         response_text = result.choices[0].message.content
         logger.debug(f"BlockRun response: {response_text[:100]}...")
 
