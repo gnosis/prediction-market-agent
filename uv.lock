@@ -5042,7 +5042,7 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", specifier = ">=0.69.33" },
+    { name = "prediction-market-agent-tooling", git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=34a6944b48c11b6caed2d280d70239cbad3fa33f" },
     { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
@@ -5062,7 +5062,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.9.0,<1.0.0" },
     { name = "types-requests", specifier = ">=2.31.0.0" },
     { name = "types-tabulate", specifier = ">=0.9.0.20241207" },
-    { name = "web3", specifier = ">=6,<8" },
+    { name = "web3", specifier = ">=7,<8" },
 ]
 
 [package.metadata.requires-dev]
@@ -5087,8 +5087,8 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.33"
-source = { registry = "https://pypi.org/simple" }
+version = "0.69.34"
+source = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=34a6944b48c11b6caed2d280d70239cbad3fa33f#34a6944b48c11b6caed2d280d70239cbad3fa33f" }
 dependencies = [
     { name = "autoflake" },
     { name = "base58" },
@@ -5140,10 +5140,6 @@ dependencies = [
     { name = "types-pytz" },
     { name = "types-requests" },
     { name = "web3" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/95/91/b6e8822daf8a7feae4de5cd9780518830a22ca9d006be2bef9558c2c71c5/prediction_market_agent_tooling-0.69.33.tar.gz", hash = "sha256:a48da4e846997126361df0fcc86b74fc42c32638dfc9eeca14c30365c69d0074", size = 190880, upload-time = "2026-03-27T15:13:16.857Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/22/0a25ea161c90312a60709b59f54fb42cf8a17ca6f881c377f22b196b177b/prediction_market_agent_tooling-0.69.33-py3-none-any.whl", hash = "sha256:72d14ff319738f2f1a69c7c3212107acaf1b0fbcfcffb0a1aef9b12a94515382", size = 254437, upload-time = "2026-03-27T15:13:18.499Z" },
 ]
 
 [package.optional-dependencies]
