@@ -5042,7 +5042,7 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=34a6944b48c11b6caed2d280d70239cbad3fa33f" },
+    { name = "prediction-market-agent-tooling", specifier = ">=0.69.35" },
     { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
@@ -5087,13 +5087,14 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.34"
-source = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git?rev=34a6944b48c11b6caed2d280d70239cbad3fa33f#34a6944b48c11b6caed2d280d70239cbad3fa33f" }
+version = "0.69.35"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoflake" },
     { name = "base58" },
     { name = "cowdao-cowpy" },
     { name = "cron-validator" },
+    { name = "cryptography" },
     { name = "eth-account" },
     { name = "eth-keys" },
     { name = "eth-typing" },
@@ -5102,7 +5103,6 @@ dependencies = [
     { name = "google-cloud-resource-manager" },
     { name = "google-cloud-secret-manager" },
     { name = "google-genai" },
-    { name = "griffe" },
     { name = "hishel" },
     { name = "httpx" },
     { name = "isort" },
@@ -5125,6 +5125,7 @@ dependencies = [
     { name = "pytest-postgresql" },
     { name = "python-dateutil" },
     { name = "python-json-logger" },
+    { name = "requests" },
     { name = "safe-cli" },
     { name = "safe-eth-py" },
     { name = "scikit-learn" },
@@ -5140,6 +5141,10 @@ dependencies = [
     { name = "types-pytz" },
     { name = "types-requests" },
     { name = "web3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a7/6e/94c9cf01b9c5649a94ce1fb0095e1f1177b4f77e0ede08490a8ff653a2b7/prediction_market_agent_tooling-0.69.35.tar.gz", hash = "sha256:f74e73bb7d0b10f306655d4f8ba42e7e8475fec2be340d057c21c2052891f5be", size = 190987, upload-time = "2026-03-30T13:32:07.13Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/e7/cda7b2631f03785fc76bd13071858d935918f915f93b750d223b58fecc10/prediction_market_agent_tooling-0.69.35-py3-none-any.whl", hash = "sha256:c22c3e82135d19b60e889543457b922806b536948f50280778dbee889194059d", size = 254571, upload-time = "2026-03-30T13:32:08.482Z" },
 ]
 
 [package.optional-dependencies]

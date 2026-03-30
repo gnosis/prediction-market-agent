@@ -226,6 +226,9 @@ class OFVChallengerAgent(DeployableAgent):
             )
 
         try:
+            logger.info(
+                f"Getting OFV answer for market {market.url=} with question {market.question_title=}"
+            )
             answer = ofv_answer_binary_question(market.question_title, api_keys)
         except Exception as e:
             logger.exception(

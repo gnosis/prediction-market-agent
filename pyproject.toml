@@ -27,7 +27,7 @@ dependencies = [
     "google-cloud-resource-manager>=1.12.0",
     "functions-framework>=3.5.0",
     "cron-validator>=1.0.8",
-    "prediction-market-agent-tooling @ git+https://github.com/gnosis/prediction-market-agent-tooling.git@34a6944b48c11b6caed2d280d70239cbad3fa33f",
+    "prediction-market-agent-tooling>=0.69.35",
     "pydantic-settings>=2.1.0",
     "markdownify>=1.0.0",
     "tavily-python>=0.5.0",
