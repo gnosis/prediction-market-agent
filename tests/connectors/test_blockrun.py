@@ -80,18 +80,18 @@ def test_blockrun_model_remap_logging(caplog):
 
 
 def test_blockrun_choices_empty_raises():
-    """Test that empty choices list raises ValueError."""
+    """Test that empty choices list raises EmptyResponseError."""
     test_key = "0x0000000000000000000000000000000000000000000000000000000000000001"
     mock_client = MagicMock()
     mock_client.chat_completion.return_value = MagicMock(choices=[])
 
     with patch.dict(os.environ, {"BLOCKRUN_WALLET_KEY": test_key}):
         with patch("blockrun_llm.LLMClient", return_value=mock_client):
-            from prediction_market_agent.connectors import BlockRunChatLLM
+            from prediction_market_agent.connectors.blockrun import BlockRunChatLLM, EmptyResponseError
             from langchain_core.messages import HumanMessage
 
             llm = BlockRunChatLLM(model="gpt-4o")
-            with pytest.raises(ValueError, match="no choices"):
+            with pytest.raises(EmptyResponseError, match="no choices"):
                 llm._generate([HumanMessage(content="hi")])
 
 

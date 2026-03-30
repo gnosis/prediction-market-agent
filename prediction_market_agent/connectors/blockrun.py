@@ -27,6 +27,10 @@ class MissingWalletKeyError(ValueError):
     """Raised when BLOCKRUN_WALLET_KEY is not configured."""
 
 
+class EmptyResponseError(ValueError):
+    """Raised when the BlockRun API returns no choices."""
+
+
 # Model mapping: consolidate deprecated/variant names to currently supported BlockRun models.
 # Older identifiers are mapped to their closest modern equivalents.
 MODEL_MAP = {
@@ -74,7 +78,7 @@ class BlockRunChatLLM(BaseChatModel):
                 - private_key: Wallet private key (or use BLOCKRUN_WALLET_KEY env)
 
         Raises:
-            ValueError: If BLOCKRUN_WALLET_KEY is not set and no private_key provided.
+            MissingWalletKeyError: If BLOCKRUN_WALLET_KEY is not set and no private_key provided.
         """
         super().__init__(**kwargs)
         # Normalize model name, log if remapped so callers know what was actually used
@@ -144,7 +148,7 @@ class BlockRunChatLLM(BaseChatModel):
                 f"BlockRun API call failed (model={self.model}): {e}"
             ) from e
         if not result.choices:
-            raise ValueError(f"BlockRun API returned no choices (model={self.model})")
+            raise EmptyResponseError(f"BlockRun API returned no choices (model={self.model})")
         response_text = result.choices[0].message.content
         logger.debug(f"BlockRun response: {response_text[:100]}...")
 
