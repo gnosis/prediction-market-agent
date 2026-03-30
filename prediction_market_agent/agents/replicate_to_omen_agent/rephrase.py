@@ -25,7 +25,7 @@ def rephrase(question: str, engine: str = "gpt-4.1-mini-2025-04-14") -> str:
     llm = get_chat_llm(
         model=engine,
         temperature=LLM_SUPER_LOW_TEMPERATURE,
-        openai_api_key=APIKeys().openai_api_key,
+        openai_api_key=APIKeys().OPENAI_API_KEY,
     )
 
     prompt = ChatPromptTemplate.from_template(template=REPHRASE_PROMPT)

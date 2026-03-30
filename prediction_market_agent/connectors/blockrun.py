@@ -18,6 +18,7 @@ from typing import List, Dict, Any, Optional, Iterator
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain_core.outputs import ChatResult, ChatGeneration
+from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,8 @@ class BlockRunChatLLM(BaseChatModel):
     model: str = "openai/gpt-4o"
     temperature: float = 0.0
     max_tokens: int = 4096
-    private_key: Optional[str] = None
+    # Excluded from serialization/repr to avoid accidental key exposure in logs
+    private_key: Optional[str] = Field(default=None, exclude=True, repr=False)
 
     _client: Any = None
 
@@ -80,6 +82,8 @@ class BlockRunChatLLM(BaseChatModel):
             raise ValueError("BLOCKRUN_WALLET_KEY not set")
 
         self._client = LLMClient(private_key=key)
+        # Clear key from instance after client is initialized
+        object.__setattr__(self, "private_key", None)
         logger.info(f"BlockRun LLM initialized: {self.model}")
 
     @property
@@ -129,12 +133,17 @@ class BlockRunChatLLM(BaseChatModel):
         converted_messages = self._convert_messages(messages)
 
         # Use blockrun-llm SDK's chat_completion method
-        result = self._client.chat_completion(
-            model=self.model,
-            messages=converted_messages,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature if self.temperature > 0 else None,
-        )
+        try:
+            result = self._client.chat_completion(
+                model=self.model,
+                messages=converted_messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature if self.temperature > 0 else None,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"BlockRun API call failed (model={self.model}): {e}"
+            ) from e
         response_text = result.choices[0].message.content
         logger.debug(f"BlockRun response: {response_text[:100]}...")
 

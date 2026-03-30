@@ -194,7 +194,7 @@ def extract_sentiment(contents: list[str]) -> str:
     llm_client = get_chat_llm(
         model="gpt-4o-mini",
         temperature=0,
-        openai_api_key=APIKeys().openai_api_key,
+        openai_api_key=APIKeys().OPENAI_API_KEY,
     )
 
     prompt = ChatPromptTemplate(
@@ -236,7 +236,7 @@ def llm(
     llm_client = get_chat_llm(
         model="gpt-4o-mini",
         temperature=0.5,
-        openai_api_key=APIKeys().openai_api_key,
+        openai_api_key=APIKeys().OPENAI_API_KEY,
     )
 
     prompt = ChatPromptTemplate(

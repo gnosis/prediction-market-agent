@@ -14,7 +14,7 @@ def _summary(
     llm = get_chat_llm(
         model=DEFAULT_OPENAI_MODEL,
         temperature=0,
-        openai_api_key=APIKeys().openai_api_key,
+        openai_api_key=APIKeys().OPENAI_API_KEY,
     )
     text_splitter = RecursiveCharacterTextSplitter(
         separators=separators, chunk_size=10000, chunk_overlap=500

@@ -190,7 +190,7 @@ class GoalManager:
         llm = get_chat_llm(
             model=self.model,
             temperature=0,
-            openai_api_key=APIKeys().openai_api_key,
+            openai_api_key=APIKeys().OPENAI_API_KEY,
         )
         chain = prompt | llm | parser
 
@@ -288,7 +288,7 @@ class GoalManager:
         llm = get_chat_llm(
             model=self.model,
             temperature=0,
-            openai_api_key=APIKeys().openai_api_key,
+            openai_api_key=APIKeys().OPENAI_API_KEY,
         )
         chain = prompt | llm | parser
 
