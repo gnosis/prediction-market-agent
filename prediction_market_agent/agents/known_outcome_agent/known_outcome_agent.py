@@ -151,9 +151,7 @@ def summarize_if_required(content: str, model: str, question: str) -> str:
     If the content is too long to fit in the model's context, summarize it.
     """
     if model == "gpt-5.4":
-        max_length = int(
-            1_000_000 * 0.9
-        )  # 1M context length, just some space to be sure
+        max_length = 3_000_000  # Conservative character count for 1M context window.
     else:
         raise ValueError(
             f"Unknown model `{model}`, please add him to the `summarize_if_required` function."
