@@ -5042,7 +5042,7 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", specifier = ">=0.69.35" },
+    { name = "prediction-market-agent-tooling", specifier = ">=0.69.36" },
     { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
@@ -5087,7 +5087,7 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.35"
+version = "0.69.36"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoflake" },
@@ -5142,9 +5142,9 @@ dependencies = [
     { name = "types-requests" },
     { name = "web3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/6e/94c9cf01b9c5649a94ce1fb0095e1f1177b4f77e0ede08490a8ff653a2b7/prediction_market_agent_tooling-0.69.35.tar.gz", hash = "sha256:f74e73bb7d0b10f306655d4f8ba42e7e8475fec2be340d057c21c2052891f5be", size = 190987, upload-time = "2026-03-30T13:32:07.13Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/f1/797ccd62fb47771a0b32f4627efc29fddb14a157971f8036b759e0087bbb/prediction_market_agent_tooling-0.69.36.tar.gz", hash = "sha256:616c275cde7b5a6d07133616ace96e3f91968915dc65650c150256cc089d0b18", size = 191019, upload-time = "2026-03-31T10:54:27.6Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/97/e7/cda7b2631f03785fc76bd13071858d935918f915f93b750d223b58fecc10/prediction_market_agent_tooling-0.69.35-py3-none-any.whl", hash = "sha256:c22c3e82135d19b60e889543457b922806b536948f50280778dbee889194059d", size = 254571, upload-time = "2026-03-30T13:32:08.482Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/c5/0a4a26d0b6afdecebe6c76f5fee4d32730d64507c0afdf39a41f52d8ebd4/prediction_market_agent_tooling-0.69.36-py3-none-any.whl", hash = "sha256:64766da28494a3eeaff46540787b29a5665169828bc9f92278c9bf0a8e2ff80b", size = 254598, upload-time = "2026-03-31T10:54:29.187Z" },
 ]
 
 [package.optional-dependencies]
