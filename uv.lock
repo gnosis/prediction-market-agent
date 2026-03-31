@@ -5007,7 +5007,7 @@ requires-dist = [
     { name = "autogen-core", specifier = ">=0.4.0" },
     { name = "autogen-ext", specifier = ">=0.4.0" },
     { name = "beautifulsoup4", specifier = ">=4,<4.13" },
-    { name = "crewai", specifier = ">=1.0.0" },
+    { name = "crewai", specifier = ">=1.6.0" },
     { name = "cron-validator", specifier = ">=1.0.8" },
     { name = "duckduckgo-search" },
     { name = "dune-client", specifier = ">=1.7" },

@@ -221,8 +221,6 @@ def get_known_outcome(model: str, question: str, max_tries: int) -> KnownOutcome
         ).strip('"')
         logger.debug(f"Searching web for the search query '{search_query}'")
         search_results = tavily_search(query=search_query, max_results=5).results
-        if not search_results:
-            raise ValueError("No search results found.")
 
         for result in search_results:
             if result.url in previous_urls:
