@@ -36,7 +36,7 @@ Then, edge = p_final - p_market
 
 
 
-class HybridAgent(DeployableTraderAgent):
+class FusionAgent(DeployableTraderAgent):
     bet_on_n_markets_per_run = 4
 
     EDGE_THRESHOLD = 0.05

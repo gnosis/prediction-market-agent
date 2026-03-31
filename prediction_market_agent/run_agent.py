@@ -108,9 +108,12 @@ from prediction_market_agent.agents.multi_persona_agent.deploy import (
 from prediction_market_agent.agents.multi_persona_ensemble_agent.deploy import (
     MultiPersonaEnsembleAgent,
 )  
-from prediction_market_agent.agents.hybrid_agent.deploy import (
-    HybridAgent,
+from prediction_market_agent.agents.fusion_agent.deploy import (
+    FusionAgent,
 )   
+from prediction_market_agent.agents.contrarian_agent.deploy import (
+    ContrarianAgent,
+)
     
 
 
@@ -175,7 +178,8 @@ class RunnableAgent(str, Enum):
     performance_alert = "performance_alert"
     multi_persona_agent = "multi_persona_agent"
     multi_persona_ensemble_agent = "multi_persona_ensemble_agent"
-    hybrid_agent = "hybrid_agent"
+    fusion_agent = "fusion_agent"
+    contrarian_agent = "contrarian_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -237,7 +241,8 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.performance_alert: PerformanceAlertAgent,
     RunnableAgent.multi_persona_agent: MultiPersonaAgent,
     RunnableAgent.multi_persona_ensemble_agent: MultiPersonaEnsembleAgent,
-    RunnableAgent.hybrid_agent: HybridAgent,
+    RunnableAgent.fusion_agent: FusionAgent,
+    RunnableAgent.contrarian_agent: ContrarianAgent,
 }
 
 
