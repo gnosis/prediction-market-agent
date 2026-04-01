@@ -360,8 +360,8 @@ class ThinkThoroughlyBase(ABC):
 
 class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
     identifier = THINK_THOROUGHLY
-    model = "openai:gpt-5.2"
-    model_for_generate_prediction_for_one_outcome = "openai:gpt-5.2"
+    model = "openai:gpt-5.4"
+    model_for_generate_prediction_for_one_outcome = "openai:gpt-5.4"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
@@ -430,8 +430,8 @@ class ThinkThoroughlyWithItsOwnResearch(ThinkThoroughlyBase):
 
 class ThinkThoroughlyWithPredictionProphetResearch(ThinkThoroughlyBase):
     identifier = THINK_THOROUGHLY_PROPHET
-    model = "openai:gpt-5.2"
-    model_for_generate_prediction_for_one_outcome = "openai:gpt-5.2"
+    model = "openai:gpt-5.4"
+    model_for_generate_prediction_for_one_outcome = "openai:gpt-5.4"
 
     @staticmethod
     def generate_prediction_for_one_outcome(
