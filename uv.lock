@@ -5042,7 +5042,7 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", specifier = ">=0.69.36" },
+    { name = "prediction-market-agent-tooling", specifier = ">=0.69.37.dev1276" },
     { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
@@ -5087,7 +5087,7 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.36"
+version = "0.69.37.dev1276"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoflake" },
@@ -5142,9 +5142,9 @@ dependencies = [
     { name = "types-requests" },
     { name = "web3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/f1/797ccd62fb47771a0b32f4627efc29fddb14a157971f8036b759e0087bbb/prediction_market_agent_tooling-0.69.36.tar.gz", hash = "sha256:616c275cde7b5a6d07133616ace96e3f91968915dc65650c150256cc089d0b18", size = 191019, upload-time = "2026-03-31T10:54:27.6Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/16/41b3feb90b4ed40aea05da48780ea3f0eee5162f127cde86648df294a270/prediction_market_agent_tooling-0.69.37.dev1276.tar.gz", hash = "sha256:5323466a4e89fa629e649c6e3846e1a4626574c278ae70a3171301c135445fa6", size = 196946, upload-time = "2026-04-01T11:23:11.54Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/c5/0a4a26d0b6afdecebe6c76f5fee4d32730d64507c0afdf39a41f52d8ebd4/prediction_market_agent_tooling-0.69.36-py3-none-any.whl", hash = "sha256:64766da28494a3eeaff46540787b29a5665169828bc9f92278c9bf0a8e2ff80b", size = 254598, upload-time = "2026-03-31T10:54:29.187Z" },
+    { url = "https://files.pythonhosted.org/packages/65/bc/39ab914edec29098078759eda3f6795da358028245a77fc288d52369c3ea/prediction_market_agent_tooling-0.69.37.dev1276-py3-none-any.whl", hash = "sha256:da123ab6d5a0d9ce88db2205defb65c6d7e69fb2720c6d099600238a9e1627ac", size = 258721, upload-time = "2026-04-01T11:23:12.859Z" },
 ]
 
 [package.optional-dependencies]
