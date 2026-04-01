@@ -75,10 +75,14 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
             raise RuntimeError("Can replicate only into Omen.")
 
         settings = ReplicateSettings()
-        self.replicate(settings)
+        max_close_time_days = max(
+            config.close_time_up_to_n_days for config in settings.REPLICATE
+        )
+
+        self.replicate(settings, max_close_time_days)
 
     @observe()
-    def replicate(self, settings: ReplicateSettings) -> None:
+    def replicate(self, settings: ReplicateSettings, max_close_time_days: int) -> None:
         self.langfuse_update_current_trace(tags=[REPLICATOR_TAG])
 
         keys = APIKeys()
@@ -149,6 +153,7 @@ class DeployableReplicateToOmenAgent(DeployableAgent):
                 api_keys=keys,
                 close_time_before=close_time_before,
                 replicated_market_table_handler=ReplicatedMarketsTableHandler(),
+                max_close_time_days=max_close_time_days,
                 auto_deposit=True,
             )
 

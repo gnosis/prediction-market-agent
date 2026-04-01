@@ -62,6 +62,7 @@ def omen_replicate_from_tx(
     initial_funds: USD | CollateralToken,
     collateral_token_address: ChecksumAddress,
     replicated_market_table_handler: ReplicatedMarketsTableHandler,
+    max_close_time_days: int = 180,
     close_time_before: DatetimeUTC | None = None,
     close_time_after: DatetimeUTC | None = None,
     auto_deposit: bool = False,
@@ -69,9 +70,13 @@ def omen_replicate_from_tx(
 ) -> list[ChecksumAddress]:
     existing_markets = OmenSubgraphHandler().get_omen_markets(limit=None)
 
-    # We fetch all replicated markets, independently of the market_type,
+    # We fetch replicated markets, independently of the market_type,
     # because we don't want to replicate the same market twice on Omen.
-    replicated_markets = replicated_market_table_handler.get_all()
+    # Time filter isn't ideal, but was needed to limit amount of markets we fetch here.
+    logger.info("Fetching already replicated markets from database.")
+    replicated_markets = replicated_market_table_handler.get_recent(
+        utcnow() - timedelta(days=max_close_time_days)
+    )
 
     excluded_questions = set(
         [m.question_title for m in existing_markets]
@@ -79,8 +84,9 @@ def omen_replicate_from_tx(
         + [i.copied_market_title for i in replicated_markets]
     )
 
+    logger.info(f"Fetching new {market_type} markets.")
     markets = get_binary_markets(
-        500 if market_type == MarketType.POLYMARKET else 1000,
+        500,
         market_type,
         filter_by=FilterBy.OPEN,
         sort_by=(
@@ -240,6 +246,7 @@ def omen_replicate_from_tx(
             copied_market_id=market_address,
             original_market_title=original_market_question,
             copied_market_title=market.question,
+            created_at=utcnow(),
         )
         replicated_market_table_handler.save_replicated_markets([replicated_market])
 

@@ -4,7 +4,10 @@ from typing import Any, Optional
 
 from prediction_market_agent_tooling.gtypes import xDaiWei
 from prediction_market_agent_tooling.loggers import logger
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from prediction_market_agent_tooling.tools.datetime_utc import (
+    DatetimeUTC,
+    DatetimeUTCType,
+)
 from sqlalchemy import Column, Numeric
 from sqlmodel import Field, SQLModel
 
@@ -19,7 +22,7 @@ class LongTermMemories(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     task_description: str
     metadata_: Optional[str] = None
-    datetime_: DatetimeUTC
+    datetime_: DatetimeUTC = Field(sa_type=DatetimeUTCType)
 
     @cached_property
     def metadata_dict(self) -> dict[str, Any] | None:
@@ -47,7 +50,7 @@ class Prompt(SQLModel, table=True):
     # This allows for future distinction between user sessions, if prompts from a specific
     # user (or app) should be persisted.
     session_identifier: str
-    datetime_: DatetimeUTC
+    datetime_: DatetimeUTC = Field(sa_type=DatetimeUTCType)
 
 
 class EvaluatedGoalModel(SQLModel, table=True):
@@ -66,7 +69,7 @@ class EvaluatedGoalModel(SQLModel, table=True):
     is_complete: bool
     reasoning: str
     output: str | None
-    datetime_: DatetimeUTC
+    datetime_: DatetimeUTC = Field(sa_type=DatetimeUTCType)
 
 
 class BlockchainMessage(SQLModel, table=True):
@@ -113,7 +116,7 @@ class ReportNFTGame(SQLModel, table=True):
     )
     # as well.
     learnings: str
-    datetime_: DatetimeUTC
+    datetime_: DatetimeUTC = Field(sa_type=DatetimeUTCType)
 
     @property
     def is_overall_report(self) -> bool:
@@ -133,3 +136,4 @@ class ReplicatedMarket(SQLModel, table=True):
         unique=True, nullable=False
     )  # We don't replicate the parent market, not even across multiple platforms.
     copied_market_title: str = Field(nullable=False)
+    created_at: DatetimeUTC = Field(sa_type=DatetimeUTCType)

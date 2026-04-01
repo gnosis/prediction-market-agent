@@ -5042,7 +5042,7 @@ requires-dist = [
     { name = "pinecone", specifier = ">=5.0.0" },
     { name = "plotly", specifier = ">=5.22.0" },
     { name = "posthog", specifier = ">=2.4.0,<6.0.0" },
-    { name = "prediction-market-agent-tooling", specifier = ">=0.69.36" },
+    { name = "prediction-market-agent-tooling", specifier = ">=0.69.37" },
     { name = "prediction-prophet", git = "https://github.com/agentcoinorg/predictionprophet.git?rev=main" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic-ai-slim", extras = ["openai", "anthropic", "logfire"], specifier = ">=1.61.0" },
@@ -5087,7 +5087,7 @@ dev = [
 
 [[package]]
 name = "prediction-market-agent-tooling"
-version = "0.69.36"
+version = "0.69.37"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoflake" },
@@ -5142,9 +5142,9 @@ dependencies = [
     { name = "types-requests" },
     { name = "web3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/f1/797ccd62fb47771a0b32f4627efc29fddb14a157971f8036b759e0087bbb/prediction_market_agent_tooling-0.69.36.tar.gz", hash = "sha256:616c275cde7b5a6d07133616ace96e3f91968915dc65650c150256cc089d0b18", size = 191019, upload-time = "2026-03-31T10:54:27.6Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/7f/9747472d499e5a5cb11f69040cea3d1d3563dc9ddaecfb2bb9c95526f549/prediction_market_agent_tooling-0.69.37.tar.gz", hash = "sha256:42242dba8c6e9e05b73d2fde754bb958bd27660a55d4a9402d7d550a862667da", size = 194639, upload-time = "2026-04-01T11:51:38.105Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/c5/0a4a26d0b6afdecebe6c76f5fee4d32730d64507c0afdf39a41f52d8ebd4/prediction_market_agent_tooling-0.69.36-py3-none-any.whl", hash = "sha256:64766da28494a3eeaff46540787b29a5665169828bc9f92278c9bf0a8e2ff80b", size = 254598, upload-time = "2026-03-31T10:54:29.187Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/83/edc451c7b1c4b8c137e8e98af7164f075e8db7cd0bec780381f4d14de523/prediction_market_agent_tooling-0.69.37-py3-none-any.whl", hash = "sha256:520a1b9b5d0c8d1e11b65aac94c6815fe0f122fba23359d1302099d73e4849e9", size = 258626, upload-time = "2026-04-01T11:51:39.438Z" },
 ]
 
 [package.optional-dependencies]
