@@ -1,6 +1,8 @@
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+from sqlmodel import col
+
 from prediction_market_agent.db.models import ReplicatedMarket
 from prediction_market_agent.db.sql_handler import SQLHandler
-from prediction_market_agent_tooling.tools.utils import DatetimeUTC
 
 
 class ReplicatedMarketsTableHandler:
@@ -21,7 +23,7 @@ class ReplicatedMarketsTableHandler:
 
     def get_recent(self, from_: DatetimeUTC) -> list[ReplicatedMarket]:
         return self.sql_handler.get_with_filter_and_order(
-            query_filters=(ReplicatedMarket.created_at >= from_,),
+            query_filters=(col(ReplicatedMarket.created_at) >= from_,),
             order_by_column_name="created_at",
             order_desc=False,
         )
