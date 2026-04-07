@@ -68,9 +68,9 @@ class DeployableKnownOutcomeAgent(DeployableTraderAgent):
                 question=market.question,
                 max_tries=3,
             )
-        except Exception as e:
-            logger.error(
-                f"Failed to predict market {market.url} with the question '{market.question}' because of '{e}'."
+        except Exception:
+            logger.exception(
+                f"Failed to predict market {market.url} with the question '{market.question}'."
             )
             outcome = None
         if outcome and outcome.has_known_result():
