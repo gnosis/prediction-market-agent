@@ -21,7 +21,7 @@ load_dotenv()
 
 
 class MultiPersonaEnsembleAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 5
+    bet_on_n_markets_per_run = 3
 
     EDGE_THRESHOLD = 0.07 #originally 0.05
     MAX_DISAGREEMENT = 0.25
@@ -227,24 +227,6 @@ Skip: [[YES]] or [[NO]]
         print(f"Risk skip vote: {should_skip}")
 
         
-        
-        # if should_skip:
-        #     print("Skipping: risk-manager veto / skip vote.")
-        #     return None
-
-        # if disagreement > self.MAX_DISAGREEMENT:
-        #     print("Skipping: personas disagree too much.")
-        #     return None
-
-        # if edge < self.EDGE_THRESHOLD:
-        #     print("Skipping: edge too small.")
-        #     return None
-
-        # return ProbabilisticAnswer(
-        #     p_yes=Probability(final_prob),
-        #     confidence=final_conf,
-        #     reasoning=reasoning,
-        # )
 
         trade_side = "YES" if final_prob > market_prob else "NO"
 
