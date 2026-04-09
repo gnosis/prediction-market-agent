@@ -85,7 +85,7 @@ Given the question: {market_question}, critique of sources: {critique} and summa
 
 
 class DeployableLogProbsAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
 
     def load(
         self,

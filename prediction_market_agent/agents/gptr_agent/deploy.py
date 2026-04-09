@@ -30,7 +30,7 @@ from prediction_market_agent.utils import APIKeys
 
 
 class GPTRAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return (
@@ -65,7 +65,7 @@ class GPTRAgent(DeployableTraderAgent):
 
 class GPTRHighestLiquidityAgent(GPTRAgent):
     get_markets_sort_by = SortBy.HIGHEST_LIQUIDITY
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
     same_market_trade_interval: TradeInterval = FixedInterval(timedelta(days=7))
 
 
