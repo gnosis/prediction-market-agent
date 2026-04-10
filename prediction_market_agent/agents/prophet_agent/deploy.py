@@ -49,7 +49,7 @@ from prediction_market_agent.utils import (
 
 class DeployableTraderAgentER(DeployableTraderAgent):
     agent: PredictionProphetAgent | OlasAgent
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
 
     def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
         prediction = self.agent.predict(market.question)
@@ -66,7 +66,7 @@ class DeployableTraderAgentER(DeployableTraderAgent):
 
 class DeployableTraderAgentERCategorical(DeployableTraderAgent):
     agent: PredictionProphetAgent
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
 
     def answer_categorical_market(
         self, market: AgentMarket
@@ -115,7 +115,7 @@ class DeployableTraderAgentProphetOpenRouter(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -156,7 +156,7 @@ class DeployablePredictionProphetGPT4oAgent(DeployableTraderAgentER):
 class DeployablePredictionProphetGPT4oAgentCategorical(
     DeployableTraderAgentERCategorical
 ):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -203,7 +203,7 @@ class DeployablePredictionProphetGPT4oAgentCategorical(
 
 class DeployableTraderAgentERScalar(DeployableTraderAgent):
     agent: PredictionProphetAgent
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
 
     def answer_scalar_market(
         self, market: AgentMarket
@@ -221,7 +221,7 @@ class DeployableTraderAgentERScalar(DeployableTraderAgent):
 
 
 class DeployablePredictionProphetGPT4oAgentScalar(DeployableTraderAgentERScalar):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     # TODO: Uncomment and configure after we get some historic bet data
@@ -267,7 +267,7 @@ class DeployablePredictionProphetGPT4oAgent_B(DeployableTraderAgentER):
     if it will maintain the performance, but with lower Tavily costs.
     """
 
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -317,7 +317,7 @@ class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
     if it will increase the profits due to the larger final payout after market is resolved.
     """
 
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -359,7 +359,7 @@ class DeployablePredictionProphetGPT4oAgent_C(DeployableTraderAgentER):
 
 
 class DeployablePredictionProphetGemini20Flash(DeployableTraderAgentProphetOpenRouter):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     model = "google/gemini-2.0-flash-001"
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
@@ -411,7 +411,7 @@ class DeployablePredictionProphetDeepSeekChat(DeployableTraderAgentProphetOpenRo
 
 
 class DeployablePredictionProphetGPT4ominiAgent(DeployableTraderAgentER):
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
     agent: PredictionProphetAgent
 
     # ! Even after optimizing, this doesn't seem to get profitable, keep commented to track tiny bets and test later. See the PR
