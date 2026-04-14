@@ -14,7 +14,7 @@ from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 
 
 class Berlin2OpenaiSearchAgentVariable(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 2
+    bet_on_n_markets_per_run = 1
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MaxAccuracyWithKellyScaledBetsStrategy(

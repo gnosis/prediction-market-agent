@@ -19,7 +19,7 @@ class AdvancedAgent(DeployableTraderAgent):
     Use as a baseline for comparing with other agents.
     """
 
-    bet_on_n_markets_per_run = 4
+    bet_on_n_markets_per_run = 1
 
     # TODO: Uncomment and configure after we get some historic bet data
     # def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
