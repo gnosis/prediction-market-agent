@@ -114,8 +114,8 @@ from prediction_market_agent.agents.fusion_agent.deploy import (
 from prediction_market_agent.agents.contrarian_agent.deploy import (
     ContrarianAgent,
 )
-from prediction_market_agent.agents.no_bias_agent.deploy import (
-    NoBiasAgent,
+from prediction_market_agent.agents.nomatic_agent.deploy import (
+    NoMaticAgent,
 )
     
 
@@ -183,7 +183,7 @@ class RunnableAgent(str, Enum):
     multi_persona_ensemble_agent = "multi_persona_ensemble_agent"
     fusion_agent = "fusion_agent"
     contrarian_agent = "contrarian_agent"
-    no_bias_agent = "no_bias_agent"
+    nomatic_agent = "nomatic_agent"
 
 
 RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
@@ -247,7 +247,7 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.multi_persona_ensemble_agent: MultiPersonaEnsembleAgent,
     RunnableAgent.fusion_agent: FusionAgent,
     RunnableAgent.contrarian_agent: ContrarianAgent,
-    RunnableAgent.no_bias_agent: NoBiasAgent,
+    RunnableAgent.nomatic_agent: NoMaticAgent,
 }
 
 

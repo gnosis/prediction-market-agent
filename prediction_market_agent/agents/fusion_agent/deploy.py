@@ -388,7 +388,7 @@ Skip: [[YES]] or [[NO]]
         return MaxAccuracyWithKellyScaledBetsStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(0.01),
-                max_=USD(0.04),
+                max_=USD(0.05),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )

@@ -23,7 +23,7 @@ load_dotenv()
 class MultiPersonaEnsembleAgent(DeployableTraderAgent):
     bet_on_n_markets_per_run = 3
 
-    EDGE_THRESHOLD = 0.07 #originally 0.05
+    EDGE_THRESHOLD = 0.06 #originally 0.05
     MAX_DISAGREEMENT = 0.25
 
     def log_forecast(
@@ -289,7 +289,7 @@ Skip: [[YES]] or [[NO]]
         return MaxAccuracyWithKellyScaledBetsStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
                 min_=USD(0.02),
-                max_=USD(0.07),
+                max_=USD(0.010),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
