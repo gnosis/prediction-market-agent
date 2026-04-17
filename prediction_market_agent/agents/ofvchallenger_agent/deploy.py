@@ -92,6 +92,14 @@ class OFVChallengerAgent(DeployableAgent):
         # Claim the bonds as first thing, to have funds for the new challenges.
         claim_all_bonds_on_reality(api_keys)
 
+        # Compute accuracy on Reality and report as error if it goes down too much.
+        last_week_accuracy = reality_accuracy(
+            api_keys.bet_from_address, timedelta(days=7)
+        )
+        (logger.info if last_week_accuracy.accuracy >= 0.8 else logger.error)(
+            f"Last weeks accuracy is {last_week_accuracy.accuracy} on {last_week_accuracy.total} questions."
+        )
+
         get_omen_binary_markets_common_filters_with_limit_and_question_opened = partial(
             OmenSubgraphHandler().get_omen_markets,
             limit=None,
@@ -147,14 +155,6 @@ class OFVChallengerAgent(DeployableAgent):
                 continue
 
             self.challenge_market(market, api_keys)
-
-        # Compute accuracy on Reality and report as error if it goes down too much.
-        last_week_accuracy = reality_accuracy(
-            api_keys.bet_from_address, timedelta(days=7)
-        )
-        (logger.info if last_week_accuracy.accuracy >= 0.8 else logger.error)(
-            f"Last weeks accuracy is {last_week_accuracy.accuracy} on {last_week_accuracy.total} questions."
-        )
 
     @retry_until_true(
         # We have a bug where subgraph sometimes return empty list of responses, even though there already are some.
