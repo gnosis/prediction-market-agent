@@ -387,8 +387,8 @@ Skip: [[YES]] or [[NO]]
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MaxAccuracyWithKellyScaledBetsStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.01),
-                max_=USD(0.05),
+                min_=USD(0.03),
+                max_=USD(0.08),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
