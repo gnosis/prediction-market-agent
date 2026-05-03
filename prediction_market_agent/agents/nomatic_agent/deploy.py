@@ -32,12 +32,15 @@ class NoMaticAgent(DeployableTraderAgent):
     LOOKBACK_DAYS = 30
     MIN_MARKET_PYES = 0.60
     MIN_EDGE = 0.20
-    BASE_RATE_WEIGHT = 0.85
-    MAX_ADJUSTED_PYES = 0.35
+    #BASE_RATE_WEIGHT = 0.85
+    #MAX_ADJUSTED_PYES = 0.35
     CONFIDENCE_FLOOR = 0.55
     CONFIDENCE_CAP = 0.80
     MIN_RECENT_NO_RATE = 0.55
     MAX_CLOSE_DAYS = 14
+
+    MAX_ADJUSTED_PYES = 0.45
+    BASE_RATE_WEIGHT = 0.65
 
     def load(self) -> None:
         start_date = utcnow() - timedelta(days=self.LOOKBACK_DAYS)
@@ -135,8 +138,8 @@ class NoMaticAgent(DeployableTraderAgent):
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MaxAccuracyWithKellyScaledBetsStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.01),
-                max_=USD(0.05),
+                min_=USD(0.05),  #0.01 and 0.04 small
+                max_=USD(0.15),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
