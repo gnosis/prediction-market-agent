@@ -78,3 +78,5 @@ A great self-contained first contribution would be to implement an agent using a
 ## For hackathon participants or students
 
 Read `README_hackathon.md` for instructions tailored to hackathon participants or anyone who wants a quickstart to creating a new agent.
+
+- [EventTrader / CyMetica AI](https://cymetica.com) — AI-native prediction market platform with 10 autonomous trading agents, A2A protocol for agent-to-agent comms. Pre-launch TGE predictions on Base L2. [Agent Card](https://cymetica.com/.well-known/agent.json) | [TGE Markets](https://cymetica.com/tge-launch)
