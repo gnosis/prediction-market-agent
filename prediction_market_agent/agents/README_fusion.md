@@ -2,63 +2,83 @@
 
 ## Overview
 
-The Fusion Agent is a hybrid prediction-market trading agent that combines three sources of information:
+The Fusion Agent is a hybrid forecasting and trading agent that combines calibrated market probabilities, machine learning predictions, and LLM-based contextual reasoning into a single prediction pipeline.
 
-1. **Market-implied probabilities**
-2. **Machine learning predictions**
-3. **LLM-based contextual adjustments**
-
-The goal is to create a more robust and calibrated forecast by blending structured data, historical patterns, and real-time information.
+Unlike the purely LLM-driven agents or the rule-based contrarian strategy, the Fusion Agent is designed to balance statistical structure with real-time information.
 
 ---
 
 ## Strategy
 
-The agent follows a multi-stage pipeline:
+The agent combines three forecasting layers:
 
 ### 1. Market Calibration
 
-The raw market probability (`p_market`) is adjusted using a learned calibration model:
+The raw market-implied probability (`p_market`) is passed through a learned calibration model:
 
-* Corrects for systematic biases (e.g., overpricing of YES outcomes)
-* Produces a calibrated probability (`p_cal`)
+```python
+p_cal = calibration_model.predict(p_market)
+```
+
+This attempts to correct systematic market biases identified during historical analysis.
 
 ---
 
 ### 2. Machine Learning Baseline
 
-A trained ML model predicts the probability of YES using structured features:
+A supervised ML model generates an independent probability estimate using structured market features:
 
-* Market probability
+* Market implied probability
 * Calibrated probability
 * Volume
-* Duration
-* Category
+* Market duration
+* Market category
 
-This produces a second estimate (`p_ml`).
+This produces:
+
+```python
+p_ml
+```
+
+which serves as a statistical baseline forecast.
 
 ---
 
-### 3. LLM Overlay
+### 3. LLM Context Overlay
 
-An LLM reviews live context (via Tavily) and suggests a **small adjustment**:
+The agent retrieves live context using Tavily and asks an LLM to suggest a **small bounded adjustment** to the baseline forecast.
 
-* Range limited to ±0.05
-* Scaled by LLM confidence
-* Can skip low-quality or ambiguous markets
+The LLM:
+
+* reviews current information
+* evaluates whether evidence supports moving probability up or down
+* can recommend skipping weak or ambiguous markets
+
+The adjustment is intentionally capped:
+
+```python
+MAX_LLM_ADJUSTMENT = 0.05
+```
+
+to prevent the LLM from dominating the prediction.
 
 ---
 
-### 4. Final Prediction
+## Final Prediction
 
-The final probability is computed as:
+The calibrated and ML probabilities are blended:
 
-* Base: 50% calibrated + 50% ML
-* Plus: small confidence-weighted LLM adjustment
-
+```python
+p_base = 0.5 * p_cal + 0.5 * p_ml
 ```
-p_final = 0.5 * p_cal + 0.5 * p_ml + (LLM_adjustment × confidence)
+
+Then a confidence-scaled LLM adjustment is added:
+
+```python
+p_final = p_base + (llm_adjustment × confidence)
 ```
+
+This creates a stable prediction backbone with a smaller real-time overlay.
 
 ---
 
@@ -66,15 +86,36 @@ p_final = 0.5 * p_cal + 0.5 * p_ml + (LLM_adjustment × confidence)
 
 A trade is placed only if:
 
-* Edge threshold is met:
+### 1. LLM does not recommend skipping
 
-  ```
-  |p_final - p_market| ≥ EDGE_THRESHOLD
-  ```
+Markets with stale, weak, or noisy evidence are filtered out.
 
-* LLM does not flag the market as low-quality
+---
 
-* Confidence exceeds minimum threshold
+### 2. Confidence exceeds threshold
+
+```python
+confidence ≥ MIN_CONFIDENCE
+```
+
+---
+
+### 3. Edge exceeds threshold
+
+```python
+edge = |p_final - p_market| ≥ EDGE_THRESHOLD
+```
+
+---
+
+## Trade Direction
+
+The Fusion Agent can place both YES and NO trades:
+
+* If `p_final > p_market` → bet YES
+* If `p_final < p_market` → bet NO
+
+This makes it a balanced forecasting strategy rather than a directional bias system.
 
 ---
 
@@ -87,25 +128,57 @@ A trade is placed only if:
 
 ---
 
-## Strengths
+## Betting Strategy
 
-* Combines structured + unstructured data
-* More stable than pure LLM approaches
-* Adaptable to real-time information
-* Explicit calibration reduces market bias
+Uses Kelly-scaled position sizing with bounded trade sizes:
+
+* Small wallet testing:
+
+  * min bet: $0.03
+  * max bet: $0.08
+
+This allows scaling exposure while maintaining controlled risk.
 
 ---
 
-## Weaknesses
+## Logging
 
-* More complex (multiple components)
-* Dependent on ML model quality
-* LLM adds noise if context is weak
-* Higher computational cost
+Forecasts are stored in:
+
+```text
+forecast_log.csv
+```
+
+Tracked fields include:
+
+* raw market probability
+* calibrated probability
+* ML prediction
+* LLM adjustment
+* final probability
+* confidence
+* trade decision
+* skip reason
+
+---
+
+## Strengths
+
+* Combines statistical modeling with live contextual reasoning
+* More stable than pure LLM-based forecasting
+* Explicit calibration layer reduces market bias
+* Uses structured ML features alongside real-time information
+* Flexible enough to identify both YES and NO opportunities
 
 ---
 
 ## Notes
 
-This agent is designed as a **balanced, general-purpose predictor** and serves as the most “complete” modeling approach in the system.
+The Fusion Agent serves as the primary **hybrid forecasting model** in the project.
 
+It was designed to balance:
+
+* predictive accuracy
+* calibration
+* adaptability
+* and profitability under live market conditions.
