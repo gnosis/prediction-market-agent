@@ -1,410 +1,495 @@
-import os
-import re
-import csv
-import pandas as pd
-import joblib
-from dotenv import load_dotenv
 from openai import OpenAI
-from tavily import TavilyClient
-from datetime import datetime, timezone
-from pathlib import Path
-
 from prediction_market_agent_tooling.deploy.agent import DeployableTraderAgent
-from prediction_market_agent_tooling.markets.agent_market import AgentMarket
-from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
-from prediction_market_agent_tooling.gtypes import Probability, USD
 from prediction_market_agent_tooling.deploy.betting_strategy import (
     BettingStrategy,
     MaxAccuracyWithKellyScaledBetsStrategy,
 )
+from prediction_market_agent_tooling.gtypes import USD, Probability
+from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.markets.agent_market import AgentMarket
+from prediction_market_agent_tooling.markets.data_models import ProbabilisticAnswer
+from prediction_market_agent_tooling.markets.markets import MarketType
+from prediction_market_agent_tooling.markets.omen.omen import OmenAgentMarket
+from prediction_market_agent_tooling.tools.relevant_news_analysis.relevant_news_analysis import (
+    get_certified_relevant_news_since_cached,
+)
+
+from prediction_market_agent_tooling.tools.utils import utcnow
+from pydantic_ai.exceptions import UnexpectedModelBehavior
+
 from prediction_market_agent.agents.utils import get_maximum_possible_bet_amount
 
-load_dotenv()
+# How much p_yes must shift before we place an updated bet on an open position
+REBET_THRESHOLD = 0.10
 
 
-""" 
-p_market = raw market implied probability
-p_cal = calibrated market probability
-p_ml = ML predicted probability
-p_base = blend of p_cal and p_ml
-delta_llm = small bounded LLM adjustment
-p_final = p_base + delta_llm
+# Stage 1 prompt — evidence gathering, superforecaster-aware
 
-Then, edge = p_final - p_market
-"""
+SEARCH_DEVELOPER_PROMPT = """
+Today is {today}.
+
+You will be given a prediction market question. Your task is to gather and
+organize every piece of evidence that a skilled forecaster would need to
+estimate the probability of the described event.
+
+Structure your report under these headings:
+
+BASE RATES & HISTORICAL PRECEDENTS
+- How often have similar events occurred historically?
+- Find concrete numbers where possible (e.g. "In the last 10 elections, the
+  incumbent won 7 times" or "FDA approval rate for Phase 3 oncology trials is ~50%").
+- Identify the most appropriate reference class for this question.
+
+CURRENT SITUATION
+- What is the current state of affairs directly relevant to this question?
+- Key recent developments, announcements, or data points.
+
+FACTORS FAVOURING YES
+- Specific evidence or conditions that make the event more likely.
+
+FACTORS FAVOURING NO
+- Specific evidence or conditions that make the event less likely.
+
+UNCERTAINTY & INFORMATION GAPS
+- What is unknown or contested?
+- Are there upcoming events that could change the picture?
+
+Rules:
+- Do not provide links — explain all evidence in full.
+- Do not draw a conclusion or state a probability. That is done elsewhere.
+- Include all relevant evidence even if it seems to point in different directions.
+- Be precise: prefer numbers, dates, and named sources over vague qualitative claims.
+""".strip()
 
 
+# Stage 1 prompt variant — focused news update for re-evaluation
+
+SEARCH_UPDATE_DEVELOPER_PROMPT = """
+Today is {today}.
+
+You will be given a prediction market question. New relevant news has been
+detected since {since_date}. Your task is to find and summarize only the NEW
+developments since that date that are relevant to the question.
+
+Structure your report under these headings:
+
+NEW DEVELOPMENTS
+- What has happened since {since_date} that is directly relevant?
+- Be specific: dates, named sources, concrete facts.
+
+IMPACT ON PROBABILITY
+- Does this new information make the YES outcome more likely, less likely,
+  or is the impact unclear?
+- Explain the directional reasoning without stating a final probability.
+
+REMAINING UNCERTAINTY
+- What is still unknown or unresolved after these developments?
+
+Rules:
+- Do not provide links — explain all evidence in full.
+- Do not draw a conclusion or state a probability. That is done elsewhere.
+- Focus only on what is NEW — do not rehash background already known.
+""".strip()
 
 
-class FusionAgent(DeployableTraderAgent):
-    bet_on_n_markets_per_run = 3
+# Stage 2 prompt — full superforecaster reasoning
 
-    EDGE_THRESHOLD = 0.05
-    MIN_CONFIDENCE = 0.50
-    MAX_LLM_ADJUSTMENT = 0.05
+REASONING_DEVELOPER_PROMPT = """
+Today is {today}.
 
-    def load(self) -> None:
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+You are a Superforecaster trained in Philip Tetlock's Good Judgment Project
+methods. You will be given a prediction market question and a structured
+evidence report. Your task is to produce a well-calibrated probability
+estimate.
 
-        # Load your trained ML model here.
-        # This should be something like logistic regression, random forest, etc.
-        # trained on the exact same features returned by build_features().
-        self.ml_model = joblib.load("ml_model.joblib")
+Work through these steps before giving your answer:
 
-        self.calibration_model = joblib.load("market_calibrator.joblib")
+1. OUTSIDE VIEW
+   - What base rate or historical frequency does the evidence report provide?
+   - State this as your starting probability anchor.
 
-        # Optional:
-        # If you later train a calibration model such as isotonic regression,
-        # uncomment this and use it inside calibrate_market_prob().
-        # self.calibration_model = joblib.load("market_calibrator.joblib")
+2. REFERENCE CLASS CHECK
+   - Is this the most appropriate reference class, or should you adjust to a
+     narrower or broader one? Briefly justify.
 
-    def log_forecast(
-        self,
-        market: AgentMarket,
-        market_prob: float,
-        calibrated_prob: float,
-        ml_prob: float,
-        llm_adjustment: float,
-        final_prob: float,
-        confidence: float,
-        traded: bool,
-        trade_side: str,
-        skip_reason: str = "",
-    ) -> None:
-        log_path = Path("forecast_log.csv")
-        file_exists = log_path.exists()
+3. INSIDE VIEW ADJUSTMENTS
+   - Which specific factors in the evidence push the probability UP from the
+     base rate, and by roughly how much?
+   - Which factors push it DOWN, and by roughly how much?
+   - Net the adjustments into a revised probability.
 
-        with log_path.open("a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
+4. SYNTHESIS
+   - Combine the outside and inside views. Weight them: outside view should
+     anchor you unless inside-view evidence is strong and specific.
 
-            if not file_exists:
-                writer.writerow([
-                    "timestamp_utc",
-                    "agent_name",
-                    "market_id",
-                    "question",
-                    "market_prob",
-                    "calibrated_prob",
-                    "ml_prob",
-                    "llm_adjustment",
-                    "final_prob",
-                    "confidence",
-                    "traded",
-                    "trade_side",
-                    "skip_reason",
-                    "outcome",
-                ])
+5. BIAS CHECK
+   - Are you anchoring too heavily on a vivid recent event? (recency bias)
+   - Are you overweighting a memorable but unrepresentative example? (availability bias)
+   - Are you being pulled toward the market's implied probability? (anchoring)
+   - Correct for any bias you identify before finalising.
 
-            writer.writerow([
-                datetime.now(timezone.utc).isoformat(),
-                "hybrid_agent",
-                str(market.id),
-                market.question,
-                round(market_prob, 6),
-                round(calibrated_prob, 6),
-                round(ml_prob, 6),
-                round(llm_adjustment, 6),
-                round(final_prob, 6),
-                round(confidence, 6),
-                int(traded),
-                trade_side,
-                skip_reason,
-                "",  # fill later once market resolves
-            ])
+6. CONFIDENCE
+   - How much does your answer depend on uncertain or incomplete information?
+   - Express this as a confidence float: 1.0 = near certainty, 0.0 = pure guess.
+   - Be conservative: most real-world forecasts deserve confidence < 0.85.
 
-    def get_live_context(self, query: str) -> str:
-        result = self.tavily.search(
-            query=query,
-            search_depth="advanced",
-            max_results=5,
-        )
-        return "\n".join(
-            item.get("content", "") for item in result.get("results", [])
-        )
+Calibration rules you must follow:
+- Avoid probabilities below 0.05 or above 0.95 unless the evidence is
+  overwhelming and unambiguous. Justify any value outside 0.1–0.9.
+- Do not let the current market price substitute for your own reasoning.
+- Uncertainty is not a reason to default to 0.5 — use your base rate instead.
 
-    def calibrate_market_prob(self, p_market: float) -> float:
-        """
-        Temporary hand-built calibration.
-        Replace later with a learned calibration model if you train one.
+Return ONLY two floats separated by a single space: probability confidence
+Nothing else. No explanation, no labels.
+""".strip()
 
-        This reflects your finding that high YES probabilities may be somewhat inflated.
-        """
-        # if p_market >= 0.85:
-        #     p_cal = p_market - 0.08
-        # elif p_market >= 0.70:
-        #     p_cal = p_market - 0.05
-        # elif p_market >= 0.55:
-        #     p_cal = p_market - 0.03
-        # else:
-        #     p_cal = p_market
+# Stage 2 prompt variant — update reasoning anchored on previous probability
 
-        # return max(0.01, min(0.99, p_cal))
+REASONING_UPDATE_DEVELOPER_PROMPT = """
+Today is {today}.
 
-        p_cal = float(self.calibration_model.predict([p_market])[0])
-        return max(0.01, min(0.99, p_cal))
+You are a Superforecaster trained in Philip Tetlock's Good Judgment Project
+methods. You previously estimated the probability for a prediction market
+question. New relevant news has since emerged and you must decide whether to
+revise your estimate.
 
-        # If using a real calibration model later, do this instead:
-        # p_cal = float(self.calibration_model.predict([[p_market]])[0])
-        # return max(0.01, min(0.99, p_cal))
+Your previous probability estimate was: {previous_probability:.2f}
 
-    def build_features(self, market, p_market, p_cal) -> dict:
-        volume = float(getattr(market, "volume", 0.0) or 0.0)
+Work through these steps:
 
-        created_time = getattr(market, "created_time", None) or getattr(market, "creation_datetime", None)
-        close_time = getattr(market, "close_time", None)
+1. NEWS IMPACT
+   - What does the new development concretely imply for the probability?
+   - Is this a strong signal or weak/ambiguous evidence?
 
-        duration_hours = 0.0
-        if created_time is not None and close_time is not None:
-            if created_time.tzinfo is None:
-                created_time = created_time.replace(tzinfo=timezone.utc)
-            if close_time.tzinfo is None:
-                close_time = close_time.replace(tzinfo=timezone.utc)
-            duration_hours = max((close_time - created_time).total_seconds() / 3600, 0.0)
+2. REVISION CHECK
+   - Should you update significantly (>0.10 shift), modestly (0.05-0.10),
+     or not at all (<0.05)?
+   - Anchoring too hard on your previous estimate is a bias — correct for it
+     if the news is genuinely informative.
 
-        category = getattr(market, "category", None) or "unknown"
+3. BIAS CHECK
+   - Are you over-reacting to vivid new information? (availability bias)
+   - Are you under-reacting because you don't want to change your view?
+     (belief perseverance)
+   - Correct for whichever applies.
 
-        return {
-            "prob_at_close": p_market,
-            "calibrated_prob": p_cal,
-            "volume": volume,
-            "duration_hours": duration_hours,
-            "category": category,
-        }
+4. CONFIDENCE
+   - Has your confidence increased or decreased given the new information?
+   - Express as a float: 1.0 = near certainty, 0.0 = pure guess.
 
-    def get_ml_baseline(self, market, p_market, p_cal) -> float:
-        feature_dict = self.build_features(market, p_market, p_cal)
-        X = pd.DataFrame([feature_dict])
-        p_ml = float(self.ml_model.predict_proba(X)[0][1])
-        return max(0.01, min(0.99, p_ml))
+Calibration rules:
+- Avoid probabilities below 0.05 or above 0.95.
+- A single news item rarely justifies a revision of more than 0.20.
+- If the news is ambiguous, stay close to your previous estimate.
 
-    def get_llm_overlay(
-        self,
-        title: str,
-        market_prob: float,
-        calibrated_prob: float,
-        ml_prob: float,
-        context: str,
-    ) -> dict:
-        prompt = f"""
-You are helping a prediction-market trading agent.
+Return ONLY two floats separated by a single space: probability confidence
+Nothing else. No explanation, no labels.
+""".strip()
 
-Your task is NOT to produce a brand-new standalone forecast.
-Instead, review the live context and suggest a SMALL adjustment
-to the baseline forecast.
 
-Market question:
-{title}
+# Core LLM helpers
 
-Raw market implied probability of YES:
-{market_prob:.3f}
+def _run_two_stage_forecast(
+    client: OpenAI,
+    question: str,
+    today: str,
+) -> tuple[float, float]:
+    """Full two-stage superforecaster forecast for a new market."""
+    search_response = client.responses.create(
+        model="gpt-4o",
+        tools=[{"type": "web_search_preview", "search_context_size": "high"}],
+        input=[
+            {
+                "role": "developer",
+                "content": SEARCH_DEVELOPER_PROMPT.format(today=today),
+            },
+            {"role": "user", "content": question},
+        ],
+    )
+    evidence_report = search_response.output_text
 
-Calibrated market probability of YES:
-{calibrated_prob:.3f}
+    reasoning_response = client.responses.create(
+        model="o3-mini",
+        input=[
+            {
+                "role": "developer",
+                "content": REASONING_DEVELOPER_PROMPT.format(today=today),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Question: {question}\n\n"
+                    f"Evidence report:\n{evidence_report}"
+                ),
+            },
+        ],
+        reasoning={"effort": "medium"},
+    )
 
-ML baseline probability of YES:
-{ml_prob:.3f}
+    raw = reasoning_response.output_text.strip()
+    try:
+        probability, confidence = map(float, raw.split())
+    except Exception as e:
+        raise UnexpectedModelBehavior(
+            f"Could not parse probability and confidence from: '{raw}'"
+        ) from e
 
-Live context:
-{context}
+    return (
+        max(0.05, min(0.95, probability)),
+        max(0.0, min(1.0, confidence)),
+    )
 
-Instructions:
-- Suggest an adjustment to the baseline in the range [-0.08, +0.08]
-- Positive adjustment means increase belief in YES
-- Negative adjustment means decrease belief in YES
-- Use small adjustments unless the evidence is unusually strong
-- If evidence is stale, noisy, weak, or ambiguous, recommend skip
 
-Return exactly in this format:
-Reasoning: <2-4 sentences>
-Adjustment: [[-0.03]]
-Confidence: [[0.72]]
-Skip: [[YES]] or [[NO]]
-"""
+def _run_update_forecast(
+    client: OpenAI,
+    question: str,
+    today: str,
+    since_date: str,
+    previous_probability: float,
+) -> tuple[float, float]:
+    """Focused update forecast for a market with new relevant news."""
+    search_response = client.responses.create(
+        model="gpt-4o",
+        tools=[{"type": "web_search_preview", "search_context_size": "medium"}],
+        input=[
+            {
+                "role": "developer",
+                "content": SEARCH_UPDATE_DEVELOPER_PROMPT.format(
+                    today=today,
+                    since_date=since_date,
+                ),
+            },
+            {"role": "user", "content": question},
+        ],
+    )
+    news_report = search_response.output_text
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": prompt}],
-        )
+    reasoning_response = client.responses.create(
+        model="o3-mini",
+        input=[
+            {
+                "role": "developer",
+                "content": REASONING_UPDATE_DEVELOPER_PROMPT.format(
+                    today=today,
+                    previous_probability=previous_probability,
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Question: {question}\n\n"
+                    f"New developments since {since_date}:\n{news_report}"
+                ),
+            },
+        ],
+        reasoning={"effort": "high"},
+    )
 
-        text = response.choices[0].message.content or ""
+    raw = reasoning_response.output_text.strip()
+    try:
+        probability, confidence = map(float, raw.split())
+    except Exception as e:
+        raise UnexpectedModelBehavior(
+            f"Could not parse probability and confidence from: '{raw}'"
+        ) from e
 
-        adj_match = re.search(r"Adjustment:\s*\[\[([+-]?\d?\.\d+)\]\]", text)
-        conf_match = re.search(r"Confidence:\s*\[\[(\d?\.\d+)\]\]", text)
-        skip_match = re.search(r"Skip:\s*\[\[(YES|NO)\]\]", text, re.IGNORECASE)
+    return (
+        max(0.05, min(0.95, probability)),
+        max(0.0, min(1.0, confidence)),
+    )
 
-        adjustment = float(adj_match.group(1)) if adj_match else 0.0
-        confidence = float(conf_match.group(1)) if conf_match else 0.5
-        skip = skip_match.group(1).upper() == "YES" if skip_match else False
 
-        adjustment = max(-self.MAX_LLM_ADJUSTMENT, min(self.MAX_LLM_ADJUSTMENT, adjustment))
-        confidence = max(0.01, min(0.99, confidence))
+# Agent
 
-        return {
-            "adjustment": adjustment,
-            "confidence": confidence,
-            "skip": skip,
-            "raw": text,
-        }
+class SuperforecasterAgent(DeployableTraderAgent):
+    """
+    Two-stage superforecaster agent with news-reactive position management.
 
-    def combine_predictions(
-        self,
-        p_cal: float,
-        p_ml: float,
-        llm_adjustment: float,
-        llm_confidence: float,
-    ) -> tuple[float, float]:
-        """
-        Stable backbone = calibrated market + ML baseline
-        LLM only nudges the result.
-        """
-        p_base = 0.5 * p_cal + 0.5 * p_ml
+    Each run has two phases:
 
-        # Confidence-scaled LLM overlay
-        scaled_adjustment = llm_adjustment * llm_confidence
+    PHASE 1 — Re-evaluate open positions
+        For each market this agent has previously bet on:
+        - Check if relevant news has appeared since the last bet date
+        - If yes: run a focused update forecast
+        - If the new p_yes differs from the original by > REBET_THRESHOLD (0.10):
+          place an updated bet in the new direction
+        - If no news or shift too small: leave original bet untouched
 
-        p_final = p_base + scaled_adjustment
-        p_final = max(0.01, min(0.99, p_final))
+    PHASE 2 — Bet on new markets (standard behavior)
+        Pick up to bet_on_n_markets_per_run new markets and run the full
+        two-stage superforecaster forecast on each.
+    """
 
-        return p_final, scaled_adjustment
-
-    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
-        title = market.question
-        market_prob = float(market.p_yes)
-
-        # 1. Calibrate raw market probability
-        calibrated_prob = self.calibrate_market_prob(market_prob)
-
-        # 2. ML baseline from structured features
-        ml_prob = self.get_ml_baseline(
-            market=market,
-            p_market=market_prob,
-            p_cal=calibrated_prob,
-        )
-
-        # 3. Pull live context
-        context = self.get_live_context(title)
-
-        # 4. LLM overlay
-        llm_result = self.get_llm_overlay(
-            title=title,
-            market_prob=market_prob,
-            calibrated_prob=calibrated_prob,
-            ml_prob=ml_prob,
-            context=context,
-        )
-
-        # 5. Combine all components
-        final_prob, scaled_adjustment = self.combine_predictions(
-            p_cal=calibrated_prob,
-            p_ml=ml_prob,
-            llm_adjustment=llm_result["adjustment"],
-            llm_confidence=llm_result["confidence"],
-        )
-
-        final_conf = llm_result["confidence"]
-        reasoning = llm_result["raw"]
-
-        edge = abs(final_prob - market_prob)
-        trade_side = "YES" if final_prob > market_prob else "NO"
-
-        print(f"\nAnalyzing: {title}")
-        print(f"Market p_yes:      {market_prob:.3f}")
-        print(f"Calibrated p_yes:  {calibrated_prob:.3f}")
-        print(f"ML baseline p_yes: {ml_prob:.3f}")
-        print(f"LLM adj scaled:    {scaled_adjustment:.3f}")
-        print(f"Final p_yes:       {final_prob:.3f}")
-        print(f"Confidence:        {final_conf:.3f}")
-        print(f"Edge:              {edge:.3f}")
-        print(f"LLM skip:          {llm_result['skip']}")
-
-        if llm_result["skip"]:
-            print("Skipping: LLM flagged weak or ambiguous evidence.")
-            self.log_forecast(
-                market=market,
-                market_prob=market_prob,
-                calibrated_prob=calibrated_prob,
-                ml_prob=ml_prob,
-                llm_adjustment=scaled_adjustment,
-                final_prob=final_prob,
-                confidence=final_conf,
-                traded=False,
-                trade_side="SKIP",
-                skip_reason="LLM_SKIP",
-            )
-            return None
-
-        if final_conf < self.MIN_CONFIDENCE:
-            print("Skipping: confidence too low.")
-            self.log_forecast(
-                market=market,
-                market_prob=market_prob,
-                calibrated_prob=calibrated_prob,
-                ml_prob=ml_prob,
-                llm_adjustment=scaled_adjustment,
-                final_prob=final_prob,
-                confidence=final_conf,
-                traded=False,
-                trade_side="SKIP",
-                skip_reason="LOW_CONFIDENCE",
-            )
-            return None
-
-        if edge < self.EDGE_THRESHOLD:
-            print("Skipping: edge too small.")
-            self.log_forecast(
-                market=market,
-                market_prob=market_prob,
-                calibrated_prob=calibrated_prob,
-                ml_prob=ml_prob,
-                llm_adjustment=scaled_adjustment,
-                final_prob=final_prob,
-                confidence=final_conf,
-                traded=False,
-                trade_side="SKIP",
-                skip_reason="EDGE_TOO_SMALL",
-            )
-            return None
-
-        self.log_forecast(
-            market=market,
-            market_prob=market_prob,
-            calibrated_prob=calibrated_prob,
-            ml_prob=ml_prob,
-            llm_adjustment=scaled_adjustment,
-            final_prob=final_prob,
-            confidence=final_conf,
-            traded=True,
-            trade_side=trade_side,
-        )
-
-        return ProbabilisticAnswer(
-            p_yes=Probability(final_prob),
-            confidence=final_conf,
-            reasoning=reasoning,
-        )
+    bet_on_n_markets_per_run = 2
 
     def get_betting_strategy(self, market: AgentMarket) -> BettingStrategy:
         return MaxAccuracyWithKellyScaledBetsStrategy(
             max_position_amount=get_maximum_possible_bet_amount(
-                min_=USD(0.10),  # .03 and .08 for small wallet, #.10 and 1.00 for larger
-                max_=USD(1.00),
+                min_=USD(0.01),
+                max_=USD(0.05),
                 trading_balance=market.get_trade_balance(self.api_keys),
             ),
         )
 
-"""
-A few important things you’ll still need to do:
 
-Train and save ml_model.joblib
-even a simple logistic regression is fine for version 1
-Make sure build_features() matches exactly how the model was trained
-Update the agent registration / run command so this new class is the one being called
-Your current calibration is just a placeholder, so later you’ll probably want isotonic regression or a learned calibration map
+    def _check_and_rebet_open_positions(self, market_type: MarketType) -> None:
+        """Phase 1: scan open positions for relevant news and re-bet if warranted."""
+        client = OpenAI(api_key=self.api_keys.openai_api_key.get_secret_value())
+        today = utcnow()
+        today_str = today.strftime("%A, %d %B %Y")
+        user_id = self.api_keys.bet_from_address
 
-The easiest way to test this before your real ML model is ready is to temporarily replace get_ml_baseline() with:
+        try:
+            open_positions = OmenAgentMarket.get_positions(
+                user_id=user_id,
+                liquid_only=True,
+                larger_than=USD(0.001),
+            )
+        except Exception as e:
+            logger.warning(f"[Superforecaster] Could not fetch open positions: {e}")
+            return
 
-def get_ml_baseline(self, market, p_market, p_cal):
-    return p_cal
+        if not open_positions:
+            logger.info("[Superforecaster] No open positions to re-evaluate.")
+            return
 
-"""
+        logger.info(
+            f"[Superforecaster] Checking {len(open_positions)} open positions "
+            f"for relevant news."
+        )
+
+        for position in open_positions:
+            try:
+                market = OmenAgentMarket.get_binary_market(position.market_id)
+            except Exception as e:
+                logger.warning(
+                    f"[Superforecaster] Could not fetch market "
+                    f"{position.market_id}: {e}"
+                )
+                continue
+
+            last_trade_datetime = market.get_most_recent_trade_datetime(
+                user_id=user_id
+            )
+            if last_trade_datetime is None:
+                continue
+
+            days_since_last_trade = max((today - last_trade_datetime).days, 1)
+            since_date_str = last_trade_datetime.strftime("%d %B %Y")
+
+            logger.info(
+                f"[Superforecaster] Checking '{market.question}' for news "
+                f"since {since_date_str} ({days_since_last_trade}d ago)."
+            )
+
+            news = get_certified_relevant_news_since_cached(
+                question=market.question,
+                days_ago=days_since_last_trade,
+                cache=None,
+            )
+
+            if news is None:
+                logger.info(
+                    f"[Superforecaster] No relevant news for "
+                    f"'{market.question}' — skipping."
+                )
+                continue
+
+            logger.info(
+                f"[Superforecaster] Relevant news found for "
+                f"'{market.question}' — running update forecast."
+            )
+
+            previous_probability = float(market.current_p_yes)
+
+            try:
+                new_probability, new_confidence = _run_update_forecast(
+                    client=client,
+                    question=market.question,
+                    today=today_str,
+                    since_date=since_date_str,
+                    previous_probability=previous_probability,
+                )
+            except UnexpectedModelBehavior as e:
+                logger.error(
+                    f"[Superforecaster] Update forecast failed for "
+                    f"'{market.question}': {e}"
+                )
+                continue
+
+            shift = abs(new_probability - previous_probability)
+            logger.info(
+                f"[Superforecaster] '{market.question}': "
+                f"prev={previous_probability:.3f} → new={new_probability:.3f} "
+                f"(shift={shift:.3f}, confidence={new_confidence:.3f})"
+            )
+
+            if shift <= REBET_THRESHOLD:
+                logger.info(
+                    f"[Superforecaster] Shift {shift:.3f} below threshold "
+                    f"{REBET_THRESHOLD} — no update bet."
+                )
+                continue
+
+            logger.info(
+                f"[Superforecaster] Placing update bet on '{market.question}'."
+            )
+
+            try:
+                self.process_trade(
+                    market=market,
+                    answer=ProbabilisticAnswer(
+                        p_yes=Probability(new_probability),
+                        confidence=new_confidence,
+                        reasoning=(
+                            f"News-reactive update: {previous_probability:.2f} → "
+                            f"{new_probability:.2f} after news since {since_date_str}."
+                        ),
+                    ),
+                    market_type=market_type,
+                )
+            except Exception as e:
+                logger.error(
+                    f"[Superforecaster] Update bet failed for "
+                    f"'{market.question}': {e}"
+                )
+
+    def answer_binary_market(self, market: AgentMarket) -> ProbabilisticAnswer | None:
+        """Phase 2: standard full forecast for new markets."""
+        client = OpenAI(api_key=self.api_keys.openai_api_key.get_secret_value())
+        today_str = utcnow().strftime("%A, %d %B %Y %H:%M UTC")
+
+        logger.info(
+            f"[Superforecaster] Full forecast for '{market.question}'."
+        )
+
+        try:
+            probability, confidence = _run_two_stage_forecast(
+                client=client,
+                question=market.question,
+                today=today_str,
+            )
+        except UnexpectedModelBehavior as e:
+            logger.error(f"[Superforecaster] Forecast failed: {e}")
+            return None
+
+        logger.info(
+            f"[Superforecaster] '{market.question}': "
+            f"p_yes={probability:.3f}, confidence={confidence:.3f}"
+        )
+
+        return ProbabilisticAnswer(
+            p_yes=Probability(probability),
+            confidence=confidence,
+        )
+
+    def run(self, market_type: MarketType) -> None:
+        """
+        Override run to inject Phase 1 (news re-evaluation) before the
+        standard Phase 2 (new market betting) loop.
+        """
+        logger.info("[Superforecaster] Phase 1: re-evaluating open positions.")
+        self._check_and_rebet_open_positions(market_type)
+
+        logger.info("[Superforecaster] Phase 2: betting on new markets.")
+        super().run(market_type)

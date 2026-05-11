@@ -248,7 +248,6 @@ RUNNABLE_AGENTS: dict[RunnableAgent, type[DeployableAgent]] = {
     RunnableAgent.prophet_gpt4o_scalar: DeployablePredictionProphetGPT4oAgentScalar,
     RunnableAgent.skew_agent: SkewAgent,
     RunnableAgent.performance_alert: PerformanceAlertAgent,
-    RunnableAgent.multi_persona_agent: MultiPersonaAgent,
     RunnableAgent.multi_persona_ensemble_agent: MultiPersonaEnsembleAgent,
     RunnableAgent.fusion_agent: FusionAgent,
     RunnableAgent.contrarian_agent: ContrarianAgent,
