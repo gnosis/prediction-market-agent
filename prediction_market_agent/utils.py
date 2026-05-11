@@ -1,6 +1,7 @@
 import json
 import typing as t
 
+from cowdao_cowpy.common.api.errors import UnexpectedResponseError
 from prediction_market_agent_tooling.config import APIKeys as APIKeysBase
 from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.tools.utils import (
